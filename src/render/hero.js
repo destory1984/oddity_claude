@@ -7,7 +7,9 @@ import {
   StandardMaterial, Color3, Quaternion, CreateIcoSphere, CreateCylinder, CreatePolyhedron,
   DynamicTexture,
 } from './babylon.js';
-import { blendFlight, hoverFlightPose, armPose, lookBack, headTilt } from '../core/pose.js';
+import {
+  blendFlight, hoverFlightPose, armPose, lookBack, idleStep, idlePose, idleProgress,
+} from '../core/pose.js';
 import { clamp } from './math.js';
 
 // A faceless paper doll, as if folded from colored craft paper: pink twin tails of
@@ -227,7 +229,7 @@ export function createHero(engine, sunDirection) {
   let sway = 0;
   let flightBlend = 0;
   let facing = { angle: 0, idle: 0 };
-  let tilt = { untilNext: 3, t: 0, side: 1, angle: 0 };
+  let idle = { untilNext: 3, name: null, t: 0, last: null };
   let elapsed = 0;
 
   // Tails hang toward the feet when still and stream behind in flight, swinging
@@ -263,21 +265,26 @@ export function createHero(engine, sunDirection) {
     hero.rotation.x = bodyPose.bodyPitch;
     // Standing still for a moment, the hero turns around to look back at the camera.
     facing = lookBack(facing.angle, facing.idle, flying < 0.05 && speed < 1, dt);
-    hero.rotation.y = facing.angle;
+    // While she looks back at the camera, now and then a cute move (core/pose.js).
+    idle = idleStep(idle, dt, facing.angle > 2.8);
+    const move = idlePose(idle.name, idleProgress(idle));
+    hero.rotation.y = facing.angle + move.spin;
     torso.rotation.z = bank * 0.3 * flying;
     torso.rotation.x = -0.18 * flying;
-    hero.position.y = -1.15 + Math.sin(elapsed * 1.5) * 0.04 * (1 - flying);
-    head.rotation.z = -bank * 0.25 * flying;
-    // Now and then a curious head tilt while she looks back at the camera.
-    tilt = headTilt(tilt, dt, facing.angle > 2.8);
-    head.rotation.y = tilt.angle;
+    hero.position.y = -1.15 + Math.sin(elapsed * 1.5) * 0.04 * (1 - flying) + move.hop;
+    head.rotation.z = -bank * 0.25 * flying + move.headTurn;
+    head.rotation.y = move.headTilt;
+    head.rotation.x = move.headNod;
 
     for (const limb of limbs) {
       const inside = Math.max(0, bank * limb.s);
       const arm = armPose(limb.s, bank, bend);
-      limb.shoulder.rotation.y = limb.s * 0.08 + (arm.shoulderYaw - limb.s * 0.08) * flying;
-      limb.shoulder.rotation.x = bodyPose.shoulderPitch;
-      limb.elbow.rotation.set(-0.08 + (arm.elbowFlex + 0.08) * flying, 0, 0);
+      const lift = move.armBlend[limb.s];
+      const target = move.arms[limb.s];
+      const yaw = limb.s * 0.08 + (arm.shoulderYaw - limb.s * 0.08) * flying;
+      limb.shoulder.rotation.y = yaw + (target.yaw - yaw) * lift;
+      limb.shoulder.rotation.x = bodyPose.shoulderPitch + (target.pitch - bodyPose.shoulderPitch) * lift;
+      limb.elbow.rotation.set((-0.08 + (arm.elbowFlex + 0.08) * flying) * (1 - lift), 0, 0);
       limb.hip.position.x = limb.s * (0.1 + 0.04 * flying);
       limb.hip.rotation.y = limb.s * (0.06 + inside * 0.22) * flying;
       limb.hip.rotation.x = 0;

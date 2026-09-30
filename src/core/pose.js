@@ -40,21 +40,86 @@ export function lookBack(angle, idleSeconds, resting, dt) {
   return { angle: target + (angle - target) * Math.exp(-dt * rate), idle };
 }
 
-const TILT_S = 1.6;
-const TILT_ANGLE = 0.38; // about 22 degrees
-const FIRST_TILT_S = 3;
+// Cute moves while resting and facing the camera. Each lasts `seconds`; idlePose()
+// gives the offsets for progress p in 0..1, all zero at both ends so moves blend in.
+export const IDLE_ACTIONS = {
+  tilt: { seconds: 1.6 },
+  wave: { seconds: 2.2 },
+  twirl: { seconds: 1.5 },
+  hop: { seconds: 1.1 },
+  lookAround: { seconds: 2.4 },
+  stretch: { seconds: 2.0 },
+};
+const IDLE_NAMES = Object.keys(IDLE_ACTIONS);
+const FIRST_MOVE_S = 3;
 
-// A curious head tilt while the hero faces the camera: every 8 to 15 seconds the
-// head leans to one side and comes back over TILT_S, alternating sides.
-// Facing away resets it. random is injectable for tests.
-export function headTilt({ untilNext, t, side }, dt, facingCamera, random = Math.random) {
-  if (!facingCamera) return { untilNext: FIRST_TILT_S, t: 0, side, angle: 0 };
-  if (t > 0) {
+const smooth = (x) => x * x * (3 - 2 * x);
+const bump = (p) => Math.sin(Math.PI * clamp(p, 0, 1)); // 0 → 1 → 0
+
+// Scheduler: every 8 to 15 s start a move other than the last one.
+// Facing away cancels the move. random is injectable for tests.
+export function idleStep({ untilNext, name, t, last }, dt, facingCamera, random = Math.random) {
+  if (!facingCamera) return { untilNext: FIRST_MOVE_S, name: null, t: 0, last };
+  if (name) {
     const next = t + dt;
-    if (next >= TILT_S) return { untilNext: 8 + random() * 7, t: 0, side: -side, angle: 0 };
-    return { untilNext, t: next, side, angle: side * TILT_ANGLE * Math.sin((Math.PI * next) / TILT_S) };
+    if (next >= IDLE_ACTIONS[name].seconds) return { untilNext: 8 + random() * 7, name: null, t: 0, last: name };
+    return { untilNext, name, t: next, last };
   }
   const wait = untilNext - dt;
-  if (wait > 0) return { untilNext: wait, t: 0, side, angle: 0 };
-  return { untilNext: 0, t: dt, side, angle: side * TILT_ANGLE * Math.sin((Math.PI * dt) / TILT_S) };
+  if (wait > 0) return { untilNext: wait, name: null, t: 0, last };
+  const choices = IDLE_NAMES.filter((n) => n !== last);
+  const pick = choices[Math.min(choices.length - 1, Math.floor(random() * choices.length))];
+  return { untilNext: 0, name: pick, t: 0, last };
+}
+
+export function idleProgress({ name, t }) {
+  return name ? t / IDLE_ACTIONS[name].seconds : 0;
+}
+
+// Offsets in the body frame: headTilt leans the head sideways, headTurn turns it,
+// headNod tips it back, spin turns the whole body, hop lifts it; arms[s] is a target
+// shoulder pitch/yaw and armBlend[s] how much of it to use (0 keeps the normal pose).
+export function idlePose(name, p) {
+  const pose = {
+    headTilt: 0, headTurn: 0, headNod: 0, spin: 0, hop: 0,
+    arms: { [-1]: { pitch: 0, yaw: 0 }, 1: { pitch: 0, yaw: 0 } },
+    armBlend: { [-1]: 0, 1: 0 },
+  };
+  if (!name || p <= 0 || p >= 1) return pose;
+  const env = bump(p);
+  switch (name) {
+    case 'tilt':
+      pose.headTilt = 0.38 * env;
+      break;
+    case 'wave': {
+      // Right arm up and out, swinging side to side three times.
+      const raise = smooth(clamp(p / 0.2, 0, 1)) * smooth(clamp((1 - p) / 0.2, 0, 1));
+      pose.armBlend[1] = raise;
+      pose.arms[1] = { pitch: 0.35, yaw: 0.5 + 0.35 * Math.sin(p * Math.PI * 6) };
+      pose.headTilt = -0.15 * env;
+      break;
+    }
+    case 'twirl':
+      pose.spin = 2 * Math.PI * smooth(p);
+      pose.hop = 0.05 * env;
+      break;
+    case 'hop':
+      // Two little hops.
+      pose.hop = 0.2 * Math.abs(Math.sin(p * Math.PI * 2));
+      break;
+    case 'lookAround':
+      pose.headTurn = 0.6 * Math.sin(p * Math.PI * 2) * env;
+      break;
+    case 'stretch':
+      pose.armBlend[-1] = env;
+      pose.armBlend[1] = env;
+      pose.arms[-1] = { pitch: 0.15, yaw: -0.25 };
+      pose.arms[1] = { pitch: 0.15, yaw: 0.25 };
+      pose.headNod = -0.25 * env;
+      pose.hop = 0.04 * env;
+      break;
+    default:
+      break;
+  }
+  return pose;
 }

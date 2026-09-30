@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { armPose, hoverFlightPose, blendFlight, lookBack, headTilt } from '../src/core/pose.js';
+import { armPose, hoverFlightPose, blendFlight, lookBack, idleStep, idlePose, IDLE_ACTIONS } from '../src/core/pose.js';
 
 test('both elbows flex toward the back/head, never hyperextend toward the chest', () => {
   for (const side of [-1, 1]) {
@@ -52,28 +52,46 @@ test('after resting a moment the hero turns around to face the camera, then turn
   assert.equal(idle, 0);
 });
 
-test('facing the camera the hero tilts her head now and then, alternating sides, and not while facing away', () => {
-  const half = () => 0.5; // fixed "random" so the timing is predictable
-  let tilt = { untilNext: 3, t: 0, side: 1, angle: 0 };
-  const peaks = [];
-  let maxAngle = 0;
-  let prevT = 0;
-  for (let i = 0; i < 60 * 60; i++) {
-    tilt = headTilt(tilt, 1 / 60, true, half);
-    maxAngle = Math.max(maxAngle, Math.abs(tilt.angle));
-    if (tilt.t > 0 && prevT === 0) peaks.push({ at: i / 60, side: tilt.side });
-    prevT = tilt.t;
+test('facing the camera she does a cute move every 8 to 15 s, never the same one twice in a row', () => {
+  let n = 0;
+  const cycle = () => { n = (n + 0.37) % 1; return n; }; // deterministic spread of "random" values
+  let idle = { untilNext: 3, name: null, t: 0, last: null };
+  const starts = [];
+  for (let i = 0; i < 60 * 120; i++) {
+    const before = idle.name;
+    idle = idleStep(idle, 1 / 60, true, cycle);
+    if (idle.name && idle.name !== before) starts.push({ at: i / 60, name: idle.name });
   }
-  assert.ok(peaks.length >= 3 && peaks.length <= 6, `tilts in a minute: ${peaks.length}`);
-  for (let i = 1; i < peaks.length; i++) {
-    assert.ok(peaks[i].at - peaks[i - 1].at >= 8, 'at least 8 s apart');
-    assert.equal(peaks[i].side, -peaks[i - 1].side, 'alternates sides');
+  assert.ok(starts.length >= 7, `moves in two minutes: ${starts.length}`);
+  for (let i = 1; i < starts.length; i++) {
+    assert.notEqual(starts[i].name, starts[i - 1].name, 'no immediate repeat');
+    assert.ok(starts[i].at - starts[i - 1].at >= 8, 'at least 8 s apart');
   }
-  assert.ok(maxAngle > 0.3 && maxAngle <= 0.45, `tilt reaches about 20 degrees: ${maxAngle}`);
+  assert.ok(new Set(starts.map((s) => s.name)).size >= 4, 'uses a variety of moves');
+});
 
-  let away = { untilNext: 0, t: 0.5, side: 1, angle: 0.3 };
-  away = headTilt(away, 1 / 60, false, half);
-  assert.equal(away.angle, 0);
-  assert.equal(away.t, 0);
+test('turning away stops the move at once and waits a moment before the next', () => {
+  const away = idleStep({ untilNext: 0, name: 'wave', t: 0.5, last: 'tilt' }, 1 / 60, false);
+  assert.equal(away.name, null);
   assert.ok(away.untilNext >= 3);
+});
+
+test('every move starts and ends in the resting pose and stays within gentle limits', () => {
+  for (const name of Object.keys(IDLE_ACTIONS)) {
+    for (const p of [0, 1]) {
+      const pose = idlePose(name, p);
+      for (const [key, value] of Object.entries(pose)) {
+        if (typeof value === 'number') assert.ok(Math.abs(value) < 1e-9, `${name} ${key} at ${p}: ${value}`);
+      }
+      for (const s of [-1, 1]) assert.ok(pose.armBlend[s] < 1e-9, `${name} arm ${s} at ${p}`);
+    }
+    for (let p = 0; p <= 1; p += 0.05) {
+      const pose = idlePose(name, p);
+      assert.ok(Math.abs(pose.headTilt) <= 0.45 && Math.abs(pose.headTurn) <= 0.7 && pose.hop >= 0 && pose.hop <= 0.25, name);
+      assert.ok(Math.abs(pose.spin) <= 2 * Math.PI + 1e-9, name);
+    }
+  }
+  assert.ok(Math.abs(idlePose('twirl', 0.999).spin) > 6, 'a twirl turns all the way round');
+  assert.ok(idlePose('wave', 0.5).armBlend[1] > 0.9, 'waving raises one arm');
+  assert.ok(idlePose('hop', 0.25).hop > 0.1, 'hops leave the ground');
 });

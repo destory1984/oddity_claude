@@ -37,6 +37,14 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
   $('capture').addEventListener('click', async () => {
     const button = $('capture');
     button.disabled = true;
+    // The player may leave photo mode or zoom while the image is being encoded:
+    // judge the missions on the view that was on screen when the button was pressed.
+    const shot = {
+      orientation,
+      fov: world.fov(),
+      aspect: canvas.width / canvas.height,
+      heroVisible: $('showHero').checked,
+    };
     try {
       world.render();
       const blob = await new Promise((resolve, reject) => {
@@ -59,7 +67,7 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
         setTimeout(() => URL.revokeObjectURL(url), 10000);
         toast.show('화면 표시 없는 우주 사진을 저장했습니다.');
       }
-      onCaptured();
+      onCaptured(shot);
     } catch (e) {
       toast.show('사진을 저장하지 못했습니다. 다시 시도해 주세요.');
       console.error(e);

@@ -30,16 +30,19 @@ let routeAt = 0;
 const toast = createToast($('toast'));
 const canvas = $('space');
 
-// Call after every change to the log: saves it, shows the score, and celebrates once
-// when the last record is filled in.
+// Call after every change to the log: saves it and shows the score. Returns true
+// when this change filled in the last record, so the caller can celebrate after
+// showing what was just achieved.
 function progressChanged(before) {
   saveProgress(progress);
   const now = summarize(progress, BODIES, MISSIONS);
   const { done, total } = score(now);
   $('journalButton').textContent = `수첩 ${done}/${total}`;
-  if (before && !isComplete(summarize(before, BODIES, MISSIONS)) && isComplete(now)) {
-    toast.show('태양계 탐험을 모두 마쳤습니다. 수첩이 가득 찼습니다!');
-  }
+  return Boolean(before) && !isComplete(summarize(before, BODIES, MISSIONS)) && isComplete(now);
+}
+
+function celebrate() {
+  toast.show('태양계 탐험을 모두 마쳤습니다. 수첩이 가득 찼습니다!');
 }
 
 function setPaused(value) {
@@ -91,22 +94,25 @@ async function init() {
     setPaused,
     isPaused: () => paused,
     clearInput: () => input.clear(),
-    onCaptured() {
+    // shot: the camera as it was when the button was pressed (photo.js snapshots it).
+    onCaptured(shot) {
       const done = completedMissions({
         position: state.position,
-        orientation: multiply(state.orientation, photo.orientation() || [0, 0, 0, 1]),
-        fovY: world.fov(),
-        aspect: canvas.width / canvas.height,
-        heroVisible: photo.heroVisible(),
+        orientation: multiply(state.orientation, shot.orientation),
+        fovY: shot.fov,
+        aspect: shot.aspect,
+        heroVisible: shot.heroVisible,
         bodies: BODIES,
       });
       const before = progress;
       const result = recordPhotos(progress, done);
+      if (!result.newly.length) return;
       progress = result.progress;
-      if (result.newly.length) progressChanged(before);
+      const finished = progressChanged(before);
       for (const id of result.newly) {
         toast.show(eventMessage({ type: 'photo', missionName: MISSIONS.find((mm) => mm.id === id).name }));
       }
+      if (finished) celebrate();
     },
   });
 
@@ -144,6 +150,8 @@ async function init() {
     },
     onClose() {
       setPaused(journalPriorPause);
+      // Time spent in the dialog (or a confirm box) is not a frame gap.
+      previous = null;
     },
     onGo(id) {
       selectedId = id;
@@ -207,15 +215,17 @@ async function init() {
     const result = step(state, intent, dt);
     state = result.state;
     const logged = updateProgress(progress, state, BODIES);
+    let finished = false;
     if (logged.events.length) {
       const before = progress;
       progress = logged.progress;
-      progressChanged(before);
+      finished = progressChanged(before);
     }
     for (const event of [...result.events, ...logged.events]) {
       const text = eventMessage(event, BODIES);
       if (text) toast.show(text, event.type === 'zoneChanged' ? 'zone' : null);
     }
+    if (finished) celebrate();
 
     const turn = dt > 0
       ? [dragTurn[0] / dt + intent.turnX * TURN_RATE, dragTurn[1] / dt + intent.turnY * TURN_RATE]
@@ -242,7 +252,8 @@ async function init() {
     else if (state.speed < 0.01) flightLabel = '정지 비행';
     else if (!driving) flightLabel = '서서히 감속 중';
     else if (state.motionSign < 0) flightLabel = '후진 비행';
-    if (now - routeAt > ROUTE_EVERY_MS) {
+    // Paused or in photo mode nothing moves, so only a new target needs a new estimate.
+    if (routeAt === 0 || (!paused && now - routeAt > ROUTE_EVERY_MS)) {
       route = estimateTravelSeconds(state, selectedId, BODIES);
       routeAt = now;
     }

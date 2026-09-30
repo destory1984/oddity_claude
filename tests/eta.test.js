@@ -42,3 +42,12 @@ test('every planet from the start is reachable in under a minute or reports what
     assert.ok(seconds.blockedBy || seconds.seconds < 60, `${body.id}: ${JSON.stringify(seconds)}`);
   }
 });
+
+test('gives up at once when even top speed cannot arrive in time', () => {
+  const bodies = [ball('goal', 1e12)];
+  const started = performance.now();
+  const result = estimateTravelSeconds(createState([0, 0, 0], [0, 0, 0, 1], bodies), 'goal', bodies);
+  const took = performance.now() - started;
+  assert.equal(result, null);
+  assert.ok(took < 5, `took ${took.toFixed(1)} ms; the full 600 s simulation takes about 50 ms`);
+});

@@ -12,7 +12,7 @@ export function createJournal({ bodies, missions, onGo, onReset, onOpen, onClose
   $('journalButton').addEventListener('click', () => open());
   $('closeJournal').addEventListener('click', () => dialog.close());
   $('resetJournal').addEventListener('click', () => {
-    if (window.confirm('탐험 기록을 모두 지울까요? 되돌릴 수 없습니다.')) onReset();
+    if (window.confirm('탐험 기록을 모두 지울까요? 되돌릴 수 없습니다. 지금 가까이 있는 천체는 곧바로 다시 기록됩니다.')) onReset();
   });
   dialog.addEventListener('close', () => onClose());
 

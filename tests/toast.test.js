@@ -78,3 +78,15 @@ test('a newer message of the same kind replaces the one on screen at once', () =
   vi.advanceTimersByTime(20000);
   assert.deepEqual(el.shown, ['zone: 1000c', 'zone: 0.1c']);
 });
+
+test('a steady stream of queued updates does not keep the current message up forever', () => {
+  const el = stubElement();
+  const toast = createToast(el);
+  toast.show('A');
+  for (let t = 0; t < 20; t += 2) {
+    toast.show(`zone ${t}`, 'zone');
+    vi.advanceTimersByTime(2000);
+  }
+  assert.notEqual(el.shown.length, 1, 'A was never replaced');
+  assert.equal(el.shown[1].startsWith('zone'), true);
+});

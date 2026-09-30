@@ -41,10 +41,13 @@ export function createToast(element) {
         display(text, kind);
         return;
       }
+      const wasEmpty = queue.length === 0;
       const same = kind ? queue.findIndex((item) => item.kind === kind) : -1;
       if (same >= 0) queue[same] = { text, kind };
       else if (!queue.some((item) => item.text === text)) queue.push({ text, kind });
-      schedule();
+      // Only the first waiting message shortens the current one; later ones keep
+      // the existing deadline so a steady stream cannot hold a message up forever.
+      if (wasEmpty && queue.length) schedule();
     },
   };
 }

@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { armPose, hoverFlightPose, blendFlight } from '../src/core/pose.js';
+import { armPose, hoverFlightPose, blendFlight, lookBack } from '../src/core/pose.js';
 
 test('both elbows flex toward the back/head, never hyperextend toward the chest', () => {
   for (const side of [-1, 1]) {
@@ -38,4 +38,16 @@ test('turns remain bounded and smoothly vary around straight flight', () => {
     assert.ok(Math.abs(a.elbowFlex - b.elbowFlex) < 0.001);
     assert.ok(Math.abs(armPose(side, 10, 10).shoulderYaw) <= 0.5);
   }
+});
+
+test('after resting a moment the hero turns around to face the camera, then turns back to fly', () => {
+  let angle = 0;
+  let idle = 0;
+  for (let i = 0; i < 60; i++) ({ angle, idle } = lookBack(angle, idle, true, 1 / 60));
+  assert.ok(angle < 0.05, 'waits about a second and a half before turning');
+  for (let i = 0; i < 240; i++) ({ angle, idle } = lookBack(angle, idle, true, 1 / 60));
+  assert.ok(Math.abs(angle - Math.PI) < 0.05, `faces back after resting: ${angle}`);
+  for (let i = 0; i < 60; i++) ({ angle, idle } = lookBack(angle, idle, false, 1 / 60));
+  assert.ok(angle < 0.1, 'swings forward within a second once moving');
+  assert.equal(idle, 0);
 });

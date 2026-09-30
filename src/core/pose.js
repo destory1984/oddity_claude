@@ -28,3 +28,14 @@ export function armPose(side, bank, bend) {
     elbowFlex: -clamp(0.08 + folded * 0.55 + inside * 0.3, 0.08, 1.15),
   };
 }
+
+const REST_BEFORE_TURN_S = 1.5;
+
+// Turn about the body's vertical axis: 0 faces along the flight, PI faces the camera.
+// Resting for a moment turns the hero around slowly; moving swings them back quickly.
+export function lookBack(angle, idleSeconds, resting, dt) {
+  const idle = resting ? idleSeconds + dt : 0;
+  const target = idle > REST_BEFORE_TURN_S ? Math.PI : 0;
+  const rate = target > angle ? 1.6 : 6;
+  return { angle: target + (angle - target) * Math.exp(-dt * rate), idle };
+}

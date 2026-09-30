@@ -4,7 +4,7 @@ import {
 } from './babylon.js';
 import capeFrag from './shaders/cape.frag?raw';
 import { shader } from './planets.js';
-import { blendFlight, hoverFlightPose, armPose } from '../core/pose.js';
+import { blendFlight, hoverFlightPose, armPose, lookBack } from '../core/pose.js';
 import { clamp } from './math.js';
 
 const CAPE_ROWS = 19;
@@ -114,6 +114,7 @@ export function createHero(engine, sunDirection) {
   let bend = 0;
   let capeLag = 0;
   let flightBlend = 0;
+  let facing = { angle: 0, idle: 0 };
   let elapsed = 0;
 
   function update({ dt, speed, turn, fov, photoOrientation, visible }) {
@@ -128,6 +129,9 @@ export function createHero(engine, sunDirection) {
     const bodyPose = hoverFlightPose(flying, bank, bend);
     hero.rotation.z = bodyPose.bodyBank;
     hero.rotation.x = bodyPose.bodyPitch;
+    // Standing still for a moment, the hero turns around to look back at the camera.
+    facing = lookBack(facing.angle, facing.idle, flying < 0.05 && speed < 1, dt);
+    hero.rotation.y = facing.angle;
     torso.rotation.z = bank * 0.3 * flying;
     torso.rotation.x = -0.18 * flying;
     hero.position.y = -1.15 + Math.sin(elapsed * 1.5) * 0.04 * (1 - flying);

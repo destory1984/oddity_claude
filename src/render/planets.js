@@ -101,6 +101,11 @@ const LOOKS = {
     shader: 'gas', colorA: [0.9, 0.8, 0.6], colorB: [0.77, 0.65, 0.45], colorC: [0.96, 0.9, 0.76],
     bands: 18, turbulence: 0.5, spot: 0, dayS: 38362, rings: { innerKm: 74500, outerKm: 136775, tilt: 0.47 },
   },
+  io: { shader: 'rocky', colorA: [0.78, 0.66, 0.25], colorB: [0.9, 0.84, 0.5], cap: 0, haze: 0, contrast: 1.1, dayS: 152854 },
+  europa: { shader: 'rocky', colorA: [0.72, 0.62, 0.52], colorB: [0.93, 0.9, 0.86], cap: 0, haze: 0, contrast: 0.5, dayS: 306822 },
+  ganymede: { shader: 'rocky', colorA: [0.42, 0.38, 0.34], colorB: [0.66, 0.62, 0.57], cap: 0.12, haze: 0, contrast: 0.7, dayS: 618153 },
+  callisto: { shader: 'rocky', colorA: [0.25, 0.23, 0.21], colorB: [0.45, 0.42, 0.38], cap: 0, haze: 0, contrast: 1.2, dayS: 1441931 },
+  titan: { shader: 'rocky', colorA: [0.72, 0.5, 0.22], colorB: [0.86, 0.66, 0.34], cap: 0, haze: 1.2, contrast: 0.1, dayS: 1377648 },
   uranus: {
     shader: 'gas', colorA: [0.62, 0.85, 0.88], colorB: [0.55, 0.79, 0.84], colorC: [0.76, 0.92, 0.94],
     bands: 6, turbulence: 0.2, spot: 0, dayS: -62064,

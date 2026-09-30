@@ -33,9 +33,30 @@ export const BODY_DATA = [
     id: 'jupiter', name: '목성', nameEn: 'Jupiter', kind: 'planet', radiusKm: 69911,
     parent: 'sun', orbitKm: 778570000, direction: [0.77, 0.01, -0.64],
   },
+  // Jupiter's four Galilean moons, spread around it.
+  {
+    id: 'io', name: '이오', nameEn: 'Io', kind: 'moon', radiusKm: 1821.6,
+    parent: 'jupiter', orbitKm: 421700, direction: [-0.6, 0.05, 0.8],
+  },
+  {
+    id: 'europa', name: '유로파', nameEn: 'Europa', kind: 'moon', radiusKm: 1560.8,
+    parent: 'jupiter', orbitKm: 671034, direction: [-0.95, -0.04, -0.3],
+  },
+  {
+    id: 'ganymede', name: '가니메데', nameEn: 'Ganymede', kind: 'moon', radiusKm: 2634.1,
+    parent: 'jupiter', orbitKm: 1070412, direction: [0.3, 0.03, 0.95],
+  },
+  {
+    id: 'callisto', name: '칼리스토', nameEn: 'Callisto', kind: 'moon', radiusKm: 2410.3,
+    parent: 'jupiter', orbitKm: 1882709, direction: [0.85, -0.02, -0.52],
+  },
   {
     id: 'saturn', name: '토성', nameEn: 'Saturn', kind: 'planet', radiusKm: 58232,
     parent: 'sun', orbitKm: 1433530000, direction: [0.94, 0.04, 0.34],
+  },
+  {
+    id: 'titan', name: '타이탄', nameEn: 'Titan', kind: 'moon', radiusKm: 2574.7,
+    parent: 'saturn', orbitKm: 1221870, direction: [-0.7, 0.1, -0.7],
   },
   {
     id: 'uranus', name: '천왕성', nameEn: 'Uranus', kind: 'planet', radiusKm: 25362,

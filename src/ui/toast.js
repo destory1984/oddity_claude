@@ -4,9 +4,11 @@ const QUEUED_MS = 2500;
 
 export function createToast(element) {
   let timer = null;
+  let currentKind = null;
   const queue = [];
 
-  function display(text) {
+  function display(text, kind = null) {
+    currentKind = kind;
     element.textContent = text;
     element.classList.add('on');
     schedule();
@@ -18,23 +20,30 @@ export function createToast(element) {
   }
 
   function next() {
-    if (queue.length) display(queue.shift());
+    if (queue.length) {
+      const item = queue.shift();
+      display(item.text, item.kind);
+    }
     else element.classList.remove('on');
   }
 
   return {
-    show(text) {
+    // kind: messages of the same kind replace each other while waiting in the queue,
+    // so a fast trip does not replay every speed-zone change after arrival.
+    show(text, kind = null) {
       const showing = element.classList.contains('on');
       if (showing && element.textContent === text) {
         // Same text while visible: extend it without re-announcing to screen readers.
         if (!queue.length) schedule();
         return;
       }
-      if (!showing) {
-        display(text);
+      if (!showing || (kind && kind === currentKind)) {
+        display(text, kind);
         return;
       }
-      if (!queue.includes(text)) queue.push(text);
+      const same = kind ? queue.findIndex((item) => item.kind === kind) : -1;
+      if (same >= 0) queue[same] = { text, kind };
+      else if (!queue.some((item) => item.text === text)) queue.push({ text, kind });
       schedule();
     },
   };

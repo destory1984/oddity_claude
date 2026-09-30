@@ -57,3 +57,24 @@ test('a queued duplicate is not shown twice', () => {
   vi.advanceTimersByTime(10000);
   assert.deepEqual(el.shown, ['A', 'B']);
 });
+
+test('a newer message of the same kind replaces a queued older one', () => {
+  const el = stubElement();
+  const toast = createToast(el);
+  toast.show('discovered Jupiter');
+  toast.show('zone: 1000c', 'zone');
+  toast.show('zone: 0.1c', 'zone');
+  toast.show('zone: 0.01c', 'zone');
+  vi.advanceTimersByTime(20000);
+  assert.deepEqual(el.shown, ['discovered Jupiter', 'zone: 0.01c']);
+});
+
+test('a newer message of the same kind replaces the one on screen at once', () => {
+  const el = stubElement();
+  const toast = createToast(el);
+  toast.show('zone: 1000c', 'zone');
+  toast.show('zone: 0.1c', 'zone');
+  assert.equal(el.textContent, 'zone: 0.1c');
+  vi.advanceTimersByTime(20000);
+  assert.deepEqual(el.shown, ['zone: 1000c', 'zone: 0.1c']);
+});

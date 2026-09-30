@@ -10,11 +10,14 @@ const sub = (a, b) => a.map((n, i) => n - b[i]);
 const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
-test('the table holds the Sun, all eight planets and the Moon at real radii', () => {
+test('the table holds the Sun, all eight planets and six large moons at real radii', () => {
   assert.deepEqual(
     BODIES.map((b) => b.id),
-    ['sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'],
+    ['sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'jupiter', 'io', 'europa', 'ganymede', 'callisto', 'saturn', 'titan', 'uranus', 'neptune'],
   );
+  assert.equal(bodyById('ganymede').radiusKm, 2634.1);
+  assert.equal(bodyById('titan').parent, 'saturn');
+  for (const id of ['io', 'europa', 'ganymede', 'callisto']) assert.equal(bodyById(id).parent, 'jupiter');
   assert.equal(bodyById('sun').radiusKm / KM_PER_UNIT, 696.34);
   assert.equal(bodyById('earth').radiusKm, 6371);
   assert.equal(bodyById('moon').radiusKm, 1737.4);

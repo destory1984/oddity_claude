@@ -214,7 +214,7 @@ async function init() {
     }
     for (const event of [...result.events, ...logged.events]) {
       const text = eventMessage(event, BODIES);
-      if (text) toast.show(text);
+      if (text) toast.show(text, event.type === 'zoneChanged' ? 'zone' : null);
     }
 
     const turn = dt > 0

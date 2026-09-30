@@ -33,15 +33,15 @@ test('zero or negative dt changes nothing', () => {
   assert.deepEqual(step(state, { drive: 1 }, -1).state, state);
 });
 
-test('full throttle reaches 100c in three seconds in empty space', () => {
+test('full throttle reaches 1000c in three seconds in empty space', () => {
   const state = createState([0, 0, 0], [0, 0, 0, 1], []);
   const after = run(state, { drive: 1 }, 180, []).state;
-  assert.ok(Math.abs(after.speed - C * 100) < 1e-3);
-  assert.ok(run(state, { drive: 1 }, 170, []).state.speed < C * 100);
+  assert.ok(Math.abs(after.speed - C * 1000) < 1e-2);
+  assert.ok(run(state, { drive: 1 }, 170, []).state.speed < C * 1000);
 });
 
 test('releasing input stops within one second from any speed', () => {
-  for (const speed of [C * 0.1, C, C * 100]) {
+  for (const speed of [C * 0.01, C * 0.1, C * 1000]) {
     const state = { ...createState([0, 0, 0], [0, 0, 0, 1], []), speed };
     const after = run(state, { drive: 0 }, 61, []).state;
     assert.equal(after.speed, 0);
@@ -54,8 +54,8 @@ test('stopNow halts at once', () => {
   assert.equal(stopNow(moving).brakeRate, 0);
 });
 
-test('a 100c dive stops on the surface, never inside, announcing each zone once', () => {
-  let state = { ...createState([0, 0, -1e7], facingBall, [ball]), speed: C * 100 };
+test('a fast dive stops on the surface, never inside, announcing each zone once', () => {
+  let state = { ...createState([0, 0, -1e7], facingBall, [ball]), speed: C * 1000 };
   const events = [];
   for (let i = 0; i < 5000 && state.restingOn === null; i++) {
     const result = step(state, { drive: 1 }, DT, [ball]);
@@ -102,8 +102,8 @@ test('boundary rest: sitting exactly on the 50,000 km shell emits no events', ()
   assert.deepEqual(run(state, {}, 120, [ball]).events, []);
 });
 
-test('reverse near a body: S while diving at 1c brakes, never enters, then backs away', () => {
-  let state = { ...createState([0, 0, -(1000 + 40000)], facingBall, [ball]), speed: C };
+test('reverse near a body: S while diving at full near-zone speed brakes, never enters, then backs away', () => {
+  let state = { ...createState([0, 0, -(1000 + 40000)], facingBall, [ball]), speed: C * 0.1 };
   const { state: after } = run(state, { drive: -1 }, 180, [ball]);
   assert.ok(Math.hypot(...after.position) >= 1000 - 1e-6);
   assert.equal(after.motionSign, -1);

@@ -12,8 +12,8 @@ export function eventMessage(event) {
     return '천체 표면에 도착했습니다. 내부로는 들어갈 수 없습니다.';
   }
   if (event.type !== 'zoneChanged') return null;
-  if (event.to === 'far') return '근처에 별이 없어서, 광속의 100배까지 속도를 올립니다.';
-  if (event.to === 'veryNear') return '별 표면에 아주 가까워서, 안전을 위해 속도를 광속의 1/10로 낮춥니다.';
-  if (event.from === 'veryNear') return '별 표면에서 멀어져서, 속도를 광속까지 올립니다.';
-  return '별 근처에서는 안전을 위해서 속도를 광속으로 낮춥니다.';
+  if (event.to === 'far') return '근처에 별이 없어서, 광속의 1000배까지 속도를 올립니다.';
+  if (event.to === 'veryNear') return '별 표면에 아주 가까워서, 안전을 위해 속도를 광속의 1/100로 낮춥니다.';
+  if (event.from === 'veryNear') return '별 표면에서 멀어져서, 속도를 광속의 1/10까지 올립니다.';
+  return '별 근처에서는 안전을 위해서 속도를 광속의 1/10로 낮춥니다.';
 }

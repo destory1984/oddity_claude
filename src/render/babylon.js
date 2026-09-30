@@ -10,6 +10,7 @@ export { CreateSphere } from '@babylonjs/core/Meshes/Builders/sphereBuilder.js';
 export { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder.js';
 export { CreateRibbon } from '@babylonjs/core/Meshes/Builders/ribbonBuilder.js';
 export { Mesh } from '@babylonjs/core/Meshes/mesh.js';
+export { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData.js';
 export { TransformNode } from '@babylonjs/core/Meshes/transformNode.js';
 export { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial.js';
 export { Effect } from '@babylonjs/core/Materials/effect.js';

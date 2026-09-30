@@ -19,11 +19,14 @@ export function cueForEvent(event) {
   }
 }
 
-// Engine hum: silent at rest, a soft rush while coasting, louder and higher under thrust.
-// gain is linear volume (0..0.25), pitch the hum's base frequency in Hz.
+// Flight sound: silent at rest, a soft rush of air while coasting; under thrust an airy
+// chord that rises with speed, with twinkles. No engine rumble: this is a flying girl,
+// not a car. gain is linear volume (0..0.25), pitch the chord root in Hz (330..660),
+// sparkle the twinkles per second.
 export function engineSound({ speed, maxSpeed, thrusting }) {
   const fraction = maxSpeed > 0 ? Math.min(1, Math.max(0, speed / maxSpeed)) : 0;
-  if (!thrusting && fraction === 0) return { gain: 0, pitch: 55 };
-  const gain = thrusting ? 0.1 + 0.15 * fraction : 0.08 * fraction;
-  return { gain, pitch: 55 + 125 * fraction };
+  if (!thrusting && fraction === 0) return { gain: 0, pitch: 330, sparkle: 0 };
+  const gain = thrusting ? 0.08 + 0.12 * fraction : 0.06 * fraction;
+  const sparkle = thrusting ? 1.5 + 4.5 * fraction : 0;
+  return { gain, pitch: 330 + 330 * fraction, sparkle };
 }

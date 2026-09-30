@@ -278,7 +278,7 @@ async function init() {
       speed: paused ? 0 : totalSpeed(state),
       maxSpeed: ZONES[state.zoneId].maxSpeed,
       thrusting: !paused && input.driving(),
-    }));
+    }), elapsed || 1 / 60);
 
     const view = world.update({
       bodies,

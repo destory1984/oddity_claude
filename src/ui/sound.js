@@ -41,36 +41,43 @@ export function createSound() {
     const data = noiseBuffer.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
 
-    // Engine: two slightly detuned saws through a low-pass, plus a band of rushing noise.
+    // Flight: a band of airy noise (wind) under a soft sine chord (root and fifth)
+    // with a slow shimmer. Deliberately no low oscillators, so it never rumbles.
     const gain = ctx.createGain();
     gain.gain.value = 0;
     gain.connect(master);
-    const lowpass = ctx.createBiquadFilter();
-    lowpass.type = 'lowpass';
-    lowpass.frequency.value = 300;
-    lowpass.connect(gain);
-    const oscA = ctx.createOscillator();
-    const oscB = ctx.createOscillator();
-    oscA.type = 'sawtooth';
-    oscB.type = 'sawtooth';
-    oscA.frequency.value = 55;
-    oscB.frequency.value = 55 * 1.012;
-    oscA.connect(lowpass);
-    oscB.connect(lowpass);
-    const rush = ctx.createBufferSource();
-    rush.buffer = noiseBuffer;
-    rush.loop = true;
+    const air = ctx.createBufferSource();
+    air.buffer = noiseBuffer;
+    air.loop = true;
     const band = ctx.createBiquadFilter();
     band.type = 'bandpass';
-    band.frequency.value = 500;
-    band.Q.value = 0.8;
-    const rushGain = ctx.createGain();
-    rushGain.gain.value = 0.5;
-    rush.connect(band).connect(rushGain).connect(gain);
+    band.frequency.value = 1200;
+    band.Q.value = 0.6;
+    const airGain = ctx.createGain();
+    airGain.gain.value = 0.55;
+    air.connect(band).connect(airGain).connect(gain);
+    const chordGain = ctx.createGain();
+    chordGain.gain.value = 0.22;
+    chordGain.connect(gain);
+    const oscA = ctx.createOscillator();
+    const oscB = ctx.createOscillator();
+    oscA.type = 'sine';
+    oscB.type = 'sine';
+    oscA.frequency.value = 330;
+    oscB.frequency.value = 330 * 1.5;
+    oscA.connect(chordGain);
+    oscB.connect(chordGain);
+    const shimmer = ctx.createOscillator();
+    const shimmerDepth = ctx.createGain();
+    shimmer.frequency.value = 5;
+    shimmerDepth.gain.value = 0.08;
+    shimmer.connect(shimmerDepth).connect(chordGain.gain);
+    air.start();
     oscA.start();
     oscB.start();
-    rush.start();
-    engine = { gain, lowpass, oscA, oscB, band };
+    shimmer.start();
+    engine = { gain, band, oscA, oscB, sparkle: 0 };
+
     return ctx;
   }
 
@@ -132,15 +139,19 @@ export function createSound() {
       if (!ctx || muted || !CUES[name]) return;
       CUES[name]();
     },
-    // { gain, pitch } from core/audio.js engineSound().
-    engine({ gain, pitch }) {
+    // { gain, pitch, sparkle } from core/audio.js engineSound(); called every frame.
+    engine({ gain, pitch, sparkle }, dt = 1 / 60) {
       if (!ctx) return;
       const t = ctx.currentTime;
-      engine.gain.gain.setTargetAtTime(gain, t, 0.12);
-      engine.oscA.frequency.setTargetAtTime(pitch, t, 0.2);
-      engine.oscB.frequency.setTargetAtTime(pitch * 1.012, t, 0.2);
-      engine.lowpass.frequency.setTargetAtTime(150 + pitch * 4, t, 0.2);
-      engine.band.frequency.setTargetAtTime(300 + pitch * 8, t, 0.2);
+      engine.gain.gain.setTargetAtTime(gain, t, 0.15);
+      engine.oscA.frequency.setTargetAtTime(pitch, t, 0.3);
+      engine.oscB.frequency.setTargetAtTime(pitch * 1.5, t, 0.3);
+      engine.band.frequency.setTargetAtTime(800 + pitch * 2, t, 0.3);
+      // Twinkles: short high pings at random, about `sparkle` per second.
+      if (!muted && sparkle > 0 && Math.random() < sparkle * dt) {
+        const notes = [1568, 1760, 2093, 2349, 2637];
+        tone({ freq: notes[Math.floor(Math.random() * notes.length)], length: 0.25, volume: 0.035 });
+      }
     },
     muted: () => muted,
     setMuted(value) {

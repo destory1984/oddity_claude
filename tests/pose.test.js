@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { armPose, hoverFlightPose, blendFlight, lookBack, idleStep, idlePose, IDLE_ACTIONS } from '../src/core/pose.js';
+import { armPose, hoverFlightPose, blendFlight, lookBack, idleStep, idlePose, IDLE_ACTIONS, heroScaleFor } from '../src/core/pose.js';
 
 test('both elbows flex toward the back/head, never hyperextend toward the chest', () => {
   for (const side of [-1, 1]) {
@@ -94,4 +94,12 @@ test('every move starts and ends in the resting pose and stays within gentle lim
   assert.ok(Math.abs(idlePose('twirl', 0.999).spin) > 6, 'a twirl turns all the way round');
   assert.ok(idlePose('wave', 0.5).armBlend[1] > 0.9, 'waving raises one arm');
   assert.ok(idlePose('hop', 0.25).hop > 0.1, 'hops leave the ground');
+});
+
+test('the hero shrinks on tall phone screens so the view stays open', () => {
+  assert.equal(heroScaleFor(16 / 9), 1.3);
+  assert.equal(heroScaleFor(1.2), 1.3);
+  assert.ok(Math.abs(heroScaleFor(390 / 844) - 0.78) < 1e-9);
+  const mid = heroScaleFor(0.9);
+  assert.ok(mid > 0.78 && mid < 1.3);
 });

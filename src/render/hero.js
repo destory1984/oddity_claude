@@ -8,7 +8,7 @@ import {
   DynamicTexture,
 } from './babylon.js';
 import {
-  blendFlight, hoverFlightPose, armPose, lookBack, idleStep, idlePose, idleProgress,
+  blendFlight, hoverFlightPose, armPose, lookBack, idleStep, idlePose, idleProgress, heroScaleFor,
 } from '../core/pose.js';
 import { clamp } from './math.js';
 
@@ -251,8 +251,9 @@ export function createHero(engine, sunDirection) {
     }
   }
 
-  function update({ dt, speed, turn, fov, photoOrientation, visible }) {
+  function update({ dt, speed, turn, fov, photoOrientation, visible, aspect = 16 / 9 }) {
     elapsed += dt;
+    hero.scaling.setAll(heroScaleFor(aspect));
     const smooth = 1 - Math.exp(-dt * 6);
     bank += (clamp(-turn[0] * 1.15, -0.9, 0.9) - bank) * smooth;
     bend += (clamp(turn[1] * 0.38, -0.3, 0.3) - bend) * smooth;

@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { createState, step, stopNow, totalSpeed, carryAlong, START_ORIENTATION } from '../src/core/game.js';
+import { createState, step, stopNow, totalSpeed, carryAlong, START_ORIENTATION, startOrientation } from '../src/core/game.js';
 import { C, ZONES, speedZone } from '../src/core/flight.js';
 import { lookAtDirection } from '../src/core/orientation.js';
 import { BODIES, START_POSITION, bodyById, nearestSurface } from '../src/core/bodies.js';
@@ -208,4 +208,15 @@ test('the opening view shows Earth and a sliver of the Sun on a wide screen', as
   const sun = frames.find((f) => f.body.id === 'sun');
   assert.ok(earth.visible && !earth.hidden, 'Earth in view');
   assert.ok(sun.visible && !sun.hidden, 'Sun edge in view');
+});
+
+test('on a tall phone screen the opening view faces Earth squarely', async () => {
+  const { frameBodies } = await import('../src/core/framing.js');
+  const portrait = startOrientation(390 / 844);
+  const frames = frameBodies({ position: START_POSITION, orientation: portrait, fovY: Math.PI / 3, aspect: 390 / 844, bodies: BODIES });
+  const earth = frames.find((f) => f.body.id === 'earth');
+  const toEarth = earth.direction;
+  const f = [2 * (portrait[0] * portrait[2] + portrait[3] * portrait[1]), 0, 1 - 2 * (portrait[0] ** 2 + portrait[1] ** 2)];
+  assert.ok(toEarth[0] * f[0] + toEarth[2] * f[2] > 0.999, 'Earth dead ahead');
+  assert.deepEqual(startOrientation(16 / 9), START_ORIENTATION);
 });

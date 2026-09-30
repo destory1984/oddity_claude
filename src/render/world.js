@@ -67,7 +67,8 @@ export async function createWorld(canvas, bodies = BODIES) {
     sun.material.setFloat('visibility', visibility);
 
     camera.rotationQuaternion = new Quaternion(...multiply(orientation, photoOrientation || [0, 0, 0, 1]));
-    hero.update({ dt, speed, turn, fov: camera.fov, photoOrientation, visible: heroVisible });
+    const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
+    hero.update({ dt, speed, turn, fov: camera.fov, photoOrientation, visible: heroVisible, aspect });
 
     camera.computeWorldMatrix(true); // axes below must reflect this frame's rotation
     const axis = (v) => {

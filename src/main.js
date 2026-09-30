@@ -2,7 +2,9 @@ import {
   BODIES, START_POSITION, TIME_SCALE, bodiesAt, bodyById, surfaceDistance, nearestLocalBody,
 } from './core/bodies.js';
 import { C, ZONES } from './core/flight.js';
-import { createState, step, stopNow, totalSpeed, carryAlong, TURN_RATE } from './core/game.js';
+import {
+  createState, step, stopNow, totalSpeed, carryAlong, TURN_RATE, START_ORIENTATION,
+} from './core/game.js';
 import { rotateLocal, lookAtDirection, multiply, conjugate } from './core/orientation.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
@@ -23,7 +25,7 @@ const MAX_FRAME_GAP_S = 0.5;
 const HUD_EVERY_N_FRAMES = 6;
 const ROUTE_EVERY_MS = 1000;
 
-let state = createState(START_POSITION);
+let state = createState(START_POSITION, START_ORIENTATION);
 let paused = false;
 let selectedId = 'earth';
 let dragTurn = [0, 0];

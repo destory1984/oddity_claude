@@ -6,6 +6,9 @@ import {
 
 export const TURN_RATE = 0.7;
 export const ROLL_RATE = 0.9;
+// Opening view: turned about 31 degrees from Earth toward the Sun, so a wide screen
+// shows Earth on the left and the edge of the Sun and its glow on the right.
+export const START_ORIENTATION = rotateLocal([0, 0, 0, 1], 0.55, 0);
 const STOPPED = 0.01;
 // Step this far past a zone shell so the next frame measures the new zone despite rounding.
 const SHELL_INSET_KM = 0.001;

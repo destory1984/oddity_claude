@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { createState, step, stopNow, totalSpeed, carryAlong } from '../src/core/game.js';
+import { createState, step, stopNow, totalSpeed, carryAlong, START_ORIENTATION } from '../src/core/game.js';
 import { C, ZONES, speedZone } from '../src/core/flight.js';
 import { lookAtDirection } from '../src/core/orientation.js';
 import { BODIES, START_POSITION, bodyById, nearestSurface } from '../src/core/bodies.js';
@@ -197,4 +197,15 @@ test('a body that moves into the traveler pushes them out to its surface', () =>
   assert.ok(Math.abs(Math.hypot(...state.position) - 1000) < 1e-6);
   assert.equal(state.restingOn, 'ball');
   assert.deepEqual(events, [{ type: 'surfaceReached', bodyId: 'ball' }]);
+});
+
+test('the opening view shows Earth and a sliver of the Sun on a wide screen', async () => {
+  const { frameBodies } = await import('../src/core/framing.js');
+  const frames = frameBodies({
+    position: START_POSITION, orientation: START_ORIENTATION, fovY: Math.PI / 3, aspect: 16 / 9, bodies: BODIES,
+  });
+  const earth = frames.find((f) => f.body.id === 'earth');
+  const sun = frames.find((f) => f.body.id === 'sun');
+  assert.ok(earth.visible && !earth.hidden, 'Earth in view');
+  assert.ok(sun.visible && !sun.hidden, 'Sun edge in view');
 });

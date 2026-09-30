@@ -39,3 +39,17 @@ export function lookBack(angle, idleSeconds, resting, dt) {
   const rate = target > angle ? 1.6 : 6;
   return { angle: target + (angle - target) * Math.exp(-dt * rate), idle };
 }
+
+const WINK_S = 0.35;
+const FIRST_WINK_S = 1;
+
+// Occasional wink while the hero faces the camera: every 2.5 to 5.5 seconds, for
+// WINK_S. Facing away resets it, so the first wink comes a moment after turning.
+// random is injectable for tests.
+export function winkStep({ untilNext, left }, dt, facingCamera, random = Math.random) {
+  if (!facingCamera) return { untilNext: FIRST_WINK_S, left: 0 };
+  if (left > 0) return { untilNext, left: Math.max(0, left - dt) };
+  const next = untilNext - dt;
+  if (next > 0) return { untilNext: next, left: 0 };
+  return { untilNext: 2.5 + random() * 3, left: WINK_S };
+}

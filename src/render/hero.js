@@ -3,7 +3,7 @@ import {
   StandardMaterial, Color3, Quaternion, CreateIcoSphere, CreateCylinder, CreatePolyhedron,
   CreatePlane, DynamicTexture,
 } from './babylon.js';
-import { blendFlight, hoverFlightPose, armPose, lookBack } from '../core/pose.js';
+import { blendFlight, hoverFlightPose, armPose, lookBack, winkStep } from '../core/pose.js';
 import { clamp } from './math.js';
 
 // A chibi girl in faceted, paper-craft style: pink twin tails, a white beret with a
@@ -28,7 +28,7 @@ const COLORS = {
 
 const TAIL_SEGMENTS = [0.36, 0.44, 0.42, 0.34, 0.26];
 
-function drawFace(texture) {
+function drawFace(texture, winking) {
   const ctx = texture.getContext();
   const size = texture.getSize().width;
   const u = size / 256;
@@ -37,22 +37,28 @@ function drawFace(texture) {
   ctx.fillStyle = 'rgba(240, 130, 130, 0.55)';
   ctx.fillRect(28 * u, 156 * u, 46 * u, 24 * u);
   ctx.fillRect(182 * u, 156 * u, 46 * u, 24 * u);
-  // Open eye with a highlight.
-  ctx.fillStyle = '#4a2a22';
-  ctx.beginPath();
-  ctx.ellipse(84 * u, 118 * u, 27 * u, 36 * u, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath();
-  ctx.ellipse(75 * u, 104 * u, 9 * u, 12 * u, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // Winking eye.
-  ctx.strokeStyle = '#4a2a22';
-  ctx.lineWidth = 9 * u;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.arc(172 * u, 132 * u, 27 * u, Math.PI * 1.15, Math.PI * 1.85);
-  ctx.stroke();
+  // Open eyes with highlights; the right one closes into an arc for a wink.
+  const openEye = (x) => {
+    ctx.fillStyle = '#4a2a22';
+    ctx.beginPath();
+    ctx.ellipse(x * u, 118 * u, 27 * u, 36 * u, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse((x - 9) * u, 104 * u, 9 * u, 12 * u, 0, 0, Math.PI * 2);
+    ctx.fill();
+  };
+  openEye(84);
+  if (winking) {
+    ctx.strokeStyle = '#4a2a22';
+    ctx.lineWidth = 9 * u;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(172 * u, 132 * u, 27 * u, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.stroke();
+  } else {
+    openEye(172);
+  }
   // Open smile.
   ctx.fillStyle = '#b8454f';
   ctx.beginPath();
@@ -152,7 +158,8 @@ export function createHero(engine, sunDirection) {
   facet('skull', [0, 0, 0], [0.74, 0.7, 0.74], materials.skin, head, 2);
   const faceTexture = new DynamicTexture('faceTexture', { width: 256, height: 256 }, scene, true);
   faceTexture.hasAlpha = true;
-  drawFace(faceTexture);
+  drawFace(faceTexture, false);
+  let winkShown = false;
   const faceMaterial = new StandardMaterial('face', scene);
   faceMaterial.diffuseTexture = faceTexture;
   faceMaterial.emissiveColor = new Color3(0.45, 0.45, 0.45);
@@ -228,6 +235,7 @@ export function createHero(engine, sunDirection) {
   let sway = 0;
   let flightBlend = 0;
   let facing = { angle: 0, idle: 0 };
+  let wink = { untilNext: 1, left: 0 };
   let elapsed = 0;
 
   // Tails hang toward the feet when still and stream behind in flight, swinging
@@ -264,6 +272,12 @@ export function createHero(engine, sunDirection) {
     // Standing still for a moment, the hero turns around to look back at the camera.
     facing = lookBack(facing.angle, facing.idle, flying < 0.05 && speed < 1, dt);
     hero.rotation.y = facing.angle;
+    // Now and then a wink while she looks back at the camera.
+    wink = winkStep(wink, dt, facing.angle > 2.8);
+    if ((wink.left > 0) !== winkShown) {
+      winkShown = wink.left > 0;
+      drawFace(faceTexture, winkShown);
+    }
     torso.rotation.z = bank * 0.3 * flying;
     torso.rotation.x = -0.18 * flying;
     hero.position.y = -1.15 + Math.sin(elapsed * 1.5) * 0.04 * (1 - flying);

@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { armPose, hoverFlightPose, blendFlight, lookBack } from '../src/core/pose.js';
+import { armPose, hoverFlightPose, blendFlight, lookBack, winkStep } from '../src/core/pose.js';
 
 test('both elbows flex toward the back/head, never hyperextend toward the chest', () => {
   for (const side of [-1, 1]) {
@@ -50,4 +50,28 @@ test('after resting a moment the hero turns around to face the camera, then turn
   for (let i = 0; i < 60; i++) ({ angle, idle } = lookBack(angle, idle, false, 1 / 60));
   assert.ok(angle < 0.1, 'swings forward within a second once moving');
   assert.equal(idle, 0);
+});
+
+test('facing the camera the hero winks now and then, briefly, and never while facing away', () => {
+  const always = () => 0.5; // fixed "random" so the timing is predictable
+  let wink = { untilNext: 1, left: 0 };
+  let winks = 0;
+  let wasWinking = false;
+  let longest = 0;
+  let run = 0;
+  for (let i = 0; i < 60 * 20; i++) {
+    wink = winkStep(wink, 1 / 60, true, always);
+    const winking = wink.left > 0;
+    if (winking && !wasWinking) winks++;
+    run = winking ? run + 1 / 60 : 0;
+    longest = Math.max(longest, run);
+    wasWinking = winking;
+  }
+  assert.ok(winks >= 4 && winks <= 8, `winks in 20 s: ${winks}`);
+  assert.ok(longest <= 0.4, `a wink lasts ${longest.toFixed(2)} s`);
+
+  let away = { untilNext: 0, left: 0.3 };
+  away = winkStep(away, 1 / 60, false, always);
+  assert.equal(away.left, 0);
+  assert.ok(away.untilNext >= 1, 'waits a moment after turning around before the first wink');
 });

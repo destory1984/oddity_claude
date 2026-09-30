@@ -112,11 +112,13 @@ const LOOKS = {
 };
 
 // Rings are a flat square plane; the shader keeps only the annulus between the radii.
-function createRings(scene, body, rings) {
+// Babylon applies rotation z, then x, then y: x lays the plane flat and tilts it,
+// y turns the tilt toward the Sun so rings open up to travelers arriving from it.
+function createRings(scene, body, rings, sunDir) {
   const outer = rings.outerKm / KM_PER_UNIT;
   const plane = CreatePlane(`${body.id}Rings`, { size: 2 * outer, sideOrientation: Mesh.DOUBLESIDE }, scene);
-  plane.rotation.x = Math.PI / 2;
-  plane.rotation.z = rings.tilt;
+  plane.rotation.x = Math.PI / 2 + rings.tilt;
+  plane.rotation.y = Math.atan2(-sunDir.x, -sunDir.z);
   const material = shader(scene, 'ring', ringFrag, ['sunLight', 'inner', 'outer']);
   material.setFloat('inner', rings.innerKm / rings.outerKm);
   material.setFloat('outer', 1);
@@ -152,7 +154,7 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   sphere.material = material;
 
   const meshes = [sphere];
-  if (look.rings) meshes.push(createRings(scene, body, look.rings));
+  if (look.rings) meshes.push(createRings(scene, body, look.rings, sunDir));
   return {
     body,
     meshes,

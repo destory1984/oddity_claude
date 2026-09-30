@@ -10,12 +10,37 @@ const sub = (a, b) => a.map((n, i) => n - b[i]);
 const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
-test('the table holds the Sun, Earth and Moon at real radii', () => {
-  assert.deepEqual(BODIES.map((b) => b.id), ['sun', 'earth', 'moon']);
+test('the table holds the Sun, all eight planets and the Moon at real radii', () => {
+  assert.deepEqual(
+    BODIES.map((b) => b.id),
+    ['sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'],
+  );
   assert.equal(bodyById('sun').radiusKm / KM_PER_UNIT, 696.34);
   assert.equal(bodyById('earth').radiusKm, 6371);
   assert.equal(bodyById('moon').radiusKm, 1737.4);
+  assert.equal(bodyById('jupiter').radiusKm, 69911);
+  assert.equal(bodyById('neptune').radiusKm, 24622);
   assert.deepEqual(bodyById('sun').position, [0, 0, 0]);
+  for (const body of BODIES) assert.ok(body.name && body.nameEn, `${body.id} needs names`);
+});
+
+test('planets orbit the Sun in order of real mean distance', () => {
+  const planets = BODIES.filter((b) => b.kind === 'planet');
+  assert.equal(planets.length, 8);
+  for (const planet of planets) assert.equal(planet.parent, 'sun');
+  const distances = planets.map((p) => Math.hypot(...p.position));
+  for (let i = 1; i < distances.length; i++) assert.ok(distances[i] > distances[i - 1]);
+});
+
+test('no two bodies overlap', () => {
+  for (let i = 0; i < BODIES.length; i++) {
+    for (let j = i + 1; j < BODIES.length; j++) {
+      const a = BODIES[i];
+      const b = BODIES[j];
+      const gap = Math.hypot(...sub(a.position, b.position)) - a.radiusKm - b.radiusKm;
+      assert.ok(gap > 0, `${a.id} and ${b.id} overlap`);
+    }
+  }
 });
 
 test('every child sits at the compressed distance from its parent', () => {

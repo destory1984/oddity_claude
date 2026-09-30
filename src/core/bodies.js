@@ -4,9 +4,19 @@ export const START_ALTITUDE_KM = 9129;
 
 const AU_KM = 149597870.7;
 
-// Parents must be listed before their children.
+// Parents must be listed before their children. orbitKm is the real mean
+// distance (semi-major axis); directions are fixed, not today's positions.
+// Planets are spread around the Sun so trips go in many directions.
 export const BODY_DATA = [
   { id: 'sun', name: '태양', nameEn: 'Sun', kind: 'star', radiusKm: 696340, parent: null },
+  {
+    id: 'mercury', name: '수성', nameEn: 'Mercury', kind: 'planet', radiusKm: 2439.7,
+    parent: 'sun', orbitKm: 57909050, direction: [0.64, 0.02, 0.77],
+  },
+  {
+    id: 'venus', name: '금성', nameEn: 'Venus', kind: 'planet', radiusKm: 6051.8,
+    parent: 'sun', orbitKm: 108208000, direction: [-0.34, 0.03, 0.94],
+  },
   {
     id: 'earth', name: '지구', nameEn: 'Earth', kind: 'planet', radiusKm: 6371,
     parent: 'sun', orbitKm: AU_KM, direction: [-1, -0.12, 0],
@@ -14,6 +24,26 @@ export const BODY_DATA = [
   {
     id: 'moon', name: '달', nameEn: 'Moon', kind: 'moon', radiusKm: 1737.4,
     parent: 'earth', orbitKm: 384400, direction: [0.83, 0.22, -0.512],
+  },
+  {
+    id: 'mars', name: '화성', nameEn: 'Mars', kind: 'planet', radiusKm: 3389.5,
+    parent: 'sun', orbitKm: 227939200, direction: [-0.34, -0.02, -0.94],
+  },
+  {
+    id: 'jupiter', name: '목성', nameEn: 'Jupiter', kind: 'planet', radiusKm: 69911,
+    parent: 'sun', orbitKm: 778570000, direction: [0.77, 0.01, -0.64],
+  },
+  {
+    id: 'saturn', name: '토성', nameEn: 'Saturn', kind: 'planet', radiusKm: 58232,
+    parent: 'sun', orbitKm: 1433530000, direction: [0.94, 0.04, 0.34],
+  },
+  {
+    id: 'uranus', name: '천왕성', nameEn: 'Uranus', kind: 'planet', radiusKm: 25362,
+    parent: 'sun', orbitKm: 2872460000, direction: [-0.87, 0.02, 0.5],
+  },
+  {
+    id: 'neptune', name: '해왕성', nameEn: 'Neptune', kind: 'planet', radiusKm: 24622,
+    parent: 'sun', orbitKm: 4495060000, direction: [0.17, -0.03, -0.98],
   },
 ];
 

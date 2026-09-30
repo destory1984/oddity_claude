@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "oddity-dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev", "--", "--port", "4317", "--strictPort"], "port": 4317, "url": "http://localhost:4317" }
+  ]
+}

@@ -19,10 +19,10 @@ export function cueForEvent(event) {
   }
 }
 
-// Flight sound: silent at rest, a soft rush of air while coasting; under thrust an airy
-// chord that rises with speed, with twinkles. No engine rumble: this is a flying girl,
-// not a car. gain is linear volume (0..0.25), pitch the chord root in Hz (330..660),
-// sparkle the twinkles per second.
+// Flight sound: silent at rest, a soft rush of air while coasting; under thrust paper
+// flutters faster and brighter with speed, with kalimba notes. No engine rumble: this is
+// a paper doll, not a car. gain is linear volume (0..0.25), pitch 330..660 sets flutter,
+// sparkle the kalimba notes per second.
 export function engineSound({ speed, maxSpeed, thrusting }) {
   const fraction = maxSpeed > 0 ? Math.min(1, Math.max(0, speed / maxSpeed)) : 0;
   if (!thrusting && fraction === 0) return { gain: 0, pitch: 330, sparkle: 0 };

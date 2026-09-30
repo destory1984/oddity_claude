@@ -41,8 +41,9 @@ export function createSound() {
     const data = noiseBuffer.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
 
-    // Flight: a band of airy noise (wind) under a soft sine chord (root and fifth)
-    // with a slow shimmer. Deliberately no low oscillators, so it never rumbles.
+    // Flight: paper fluttering in the wind. A band of noise, its loudness chopped by a
+    // flutter oscillator; faster flight flutters quicker and brighter. No tones under
+    // it, so it never hums like an engine.
     const gain = ctx.createGain();
     gain.gain.value = 0;
     gain.connect(master);
@@ -51,32 +52,20 @@ export function createSound() {
     air.loop = true;
     const band = ctx.createBiquadFilter();
     band.type = 'bandpass';
-    band.frequency.value = 1200;
-    band.Q.value = 0.6;
-    const airGain = ctx.createGain();
-    airGain.gain.value = 0.55;
-    air.connect(band).connect(airGain).connect(gain);
-    const chordGain = ctx.createGain();
-    chordGain.gain.value = 0.22;
-    chordGain.connect(gain);
-    const oscA = ctx.createOscillator();
-    const oscB = ctx.createOscillator();
-    oscA.type = 'sine';
-    oscB.type = 'sine';
-    oscA.frequency.value = 330;
-    oscB.frequency.value = 330 * 1.5;
-    oscA.connect(chordGain);
-    oscB.connect(chordGain);
-    const shimmer = ctx.createOscillator();
-    const shimmerDepth = ctx.createGain();
-    shimmer.frequency.value = 5;
-    shimmerDepth.gain.value = 0.08;
-    shimmer.connect(shimmerDepth).connect(chordGain.gain);
+    band.frequency.value = 1800;
+    band.Q.value = 0.9;
+    const flutterGain = ctx.createGain();
+    flutterGain.gain.value = 0.5;
+    air.connect(band).connect(flutterGain).connect(gain);
+    const flutter = ctx.createOscillator();
+    flutter.type = 'square';
+    flutter.frequency.value = 9;
+    const flutterDepth = ctx.createGain();
+    flutterDepth.gain.value = 0.35;
+    flutter.connect(flutterDepth).connect(flutterGain.gain);
     air.start();
-    oscA.start();
-    oscB.start();
-    shimmer.start();
-    engine = { gain, band, oscA, oscB, sparkle: 0 };
+    flutter.start();
+    engine = { gain, band, flutter };
 
     return ctx;
   }
@@ -112,22 +101,43 @@ export function createSound() {
     src.stop(t + length + 0.05);
   }
 
+  // Kalimba: a sine with a quick decay, a faint octave overtone and a tiny tine click.
+  function pluck(freq, start = 0, volume = 0.16, length = 0.9) {
+    tone({ freq, start, length, volume });
+    tone({ freq: freq * 2, start, length: length * 0.4, volume: volume * 0.25 });
+    noise({ start, length: 0.015, volume: volume * 0.5, freq: 4000 });
+  }
+
+  // Music box: high, bell-like, with a third-harmonic shimmer.
+  function bell(freq, start = 0, volume = 0.1) {
+    tone({ freq, start, length: 1.1, volume });
+    tone({ freq: freq * 3, start, length: 0.35, volume: volume * 0.2 });
+  }
+
+  const PENTATONIC = [523, 587, 659, 784, 880, 1047, 1175, 1319];
+
   const CUES = {
-    zoneUp: () => tone({ freq: 440, to: 880, type: 'triangle', length: 0.3, volume: 0.15 }),
-    zoneDown: () => tone({ freq: 660, to: 300, type: 'triangle', length: 0.35, volume: 0.15 }),
-    discovered: () => [523, 659, 784, 1047].forEach((f, i) => tone({ freq: f, type: 'triangle', start: i * 0.11, length: 0.35, volume: 0.14 })),
+    zoneUp: () => {
+      pluck(523);
+      pluck(784, 0.12);
+    },
+    zoneDown: () => {
+      pluck(784);
+      pluck(523, 0.12);
+    },
+    discovered: () => [523, 659, 784, 880, 1047].forEach((f, i) => pluck(f, i * 0.1, 0.14)),
     landed: () => {
-      tone({ freq: 110, to: 38, length: 0.45, volume: 0.45 });
-      noise({ length: 0.3, volume: 0.25, type: 'lowpass', freq: 600, to: 120 });
+      noise({ length: 0.12, volume: 0.35, type: 'lowpass', freq: 900, to: 250 });
+      pluck(196, 0.02, 0.18, 0.7);
     },
     shutter: () => {
-      noise({ length: 0.04, volume: 0.35, freq: 3000 });
-      noise({ start: 0.07, length: 0.05, volume: 0.25, freq: 2200 });
+      noise({ length: 0.03, volume: 0.3, type: 'bandpass', freq: 2500 });
+      noise({ start: 0.05, length: 0.06, volume: 0.22, type: 'bandpass', freq: 1400, to: 900 });
     },
-    mission: () => [784, 988, 1175, 1568].forEach((f, i) => tone({ freq: f, start: i * 0.09, length: 0.6, volume: 0.12 })),
-    complete: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone({ freq: f, type: 'triangle', start: i * 0.14, length: 0.5, volume: 0.14 })),
-    brake: () => noise({ length: 0.35, volume: 0.2, type: 'bandpass', freq: 1800, to: 200 }),
-    click: () => tone({ freq: 1200, length: 0.05, volume: 0.06 }),
+    mission: () => [784, 988, 784, 1175, 1568].forEach((f, i) => bell(f, i * 0.12)),
+    complete: () => [523, 659, 784, 1047, 988, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.16, 0.12)),
+    brake: () => noise({ length: 0.3, volume: 0.22, type: 'bandpass', freq: 2600, to: 500 }),
+    click: () => pluck(1319, 0, 0.05, 0.2),
   };
 
   return {
@@ -144,13 +154,12 @@ export function createSound() {
       if (!ctx) return;
       const t = ctx.currentTime;
       engine.gain.gain.setTargetAtTime(gain, t, 0.15);
-      engine.oscA.frequency.setTargetAtTime(pitch, t, 0.3);
-      engine.oscB.frequency.setTargetAtTime(pitch * 1.5, t, 0.3);
-      engine.band.frequency.setTargetAtTime(800 + pitch * 2, t, 0.3);
-      // Twinkles: short high pings at random, about `sparkle` per second.
+      // pitch runs 330..660 with speed: flutter 8..20 times a second, brighter band.
+      engine.flutter.frequency.setTargetAtTime(8 + ((pitch - 330) / 330) * 12, t, 0.3);
+      engine.band.frequency.setTargetAtTime(1200 + pitch * 2.5, t, 0.3);
+      // Now and then a soft kalimba note, about `sparkle` per second.
       if (!muted && sparkle > 0 && Math.random() < sparkle * dt) {
-        const notes = [1568, 1760, 2093, 2349, 2637];
-        tone({ freq: notes[Math.floor(Math.random() * notes.length)], length: 0.25, volume: 0.035 });
+        pluck(PENTATONIC[Math.floor(Math.random() * PENTATONIC.length)], 0, 0.035, 0.6);
       }
     },
     muted: () => muted,

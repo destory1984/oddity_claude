@@ -9,7 +9,7 @@ export function createSun(scene, sunBody) {
   const size = (2 * sunBody.radiusKm) / KM_PER_UNIT / DISC_FRACTION;
   const plane = CreatePlane('sun', { size }, scene);
   plane.billboardMode = Mesh.BILLBOARDMODE_ALL;
-  const material = shader(scene, 'sunGlow', sunFrag, ['visibility']);
+  const material = shader(scene, 'sunGlow', sunFrag, ['visibility', 'time']);
   material.alphaMode = Constants.ALPHA_ADD;
   material.needAlphaBlending = () => true;
   material.disableDepthWrite = true;

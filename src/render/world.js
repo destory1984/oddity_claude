@@ -65,6 +65,7 @@ export async function createWorld(canvas, bodies = BODIES) {
     }));
     const visibility = sunVisibility(directions[sunNow.id], distances[sunNow.id], sunNow.radiusKm, occluders);
     sun.material.setFloat('visibility', visibility);
+    sun.material.setFloat('time', elapsed);
 
     camera.rotationQuaternion = new Quaternion(...multiply(orientation, photoOrientation || [0, 0, 0, 1]));
     const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());

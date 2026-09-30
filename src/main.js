@@ -343,4 +343,24 @@ async function init() {
   };
 }
 
+// Installable app: offline cache in production builds only (dev must always be fresh).
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch((e) => console.warn('offline cache unavailable', e));
+}
+
+// Android Chrome offers an install prompt we can show from the help dialog.
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  $('installButton').hidden = false;
+});
+$('installButton').addEventListener('click', async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  await installPrompt.userChoice;
+  installPrompt = null;
+  $('installButton').hidden = true;
+});
+
 init();

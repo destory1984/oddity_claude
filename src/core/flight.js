@@ -3,7 +3,7 @@ export const C = 299792.458;
 export const ZONES = Object.freeze({
   veryNear: Object.freeze({ id: 'veryNear', maxSpeed: C * 0.01, label: '0.01c', margin: 500 }),
   near: Object.freeze({ id: 'near', maxSpeed: C * 0.1, label: '0.1c', margin: 50000 }),
-  far: Object.freeze({ id: 'far', maxSpeed: C * 1000, label: '1000c', margin: Infinity }),
+  far: Object.freeze({ id: 'far', maxSpeed: C * 100, label: '100c', margin: Infinity }),
 });
 
 const ACCELERATION_SECONDS = 3;

@@ -33,15 +33,15 @@ test('zero or negative dt changes nothing', () => {
   assert.deepEqual(step(state, { drive: 1 }, -1).state, state);
 });
 
-test('full throttle reaches 1000c in three seconds in empty space', () => {
+test('full throttle reaches 100c in three seconds in empty space', () => {
   const state = createState([0, 0, 0], [0, 0, 0, 1], []);
   const after = run(state, { drive: 1 }, 180, []).state;
-  assert.ok(Math.abs(after.speed - C * 1000) < 1e-2);
-  assert.ok(run(state, { drive: 1 }, 170, []).state.speed < C * 1000);
+  assert.ok(Math.abs(after.speed - C * 100) < 1e-3);
+  assert.ok(run(state, { drive: 1 }, 170, []).state.speed < C * 100);
 });
 
 test('releasing input stops within one second from any speed', () => {
-  for (const speed of [C * 0.01, C * 0.1, C * 1000]) {
+  for (const speed of [C * 0.01, C * 0.1, C * 100]) {
     const state = { ...createState([0, 0, 0], [0, 0, 0, 1], []), speed };
     const after = run(state, { drive: 0 }, 61, []).state;
     assert.equal(after.speed, 0);
@@ -55,7 +55,7 @@ test('stopNow halts at once', () => {
 });
 
 test('a fast dive stops on the surface, never inside, announcing each zone once', () => {
-  let state = { ...createState([0, 0, -1e7], facingBall, [ball]), speed: C * 1000 };
+  let state = { ...createState([0, 0, -1e7], facingBall, [ball]), speed: C * 100 };
   const events = [];
   for (let i = 0; i < 5000 && state.restingOn === null; i++) {
     const result = step(state, { drive: 1 }, DT, [ball]);

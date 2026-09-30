@@ -28,7 +28,7 @@ export function eventMessage(event, bodies = []) {
     case 'photo':
       return `사진 임무 달성: ${event.missionName}`;
     case 'zoneChanged':
-      if (event.to === 'far') return '근처에 별이 없어서, 광속의 1000배까지 속도를 올립니다.';
+      if (event.to === 'far') return '근처에 별이 없어서, 광속의 100배까지 속도를 올립니다.';
       if (event.to === 'veryNear') return '별 표면에 아주 가까워서, 안전을 위해 속도를 광속의 1/100로 낮춥니다.';
       if (event.from === 'veryNear') return '별 표면에서 멀어져서, 속도를 광속의 1/10까지 올립니다.';
       return '별 근처에서는 안전을 위해서 속도를 광속의 1/10로 낮춥니다.';

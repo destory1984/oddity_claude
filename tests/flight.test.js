@@ -16,8 +16,8 @@ test('zones switch exactly at 500 km and 50,000 km', () => {
   assert.equal(speedZone(Infinity).id, 'far');
   assert.equal(ZONES.veryNear.maxSpeed, C * 0.01);
   assert.equal(ZONES.near.maxSpeed, C * 0.1);
-  assert.equal(ZONES.far.maxSpeed, C * 1000);
-  assert.deepEqual([ZONES.far.label, ZONES.near.label, ZONES.veryNear.label], ['1000c', '0.1c', '0.01c']);
+  assert.equal(ZONES.far.maxSpeed, C * 100);
+  assert.deepEqual([ZONES.far.label, ZONES.near.label, ZONES.veryNear.label], ['100c', '0.1c', '0.01c']);
 });
 
 test('stricterZoneBelow walks toward the surface', () => {
@@ -37,8 +37,8 @@ test('full acceleration reaches each zone limit in three seconds and never excee
 test('braking at the release speed stops in one second at any frame rate', () => {
   assert.equal(brakeSpeed(C * 20, C * 20, 0.5), C * 10);
   assert.equal(brakeSpeed(C * 20, C * 20, 1), 0);
-  let speed = C * 1000;
-  for (let i = 0; i < 60; i++) speed = brakeSpeed(speed, C * 1000, 1 / 60);
+  let speed = C * 100;
+  for (let i = 0; i < 60; i++) speed = brakeSpeed(speed, C * 100, 1 / 60);
   assert.ok(speed < 1e-6);
 });
 

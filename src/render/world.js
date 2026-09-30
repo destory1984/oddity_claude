@@ -37,11 +37,13 @@ export async function createWorld(canvas, bodies = BODIES) {
   const relative = (body, position) => body.position.map((n, i) => (n - position[i]) / KM_PER_UNIT);
   let elapsed = 0;
 
-  function update({ position, orientation, dt, speed, photoOrientation, heroVisible, turn }) {
+  // now: where every body is this frame (they orbit); defaults to the starting layout.
+  function update({ bodies: now = bodies, position, orientation, dt, speed, photoOrientation, heroVisible, turn }) {
     elapsed += dt;
     const directions = {};
     const distances = {};
-    for (const body of bodies) {
+    const sunNow = now.find((b) => b.kind === 'star');
+    for (const body of now) {
       const rel = relative(body, position);
       const length = Math.hypot(...rel);
       directions[body.id] = rel.map((n) => n / length);
@@ -49,17 +51,19 @@ export async function createWorld(canvas, bodies = BODIES) {
     }
 
     for (const item of rendered) {
-      const rel = relative(item.body, position);
+      const body = now.find((b) => b.id === item.body.id) ?? item.body;
+      const rel = relative(body, position);
       for (const mesh of item.meshes) mesh.position.set(rel[0], rel[1], rel[2]);
       item.spin(elapsed);
+      item.setSun(normalize(sunNow.position.map((n, i) => n - body.position[i])));
     }
-    const sunRel = relative(sunBody, position);
+    const sunRel = relative(sunNow, position);
     sun.mesh.position.set(sunRel[0], sunRel[1], sunRel[2]);
 
-    const occluders = bodies.filter((b) => b !== sunBody).map((b) => ({
+    const occluders = now.filter((b) => b.kind !== 'star').map((b) => ({
       direction: directions[b.id], distance: distances[b.id], radius: b.radiusKm,
     }));
-    const visibility = sunVisibility(directions[sunBody.id], distances[sunBody.id], sunBody.radiusKm, occluders);
+    const visibility = sunVisibility(directions[sunNow.id], distances[sunNow.id], sunNow.radiusKm, occluders);
     sun.material.setFloat('visibility', visibility);
 
     camera.rotationQuaternion = new Quaternion(...multiply(orientation, photoOrientation || [0, 0, 0, 1]));

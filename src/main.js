@@ -1,6 +1,8 @@
-import { BODIES, START_POSITION, bodyById, surfaceDistance, nearestLocalBody } from './core/bodies.js';
+import {
+  BODIES, START_POSITION, TIME_SCALE, bodiesAt, bodyById, surfaceDistance, nearestLocalBody,
+} from './core/bodies.js';
 import { C, ZONES } from './core/flight.js';
-import { createState, step, stopNow, totalSpeed, TURN_RATE } from './core/game.js';
+import { createState, step, stopNow, totalSpeed, carryAlong, TURN_RATE } from './core/game.js';
 import { rotateLocal, lookAtDirection, multiply, conjugate } from './core/orientation.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
@@ -24,6 +26,11 @@ let paused = false;
 let selectedId = 'earth';
 let dragTurn = [0, 0];
 let progress = loadProgress(BODIES, MISSIONS);
+// Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
+let simTime = 0;
+let bodies = bodiesAt(0);
+// Where a body is right now (BODIES is only the starting layout).
+const here = (id) => bodyById(id, bodies);
 let route = null;
 let routeAt = 0;
 
@@ -102,7 +109,7 @@ async function init() {
         fovY: shot.fov,
         aspect: shot.aspect,
         heroVisible: shot.heroVisible,
-        bodies: BODIES,
+        bodies,
       });
       const before = progress;
       const result = recordPhotos(progress, done);
@@ -123,13 +130,13 @@ async function init() {
       hud.showSelection(bodyById(id));
     },
     onFace() {
-      const body = bodyById(selectedId);
+      const body = here(selectedId);
       const direction = body.position.map((n, i) => n - state.position[i]);
       state = { ...state, orientation: lookAtDirection(direction) };
       toast.show(hud.faceToast(body));
     },
     onInspect() {
-      const body = bodyById(selectedId);
+      const body = here(selectedId);
       const direction = body.position.map((n, i) => n - state.position[i]);
       const distance = Math.hypot(...direction);
       const diameterDeg = (2 * Math.asin(Math.min(1, body.radiusKm / distance)) * 180) / Math.PI;
@@ -156,7 +163,7 @@ async function init() {
     onGo(id) {
       selectedId = id;
       hud.showSelection(bodyById(id));
-      const body = bodyById(id);
+      const body = here(id);
       state = { ...state, orientation: lookAtDirection(body.position.map((n, i) => n - state.position[i])) };
       routeAt = 0;
       toast.show(hud.faceToast(body));
@@ -164,7 +171,7 @@ async function init() {
     onReset() {
       progress = createProgress();
       progressChanged(null);
-      journal.update(progress, state.position);
+      journal.update(progress, state.position, bodies);
       $('journal').close();
       toast.show('탐험 기록을 지웠습니다.');
     },
@@ -211,10 +218,17 @@ async function init() {
     if (elapsed > MAX_FRAME_GAP_S) setPaused(true);
     const dt = paused ? 0 : elapsed;
 
+    // Advance the orbits, carry the traveler with a nearby body, then fly.
+    if (dt > 0) {
+      const before = bodies;
+      simTime += dt * TIME_SCALE;
+      bodies = bodiesAt(simTime);
+      state = carryAlong(state, before, bodies);
+    }
     const intent = input.intent();
-    const result = step(state, intent, dt);
+    const result = step(state, intent, dt, bodies);
     state = result.state;
-    const logged = updateProgress(progress, state, BODIES);
+    const logged = updateProgress(progress, state, bodies);
     let finished = false;
     if (logged.events.length) {
       const before = progress;
@@ -234,6 +248,7 @@ async function init() {
     dragTurn = [0, 0];
 
     const view = world.update({
+      bodies,
       position: state.position,
       orientation: state.orientation,
       dt,
@@ -245,7 +260,7 @@ async function init() {
     world.render();
 
     if (frame++ % HUD_EVERY_N_FRAMES !== 0) return;
-    const selected = bodyById(selectedId);
+    const selected = here(selectedId);
     const driving = input.driving();
     let flightLabel = '자유 비행';
     if (paused) flightLabel = '일시 정지';
@@ -256,14 +271,14 @@ async function init() {
     else if (state.motionSign < 0) flightLabel = '후진 비행';
     // Paused or in photo mode nothing moves, so only a new target needs a new estimate.
     if (routeAt === 0 || (!paused && now - routeAt > ROUTE_EVERY_MS)) {
-      route = estimateTravelSeconds(state, selectedId, BODIES);
+      route = estimateTravelSeconds(state, selectedId, bodies);
       routeAt = now;
     }
-    journal.update(progress, state.position);
+    journal.update(progress, state.position, bodies);
     hud.update({
       route: routeText(route, BODIES),
       view,
-      local: nearestLocalBody(state.position),
+      local: nearestLocalBody(state.position, bodies),
       selected,
       selectedDistance: surfaceDistance(state.position, selected),
       speed: totalSpeed(state),
@@ -284,6 +299,9 @@ async function init() {
       motionSign: state.motionSign,
       zoneId: state.zoneId,
       restingOn: state.restingOn,
+      simTime,
+      moonFromEarth: Math.hypot(...here('moon').position.map((n, i) => n - here('earth').position[i])),
+      moonPosition: [...here('moon').position],
       paused,
       photo: photo.active(),
       throttle: input.throttle(),

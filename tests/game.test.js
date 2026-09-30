@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { createState, step, stopNow, totalSpeed } from '../src/core/game.js';
+import { createState, step, stopNow, totalSpeed, carryAlong } from '../src/core/game.js';
 import { C, ZONES, speedZone } from '../src/core/flight.js';
 import { lookAtDirection } from '../src/core/orientation.js';
 import { BODIES, START_POSITION, bodyById, nearestSurface } from '../src/core/bodies.js';
@@ -166,4 +166,35 @@ test('sliding sideways into a body stops on its surface', () => {
   assert.equal(state.restingOn, 'side');
   assert.ok(Math.abs(Math.hypot(...state.position.map((n, i) => n - side.position[i])) - 1000) < 1e-6);
   assert.equal(totalSpeed(state), 0);
+});
+
+test('within 50,000 km of a surface the traveler rides along with that body', () => {
+  const before = [{ ...ball, position: [0, 0, 0] }];
+  const after = [{ ...ball, position: [300, 0, 0] }];
+  const state = createState([0, 0, -1000 - 20000], facingBall, before);
+  const carried = carryAlong(state, before, after);
+  assert.deepEqual(carried.position, [300, 0, -21000]);
+});
+
+test('far from every surface nothing carries the traveler', () => {
+  const before = [{ ...ball, position: [0, 0, 0] }];
+  const after = [{ ...ball, position: [300, 0, 0] }];
+  const state = createState([0, 0, -1e6], facingBall, before);
+  assert.deepEqual(carryAlong(state, before, after).position, [0, 0, -1e6]);
+});
+
+test('the nearest body does the carrying when two are close', () => {
+  const small = { id: 'small', name: 'small', kind: 'moon', radiusKm: 100, position: [0, 0, 0] };
+  const big = { id: 'big', name: 'big', kind: 'planet', radiusKm: 1000, position: [0, 0, 30000] };
+  const moved = [{ ...small, position: [0, 50, 0] }, { ...big, position: [0, 0, 30000] }];
+  const state = createState([0, 0, -200], [0, 0, 0, 1], [small, big]);
+  assert.deepEqual(carryAlong(state, [small, big], moved).position, [0, 50, -200]);
+});
+
+test('a body that moves into the traveler pushes them out to its surface', () => {
+  const inside = createState([0, 0, -900], facingBall, [ball]);
+  const { state, events } = step(inside, {}, DT, [ball]);
+  assert.ok(Math.abs(Math.hypot(...state.position) - 1000) < 1e-6);
+  assert.equal(state.restingOn, 'ball');
+  assert.deepEqual(events, [{ type: 'surfaceReached', bodyId: 'ball' }]);
 });

@@ -30,6 +30,29 @@ export function stopNow(state) {
   return { ...state, speed: 0, brakeRate: 0, sideSpeed: 0, sideBrakeRate: 0 };
 }
 
+// Bodies move along their orbits between frames. Near a body (inside its 0.1c zone)
+// the traveler moves with it, so a moon does not slide out from under a landing.
+export function carryAlong(state, before, after) {
+  const { body, distance } = nearestSurface(state.position, before);
+  if (!body || distance > ZONES.near.margin) return state;
+  const moved = after.find((b) => b.id === body.id);
+  if (!moved) return state;
+  return { ...state, position: state.position.map((n, i) => n + moved.position[i] - body.position[i]) };
+}
+
+// If a moving body has swept over the traveler, put them back on its surface.
+function pushOut(position, bodies) {
+  for (const body of bodies) {
+    const offset = position.map((n, i) => n - body.position[i]);
+    const distance = Math.hypot(...offset);
+    if (distance < body.radiusKm - 1e-9) {
+      const up = distance > 0 ? offset.map((n) => n / distance) : [0, 1, 0];
+      return { body, position: body.position.map((n, i) => n + up[i] * body.radiusKm) };
+    }
+  }
+  return null;
+}
+
 export function totalSpeed(state) {
   return Math.hypot(state.speed, state.sideSpeed ?? 0);
 }
@@ -65,6 +88,14 @@ function capTotal(main, side, maxSpeed) {
 export function step(state, input, dt, bodies = BODIES) {
   const events = [];
   if (!(dt > 0)) return { state, events };
+
+  const inside = pushOut(state.position, bodies);
+  if (inside) {
+    if (state.restingOn !== inside.body.id) events.push({ type: 'surfaceReached', bodyId: inside.body.id });
+    state = {
+      ...stopNow(state), position: inside.position, restingOn: inside.body.id,
+    };
+  }
 
   const { turnX = 0, turnY = 0, roll = 0, drive = 0, strafe = 0, throttle = 1 } = input;
   const orientation = rotateLocal(

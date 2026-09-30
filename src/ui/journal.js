@@ -18,6 +18,7 @@ export function createJournal({ bodies, missions, onGo, onReset, onOpen, onClose
 
   let lastProgress = null;
   let lastPosition = null;
+  let lastBodies = bodies;
 
   function render() {
     const progress = lastProgress;
@@ -38,7 +39,8 @@ export function createJournal({ bodies, missions, onGo, onReset, onOpen, onClose
       marks.textContent = `${found ? '발견 ✓' : '발견 —'}  ${landed ? '착지 ✓' : '착지 —'}`;
       const distance = document.createElement('span');
       distance.className = 'distance';
-      distance.textContent = `${fmt(surfaceDistance(lastPosition, body))} km`;
+      const now = lastBodies.find((b) => b.id === body.id) ?? body;
+      distance.textContent = `${fmt(surfaceDistance(lastPosition, now))} km`;
       const go = document.createElement('button');
       go.textContent = '목적지로';
       go.setAttribute('aria-label', `${body.name}${objectParticle(body.name)} 목적지로`);
@@ -76,9 +78,10 @@ export function createJournal({ bodies, missions, onGo, onReset, onOpen, onClose
     open,
     isOpen: () => dialog.open,
     // Remembered for the next open; the open list is not rebuilt so focus stays put.
-    update(progress, position) {
+    update(progress, position, current = bodies) {
       lastProgress = progress;
       lastPosition = position;
+      lastBodies = current;
     },
   };
 }

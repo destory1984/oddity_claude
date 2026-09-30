@@ -82,6 +82,12 @@ function createEarth(scene, body, sunDir) {
       earth.rotation.y = EARTH_START_SPIN + turn;
       clouds.rotation.y = EARTH_START_SPIN + 0.008 + turn * CLOUD_DRIFT;
     },
+    setSun(dir) {
+      const v = new Vector3(...dir);
+      surface.setVector3('sun', v);
+      cloudMaterial.setVector3('sun', v);
+      airMaterial.setVector3('sun', v);
+    },
   };
 }
 
@@ -90,7 +96,18 @@ function createMoon(scene, body, sunDir) {
   const material = shader(scene, 'lunar', lunarFrag, ['sun']);
   material.setVector3('sun', sunDir);
   moon.material = material;
-  return { body, meshes: [moon], spin() {} };
+  // Tidally locked: one turn per orbit (27.3 days), so the same face points at Earth.
+  const MOON_ORBIT_S = 27.3217 * 86400;
+  return {
+    body,
+    meshes: [moon],
+    spin(elapsed) {
+      moon.rotation.y = (elapsed * SPIN_SPEEDUP * 2 * Math.PI) / MOON_ORBIT_S;
+    },
+    setSun(dir) {
+      material.setVector3('sun', new Vector3(...dir));
+    },
+  };
 }
 
 // Procedural looks for bodies without photo textures. Colors are linear RGB;
@@ -172,10 +189,13 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     spin(elapsed) {
       sphere.rotation.y = (elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
     },
+    setSun(dir) {
+      material.setVector3('sun', new Vector3(...dir));
+    },
   };
 }
 
-// One entry per rendered body: { body, meshes, spin(elapsed) }. The Sun is drawn by sun.js.
+// One entry per rendered body: { body, meshes, spin(elapsed), setSun([x,y,z]) }. The Sun is drawn by sun.js.
 export function createBodyMeshes(scene, bodies, sunBody) {
   const made = [];
   for (const body of bodies) {

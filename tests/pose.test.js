@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { armPose, hoverFlightPose, blendFlight, lookBack } from '../src/core/pose.js';
+import { armPose, hoverFlightPose, blendFlight, lookBack, headTilt } from '../src/core/pose.js';
 
 test('both elbows flex toward the back/head, never hyperextend toward the chest', () => {
   for (const side of [-1, 1]) {
@@ -50,4 +50,30 @@ test('after resting a moment the hero turns around to face the camera, then turn
   for (let i = 0; i < 60; i++) ({ angle, idle } = lookBack(angle, idle, false, 1 / 60));
   assert.ok(angle < 0.1, 'swings forward within a second once moving');
   assert.equal(idle, 0);
+});
+
+test('facing the camera the hero tilts her head now and then, alternating sides, and not while facing away', () => {
+  const half = () => 0.5; // fixed "random" so the timing is predictable
+  let tilt = { untilNext: 3, t: 0, side: 1, angle: 0 };
+  const peaks = [];
+  let maxAngle = 0;
+  let prevT = 0;
+  for (let i = 0; i < 60 * 60; i++) {
+    tilt = headTilt(tilt, 1 / 60, true, half);
+    maxAngle = Math.max(maxAngle, Math.abs(tilt.angle));
+    if (tilt.t > 0 && prevT === 0) peaks.push({ at: i / 60, side: tilt.side });
+    prevT = tilt.t;
+  }
+  assert.ok(peaks.length >= 3 && peaks.length <= 6, `tilts in a minute: ${peaks.length}`);
+  for (let i = 1; i < peaks.length; i++) {
+    assert.ok(peaks[i].at - peaks[i - 1].at >= 8, 'at least 8 s apart');
+    assert.equal(peaks[i].side, -peaks[i - 1].side, 'alternates sides');
+  }
+  assert.ok(maxAngle > 0.3 && maxAngle <= 0.45, `tilt reaches about 20 degrees: ${maxAngle}`);
+
+  let away = { untilNext: 0, t: 0.5, side: 1, angle: 0.3 };
+  away = headTilt(away, 1 / 60, false, half);
+  assert.equal(away.angle, 0);
+  assert.equal(away.t, 0);
+  assert.ok(away.untilNext >= 3);
 });

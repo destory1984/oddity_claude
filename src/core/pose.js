@@ -39,3 +39,22 @@ export function lookBack(angle, idleSeconds, resting, dt) {
   const rate = target > angle ? 1.6 : 6;
   return { angle: target + (angle - target) * Math.exp(-dt * rate), idle };
 }
+
+const TILT_S = 1.6;
+const TILT_ANGLE = 0.38; // about 22 degrees
+const FIRST_TILT_S = 3;
+
+// A curious head tilt while the hero faces the camera: every 8 to 15 seconds the
+// head leans to one side and comes back over TILT_S, alternating sides.
+// Facing away resets it. random is injectable for tests.
+export function headTilt({ untilNext, t, side }, dt, facingCamera, random = Math.random) {
+  if (!facingCamera) return { untilNext: FIRST_TILT_S, t: 0, side, angle: 0 };
+  if (t > 0) {
+    const next = t + dt;
+    if (next >= TILT_S) return { untilNext: 8 + random() * 7, t: 0, side: -side, angle: 0 };
+    return { untilNext, t: next, side, angle: side * TILT_ANGLE * Math.sin((Math.PI * next) / TILT_S) };
+  }
+  const wait = untilNext - dt;
+  if (wait > 0) return { untilNext: wait, t: 0, side, angle: 0 };
+  return { untilNext: 0, t: dt, side, angle: side * TILT_ANGLE * Math.sin((Math.PI * dt) / TILT_S) };
+}

@@ -7,7 +7,7 @@ import {
   StandardMaterial, Color3, Quaternion, CreateIcoSphere, CreateCylinder, CreatePolyhedron,
   DynamicTexture,
 } from './babylon.js';
-import { blendFlight, hoverFlightPose, armPose, lookBack } from '../core/pose.js';
+import { blendFlight, hoverFlightPose, armPose, lookBack, headTilt } from '../core/pose.js';
 import { clamp } from './math.js';
 
 // A faceless paper doll, as if folded from colored craft paper: pink twin tails of
@@ -227,6 +227,7 @@ export function createHero(engine, sunDirection) {
   let sway = 0;
   let flightBlend = 0;
   let facing = { angle: 0, idle: 0 };
+  let tilt = { untilNext: 3, t: 0, side: 1, angle: 0 };
   let elapsed = 0;
 
   // Tails hang toward the feet when still and stream behind in flight, swinging
@@ -267,6 +268,9 @@ export function createHero(engine, sunDirection) {
     torso.rotation.x = -0.18 * flying;
     hero.position.y = -1.15 + Math.sin(elapsed * 1.5) * 0.04 * (1 - flying);
     head.rotation.z = -bank * 0.25 * flying;
+    // Now and then a curious head tilt while she looks back at the camera.
+    tilt = headTilt(tilt, dt, facing.angle > 2.8);
+    head.rotation.y = tilt.angle;
 
     for (const limb of limbs) {
       const inside = Math.max(0, bank * limb.s);

@@ -1,4 +1,5 @@
 import { objectParticle } from './messages.js';
+import { keepMarker, spreadArrows } from '../core/markers.js';
 
 const $ = (id) => document.getElementById(id);
 const ARROWS = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
@@ -61,20 +62,25 @@ export function createHud(bodies, { onSelect, onFace, onInspect }) {
       $('flightState').textContent = flightLabel;
       $('targetDistance').textContent = `${selected.name} 표면까지 ${fmt(selectedDistance)} km`;
       $('targetRoute').textContent = route;
-      // Every body in view gets a label; off-screen arrows only for the selected and
-      // the nearest body, so ten arrows do not pile up on one edge.
+      // Every body in view gets a label; off-screen arrows only for the selected, the
+      // nearest and nearby bodies (core/markers.js), so fifteen arrows do not pile up.
       const arrows = [];
       for (const body of bodies) {
         const el = markers.get(body.id);
         const hidden = body.kind === 'star' && view.sunVisibility < 0.01;
         const spot = placeMarker(el, view.directions[body.id], view.camera, hidden ? `${body.name} · 가려짐` : body.name);
-        const keep = !spot.outside || body.id === selected.id || body.id === local.body.id;
+        const keep = keepMarker({
+          outside: spot.outside,
+          selected: body.id === selected.id,
+          nearest: body.id === local.body.id,
+          surfaceKm: view.distances[body.id] - body.radiusKm,
+        });
         el.hidden = !keep;
         if (keep && spot.outside) arrows.push({ el, ...spot });
       }
-      if (arrows.length === 2 && Math.hypot(arrows[0].x - arrows[1].x, arrows[0].y - arrows[1].y) < 40) {
-        arrows[1].el.style.top = `${arrows[1].y + (arrows[1].y > innerHeight / 2 ? -40 : 40)}px`;
-      }
+      spreadArrows(arrows, 40, innerHeight).forEach((spot, i) => {
+        arrows[i].el.style.top = `${spot.y}px`;
+      });
     },
     faceToast(body) {
       return `${body.name}${objectParticle(body.name)} 바라봅니다. 위치와 속도는 유지됩니다.`;

@@ -1,4 +1,7 @@
 export const DISTANCE_COMPRESSION = 100;
+// Moons get a gentler squeeze: at 1/100 the Moon hung 3,763 km above Earth and
+// Titan sat inside Saturn's rings. At 1/10 they read as separate worlds.
+export const SATELLITE_COMPRESSION = 10;
 export const KM_PER_UNIT = 1000;
 export const START_ALTITUDE_KM = 9129;
 
@@ -23,7 +26,8 @@ export const BODY_DATA = [
   },
   {
     id: 'moon', name: '달', nameEn: 'Moon', kind: 'moon', radiusKm: 1737.4,
-    parent: 'earth', orbitKm: 384400, direction: [0.83, 0.22, -0.512],
+    // Upper left of Earth in the opening view, on the side away from the Sun so its lit face shows.
+    parent: 'earth', orbitKm: 384400, direction: [-0.6, 0.35, 0.72],
   },
   {
     id: 'mars', name: '화성', nameEn: 'Mars', kind: 'planet', radiusKm: 3389.5,
@@ -75,9 +79,9 @@ function normalize(v) {
   return v.map((n) => n / length);
 }
 
-export function compressedCenterDistance(originalKm, radiusA, radiusB) {
+export function compressedCenterDistance(originalKm, radiusA, radiusB, factor = DISTANCE_COMPRESSION) {
   const radii = radiusA + radiusB;
-  return radii + (originalKm - radii) / DISTANCE_COMPRESSION;
+  return radii + (originalKm - radii) / factor;
 }
 
 export function placeBodies(data) {
@@ -87,7 +91,8 @@ export function placeBodies(data) {
     if (item.parent) {
       const parent = placed.get(item.parent);
       if (!parent) throw new Error(`parent ${item.parent} must come before ${item.id}`);
-      const distance = compressedCenterDistance(item.orbitKm, parent.radiusKm, item.radiusKm);
+      const factor = parent.kind === 'star' ? DISTANCE_COMPRESSION : SATELLITE_COMPRESSION;
+      const distance = compressedCenterDistance(item.orbitKm, parent.radiusKm, item.radiusKm, factor);
       position = normalize(item.direction).map((n, i) => parent.position[i] + n * distance);
     }
     const { id, name, nameEn, kind, radiusKm, parent = null } = item;

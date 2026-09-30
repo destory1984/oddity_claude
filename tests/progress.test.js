@@ -42,8 +42,8 @@ test('updates never mutate the previous log', () => {
   assert.deepEqual(before, createProgress());
 });
 
-test('the Moon, 12,000 km away, is discovered on the first frame', () => {
-  assert.deepEqual(updateProgress(createProgress(), at(START_POSITION), BODIES).events, [{ type: 'discovered', bodyId: 'moon' }]);
+test('the start discovers nothing new: the Moon waits just outside 50,000 km', () => {
+  assert.deepEqual(updateProgress(createProgress(), at(START_POSITION), BODIES).events, []);
 });
 
 test('recordPhotos keeps the first completion only', () => {

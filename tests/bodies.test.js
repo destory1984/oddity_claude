@@ -46,20 +46,29 @@ test('no two bodies overlap', () => {
   }
 });
 
-test('every child sits at the compressed distance from its parent', () => {
+test('planets sit at 1/100 of the real gap from the Sun, moons at 1/10 from their planet', () => {
   for (const item of BODY_DATA.filter((d) => d.parent)) {
     const body = bodyById(item.id);
     const parent = bodyById(item.parent);
     const centerDistance = Math.hypot(...sub(body.position, parent.position));
     const radii = body.radiusKm + parent.radiusKm;
+    const factor = parent.kind === 'star' ? 100 : 10;
     assert.ok(centerDistance > radii);
-    near(centerDistance - radii, (item.orbitKm - radii) / 100);
+    near(centerDistance - radii, (item.orbitKm - radii) / factor);
   }
-  near(Math.hypot(...sub(bodyById('moon').position, bodyById('earth').position)), 11871.316);
+  // Moon: 8,108.4 km of radii + (384,400 - 8,108.4) / 10 of gap.
+  near(Math.hypot(...sub(bodyById('moon').position, bodyById('earth').position)), 45737.56);
 });
 
-test('compressedCenterDistance keeps radii and divides the gap by 100', () => {
+test('Titan orbits outside the rings of Saturn', () => {
+  const ringOuterKm = 136775;
+  const gap = Math.hypot(...sub(bodyById('titan').position, bodyById('saturn').position));
+  assert.ok(gap - bodyById('titan').radiusKm > ringOuterKm);
+});
+
+test('compressedCenterDistance keeps radii and divides the gap, by 100 unless told otherwise', () => {
   assert.equal(compressedCenterDistance(1100, 50, 50), 100 + 10);
+  assert.equal(compressedCenterDistance(1100, 50, 50, 10), 100 + 100);
 });
 
 test('placeBodies rejects a child listed before its parent', () => {
@@ -106,4 +115,22 @@ test('a body grows in view as the traveler approaches it', () => {
   const far = apparentAngularRadius(696340, 2e6);
   const half = apparentAngularRadius(696340, 1e6);
   assert.ok(half > far * 1.99);
+});
+
+test('from the start, looking at Earth, the Moon hangs beside it in frame and partly sunlit', async () => {
+  const { frameBodies } = await import('../src/core/framing.js');
+  const earth = bodyById('earth');
+  const moon = bodyById('moon');
+  const toEarth = sub(earth.position, START_POSITION);
+  const len = Math.hypot(...toEarth);
+  const q = (await import('../src/core/orientation.js')).lookAtDirection(toEarth.map((n) => n / len));
+  const frames = frameBodies({ position: START_POSITION, orientation: q, fovY: Math.PI / 3, aspect: 16 / 9, bodies: BODIES });
+  const moonFrame = frames.find((f) => f.body.id === 'moon');
+  assert.equal(moonFrame.visible, true);
+  assert.equal(moonFrame.hidden, false);
+  // The Sun lights the face we see: angle Sun-Moon-viewer under 100 degrees.
+  const toSun = sub(bodyById('sun').position, moon.position);
+  const toViewer = sub(START_POSITION, moon.position);
+  const cos = dot(toSun, toViewer) / (Math.hypot(...toSun) * Math.hypot(...toViewer));
+  assert.ok(Math.acos(cos) < (100 * Math.PI) / 180);
 });

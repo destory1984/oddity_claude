@@ -18,3 +18,7 @@ export { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial.js'
 export { PointsCloudSystem } from '@babylonjs/core/Particles/pointsCloudSystem.js';
 export { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight.js';
 export { DirectionalLight } from '@babylonjs/core/Lights/directionalLight.js';
+export { CreateIcoSphere } from '@babylonjs/core/Meshes/Builders/icoSphereBuilder.js';
+export { CreateCylinder } from '@babylonjs/core/Meshes/Builders/cylinderBuilder.js';
+export { CreatePolyhedron } from '@babylonjs/core/Meshes/Builders/polyhedronBuilder.js';
+export { DynamicTexture } from '@babylonjs/core/Materials/Textures/dynamicTexture.js';

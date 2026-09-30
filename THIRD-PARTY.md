@@ -7,4 +7,4 @@
 | `public/assets/earth-clouds.jpg` | NASA Visible Earth, 구름 합성 지도. https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg | 미국 정부 저작물, 저작권 없음 |
 | `@babylonjs/core` (npm) | https://github.com/BabylonJS/Babylon.js | Apache-2.0 |
 
-NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는다. 캐릭터, 망토, 셰이더와 게임 코드는 이 저장소에서 직접 만든 것이다.
+NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는다. 캐릭터, 셰이더, 효과음과 게임 코드는 이 저장소에서 직접 만든 것이다.

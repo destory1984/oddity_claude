@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { createState, step, stopNow } from '../src/core/game.js';
+import { createState, step, stopNow, totalSpeed } from '../src/core/game.js';
 import { C, ZONES, speedZone } from '../src/core/flight.js';
 import { lookAtDirection } from '../src/core/orientation.js';
 import { BODIES, START_POSITION, bodyById, nearestSurface } from '../src/core/bodies.js';
@@ -128,4 +128,42 @@ test('a move that ends just past a zone shell still lands inside it', () => {
   assert.deepEqual(first.events, [{ type: 'zoneChanged', from: 'far', to: 'near' }]);
   const { events } = run(first.state, {}, 30, [ball]);
   assert.deepEqual(events, []);
+});
+
+test('strafing right slides along the body right axis at the zone limit within three seconds', () => {
+  const state = createState([0, 0, 0], [0, 0, 0, 1], []);
+  const after = run(state, { strafe: 1 }, 180, []).state;
+  assert.ok(after.position[0] > 0, 'moved right');
+  assert.ok(Math.abs(after.position[2]) < 1e-6, 'no forward motion');
+  assert.ok(Math.abs(totalSpeed(after) - C * 100) < 1e-3);
+});
+
+test('strafing left moves the other way', () => {
+  const after = run(createState([0, 0, 0], [0, 0, 0, 1], []), { strafe: -1 }, 30, []).state;
+  assert.ok(after.position[0] < 0);
+});
+
+test('forward plus sideways never exceeds the zone limit', () => {
+  let state = createState([0, 0, 0], [0, 0, 0, 1], []);
+  for (let i = 0; i < 400; i++) {
+    state = step(state, { drive: 1, strafe: 1 }, DT, []).state;
+    assert.ok(totalSpeed(state) <= C * 100 + 1e-6);
+  }
+  assert.ok(state.position[0] > 0 && state.position[2] > 0);
+});
+
+test('releasing A or D stops the slide within one second', () => {
+  const moving = run(createState([0, 0, 0], [0, 0, 0, 1], []), { strafe: 1 }, 120, []).state;
+  const after = run(moving, {}, 61, []).state;
+  assert.equal(totalSpeed(after), 0);
+});
+
+test('sliding sideways into a body stops on its surface', () => {
+  // Ball to the right of a traveler looking along +z.
+  const side = { id: 'side', name: 'side', kind: 'planet', radiusKm: 1000, position: [5000, 0, 0] };
+  let state = createState([0, 0, 0], [0, 0, 0, 1], [side]);
+  for (let i = 0; i < 2000 && !state.restingOn; i++) state = step(state, { strafe: 1 }, DT, [side]).state;
+  assert.equal(state.restingOn, 'side');
+  assert.ok(Math.abs(Math.hypot(...state.position.map((n, i) => n - side.position[i])) - 1000) < 1e-6);
+  assert.equal(totalSpeed(state), 0);
 });

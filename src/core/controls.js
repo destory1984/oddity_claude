@@ -5,6 +5,7 @@ export function controlIntent(keys, stickActive, flyingButton, reversingButton =
     turnX: (keys.has('ArrowRight') ? 1 : 0) - (keys.has('ArrowLeft') ? 1 : 0),
     turnY: (keys.has('ArrowDown') ? 1 : 0) - (keys.has('ArrowUp') ? 1 : 0),
     drive: forward - reverse,
+    strafe: (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0),
   };
 }
 

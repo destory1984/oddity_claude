@@ -1,4 +1,4 @@
-import { rotateLocal, forward } from './orientation.js';
+import { rotateLocal, forward, right } from './orientation.js';
 import { BODIES, nearestSurface } from './bodies.js';
 import {
   speedZone, stricterZoneBelow, accelerateSpeed, brakeSpeed, firstSphereHit, ZONES,
@@ -17,20 +17,56 @@ export function createState(position, orientation = [0, 0, 0, 1], bodies = BODIE
     speed: 0,
     motionSign: 1,
     brakeRate: 0,
+    // Sideways channel (A/D), same rules as forward/back along the body's right axis.
+    sideSpeed: 0,
+    sideSign: 1,
+    sideBrakeRate: 0,
     zoneId: speedZone(nearestSurface(position, bodies).distance).id,
     restingOn: null,
   };
 }
 
 export function stopNow(state) {
-  return { ...state, speed: 0, brakeRate: 0 };
+  return { ...state, speed: 0, brakeRate: 0, sideSpeed: 0, sideBrakeRate: 0 };
+}
+
+export function totalSpeed(state) {
+  return Math.hypot(state.speed, state.sideSpeed ?? 0);
+}
+
+// One thrust axis: hold a direction to accelerate, let go to brake to a stop in one
+// second, and press the other way to stop first and then accelerate back.
+function thrust(speed, sign, brakeRate, command, throttle, dt, maxSpeed) {
+  if (command !== 0 && command !== sign && speed < STOPPED) sign = command;
+  const changingDirection = command !== 0 && command !== sign;
+  if (command !== 0 && !changingDirection) {
+    return { speed: accelerateSpeed(speed, throttle, dt, maxSpeed), sign, brakeRate: 0 };
+  }
+  if (speed > 0 && brakeRate === 0) brakeRate = speed;
+  speed = brakeSpeed(speed, brakeRate, dt);
+  if (speed === 0) {
+    brakeRate = 0;
+    if (changingDirection) {
+      sign = command;
+      speed = accelerateSpeed(0, throttle, dt, maxSpeed);
+    }
+  }
+  return { speed, sign, brakeRate };
+}
+
+// Scale both axes down together so the combined speed stays within the limit.
+function capTotal(main, side, maxSpeed) {
+  const total = Math.hypot(main, side);
+  if (total <= maxSpeed) return [main, side];
+  const k = maxSpeed / total;
+  return [main * k, side * k];
 }
 
 export function step(state, input, dt, bodies = BODIES) {
   const events = [];
   if (!(dt > 0)) return { state, events };
 
-  const { turnX = 0, turnY = 0, roll = 0, drive = 0, throttle = 1 } = input;
+  const { turnX = 0, turnY = 0, roll = 0, drive = 0, strafe = 0, throttle = 1 } = input;
   const orientation = rotateLocal(
     state.orientation, turnX * TURN_RATE * dt, turnY * TURN_RATE * dt, roll * ROLL_RATE * dt,
   );
@@ -38,29 +74,23 @@ export function step(state, input, dt, bodies = BODIES) {
   let zone = speedZone(nearestSurface(state.position, bodies).distance);
   if (zone.id !== state.zoneId) events.push({ type: 'zoneChanged', from: state.zoneId, to: zone.id });
 
-  let { speed, motionSign, brakeRate } = state;
-  speed = Math.min(speed, zone.maxSpeed);
+  let [speed, sideSpeed] = capTotal(state.speed, state.sideSpeed ?? 0, zone.maxSpeed);
+  let { motionSign, brakeRate } = state;
+  let sideSign = state.sideSign ?? 1;
+  let sideBrakeRate = state.sideBrakeRate ?? 0;
 
-  if (drive !== 0 && drive !== motionSign && speed < STOPPED) motionSign = drive;
-  const changingDirection = drive !== 0 && drive !== motionSign;
+  ({ speed, sign: motionSign, brakeRate } = thrust(speed, motionSign, brakeRate, drive, throttle, dt, zone.maxSpeed));
+  ({ speed: sideSpeed, sign: sideSign, brakeRate: sideBrakeRate } = thrust(
+    sideSpeed, sideSign, sideBrakeRate, strafe, throttle, dt, zone.maxSpeed,
+  ));
+  [speed, sideSpeed] = capTotal(speed, sideSpeed, zone.maxSpeed);
 
-  if (drive !== 0 && !changingDirection) {
-    brakeRate = 0;
-    speed = accelerateSpeed(speed, throttle, dt, zone.maxSpeed);
-  } else {
-    if (speed > 0 && brakeRate === 0) brakeRate = speed;
-    speed = brakeSpeed(speed, brakeRate, dt);
-    if (speed === 0) {
-      brakeRate = 0;
-      if (changingDirection) {
-        motionSign = drive;
-        speed = accelerateSpeed(0, throttle, dt, zone.maxSpeed);
-      }
-    }
-  }
-
-  const direction = forward(orientation).map((n) => n * motionSign);
-  const length = speed * dt;
+  const f = forward(orientation);
+  const r = right(orientation);
+  const velocity = f.map((n, i) => n * speed * motionSign + r[i] * sideSpeed * sideSign);
+  const combined = Math.hypot(...velocity);
+  const direction = combined > 0 ? velocity.map((n) => n / combined) : f;
+  const length = combined * dt;
   let position = state.position;
   let restingOn = state.restingOn;
 
@@ -72,7 +102,7 @@ export function step(state, input, dt, bodies = BODIES) {
       position = state.position.map((n, i) => n + direction[i] * travel);
       events.push({ type: 'zoneChanged', from: zone.id, to: inner.id });
       zone = inner;
-      speed = Math.min(speed, zone.maxSpeed);
+      [speed, sideSpeed] = capTotal(speed, sideSpeed, zone.maxSpeed);
       restingOn = null;
     } else {
       const hit = firstSphereHit(state.position, direction, length, bodies, 0);
@@ -80,6 +110,8 @@ export function step(state, input, dt, bodies = BODIES) {
         position = hit.position;
         speed = 0;
         brakeRate = 0;
+        sideSpeed = 0;
+        sideBrakeRate = 0;
         if (restingOn !== hit.body.id) events.push({ type: 'surfaceReached', bodyId: hit.body.id });
         restingOn = hit.body.id;
       } else {
@@ -90,7 +122,9 @@ export function step(state, input, dt, bodies = BODIES) {
   }
 
   return {
-    state: { position, orientation, speed, motionSign, brakeRate, zoneId: zone.id, restingOn },
+    state: {
+      position, orientation, speed, motionSign, brakeRate, sideSpeed, sideSign, sideBrakeRate, zoneId: zone.id, restingOn,
+    },
     events,
   };
 }

@@ -101,11 +101,12 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
         turnY: c.turnY + stick[1],
         roll: (held.has('KeyE') ? 1 : 0) - (held.has('KeyQ') ? 1 : 0),
         drive: c.drive,
+        strafe: c.strafe,
         throttle,
       };
     },
     driving() {
-      return held.has('KeyW') || held.has('KeyS') || stickId !== null || flyingButton || reversingButton;
+      return held.has('KeyW') || held.has('KeyS') || held.has('KeyA') || held.has('KeyD') || stickId !== null || flyingButton || reversingButton;
     },
   };
 }

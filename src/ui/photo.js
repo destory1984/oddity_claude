@@ -54,7 +54,7 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
       const touch = document.body.classList.contains('touch');
       if (touch && navigator.canShare?.({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: 'Oddity' });
+          await navigator.share({ files: [file], title: 'Space Oddity' });
         } catch (e) {
           if (e.name !== 'AbortError') throw e;
         }

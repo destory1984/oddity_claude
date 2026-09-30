@@ -1,6 +1,6 @@
 import { BODIES, START_POSITION, bodyById, surfaceDistance, nearestLocalBody } from './core/bodies.js';
 import { C, ZONES } from './core/flight.js';
-import { createState, step, stopNow, TURN_RATE } from './core/game.js';
+import { createState, step, stopNow, totalSpeed, TURN_RATE } from './core/game.js';
 import { rotateLocal, lookAtDirection, multiply, conjugate } from './core/orientation.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
@@ -228,7 +228,8 @@ async function init() {
     if (finished) celebrate();
 
     const turn = dt > 0
-      ? [dragTurn[0] / dt + intent.turnX * TURN_RATE, dragTurn[1] / dt + intent.turnY * TURN_RATE]
+      // Sliding sideways leans the character like a gentle turn.
+      ? [dragTurn[0] / dt + intent.turnX * TURN_RATE + intent.strafe * 0.6, dragTurn[1] / dt + intent.turnY * TURN_RATE]
       : [0, 0];
     dragTurn = [0, 0];
 
@@ -236,7 +237,7 @@ async function init() {
       position: state.position,
       orientation: state.orientation,
       dt,
-      speed: state.speed,
+      speed: totalSpeed(state),
       photoOrientation: photo.orientation(),
       heroVisible: photo.heroVisible(),
       turn,
@@ -249,8 +250,9 @@ async function init() {
     let flightLabel = '자유 비행';
     if (paused) flightLabel = '일시 정지';
     else if (state.restingOn) flightLabel = `${bodyById(state.restingOn).name} 표면`;
-    else if (state.speed < 0.01) flightLabel = '정지 비행';
+    else if (totalSpeed(state) < 0.01) flightLabel = '정지 비행';
     else if (!driving) flightLabel = '서서히 감속 중';
+    else if (state.sideSpeed > state.speed) flightLabel = '옆으로 비행';
     else if (state.motionSign < 0) flightLabel = '후진 비행';
     // Paused or in photo mode nothing moves, so only a new target needs a new estimate.
     if (routeAt === 0 || (!paused && now - routeAt > ROUTE_EVERY_MS)) {
@@ -264,8 +266,9 @@ async function init() {
       local: nearestLocalBody(state.position),
       selected,
       selectedDistance: surfaceDistance(state.position, selected),
-      speed: state.speed,
-      motionSign: state.motionSign,
+      speed: totalSpeed(state),
+      // Only forward/back motion can be 'backward'; a pure slide is not.
+      motionSign: state.speed > 0.01 ? state.motionSign : 1,
       zoneLabel: ZONES[state.zoneId].label,
       flightLabel,
       throttle: input.throttle(),
@@ -277,7 +280,7 @@ async function init() {
   window.oddity = {
     getState: () => ({
       position: [...state.position],
-      speed: state.speed,
+      speed: totalSpeed(state),
       motionSign: state.motionSign,
       zoneId: state.zoneId,
       restingOn: state.restingOn,

@@ -844,3 +844,12 @@ nav button {
     display: none;
   }
 }
+
+/* "Space Oddity" folds onto two short lines on phones so the header buttons fit. */
+@media (max-width: 480px) {
+  .brand strong {
+    font-size: 17px;
+    line-height: 1.05;
+    max-width: 64px;
+  }
+}

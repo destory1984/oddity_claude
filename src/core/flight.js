@@ -1,11 +1,5 @@
 export const C = 299792.458;
 
-export const ZONES = Object.freeze({
-  veryNear: Object.freeze({ id: 'veryNear', maxSpeed: C * 0.01, label: '0.01c', margin: 500 }),
-  near: Object.freeze({ id: 'near', maxSpeed: C * 0.1, label: '0.1c', margin: 50000 }),
-  far: Object.freeze({ id: 'far', maxSpeed: C * 100, label: '100c', margin: Infinity }),
-});
-
 export const MIN_SPEED = C * 0.01;
 export const MAX_SPEED = C * 100;
 // The limit grows with the distance to the nearest surface: flying straight at a body
@@ -18,18 +12,6 @@ export function speedLimit(surfaceKm) {
 }
 
 const ACCELERATION_SECONDS = 3;
-
-export function speedZone(surfaceDistance) {
-  if (surfaceDistance <= ZONES.veryNear.margin) return ZONES.veryNear;
-  if (surfaceDistance <= ZONES.near.margin) return ZONES.near;
-  return ZONES.far;
-}
-
-export function stricterZoneBelow(zone) {
-  if (zone.id === 'far') return ZONES.near;
-  if (zone.id === 'near') return ZONES.veryNear;
-  return null;
-}
 
 export function accelerateSpeed(current, strength, dt, maxSpeed) {
   const clampedStrength = Math.max(0, Math.min(1, strength));

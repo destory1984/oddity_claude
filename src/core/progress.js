@@ -1,19 +1,21 @@
 import { surfaceDistance } from './bodies.js';
-import { ZONES } from './flight.js';
 
 // The explorer's log: which bodies were discovered and landed on, which photo
 // missions were completed. Plain arrays of ids so it stores as JSON.
+
+// A body counts as discovered once the traveler comes this close to its surface.
+export const DISCOVERY_KM = 50000;
 
 export function createProgress() {
   return { discovered: ['earth'], landed: [], photos: [] };
 }
 
-// Discovery happens on entering the near zone of a body (same edge as the 0.1c limit).
+// Discovery happens within DISCOVERY_KM of a body's surface.
 export function updateProgress(progress, state, bodies) {
   const events = [];
   let { discovered, landed } = progress;
   for (const body of bodies) {
-    if (!discovered.includes(body.id) && surfaceDistance(state.position, body) <= ZONES.near.margin) {
+    if (!discovered.includes(body.id) && surfaceDistance(state.position, body) <= DISCOVERY_KM) {
       discovered = [...discovered, body.id];
       events.push({ type: 'discovered', bodyId: body.id });
     }

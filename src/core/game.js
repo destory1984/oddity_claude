@@ -1,8 +1,6 @@
 import { rotateLocal, forward, right } from './orientation.js';
 import { BODIES, nearestSurface } from './bodies.js';
-import {
-  speedZone, stricterZoneBelow, accelerateSpeed, brakeSpeed, firstSphereHit, ZONES,
-} from './flight.js';
+import { speedLimit, accelerateSpeed, brakeSpeed, firstSphereHit } from './flight.js';
 
 export const TURN_RATE = 0.7;
 export const ROLL_RATE = 0.9;
@@ -15,10 +13,10 @@ export function startOrientation(aspect) {
   return aspect < 1 ? [0, 0, 0, 1] : START_ORIENTATION;
 }
 const STOPPED = 0.01;
-// Step this far past a zone shell so the next frame measures the new zone despite rounding.
-const SHELL_INSET_KM = 0.001;
+// Within this distance of a surface the traveler rides along with that body.
+export const CARRY_KM = 50000;
 
-export function createState(position, orientation = [0, 0, 0, 1], bodies = BODIES) {
+export function createState(position, orientation = [0, 0, 0, 1]) {
   return {
     position: [...position],
     orientation: [...orientation],
@@ -29,7 +27,6 @@ export function createState(position, orientation = [0, 0, 0, 1], bodies = BODIE
     sideSpeed: 0,
     sideSign: 1,
     sideBrakeRate: 0,
-    zoneId: speedZone(nearestSurface(position, bodies).distance).id,
     restingOn: null,
   };
 }
@@ -38,11 +35,11 @@ export function stopNow(state) {
   return { ...state, speed: 0, brakeRate: 0, sideSpeed: 0, sideBrakeRate: 0 };
 }
 
-// Bodies move along their orbits between frames. Near a body (inside its 0.1c zone)
-// the traveler moves with it, so a moon does not slide out from under a landing.
+// Bodies move along their orbits between frames. Near a body (within CARRY_KM of its
+// surface) the traveler moves with it, so a moon does not slide out from under a landing.
 export function carryAlong(state, before, after) {
   const { body, distance } = nearestSurface(state.position, before);
-  if (!body || distance > ZONES.near.margin) return state;
+  if (!body || distance > CARRY_KM) return state;
   const moved = after.find((b) => b.id === body.id);
   if (!moved) return state;
   return { ...state, position: state.position.map((n, i) => n + moved.position[i] - body.position[i]) };
@@ -110,19 +107,17 @@ export function step(state, input, dt, bodies = BODIES) {
     state.orientation, turnX * TURN_RATE * dt, turnY * TURN_RATE * dt, roll * ROLL_RATE * dt,
   );
 
-  let zone = speedZone(nearestSurface(state.position, bodies).distance);
-  if (zone.id !== state.zoneId) events.push({ type: 'zoneChanged', from: state.zoneId, to: zone.id });
-
-  let [speed, sideSpeed] = capTotal(state.speed, state.sideSpeed ?? 0, zone.maxSpeed);
+  const limit = speedLimit(nearestSurface(state.position, bodies).distance);
+  let [speed, sideSpeed] = capTotal(state.speed, state.sideSpeed ?? 0, limit);
   let { motionSign, brakeRate } = state;
   let sideSign = state.sideSign ?? 1;
   let sideBrakeRate = state.sideBrakeRate ?? 0;
 
-  ({ speed, sign: motionSign, brakeRate } = thrust(speed, motionSign, brakeRate, drive, throttle, dt, zone.maxSpeed));
+  ({ speed, sign: motionSign, brakeRate } = thrust(speed, motionSign, brakeRate, drive, throttle, dt, limit));
   ({ speed: sideSpeed, sign: sideSign, brakeRate: sideBrakeRate } = thrust(
-    sideSpeed, sideSign, sideBrakeRate, strafe, throttle, dt, zone.maxSpeed,
+    sideSpeed, sideSign, sideBrakeRate, strafe, throttle, dt, limit,
   ));
-  [speed, sideSpeed] = capTotal(speed, sideSpeed, zone.maxSpeed);
+  [speed, sideSpeed] = capTotal(speed, sideSpeed, limit);
 
   const f = forward(orientation);
   const r = right(orientation);
@@ -134,38 +129,28 @@ export function step(state, input, dt, bodies = BODIES) {
   let restingOn = state.restingOn;
 
   if (length > 0) {
-    const inner = stricterZoneBelow(zone);
-    const shell = inner ? firstSphereHit(state.position, direction, length, bodies, inner.margin) : null;
-    if (shell) {
-      const travel = Math.min(length, shell.t + SHELL_INSET_KM);
-      position = state.position.map((n, i) => n + direction[i] * travel);
-      events.push({ type: 'zoneChanged', from: zone.id, to: inner.id });
-      zone = inner;
-      [speed, sideSpeed] = capTotal(speed, sideSpeed, zone.maxSpeed);
-      restingOn = null;
+    const hit = firstSphereHit(state.position, direction, length, bodies, 0);
+    if (hit) {
+      position = hit.position;
+      speed = 0;
+      brakeRate = 0;
+      sideSpeed = 0;
+      sideBrakeRate = 0;
+      if (restingOn !== hit.body.id) events.push({ type: 'surfaceReached', bodyId: hit.body.id });
+      restingOn = hit.body.id;
     } else {
-      const hit = firstSphereHit(state.position, direction, length, bodies, 0);
-      if (hit) {
-        position = hit.position;
-        speed = 0;
-        brakeRate = 0;
-        sideSpeed = 0;
-        sideBrakeRate = 0;
-        if (restingOn !== hit.body.id) events.push({ type: 'surfaceReached', bodyId: hit.body.id });
-        restingOn = hit.body.id;
-      } else {
-        position = state.position.map((n, i) => n + direction[i] * length);
-        restingOn = null;
-      }
+      position = state.position.map((n, i) => n + direction[i] * length);
+      restingOn = null;
+      // Having moved closer, never carry more speed than the new spot allows.
+      [speed, sideSpeed] = capTotal(speed, sideSpeed, speedLimit(nearestSurface(position, bodies).distance));
     }
   }
 
   return {
     state: {
-      position, orientation, speed, motionSign, brakeRate, sideSpeed, sideSign, sideBrakeRate, zoneId: zone.id, restingOn,
+      position, orientation, speed, motionSign, brakeRate, sideSpeed, sideSign, sideBrakeRate, restingOn,
     },
     events,
   };
 }
 
-export { ZONES };

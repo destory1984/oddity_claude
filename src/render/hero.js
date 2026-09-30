@@ -235,7 +235,7 @@ export function createHero(engine, sunDirection) {
   let sway = 0;
   let flightBlend = 0;
   let facing = { angle: 0, idle: 0 };
-  let wink = { untilNext: 1, left: 0 };
+  let wink = { untilNext: 3, left: 0 };
   let elapsed = 0;
 
   // Tails hang toward the feet when still and stream behind in flight, swinging

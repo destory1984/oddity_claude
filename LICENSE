@@ -1,0 +1,48 @@
+Space Oddity — 우주 한량
+Copyright (c) 2026 destory1984
+
+This repository is licensed in three parts.
+
+1. Source code
+   Everything in this repository is licensed under the MIT License below,
+   except the material listed in parts 2 and 3.
+
+2. Reserved: all rights reserved, NOT licensed under the MIT License
+   - The player character: its design (pink twin tails, white beret with a gold
+     star, red and white dress, brown boots, face) and the code that defines and
+     draws it, src/render/hero.js.
+   - The app icons in public/icons/.
+   - The game's name and title as a brand: "우주 한량" and
+     "Space Oddity — 우주 한량", including their use as the name of an app, game
+     or product.
+   You may view this material here, but you may not copy, modify, publish or
+   sell it, or use it in your own work, without written permission from the
+   copyright holder. Forks that reuse the MIT-licensed code must replace the
+   character, icons and name with their own.
+
+3. Third-party material keeps its own terms; see THIRD-PARTY.md
+   (NASA images: public domain; Babylon.js: Apache License 2.0).
+
+--------------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) 2026 destory1984
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

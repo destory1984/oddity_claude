@@ -1,3 +1,7 @@
+// Copyright (c) 2026 destory1984. All rights reserved.
+// This file (the player character's design) is NOT covered by the MIT License;
+// see LICENSE, part 2. Forks must replace the character with their own.
+
 import {
   Scene, FreeCamera, Vector3, TransformNode, HemisphericLight, DirectionalLight,
   StandardMaterial, Color3, Quaternion, CreateIcoSphere, CreateCylinder, CreatePolyhedron,

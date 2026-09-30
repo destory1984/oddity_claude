@@ -5,126 +5,60 @@
 import {
   Scene, FreeCamera, Vector3, TransformNode, HemisphericLight, DirectionalLight,
   StandardMaterial, Color3, Quaternion, CreateIcoSphere, CreateCylinder, CreatePolyhedron,
-  CreatePlane, DynamicTexture,
+  DynamicTexture,
 } from './babylon.js';
-import { blendFlight, hoverFlightPose, armPose, lookBack, winkStep } from '../core/pose.js';
+import { blendFlight, hoverFlightPose, armPose, lookBack } from '../core/pose.js';
 import { clamp } from './math.js';
 
-// A chibi girl in faceted, paper-craft style: pink twin tails, a white beret with a
-// gold star, a red and white dress and brown boots.
+// A faceless paper doll, as if folded from colored craft paper: pink twin tails of
+// long folded strips, a white beret with a gold star, a white capelet over a red
+// dress, gold paper trim, dark stockings and folded brown boots.
 //
 // Local axes of the body: +z runs from the feet to the head, +y is the back and -y
-// the front (the face). The flight poses in core/pose.js rotate this whole frame.
+// the front. The flight poses in core/pose.js rotate this whole frame.
 
 const COLORS = {
-  skin: '#f6d2bf',
-  hair: '#ec8f8a',
-  hairDark: '#d0646a',
-  beret: '#efe8e1',
-  band: '#5a3a2e',
-  gold: '#e3b24c',
-  dress: '#b8444c',
-  vest: '#7e2f36',
-  blouse: '#f3eee8',
-  boot: '#5c392d',
-  bow: '#c24b55',
+  skin: '#efd3bf',
+  hair: '#e8928e',
+  hairFold: '#cf7478',
+  paper: '#f2ede4',
+  band: '#5b3b2f',
+  gold: '#c9a55c',
+  dress: '#b04852',
+  vest: '#6e2b33',
+  stocking: '#2f2b2e',
+  boot: '#6b4332',
+  bow: '#b8444f',
 };
 
-const TAIL_SEGMENTS = [0.36, 0.44, 0.42, 0.34, 0.26];
-
-function drawFace(texture, winking) {
+// Craft paper: an off-white sheet with faint fibers, tinted by each material's color.
+function paperTexture(scene) {
+  const texture = new DynamicTexture('paper', { width: 256, height: 256 }, scene, true);
   const ctx = texture.getContext();
-  const size = texture.getSize().width;
-  const u = size / 256;
-  ctx.clearRect(0, 0, size, size);
-
-  // Soft round blush.
-  for (const x of [52, 204]) {
-    const g = ctx.createRadialGradient(x * u, 168 * u, 2 * u, x * u, 168 * u, 26 * u);
-    g.addColorStop(0, 'rgba(255, 120, 140, 0.6)');
-    g.addColorStop(1, 'rgba(255, 120, 140, 0)');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.ellipse(x * u, 168 * u, 28 * u, 18 * u, 0, 0, Math.PI * 2);
-    ctx.fill();
+  ctx.fillStyle = '#f4f1ea';
+  ctx.fillRect(0, 0, 256, 256);
+  let seed = 4242;
+  const rand = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  for (let i = 0; i < 900; i++) {
+    const shade = rand() < 0.5 ? 255 : 200;
+    ctx.fillStyle = `rgba(${shade}, ${shade}, ${shade - 8}, ${0.06 + rand() * 0.1})`;
+    ctx.fillRect(rand() * 256, rand() * 256, 1 + rand() * 2, 1 + rand() * 2);
   }
-
-  // Short, light eyebrows.
-  ctx.strokeStyle = 'rgba(150, 70, 70, 0.7)';
-  ctx.lineCap = 'round';
-  ctx.lineWidth = 5 * u;
-  for (const x of [84, 172]) {
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 120; i++) {
+    ctx.strokeStyle = `rgba(180, 175, 165, ${0.05 + rand() * 0.08})`;
+    const x = rand() * 256;
+    const y = rand() * 256;
     ctx.beginPath();
-    ctx.moveTo((x - 14) * u, 78 * u);
-    ctx.quadraticCurveTo(x * u, 70 * u, (x + 14) * u, 78 * u);
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + (rand() - 0.5) * 24, y + (rand() - 0.5) * 24);
     ctx.stroke();
   }
-
-  // Big glossy eye: dark rim, brown-to-amber iris, lash line, two sparkles.
-  const openEye = (x) => {
-    ctx.fillStyle = '#3b1f1a';
-    ctx.beginPath();
-    ctx.ellipse(x * u, 128 * u, 30 * u, 40 * u, 0, 0, Math.PI * 2);
-    ctx.fill();
-    const iris = ctx.createLinearGradient(0, 100 * u, 0, 166 * u);
-    iris.addColorStop(0, '#5a2e22');
-    iris.addColorStop(1, '#d58a4a');
-    ctx.fillStyle = iris;
-    ctx.beginPath();
-    ctx.ellipse(x * u, 132 * u, 24 * u, 33 * u, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#2a1512';
-    ctx.beginPath();
-    ctx.ellipse(x * u, 130 * u, 11 * u, 15 * u, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#2a1512';
-    ctx.lineWidth = 7 * u;
-    ctx.beginPath();
-    ctx.ellipse(x * u, 128 * u, 31 * u, 41 * u, 0, Math.PI * 1.1, Math.PI * 1.9);
-    ctx.stroke();
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.ellipse((x - 10) * u, 112 * u, 10 * u, 12 * u, -0.3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc((x + 10) * u, 148 * u, 5 * u, 0, Math.PI * 2);
-    ctx.fill();
-  };
-
-  // A closed, happy "^" eye with two little lashes.
-  const winkEye = (x) => {
-    ctx.strokeStyle = '#2a1512';
-    ctx.lineWidth = 8 * u;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo((x - 26) * u, 138 * u);
-    ctx.quadraticCurveTo(x * u, 104 * u, (x + 26) * u, 138 * u);
-    ctx.stroke();
-    ctx.lineWidth = 5 * u;
-    ctx.beginPath();
-    ctx.moveTo((x + 22) * u, 128 * u);
-    ctx.lineTo((x + 32) * u, 120 * u);
-    ctx.moveTo((x + 14) * u, 118 * u);
-    ctx.lineTo((x + 20) * u, 108 * u);
-    ctx.stroke();
-  };
-
-  openEye(84);
-  if (winking) winkEye(172);
-  else openEye(172);
-
-  // Small open smile with a pink tongue.
-  ctx.fillStyle = '#a93a48';
-  ctx.beginPath();
-  ctx.moveTo(114 * u, 178 * u);
-  ctx.quadraticCurveTo(128 * u, 206 * u, 142 * u, 178 * u);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = '#f58ea0';
-  ctx.beginPath();
-  ctx.ellipse(128 * u, 192 * u, 8 * u, 5 * u, 0, 0, Math.PI * 2);
-  ctx.fill();
   texture.update();
+  return texture;
 }
 
 // The meter-scale character lives in its own scene and pass, so the planetary
@@ -145,142 +79,146 @@ export function createHero(engine, sunDirection) {
   hero.scaling.setAll(1.3);
   hero.position.set(0, -1.15, 6);
 
+  // Strong key light and a soft fill, so every fold shows a light and a dark side.
   const fill = new HemisphericLight('fill', new Vector3(-0.3, 1, -1), scene);
-  fill.intensity = 0.95;
-  fill.groundColor = new Color3(0.35, 0.3, 0.35);
+  fill.intensity = 0.7;
+  fill.groundColor = new Color3(0.3, 0.28, 0.3);
   const direct = new DirectionalLight('sunlight', sunDirection.negate(), scene);
-  direct.intensity = 1.6;
+  direct.intensity = 1.9;
 
-  // Flat pastel paper: mostly its own color, lit enough to show the facets.
+  // Matte paper: no shine, a little self-light so it never goes black in space.
+  const grain = paperTexture(scene);
   const materials = {};
   for (const [name, hex] of Object.entries(COLORS)) {
     const m = new StandardMaterial(name, scene);
     const c = Color3.FromHexString(hex);
     m.diffuseColor = c;
-    m.emissiveColor = c.scale(0.28);
-    m.specularColor = new Color3(0.06, 0.06, 0.06);
+    m.diffuseTexture = grain;
+    m.emissiveColor = c.scale(0.14);
+    m.specularColor = new Color3(0, 0, 0);
     materials[name] = m;
   }
 
-  function facet(name, position, scale, material, parent = hero, subdivisions = 1) {
-    const mesh = CreateIcoSphere(name, { radius: 0.5, subdivisions, flat: true }, scene);
+  function place(mesh, position, scale, material, parent, rotation = [0, 0, 0]) {
     mesh.parent = parent;
     mesh.position = new Vector3(...position);
     mesh.scaling = new Vector3(...scale);
+    mesh.rotation = new Vector3(...rotation);
     mesh.material = material;
     return mesh;
+  }
+
+  // A lump of crumpled-and-folded paper: an icosahedron, 20 flat faces.
+  function facet(name, position, scale, material, parent = hero) {
+    return place(CreateIcoSphere(name, { radius: 0.5, subdivisions: 1, flat: true }, scene), position, scale, material, parent);
+  }
+
+  // A folded strip: a tapered triangular prism along the body axis.
+  function strip(name, position, length, top, bottom, material, parent = hero, rotation = [0, 0, 0]) {
+    const mesh = CreateCylinder(name, { height: 1, diameterTop: top, diameterBottom: bottom, tessellation: 3 }, scene);
+    mesh.convertToFlatShadedMesh();
+    const holder = new TransformNode(`${name}Holder`, scene);
+    holder.parent = parent;
+    holder.position = new Vector3(...position);
+    holder.rotation = new Vector3(...rotation);
+    place(mesh, [0, 0, 0], [1, length, 1], material, holder, [Math.PI / 2, 0, 0]);
+    return holder;
   }
 
   function gem(name, position, size, parent = hero) {
     const mesh = CreatePolyhedron(name, { type: 1, size, flat: true }, scene);
-    mesh.parent = parent;
-    mesh.position = new Vector3(...position);
-    mesh.scaling = new Vector3(1, 0.6, 1.3);
-    mesh.material = materials.gold;
-    return mesh;
+    return place(mesh, position, [1, 0.6, 1.3], materials.gold, parent);
   }
 
-  // Cone along the body axis (feet to head): top radius at +z, bottom at -z.
-  function flare(name, z, height, top, bottom, material, sides = 9) {
+  // Folded cone along the body axis (feet to head): top radius at +z, bottom at -z.
+  function flare(name, z, height, top, bottom, material, sides = 6, parent = hero) {
     const mesh = CreateCylinder(name, { height, diameterTop: top, diameterBottom: bottom, tessellation: sides }, scene);
     mesh.convertToFlatShadedMesh();
-    mesh.parent = hero;
-    mesh.rotation.x = Math.PI / 2;
-    mesh.position.z = z;
-    mesh.material = material;
-    return mesh;
+    return place(mesh, [0, 0, z], [1, 1, 1], material, parent, [Math.PI / 2, 0, 0]);
   }
 
-  // Body and dress.
+  // Body: blouse, dark vest, belt with a gold buckle, white capelet with gold trim.
   const torso = new TransformNode('torso', scene);
   torso.parent = hero;
-  facet('blouse', [0, 0, 0.12], [0.4, 0.3, 0.44], materials.blouse, torso);
-  facet('vest', [0, -0.05, 0.08], [0.36, 0.24, 0.36], materials.vest, torso);
-  facet('neckBow', [0, -0.16, 0.3], [0.24, 0.1, 0.12], materials.bow, torso);
-  gem('neckStar', [0, -0.21, 0.3], 0.05, torso);
-  gem('vestStar', [0, -0.18, 0.1], 0.035, torso);
+  facet('blouse', [0, 0, 0.12], [0.38, 0.28, 0.44], materials.paper, torso);
+  facet('vest', [0, -0.04, 0.08], [0.34, 0.24, 0.34], materials.vest, torso);
+  flare('belt', -0.02, 0.05, 0.4, 0.4, materials.band, 6, torso);
+  gem('buckle', [0, -0.2, -0.02], 0.035, torso);
+  flare('capelet', 0.24, 0.2, 0.28, 0.64, materials.paper, 6, torso);
+  flare('capeletTrim', 0.14, 0.03, 0.64, 0.66, materials.gold, 6, torso);
+  flare('collar', 0.37, 0.07, 0.2, 0.22, materials.paper, 6, torso);
+
+  // Dress: white under-layer, red folded skirt, gold hem.
   const skirtParts = [
-    flare('petticoat', -0.24, 0.26, 0.5, 1.02, materials.blouse),
-    flare('skirt', -0.12, 0.42, 0.46, 0.96, materials.dress),
-    flare('hem', -0.33, 0.035, 0.96, 0.98, materials.gold),
+    flare('petticoat', -0.26, 0.26, 0.48, 1.0, materials.paper),
+    flare('skirt', -0.14, 0.42, 0.44, 0.96, materials.dress),
+    flare('hem', -0.35, 0.035, 0.96, 0.98, materials.gold),
   ];
 
-  // Head, face and hair.
+  // Head: a blank folded face, as in paper dolls, under folded pink hair and a beret.
   const head = new TransformNode('head', scene);
   head.parent = hero;
-  head.position.z = 0.72;
-  facet('skull', [0, 0, 0], [0.74, 0.7, 0.74], materials.skin, head, 2);
-  const faceTexture = new DynamicTexture('faceTexture', { width: 512, height: 512 }, scene, true);
-  faceTexture.hasAlpha = true;
-  drawFace(faceTexture, false);
-  let winkShown = false;
-  const faceMaterial = new StandardMaterial('face', scene);
-  faceMaterial.diffuseTexture = faceTexture;
-  faceMaterial.emissiveColor = new Color3(0.45, 0.45, 0.45);
-  faceMaterial.specularColor = new Color3(0, 0, 0);
-  faceMaterial.useAlphaFromDiffuseTexture = true;
-  faceMaterial.backFaceCulling = false;
-  const face = CreatePlane('face', { size: 0.58 }, scene);
-  face.parent = head;
-  // Plane faces -z by default: turn it to face the front (-y) with its top toward +z.
-  face.rotation.set(-Math.PI / 2, 0, Math.PI);
-  face.position.set(0, -0.36, -0.07);
-  face.material = faceMaterial;
-
-  facet('hairBack', [0, 0.1, 0.04], [0.84, 0.72, 0.84], materials.hair, head, 2);
-  facet('bangs', [0, -0.2, 0.2], [0.74, 0.34, 0.34], materials.hair, head);
+  head.position.z = 0.7;
+  facet('skull', [0, -0.02, -0.02], [0.6, 0.58, 0.7], materials.skin, head);
+  facet('hairBack', [0, 0.1, 0.06], [0.72, 0.62, 0.8], materials.hair, head);
+  strip('bangsLeft', [-0.12, -0.24, 0.16], 0.34, 0.03, 0.26, materials.hair, head, [0.25, 0.3, 0]);
+  strip('bangsRight', [0.12, -0.24, 0.16], 0.34, 0.03, 0.26, materials.hairFold, head, [0.25, -0.3, 0]);
   for (const s of [-1, 1]) {
-    facet(`sideLock${s}`, [s * 0.34, -0.12, -0.1], [0.18, 0.2, 0.4], materials.hair, head);
+    strip(`sideLock${s}`, [s * 0.3, -0.12, -0.12], 0.46, 0.18, 0.04, materials.hair, head, [0, s * 0.12, 0]);
   }
   const beret = new TransformNode('beret', scene);
   beret.parent = head;
-  beret.position.set(0.04, 0.04, 0.33);
+  beret.position.set(0.04, 0.04, 0.34);
   beret.rotation.set(0.12, 0.18, 0);
-  facet('beretTop', [0, 0, 0.06], [0.98, 0.94, 0.34], materials.beret, beret);
-  const band = CreateCylinder('beretBand', { height: 0.07, diameter: 0.8, tessellation: 12 }, scene);
-  band.convertToFlatShadedMesh();
-  band.parent = beret;
-  band.rotation.x = Math.PI / 2;
-  band.material = materials.band;
-  gem('beretStar', [0, -0.4, 0.02], 0.06, beret);
+  facet('beretTop', [0, 0, 0.06], [0.9, 0.86, 0.28], materials.paper, beret);
+  flare('beretBand', 0, 0.07, 0.74, 0.74, materials.gold, 8, beret);
+  gem('beretStar', [0, -0.38, 0.02], 0.06, beret);
 
-  // Twin tails: a chain of faceted lumps from each side of the head, tied with red bows.
+  // Twin tails: long folded strips hanging from red bows.
   const tails = [];
+  const TAIL = [
+    { length: 0.5, top: 0.2, bottom: 0.3 },
+    { length: 0.54, top: 0.3, bottom: 0.22 },
+    { length: 0.48, top: 0.22, bottom: 0.05 },
+  ];
   for (const s of [-1, 1]) {
     const root = new TransformNode(`tail${s}`, scene);
     root.parent = head;
-    root.position.set(s * 0.44, 0.08, 0.08);
-    facet(`bow${s}a`, [0, 0, 0.02], [0.28, 0.12, 0.2], materials.bow, root);
-    gem(`bowGem${s}`, [0, -0.06, 0.02], 0.045, root);
-    const segments = TAIL_SEGMENTS.map((size, i) =>
-      facet(`tail${s}_${i}`, [0, 0, 0], [size, size * 0.85, size * 1.1], i % 2 ? materials.hairDark : materials.hair, root));
-    const tip = facet(`tailBow${s}`, [0, 0, 0], [0.22, 0.1, 0.16], materials.bow, root);
-    tails.push({ s, root, segments, tip });
+    root.position.set(s * 0.4, 0.08, 0.1);
+    facet(`bow${s}`, [0, 0, 0.02], [0.26, 0.1, 0.18], materials.bow, root);
+    gem(`bowGem${s}`, [0, -0.06, 0.02], 0.04, root);
+    const segments = TAIL.map((t, i) =>
+      strip(`tail${s}_${i}`, [0, 0, 0], t.length, t.top, t.bottom, i % 2 ? materials.hairFold : materials.hair, root));
+    tails.push({ s, segments });
   }
 
-  // Arms and legs on the same joints as before, so core/pose.js drives them.
+  // Arms with wide paper sleeves and gold cuffs; legs in dark stockings and folded boots.
   const limbs = [];
   for (const s of [-1, 1]) {
     const shoulder = new TransformNode(`shoulder${s}`, scene);
     shoulder.parent = hero;
-    shoulder.position.set(s * 0.28, 0, 0.28);
-    facet(`sleeve${s}`, [0, 0, 0.14], [0.2, 0.2, 0.3], materials.blouse, shoulder);
+    shoulder.position.set(s * 0.26, 0, 0.28);
+    facet(`upperArm${s}`, [0, 0, 0.13], [0.16, 0.16, 0.28], materials.paper, shoulder);
     const elbow = new TransformNode(`elbow${s}`, scene);
     elbow.parent = shoulder;
-    elbow.position.z = 0.28;
-    facet(`forearm${s}`, [0, 0, 0.09], [0.15, 0.15, 0.2], materials.blouse, elbow);
-    facet(`cuff${s}`, [0, 0, 0.19], [0.13, 0.13, 0.05], materials.band, elbow);
-    facet(`hand${s}`, [0, 0, 0.27], [0.13, 0.11, 0.14], materials.skin, elbow);
+    elbow.position.z = 0.26;
+    const sleeve = CreateCylinder(`sleeve${s}`, { height: 0.2, diameterTop: 0.2, diameterBottom: 0.12, tessellation: 5 }, scene);
+    sleeve.convertToFlatShadedMesh();
+    place(sleeve, [0, 0, 0.1], [1, 1, 1], materials.paper, elbow, [-Math.PI / 2, 0, 0]);
+    const cuff = CreateCylinder(`cuff${s}`, { height: 0.03, diameter: 0.21, tessellation: 5 }, scene);
+    cuff.convertToFlatShadedMesh();
+    place(cuff, [0, 0, 0.2], [1, 1, 1], materials.gold, elbow, [Math.PI / 2, 0, 0]);
+    facet(`hand${s}`, [0, 0, 0.26], [0.11, 0.09, 0.13], materials.skin, elbow);
 
     const hip = new TransformNode(`hip${s}`, scene);
     hip.parent = hero;
-    hip.position.set(s * 0.13, 0, -0.26);
-    facet(`thigh${s}`, [0, 0, -0.13], [0.15, 0.15, 0.28], materials.skin, hip);
+    hip.position.set(s * 0.12, 0, -0.26);
+    strip(`thigh${s}`, [0, 0, -0.14], 0.28, 0.13, 0.1, materials.stocking, hip);
     const knee = new TransformNode(`knee${s}`, scene);
     knee.parent = hip;
     knee.position.z = -0.26;
-    facet(`boot${s}`, [0, -0.02, -0.14], [0.18, 0.2, 0.3], materials.boot, knee);
-    gem(`bootGem${s}`, [0, -0.13, -0.08], 0.04, knee);
+    facet(`boot${s}`, [0, -0.02, -0.14], [0.16, 0.19, 0.3], materials.boot, knee);
+    facet(`bootCuff${s}`, [0, 0, -0.02], [0.17, 0.17, 0.08], materials.boot, knee);
     limbs.push({ s, shoulder, elbow, hip, knee });
   }
 
@@ -289,25 +227,24 @@ export function createHero(engine, sunDirection) {
   let sway = 0;
   let flightBlend = 0;
   let facing = { angle: 0, idle: 0 };
-  let wink = { untilNext: 3, left: 0 };
   let elapsed = 0;
 
   // Tails hang toward the feet when still and stream behind in flight, swinging
-  // out on turns and rippling faster with speed.
+  // out on turns and rippling faster with speed. Each strip tilts to follow the one above.
   function placeTails(velocity) {
     for (const tail of tails) {
-      let offset = [0, 0, -0.08];
+      let offset = [0, 0, -0.1];
       tail.segments.forEach((segment, i) => {
-        const wave = Math.sin(elapsed * (2.2 + velocity * 4) - i * 0.9) * (0.02 + 0.05 * velocity) * (i + 1) * 0.5;
-        offset = [
-          offset[0] + tail.s * 0.05 * (1 - velocity) + sway * 0.05 * i,
-          offset[1] + 0.03 + velocity * 0.05 + wave,
-          offset[2] - (i === 0 ? 0.12 : 0.3) * (1 - 0.15 * velocity),
+        const wave = Math.sin(elapsed * (2.2 + velocity * 4) - i * 0.9) * (0.03 + 0.06 * velocity) * (i + 1) * 0.5;
+        const step = [
+          tail.s * 0.05 * (1 - velocity) + sway * 0.06 * i,
+          0.03 + velocity * 0.06 + wave,
+          -0.4 * (1 - 0.1 * velocity),
         ];
-        segment.position.set(...offset);
+        segment.position.set(offset[0] + step[0] / 2, offset[1] + step[1] / 2, offset[2] + step[2] / 2);
+        segment.rotation.set(-Math.atan2(step[1], -step[2]), Math.atan2(step[0], -step[2]), 0);
+        offset = offset.map((n, k) => n + step[k]);
       });
-      const last = tail.segments.at(-1).position;
-      tail.tip.position.set(last.x, last.y, last.z - 0.18);
     }
   }
 
@@ -326,12 +263,6 @@ export function createHero(engine, sunDirection) {
     // Standing still for a moment, the hero turns around to look back at the camera.
     facing = lookBack(facing.angle, facing.idle, flying < 0.05 && speed < 1, dt);
     hero.rotation.y = facing.angle;
-    // Now and then a wink while she looks back at the camera.
-    wink = winkStep(wink, dt, facing.angle > 2.8);
-    if ((wink.left > 0) !== winkShown) {
-      winkShown = wink.left > 0;
-      drawFace(faceTexture, winkShown);
-    }
     torso.rotation.z = bank * 0.3 * flying;
     torso.rotation.x = -0.18 * flying;
     hero.position.y = -1.15 + Math.sin(elapsed * 1.5) * 0.04 * (1 - flying);
@@ -343,7 +274,7 @@ export function createHero(engine, sunDirection) {
       limb.shoulder.rotation.y = limb.s * 0.08 + (arm.shoulderYaw - limb.s * 0.08) * flying;
       limb.shoulder.rotation.x = bodyPose.shoulderPitch;
       limb.elbow.rotation.set(-0.08 + (arm.elbowFlex + 0.08) * flying, 0, 0);
-      limb.hip.position.x = limb.s * (0.11 + 0.04 * flying);
+      limb.hip.position.x = limb.s * (0.1 + 0.04 * flying);
       limb.hip.rotation.y = limb.s * (0.06 + inside * 0.22) * flying;
       limb.hip.rotation.x = 0;
       limb.knee.rotation.x = bodyPose.kneeFlex - (inside * 1.05 + Math.abs(bend) * 0.6) * flying;
@@ -359,4 +290,3 @@ export function createHero(engine, sunDirection) {
 
   return { scene, camera, root: hero, update };
 }
-

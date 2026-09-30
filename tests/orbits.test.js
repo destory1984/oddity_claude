@@ -53,3 +53,16 @@ test('moons ride along with their planet', () => {
   assert.ok(Math.abs(moonFromEarth - dist(at(0, 'moon').position, at(0, 'earth').position)) < 1e-6);
   assert.notDeepEqual(at(t, 'earth').position, at(0, 'earth').position);
 });
+
+test('orbits run counterclockwise seen from the north (+y), like the real solar system', () => {
+  // In Babylon's left-handed frame seen from +y, +x is right and +z is up on screen,
+  // so counterclockwise turns +x toward +z: the tangent at (x, z) is (-z, x).
+  for (const d of BODY_DATA.filter((x) => x.parent)) {
+    const offset = (t) => sub(at(t, d.id).position, at(t, d.parent).position);
+    const a = offset(0);
+    const b = offset(d.periodS / 1000);
+    const move = [b[0] - a[0], b[2] - a[2]];
+    const tangent = [-a[2], a[0]];
+    assert.ok(move[0] * tangent[0] + move[1] * tangent[1] > 0, `${d.id} goes clockwise`);
+  }
+});

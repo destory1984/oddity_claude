@@ -79,8 +79,9 @@ function createEarth(scene, body, sunDir) {
     meshes: [earth, clouds, air],
     spin(elapsed) {
       const turn = (elapsed * SPIN_SPEEDUP * 2 * Math.PI) / SIDEREAL_DAY_S;
-      earth.rotation.y = EARTH_START_SPIN + turn;
-      clouds.rotation.y = EARTH_START_SPIN + 0.008 + turn * CLOUD_DRIFT;
+      // Negative rotation turns counterclockwise seen from the north: the ground moves east.
+      earth.rotation.y = EARTH_START_SPIN - turn;
+      clouds.rotation.y = EARTH_START_SPIN + 0.008 - turn * CLOUD_DRIFT;
     },
     setSun(dir) {
       const v = new Vector3(...dir);
@@ -207,7 +208,7 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     body,
     meshes,
     spin(elapsed) {
-      sphere.rotation.y = (elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
+      sphere.rotation.y = -(elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
     },
     setSun(dir) {
       material.setVector3('sun', new Vector3(...dir));

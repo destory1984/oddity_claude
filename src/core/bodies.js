@@ -105,7 +105,8 @@ export function placeBodies(data, timeS = 0) {
       if (!parent) throw new Error(`parent ${item.parent} must come before ${item.id}`);
       const factor = parent.kind === 'star' ? DISTANCE_COMPRESSION : SATELLITE_COMPRESSION;
       const distance = compressedCenterDistance(item.orbitKm, parent.radiusKm, item.radiusKm, factor);
-      const angle = item.periodS ? (2 * Math.PI * timeS) / item.periodS : 0;
+      // Negative: counterclockwise seen from +y (north) in Babylon's left-handed frame.
+      const angle = item.periodS ? (-2 * Math.PI * timeS) / item.periodS : 0;
       position = normalize(turnAboutY(item.direction, angle)).map((n, i) => parent.position[i] + n * distance);
     }
     const { id, name, nameEn, kind, radiusKm, parent = null } = item;

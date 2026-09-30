@@ -11,6 +11,8 @@ void main(){
   vec4 p=world*vec4(position,1.);
   wp=p.xyz;
   n=normalize(mat3(world)*normal);
-  vUV=uv;
+  // Babylon spheres wrap u westward when seen from outside; flip it so east is east
+  // on every map (Arabia right of Egypt). Rings and the Sun are symmetric in u.
+  vUV=vec2(1.-uv.x,uv.y);
   gl_Position=worldViewProjection*vec4(position,1.);
 }

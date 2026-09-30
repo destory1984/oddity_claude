@@ -1,6 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { objectParticle, eventMessage } from '../src/ui/messages.js';
+import { objectParticle, subjectParticle, eventMessage, routeText } from '../src/ui/messages.js';
+import { BODIES } from '../src/core/bodies.js';
 
 test('object particle follows the final consonant', () => {
   assert.equal(objectParticle('달'), '을');
@@ -23,4 +24,26 @@ test('surface arrival message', () => {
     '천체 표면에 도착했습니다. 내부로는 들어갈 수 없습니다.',
   );
   assert.equal(eventMessage({ type: 'unknown' }), null);
+});
+
+test('subject particle follows the final consonant', () => {
+  assert.equal(subjectParticle('달'), '이');
+  assert.equal(subjectParticle('태양'), '이');
+  assert.equal(subjectParticle('지구'), '가');
+  assert.equal(subjectParticle('토성'), '이');
+});
+
+test('explorer log messages name the body or mission', () => {
+  assert.equal(eventMessage({ type: 'discovered', bodyId: 'mars' }, BODIES), '새 천체 발견: 화성');
+  assert.equal(eventMessage({ type: 'landed', bodyId: 'moon' }, BODIES), '착지 기록: 달. 수첩에 남겼습니다.');
+  assert.equal(eventMessage({ type: 'photo', missionName: '지구돋이' }, BODIES), '사진 임무 달성: 지구돋이');
+});
+
+test('route text says how long, or what is in the way', () => {
+  assert.equal(routeText({ seconds: 5.6 }, BODIES), '곧장 가면 약 6초');
+  assert.equal(routeText({ seconds: 0 }, BODIES), '도착');
+  assert.equal(routeText({ seconds: 0.3 }, BODIES), '곧장 가면 1초 안');
+  assert.equal(routeText({ blockedBy: 'sun' }, BODIES), '곧장 가면 태양이 막고 있음');
+  assert.equal(routeText({ blockedBy: 'earth' }, BODIES), '곧장 가면 지구가 막고 있음');
+  assert.equal(routeText(null, BODIES), '');
 });

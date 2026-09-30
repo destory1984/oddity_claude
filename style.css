@@ -853,3 +853,21 @@ nav button {
     max-width: 64px;
   }
 }
+
+/* Five header buttons on a 375 px phone: tighter buttons, a smaller two-line title. */
+@media (max-width: 480px) {
+  nav button {
+    padding: 7px 6px;
+    font-size: 11px;
+  }
+
+  #soundButton,
+  #helpButton {
+    min-width: 32px;
+  }
+
+  .brand strong {
+    font-size: 15px;
+    max-width: 52px;
+  }
+}

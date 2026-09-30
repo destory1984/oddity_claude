@@ -15,6 +15,8 @@ import { updateProgress, recordPhotos, createProgress, summarize, score, isCompl
 import { estimateTravelSeconds } from './core/eta.js';
 import { loadProgress, saveProgress } from './ui/storage.js';
 import { createJournal } from './ui/journal.js';
+import { createSound } from './ui/sound.js';
+import { cueForEvent, engineSound } from './core/audio.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
@@ -35,6 +37,7 @@ let route = null;
 let routeAt = 0;
 
 const toast = createToast($('toast'));
+const sound = createSound();
 const canvas = $('space');
 
 // Call after every change to the log: saves it and shows the score. Returns true
@@ -49,6 +52,7 @@ function progressChanged(before) {
 }
 
 function celebrate() {
+  sound.cue('complete');
   toast.show('태양계 탐험을 모두 마쳤습니다. 수첩이 가득 찼습니다!');
 }
 
@@ -60,6 +64,7 @@ function setPaused(value) {
 
 function brake() {
   input.clear();
+  if (totalSpeed(state) > 0) sound.cue('brake');
   state = stopNow(state);
   toast.show('정지했습니다. 주변을 둘러보세요.');
 }
@@ -90,6 +95,7 @@ async function init() {
     onBrake: brake,
     onTogglePhoto: () => photo.toggle(),
     onJournal: () => journal.open(),
+    onMute: () => toggleSound(),
     onEscape: () => (photo.active() ? photo.toggle() : setPaused(!paused)),
     onWheel: (deltaY) => photo.zoom(deltaY),
     isBlocked: () => $('help').open || $('journal').open,
@@ -117,7 +123,9 @@ async function init() {
       progress = result.progress;
       const finished = progressChanged(before);
       for (const id of result.newly) {
-        toast.show(eventMessage({ type: 'photo', missionName: MISSIONS.find((mm) => mm.id === id).name }));
+        const event = { type: 'photo', missionName: MISSIONS.find((mm) => mm.id === id).name };
+        toast.show(eventMessage(event));
+        sound.cue(cueForEvent(event));
       }
       if (finished) celebrate();
     },
@@ -176,6 +184,23 @@ async function init() {
       toast.show('탐험 기록을 지웠습니다.');
     },
   });
+
+  function showSoundButton() {
+    $('soundButton').textContent = sound.muted() ? '🔇' : '🔊';
+    $('soundButton').setAttribute('aria-label', sound.muted() ? '소리 켜기' : '소리 끄기');
+  }
+  function toggleSound() {
+    sound.unlock();
+    sound.setMuted(!sound.muted());
+    showSoundButton();
+  }
+  showSoundButton();
+  $('soundButton').addEventListener('click', toggleSound);
+  // Audio may only start after a user gesture.
+  for (const type of ['pointerdown', 'keydown']) {
+    document.addEventListener(type, () => sound.unlock(), { capture: true });
+  }
+  $('capture').addEventListener('click', () => sound.cue('shutter'));
 
   $('brake').addEventListener('click', brake);
   $('pauseButton').addEventListener('click', () => setPaused(!paused));
@@ -238,6 +263,8 @@ async function init() {
     for (const event of [...result.events, ...logged.events]) {
       const text = eventMessage(event, BODIES);
       if (text) toast.show(text, event.type === 'zoneChanged' ? 'zone' : null);
+      const cue = cueForEvent(event);
+      if (cue) sound.cue(cue);
     }
     if (finished) celebrate();
 
@@ -246,6 +273,12 @@ async function init() {
       ? [dragTurn[0] / dt + intent.turnX * TURN_RATE + intent.strafe * 0.6, dragTurn[1] / dt + intent.turnY * TURN_RATE]
       : [0, 0];
     dragTurn = [0, 0];
+
+    sound.engine(engineSound({
+      speed: paused ? 0 : totalSpeed(state),
+      maxSpeed: ZONES[state.zoneId].maxSpeed,
+      thrusting: !paused && input.driving(),
+    }));
 
     const view = world.update({
       bodies,

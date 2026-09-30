@@ -86,6 +86,11 @@ test('two planets in one shot, neither hidden behind the other', () => {
   const awayFromEarth = unit(sub(mars.position, bodyById('earth').position));
   const side = unit([awayFromEarth[2], 0, -awayFromEarth[0]]);
   const spot = add(add(mars.position, scale(awayFromEarth, 50000)), scale(side, 20000));
-  assert.ok(shoot(spot, 'earth').includes('twoPlanets'));
+  assert.ok(shoot(spot, 'earth', { fovDeg: 30 }).includes('twoPlanets'));
+  assert.ok(!shoot(spot, 'earth', { fovDeg: 60 }).includes('twoPlanets'), 'Earth is under 5 px unzoomed');
   assert.ok(!shoot(START_POSITION, 'earth', { fovDeg: 5 }).includes('twoPlanets'));
+});
+
+test('two planets needs more than specks: Mars and Jupiter from the start do not count', () => {
+  assert.ok(!shoot(START_POSITION, 'jupiter').includes('twoPlanets'));
 });

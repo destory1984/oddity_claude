@@ -52,9 +52,9 @@ export const MISSIONS = [
   {
     id: 'twoPlanets',
     name: '두 행성 한 컷',
-    hint: '행성 둘을 한 화면에 (위성과 태양은 빼고)',
-    // 0.002 of the view height is about two pixels on a 1,000 pixel tall screen.
-    check: (s) => s.frames.filter((f) => f.body.kind === 'planet' && f.visible && !f.hidden && f.fill >= 0.002).length >= 2,
+    hint: '행성 둘을 한 화면에, 둘 다 화면 높이의 0.5% 이상 (확대하면 쉽다)',
+    // 0.005 of the view height is about five pixels on a 1,000 pixel tall screen.
+    check: (s) => s.frames.filter((f) => f.body.kind === 'planet' && f.visible && !f.hidden && f.fill >= 0.005).length >= 2,
   },
 ];
 

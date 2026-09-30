@@ -7,16 +7,25 @@ import { createInput } from './ui/input.js';
 import { createHud } from './ui/hud.js';
 import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
-import { eventMessage } from './ui/messages.js';
+import { eventMessage, routeText } from './ui/messages.js';
+import { MISSIONS, completedMissions } from './core/missions.js';
+import { updateProgress, recordPhotos, createProgress } from './core/progress.js';
+import { estimateTravelSeconds } from './core/eta.js';
+import { loadProgress, saveProgress } from './ui/storage.js';
+import { createJournal } from './ui/journal.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
 const HUD_EVERY_N_FRAMES = 6;
+const ROUTE_EVERY_MS = 1000;
 
 let state = createState(START_POSITION);
 let paused = false;
 let selectedId = 'earth';
 let dragTurn = [0, 0];
+let progress = loadProgress(BODIES, MISSIONS);
+let route = null;
+let routeAt = 0;
 
 const toast = createToast($('toast'));
 const canvas = $('space');
@@ -58,15 +67,40 @@ async function init() {
     },
     onBrake: brake,
     onTogglePhoto: () => photo.toggle(),
+    onJournal: () => journal.open(),
     onEscape: () => (photo.active() ? photo.toggle() : setPaused(!paused)),
     onWheel: (deltaY) => photo.zoom(deltaY),
-    isBlocked: () => $('help').open,
+    isBlocked: () => $('help').open || $('journal').open,
   });
-  photo = createPhoto({ world, canvas, toast, setPaused, isPaused: () => paused, clearInput: () => input.clear() });
+  photo = createPhoto({
+    world,
+    canvas,
+    toast,
+    setPaused,
+    isPaused: () => paused,
+    clearInput: () => input.clear(),
+    onCaptured() {
+      const done = completedMissions({
+        position: state.position,
+        orientation: multiply(state.orientation, photo.orientation() || [0, 0, 0, 1]),
+        fovY: world.fov(),
+        aspect: canvas.width / canvas.height,
+        heroVisible: photo.heroVisible(),
+        bodies: BODIES,
+      });
+      const result = recordPhotos(progress, done);
+      progress = result.progress;
+      if (result.newly.length) saveProgress(progress);
+      for (const id of result.newly) {
+        toast.show(eventMessage({ type: 'photo', missionName: MISSIONS.find((mm) => mm.id === id).name }));
+      }
+    },
+  });
 
   const hud = createHud(BODIES, {
     onSelect(id) {
       selectedId = id;
+      routeAt = 0;
       hud.showSelection(bodyById(id));
     },
     onFace() {
@@ -86,6 +120,34 @@ async function init() {
     },
   });
   hud.showSelection(bodyById(selectedId));
+
+  let journalPriorPause = false;
+  const journal = createJournal({
+    bodies: BODIES,
+    missions: MISSIONS,
+    onOpen() {
+      journalPriorPause = paused;
+      setPaused(true);
+    },
+    onClose() {
+      setPaused(journalPriorPause);
+    },
+    onGo(id) {
+      selectedId = id;
+      hud.showSelection(bodyById(id));
+      const body = bodyById(id);
+      state = { ...state, orientation: lookAtDirection(body.position.map((n, i) => n - state.position[i])) };
+      routeAt = 0;
+      toast.show(hud.faceToast(body));
+    },
+    onReset() {
+      progress = createProgress();
+      saveProgress(progress);
+      journal.update(progress, state.position);
+      $('journal').close();
+      toast.show('탐험 기록을 지웠습니다.');
+    },
+  });
 
   $('brake').addEventListener('click', brake);
   $('pauseButton').addEventListener('click', () => setPaused(!paused));
@@ -126,8 +188,13 @@ async function init() {
     const intent = input.intent();
     const result = step(state, intent, dt);
     state = result.state;
-    for (const event of result.events) {
-      const text = eventMessage(event);
+    const logged = updateProgress(progress, state, BODIES);
+    if (logged.events.length) {
+      progress = logged.progress;
+      saveProgress(progress);
+    }
+    for (const event of [...result.events, ...logged.events]) {
+      const text = eventMessage(event, BODIES);
       if (text) toast.show(text);
     }
 
@@ -156,7 +223,13 @@ async function init() {
     else if (state.speed < 0.01) flightLabel = '정지 비행';
     else if (!driving) flightLabel = '서서히 감속 중';
     else if (state.motionSign < 0) flightLabel = '후진 비행';
+    if (now - routeAt > ROUTE_EVERY_MS) {
+      route = estimateTravelSeconds(state, selectedId, BODIES);
+      routeAt = now;
+    }
+    journal.update(progress, state.position);
     hud.update({
+      route: routeText(route, BODIES),
       view,
       local: nearestLocalBody(state.position),
       selected,

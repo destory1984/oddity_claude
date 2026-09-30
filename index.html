@@ -4,25 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#02040b">
-  <title>Oddity — 지구의 가장자리</title>
+  <title>Oddity — 태양계 탐험</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <canvas id="space" aria-label="지구 근처 우주 비행 화면" tabindex="0"></canvas>
+  <canvas id="space" aria-label="태양계 비행 화면" tabindex="0"></canvas>
 
   <div id="loading">
     <strong>Oddity</strong>
-    <span>지구의 가장자리로 향하는 중…</span>
+    <span>태양계로 향하는 중…</span>
     <p id="loadError"></p>
   </div>
 
   <div id="hud">
     <header>
-      <div class="brand"><strong>Oddity</strong><span>지구의 가장자리</span></div>
+      <div class="brand"><strong>Oddity</strong><span>태양계 탐험</span></div>
       <nav>
         <button id="helpButton" aria-label="조작 안내">?</button>
         <button id="pauseButton">일시 정지</button>
+        <button id="journalButton">수첩</button>
         <button id="photoButton">사진 모드</button>
       </nav>
     </header>
@@ -40,6 +41,7 @@
       <span>선택한 천체</span>
       <strong id="targetName">지구 <small>Earth</small></strong>
       <p id="targetDistance">—</p>
+      <p id="targetRoute"></p>
       <p id="surfaceInfo">실제 표면까지 접근 가능</p>
       <button id="faceTarget">지구 바라보기</button>
       <button id="inspectTarget">확대 관찰</button>
@@ -76,8 +78,22 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
 
+  <dialog id="journal" aria-labelledby="journalTitle">
+    <h1 id="journalTitle">탐험 수첩</h1>
+    <p id="journalSummary"></p>
+    <h2>천체</h2>
+    <ul id="journalBodies"></ul>
+    <h2>사진 임무</h2>
+    <p class="muted">사진 모드에서 "사진 저장"을 누르는 순간의 구도로 판정합니다.</p>
+    <ul id="journalMissions"></ul>
+    <div class="journalActions">
+      <button id="resetJournal">기록 지우기</button>
+      <button id="closeJournal">비행 계속하기</button>
+    </div>
+  </dialog>
+
   <dialog id="help">
-    <h1>지구의 가장자리</h1>
+    <h1>태양계 탐험</h1>
     <p>크기는 실제대로, 천체 사이의 빈 거리는 1/100로 압축된 우주를 날아보세요.</p>
     <dl>
       <dt>방향 전환</dt><dd>화면 드래그 / 방향키 / 터치 스틱</dd>
@@ -87,8 +103,9 @@
       <dt>가속 강도</dt><dd>아래쪽 슬라이더</dd>
       <dt>정지</dt><dd>Space 키 / 정지 버튼</dd>
       <dt>사진</dt><dd>P 키 / 사진 모드 버튼</dd>
+      <dt>탐험 수첩</dt><dd>J 키 / 수첩 버튼. 새 천체를 발견하고, 표면에 내려앉고, 사진 임무를 달성하면 기록됩니다.</dd>
     </dl>
-    <p class="muted">지구·달·태양의 실제 표면 바로 앞까지 접근할 수 있습니다. 천체 내부로는 들어갈 수 없습니다. 천체 표면 사이의 빈 거리만 1/100로 줄였으며, 오늘의 실제 천문 위치는 아닙니다. 창을 벗어나면 비행이 일시 정지됩니다.</p>
+    <p class="muted">태양, 여덟 행성, 달의 실제 표면 바로 앞까지 접근할 수 있습니다. 천체 내부로는 들어갈 수 없습니다. 천체 표면 사이의 빈 거리만 1/100로 줄였으며, 오늘의 실제 천문 위치는 아닙니다. 창을 벗어나면 비행이 일시 정지됩니다.</p>
     <button id="closeHelp">비행 계속하기</button>
   </dialog>
 

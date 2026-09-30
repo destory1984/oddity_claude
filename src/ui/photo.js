@@ -3,7 +3,7 @@ import { rotateLocal } from '../core/orientation.js';
 const $ = (id) => document.getElementById(id);
 const DEFAULT_FOV_DEG = 60;
 
-export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearInput }) {
+export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearInput, onCaptured }) {
   let active = false;
   let priorPause = false;
   let orientation = [0, 0, 0, 1];
@@ -59,6 +59,7 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
         setTimeout(() => URL.revokeObjectURL(url), 10000);
         toast.show('화면 표시 없는 우주 사진을 저장했습니다.');
       }
+      onCaptured();
     } catch (e) {
       toast.show('사진을 저장하지 못했습니다. 다시 시도해 주세요.');
       console.error(e);

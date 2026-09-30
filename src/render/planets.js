@@ -14,6 +14,11 @@ import { KM_PER_UNIT } from '../core/bodies.js';
 import { normalize } from './math.js';
 
 const SIDEREAL_DAY_S = 86164;
+// Real rotation is too slow to see (Earth turns 1.25 degrees in five minutes), so
+// every body spins 720 times faster: one Earth day passes in two minutes.
+const SPIN_SPEEDUP = 720;
+// Clouds drift a little faster than the ground so the weather visibly moves.
+const CLOUD_DRIFT = 1.08;
 const EARTH_START_SPIN = 1.35;
 // Shell sizes relative to the Earth sphere, kept from the prototype (12.776 and 13.0 over 12.742).
 const CLOUD_SCALE = 12.776 / 12.742;
@@ -73,8 +78,9 @@ function createEarth(scene, body, sunDir) {
     body,
     meshes: [earth, clouds, air],
     spin(elapsed) {
-      earth.rotation.y = EARTH_START_SPIN + (elapsed * 2 * Math.PI) / SIDEREAL_DAY_S;
-      clouds.rotation.y = earth.rotation.y + 0.008;
+      const turn = (elapsed * SPIN_SPEEDUP * 2 * Math.PI) / SIDEREAL_DAY_S;
+      earth.rotation.y = EARTH_START_SPIN + turn;
+      clouds.rotation.y = EARTH_START_SPIN + 0.008 + turn * CLOUD_DRIFT;
     },
   };
 }
@@ -164,7 +170,7 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     body,
     meshes,
     spin(elapsed) {
-      sphere.rotation.y = (elapsed * 2 * Math.PI) / look.dayS;
+      sphere.rotation.y = (elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
     },
   };
 }

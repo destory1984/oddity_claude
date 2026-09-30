@@ -37,42 +37,92 @@ function drawFace(texture, winking) {
   const size = texture.getSize().width;
   const u = size / 256;
   ctx.clearRect(0, 0, size, size);
-  // Blush.
-  ctx.fillStyle = 'rgba(240, 130, 130, 0.55)';
-  ctx.fillRect(28 * u, 156 * u, 46 * u, 24 * u);
-  ctx.fillRect(182 * u, 156 * u, 46 * u, 24 * u);
-  // Open eyes with highlights; the right one closes into an arc for a wink.
-  const openEye = (x) => {
-    ctx.fillStyle = '#4a2a22';
+
+  // Soft round blush.
+  for (const x of [52, 204]) {
+    const g = ctx.createRadialGradient(x * u, 168 * u, 2 * u, x * u, 168 * u, 26 * u);
+    g.addColorStop(0, 'rgba(255, 120, 140, 0.6)');
+    g.addColorStop(1, 'rgba(255, 120, 140, 0)');
+    ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.ellipse(x * u, 118 * u, 27 * u, 36 * u, 0, 0, Math.PI * 2);
+    ctx.ellipse(x * u, 168 * u, 28 * u, 18 * u, 0, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  // Short, light eyebrows.
+  ctx.strokeStyle = 'rgba(150, 70, 70, 0.7)';
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 5 * u;
+  for (const x of [84, 172]) {
+    ctx.beginPath();
+    ctx.moveTo((x - 14) * u, 78 * u);
+    ctx.quadraticCurveTo(x * u, 70 * u, (x + 14) * u, 78 * u);
+    ctx.stroke();
+  }
+
+  // Big glossy eye: dark rim, brown-to-amber iris, lash line, two sparkles.
+  const openEye = (x) => {
+    ctx.fillStyle = '#3b1f1a';
+    ctx.beginPath();
+    ctx.ellipse(x * u, 128 * u, 30 * u, 40 * u, 0, 0, Math.PI * 2);
+    ctx.fill();
+    const iris = ctx.createLinearGradient(0, 100 * u, 0, 166 * u);
+    iris.addColorStop(0, '#5a2e22');
+    iris.addColorStop(1, '#d58a4a');
+    ctx.fillStyle = iris;
+    ctx.beginPath();
+    ctx.ellipse(x * u, 132 * u, 24 * u, 33 * u, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#2a1512';
+    ctx.beginPath();
+    ctx.ellipse(x * u, 130 * u, 11 * u, 15 * u, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2a1512';
+    ctx.lineWidth = 7 * u;
+    ctx.beginPath();
+    ctx.ellipse(x * u, 128 * u, 31 * u, 41 * u, 0, Math.PI * 1.1, Math.PI * 1.9);
+    ctx.stroke();
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.ellipse((x - 9) * u, 104 * u, 9 * u, 12 * u, 0, 0, Math.PI * 2);
+    ctx.ellipse((x - 10) * u, 112 * u, 10 * u, 12 * u, -0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc((x + 10) * u, 148 * u, 5 * u, 0, Math.PI * 2);
     ctx.fill();
   };
-  openEye(84);
-  if (winking) {
-    ctx.strokeStyle = '#4a2a22';
-    ctx.lineWidth = 9 * u;
+
+  // A closed, happy "^" eye with two little lashes.
+  const winkEye = (x) => {
+    ctx.strokeStyle = '#2a1512';
+    ctx.lineWidth = 8 * u;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.arc(172 * u, 132 * u, 27 * u, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.moveTo((x - 26) * u, 138 * u);
+    ctx.quadraticCurveTo(x * u, 104 * u, (x + 26) * u, 138 * u);
     ctx.stroke();
-  } else {
-    openEye(172);
-  }
-  // Open smile.
-  ctx.fillStyle = '#b8454f';
+    ctx.lineWidth = 5 * u;
+    ctx.beginPath();
+    ctx.moveTo((x + 22) * u, 128 * u);
+    ctx.lineTo((x + 32) * u, 120 * u);
+    ctx.moveTo((x + 14) * u, 118 * u);
+    ctx.lineTo((x + 20) * u, 108 * u);
+    ctx.stroke();
+  };
+
+  openEye(84);
+  if (winking) winkEye(172);
+  else openEye(172);
+
+  // Small open smile with a pink tongue.
+  ctx.fillStyle = '#a93a48';
   ctx.beginPath();
-  ctx.moveTo(100 * u, 172 * u);
-  ctx.quadraticCurveTo(128 * u, 226 * u, 156 * u, 172 * u);
+  ctx.moveTo(114 * u, 178 * u);
+  ctx.quadraticCurveTo(128 * u, 206 * u, 142 * u, 178 * u);
   ctx.closePath();
   ctx.fill();
-  ctx.fillStyle = '#f08c95';
+  ctx.fillStyle = '#f58ea0';
   ctx.beginPath();
-  ctx.ellipse(128 * u, 196 * u, 13 * u, 8 * u, 0, 0, Math.PI * 2);
+  ctx.ellipse(128 * u, 192 * u, 8 * u, 5 * u, 0, 0, Math.PI * 2);
   ctx.fill();
   texture.update();
 }
@@ -160,7 +210,7 @@ export function createHero(engine, sunDirection) {
   head.parent = hero;
   head.position.z = 0.72;
   facet('skull', [0, 0, 0], [0.74, 0.7, 0.74], materials.skin, head, 2);
-  const faceTexture = new DynamicTexture('faceTexture', { width: 256, height: 256 }, scene, true);
+  const faceTexture = new DynamicTexture('faceTexture', { width: 512, height: 512 }, scene, true);
   faceTexture.hasAlpha = true;
   drawFace(faceTexture, false);
   let winkShown = false;
@@ -170,11 +220,11 @@ export function createHero(engine, sunDirection) {
   faceMaterial.specularColor = new Color3(0, 0, 0);
   faceMaterial.useAlphaFromDiffuseTexture = true;
   faceMaterial.backFaceCulling = false;
-  const face = CreatePlane('face', { size: 0.5 }, scene);
+  const face = CreatePlane('face', { size: 0.58 }, scene);
   face.parent = head;
   // Plane faces -z by default: turn it to face the front (-y) with its top toward +z.
   face.rotation.set(-Math.PI / 2, 0, Math.PI);
-  face.position.set(0, -0.36, -0.04);
+  face.position.set(0, -0.36, -0.07);
   face.material = faceMaterial;
 
   facet('hairBack', [0, 0.1, 0.04], [0.84, 0.72, 0.84], materials.hair, head, 2);

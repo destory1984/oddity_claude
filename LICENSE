@@ -8,8 +8,9 @@ This repository is licensed in three parts.
    except the material listed in parts 2 and 3.
 
 2. Reserved: all rights reserved, NOT licensed under the MIT License
-   - The player character: its design (pink twin tails, white beret with a gold
-     star, red and white dress, brown boots, face) and the code that defines and
+   - The player character: its design (a faceless paper doll with pink twin tails,
+     a white beret with a gold star, a white capelet over a red dress with gold trim,
+     folded brown boots) and the code that defines and
      draws it, src/render/hero.js.
    - The app icons in public/icons/.
    - The game's name and title as a brand: "우주 한량" and

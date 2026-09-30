@@ -22,7 +22,7 @@ export const MISSIONS = [
   {
     id: 'eclipse',
     name: '개기일식',
-    hint: '다른 천체가 태양을 90% 넘게 가린 순간을 태양 쪽으로 찍기',
+    hint: '행성이나 위성의 밤쪽 가까이에서 태양 쪽을 보고 찍기 (태양이 90% 넘게 가려져야 한다)',
     check: (s) => s.frame('sun').visible && s.sunShown < 0.1,
   },
   {

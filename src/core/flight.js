@@ -6,6 +6,17 @@ export const ZONES = Object.freeze({
   far: Object.freeze({ id: 'far', maxSpeed: C * 100, label: '100c', margin: Infinity }),
 });
 
+export const MIN_SPEED = C * 0.01;
+export const MAX_SPEED = C * 100;
+// The limit grows with the distance to the nearest surface: flying straight at a body
+// at the limit, the surface is always at least one second away, so the traveler slows
+// down smoothly on approach and speeds up smoothly on departure.
+export const LIMIT_PER_SECOND = 1;
+
+export function speedLimit(surfaceKm) {
+  return Math.min(MAX_SPEED, Math.max(MIN_SPEED, surfaceKm * LIMIT_PER_SECOND));
+}
+
 const ACCELERATION_SECONDS = 3;
 
 export function speedZone(surfaceDistance) {

@@ -1,36 +1,37 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  C, ZONES, speedZone, stricterZoneBelow, accelerateSpeed, brakeSpeed,
+  C, speedLimit, MIN_SPEED, MAX_SPEED, accelerateSpeed, brakeSpeed,
   sweepSphere, firstSphereHit,
 } from '../src/core/flight.js';
 
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
-test('zones switch exactly at 500 km and 50,000 km', () => {
-  assert.equal(speedZone(0).id, 'veryNear');
-  assert.equal(speedZone(500).id, 'veryNear');
-  assert.equal(speedZone(500.001).id, 'near');
-  assert.equal(speedZone(50000).id, 'near');
-  assert.equal(speedZone(50000.001).id, 'far');
-  assert.equal(speedZone(Infinity).id, 'far');
-  assert.equal(ZONES.veryNear.maxSpeed, C * 0.01);
-  assert.equal(ZONES.near.maxSpeed, C * 0.1);
-  assert.equal(ZONES.far.maxSpeed, C * 100);
-  assert.deepEqual([ZONES.far.label, ZONES.near.label, ZONES.veryNear.label], ['100c', '0.1c', '0.01c']);
+test('the limit is the surface distance per second, between 0.01c and 100c', () => {
+  assert.equal(MIN_SPEED, C * 0.01);
+  assert.equal(MAX_SPEED, C * 100);
+  assert.equal(speedLimit(0), MIN_SPEED);
+  assert.equal(speedLimit(1000), MIN_SPEED, 'close to a surface the floor applies');
+  near(speedLimit(30000), 30000);
+  near(speedLimit(3e6), 3e6);
+  assert.equal(speedLimit(4e7), MAX_SPEED);
+  assert.equal(speedLimit(Infinity), MAX_SPEED);
 });
 
-test('stricterZoneBelow walks toward the surface', () => {
-  assert.equal(stricterZoneBelow(ZONES.far), ZONES.near);
-  assert.equal(stricterZoneBelow(ZONES.near), ZONES.veryNear);
-  assert.equal(stricterZoneBelow(ZONES.veryNear), null);
+test('the limit never falls as the distance grows', () => {
+  let previous = 0;
+  for (let d = 0; d < 5e7; d = d * 1.5 + 100) {
+    const limit = speedLimit(d);
+    assert.ok(limit >= previous, `limit fell at ${d} km`);
+    previous = limit;
+  }
 });
 
-test('full acceleration reaches each zone limit in three seconds and never exceeds it', () => {
-  for (const zone of Object.values(ZONES)) {
-    assert.equal(accelerateSpeed(0, 1, 3, zone.maxSpeed), zone.maxSpeed);
-    assert.ok(accelerateSpeed(0, 1, 2.9, zone.maxSpeed) < zone.maxSpeed);
-    assert.equal(accelerateSpeed(zone.maxSpeed, 1, 3, zone.maxSpeed), zone.maxSpeed);
+test('full acceleration reaches a fixed limit in three seconds and never exceeds it', () => {
+  for (const limit of [MIN_SPEED, C * 0.1, MAX_SPEED]) {
+    assert.equal(accelerateSpeed(0, 1, 3, limit), limit);
+    assert.ok(accelerateSpeed(0, 1, 2.9, limit) < limit);
+    assert.equal(accelerateSpeed(limit, 1, 3, limit), limit);
   }
 });
 
@@ -70,7 +71,7 @@ test('firstSphereHit picks the first surface along a path crossing several bodie
   near(hit.position[2], 9000);
 });
 
-test('firstSphereHit with a margin finds the zone shell', () => {
+test('firstSphereHit with a margin finds the shell', () => {
   const bodies = [{ id: 'b', radiusKm: 1000, position: [0, 0, 100000] }];
   const hit = firstSphereHit([0, 0, 0], [0, 0, 1], 1e6, bodies, 50000);
   near(hit.t, 100000 - 51000);

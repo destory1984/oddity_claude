@@ -3,10 +3,6 @@ import assert from 'node:assert/strict';
 import { cueForEvent, engineSound } from '../src/core/audio.js';
 
 test('each game event maps to one sound cue', () => {
-  assert.equal(cueForEvent({ type: 'zoneChanged', from: 'near', to: 'far' }), 'zoneUp');
-  assert.equal(cueForEvent({ type: 'zoneChanged', from: 'veryNear', to: 'near' }), 'zoneUp');
-  assert.equal(cueForEvent({ type: 'zoneChanged', from: 'far', to: 'near' }), 'zoneDown');
-  assert.equal(cueForEvent({ type: 'zoneChanged', from: 'near', to: 'veryNear' }), 'zoneDown');
   assert.equal(cueForEvent({ type: 'surfaceReached', bodyId: 'moon' }), 'landed');
   assert.equal(cueForEvent({ type: 'discovered', bodyId: 'mars' }), 'discovered');
   assert.equal(cueForEvent({ type: 'landed', bodyId: 'mars' }), null, 'the thud already played');

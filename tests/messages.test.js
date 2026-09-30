@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { objectParticle, subjectParticle, eventMessage, routeText } from '../src/ui/messages.js';
+import { objectParticle, subjectParticle, eventMessage, limitText } from '../src/ui/messages.js';
 import { BODIES } from '../src/core/bodies.js';
 
 test('object particle follows the final consonant', () => {
@@ -8,14 +8,6 @@ test('object particle follows the final consonant', () => {
   assert.equal(objectParticle('태양'), '을');
   assert.equal(objectParticle('지구'), '를');
   assert.equal(objectParticle('Moon'), '을');
-});
-
-test('zone messages match the spec wording', () => {
-  const msg = (from, to) => eventMessage({ type: 'zoneChanged', from, to });
-  assert.equal(msg('near', 'far'), '근처에 별이 없어서, 광속의 100배까지 속도를 올립니다.');
-  assert.equal(msg('far', 'near'), '별 근처에서는 안전을 위해서 속도를 광속의 1/10로 낮춥니다.');
-  assert.equal(msg('near', 'veryNear'), '별 표면에 아주 가까워서, 안전을 위해 속도를 광속의 1/100로 낮춥니다.');
-  assert.equal(msg('veryNear', 'near'), '별 표면에서 멀어져서, 속도를 광속의 1/10까지 올립니다.');
 });
 
 test('surface arrival message', () => {
@@ -39,11 +31,16 @@ test('explorer log messages name the body or mission', () => {
   assert.equal(eventMessage({ type: 'photo', missionName: '지구돋이' }, BODIES), '사진 임무 달성: 지구돋이');
 });
 
-test('route text says how long, or what is in the way', () => {
-  assert.equal(routeText({ seconds: 5.6 }, BODIES), '곧장 가면 약 6초');
-  assert.equal(routeText({ seconds: 0 }, BODIES), '도착');
-  assert.equal(routeText({ seconds: 0.3 }, BODIES), '곧장 가면 1초 안');
-  assert.equal(routeText({ blockedBy: 'sun' }, BODIES), '곧장 가면 태양이 막고 있음');
-  assert.equal(routeText({ blockedBy: 'earth' }, BODIES), '곧장 가면 지구가 막고 있음');
-  assert.equal(routeText(null, BODIES), '');
+test('the live limit reads like 0.12c, 3.4c or 42c', () => {
+  assert.equal(limitText(0.01), '0.01c');
+  assert.equal(limitText(0.123), '0.12c');
+  assert.equal(limitText(1), '1.0c');
+  assert.equal(limitText(3.44), '3.4c');
+  assert.equal(limitText(10), '10c');
+  assert.equal(limitText(42.4), '42c');
+  assert.equal(limitText(100), '100c');
+});
+
+test('speed zone events are gone', () => {
+  assert.equal(eventMessage({ type: 'zoneChanged', from: 'near', to: 'far' }), null);
 });

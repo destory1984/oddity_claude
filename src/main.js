@@ -1,7 +1,7 @@
 import {
-  BODIES, START_POSITION, TIME_SCALE, bodiesAt, bodyById, surfaceDistance, nearestLocalBody,
+  BODIES, START_POSITION, TIME_SCALE, bodiesAt, bodyById, nearestSurface, nearestLocalBody,
 } from './core/bodies.js';
-import { C, ZONES } from './core/flight.js';
+import { C, speedLimit } from './core/flight.js';
 import {
   createState, step, stopNow, totalSpeed, carryAlong, TURN_RATE, startOrientation,
 } from './core/game.js';
@@ -11,10 +11,9 @@ import { createInput } from './ui/input.js';
 import { createHud } from './ui/hud.js';
 import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
-import { eventMessage, routeText } from './ui/messages.js';
+import { eventMessage, limitText } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import { updateProgress, recordPhotos, createProgress, summarize, score, isComplete } from './core/progress.js';
-import { estimateTravelSeconds } from './core/eta.js';
 import { loadProgress, saveProgress } from './ui/storage.js';
 import { createJournal } from './ui/journal.js';
 import { createSound } from './ui/sound.js';
@@ -23,7 +22,6 @@ import { cueForEvent, engineSound } from './core/audio.js';
 const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
 const HUD_EVERY_N_FRAMES = 6;
-const ROUTE_EVERY_MS = 1000;
 
 let state = createState(START_POSITION, startOrientation(innerWidth / innerHeight));
 let paused = false;
@@ -35,8 +33,6 @@ let simTime = 0;
 let bodies = bodiesAt(0);
 // Where a body is right now (BODIES is only the starting layout).
 const here = (id) => bodyById(id, bodies);
-let route = null;
-let routeAt = 0;
 
 const toast = createToast($('toast'));
 const sound = createSound();
@@ -136,7 +132,6 @@ async function init() {
   const hud = createHud(BODIES, {
     onSelect(id) {
       selectedId = id;
-      routeAt = 0;
       hud.showSelection(bodyById(id));
     },
     onFace() {
@@ -175,7 +170,6 @@ async function init() {
       hud.showSelection(bodyById(id));
       const body = here(id);
       state = { ...state, orientation: lookAtDirection(body.position.map((n, i) => n - state.position[i])) };
-      routeAt = 0;
       toast.show(hud.faceToast(body));
     },
     onReset() {
@@ -264,7 +258,7 @@ async function init() {
     }
     for (const event of [...result.events, ...logged.events]) {
       const text = eventMessage(event, BODIES);
-      if (text) toast.show(text, event.type === 'zoneChanged' ? 'zone' : null);
+      if (text) toast.show(text);
       const cue = cueForEvent(event);
       if (cue) sound.cue(cue);
     }
@@ -276,9 +270,10 @@ async function init() {
       : [0, 0];
     dragTurn = [0, 0];
 
+    const limit = speedLimit(nearestSurface(state.position, bodies).distance);
     sound.engine(engineSound({
       speed: paused ? 0 : totalSpeed(state),
-      maxSpeed: ZONES[state.zoneId].maxSpeed,
+      maxSpeed: limit,
       thrusting: !paused && input.driving(),
     }), elapsed || 1 / 60);
 
@@ -304,22 +299,15 @@ async function init() {
     else if (!driving) flightLabel = '서서히 감속 중';
     else if (state.sideSpeed > state.speed) flightLabel = '옆으로 비행';
     else if (state.motionSign < 0) flightLabel = '후진 비행';
-    // Paused or in photo mode nothing moves, so only a new target needs a new estimate.
-    if (routeAt === 0 || (!paused && now - routeAt > ROUTE_EVERY_MS)) {
-      route = estimateTravelSeconds(state, selectedId, bodies);
-      routeAt = now;
-    }
     journal.update(progress, state.position, bodies);
     hud.update({
-      route: routeText(route, BODIES),
       view,
       local: nearestLocalBody(state.position, bodies),
       selected,
-      selectedDistance: surfaceDistance(state.position, selected),
       speed: totalSpeed(state),
       // Only forward/back motion can be 'backward'; a pure slide is not.
       motionSign: state.speed > 0.01 ? state.motionSign : 1,
-      zoneLabel: ZONES[state.zoneId].label,
+      limitLabel: limitText(limit / C),
       flightLabel,
       throttle: input.throttle(),
       C,
@@ -332,7 +320,7 @@ async function init() {
       position: [...state.position],
       speed: totalSpeed(state),
       motionSign: state.motionSign,
-      zoneId: state.zoneId,
+      limitC: speedLimit(nearestSurface(state.position, bodies).distance) / C,
       restingOn: state.restingOn,
       simTime,
       moonFromEarth: Math.hypot(...here('moon').position.map((n, i) => n - here('earth').position[i])),

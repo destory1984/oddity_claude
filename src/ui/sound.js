@@ -117,14 +117,6 @@ export function createSound() {
   const PENTATONIC = [523, 587, 659, 784, 880, 1047, 1175, 1319];
 
   const CUES = {
-    zoneUp: () => {
-      pluck(523);
-      pluck(784, 0.12);
-    },
-    zoneDown: () => {
-      pluck(784);
-      pluck(523, 0.12);
-    },
     discovered: () => [523, 659, 784, 880, 1047].forEach((f, i) => pluck(f, i * 0.1, 0.14)),
     landed: () => {
       noise({ length: 0.12, volume: 0.35, type: 'lowpass', freq: 900, to: 250 });

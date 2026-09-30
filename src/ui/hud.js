@@ -51,17 +51,15 @@ export function createHud(bodies, { onSelect, onFace, onInspect }) {
       $('targetName').innerHTML = `${body.name} <small>${body.nameEn}</small>`;
       $('faceTarget').textContent = `${body.name} 바라보기`;
     },
-    update({ view, local, selected, selectedDistance, speed, motionSign, zoneLabel, flightLabel, throttle, C, route = '' }) {
+    update({ view, local, selected, speed, motionSign, limitLabel, flightLabel, throttle, C }) {
       $('altitudeLabel').textContent = local.label;
       $('altitude').textContent = fmt(local.altitude);
       const backward = speed > 0.01 && motionSign < 0;
       $('speed').innerHTML = `${backward ? '후진 ' : ''}${fmt(speed)} <small>km/s</small>`;
       $('lightSpeed').textContent = `${backward ? '-' : ''}${(speed / C).toFixed(6)} c`;
       $('throttleValue').textContent = `${Math.round(throttle * 100)}%`;
-      $('speedLimit').textContent = `현재 제한 ${zoneLabel}`;
+      $('speedLimit').textContent = `현재 제한 ${limitLabel}`;
       $('flightState').textContent = flightLabel;
-      $('targetDistance').textContent = `${selected.name} 표면까지 ${fmt(selectedDistance)} km`;
-      $('targetRoute').textContent = route;
       // Every body in view gets a label; off-screen arrows only for the selected, the
       // nearest and nearby bodies (core/markers.js), so fifteen arrows do not pile up.
       const arrows = [];

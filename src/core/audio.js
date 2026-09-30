@@ -1,12 +1,8 @@
 // What the game should sound like, independent of the Web Audio plumbing.
 // Space is silent; these are game sounds, not physics.
 
-const ZONE_RANK = { veryNear: 0, near: 1, far: 2 };
-
 export function cueForEvent(event) {
   switch (event.type) {
-    case 'zoneChanged':
-      return ZONE_RANK[event.to] > ZONE_RANK[event.from] ? 'zoneUp' : 'zoneDown';
     case 'surfaceReached':
       return 'landed';
     case 'discovered':

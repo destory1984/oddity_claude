@@ -47,8 +47,6 @@
     <aside id="targetPanel">
       <span>선택한 천체</span>
       <strong id="targetName">지구 <small>Earth</small></strong>
-      <p id="targetDistance">—</p>
-      <p id="targetRoute"></p>
       <p id="surfaceInfo">실제 표면까지 접근 가능</p>
       <button id="faceTarget">지구 바라보기</button>
       <button id="inspectTarget">확대 관찰</button>
@@ -59,7 +57,7 @@
         <span>비행 속도</span>
         <strong id="speed">0 <small>km/s</small></strong>
         <p id="lightSpeed">0.000000 c</p>
-        <p id="speedLimit">현재 제한 0.1c</p>
+        <p id="speedLimit">현재 제한 0.01c</p>
       </div>
       <div class="throttle">
         <div><label for="throttle">가속 강도</label><output id="throttleValue">100%</output></div>
@@ -107,7 +105,7 @@
       <dt>옆걸음</dt><dd>A / D · 왼쪽, 오른쪽으로 미끄러지듯 이동합니다.</dd>
       <dt>몸 회전</dt><dd>Q / E · 좌우 롤 회전. 위아래 회전도 360도 가능합니다.</dd>
       <dt>전진·후진</dt><dd>W / 전진 버튼, S / 후진 버튼. 누르는 동안 현재 안전 속도까지 가속하고, 놓으면 약 1초 동안 감속합니다.</dd>
-      <dt>자동 속도</dt><dd>빈 우주 100c · 별 근처 0.1c · 표면 근처 0.01c</dd>
+      <dt>자동 속도</dt><dd>가까울수록 느리게, 멀수록 빠르게 (0.01c → 100c)</dd>
       <dt>가속 강도</dt><dd>아래쪽 슬라이더</dd>
       <dt>정지</dt><dd>Space 키 / 정지 버튼</dd>
       <dt>사진</dt><dd>P 키 / 사진 모드 버튼</dd>

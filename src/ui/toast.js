@@ -29,7 +29,7 @@ export function createToast(element) {
 
   return {
     // kind: messages of the same kind replace each other while waiting in the queue,
-    // so a fast trip does not replay every speed-zone change after arrival.
+    // so a burst of updates does not replay one by one.
     show(text, kind = null) {
       const showing = element.classList.contains('on');
       if (showing && element.textContent === text) {

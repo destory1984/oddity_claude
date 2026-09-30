@@ -805,10 +805,6 @@ body.touch #reticle span {
   margin-top: 20px;
 }
 
-#targetRoute {
-  color: #ffdfa6 !important;
-}
-
 @media (max-width: 480px) {
   #journalBodies li {
     grid-template-columns: 1fr auto;

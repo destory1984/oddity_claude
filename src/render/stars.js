@@ -1,4 +1,4 @@
-import { PointsCloudSystem, Vector3, Color4 } from '@babylonjs/core';
+import { PointsCloudSystem, Vector3, Color4 } from './babylon.js';
 
 // Sparse, fixed celestial background. Points are distant directions, not nearby dust.
 export async function createStars(scene) {

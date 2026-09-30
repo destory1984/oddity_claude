@@ -1,7 +1,7 @@
 import {
   Scene, FreeCamera, Vector3, TransformNode, HemisphericLight, DirectionalLight,
-  StandardMaterial, Color3, MeshBuilder, Mesh, Quaternion,
-} from '@babylonjs/core';
+  StandardMaterial, Color3, Mesh, Quaternion, CreateSphere, CreateRibbon,
+} from './babylon.js';
 import capeFrag from './shaders/cape.frag?raw';
 import { shader } from './planets.js';
 import { blendFlight, hoverFlightPose, armPose } from '../core/pose.js';
@@ -65,7 +65,7 @@ export function createHero(engine, sunDirection) {
   skin.diffuseColor = Color3.FromHexString('#bd9276');
 
   function part(name, position, scale, material, parent = hero) {
-    const mesh = MeshBuilder.CreateSphere(name, { diameter: 1, segments: 12 }, scene);
+    const mesh = CreateSphere(name, { diameter: 1, segments: 12 }, scene);
     mesh.parent = parent;
     mesh.position = new Vector3(...position);
     mesh.scaling = new Vector3(...scale);
@@ -104,7 +104,7 @@ export function createHero(engine, sunDirection) {
 
   const capeMaterial = shader(scene, 'capeCloth', capeFrag);
   capeMaterial.backFaceCulling = false;
-  const cape = MeshBuilder.CreateRibbon('cape', {
+  const cape = CreateRibbon('cape', {
     pathArray: capePaths(0, 0, 0), updatable: true, sideOrientation: Mesh.DOUBLESIDE,
   }, scene);
   cape.parent = hero;
@@ -149,7 +149,7 @@ export function createHero(engine, sunDirection) {
     hero.setEnabled(visible);
     camera.fov = fov;
     camera.rotationQuaternion = new Quaternion(...(photoOrientation || [0, 0, 0, 1]));
-    MeshBuilder.CreateRibbon('cape', {
+    CreateRibbon('cape', {
       pathArray: capePaths(elapsed, Math.min(speed / 100, 1), capeLag), instance: cape,
     });
   }

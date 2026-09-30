@@ -1,4 +1,4 @@
-import { MeshBuilder, ShaderMaterial, Effect, Texture, Vector3, Constants } from '@babylonjs/core';
+import { CreateSphere, ShaderMaterial, Effect, Texture, Vector3, Constants } from './babylon.js';
 import vertex from './shaders/body.vert?raw';
 import planetFrag from './shaders/planet.frag?raw';
 import lunarFrag from './shaders/lunar.frag?raw';
@@ -35,7 +35,7 @@ function sunDirectionFor(body, sunBody) {
 function createEarth(scene, body, sunDir) {
   const diameter = (2 * body.radiusKm) / KM_PER_UNIT;
 
-  const earth = MeshBuilder.CreateSphere('earth', { diameter, segments: 112 }, scene);
+  const earth = CreateSphere('earth', { diameter, segments: 112 }, scene);
   const surface = shader(scene, 'planet', planetFrag, ['sun', 'eye'], ['day', 'night']);
   surface.setTexture('day', texture(scene, 'earth-day.jpg'));
   surface.setTexture('night', texture(scene, 'earth-night.jpg'));
@@ -43,7 +43,7 @@ function createEarth(scene, body, sunDir) {
   surface.setVector3('eye', Vector3.Zero());
   earth.material = surface;
 
-  const clouds = MeshBuilder.CreateSphere('clouds', { diameter: diameter * CLOUD_SCALE, segments: 96 }, scene);
+  const clouds = CreateSphere('clouds', { diameter: diameter * CLOUD_SCALE, segments: 96 }, scene);
   const cloudMaterial = shader(scene, 'cloudLayer', cloudsFrag, ['sun'], ['cloudMap']);
   cloudMaterial.setTexture('cloudMap', texture(scene, 'earth-clouds.jpg'));
   cloudMaterial.setVector3('sun', sunDir);
@@ -51,7 +51,7 @@ function createEarth(scene, body, sunDir) {
   cloudMaterial.needAlphaBlending = () => true;
   clouds.material = cloudMaterial;
 
-  const air = MeshBuilder.CreateSphere('atmosphere', { diameter: diameter * AIR_SCALE, segments: 112 }, scene);
+  const air = CreateSphere('atmosphere', { diameter: diameter * AIR_SCALE, segments: 112 }, scene);
   const airMaterial = shader(scene, 'air', airFrag, ['sun', 'eye']);
   airMaterial.setVector3('sun', sunDir);
   airMaterial.setVector3('eye', Vector3.Zero());
@@ -72,7 +72,7 @@ function createEarth(scene, body, sunDir) {
 }
 
 function createMoon(scene, body, sunDir) {
-  const moon = MeshBuilder.CreateSphere('moon', { diameter: (2 * body.radiusKm) / KM_PER_UNIT, segments: 48 }, scene);
+  const moon = CreateSphere('moon', { diameter: (2 * body.radiusKm) / KM_PER_UNIT, segments: 48 }, scene);
   const material = shader(scene, 'lunar', lunarFrag, ['sun']);
   material.setVector3('sun', sunDir);
   moon.material = material;

@@ -1,4 +1,4 @@
-import { Engine, Scene, FreeCamera, Vector3, Color4, Quaternion } from '@babylonjs/core';
+import { Engine, Scene, FreeCamera, Vector3, Color4, Quaternion } from './babylon.js';
 import { BODIES, KM_PER_UNIT } from '../core/bodies.js';
 import { multiply } from '../core/orientation.js';
 import { sunVisibility } from '../core/occlusion.js';

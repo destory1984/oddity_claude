@@ -55,3 +55,15 @@ export function sanitizeProgress(raw, bodies, missions) {
     photos: clean(raw.photos, missionIds),
   };
 }
+
+export function score(summary) {
+  return {
+    done: summary.discovered + summary.landed + summary.photos,
+    total: summary.bodies * 2 + summary.missions,
+  };
+}
+
+export function isComplete(summary) {
+  const { done, total } = score(summary);
+  return done === total;
+}

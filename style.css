@@ -820,3 +820,27 @@ body.touch #reticle span {
     text-align: left;
   }
 }
+
+/* Four header buttons must fit a 375 px phone on one line each. */
+nav button {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  nav {
+    gap: 4px;
+  }
+
+  nav button {
+    padding: 8px 9px;
+    font-size: 12px;
+  }
+
+  .brand strong {
+    font-size: 20px;
+  }
+
+  .brand span {
+    display: none;
+  }
+}

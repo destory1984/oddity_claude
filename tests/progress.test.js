@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { createProgress, updateProgress, recordPhotos, summarize, sanitizeProgress } from '../src/core/progress.js';
+import { createProgress, updateProgress, recordPhotos, summarize, sanitizeProgress, isComplete, score } from '../src/core/progress.js';
 import { BODIES, START_POSITION, bodyById } from '../src/core/bodies.js';
 import { MISSIONS } from '../src/core/missions.js';
 
@@ -66,4 +66,16 @@ test('sanitizeProgress drops junk from storage and keeps known ids', () => {
   assert.deepEqual(sanitizeProgress(junk, BODIES, MISSIONS), { discovered: ['earth', 'mars'], landed: [], photos: ['eclipse'] });
   assert.deepEqual(sanitizeProgress(null, BODIES, MISSIONS), createProgress());
   assert.deepEqual(sanitizeProgress('nonsense', BODIES, MISSIONS), createProgress());
+});
+
+test('the tour is complete only when every body is found and landed on and every photo taken', () => {
+  const all = { discovered: BODIES.map((b) => b.id), landed: BODIES.map((b) => b.id), photos: MISSIONS.map((m) => m.id) };
+  assert.equal(isComplete(summarize(all, BODIES, MISSIONS)), true);
+  assert.equal(isComplete(summarize({ ...all, photos: all.photos.slice(1) }, BODIES, MISSIONS)), false);
+  assert.equal(isComplete(summarize(createProgress(), BODIES, MISSIONS)), false);
+});
+
+test('score counts every record out of the total', () => {
+  const s = summarize({ discovered: ['earth', 'moon'], landed: ['moon'], photos: ['eclipse'] }, BODIES, MISSIONS);
+  assert.deepEqual(score(s), { done: 4, total: BODIES.length * 2 + MISSIONS.length });
 });

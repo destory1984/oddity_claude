@@ -9,7 +9,7 @@ import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
 import { eventMessage, routeText } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
-import { updateProgress, recordPhotos, createProgress } from './core/progress.js';
+import { updateProgress, recordPhotos, createProgress, summarize, score, isComplete } from './core/progress.js';
 import { estimateTravelSeconds } from './core/eta.js';
 import { loadProgress, saveProgress } from './ui/storage.js';
 import { createJournal } from './ui/journal.js';
@@ -29,6 +29,18 @@ let routeAt = 0;
 
 const toast = createToast($('toast'));
 const canvas = $('space');
+
+// Call after every change to the log: saves it, shows the score, and celebrates once
+// when the last record is filled in.
+function progressChanged(before) {
+  saveProgress(progress);
+  const now = summarize(progress, BODIES, MISSIONS);
+  const { done, total } = score(now);
+  $('journalButton').textContent = `수첩 ${done}/${total}`;
+  if (before && !isComplete(summarize(before, BODIES, MISSIONS)) && isComplete(now)) {
+    toast.show('태양계 탐험을 모두 마쳤습니다. 수첩이 가득 찼습니다!');
+  }
+}
 
 function setPaused(value) {
   paused = value;
@@ -88,9 +100,10 @@ async function init() {
         heroVisible: photo.heroVisible(),
         bodies: BODIES,
       });
+      const before = progress;
       const result = recordPhotos(progress, done);
       progress = result.progress;
-      if (result.newly.length) saveProgress(progress);
+      if (result.newly.length) progressChanged(before);
       for (const id of result.newly) {
         toast.show(eventMessage({ type: 'photo', missionName: MISSIONS.find((mm) => mm.id === id).name }));
       }
@@ -142,7 +155,7 @@ async function init() {
     },
     onReset() {
       progress = createProgress();
-      saveProgress(progress);
+      progressChanged(null);
       journal.update(progress, state.position);
       $('journal').close();
       toast.show('탐험 기록을 지웠습니다.');
@@ -172,6 +185,11 @@ async function init() {
   $('loading').style.display = 'none';
   document.body.dataset.ready = 'true';
   toast.show('지구 근처에 도착했습니다. 드래그로 둘러보세요.');
+  progressChanged(null);
+  if (score(summarize(progress, BODIES, MISSIONS)).done <= 2) {
+    const how = document.body.classList.contains('touch') ? '수첩 버튼' : 'J 키나 수첩 버튼';
+    toast.show(`${how}으로 탐험 목표를 확인하세요. 행성을 발견하고, 내려앉고, 사진 임무를 채워 보세요.`);
+  }
 
   // The first frame uploads shaders and textures; count it as zero time so the
   // long-gap guard below does not pause the game before the player does anything.
@@ -190,8 +208,9 @@ async function init() {
     state = result.state;
     const logged = updateProgress(progress, state, BODIES);
     if (logged.events.length) {
+      const before = progress;
       progress = logged.progress;
-      saveProgress(progress);
+      progressChanged(before);
     }
     for (const event of [...result.events, ...logged.events]) {
       const text = eventMessage(event, BODIES);

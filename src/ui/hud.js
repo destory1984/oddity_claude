@@ -18,6 +18,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect }) {
   $('faceTarget').addEventListener('click', onFace);
   $('inspectTarget').addEventListener('click', onInspect);
 
+  // Returns the screen point and whether the body is off screen.
   function placeMarker(el, direction, camera, label) {
     const x = dot(direction, camera.right);
     const y = dot(direction, camera.up);
@@ -41,6 +42,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect }) {
     el.classList.toggle('inView', !outside);
     const arrow = outside ? `${ARROWS[(Math.round(Math.atan2(py, px) / (Math.PI / 4)) + 8) % 8]} ` : '';
     el.textContent = arrow + label;
+    return { outside, x: w / 2 + px, y: h / 2 + py };
   }
 
   return {
@@ -48,7 +50,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect }) {
       $('targetName').innerHTML = `${body.name} <small>${body.nameEn}</small>`;
       $('faceTarget').textContent = `${body.name} 바라보기`;
     },
-    update({ view, local, selected, selectedDistance, speed, motionSign, zoneLabel, flightLabel, throttle, C }) {
+    update({ view, local, selected, selectedDistance, speed, motionSign, zoneLabel, flightLabel, throttle, C, extra = '' }) {
       $('altitudeLabel').textContent = local.label;
       $('altitude').textContent = fmt(local.altitude);
       const backward = speed > 0.01 && motionSign < 0;
@@ -57,10 +59,20 @@ export function createHud(bodies, { onSelect, onFace, onInspect }) {
       $('throttleValue').textContent = `${Math.round(throttle * 100)}%`;
       $('speedLimit').textContent = `현재 제한 ${zoneLabel}`;
       $('flightState').textContent = flightLabel;
-      $('targetDistance').textContent = `${selected.name} 표면까지 ${fmt(selectedDistance)} km`;
+      $('targetDistance').textContent = `${selected.name} 표면까지 ${fmt(selectedDistance)} km${extra}`;
+      // Every body in view gets a label; off-screen arrows only for the selected and
+      // the nearest body, so ten arrows do not pile up on one edge.
+      const arrows = [];
       for (const body of bodies) {
+        const el = markers.get(body.id);
         const hidden = body.kind === 'star' && view.sunVisibility < 0.01;
-        placeMarker(markers.get(body.id), view.directions[body.id], view.camera, hidden ? `${body.name} · 가려짐` : body.name);
+        const spot = placeMarker(el, view.directions[body.id], view.camera, hidden ? `${body.name} · 가려짐` : body.name);
+        const keep = !spot.outside || body.id === selected.id || body.id === local.body.id;
+        el.hidden = !keep;
+        if (keep && spot.outside) arrows.push({ el, ...spot });
+      }
+      if (arrows.length === 2 && Math.hypot(arrows[0].x - arrows[1].x, arrows[0].y - arrows[1].y) < 40) {
+        arrows[1].el.style.top = `${arrows[1].y + (arrows[1].y > innerHeight / 2 ? -40 : 40)}px`;
       }
     },
     faceToast(body) {

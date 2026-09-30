@@ -74,6 +74,11 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
     heroVisible: () => !active || $('showHero').checked,
     rotate(dx, dy) { orientation = rotateLocal(orientation, dx, dy); },
     zoom(deltaY) { if (active) setFovDeg((world.fov() * 180) / Math.PI + deltaY * 0.03); },
-    frame(deg) { if (!active) toggle(); $('showHero').checked = false; setFovDeg(deg); },
+    frame(deg, aim) {
+      if (!active) toggle();
+      orientation = aim;
+      $('showHero').checked = false;
+      setFovDeg(deg);
+    },
   };
 }

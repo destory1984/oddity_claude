@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { rotateLocal, forward, lookAtDirection } from '../src/core/orientation.js';
+import { rotateLocal, forward, lookAtDirection, multiply, conjugate } from '../src/core/orientation.js';
 
 const near = (a, b) => a.forEach((n, i) => assert.ok(Math.abs(n - b[i]) < 1e-9));
 
@@ -26,4 +26,11 @@ test('target pointing covers all axes', () => {
     const length = Math.hypot(...d);
     near(forward(lookAtDirection(d)), d.map((n) => n / length));
   }
+});
+
+test('conjugate undoes a rotation, so a camera can be aimed relative to the body', () => {
+  const ship = rotateLocal([0, 0, 0, 1], 0.7, -0.4, 0.2);
+  const target = lookAtDirection([0.3, -0.5, -0.8]);
+  const relative = multiply(conjugate(ship), target);
+  near(forward(multiply(ship, relative)), forward(target));
 });

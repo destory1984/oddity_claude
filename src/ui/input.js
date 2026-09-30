@@ -1,4 +1,4 @@
-import { controlIntent, rangeKeepsKey } from '../core/controls.js';
+import { controlIntent, rangeKeepsKey, tracksKey } from '../core/controls.js';
 
 const $ = (id) => document.getElementById(id);
 const DRAG_RATE = 0.0035;
@@ -26,7 +26,11 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onEscape, 
 
   for (const [id, set] of [['flyButton', (v) => { flyingButton = v; }], ['reverseButton', (v) => { reversingButton = v; }]]) {
     const button = $(id);
-    button.addEventListener('pointerdown', (e) => { set(true); button.setPointerCapture(e.pointerId); });
+    button.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return; // a right-click opens a menu and may never send pointerup
+      set(true);
+      button.setPointerCapture(e.pointerId);
+    });
     for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) button.addEventListener(ev, () => set(false));
   }
 
@@ -38,10 +42,14 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onEscape, 
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
     if (e.code === 'Space' && !e.repeat) onBrake();
     else if (e.code === 'KeyP' && !e.repeat) onTogglePhoto();
-    else if (e.code === 'Escape') onEscape();
-    held.add(e.code);
+    else if (e.code === 'Escape' && !e.repeat) onEscape();
+    if (tracksKey(e)) held.add(e.code);
   });
-  document.addEventListener('keyup', (e) => held.delete(e.code));
+  document.addEventListener('keyup', (e) => {
+    held.delete(e.code);
+    // Releasing a modifier may swallow the keyups of letters pressed with it.
+    if (['MetaLeft', 'MetaRight', 'ControlLeft', 'ControlRight'].includes(e.code)) held.clear();
+  });
 
   canvas.addEventListener('pointerdown', (e) => {
     canvas.focus();

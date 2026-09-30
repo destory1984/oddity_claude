@@ -12,3 +12,9 @@ export function controlIntent(keys, stickActive, flyingButton, reversingButton =
 export function rangeKeepsKey(code) {
   return code === 'Home' || code === 'End';
 }
+
+// Browser shortcuts (Ctrl+S, Cmd+W...) must not leave a flight key held: on macOS
+// the letter's keyup never arrives while Cmd is down.
+export function tracksKey(event) {
+  return !(event.ctrlKey || event.altKey || event.metaKey);
+}

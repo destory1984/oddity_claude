@@ -1,7 +1,7 @@
 import { BODIES, START_POSITION, bodyById, surfaceDistance, nearestLocalBody } from './core/bodies.js';
 import { C, ZONES } from './core/flight.js';
 import { createState, step, stopNow, TURN_RATE } from './core/game.js';
-import { rotateLocal, lookAtDirection } from './core/orientation.js';
+import { rotateLocal, lookAtDirection, multiply, conjugate } from './core/orientation.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
 import { createHud } from './ui/hud.js';
@@ -78,10 +78,11 @@ async function init() {
     onInspect() {
       const body = bodyById(selectedId);
       const direction = body.position.map((n, i) => n - state.position[i]);
-      state = { ...state, orientation: lookAtDirection(direction) };
       const distance = Math.hypot(...direction);
       const diameterDeg = (2 * Math.asin(Math.min(1, body.radiusKm / distance)) * 180) / Math.PI;
-      photo.frame(diameterDeg * 1.4);
+      // Aim only the photo camera, relative to the body: the flight heading and any
+      // coast in progress stay as they were when photo mode closes.
+      photo.frame(diameterDeg * 1.4, multiply(conjugate(state.orientation), lookAtDirection(direction)));
     },
   });
   hud.showSelection(bodyById(selectedId));

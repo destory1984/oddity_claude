@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { controlIntent, rangeKeepsKey } from '../src/core/controls.js';
+import { controlIntent, rangeKeepsKey, tracksKey } from '../src/core/controls.js';
 
 test('arrow keys steer in four directions without applying thrust', () => {
   assert.deepEqual(controlIntent(new Set(['ArrowLeft']), false, false), { turnX: -1, turnY: 0, drive: 0 });
@@ -27,4 +27,11 @@ test('focused speed slider cannot consume direction arrows', () => {
   }
   assert.equal(rangeKeepsKey('Home'), true);
   assert.equal(rangeKeepsKey('End'), true);
+});
+
+test('keys pressed with Ctrl, Alt or Meta are not held for flight', () => {
+  assert.equal(tracksKey({ code: 'KeyW' }), true);
+  assert.equal(tracksKey({ code: 'KeyS', metaKey: true }), false);
+  assert.equal(tracksKey({ code: 'KeyS', ctrlKey: true }), false);
+  assert.equal(tracksKey({ code: 'KeyW', altKey: true }), false);
 });

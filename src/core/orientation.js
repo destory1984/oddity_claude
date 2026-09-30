@@ -33,3 +33,8 @@ export function lookAtDirection(d) {
   const [x, y, z] = d.map((n) => n / length);
   return rotateLocal([0, 0, 0, 1], Math.atan2(x, z), -Math.asin(Math.max(-1, Math.min(1, y))));
 }
+
+// Inverse of a unit quaternion.
+export function conjugate([x, y, z, w]) {
+  return [-x, -y, -z, w];
+}

@@ -117,3 +117,15 @@ test('the real table: diving from the start at Earth lands on Earth', () => {
   assert.ok(Math.abs(nearestSurface(after.position).distance) < 1e-6);
   assert.ok(events.some((e) => e.type === 'surfaceReached' && e.bodyId === 'earth'));
 });
+
+test('a move that ends just past a zone shell still lands inside it', () => {
+  // Shell of the near zone around the ball is at 51,000 km from its center.
+  // Travel 1.0005 km in one frame starting 1 km outside it: less than t + inset.
+  const speed = 1.0005 * 60;
+  let state = { ...createState([0, 0, -(51000 + 1)], facingBall, [ball]), speed };
+  const first = step(state, { drive: 1, throttle: 0 }, DT, [ball]);
+  assert.ok(Math.hypot(...first.state.position) < 51000, 'must end inside the shell');
+  assert.deepEqual(first.events, [{ type: 'zoneChanged', from: 'far', to: 'near' }]);
+  const { events } = run(first.state, {}, 30, [ball]);
+  assert.deepEqual(events, []);
+});

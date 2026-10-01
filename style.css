@@ -808,6 +808,55 @@ body.touch #reticle span {
   z-index:2;
 }
 
+/* Shown while docked: what this craft is */
+/* It sits in the target panel, under the dock button, so nothing overlaps it. */
+#craftCard {
+  width:270px;
+  margin:12px 0 0 auto;
+  text-align:left;
+  padding:14px 16px;
+  border:1px solid #ffdfa655;
+  border-radius:10px;
+  background:#0c2236e6;
+  font-size:13px;
+  line-height:1.55;
+}
+
+#craftCard[hidden] {
+  display:none;
+}
+
+#craftCard span {
+  display:block;
+  color:#ffdfa6;
+  font-size:12px;
+}
+
+#craftCard strong {
+  display:block;
+  margin:2px 0 6px;
+  font-size:16px;
+  font-weight:500;
+}
+
+#craftCard p {
+  margin:0;
+  color:#cfe3f5;
+  word-break:keep-all;
+}
+
+@media (max-width:800px) {
+  #craftCard {
+    position:fixed;
+    left:16px;
+    right:16px;
+    bottom:210px;
+    width:auto;
+    margin:0;
+    font-size:12px;
+  }
+}
+
 #inspectTarget,
 #dockTarget {
   display:block;

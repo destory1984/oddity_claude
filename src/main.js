@@ -200,8 +200,18 @@ async function init() {
     if (cue) sound.cue(cue);
   }
 
+  // The card beside the view while docked: when it went up and what it does.
+  function showCraftCard(target) {
+    $('craftCard').hidden = !target;
+    if (!target) return;
+    $('craftCardYear').textContent = `${target.launched}년 발사`;
+    $('craftCardName').textContent = `${target.name} ${target.nameEn}`;
+    $('craftCardIntro').textContent = target.intro;
+  }
+
   function dock(target) {
     docked = startDocking(state.position, target);
+    showCraftCard(target);
     input.clear();
     announce({ type: 'docking', name: target.name });
     sound.say('Docking in progress.');
@@ -211,6 +221,7 @@ async function init() {
     const { name } = here(docked.id);
     const latched = isDocked(docked);
     docked = null;
+    showCraftCard(null);
     sound.hush();
     announce({ type: latched ? 'undocked' : 'dockAborted', name });
   }

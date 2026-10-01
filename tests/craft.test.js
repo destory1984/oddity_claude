@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { CRAFT, craftAt, HUBBLE_ALTITUDE_KM, JWST_FROM_EARTH_KM } from '../src/core/craft.js';
+import { CRAFT, craftAt, HUBBLE_ALTITUDE_KM, JWST_FROM_EARTH_KM, CHANDRA_PERIOD_S } from '../src/core/craft.js';
 import { bodiesAt } from '../src/core/bodies.js';
 import { C } from '../src/core/flight.js';
 import { createState, step } from '../src/core/game.js';
@@ -8,9 +8,67 @@ import { createState, step } from '../src/core/game.js';
 const dist = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
 const near = (a, b, eps) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 
-test('four craft: the two Voyagers, Hubble and Webb', () => {
-  assert.deepEqual(CRAFT.map((c) => c.id), ['voyager1', 'voyager2', 'hubble', 'jwst']);
+test('seven craft: the two Voyagers and five space telescopes', () => {
+  assert.deepEqual(CRAFT.map((c) => c.id), ['voyager1', 'voyager2', 'hubble', 'jwst', 'kepler', 'chandra', 'euclid']);
   for (const c of CRAFT) assert.ok(c.name && c.nameEn && c.kind === 'craft');
+});
+
+test('every craft has a launch year and a short introduction for the docking card', () => {
+  for (const c of CRAFT) {
+    assert.ok(c.launched >= 1977 && c.launched <= 2023, c.id);
+    assert.ok(c.intro.length >= 40 && c.intro.length <= 150, `${c.id}: ${c.intro.length}`);
+    assert.ok(c.intro.endsWith('.') && !c.intro.includes('~'), c.id);
+  }
+  // The card's data travels with each frame's craft.
+  assert.equal(craftAt(0, bodiesAt(0)).find((c) => c.id === 'kepler').launched, 2009);
+});
+
+test('Kepler trails Earth round the Sun: same distance out, 60 degrees behind', () => {
+  for (const t of [0, 4e6]) {
+    const bodies = bodiesAt(t);
+    const sun = bodies.find((b) => b.kind === 'star');
+    const earth = bodies.find((b) => b.id === 'earth');
+    const kepler = craftAt(t, bodies).find((c) => c.id === 'kepler');
+    near(dist(kepler.position, sun.position), dist(earth.position, sun.position), 1e-3);
+    const angle = (p) => Math.atan2(p[2] - sun.position[2], p[0] - sun.position[0]);
+    // The planets go round with this angle growing, so behind means smaller.
+    const behind = ((angle(earth.position) - angle(kepler.position)) * 180 / Math.PI + 360) % 360;
+    near(behind, 60, 1e-6);
+    near(kepler.position[1], earth.position[1], 1e-6);
+  }
+});
+
+test('Chandra swings round Earth on a long ellipse: 1,600 to 13,300 km up after the 1/10 squeeze', () => {
+  const bodies = bodiesAt(0);
+  const earth = bodies.find((b) => b.id === 'earth');
+  let lowest = Infinity;
+  let highest = 0;
+  // One lap is 63.5 hours on the game clock.
+  for (let i = 0; i <= 400; i++) {
+    const t = (i / 400) * CHANDRA_PERIOD_S;
+    const km = dist(craftAt(t, bodies).find((c) => c.id === 'chandra').position, earth.position) - earth.radiusKm;
+    lowest = Math.min(lowest, km);
+    highest = Math.max(highest, km);
+  }
+  near(lowest, 1600, 20);
+  near(highest, 13300, 20);
+  // Always above Hubble, never inside the Moon's orbit's far reaches.
+  assert.ok(lowest > HUBBLE_ALTITUDE_KM);
+  const again = craftAt(CHANDRA_PERIOD_S, bodies).find((c) => c.id === 'chandra');
+  near(dist(again.position, craftAt(0, bodies).find((c) => c.id === 'chandra').position), 0, 1e-3);
+});
+
+test('Euclid shares the L2 point with Webb, 50,000 km to one side', () => {
+  const bodies = bodiesAt(900);
+  const earth = bodies.find((b) => b.id === 'earth');
+  const sun = bodies.find((b) => b.kind === 'star');
+  const craft = craftAt(900, bodies);
+  const euclid = craft.find((c) => c.id === 'euclid');
+  const webb = craft.find((c) => c.id === 'jwst');
+  near(dist(euclid.position, webb.position), 50000, 1e-3);
+  // Both are farther from the Sun than Earth is.
+  assert.ok(dist(euclid.position, sun.position) > dist(earth.position, sun.position));
+  near(dist(euclid.position, earth.position), Math.hypot(JWST_FROM_EARTH_KM, 50000), 1e-3);
 });
 
 test('Hubble circles 540 km above Earth and keeps up with Earth as it orbits the Sun', () => {

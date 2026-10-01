@@ -17,6 +17,10 @@ const RULES = {
   voyager2: { visibleKm: 3e6, maxKm: Infinity },
   hubble: { visibleKm: 60000, maxKm: 300 },
   jwst: { visibleKm: 400000, maxKm: 4000 },
+  kepler: { visibleKm: 400000, maxKm: 4000 },
+  // Chandra comes within 1,600 km of Earth, so it too must stay small.
+  chandra: { visibleKm: 100000, maxKm: 600 },
+  euclid: { visibleKm: 400000, maxKm: 4000 },
 };
 
 function paint(scene, name, hex, glow = 0.25) {
@@ -91,9 +95,10 @@ function solarCells(scene) {
 }
 
 // Crinkled silver insulation in panels, with seams and a few darker patches.
-function foil(scene) {
-  return drawn(scene, 'craftFoil', 256, (ctx, size) => {
-    ctx.fillStyle = '#b4b8c0';
+// base: the sheet's colour; silver for most craft, gold for Kapton blankets.
+function foil(scene, name = 'craftFoil', base = '#b4b8c0', tint = [1, 1, 1.04]) {
+  return drawn(scene, name, 256, (ctx, size) => {
+    ctx.fillStyle = base;
     ctx.fillRect(0, 0, size, size);
     let seed = 9151;
     const rand = () => {
@@ -102,7 +107,7 @@ function foil(scene) {
     };
     for (let n = 0; n < 260; n++) {
       const v = 150 + Math.floor(rand() * 80);
-      ctx.fillStyle = `rgba(${v},${v},${v + 6},0.35)`;
+      ctx.fillStyle = `rgba(${Math.round(v * tint[0])},${Math.round(v * tint[1])},${Math.round(v * tint[2])},0.35)`;
       ctx.fillRect(rand() * size, rand() * size, 6 + rand() * 30, 3 + rand() * 14);
     }
     ctx.fillStyle = 'rgba(70,74,84,0.55)';
@@ -200,6 +205,75 @@ function webb(scene, name, mats) {
   return root;
 }
 
+// Kepler: a photometer tube under a slanted sunshade, solar panels wrapped round the
+// sunward side, a six-sided bus and a dish antenna at the foot. The tube points across
+// the sunward axis; the panels face the Sun.
+function kepler(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  const up = (id, options, material, y, rotation = [0, 0, 0]) => part(cyl(scene, `${name}${id}`, options), root, material, [0, y, 0], rotation);
+  up('Bus', { height: 0.18, diameter: 0.46, tessellation: 6 }, mats.goldFoil, -0.36);
+  up('Tube', { height: 0.5, diameter: 0.34, tessellation: 24 }, mats.foil, -0.02);
+  up('Shade', { height: 0.3, diameterTop: 0.4, diameterBottom: 0.36, tessellation: 24 }, mats.foil, 0.36);
+  up('Mouth', { height: 0.01, diameter: 0.36, tessellation: 24 }, mats.dark, 0.512);
+  up('Collar', { height: 0.012, diameter: 0.37, tessellation: 24 }, mats.grey, 0.215);
+  // Four panels round the sunward half of the tube.
+  for (const [i, angle] of [[0, -0.9], [1, -0.3], [2, 0.3], [3, 0.9]]) {
+    part(CreateBox(`${name}Panel${i}`, { width: 0.115, height: 0.58, depth: 0.008 }, scene), root, mats.cells,
+      [Math.sin(angle) * 0.2, 0.0, Math.cos(angle) * 0.2], [0, angle, 0]);
+  }
+  part(cyl(scene, `${name}Dish`, { height: 0.03, diameterTop: 0.2, diameterBottom: 0.04, tessellation: 20 }), root, mats.white, [0, -0.48, -0.08], [Math.PI, 0, 0]);
+  part(CreateBox(`${name}Tracker`, { width: 0.05, height: 0.07, depth: 0.05 }, scene), root, mats.dark, [0.12, -0.3, -0.2]);
+  return root;
+}
+
+// Chandra: a long tube that narrows toward the instruments at the back, a wider
+// spacecraft module at the front with the sunshade door swung open, and two solar
+// wings of three panels each. The tube lies across the sunward axis, like Hubble's.
+function chandra(scene, name, mats) {
+  const outer = new TransformNode(name, scene);
+  const root = new TransformNode(`${name}Body`, scene);
+  root.parent = outer;
+  root.rotation.x = -QUARTER;
+  const tube = (id, options, z, material) => part(cyl(scene, `${name}${id}`, { tessellation: 28, ...options }), root, material, [0, 0, z], [QUARTER, 0, 0]);
+  tube('Module', { height: 0.2, diameter: 0.3 }, 0.34, mats.goldFoil);
+  tube('Mouth', { height: 0.01, diameter: 0.2 }, 0.445, mats.dark);
+  // Babylon's cylinder has diameterTop at +y, which the quarter turn lays toward +z.
+  tube('Bench', { height: 0.62, diameterTop: 0.2, diameterBottom: 0.12 }, -0.07, mats.foil);
+  tube('Ring', { height: 0.012, diameter: 0.31 }, 0.24, mats.grey);
+  part(CreateBox(`${name}Instruments`, { width: 0.2, height: 0.16, depth: 0.14 }, scene), root, mats.goldFoil, [0, 0, -0.44]);
+  part(cyl(scene, `${name}Radiator`, { height: 0.012, diameter: 0.24, tessellation: 4 }), root, mats.silver, [0, 0.09, -0.44]);
+  const hinge = new TransformNode(`${name}Hinge`, scene);
+  hinge.parent = root;
+  hinge.position.set(0, 0.1, 0.445);
+  hinge.rotation.x = -1.9;
+  part(cyl(scene, `${name}Door`, { height: 0.008, diameter: 0.2, tessellation: 28 }), hinge, mats.goldFoil, [0, -0.1, 0], [QUARTER, 0, 0]);
+  for (const s of [-1, 1]) {
+    part(cyl(scene, `${name}Arm${s}`, { height: 0.1, diameter: 0.012, tessellation: 6 }), root, mats.grey, [s * 0.2, 0, 0.34], [0, 0, QUARTER]);
+    for (let k = 0; k < 3; k++) {
+      part(CreateBox(`${name}Wing${s}${k}`, { width: 0.115, height: 0.008, depth: 0.2 }, scene), root, mats.cells, [s * (0.31 + k * 0.12), 0, 0.34]);
+    }
+  }
+  return outer;
+}
+
+// Euclid: a telescope tube standing on a gold service module, with one tall flat
+// sunshield of solar cells down the sunward side and a dish underneath.
+function euclid(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(cyl(scene, `${name}Service`, { height: 0.2, diameter: 0.5, tessellation: 6 }), root, mats.goldFoil, [0, -0.36, -0.03]);
+  part(cyl(scene, `${name}Tube`, { height: 0.62, diameter: 0.36, tessellation: 24 }), root, mats.dark, [0, 0.05, -0.05]);
+  part(cyl(scene, `${name}Baffle`, { height: 0.06, diameter: 0.38, tessellation: 24 }), root, mats.white, [0, 0.39, -0.05]);
+  part(cyl(scene, `${name}Mouth`, { height: 0.01, diameter: 0.33, tessellation: 24 }), root, mats.dark, [0, 0.423, -0.05]);
+  // The sunshield: solar cells facing the Sun, white behind.
+  part(CreateBox(`${name}Shield`, { width: 0.52, height: 0.94, depth: 0.012 }, scene), root, mats.cells, [0, 0.0, 0.17]);
+  part(CreateBox(`${name}ShieldBack`, { width: 0.52, height: 0.94, depth: 0.006 }, scene), root, mats.white, [0, 0.0, 0.158]);
+  for (const s of [-1, 1]) {
+    part(CreateBox(`${name}Brace${s}`, { width: 0.02, height: 0.5, depth: 0.2 }, scene), root, mats.grey, [s * 0.2, 0.0, 0.06]);
+  }
+  part(cyl(scene, `${name}Dish`, { height: 0.03, diameterTop: 0.18, diameterBottom: 0.04, tessellation: 20 }), root, mats.white, [0.1, -0.5, -0.05], [Math.PI, 0, 0]);
+  return root;
+}
+
 export function createCraft(scene, craftList) {
   const mats = {
     white: paint(scene, 'craftWhite', '#e8e6e0'),
@@ -211,8 +285,9 @@ export function createCraft(scene, craftList) {
     shield: paint(scene, 'craftShield', '#6f6384', 0.12),
     cells: textured(scene, 'craftCells', solarCells(scene), 0.45),
     foil: textured(scene, 'craftFoil', foil(scene), 0.3),
+    goldFoil: textured(scene, 'craftGoldFoil', foil(scene, 'craftGoldFoilMap', '#b8892f', [1, 0.78, 0.36]), 0.3),
   };
-  const build = { voyager1: voyager, voyager2: voyager, hubble, jwst: webb };
+  const build = { voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid };
   const nodes = new Map(craftList.map((c) => [c.id, build[c.id](scene, c.id, mats)]));
 
   // craft: this frame's positions (km); position: the traveler (km); sunPosition (km).

@@ -31,7 +31,7 @@ void main(){
   // The planet in front already hides the covered part of the disc; what is left keeps
   // its full surface brightness. Only the glare around it fades with the covered area.
   // (Additive blending multiplies the colour by alpha, so visibility goes in once.)
-  vec3 col = (surface * disc * 1.35 + glow * visibility) * .8;
+  vec3 col = (surface * disc * 1.35 + glow * visibility) * .68;
   float a = clamp(disc + corona * .38 + rayH + rayV + ring, 0., 1.);
   gl_FragColor = vec4(col, a);
 }

@@ -718,6 +718,9 @@ body.touch #reticle span {
   font-size:9px;
   content:"·";
 }
+.marker.selected {
+  z-index:2;
+}
 
 #inspectTarget {
   display:block;

@@ -27,3 +27,17 @@ export function spreadArrows(arrows, gap, height) {
   for (const p of placed) result[p.i] = { ...arrows[p.i], y: Math.max(0, p.y) };
   return result;
 }
+
+// From far away a moon sits almost on its planet, and the later label covered the
+// planet's. Hide such moon labels unless the moon is the selected one.
+export function crowdedMoons(spots, gap = 40) {
+  const byId = new Map(spots.map((s) => [s.id, s]));
+  const hidden = new Set();
+  for (const moon of spots) {
+    if (!moon.parent || moon.outside || moon.selected) continue;
+    const planet = byId.get(moon.parent);
+    if (!planet || planet.outside) continue;
+    if (Math.abs(moon.x - planet.x) < gap && Math.abs(moon.y - planet.y) < gap) hidden.add(moon.id);
+  }
+  return hidden;
+}

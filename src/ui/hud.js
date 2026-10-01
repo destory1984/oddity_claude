@@ -1,5 +1,5 @@
 import { objectParticle } from './messages.js';
-import { keepMarker, spreadArrows } from '../core/markers.js';
+import { keepMarker, spreadArrows, crowdedMoons } from '../core/markers.js';
 
 const $ = (id) => document.getElementById(id);
 const ARROWS = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
@@ -62,19 +62,27 @@ export function createHud(bodies, { onSelect, onFace, onInspect }) {
       $('flightState').textContent = flightLabel;
       // Every body in view gets a label; off-screen arrows only for the selected, the
       // nearest and nearby bodies (core/markers.js), so fifteen arrows do not pile up.
-      const arrows = [];
-      for (const body of bodies) {
+      const placed = bodies.map((body) => {
         const el = markers.get(body.id);
         const hidden = body.kind === 'star' && view.sunVisibility < 0.01;
         const spot = placeMarker(el, view.directions[body.id], view.camera, hidden ? `${body.name} · 가려짐` : body.name);
+        const selectedHere = body.id === selected.id;
         const keep = keepMarker({
           outside: spot.outside,
-          selected: body.id === selected.id,
+          selected: selectedHere,
           nearest: body.id === local.body.id,
           surfaceKm: view.distances[body.id] - body.radiusKm,
         });
-        el.hidden = !keep;
-        if (keep && spot.outside) arrows.push({ el, ...spot });
+        return { body, el, spot, keep, selected: selectedHere };
+      });
+      const crowded = crowdedMoons(placed.map(({ body, spot, selected: sel }) => ({
+        id: body.id, parent: body.kind === 'moon' ? body.parent : null, x: spot.x, y: spot.y, outside: spot.outside, selected: sel,
+      })));
+      const arrows = [];
+      for (const { body, el, spot, keep, selected: sel } of placed) {
+        el.hidden = !keep || crowded.has(body.id);
+        el.classList.toggle('selected', sel);
+        if (!el.hidden && spot.outside) arrows.push({ el, ...spot });
       }
       spreadArrows(arrows, 40, innerHeight).forEach((spot, i) => {
         arrows[i].el.style.top = `${spot.y}px`;

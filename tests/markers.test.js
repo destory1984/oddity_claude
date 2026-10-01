@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { keepMarker, spreadArrows } from '../src/core/markers.js';
+import { keepMarker, spreadArrows, crowdedMoons } from '../src/core/markers.js';
 
 test('on-screen bodies always keep their label', () => {
   assert.equal(keepMarker({ outside: false, selected: false, nearest: false, surfaceKm: 1e9 }), true);
@@ -25,4 +25,25 @@ test('arrows piled on one spot are pushed apart vertically', () => {
 test('arrows far apart are left alone', () => {
   const input = [{ x: 100, y: 300 }, { x: 1200, y: 300 }];
   assert.deepEqual(spreadArrows(input, 40, 720), input);
+});
+
+const saturn = { id: 'saturn', parent: null, x: 567, y: 212, outside: false, selected: false };
+const titan = { id: 'titan', parent: 'saturn', x: 573, y: 210, outside: false, selected: false };
+
+test('a moon label sitting on its planet label is hidden', () => {
+  assert.deepEqual([...crowdedMoons([saturn, titan])], ['titan']);
+});
+
+test('a selected moon keeps its label even on top of its planet', () => {
+  assert.deepEqual([...crowdedMoons([saturn, { ...titan, selected: true }])], []);
+});
+
+test('a moon far enough from its planet on screen keeps its label', () => {
+  assert.deepEqual([...crowdedMoons([saturn, { ...titan, x: 567 + 41 }])], []);
+  assert.deepEqual([...crowdedMoons([saturn, { ...titan, y: 212 + 41 }])], []);
+});
+
+test('off-screen arrows are left to spreadArrows', () => {
+  assert.deepEqual([...crowdedMoons([{ ...saturn, outside: true }, titan])], []);
+  assert.deepEqual([...crowdedMoons([saturn, { ...titan, outside: true }])], []);
 });

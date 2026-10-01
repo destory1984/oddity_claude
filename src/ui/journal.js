@@ -137,6 +137,9 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     renderStories();
     renderCraft();
     dialog.showModal();
+    // The close button at the foot takes the focus, which scrolls the long list to its
+    // end: start at the top instead.
+    dialog.scrollTop = 0;
   }
 
   return {

@@ -215,6 +215,13 @@ export function createSound() {
       bell(659, 0.9);
       bell(988, 1.08);
     },
+    // A slingshot: the air tearing past, a rising note, and three bells as the planet
+    // falls behind.
+    sling: () => {
+      noise({ length: 1.8, volume: 0.26, type: 'bandpass', freq: 500, to: 4200 });
+      tone({ freq: 147, to: 880, length: 1.4, volume: 0.1 });
+      [784, 1175, 1568].forEach((f, i) => bell(f, 0.5 + i * 0.14, 0.08));
+    },
     // A jump, six seconds like the flash (ui/warp.js): a rush that rises for 2.7 s, bells
     // as the screen goes white, then the air settling as the new place appears.
     warp: () => {

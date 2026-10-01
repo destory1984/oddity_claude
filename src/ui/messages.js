@@ -46,6 +46,8 @@ export function eventMessage(event, bodies = []) {
       const final = code >= HANGUL_START && code <= HANGUL_END ? (code - HANGUL_START) % 28 : 0;
       return `${event.name}${final === 0 || final === 8 ? '로' : '으로'} 순간 이동했습니다.`;
     }
+    case 'slingshot':
+      return `${nameOf(bodies, event.bodyId)} 스윙바이! 제한 속도의 ${event.factor.toFixed(1)}배로 튕겨 나갑니다. Space로 멈춥니다.`;
     case 'dockRefused':
       return `${event.name}${hasFinalConsonant(event.name) ? '은' : '는'} 지표면과 너무 가까워 도킹할 수 없습니다.`;
     case 'dockAborted':

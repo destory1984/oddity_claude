@@ -3,7 +3,7 @@ import {
 } from './core/bodies.js';
 import { C, speedLimit } from './core/flight.js';
 import {
-  createState, step, stopNow, totalSpeed, carryAlong, TURN_RATE, START_YAW,
+  createState, step, stopNow, totalSpeed, carryAlong, boostLift, TURN_RATE, START_YAW,
 } from './core/game.js';
 import { rotateLocal, lookAtDirection, multiply, conjugate, forward } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft } from './core/craft.js';
@@ -15,6 +15,7 @@ import { createMinimap } from './ui/minimap.js';
 import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
 import { createWarp } from './ui/warp.js';
+import { slingshot } from './core/slingshot.js';
 import { teleportSpot } from './core/teleport.js';
 import { eventMessage, limitText, dateText, withParticle } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
@@ -88,6 +89,8 @@ let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
 let simTime = 0;
 // The note on entering the asteroid belt shows once per visit to the game.
 let beltSeen = false;
+// The fly-by of a planet in progress, watched for a slingshot (core/slingshot.js).
+let pass = null;
 // The craft the traveler is docked with, and the glide toward it (core/dock.js startDocking).
 let docked = null;
 // While docked, the speed shown is the craft's own (the traveler rides with it).
@@ -466,6 +469,13 @@ async function init() {
     const slowPoints = craft.map((c) => c.position);
     const result = step(state, intent, dt, bodies, slowPoints);
     state = result.state;
+    // Flying fast past a planet flings the traveler off on the way out.
+    const swing = docked ? { pass: null, flung: null } : slingshot(pass, state, bodies);
+    pass = swing.pass;
+    if (swing.flung) {
+      state = swing.flung.state;
+      result.events.push({ type: 'slingshot', bodyId: swing.flung.bodyId, factor: swing.flung.factor });
+    }
     const logged = updateProgress(progress, state, bodies);
     let finished = false;
     if (logged.events.length) {
@@ -521,7 +531,7 @@ async function init() {
     const limit = speedLimit(Math.min(
       nearestSurface(state.position, bodies).distance,
       ...slowPoints.map((p) => Math.hypot(...p.map((n, i) => n - state.position[i]))),
-    ));
+    )) * boostLift(state);
     sound.engine(engineSound({
       speed: paused ? 0 : shownSpeed(),
       maxSpeed: limit,

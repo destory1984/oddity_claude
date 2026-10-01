@@ -9,6 +9,12 @@ export function keepMarker({ outside, selected, nearest, surfaceKm, always = fal
   return !outside || selected || nearest || always || surfaceKm <= NEARBY_KM;
 }
 
+// Labels this close to the middle of the screen also show how far away the thing is:
+// within a quarter of the screen's shorter side.
+export function nearCentre(x, y, width, height) {
+  return Math.hypot(x - width / 2, y - height / 2) <= Math.min(width, height) / 4;
+}
+
 // Arrows closer than `gap` pixels (in both x and y) are pushed apart vertically,
 // staying within the screen height.
 export function spreadArrows(arrows, gap, height) {

@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  objectParticle, subjectParticle, withParticle, eventMessage, limitText, dateText,
+  objectParticle, subjectParticle, withParticle, eventMessage, limitText, dateText, distanceText,
 } from '../src/ui/messages.js';
 import { BODIES } from '../src/core/bodies.js';
 import { FACTS } from '../src/core/facts.js';
@@ -81,4 +81,15 @@ test('docking messages name the craft with the right particle', () => {
   assert.equal(eventMessage({ type: 'undocked', name: '보이저 1호' }), '보이저 1호와 도킹을 풀었습니다.');
   assert.equal(eventMessage({ type: 'docking', name: '허블 우주망원경' }), '허블 우주망원경에 도킹 중입니다. 0에 맞춰 붙습니다.');
   assert.equal(eventMessage({ type: 'dockAborted', name: '허블 우주망원경' }), '허블 우주망원경 도킹을 그만두었습니다.');
+});
+
+test('distances read in km, then in 만 and 억 as they grow', () => {
+  assert.equal(distanceText(0), '0km');
+  assert.equal(distanceText(540.4), '540km');
+  assert.equal(distanceText(9129), '9,129km');
+  assert.equal(distanceText(45737), '4.6만km');
+  assert.equal(distanceText(999499), '99.9만km');
+  assert.equal(distanceText(2190000), '219만km');
+  assert.equal(distanceText(59063800), '5,906만km');
+  assert.equal(distanceText(254000000), '2.5억km');
 });

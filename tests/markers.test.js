@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { keepMarker, spreadArrows, crowdedMoons } from '../src/core/markers.js';
+import { keepMarker, spreadArrows, crowdedMoons, nearCentre } from '../src/core/markers.js';
 
 test('on-screen bodies always keep their label', () => {
   assert.equal(keepMarker({ outside: false, selected: false, nearest: false, surfaceKm: 1e9 }), true);
@@ -52,4 +52,15 @@ test('Earth and the Sun keep their arrow from anywhere', () => {
   const far = { outside: true, selected: false, nearest: false, surfaceKm: 5e8 };
   assert.equal(keepMarker(far), false);
   assert.equal(keepMarker({ ...far, always: true }), true);
+});
+
+test('a label counts as near the centre within a quarter of the shorter side of the screen', () => {
+  // 1280 x 720: within 180 px of (640, 360).
+  assert.equal(nearCentre(640, 360, 1280, 720), true);
+  assert.equal(nearCentre(640 + 179, 360, 1280, 720), true);
+  assert.equal(nearCentre(640 + 181, 360, 1280, 720), false);
+  assert.equal(nearCentre(640 + 130, 360 + 130, 1280, 720), false);
+  // A tall phone: 375 x 812 gives 94 px.
+  assert.equal(nearCentre(187, 406 + 90, 375, 812), true);
+  assert.equal(nearCentre(187, 406 + 100, 375, 812), false);
 });

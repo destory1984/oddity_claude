@@ -1,5 +1,5 @@
-import { objectParticle } from './messages.js';
-import { keepMarker, spreadArrows, crowdedMoons } from '../core/markers.js';
+import { objectParticle, distanceText } from './messages.js';
+import { keepMarker, spreadArrows, crowdedMoons, nearCentre } from '../core/markers.js';
 
 const $ = (id) => document.getElementById(id);
 const ARROWS = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
@@ -76,6 +76,10 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         const el = markers.get(body.id);
         const hidden = body.kind === 'star' && view.sunVisibility < 0.01;
         const spot = placeMarker(el, view.directions[body.id], view.camera, hidden ? `${body.name} · 가려짐` : body.name);
+        // What the traveler is looking toward also says how far its surface is.
+        if (!spot.outside && nearCentre(spot.x, spot.y, innerWidth, innerHeight)) {
+          el.textContent += ` · ${distanceText(Math.max(0, view.distances[body.id] - body.radiusKm))}`;
+        }
         const selectedHere = body.id === selected.id;
         // A story place gets no off-screen arrow unless it is the chosen target.
         const keep = (body.kind !== 'site' || !spot.outside || selectedHere) && keepMarker({

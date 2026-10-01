@@ -2,6 +2,8 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { MISSIONS, completedMissions } from '../src/core/missions.js';
 import { BODIES, START_POSITION, bodyById } from '../src/core/bodies.js';
+import { craftAt } from '../src/core/craft.js';
+import { fromEquatorial } from '../src/core/sky.js';
 import { lookAtDirection } from '../src/core/orientation.js';
 
 const DEG = Math.PI / 180;
@@ -29,9 +31,9 @@ function near(bodyId, distanceKm, fromId = 'sun') {
   return add(body.position, scale(toward, distanceKm));
 }
 
-test('there are eight missions with names and hints', () => {
-  assert.equal(MISSIONS.length, 8);
-  assert.equal(new Set(MISSIONS.map((m) => m.id)).size, 8);
+test('there are seventeen missions with names and hints', () => {
+  assert.equal(MISSIONS.length, 17);
+  assert.equal(new Set(MISSIONS.map((m) => m.id)).size, 17);
   for (const m of MISSIONS) assert.ok(m.name && m.hint);
 });
 
@@ -93,4 +95,85 @@ test('two planets in one shot, neither hidden behind the other', () => {
 
 test('two planets needs more than specks: Mars and Jupiter from the start do not count', () => {
   assert.ok(!shoot(START_POSITION, 'jupiter').includes('twoPlanets'));
+});
+
+// ---- missions after famous photographs ----
+const CRAFT = craftAt(0, BODIES);
+const craftById = (id) => CRAFT.find((c) => c.id === id);
+function shootWith(position, target, { fovDeg = 60 } = {}) {
+  return completedMissions({
+    position, orientation: lookAtDirection(sub(target, position)), fovY: fovDeg * DEG, aspect: 16 / 9,
+    heroVisible: false, bodies: BODIES, craft: CRAFT,
+  });
+}
+
+test('family portrait: six planets in one frame from beyond Neptune', () => {
+  const sun = bodyById('sun').position;
+  const high = add(sun, [0, 2e8, 0]);
+  assert.ok(shootWith(high, sun, { fovDeg: 60 }).includes('familyPortrait'));
+  // Inside Neptune's orbit it does not count, however many planets show.
+  assert.ok(!shootWith(add(sun, [0, 2e7, 0]), sun, { fovDeg: 95 }).includes('familyPortrait'));
+});
+
+test('blue marble: the fully lit Earth filling the frame', () => {
+  const day = near('earth', 6371 + 8000, 'sun');
+  assert.ok(shoot(day, 'earth').includes('blueMarble'));
+  const earth = bodyById('earth').position;
+  const night = day.map((n, i) => 2 * earth[i] - n);
+  assert.ok(!shoot(night, 'earth').includes('blueMarble'));
+  assert.ok(!shoot(near('earth', 6371 + 200000, 'sun'), 'earth').includes('blueMarble'));
+});
+
+test("in Saturn's shadow: Saturn large with the Sun hidden behind it", () => {
+  const saturn = bodyById('saturn');
+  const behind = near('saturn', 58232 + 150000, 'sun').map((n, i) => 2 * saturn.position[i] - n);
+  assert.ok(shoot(behind, 'saturn').includes('saturnShadow'));
+  assert.ok(!shoot(near('saturn', 58232 + 150000, 'sun'), 'saturn').includes('saturnShadow'));
+});
+
+test("Galileo's discovery: Jupiter and its four big moons together", () => {
+  const jupiter = bodyById('jupiter').position;
+  const above = add(jupiter, [0, 600000, 0]);
+  assert.ok(shoot(above, 'jupiter', { fovDeg: 60 }).includes('galileo'));
+  assert.ok(!shoot(above, 'jupiter', { fovDeg: 5 }).includes('galileo'));
+});
+
+test('the moons of Mars: Phobos and Deimos in one frame from close by', () => {
+  const mars = bodyById('mars').position;
+  const above = add(mars, [0, 3389.5 + 15000, 0]);
+  assert.ok(shoot(above, 'mars', { fovDeg: 70 }).includes('marsMoons'));
+  assert.ok(!shoot(add(mars, [0, 3389.5 + 40000, 0]), 'mars', { fovDeg: 70 }).includes('marsMoons'));
+});
+
+test('Earth and Moon from afar: both in frame, Earth small but more than a dot', () => {
+  const earth = bodyById('earth').position;
+  const out = add(earth, scale(unit(sub(earth, bodyById('sun').position)), 1.5e6));
+  assert.ok(shoot(out, 'earth').includes('earthAndMoon'));
+  assert.ok(!shoot(START_POSITION, 'earth').includes('earthAndMoon'));
+});
+
+test('Hubble over Earth: the telescope close by with Earth in the frame', () => {
+  const hubble = craftById('hubble');
+  const earth = bodyById('earth').position;
+  const outward = unit(sub(hubble.position, earth));
+  const spot = add(hubble.position, scale(outward, 500));
+  assert.ok(shootWith(spot, hubble.position).includes('hubbleEarth'));
+  assert.ok(!shootWith(add(hubble.position, scale(outward, 20000)), hubble.position).includes('hubbleEarth'));
+  // Without the craft list the mission is simply not met.
+  assert.ok(!shoot(spot, hubble.position).includes('hubbleEarth'));
+});
+
+test('golden record: a Voyager close by with the Sun in the frame', () => {
+  const v1 = craftById('voyager1');
+  const sun = bodyById('sun').position;
+  const beyond = add(v1.position, scale(unit(sub(v1.position, sun)), 1000));
+  assert.ok(shootWith(beyond, sun, { fovDeg: 40 }).includes('goldenRecord'));
+  assert.ok(!shootWith(add(v1.position, [0, 1e6, 0]), sun).includes('goldenRecord'));
+});
+
+test('heart of the Milky Way: the galactic centre in the middle of the frame', () => {
+  const centre = fromEquatorial(17.761, -29.0);
+  const from = add(bodyById('sun').position, [0, 5e7, 0]);
+  assert.ok(shoot(from, add(from, centre)).includes('milkyWayHeart'));
+  assert.ok(!shoot(from, add(from, scale(centre, -1))).includes('milkyWayHeart'));
 });

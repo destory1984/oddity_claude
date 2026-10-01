@@ -139,6 +139,7 @@ async function init() {
         aspect: shot.aspect,
         heroVisible: shot.heroVisible,
         bodies,
+        craft,
       });
       const before = progress;
       const result = recordPhotos(progress, done);

@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { fromEquatorial, GALAXIES, CONSTELLATIONS, BRIGHT_STARS, skyLabels } from '../src/core/sky.js';
+import { fromEquatorial, GALAXIES, NEBULAE, CONSTELLATIONS, BRIGHT_STARS, skyLabels } from '../src/core/sky.js';
 
 const deg = (r) => (r * 180) / Math.PI;
 const angle = (a, b) => deg(Math.acos(Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]))));
@@ -56,7 +56,12 @@ test('Polaris marks the north celestial pole; Sirius is the brightest star liste
 
 test('one label per constellation and galaxy, each a unit direction inside its figure', () => {
   const labels = skyLabels();
-  assert.equal(labels.length, CONSTELLATIONS.length + GALAXIES.length);
+  assert.equal(labels.length, CONSTELLATIONS.length + GALAXIES.length + NEBULAE.length);
+  assert.deepEqual(NEBULAE.map((n) => n.id), ['m42', 'carina', 'm8', 'm45', 'omegaCen']);
+  // The Orion Nebula sits in Orion's sword, just south of the celestial equator.
+  const m42 = fromEquatorial(5.588, -5.39);
+  const belt = fromEquatorial(5.6, -1.2);
+  assert.ok(m42.reduce((sum, n, i) => sum + n * belt[i], 0) > Math.cos(5 * Math.PI / 180));
   for (const l of labels) assert.ok(l.id && l.name && Math.abs(len(l.direction) - 1) < 1e-9, l.id);
   const orion = CONSTELLATIONS.find((c) => c.id === 'ori');
   const label = labels.find((l) => l.id === 'ori');

@@ -9,7 +9,46 @@ uniform vec3 centre;
 uniform vec3 galDir[4];
 uniform vec3 galAxis[4];
 uniform vec4 galShape[4];
+// Nebulae and star clusters: direction, and (half-width in radians, kind, brightness, 0).
+uniform vec3 nebDir[5];
+uniform vec4 nebShape[5];
+// The way to the Sun from the traveler, for the zodiacal light.
+uniform vec3 sunDir;
 #include<noise>
+// A glowing gas cloud (kind 0), an open cluster of young blue stars (1) or a ball of
+// old stars (2).
+vec3 nebula(vec3 d, vec3 dir, vec4 shape) {
+  float c = dot(d, dir);
+  if (c < .97) return vec3(0.);
+  vec3 ax = normalize(cross(dir, vec3(0., 1., 0.)));
+  vec3 ay = cross(dir, ax);
+  vec3 v = d - dir * c;
+  vec2 p = vec2(dot(v, ax), dot(v, ay)) / shape.x;
+  float r = length(p);
+  if (r > 2.) return vec3(0.);
+  float edge = 1. - smoothstep(1.2, 2., r);
+  vec2 here = dir.xz * 30.;
+  if (shape.y < .5) {
+    // Ragged, with dark lanes across it; pink at the rim, bluish white at the heart.
+    float cloud = fbm(p * 2.2 + here);
+    float body = exp(-r * r * 1.4) * (.3 + 1.3 * cloud);
+    float dark = smoothstep(.45, .7, fbm(p * 3.5 + here + 9.));
+    vec3 tint = mix(vec3(1., .36, .55), vec3(.75, .84, 1.), exp(-r * r * 6.));
+    return tint * body * (1. - .6 * dark) * edge * shape.z;
+  }
+  if (shape.y < 1.5) {
+    // A blue haze with a handful of sharp stars in it.
+    float haze = exp(-r * r * 2.) * .3 * (.6 + .8 * fbm(p * 3. + here));
+    float stars = 0.;
+    for (int k = 0; k < 8; k++) {
+      vec2 at = vec2(sin(float(k) * 12.9898 + 1.) * .6, sin(float(k) * 78.233 + 2.) * .42);
+      stars += exp(-dot(p - at, p - at) * 900.);
+    }
+    return vec3(.7, .82, 1.) * (haze + stars * 1.6) * edge * shape.z;
+  }
+  float ball = exp(-r * 5.) * 1.4 + exp(-r * r * 3.) * .4 * (.5 + noise(p * 40. + here));
+  return vec3(1., .93, .8) * ball * edge * shape.z;
+}
 // A galaxy as a small glowing patch: a bright core in a soft disc. Spirals get two
 // faint arms; the irregular Magellanic Clouds get a bar and ragged clumps instead.
 vec3 galaxy(vec3 d, vec3 dir, vec3 axis, vec4 shape) {
@@ -63,5 +102,12 @@ void main(){
   vec3 cool = vec3(.72, .8, 1.);
   vec3 col = mix(cool, warm, bulge * .8 + .1) * light * .3;
   for (int i = 0; i < 4; i++) col += galaxy(d, galDir[i], galAxis[i], galShape[i]);
+  for (int i = 0; i < 5; i++) col += nebula(d, nebDir[i], nebShape[i]);
+  // Zodiacal light: sunlight scattered by the dust between the planets, a faint wedge
+  // lying along their plane (y = 0) and brightest toward the Sun.
+  float elong = acos(clamp(dot(d, sunDir), -1., 1.));
+  float fromPlane = asin(clamp(d.y, -1., 1.));
+  float zodiacal = exp(-elong * 1.9) * exp(-pow(fromPlane / (.09 + .2 * elong), 2.)) * .2;
+  col += vec3(1., .93, .8) * zodiacal;
   gl_FragColor = vec4(col, 1.);
 }

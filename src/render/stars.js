@@ -1,7 +1,7 @@
 import {
   PointsCloudSystem, Vector3, Color3, Color4, CreateSphere, CreateLineSystem, Constants,
 } from './babylon.js';
-import { fromEquatorial, GALAXIES, CONSTELLATIONS, BRIGHT_STARS } from '../core/sky.js';
+import { fromEquatorial, GALAXIES, NEBULAE, CONSTELLATIONS, BRIGHT_STARS } from '../core/sky.js';
 import skyFrag from './shaders/sky.frag?raw';
 import { shader } from './planets.js';
 
@@ -17,6 +17,8 @@ const GALACTIC_CENTRE = fromEcliptic(266.8, -5.5);
 
 // Galaxies are drawn 1.6 times their real apparent size so they can be picked out.
 const GALAXY_ZOOM = 1.6;
+// Nebulae and clusters are small: three times their real size.
+const NEBULA_ZOOM = 3;
 const skyVector = (raH, decDeg) => new Vector3(...fromEquatorial(raH, decDeg));
 
 // Sparse, fixed celestial background. Points are distant directions, not nearby dust.
@@ -52,7 +54,7 @@ export async function createStars(scene) {
 
   // The Milky Way's glow, painted on the inside of a sphere just nearer than the stars.
   const sky = CreateSphere('milkyWay', { diameter: 2 * 79000, segments: 24, sideOrientation: 1 }, scene);
-  const material = shader(scene, 'sky', skyFrag, ['pole', 'centre', 'galDir', 'galAxis', 'galShape']);
+  const material = shader(scene, 'sky', skyFrag, ['pole', 'centre', 'galDir', 'galAxis', 'galShape', 'nebDir', 'nebShape', 'sunDir']);
   material.setVector3('pole', GALACTIC_POLE);
   material.setVector3('centre', GALACTIC_CENTRE);
   const celestialNorth = skyVector(0, 90);
@@ -71,6 +73,9 @@ export async function createStars(scene) {
   material.setArray3('galDir', dirs);
   material.setArray3('galAxis', axes);
   material.setArray4('galShape', shapes);
+  material.setArray3('nebDir', NEBULAE.flatMap((n) => fromEquatorial(n.raH, n.decDeg)));
+  material.setArray4('nebShape', NEBULAE.flatMap((n) => [rad(n.sizeDeg) * NEBULA_ZOOM, n.kind, n.light, 0]));
+  material.setVector3('sunDir', new Vector3(1, 0, 0));
   material.backFaceCulling = false;
   material.alphaMode = Constants.ALPHA_ADD;
   material.needAlphaBlending = () => true;
@@ -114,5 +119,6 @@ export async function createStars(scene) {
   lines.alpha = 0.16;
   lines.isPickable = false;
   lines.alwaysSelectAsActiveMesh = true;
-  return cloud.mesh;
+  // setSun: the way to the Sun from the traveler (a unit vector), for the zodiacal light.
+  return { mesh: cloud.mesh, setSun: (direction) => material.setVector3('sunDir', new Vector3(...direction)) };
 }

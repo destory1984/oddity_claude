@@ -27,6 +27,18 @@ export const GALAXIES = [
   { id: 'smc', name: '소마젤란은하', raH: 0.878, decDeg: -72.83, paDeg: 45, sizeDeg: 2.2, ratio: 0.6, light: 0.36, irregular: 1 },
 ];
 
+// Glowing gas clouds and star clusters, the showpieces of the night sky. kind: 0 a
+// nebula (pink hydrogen light), 1 an open cluster (young blue stars in a haze), 2 a
+// globular cluster (a ball of old stars). sizeDeg: real half-width; light: brightness.
+// Drawn larger than life like the galaxies (render/stars.js).
+export const NEBULAE = [
+  { id: 'm42', name: '오리온 대성운', raH: 5.588, decDeg: -5.39, sizeDeg: 0.6, light: 0.75, kind: 0 },
+  { id: 'carina', name: '용골자리 성운', raH: 10.752, decDeg: -59.87, sizeDeg: 1, light: 0.6, kind: 0 },
+  { id: 'm8', name: '석호 성운', raH: 18.06, decDeg: -24.38, sizeDeg: 0.6, light: 0.5, kind: 0 },
+  { id: 'm45', name: '플레이아데스성단', raH: 3.79, decDeg: 24.12, sizeDeg: 0.9, light: 0.8, kind: 1 },
+  { id: 'omegaCen', name: '오메가 센타우리', raH: 13.447, decDeg: -47.48, sizeDeg: 0.4, light: 0.7, kind: 2 },
+];
+
 const star = (name, raH, decDeg, mag) => ({ name, raH, decDeg, mag });
 
 export { CONSTELLATIONS };
@@ -39,9 +51,10 @@ export const BRIGHT_STARS = [
   star('Spica', 13.42, -11.16, 0.97), star('Polaris', 2.53, 89.26, 1.98),
 ];
 
-// Where to write each name: a constellation's label point, a galaxy's centre.
+// Where to write each name: a constellation's label point, the centre of a galaxy,
+// a nebula or a cluster.
 export function skyLabels() {
   const labels = CONSTELLATIONS.map((c) => ({ id: c.id, name: c.name, direction: fromEquatorial(c.label[0], c.label[1]) }));
-  for (const g of GALAXIES) labels.push({ id: g.id, name: g.name, direction: fromEquatorial(g.raH, g.decDeg) });
+  for (const g of [...GALAXIES, ...NEBULAE]) labels.push({ id: g.id, name: g.name, direction: fromEquatorial(g.raH, g.decDeg) });
   return labels;
 }

@@ -44,7 +44,7 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
   const sunBody = bodies.find((b) => b.kind === 'star');
   const rendered = createBodyMeshes(scene, bodies, sunBody);
   const sun = createSun(scene, sunBody);
-  await createStars(scene);
+  const stars = await createStars(scene);
   const belt = await createBelt(scene);
   // Lights only matter to the spacecraft; planets and the Sun use their own shaders.
   const craftFill = new HemisphericLight('craftFill', new Vector3(0, 1, 0), scene);
@@ -131,6 +131,7 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       direction: directions[b.id], distance: distances[b.id], radius: b.radiusKm,
     }));
     const visibility = sunVisibility(directions[sunNow.id], distances[sunNow.id], sunNow.radiusKm, occluders);
+    stars.setSun(directions[sunNow.id]);
     sun.material.setFloat('visibility', visibility);
     sun.material.setFloat('time', elapsed);
     sun.material.setFloat('eclipse', eclipseDepth(visibility));

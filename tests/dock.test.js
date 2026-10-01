@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import {
   DOCK_RANGE_KM, DOCK_GAP_KM, DOCK_MIN_ALTITUDE_KM, tooLowToDock, DOCK_SECONDS, dockable, dockOffset, dockedState, wantsToLeave, rideSpeed,
   startDocking, dockingOffset, countsBetween, isDocked, latchJolt, ZERO_WORD_S, JOLT_SECONDS, releaseDrift,
+  DOCK_ASIDE, dockFacing, dockingFacing,
 } from '../src/core/dock.js';
+import { forward, rotateVector, conjugate } from '../src/core/orientation.js';
 import { bodiesAt } from '../src/core/bodies.js';
 import { craftAt } from '../src/core/craft.js';
 import { createState } from '../src/core/game.js';
@@ -186,4 +188,28 @@ test('letting go far from any body keeps the whole speed of the craft', () => {
   const speed = Math.hypot(...releaseDrift('jwst', craftAt(0, before), craftAfter, before, after, webb.position, dt));
   assert.ok(speed > 300 && speed < 350, `${speed}`);
   assert.deepEqual(releaseDrift('jwst', craftAfter, craftAfter, after, after, webb.position, 0), [0, 0, 0]);
+});
+
+test('the view turns aside on the way in, so the craft ends up beside the traveler, not behind', () => {
+  const at = [400, 2100, 3050];
+  // Where the craft is in the traveler's own frame (x right, y up, z ahead).
+  const seen = (q) => {
+    const rel = hubble.position.map((n, i) => n - at[i]);
+    const length = Math.hypot(...rel);
+    return rotateVector(conjugate(q), rel).map((n) => n / length);
+  };
+  const wide = seen(dockFacing(at, hubble.position, true));
+  near(wide[0], -Math.sin(DOCK_ASIDE.yaw), 1e-9);
+  near(wide[1], 0, 1e-9);
+  const tall = seen(dockFacing(at, hubble.position, false));
+  near(tall[0], 0, 1e-9);
+  near(tall[1], Math.sin(DOCK_ASIDE.pitch), 1e-9);
+  // It starts as the traveler faced, gets there half a second before contact, and
+  // once docked leaves the view alone.
+  const from = [0, 0, 0, 1];
+  const dock = startDocking(at, hubble);
+  forward(dockingFacing(dock, from, at, hubble.position)).forEach((n, i) => near(n, [0, 0, 1][i], 1e-9));
+  const late = dockingFacing({ ...dock, elapsed: DOCK_SECONDS - 0.4 }, from, at, hubble.position);
+  forward(late).forEach((n, i) => near(n, forward(dockFacing(at, hubble.position))[i], 1e-9));
+  assert.equal(dockingFacing({ ...dock, elapsed: DOCK_SECONDS }, from, at, hubble.position), null);
 });

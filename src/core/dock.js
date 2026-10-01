@@ -1,6 +1,7 @@
 // Docking with a spacecraft or telescope: come close, dock, and ride along with it.
 import { stopNow, CARRY_KM } from './game.js';
 import { nearestSurface } from './bodies.js';
+import { lookAtDirection, rotateLocal, blend } from './orientation.js';
 
 // How close the traveler must be to dock, and how far off they sit once docked (the
 // craft are drawn 30 km wide, so 60 km shows the whole craft at arm's length).
@@ -68,6 +69,26 @@ export function dockingOffset({ from, to, elapsed }) {
   // seconds early and hanging there.)
   const eased = t * t * (2.5 - 1.5 * t);
   return from.map((n, i) => n + (to[i] - n) * eased);
+}
+
+// The traveler stands in the middle of the view, so a craft straight ahead would be
+// hidden behind them. The view is turned this far (radians) off the craft as the glide
+// runs: to one side on a wide screen, downward on a tall one (the craft then sits above).
+export const DOCK_ASIDE = { yaw: 0.42, pitch: 0.36 };
+
+// The way to face on contact: at the craft, turned aside. wide: the screen is wider
+// than it is tall.
+export function dockFacing(position, craftPosition, wide = true) {
+  const at = lookAtDirection(craftPosition.map((n, i) => n - position[i]));
+  return wide ? rotateLocal(at, DOCK_ASIDE.yaw, 0) : rotateLocal(at, 0, DOCK_ASIDE.pitch);
+}
+
+// The orientation part-way through the glide: from how the traveler faced at the
+// start (`from`) round to dockFacing, evenly eased; null once docked (free to look).
+export function dockingFacing(dock, from, position, craftPosition, wide = true) {
+  if (isDocked(dock)) return null;
+  const t = Math.max(0, Math.min(1, dock.elapsed / (DOCK_SECONDS - 0.5)));
+  return blend(from, dockFacing(position, craftPosition, wide), t * t * (3 - 2 * t));
 }
 
 // The numbers to call out as the glide's clock goes from `before` to `after` seconds.

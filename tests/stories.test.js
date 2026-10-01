@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { STORIES, storySitesAt, completedStories, siteHidden, siteFar, SITE_SHOWN_KM } from '../src/core/stories.js';
+import { STORIES, storySitesAt, completedStories, siteHidden, siteFar, SITE_SHOWN_RADII } from '../src/core/stories.js';
 import { surfaceDirection, spinAngle } from '../src/core/surface.js';
 import { BODIES, bodiesAt, bodyById } from '../src/core/bodies.js';
 import { craftAt } from '../src/core/craft.js';
@@ -70,11 +70,14 @@ test('the landers and rovers of the Moon and Mars: 21 on the Moon, 11 on Mars, w
   assert.deepEqual(done(sites.find((s) => s.id === 'perseverance').position, 'mars'), ['perseverance']);
 });
 
-test("a place's label shows only from within 300,000 km of its body", () => {
+test("a place's label shows only from within four radii of its body's surface", () => {
   const moon = bodyById('moon');
-  assert.equal(SITE_SHOWN_KM, 300000);
-  assert.equal(siteFar(moon, add(moon.position, [0, moon.radiusKm + 300000, 0])), false);
-  assert.equal(siteFar(moon, add(moon.position, [0, moon.radiusKm + 300001, 0])), true);
+  assert.equal(SITE_SHOWN_RADII, 4);
+  near(4 * moon.radiusKm, 6950, 5);
+  assert.equal(siteFar(moon, add(moon.position, [0, moon.radiusKm * 5, 0])), false);
+  assert.equal(siteFar(moon, add(moon.position, [0, moon.radiusKm * 5 + 1, 0])), true);
+  // 18,000 km from the Moon, where the labels used to pile up on its disc: hidden.
+  assert.equal(siteFar(moon, add(moon.position, [0, moon.radiusKm + 18000, 0])), true);
 });
 
 test('the places sit on the surface of their body and move as it spins', () => {

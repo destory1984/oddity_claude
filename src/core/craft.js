@@ -182,28 +182,33 @@ function onOrbit(centre, out, [x, y], tiltDeg, turnDeg = 0) {
   ];
 }
 
-// A craft that goes round a planet or a moon shows only from within this far of that
-// body's surface, or of the craft itself (Juno swings 800,000 km out from Jupiter).
-// From farther off their names would only crowd round the planet.
+// A craft that goes round a planet or a moon shows only from close to that body: within
+// this many of its radii above the surface (the Moon: 6,950 km; Earth: 25,500 km), or,
+// for one that flies far out (Webb, Cassini, Juno at its far point), within twice the
+// craft's own distance from the body. From farther off the names only pile up on the
+// planet's disc.
+export const SHOWN_RADII = 4;
+// The Roadster goes round the Sun some four million km from Earth, but counts as
+// Earth's: it shows from within this far of Earth's surface, or of the car itself.
 export const CRAFT_SHOWN_KM = 300000;
-// The Roadster goes round the Sun some four million km from Earth, but counts as Earth's.
 const HOME = { roadster: 'earth' };
 
 // The ids of the craft to leave undrawn and unnamed from where the traveler is.
 // keepId: the chosen target, which stays. craft: this frame's positions (craftAt).
 export function hiddenCraft(position, bodies, keepId = null, craft = []) {
-  const from = (point) => Math.hypot(...position.map((n, i) => n - point[i]));
-  const nearBody = (id) => {
-    const body = bodies.find((b) => b.id === id);
-    return from(body.position) - body.radiusKm <= CRAFT_SHOWN_KM;
-  };
-  const beside = (id) => {
-    const there = craft.find((c) => c.id === id);
-    return Boolean(there) && from(there.position) <= CRAFT_SHOWN_KM;
-  };
+  const gap = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
+  const above = (body) => gap(position, body.position) - body.radiusKm;
   return CRAFT.filter((c) => {
-    const home = c.parent ?? HOME[c.id];
-    return c.id !== keepId && Boolean(home) && !nearBody(home) && !beside(c.id);
+    if (c.id === keepId) return false;
+    const there = craft.find((x) => x.id === c.id);
+    if (c.parent) {
+      const parent = bodies.find((b) => b.id === c.parent);
+      const out = there ? gap(there.position, parent.position) : 0;
+      return above(parent) > Math.max(SHOWN_RADII * parent.radiusKm, 2 * out);
+    }
+    if (!HOME[c.id]) return false;
+    const beside = Boolean(there) && gap(position, there.position) <= CRAFT_SHOWN_KM;
+    return above(bodies.find((b) => b.id === HOME[c.id])) > CRAFT_SHOWN_KM && !beside;
   }).map((c) => c.id);
 }
 

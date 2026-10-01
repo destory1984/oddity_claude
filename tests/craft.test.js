@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  CRAFT, craftAt, hiddenCraft, CRAFT_SHOWN_KM, HUBBLE_ALTITUDE_KM, JWST_FROM_EARTH_KM, CHANDRA_PERIOD_S,
+  CRAFT, craftAt, hiddenCraft, CRAFT_SHOWN_KM, SHOWN_RADII, HUBBLE_ALTITUDE_KM, JWST_FROM_EARTH_KM, CHANDRA_PERIOD_S,
 } from '../src/core/craft.js';
 import { bodiesAt } from '../src/core/bodies.js';
 import { C } from '../src/core/flight.js';
@@ -20,11 +20,13 @@ test('twenty-two craft: probes, telescopes, space stations, the first satellite 
   for (const c of CRAFT) assert.ok(c.name && c.nameEn && c.kind === 'craft');
 });
 
-test('a craft that circles a planet or a moon shows only from within 300,000 km of it', () => {
+test('a craft that circles a planet or a moon shows only from close to it: four radii up, or twice its own distance out', () => {
   const bodies = bodiesAt(0);
   const craft = craftAt(0, bodies);
   const body = (id) => bodies.find((b) => b.id === id);
   const above = (b, km) => [b.position[0], b.position[1] + b.radiusKm + km, b.position[2]];
+  const hidden = (position, keepId = null) => hiddenCraft(position, bodies, keepId, craft);
+  assert.equal(SHOWN_RADII, 4);
   assert.equal(CRAFT_SHOWN_KM, 300000);
   const homes = {
     earth: ['hubble', 'jwst', 'chandra', 'euclid', 'iss', 'tiangong', 'sputnik', 'roadster'],
@@ -36,36 +38,46 @@ test('a craft that circles a planet or a moon shows only from within 300,000 km 
   const all = Object.values(homes).flat();
   // High over the Sun's pole, far from every planet: all of them are hidden...
   const nowhere = above(body('sun'), 5e7);
-  assert.deepEqual([...hiddenCraft(nowhere, bodies, null, craft)].sort(), [...all].sort());
+  assert.deepEqual([...hidden(nowhere)].sort(), [...all].sort());
   // ...and the ones that roam the solar system on their own never are.
   for (const id of ['voyager1', 'voyager2', 'kepler', 'parker', 'newHorizons', 'pioneer10', 'europaClipper', 'lucy', 'pioneer11']) {
     assert.ok(!all.includes(id), id);
   }
-  // Near its own body each one shows, right up to the line.
-  for (const [home, ids] of Object.entries(homes)) {
-    const close = hiddenCraft(above(body(home), 300000), bodies, null, craft);
-    for (const id of ids) assert.ok(!close.includes(id), `${id} from ${home}`);
+  // The low fliers show from four radii above their body, and not from a km farther.
+  for (const [home, ids] of [['moon', ['danuri', 'lro']], ['earth', ['hubble', 'iss', 'tiangong', 'sputnik']], ['mars', ['mro']]]) {
+    const b = body(home);
+    for (const id of ids) {
+      assert.ok(!hidden(above(b, 4 * b.radiusKm)).includes(id), id);
+      assert.ok(hidden(above(b, 4 * b.radiusKm + 1)).includes(id), id);
+    }
+  }
+  // 18,000 km from the Moon, where the names used to pile up on its disc: none.
+  assert.ok(hidden(above(body('moon'), 18000)).includes('danuri'));
+  // Webb is 150,000 km out from Earth: it shows from twice that, when Hubble long has not.
+  const earth = body('earth');
+  const webbOut = dist(craft.find((c) => c.id === 'jwst').position, earth.position);
+  assert.ok(!hidden(above(earth, 2 * webbOut - 1)).includes('jwst'));
+  assert.ok(hidden(above(earth, 2 * webbOut + 1)).includes('jwst'));
+  assert.ok(hidden(above(earth, 2 * webbOut - 1)).includes('hubble'));
+  // Standing beside any of them, it shows.
+  for (const id of all) {
+    const it = craft.find((c) => c.id === id);
+    assert.ok(!hidden([it.position[0], it.position[1], it.position[2] + 80]).includes(id), id);
   }
   // From Saturn: Cassini shows, Earth's and Jupiter's do not.
-  const fromSaturn = hiddenCraft(above(body('saturn'), 1000), bodies, null, craft);
+  const fromSaturn = hidden(above(body('saturn'), 1000));
   assert.ok(!fromSaturn.includes('cassini'));
   for (const id of ['hubble', 'iss', 'juno', 'mro', 'danuri', 'roadster']) assert.ok(fromSaturn.includes(id), id);
-  // Just past the line over Earth, Earth's own go (the Moon's stay while the Moon is near).
-  const pastEarth = hiddenCraft(above(body('earth'), 300001), bodies);
-  for (const id of ['hubble', 'jwst', 'chandra', 'euclid', 'iss', 'tiangong', 'sputnik', 'roadster']) assert.ok(pastEarth.includes(id), id);
-  // The Roadster is millions of km from Earth, and Juno swings far out from Jupiter:
-  // each also shows from beside the craft itself.
-  for (const id of ['roadster', 'juno']) {
-    const it = craft.find((c) => c.id === id);
-    const off = (km) => [it.position[0], it.position[1], it.position[2] + km];
-    assert.ok(!hiddenCraft(off(300000), bodies, null, craft).includes(id), id);
-  }
+  // The Roadster, millions of km from Earth: from within 300,000 km of Earth or of the car.
   const car = craft.find((c) => c.id === 'roadster');
-  assert.ok(dist(car.position, body('earth').position) > 1e6);
-  assert.ok(hiddenCraft([car.position[0], car.position[1] + 300001, car.position[2]], bodies, null, craft).includes('roadster'));
+  assert.ok(dist(car.position, earth.position) > 1e6);
+  assert.ok(!hidden(above(earth, 300000)).includes('roadster'));
+  assert.ok(hidden(above(earth, 300001)).includes('roadster'));
+  assert.ok(!hidden([car.position[0], car.position[1] + 300000, car.position[2]]).includes('roadster'));
+  assert.ok(hidden([car.position[0], car.position[1] + 300001, car.position[2]]).includes('roadster'));
   // The chosen target keeps its label wherever the traveler is.
-  assert.ok(!hiddenCraft(nowhere, bodies, 'jwst', craft).includes('jwst'));
-  assert.equal(hiddenCraft(nowhere, bodies, 'jwst', craft).length, all.length - 1);
+  assert.ok(!hidden(nowhere, 'jwst').includes('jwst'));
+  assert.equal(hidden(nowhere, 'jwst').length, all.length - 1);
 });
 
 test('every craft has a launch year and a short introduction for the docking card', () => {

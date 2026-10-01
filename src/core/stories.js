@@ -110,11 +110,12 @@ STORIES.push(
   ...MARS_LANDINGS.map((row) => landing('mars', '화성', row)),
 );
 
-// A place's label shows only from within this far of its body's surface, like the
-// craft that circle a planet (core/craft.js hiddenCraft).
-export const SITE_SHOWN_KM = 300000;
+// A place's label shows only from within this many of its body's radii above the
+// surface (the Moon: 6,950 km; Mars: 13,560 km), like the craft that circle a planet
+// (core/craft.js hiddenCraft). From farther off the names pile up on the disc.
+export const SITE_SHOWN_RADII = 4;
 export function siteFar(body, position) {
-  return Math.hypot(...position.map((n, i) => n - body.position[i])) - body.radiusKm > SITE_SHOWN_KM;
+  return Math.hypot(...position.map((n, i) => n - body.position[i])) - body.radiusKm > SITE_SHOWN_RADII * body.radiusKm;
 }
 
 const gap = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));

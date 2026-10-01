@@ -29,6 +29,7 @@ import { createGuideView } from './ui/guide.js';
 import { createJournal } from './ui/journal.js';
 import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
+import { moodFor } from './core/music.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
@@ -257,6 +258,15 @@ async function init() {
     document.addEventListener(type, () => sound.unlock(), { capture: true });
   }
   $('capture').addEventListener('click', () => sound.cue('shutter'));
+  function showMusicButton() {
+    $('musicButton').textContent = sound.musicOn() ? '배경 음악 끄기' : '배경 음악 켜기';
+  }
+  showMusicButton();
+  $('musicButton').addEventListener('click', () => {
+    sound.unlock();
+    sound.setMusic(!sound.musicOn());
+    showMusicButton();
+  });
 
   $('brake').addEventListener('click', brake);
   $('pauseButton').addEventListener('click', () => setPaused(!paused));
@@ -381,6 +391,7 @@ async function init() {
       maxSpeed: limit,
       thrusting: !paused && input.driving(),
     }), elapsed || 1 / 60);
+    sound.music(moodFor({ restingOn: state.restingOn, surfaceKm: nearestSurface(state.position, bodies).distance }));
 
     const view = world.update({
       bodies,

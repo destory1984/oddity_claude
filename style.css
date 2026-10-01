@@ -968,7 +968,8 @@ nav button {
 }
 
 #installButton,
-#layoutButton {
+#layoutButton,
+#musicButton {
   width: auto;
   margin: 8px 0 0;
   min-height: 34px;

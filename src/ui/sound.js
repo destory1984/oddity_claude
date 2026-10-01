@@ -1,7 +1,13 @@
 // Synthesized game sounds (Web Audio). No sound files: every cue is built from
 // oscillators and a noise buffer, so nothing is downloaded and nothing is licensed.
 
+import { BAR_S, barPlan } from '../core/music.js';
+
 const MUTE_KEY = 'oddity.muted';
+const MUSIC_KEY = 'oddity.music';
+// Music sits well under the effects.
+const PAD_VOLUME = 0.02;
+const BASS_VOLUME = 0.03;
 const MASTER_VOLUME = 0.8;
 
 function loadMuted() {
@@ -9,6 +15,23 @@ function loadMuted() {
     return localStorage.getItem(MUTE_KEY) === '1';
   } catch {
     return false;
+  }
+}
+
+// Background music is on unless the player turned it off.
+function loadMusic() {
+  try {
+    return localStorage.getItem(MUSIC_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+
+function saveMusic(on) {
+  try {
+    localStorage.setItem(MUSIC_KEY, on ? '1' : '0');
+  } catch {
+    // Not remembered in this window; still applies now.
   }
 }
 
@@ -26,6 +49,11 @@ export function createSound() {
   let noiseBuffer;
   let engine;
   let muted = loadMuted();
+  let musicOn = loadMusic();
+  let musicBus;
+  // When the next bar of music starts (audio clock) and which bar it is.
+  let nextBarAt = 0;
+  let barNumber = 0;
 
   // Browsers only allow audio after a user gesture, so this runs on the first key or tap.
   function ensure() {
@@ -36,6 +64,9 @@ export function createSound() {
     master = ctx.createGain();
     master.gain.value = muted ? 0 : MASTER_VOLUME;
     master.connect(ctx.destination);
+    musicBus = ctx.createGain();
+    musicBus.gain.value = musicOn ? 1 : 0;
+    musicBus.connect(master);
 
     noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const data = noiseBuffer.getChannelData(0);
@@ -70,7 +101,7 @@ export function createSound() {
     return ctx;
   }
 
-  function tone({ freq, to = freq, type = 'sine', start = 0, length = 0.2, volume = 0.2 }) {
+  function tone({ freq, to = freq, type = 'sine', start = 0, length = 0.2, volume = 0.2, out = master }) {
     const t = ctx.currentTime + start;
     const osc = ctx.createOscillator();
     const env = ctx.createGain();
@@ -80,9 +111,44 @@ export function createSound() {
     env.gain.setValueAtTime(0.0001, t);
     env.gain.exponentialRampToValueAtTime(volume, t + 0.01);
     env.gain.exponentialRampToValueAtTime(0.0001, t + length);
-    osc.connect(env).connect(master);
+    osc.connect(env).connect(out);
     osc.start(t);
     osc.stop(t + length + 0.05);
+  }
+
+  // One held note of the pad: two slightly detuned triangles behind a low-pass filter,
+  // swelling in over 2.5 s and fading out over 3 s so bars melt into each other.
+  function padNote(freq, start, volume) {
+    const t = ctx.currentTime + start;
+    const end = t + BAR_S + 3;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 900;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.linearRampToValueAtTime(volume, t + 2.5);
+    env.gain.setValueAtTime(volume, end - 3);
+    env.gain.linearRampToValueAtTime(0.0001, end);
+    filter.connect(env).connect(musicBus);
+    for (const cents of [-6, 6]) {
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      osc.detune.value = cents;
+      osc.connect(filter);
+      osc.start(t);
+      osc.stop(end + 0.05);
+    }
+  }
+
+  // plan from core/music.js barPlan(); start is seconds from now.
+  function playBar(plan, start) {
+    for (const freq of plan.pad) padNote(freq, start, PAD_VOLUME);
+    tone({ freq: plan.bass, start, length: BAR_S, volume: BASS_VOLUME, out: musicBus });
+    for (const note of plan.notes) {
+      tone({ freq: note.freq, start: start + note.at, length: 1.4, volume: note.volume, out: musicBus });
+      tone({ freq: note.freq * 3, start: start + note.at, length: 0.4, volume: note.volume * 0.2, out: musicBus });
+    }
   }
 
   function noise({ start = 0, length = 0.1, volume = 0.2, type = 'highpass', freq = 2000, to = freq }) {
@@ -153,6 +219,24 @@ export function createSound() {
       if (!muted && sparkle > 0 && Math.random() < sparkle * dt) {
         pluck(PENTATONIC[Math.floor(Math.random() * PENTATONIC.length)], 0, 0.035, 0.6);
       }
+    },
+    // Called every frame with the mood from core/music.js moodFor(); starts each bar a
+    // little ahead of time so the audio clock, not the frame rate, keeps the beat.
+    music(mood) {
+      if (!ctx || muted || !musicOn || ctx.state !== 'running') return;
+      const now = ctx.currentTime;
+      // After a pause or a hidden tab, pick up from now rather than catching up.
+      if (nextBarAt < now) nextBarAt = now + 0.1;
+      if (nextBarAt - now > 0.5) return;
+      playBar(barPlan(barNumber, mood), nextBarAt - now);
+      barNumber += 1;
+      nextBarAt += BAR_S;
+    },
+    musicOn: () => musicOn,
+    setMusic(on) {
+      musicOn = on;
+      saveMusic(on);
+      if (ctx) musicBus.gain.setTargetAtTime(on ? 1 : 0, ctx.currentTime, 0.3);
     },
     muted: () => muted,
     setMuted(value) {

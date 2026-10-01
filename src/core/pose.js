@@ -49,6 +49,10 @@ export const IDLE_ACTIONS = {
   hop: { seconds: 1.1 },
   lookAround: { seconds: 2.4 },
   stretch: { seconds: 2.0 },
+  nod: { seconds: 1.4 },
+  sway: { seconds: 2.4 },
+  cheer: { seconds: 1.8 },
+  bothWave: { seconds: 2.2 },
 };
 const IDLE_NAMES = Object.keys(IDLE_ACTIONS);
 const FIRST_MOVE_S = 3;
@@ -118,6 +122,35 @@ export function idlePose(name, p) {
       pose.headNod = -0.25 * env;
       pose.hop = 0.04 * env;
       break;
+    case 'nod':
+      // Two small nods toward the camera.
+      pose.headNod = 0.25 * Math.sin(p * Math.PI * 2) ** 2;
+      break;
+    case 'sway':
+      // Rocking from side to side, head leaning with the body.
+      pose.spin = 0.3 * Math.sin(p * Math.PI * 2) * env;
+      pose.headTilt = 0.2 * Math.sin(p * Math.PI * 2) * env;
+      break;
+    case 'cheer': {
+      // Both arms thrown up over three bounces.
+      const raise = smooth(clamp(p / 0.2, 0, 1)) * smooth(clamp((1 - p) / 0.2, 0, 1));
+      pose.armBlend[-1] = raise;
+      pose.armBlend[1] = raise;
+      pose.arms[-1] = { pitch: 0.15, yaw: -0.3 };
+      pose.arms[1] = { pitch: 0.15, yaw: 0.3 };
+      pose.hop = 0.18 * Math.abs(Math.sin(p * Math.PI * 3));
+      break;
+    }
+    case 'bothWave': {
+      // Both arms up and out, swinging in mirror image.
+      const raise = smooth(clamp(p / 0.2, 0, 1)) * smooth(clamp((1 - p) / 0.2, 0, 1));
+      const swing = 0.45 + 0.3 * Math.sin(p * Math.PI * 6);
+      pose.armBlend[-1] = raise;
+      pose.armBlend[1] = raise;
+      pose.arms[-1] = { pitch: 0.35, yaw: -swing };
+      pose.arms[1] = { pitch: 0.35, yaw: swing };
+      break;
+    }
     default:
       break;
   }

@@ -103,3 +103,21 @@ test('the hero shrinks on tall phone screens so the view stays open', () => {
   const mid = heroScaleFor(0.9);
   assert.ok(mid > 0.78 && mid < 1.3);
 });
+
+test('ten resting moves: nod, sway, cheer and a two-handed wave join the first six', () => {
+  assert.deepEqual(Object.keys(IDLE_ACTIONS), ['tilt', 'wave', 'twirl', 'hop', 'lookAround', 'stretch', 'nod', 'sway', 'cheer', 'bothWave']);
+  // Nod: the head dips forward twice and comes back up in between.
+  assert.ok(idlePose('nod', 0.25).headNod > 0.15);
+  assert.ok(idlePose('nod', 0.5).headNod < 0.03);
+  assert.ok(idlePose('nod', 0.75).headNod > 0.15);
+  // Sway: the body turns a little one way, then the other, never far.
+  assert.ok(idlePose('sway', 0.25).spin * idlePose('sway', 0.75).spin < 0);
+  for (let p = 0; p <= 1; p += 0.05) assert.ok(Math.abs(idlePose('sway', p).spin) <= 0.4);
+  // Cheer: both arms up while she bounces.
+  const cheer = idlePose('cheer', 0.3);
+  assert.ok(cheer.armBlend[1] > 0.9 && cheer.armBlend[-1] > 0.9 && cheer.hop > 0.05);
+  // Two-handed wave: both arms raised, swinging in mirror image.
+  const a = idlePose('bothWave', 0.42);
+  assert.ok(a.armBlend[1] > 0.9 && a.armBlend[-1] > 0.9);
+  assert.ok(Math.abs(a.arms[1].yaw + a.arms[-1].yaw) < 1e-9);
+});

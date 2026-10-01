@@ -1,7 +1,8 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  DOCK_RANGE_KM, DOCK_GAP_KM, dockable, dockOffset, dockedState, wantsToLeave, rideSpeed,
+  DOCK_RANGE_KM, DOCK_GAP_KM, DOCK_SECONDS, dockable, dockOffset, dockedState, wantsToLeave, rideSpeed,
+  startDocking, dockingOffset,
 } from '../src/core/dock.js';
 import { bodiesAt } from '../src/core/bodies.js';
 import { craftAt } from '../src/core/craft.js';
@@ -64,4 +65,33 @@ test('riding with Voyager 1 shows its speed away from the Sun, and no time passi
   const after = bodiesAt(dt * 720);
   near(rideSpeed('voyager1', craftAt(0, before), craftAt(dt * 720, after), before, after, dt), (17 * 720) / 100, 0.01);
   assert.equal(rideSpeed('voyager1', craftAt(0, before), craftAt(0, before), before, before, 0), 0);
+});
+
+test('docking glides in over three seconds instead of jumping', () => {
+  assert.equal(DOCK_SECONDS, 3);
+  let dock = startDocking([1000, 2000, 3800], hubble);
+  assert.equal(dock.id, 'hubble');
+  // At the first instant the traveler has not moved.
+  assert.deepEqual(dockingOffset(dock), [0, 0, 800]);
+  const seen = [800];
+  for (let i = 0; i < 180; i++) {
+    dock = { ...dock, elapsed: dock.elapsed + 1 / 60 };
+    seen.push(dockingOffset(dock)[2]);
+  }
+  // Always closing in, never past the docking spot, and there at the end.
+  for (let i = 1; i < seen.length; i++) assert.ok(seen[i] <= seen[i - 1] + 1e-9 && seen[i] >= 60 - 1e-9);
+  near(seen[180], 60, 1e-6);
+  // Gentle at both ends: the first and last tenth of a second move far less than the middle.
+  const early = seen[0] - seen[6];
+  const middle = seen[87] - seen[93];
+  const late = seen[174] - seen[180];
+  assert.ok(early < middle / 5 && late < middle / 5, `${early} ${middle} ${late}`);
+  // Long after, it stays put.
+  near(dockingOffset({ ...dock, elapsed: 99 })[2], 60, 1e-9);
+});
+
+test('docking from inside the docking distance eases outward to it', () => {
+  const dock = startDocking([1000, 2000, 3010], hubble);
+  near(Math.hypot(...dockingOffset(dock)), 10);
+  near(Math.hypot(...dockingOffset({ ...dock, elapsed: 3 })), 60, 1e-9);
 });

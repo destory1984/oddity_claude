@@ -5,6 +5,8 @@ import { stopNow } from './game.js';
 // craft are drawn 30 km wide, so 60 km shows the whole craft at arm's length).
 export const DOCK_RANGE_KM = 1000;
 export const DOCK_GAP_KM = 60;
+// The glide from where the traveler was to the docking spot.
+export const DOCK_SECONDS = 3;
 
 const gap = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
 
@@ -28,6 +30,24 @@ export function dockOffset(position, craft) {
   const length = Math.hypot(...out);
   if (length < 1e-9) return [0, DOCK_GAP_KM, 0];
   return out.map((n) => (n / length) * DOCK_GAP_KM);
+}
+
+// A docking in progress: where the traveler was relative to the craft, where they will
+// sit, and how long the glide has run (seconds of play).
+export function startDocking(position, craft) {
+  return {
+    id: craft.id,
+    from: position.map((n, i) => n - craft.position[i]),
+    to: dockOffset(position, craft),
+    elapsed: 0,
+  };
+}
+
+// The traveler's offset from the craft right now: eased, slow at both ends.
+export function dockingOffset({ from, to, elapsed }) {
+  const t = Math.max(0, Math.min(1, elapsed / DOCK_SECONDS));
+  const eased = t * t * t * (t * (6 * t - 15) + 10);
+  return from.map((n, i) => n + (to[i] - n) * eased);
 }
 
 // The traveler held at the craft: carried with it and at rest, free to look around.

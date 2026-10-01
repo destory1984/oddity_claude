@@ -30,7 +30,9 @@ import { createJournal } from './ui/journal.js';
 import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
-import { dockable, dockOffset, dockedState, wantsToLeave, rideSpeed } from './core/dock.js';
+import {
+  dockable, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset,
+} from './core/dock.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
@@ -81,7 +83,7 @@ let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
 let simTime = 0;
 // The note on entering the asteroid belt shows once per visit to the game.
 let beltSeen = false;
-// The craft the traveler is docked with: { id, offset } (offset from the craft, km).
+// The craft the traveler is docked with, and the glide toward it (core/dock.js startDocking).
 let docked = null;
 // While docked, the speed shown is the craft's own (the traveler rides with it).
 let rideKmS = 0;
@@ -199,7 +201,7 @@ async function init() {
   }
 
   function dock(target) {
-    docked = { id: target.id, offset: dockOffset(state.position, target) };
+    docked = startDocking(state.position, target);
     input.clear();
     announce({ type: 'docked', name: target.name });
   }
@@ -376,7 +378,10 @@ async function init() {
     const intent = input.intent();
     if (docked) {
       if (!paused && wantsToLeave(intent)) undock();
-      else state = dockedState(state, here(docked.id), docked.offset);
+      else {
+        docked = { ...docked, elapsed: docked.elapsed + dt };
+        state = dockedState(state, here(docked.id), dockingOffset(docked));
+      }
     }
     const slowPoints = craft.map((c) => c.position);
     const result = step(state, intent, dt, bodies, slowPoints);

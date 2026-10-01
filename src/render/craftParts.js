@@ -35,6 +35,50 @@ function textured(scene, name, texture, glow = 0.3) {
   return m;
 }
 
+// The flag of Korea, for Danuri: white, the red and blue taeguk in the middle, a
+// trigram toward each corner. Drawn in the flag's own 3 by 2 units, stretched over the
+// square texture (the panel it goes on is 3 by 2).
+function taegukgi(scene) {
+  return drawn(scene, 'craftTaegukgiMap', 256, (ctx, size) => {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+    ctx.save();
+    ctx.scale(size / 3, size / 2);
+    ctx.translate(1.5, 1);
+    const tilt = Math.atan2(2, 3);
+    ctx.save();
+    ctx.rotate(tilt);
+    ctx.fillStyle = '#cd2e3a';
+    ctx.beginPath(); ctx.arc(0, 0, 0.5, Math.PI, 2 * Math.PI); ctx.fill();
+    ctx.fillStyle = '#0047a0';
+    ctx.beginPath(); ctx.arc(0, 0, 0.5, 0, Math.PI); ctx.fill();
+    ctx.fillStyle = '#cd2e3a';
+    ctx.beginPath(); ctx.arc(-0.25, 0, 0.25, 0, 2 * Math.PI); ctx.fill();
+    ctx.fillStyle = '#0047a0';
+    ctx.beginPath(); ctx.arc(0.25, 0, 0.25, 0, 2 * Math.PI); ctx.fill();
+    ctx.restore();
+    // Bars from the middle outward: 1 whole, 0 broken. Upper left geon, lower right
+    // gon, upper right gam, lower left ri.
+    const trigrams = [[Math.PI + tilt, [1, 1, 1]], [tilt, [0, 0, 0]], [-tilt, [0, 1, 0]], [Math.PI - tilt, [1, 0, 1]]];
+    ctx.fillStyle = '#111111';
+    for (const [angle, bars] of trigrams) {
+      ctx.save();
+      ctx.rotate(angle);
+      ctx.translate(0.5 + 0.25 + 1 / 6, 0);
+      bars.forEach((whole, k) => {
+        const x = (k - 1) / 8 - 1 / 24;
+        if (whole) ctx.fillRect(x, -0.25, 1 / 12, 0.5);
+        else {
+          ctx.fillRect(x, -0.25, 1 / 12, 0.5 / 2 - 1 / 48);
+          ctx.fillRect(x, 1 / 48, 1 / 12, 0.5 / 2 - 1 / 48);
+        }
+      });
+      ctx.restore();
+    }
+    ctx.restore();
+  });
+}
+
 const seeded = (seed) => () => {
   seed = (seed * 1664525 + 1013904223) >>> 0;
   return seed / 4294967296;
@@ -122,6 +166,7 @@ export function craftMaterials(scene) {
     goldFoil: textured(scene, 'craftGoldFoil', foil(scene, 'craftGoldFoilMap', '#b8892f', [1, 0.78, 0.36]), 0.3),
     blackFoil: textured(scene, 'craftBlackFoil', foil(scene, 'craftBlackFoilMap', '#2a2b30', [0.3, 0.3, 0.33]), 0.5),
     plate: textured(scene, 'craftPlate', plating(scene), 0.28),
+    taegukgi: textured(scene, 'craftTaegukgi', taegukgi(scene), 0.6),
   };
   mats.chrome.specularColor = new Color3(0.9, 0.9, 0.9);
   mats.chrome.specularPower = 40;

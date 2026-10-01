@@ -39,7 +39,7 @@ import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
 import {
-  dockable, tooLowToDock, DOCK_RANGE_KM, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
+  dockable, DOCK_RANGE_KM, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
   releaseDrift, dockingFacing,
 } from './core/dock.js';
 import { standSpot, startVisit, hasArrived, visitStep } from './core/visit.js';
@@ -258,12 +258,8 @@ async function init() {
   }
 
   function dock(target) {
-    if (tooLowToDock(target, bodies)) {
-      toast.show(eventMessage({ type: 'dockRefused', name: target.name }));
-      return;
-    }
     visit = null;
-    docked = { ...startDocking(state.position, target), facing: state.orientation };
+    docked = { ...startDocking(state.position, target, bodies), facing: state.orientation };
     rideDrift = [0, 0, 0];
     showCraftCard(target);
     input.clear();
@@ -327,7 +323,7 @@ async function init() {
       const aside = target.kind !== 'craft' && target.kind !== 'site' && innerWidth / innerHeight >= 1;
       state = createState(spot, aside ? rotateLocal(facing, VISTA_YAW, 0) : facing);
       // On arrival, say what this is. A craft about to be docked with shows its card instead.
-      const docking = target.kind === 'craft' && !tooLowToDock(target, bodies);
+      const docking = target.kind === 'craft';
       const about = docking ? null : aboutKnown(target);
       const arrived = eventMessage({ type: 'teleported', name: target.name });
       toast.show(about ? `${arrived}\n${about}` : arrived);
@@ -554,7 +550,7 @@ async function init() {
           if (n > 0) sound.cue('count');
         }
         if (isDocked(docked) && was < docked.elapsed && !isDocked({ elapsed: was })) announce({ type: 'docked', name: here(docked.id).name });
-        state = dockedState(state, here(docked.id), dockingOffset(docked));
+        state = dockedState(state, here(docked.id), dockingOffset(docked), bodies);
         // Turn aside on the way in, so the craft ends up beside her, not behind her.
         const facing = dt > 0 ? dockingFacing(docked, docked.facing, state.position, here(docked.id).position, innerWidth >= innerHeight) : null;
         if (facing) state = { ...state, orientation: facing };

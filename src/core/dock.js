@@ -17,11 +17,14 @@ export const ZERO_WORD_S = 0.6;
 // The glide from where the traveler was to the docking spot.
 export const DOCK_SECONDS = COUNT_STARTS_S + COUNT_FROM + ZERO_WORD_S;
 
-// A craft flying lower than this over a surface cannot be docked with: sitting 60 km
-// off it, the traveler would be skimming the ground (LRO and Danuri over the Moon).
+// A craft flying lower than this over a surface (LRO and Danuri over the Moon) is
+// docked with from straight above: sitting 60 km off it on any other side, the
+// traveler would be skimming the ground or under it.
 export const DOCK_MIN_ALTITUDE_KM = 200;
+// The glide in never comes closer to a surface than this.
+export const GLIDE_CLEAR_KM = 20;
 
-// True when the craft is too close to the ground to dock with.
+// True when the craft is that close to the ground.
 export function tooLowToDock(craft, bodies) {
   return nearestSurface(craft.position, bodies).distance < DOCK_MIN_ALTITUDE_KM;
 }
@@ -42,9 +45,14 @@ export function dockable(position, craft) {
   return best;
 }
 
-// Where the docked traveler sits relative to the craft: on the side they came from.
-export function dockOffset(position, craft) {
-  const out = position.map((n, i) => n - craft.position[i]);
+// Where the docked traveler sits relative to the craft: on the side they came from,
+// or, for a craft flying low over a surface (bodies given), on the side away from
+// the ground.
+export function dockOffset(position, craft, bodies = null) {
+  const ground = bodies ? nearestSurface(craft.position, bodies) : null;
+  const out = ground?.body && ground.distance < DOCK_MIN_ALTITUDE_KM
+    ? craft.position.map((n, i) => n - ground.body.position[i])
+    : position.map((n, i) => n - craft.position[i]);
   const length = Math.hypot(...out);
   if (length < 1e-9) return [0, DOCK_GAP_KM, 0];
   return out.map((n) => (n / length) * DOCK_GAP_KM);
@@ -52,11 +60,11 @@ export function dockOffset(position, craft) {
 
 // A docking in progress: where the traveler was relative to the craft, where they will
 // sit, and how long the glide has run (seconds of play).
-export function startDocking(position, craft) {
+export function startDocking(position, craft, bodies = null) {
   return {
     id: craft.id,
     from: position.map((n, i) => n - craft.position[i]),
-    to: dockOffset(position, craft),
+    to: dockOffset(position, craft, bodies),
     elapsed: 0,
   };
 }
@@ -121,8 +129,19 @@ export function isDocked(dock) {
 }
 
 // The traveler held at the craft: carried with it and at rest, free to look around.
-export function dockedState(state, craft, offset) {
-  return { ...stopNow(state), restingOn: null, position: craft.position.map((n, i) => n + offset[i]) };
+// bodies: when given, the glide is kept above the ground (a craft low over the far
+// side of a moon would otherwise be reached through it).
+export function dockedState(state, craft, offset, bodies = null) {
+  let position = craft.position.map((n, i) => n + offset[i]);
+  if (bodies) {
+    const { body, distance } = nearestSurface(position, bodies);
+    if (body && distance < GLIDE_CLEAR_KM) {
+      const up = position.map((n, i) => n - body.position[i]);
+      const height = Math.hypot(...up) || 1;
+      position = body.position.map((n, i) => n + (up[i] / height) * (body.radiusKm + GLIDE_CLEAR_KM));
+    }
+  }
+  return { ...stopNow(state), restingOn: null, position };
 }
 
 // How fast the docked pair is going, in game km per second of play: the craft's motion

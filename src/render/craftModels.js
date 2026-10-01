@@ -644,26 +644,53 @@ function pioneer(scene, name, mats) {
 // a dish on a two-jointed boom, the main cameras looking down and NASA's shadow camera.
 function danuri(scene, name, mats) {
   const root = new TransformNode(name, scene);
-  box(scene, `${name}Bus`, root, mats.blackFoil, [0.24, 0.26, 0.24]);
-  box(scene, `${name}Top`, root, mats.goldFoil, [0.245, 0.02, 0.245], [0, 0.14, 0]);
-  box(scene, `${name}Foot`, root, mats.grey, [0.245, 0.012, 0.245], [0, -0.136, 0]);
-  for (const s of [-1, 1]) wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.12, 0, 0.02], to: [s * 0.52, 0, 0.02], width: 0.2, panels: 2, face: Z, yoke: 0.16 });
-  rod(scene, `${name}Boom0`, root, mats.grey, [0.05, 0.15, -0.05], [0.05, 0.25, -0.08], 0.014, 6);
-  rod(scene, `${name}Boom1`, root, mats.grey, [0.05, 0.25, -0.08], [0.05, 0.31, -0.03], 0.014, 6);
-  dish(scene, `${name}Dish`, root, mats, { at: [0.05, 0.31, -0.03], toward: [0, 1, 0.4], diameter: 0.2 });
-  // Looking down: the high-resolution camera pair, the wide polarising camera and
-  // ShadowCam, which sees into craters the Sun never reaches.
+  // The bus: gold blankets in a white frame, a dark radiator on the shaded side.
+  box(scene, `${name}Bus`, root, mats.goldFoil, [0.26, 0.32, 0.26]);
+  box(scene, `${name}Top`, root, mats.white, [0.275, 0.012, 0.275], [0, 0.166, 0]);
+  box(scene, `${name}Deck`, root, mats.grey, [0.275, 0.012, 0.275], [0, -0.166, 0]);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) box(scene, `${name}Post${sx}${sz}`, root, mats.white, [0.016, 0.33, 0.016], [sx * 0.131, 0, sz * 0.131]);
+  box(scene, `${name}Radiator`, root, mats.blackFoil, [0.2, 0.22, 0.006], [0, 0.01, -0.133]);
+  box(scene, `${name}Louvre`, root, mats.chrome, [0.2, 0.05, 0.008], [0, -0.1, -0.134]);
+  // The flag, on the sunward face.
+  box(scene, `${name}Flag`, root, mats.taegukgi, [0.12, 0.08, 0.004], [0.045, 0.085, 0.133]);
+  box(scene, `${name}Hatch`, root, mats.blackFoil, [0.09, 0.1, 0.004], [-0.06, -0.06, 0.133]);
+  // Two wings of three panels, turned to the Sun.
   for (const s of [-1, 1]) {
-    drum(scene, `${name}Luti${s}`, root, mats.white, { height: 0.07, diameter: 0.05 }, [s * 0.035 - 0.04, -0.17, 0.05]);
-    drum(scene, `${name}LutiEye${s}`, root, mats.black, { height: 0.004, diameter: 0.04 }, [s * 0.035 - 0.04, -0.206, 0.05]);
+    drum(scene, `${name}Drive${s}`, root, mats.grey, { height: 0.03, diameter: 0.05 }, [s * 0.145, 0.03, 0], [1, 0, 0]);
+    wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.15, 0.03, 0], to: [s * 0.9, 0.03, 0], width: 0.27, panels: 3, face: Z, yoke: 0.15 });
   }
-  drum(scene, `${name}Shadow`, root, mats.goldFoil, { height: 0.1, diameter: 0.07 }, [0.06, -0.18, -0.04]);
-  drum(scene, `${name}ShadowEye`, root, mats.black, { height: 0.004, diameter: 0.06 }, [0.06, -0.231, -0.04]);
-  box(scene, `${name}Polcam`, root, mats.white, [0.05, 0.04, 0.05], [0.07, -0.15, 0.07]);
-  rod(scene, `${name}MagBoom`, root, mats.grey, [-0.1, -0.1, -0.12], [-0.22, -0.2, -0.3], 0.008, 4);
-  for (const [x, y, , a] of ring(4, 0.08, 0, 0.78)) nozzle(scene, `${name}Engine${a}`, root, mats.dark, [x, y, -0.12], [0, 0, -1], 0.03, 0.03);
+  // The dish for sending pictures home, on a two-jointed arm.
+  rod(scene, `${name}Boom0`, root, mats.white, [0.05, 0.17, -0.05], [0.05, 0.3, -0.1], 0.018, 6);
+  sphere(scene, `${name}Elbow`, root, mats.grey, 0.04, [0.05, 0.3, -0.1]);
+  rod(scene, `${name}Boom1`, root, mats.white, [0.05, 0.3, -0.1], [0.05, 0.38, -0.03], 0.018, 6);
+  sphere(scene, `${name}Wrist`, root, mats.grey, 0.04, [0.05, 0.38, -0.03]);
+  dish(scene, `${name}Dish`, root, mats, { at: [0.05, 0.39, -0.03], toward: [0, 1, 0.45], diameter: 0.3 });
+  // Small aerials and the star trackers that tell it which way it faces.
+  for (const s of [-1, 1]) {
+    drum(scene, `${name}Aerial${s}`, root, mats.white, { height: 0.05, diameterTop: 0.012, diameterBottom: 0.04 }, [s * 0.1, 0.195, 0.1]);
+    drum(scene, `${name}Tracker${s}`, root, mats.black, { height: 0.07, diameter: 0.04 }, [s * 0.09, 0.19, -0.02], [s * 0.6, 1, -0.3]);
+    drum(scene, `${name}TrackerHood${s}`, root, mats.white, { height: 0.012, diameter: 0.048 }, [s * 0.108, 0.22, -0.029], [s * 0.6, 1, -0.3]);
+  }
+  // Looking down: the high-resolution camera pair, the wide polarising camera, the
+  // gamma-ray spectrometer and ShadowCam, which sees into craters the Sun never reaches.
+  for (const s of [-1, 1]) {
+    drum(scene, `${name}Luti${s}`, root, mats.white, { height: 0.08, diameter: 0.055 }, [s * 0.038 - 0.05, -0.21, 0.06]);
+    drum(scene, `${name}LutiEye${s}`, root, mats.black, { height: 0.004, diameter: 0.044 }, [s * 0.038 - 0.05, -0.251, 0.06]);
+  }
+  drum(scene, `${name}Shadow`, root, mats.goldFoil, { height: 0.12, diameter: 0.08 }, [0.07, -0.23, -0.05]);
+  drum(scene, `${name}ShadowHood`, root, mats.black, { height: 0.03, diameterTop: 0.08, diameterBottom: 0.1 }, [0.07, -0.3, -0.05]);
+  box(scene, `${name}Polcam`, root, mats.white, [0.06, 0.05, 0.06], [0.08, -0.195, 0.08]);
+  drum(scene, `${name}PolcamEye`, root, mats.black, { height: 0.004, diameter: 0.035 }, [0.08, -0.222, 0.08]);
+  box(scene, `${name}Gamma`, root, mats.foil, [0.06, 0.05, 0.06], [-0.07, -0.195, -0.07]);
+  // The magnetometer on its long boom, three sensors along it.
+  rod(scene, `${name}MagBoom`, root, mats.grey, [-0.11, -0.12, -0.12], [-0.3, -0.3, -0.42], 0.009, 4);
+  for (const t of [0.4, 0.7, 1]) box(scene, `${name}Mag${t}`, root, mats.gold, [0.024, 0.024, 0.024], [-0.11 - 0.19 * t, -0.12 - 0.18 * t, -0.12 - 0.3 * t]);
+  // Four main engines and the small ones that turn it.
+  for (const [x, y, , a] of ring(4, 0.075, 0, 0.78)) nozzle(scene, `${name}Engine${a}`, root, mats.dark, [x, y, -0.135], [0, 0, -1], 0.04, 0.04);
+  thrusters(scene, `${name}Jets`, root, mats, [[[0.135, 0.14, -0.12], [1, 0, 0]], [[-0.135, 0.14, -0.12], [-1, 0, 0]], [[0.135, -0.14, -0.12], [1, 0, 0]], [[-0.135, -0.14, -0.12], [-1, 0, 0]]], 0.016);
   return fuse(scene, root);
 }
+
 
 // LRO: a tall silver box with its instrument deck underneath, one solar array of three
 // panels out to one side, a dish on a long two-jointed boom, the pair of narrow cameras

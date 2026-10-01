@@ -213,3 +213,23 @@ test('the view turns aside on the way in, so the craft ends up beside the travel
   forward(late).forEach((n, i) => near(n, forward(dockFacing(at, hubble.position))[i], 1e-9));
   assert.equal(dockingFacing({ ...dock, elapsed: DOCK_SECONDS }, from, at, hubble.position), null);
 });
+
+test('a craft low over a surface is docked with from straight above, and the glide stays out of the ground', () => {
+  const bodies = bodiesAt(0);
+  const moon = bodies.find((b) => b.id === 'moon');
+  const danuri = craftAt(0, bodies).find((c) => c.id === 'danuri');
+  assert.ok(tooLowToDock(danuri, bodies));
+  const up = danuri.position.map((n, i) => n - moon.position[i]);
+  const height = Math.hypot(...up);
+  // Coming from the far side of the Moon.
+  const from = moon.position.map((n, i) => n - (up[i] / height) * (moon.radiusKm + 3000));
+  const dock = startDocking(from, danuri, bodies);
+  dock.to.forEach((n, i) => near(n, (up[i] / height) * DOCK_GAP_KM, 1e-6));
+  for (let t = 0; t <= DOCK_SECONDS; t += 0.1) {
+    const state = dockedState(createState(from), danuri, dockingOffset({ ...dock, elapsed: t }), bodies);
+    const above = Math.hypot(...state.position.map((n, i) => n - moon.position[i])) - moon.radiusKm;
+    assert.ok(above >= 20 - 1e-6, `${t}: ${above}`);
+  }
+  const end = dockedState(createState(from), danuri, dockingOffset({ ...dock, elapsed: DOCK_SECONDS }), bodies);
+  near(Math.hypot(...end.position.map((n, i) => n - danuri.position[i])), DOCK_GAP_KM, 1e-6);
+});

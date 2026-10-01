@@ -589,6 +589,7 @@ async function init() {
       move: {
         drive: docked ? 1 : (state.speed > 0.01 ? state.motionSign : 0),
         strafe: docked ? 0 : ((state.sideSpeed ?? 0) > 0.01 ? state.sideSign : 0),
+        held: Boolean(docked) && isDocked(docked),
       },
     });
     if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`);

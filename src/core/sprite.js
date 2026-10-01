@@ -7,8 +7,19 @@
 
 export const SHEETS = ['forward', 'backward', 'left', 'right', 'up', 'down', 'brake', 'idle'];
 export const FRAMES = 4;
-// Frames per second: flight loops, the stop (played once), and hovering.
-export const SPRITE_FPS = { flight: 10, brake: 8, idle: 3 };
+// Frames per second: flight loops, and the stop (played once).
+export const SPRITE_FPS = { flight: 10, brake: 8 };
+// Hovering is mostly stillness. The four idle drawings are: 0 eyes open, 1 eyes shut,
+// 2 looking aside, 3 waving. Over a ten-second round she blinks twice, glances aside
+// once and waves once; the rest of the time she just hangs there. (Run as a loop at
+// three frames a second she never stopped fidgeting.)
+export const IDLE_ROUND_S = 10;
+const IDLE_MOMENTS = [
+  { from: 2.5, to: 2.65, frame: 1 },
+  { from: 4.0, to: 4.9, frame: 2 },
+  { from: 6.0, to: 6.15, frame: 1 },
+  { from: 8.0, to: 9.2, frame: 3, flutter: 0.3 },
+];
 // Slower than this (km/s) she is standing still.
 const MOVING_KM_S = 1;
 // Turning faster than this (radians per second) shows the turn instead of plain flight.
@@ -30,9 +41,11 @@ export function flightSheet({ drive = 0, strafe = 0, turn = [0, 0] }) {
   return drive < 0 ? 'forward' : 'backward';
 }
 
-// Advance by dt seconds. input: { speed, drive, strafe, turn }.
+// Advance by dt seconds. input: { speed, drive, strafe, turn, held }.
+// held: latched to a craft. She rides at rest, whatever the craft's own speed (which
+// wavers from frame to frame and would flip her between flying and stopping).
 export function stepSprite(state, input, dt) {
-  const moving = input.speed >= MOVING_KM_S;
+  const moving = !input.held && input.speed >= MOVING_KM_S;
   if (moving) {
     // Flight sheets share one beat, so switching between them does not restart the loop.
     const flying = state.moving;
@@ -49,8 +62,15 @@ export function stepSprite(state, input, dt) {
 // Which of the four frames (0..3) to show.
 export function spriteFrame({ sheet, time }) {
   if (sheet === 'brake') return Math.min(FRAMES - 1, Math.floor(time * SPRITE_FPS.brake));
-  const fps = sheet === 'idle' ? SPRITE_FPS.idle : SPRITE_FPS.flight;
-  return Math.floor(time * fps) % FRAMES;
+  if (sheet === 'idle') {
+    const t = time % IDLE_ROUND_S;
+    const now = IDLE_MOMENTS.find((m) => t >= m.from && t < m.to);
+    if (!now) return 0;
+    // The wave: hand up, down to rest, up again.
+    if (now.flutter && Math.floor((t - now.from) / now.flutter) % 2 === 1) return 0;
+    return now.frame;
+  }
+  return Math.floor(time * SPRITE_FPS.flight) % FRAMES;
 }
 
 // The file for a sheet and frame, under the site's assets folder.

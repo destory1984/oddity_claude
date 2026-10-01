@@ -1,4 +1,5 @@
 import { mapPoint, mapHeading, pickNearest } from '../core/minimap.js';
+import { BELT } from '../core/belt.js';
 
 const COLORS = {
   sun: '#ffd27a',
@@ -10,10 +11,14 @@ const COLORS = {
   saturn: '#e8d49a',
   uranus: '#9fe3ea',
   neptune: '#6f8dff',
+  ceres: '#b5aea6',
+  pluto: '#d9bfa5',
+  halley: '#bfe6ff',
 };
 const EDGE_PX = 8;
 
-// Round map in the HUD: the Sun, the eight planets and their orbits, and the
+// Round map in the HUD: the Sun, the planets and dwarf planets with their orbits, the
+// asteroid belt, the comet, and the
 // traveler with an arrow for the flight heading. Tapping a planet selects it.
 export function createMinimap(canvas, { onPick }) {
   const ctx = canvas.getContext('2d');
@@ -50,7 +55,8 @@ export function createMinimap(canvas, { onPick }) {
 
     const radius = size / 2 - EDGE_PX;
     const sun = bodies.find((b) => b.kind === 'star');
-    const planets = bodies.filter((b) => b.kind === 'planet');
+    const planets = bodies.filter((b) => b.kind === 'planet' || b.kind === 'dwarf');
+    const comets = bodies.filter((b) => b.kind === 'comet');
     const dist = (b) => Math.hypot(b.position[0] - sun.position[0], b.position[2] - sun.position[2]);
     const outerKm = Math.max(...planets.map(dist));
     const at = (p) => mapPoint(p, sun.position, outerKm, radius);
@@ -70,15 +76,22 @@ export function createMinimap(canvas, { onPick }) {
       ctx.stroke();
     }
 
+    // The asteroid belt: one dotted ring down its middle.
+    ctx.setLineDash([2, 3]);
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * Math.sqrt((BELT.innerKm + BELT.outerKm) / 2 / outerKm), 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
     const selected = bodies.find((b) => b.id === selectedId);
     const ringed = selected?.kind === 'moon' ? selected.parent : selectedId;
     dots = [];
     named = [];
-    for (const body of [sun, ...planets]) {
+    for (const body of [sun, ...planets, ...comets]) {
       const [x, y] = at(body.position);
       ctx.fillStyle = COLORS[body.id] ?? '#cfe3f3';
       ctx.beginPath();
-      ctx.arc(x, y, body.kind === 'star' ? 4 : 2.6, 0, Math.PI * 2);
+      ctx.arc(x, y, body.kind === 'star' ? 4 : body.kind === 'planet' ? 2.6 : 2, 0, Math.PI * 2);
       ctx.fill();
       if (body.id === ringed) {
         ctx.strokeStyle = '#ffffff';
@@ -86,7 +99,7 @@ export function createMinimap(canvas, { onPick }) {
         ctx.arc(x, y, 6, 0, Math.PI * 2);
         ctx.stroke();
       }
-      if (body.kind === 'planet') dots.push({ id: body.id, x, y });
+      if (body.kind !== 'star') dots.push({ id: body.id, x, y });
       named.push({ id: body.id, x, y, name: body.name });
     }
 

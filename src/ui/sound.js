@@ -228,17 +228,26 @@ export function createSound() {
       tone({ freq: 147, to: 880, length: 1.4, volume: 0.1 });
       [784, 1175, 1568].forEach((f, i) => bell(f, 0.5 + i * 0.14, 0.08));
     },
-    // A jump, six seconds like the flash (ui/warp.js): a rush that rises for 2.7 s, bells
-    // as the screen goes white, then the air settling as the new place appears.
+    // A jump, six seconds like the flash (ui/warp.js). All bells and clear tones, no low
+    // noise: music-box notes climbing a five-note scale faster and faster for 2.6 s, a
+    // bright chord as the screen goes white, then a few slow chimes drifting down as
+    // the new place appears. (The first version was a band of noise swept up from
+    // 200 Hz, which sounded like breaking wind.)
     warp: () => {
-      noise({ length: 2.8, volume: 0.2, type: 'bandpass', freq: 200, to: 5200 });
-      tone({ freq: 110, to: 1320, length: 2.7, volume: 0.09 });
-      tone({ freq: 165, to: 1980, length: 2.7, volume: 0.04 });
-      bell(1319, 2.75, 0.09);
-      bell(1976, 2.9, 0.07);
-      bell(2637, 3.05, 0.05);
-      noise({ start: 3.1, length: 2.6, volume: 0.1, type: 'bandpass', freq: 3200, to: 500 });
-      bell(988, 4.4, 0.04);
+      const scale = [392, 440, 523, 587, 659, 784, 880, 1047, 1175, 1319, 1568, 1760, 2093, 2349, 2637, 3136];
+      scale.forEach((freq, k) => {
+        // Bunched toward the end: the last notes are a tenth of a second apart.
+        const at = 2.6 * (1 - (1 - k / scale.length) ** 1.7);
+        bell(freq, at, 0.03 + 0.045 * (k / scale.length));
+      });
+      // A thin, high shimmer under the climb.
+      tone({ freq: 1568, to: 3136, start: 0.6, length: 2.1, volume: 0.018 });
+      noise({ start: 1.6, length: 1.2, volume: 0.035, type: 'highpass', freq: 6000, to: 9000 });
+      // Arrival: a wide, bright chord.
+      [1047, 1319, 1568, 2093, 2637].forEach((freq, i) => bell(freq, 2.72 + i * 0.03, 0.085 - i * 0.008));
+      tone({ freq: 523, start: 2.72, length: 1.6, volume: 0.05 });
+      // Settling: slow chimes stepping down.
+      [[2093, 3.5], [1568, 4.0], [1319, 4.5], [1047, 5.0]].forEach(([freq, at], i) => bell(freq, at, 0.045 - i * 0.007));
     },
     undock: () => {
       noise({ length: 0.25, volume: 0.18, type: 'bandpass', freq: 900, to: 2400 });

@@ -9,6 +9,7 @@ import { createSun } from './sun.js';
 import { createStars } from './stars.js';
 import { createHero } from './hero.js';
 import { createCraft } from './craft.js';
+import { createComet } from './comet.js';
 import { createIce } from './ice.js';
 import { ringCrossing, ringDensity } from '../core/rings.js';
 import { eyeView } from '../core/eye.js';
@@ -41,6 +42,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   const craftSun = new DirectionalLight('craftSun', new Vector3(0, 0, 1), scene);
   craftSun.intensity = 1.1;
   const craftMeshes = createCraft(scene, CRAFT);
+  const comet = createComet(scene);
 
   // The character's sunlight is set once from the starting view, as in the prototype.
   const earth = bodies.find((b) => b.id === 'earth');
@@ -101,6 +103,8 @@ export async function createWorld(canvas, bodies = BODIES) {
     }
     craftMeshes.update(craft, position, sunNow.position);
     craftSun.direction = new Vector3(...normalize(sunRel)).scale(-1);
+    const halley = now.find((b) => b.kind === 'comet');
+    if (halley) comet.update(halley, position, sunNow.position);
 
     const occluders = now.filter((b) => b.kind !== 'star').map((b) => ({
       direction: directions[b.id], distance: distances[b.id], radius: b.radiusKm,

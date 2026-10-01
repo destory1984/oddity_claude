@@ -179,6 +179,8 @@ export function createHero(engine, sunDirection) {
   }
   const { torso, skirt, head } = joints;
   head.scaling.setAll(HEAD_SCALE);
+  // A short neck: the head sits lower, its chin just above the collar.
+  head.position.z -= 0.055;
   const limbs = [1, -1].map((s) => ({
     s,
     shoulder: joints[`shoulder${s}`],

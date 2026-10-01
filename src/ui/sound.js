@@ -48,7 +48,7 @@ export function createSound() {
   let master;
   let noiseBuffer;
   let engine;
-  const FLIGHT_VOLUME = 0.5;
+  const FLIGHT_VOLUME = 0.8;
   let muted = loadMuted();
   let musicOn = loadMusic();
   let musicBus;
@@ -276,7 +276,7 @@ export function createSound() {
     engine({ gain, pitch }) {
       if (!ctx) return;
       const t = ctx.currentTime;
-      // Half as loud as the first flight sounds were.
+      // A little quieter than the first flight sounds were.
       engine.gain.gain.setTargetAtTime(gain * FLIGHT_VOLUME, t, 0.3);
       // pitch runs 330..660 with speed: the wind slides from 300 up to 750 Hz.
       const k = Math.max(0, Math.min(1, (pitch - 330) / 330));

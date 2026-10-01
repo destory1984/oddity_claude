@@ -5,8 +5,8 @@ import { stopNow } from './game.js';
 // craft are drawn 30 km wide, so 60 km shows the whole craft at arm's length).
 export const DOCK_RANGE_KM = 1000;
 export const DOCK_GAP_KM = 60;
-// The countdown: "Docking in progress", then 10 down to 0, one number a second.
-export const COUNT_FROM = 10;
+// The countdown: "Docking in progress", then 5 down to 0, one number a second.
+export const COUNT_FROM = 5;
 const COUNT_STARTS_S = 1.5;
 // The glide from where the traveler was to the docking spot ends on the 0.
 export const DOCK_SECONDS = COUNT_STARTS_S + COUNT_FROM;

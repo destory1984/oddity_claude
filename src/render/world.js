@@ -9,6 +9,7 @@ import { createBodyMeshes } from './planets.js';
 import { createSun } from './sun.js';
 import { createStars } from './stars.js';
 import { createHero } from './hero.js';
+import { createSpriteHero } from './spriteHero.js';
 import { createCraft, createSiteModels } from './craft.js';
 import { storySitesAt } from '../core/stories.js';
 import { createComet } from './comet.js';
@@ -23,7 +24,8 @@ import { normalize } from './math.js';
 
 // Floating origin: the player stays at the scene origin and every body is placed
 // relative to it, one scene unit per 1,000 km.
-export async function createWorld(canvas, bodies = BODIES) {
+// heroKind: 'model' (the folded-paper figure) or 'sprite' (the pixel-art drawings on trial).
+export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' } = {}) {
   const engine = new Engine(canvas, true, {
     preserveDrawingBuffer: true, stencil: true, powerPreference: 'high-performance',
   });
@@ -59,7 +61,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   const tourEarth = BODIES.find((b) => b.id === 'earth');
   const tourSun = BODIES.find((b) => b.kind === 'star');
   const heroSun = new Vector3(...normalize(tourSun.position.map((n, i) => n - tourEarth.position[i])));
-  const hero = createHero(engine, heroSun);
+  const hero = heroKind === 'sprite' ? createSpriteHero(engine) : createHero(engine, heroSun);
   const ice = createIce(hero.scene);
   // The traveler's place relative to each ringed planet last frame, to catch a crossing.
   const lastByRings = new Map();
@@ -68,7 +70,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   let elapsed = 0;
 
   // now: where every body is this frame (they orbit); defaults to the starting layout.
-  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn }) {
+  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn, move = {} }) {
     elapsed += dt;
     // Draw from a point just above the ground when standing on it, and pull the near
     // plane in as the ground gets close; otherwise the planet under the feet is cut away
@@ -131,7 +133,7 @@ export async function createWorld(canvas, bodies = BODIES) {
     camera.rotationQuaternion = new Quaternion(...multiply(orientation, photoOrientation || [0, 0, 0, 1]));
     const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
     hero.update({
-      dt, speed, turn, fov: camera.fov, photoOrientation, visible: heroVisible, aspect,
+      dt, speed, turn, fov: camera.fov, photoOrientation, visible: heroVisible, aspect, move,
       light: heroLighting({ position: traveler, orientation, bodies: now, sunVisibility: visibility }),
     });
     ice.update(dt);

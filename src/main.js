@@ -26,6 +26,7 @@ import {
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
+  loadHeroKind, saveHeroKind,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
@@ -52,6 +53,8 @@ const START_NEAR = null;
 // Two layouts: 'tour' is the hand-made one (planets spread round the Sun); 'today' puts
 // the planets where they really are on the day the game is opened.
 const layout = loadLayout();
+// The character: the folded-paper model, or the pixel-art drawings on trial.
+const heroKind = loadHeroKind();
 const openedAt = new Date();
 const bodyData = layout === 'today' ? todayData(openedAt) : BODY_DATA;
 const bodiesAt = (timeS) => placeBodies(bodyData, timeS);
@@ -153,7 +156,7 @@ let world;
 
 async function init() {
   try {
-    world = await createWorld(canvas, bodies);
+    world = await createWorld(canvas, bodies, { heroKind });
   } catch (e) {
     console.error(e);
     $('loadError').textContent = `${e.message} 최신 Chrome이나 Edge에서 하드웨어 가속을 켜고 다시 열어 주세요.`;
@@ -415,6 +418,13 @@ async function init() {
   // Switching the layout moves every planet, so the game starts over (the log is kept).
   $('layoutNow').textContent = layout === 'today' ? '지금: 오늘의 하늘(오늘 날짜의 실제 위치).' : '지금: 여행 배치(행성을 태양 둘레에 고루 흩어 놓음).';
   $('layoutButton').textContent = layout === 'today' ? '여행 배치로 바꾸기' : '오늘의 하늘로 바꾸기';
+  $('heroNow').textContent = heroKind === 'sprite' ? '지금: 도트 그림(시험 중).' : '지금: 종이 인형.';
+  $('heroButton').textContent = heroKind === 'sprite' ? '종이 인형으로 바꾸기' : '도트 그림으로 바꾸기';
+  $('heroButton').addEventListener('click', () => {
+    saveHeroKind(heroKind === 'sprite' ? 'model' : 'sprite');
+    // Drop any ?hero= from the address, which would override the saved choice.
+    location.href = location.pathname;
+  });
   $('layoutButton').addEventListener('click', () => {
     saveLayout(layout === 'today' ? 'tour' : 'today');
     location.reload();
@@ -575,6 +585,11 @@ async function init() {
       photoOrientation: photo.orientation(),
       heroVisible: photo.heroVisible(),
       turn,
+      // For the sprite character: which way she is thrusting. Docked, she rides ahead.
+      move: {
+        drive: docked ? 1 : (state.speed > 0.01 ? state.motionSign : 0),
+        strafe: docked ? 0 : ((state.sideSpeed ?? 0) > 0.01 ? state.sideSign : 0),
+      },
     });
     if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`);
     if (view.meteorLit && !meteorSeen) {

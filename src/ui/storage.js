@@ -83,3 +83,25 @@ export function saveAlbum(album) {
     }
   }
 }
+
+const HERO_KEY = 'oddity.hero.v1';
+
+// Which character is drawn: 'model' (the folded-paper figure) unless the player chose
+// the pixel-art drawings on trial. `?hero=sprite` or `?hero=model` in the address wins.
+export function loadHeroKind() {
+  const asked = new URLSearchParams(location.search).get('hero');
+  if (asked === 'sprite' || asked === 'model') return asked;
+  try {
+    return localStorage.getItem(HERO_KEY) === 'sprite' ? 'sprite' : 'model';
+  } catch {
+    return 'model';
+  }
+}
+
+export function saveHeroKind(kind) {
+  try {
+    localStorage.setItem(HERO_KEY, kind);
+  } catch {
+    // The choice lasts only for this page.
+  }
+}

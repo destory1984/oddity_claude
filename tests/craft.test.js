@@ -1,6 +1,8 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { CRAFT, craftAt, HUBBLE_ALTITUDE_KM, JWST_FROM_EARTH_KM, CHANDRA_PERIOD_S } from '../src/core/craft.js';
+import {
+  CRAFT, craftAt, hiddenCraft, EARTH_CRAFT_SHOWN_KM, HUBBLE_ALTITUDE_KM, JWST_FROM_EARTH_KM, CHANDRA_PERIOD_S,
+} from '../src/core/craft.js';
 import { bodiesAt } from '../src/core/bodies.js';
 import { C } from '../src/core/flight.js';
 import { createState, step } from '../src/core/game.js';
@@ -15,6 +17,23 @@ test('seventeen craft: probes, telescopes, space stations, the first satellite a
   ]);
   assert.equal(new Set(CRAFT.map((c) => c.name)).size, CRAFT.length);
   for (const c of CRAFT) assert.ok(c.name && c.nameEn && c.kind === 'craft');
+});
+
+test("Earth's seven craft show only from within 300,000 km of Earth; the rest always", () => {
+  const bodies = bodiesAt(0);
+  const earth = bodies.find((b) => b.id === 'earth');
+  const out = (km) => [earth.position[0], earth.position[1] + earth.radiusKm + km, earth.position[2]];
+  assert.equal(EARTH_CRAFT_SHOWN_KM, 300000);
+  assert.deepEqual(hiddenCraft(out(500), bodies), []);
+  assert.deepEqual(hiddenCraft(out(300000), bodies), []);
+  assert.deepEqual(hiddenCraft(out(300001), bodies), ['hubble', 'jwst', 'chandra', 'euclid', 'iss', 'tiangong', 'sputnik']);
+  // Webb and Euclid, the farthest of them, are well inside the line.
+  for (const c of craftAt(0, bodies).filter((x) => x.parent === 'earth')) {
+    assert.ok(dist(c.position, earth.position) < EARTH_CRAFT_SHOWN_KM / 1.5, c.id);
+  }
+  // The chosen target keeps its label wherever the traveler is.
+  assert.ok(!hiddenCraft(out(5e6), bodies, 'jwst').includes('jwst'));
+  assert.equal(hiddenCraft(out(5e6), bodies, 'jwst').length, 6);
 });
 
 test('every craft has a launch year and a short introduction for the docking card', () => {

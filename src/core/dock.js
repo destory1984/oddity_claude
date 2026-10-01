@@ -4,7 +4,7 @@ import { nearestSurface } from './bodies.js';
 
 // How close the traveler must be to dock, and how far off they sit once docked (the
 // craft are drawn 30 km wide, so 60 km shows the whole craft at arm's length).
-export const DOCK_RANGE_KM = 1000;
+export const DOCK_RANGE_KM = 10000;
 export const DOCK_GAP_KM = 60;
 // The countdown: "Docking in progress", then 5 down to 0, one number a second.
 export const COUNT_FROM = 5;

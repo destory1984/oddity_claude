@@ -6,7 +6,7 @@ import {
   createState, step, stopNow, totalSpeed, carryAlong, TURN_RATE, START_YAW,
 } from './core/game.js';
 import { rotateLocal, lookAtDirection, multiply, conjugate, forward } from './core/orientation.js';
-import { CRAFT, craftAt, craftById } from './core/craft.js';
+import { CRAFT, craftAt, craftById, hiddenCraft } from './core/craft.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
@@ -470,9 +470,12 @@ async function init() {
     }), elapsed || 1 / 60);
     sound.music(moodFor({ restingOn: state.restingOn, surfaceKm: nearestSurface(state.position, bodies).distance }));
 
+    // Earth's craft are drawn and named only from near Earth.
+    const awayCraft = hiddenCraft(state.position, bodies, selectedId);
     const view = world.update({
       bodies,
       craft,
+      hiddenCraft: awayCraft,
       sites,
       jolt: docked ? { id: docked.id, ...latchJolt(docked) } : null,
       position: state.position,
@@ -522,7 +525,7 @@ async function init() {
       C,
       goalId: guideGoal(guide)?.targetId ?? null,
       // A place on the far side of its body gets no label.
-      hiddenIds: sites.filter((s) => siteHidden(s, here(s.parent), state.position)).map((s) => s.id),
+      hiddenIds: [...sites.filter((s) => siteHidden(s, here(s.parent), state.position)).map((s) => s.id), ...awayCraft],
     });
     minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId });
   });

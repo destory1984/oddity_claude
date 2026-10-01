@@ -153,6 +153,20 @@ function onOrbit(centre, out, [x, y], tiltDeg, turnDeg = 0) {
   ];
 }
 
+// The seven that fly round Earth (Hubble, the stations, Webb out at L2...) show only
+// from within this far of Earth's surface; from farther off their names would only
+// crowd round the planet.
+export const EARTH_CRAFT_SHOWN_KM = 300000;
+
+// The ids of Earth's craft to leave undrawn and unnamed from where the traveler is.
+// keepId: the chosen target, which stays.
+export function hiddenCraft(position, bodies, keepId = null) {
+  const earth = bodies.find((b) => b.id === 'earth');
+  const surfaceKm = Math.hypot(...position.map((n, i) => n - earth.position[i])) - earth.radiusKm;
+  if (surfaceKm <= EARTH_CRAFT_SHOWN_KM) return [];
+  return CRAFT.filter((c) => c.parent === 'earth' && c.id !== keepId).map((c) => c.id);
+}
+
 export function craftById(id) {
   return CRAFT.find((c) => c.id === id);
 }

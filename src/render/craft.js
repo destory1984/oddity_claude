@@ -548,13 +548,14 @@ export function createCraft(scene, craftList) {
 
   // craft: this frame's positions (km); position: the traveler (km); sunPosition (km).
   // jolt: { id, push, tilt } for the craft being docked with (core/dock.js latchJolt).
-  function update(craft, position, sunPosition, jolt = null) {
+  // hidden: ids not to draw at all (core/craft.js hiddenCraft).
+  function update(craft, position, sunPosition, jolt = null, hidden = []) {
     for (const c of craft) {
       const node = nodes.get(c.id);
       const rel = c.position.map((n, i) => (n - position[i]) / KM_PER_UNIT);
       const distanceKm = Math.hypot(...rel) * KM_PER_UNIT;
       const rule = RULES[c.id];
-      node.setEnabled(distanceKm < rule.visibleKm);
+      node.setEnabled(distanceKm < rule.visibleKm && !hidden.includes(c.id));
       if (!node.isEnabled()) continue;
       const sizeKm = Math.min(rule.maxKm, Math.max(CRAFT_SIZE_KM, distanceKm * APPARENT));
       node.scaling.setAll(sizeKm / KM_PER_UNIT);

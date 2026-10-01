@@ -12,10 +12,11 @@ const hubble = { id: 'hubble', name: '허블 우주망원경', kind: 'craft', ra
 const webb = { id: 'jwst', name: '제임스 웹 우주망원경', kind: 'craft', radiusKm: 15, position: [9000, 2000, 3000] };
 const near = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 
-test('a craft can be docked with from within 1,000 km, not from farther', () => {
-  assert.equal(DOCK_RANGE_KM, 1000);
+test('a craft can be docked with from within 10,000 km, not from farther', () => {
+  assert.equal(DOCK_RANGE_KM, 10000);
   assert.equal(dockable([1000, 2000, 3900], [hubble, webb]).id, 'hubble');
-  assert.equal(dockable([1000, 2000, 4001], [hubble]), null);
+  assert.equal(dockable([1000, 2000, 12900], [hubble]).id, 'hubble');
+  assert.equal(dockable([1000, 2000, 13001], [hubble]), null);
   assert.equal(dockable([0, 0, 0], []), null);
 });
 

@@ -4,6 +4,8 @@
 
 주소: https://destory1984.github.io/oddity_claude/
 
+![지구 9,129km 위에서 시작하는 첫 화면. 가운데가 캐릭터 서라, 왼쪽이 밤의 지구와 도시 불빛이고, 이름표 앞의 ✓와 ○는 수첩에 있는지를 나타낸다](docs/screenshot.jpg)
+
 ## 무엇이 있나
 
 | 종류 | 내용 |

@@ -61,6 +61,9 @@ test('a jump happens only from far away: nearby, choosing a name works as before
   assert.equal(teleportSpot(mars, { position: at(1000 + mars.radiusKm), progress: seen, bodies }), null);
   assert.equal(teleportSpot(mars, { position: far, progress: createProgress(), bodies }), null);
   assert.ok(teleportSpot(mars, { position: far, progress: seen, bodies }));
+  // The journal's button jumps even from close by, but still only to somewhere visited.
+  assert.ok(teleportSpot(mars, { position: at(1000 + mars.radiusKm), progress: seen, bodies, anywhere: true }));
+  assert.equal(teleportSpot(mars, { position: far, progress: createProgress(), bodies, anywhere: true }), null);
 });
 
 test('a body is seen from five radii, mostly sunlit, a little from above, clear of every other body', () => {

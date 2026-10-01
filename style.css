@@ -895,7 +895,7 @@ body.touch #reticle span {
 
 #journalBodies li {
   display: grid;
-  grid-template-columns: 1fr auto auto auto;
+  grid-template-columns: 1fr auto auto auto auto;
   gap: 12px;
   align-items: center;
   padding: 6px 0;
@@ -931,22 +931,31 @@ body.touch #reticle span {
 }
 
 #journalMissions li,
-#journalStories li {
+#journalStories li,
+#journalCraft li {
   padding: 6px 0;
   font-size: 13px;
   color: var(--muted);
 }
 
 #journalMissions li strong,
-#journalStories li strong {
+#journalStories li strong,
+#journalCraft li strong {
   display: block;
   font-weight: 400;
   color: #b6cbe0;
 }
 
 #journalMissions li.done strong,
-#journalStories li.done strong {
+#journalStories li.done strong,
+#journalCraft li.done strong {
   color: #7fe3c5;
+}
+
+#journalStories li button,
+#journalCraft li button {
+  display: block;
+  margin-top: 6px;
 }
 
 .journalActions {
@@ -1087,14 +1096,17 @@ body.touch #reverseButton,body.touch #flyButton,body.touch #brake {
 }
 
 #warp.on {
-  animation:warp .9s ease-out both;
+  animation:warp 6s linear both;
 }
 
+/* 0 to 2.6 s the streaks gather and rush out, 2.6 to 3.2 s all white, then 2.8 s to clear */
 @keyframes warp {
-  0% { opacity:0; transform:scale(.3); }
-  30% { opacity:1; transform:scale(1.6); background-color:#ffffff00; }
-  40% { opacity:1; transform:scale(2.2); background-color:#ffffff; }
-  100% { opacity:0; transform:scale(3); background-color:#ffffff00; }
+  0% { opacity:0; transform:scale(.2) rotate(0deg); background-color:#ffffff00; }
+  15% { opacity:.35; transform:scale(.5) rotate(4deg); background-color:#ffffff00; }
+  35% { opacity:.8; transform:scale(1.2) rotate(10deg); background-color:#ffffff00; }
+  43.3% { opacity:1; transform:scale(2.2) rotate(14deg); background-color:#ffffff; }
+  53.3% { opacity:1; transform:scale(2.4) rotate(15deg); background-color:#ffffff; }
+  100% { opacity:0; transform:scale(3) rotate(18deg); background-color:#ffffff00; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1103,7 +1115,8 @@ body.touch #reverseButton,body.touch #flyButton,body.touch #brake {
   }
   @keyframes warp {
     0% { opacity:0; }
-    35% { opacity:1; }
+    43.3% { opacity:1; }
+    53.3% { opacity:1; }
     100% { opacity:0; }
   }
 }

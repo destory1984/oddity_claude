@@ -4,10 +4,16 @@ import { objectParticle } from './messages.js';
 import { FACTS } from '../core/facts.js';
 
 const $ = (id) => document.getElementById(id);
+// 로 after a vowel or ㄹ, 으로 after any other final consonant.
+function hasFinalRieulOrNone(word) {
+  const code = word.charCodeAt(word.length - 1);
+  if (code < 0xac00 || code > 0xd7a3) return true;
+  return [0, 8].includes((code - 0xac00) % 28);
+}
 const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], onGo, onReset, onOpen, onClose }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -16,6 +22,18 @@ export function createJournal({ bodies, missions, stories = [], onGo, onReset, o
     if (window.confirm('탐험 기록을 모두 지울까요? 되돌릴 수 없습니다. 지금 가까이 있는 천체는 곧바로 다시 기록됩니다.')) onReset();
   });
   dialog.addEventListener('close', () => onClose());
+
+  // A button that closes the journal and jumps to somewhere already visited.
+  function jumpButton(id, name) {
+    const jump = document.createElement('button');
+    jump.textContent = '순간 이동';
+    jump.setAttribute('aria-label', `${name}${hasFinalRieulOrNone(name) ? '로' : '으로'} 순간 이동`);
+    jump.addEventListener('click', () => {
+      dialog.close();
+      onJump(id);
+    });
+    return jump;
+  }
 
   let lastProgress = null;
   let lastPosition = null;
@@ -50,6 +68,7 @@ export function createJournal({ bodies, missions, stories = [], onGo, onReset, o
         onGo(body.id);
       });
       li.append(name, marks, distance, go);
+      if (found) li.append(jumpButton(body.id, body.name));
       if (found && FACTS[body.id]) {
         const fact = document.createElement('small');
         fact.className = 'fact';
@@ -87,6 +106,26 @@ export function createJournal({ bodies, missions, stories = [], onGo, onReset, o
       const line = document.createElement('span');
       line.textContent = done ? story.text : story.hint;
       li.append(title, line);
+      // Only places on a surface have somewhere to appear.
+      if (done && story.type === 'surface') li.append(jumpButton(story.id, story.name));
+      list.append(li);
+    }
+  }
+
+  // Craft are not scored: the list only says which have been met and offers the jump.
+  function renderCraft() {
+    const list = $('journalCraft');
+    list.replaceChildren();
+    for (const c of craft) {
+      const met = (lastProgress.craft ?? []).includes(c.id);
+      const li = document.createElement('li');
+      li.className = met ? 'done' : '';
+      const title = document.createElement('strong');
+      title.textContent = `${met ? '✓' : '○'} ${c.name} (${c.launched}년)`;
+      const line = document.createElement('span');
+      line.textContent = met ? c.intro : '아직 만나지 못했습니다.';
+      li.append(title, line);
+      if (met) li.append(jumpButton(c.id, c.name));
       list.append(li);
     }
   }
@@ -96,6 +135,7 @@ export function createJournal({ bodies, missions, stories = [], onGo, onReset, o
     onOpen();
     render();
     renderStories();
+    renderCraft();
     dialog.showModal();
   }
 

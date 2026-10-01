@@ -243,11 +243,12 @@ async function init() {
 
   // A place already visited, chosen from far away: appear there behind a flash. A body
   // is seen from its best side, a craft is docked with, a story place is seen from above.
-  function teleport(id) {
+  function teleport(id, anywhere = false) {
+    if (warp.busy()) return;
     sound.cue('warp');
     warp.play(() => {
       const target = here(id);
-      const spot = teleportSpot(target, { position: state.position, progress, bodies, parent: target.parent ? here(target.parent) : null });
+      const spot = teleportSpot(target, { position: state.position, progress, bodies, parent: target.parent ? here(target.parent) : null, anywhere });
       if (!spot) return;
       if (docked) {
         docked = null;
@@ -314,6 +315,13 @@ async function init() {
     bodies: BODIES,
     missions: MISSIONS,
     stories: STORIES,
+    craft: CRAFT,
+    // The journal's "순간 이동": jump there from anywhere.
+    onJump(id) {
+      selectedId = id;
+      hud.showSelection(named(id));
+      teleport(id, true);
+    },
     onOpen() {
       journalPriorPause = paused;
       setPaused(true);
@@ -338,6 +346,8 @@ async function init() {
       toast.show('탐험 기록을 지웠습니다.');
     },
   });
+  // Opened before the first frame, the journal still has something to show.
+  journal.update(progress, state.position, bodies);
 
   function showSoundButton() {
     $('soundButton').textContent = sound.muted() ? '🔇' : '🔊';

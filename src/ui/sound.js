@@ -215,12 +215,17 @@ export function createSound() {
       bell(659, 0.9);
       bell(988, 1.08);
     },
-    // A jump: a rush rising to a bright ping.
+    // A jump, six seconds like the flash (ui/warp.js): a rush that rises for 2.7 s, bells
+    // as the screen goes white, then the air settling as the new place appears.
     warp: () => {
-      noise({ length: 0.45, volume: 0.22, type: 'bandpass', freq: 300, to: 5000 });
-      tone({ freq: 180, to: 1400, length: 0.35, volume: 0.1 });
-      bell(1319, 0.32, 0.08);
-      bell(1976, 0.42, 0.06);
+      noise({ length: 2.8, volume: 0.2, type: 'bandpass', freq: 200, to: 5200 });
+      tone({ freq: 110, to: 1320, length: 2.7, volume: 0.09 });
+      tone({ freq: 165, to: 1980, length: 2.7, volume: 0.04 });
+      bell(1319, 2.75, 0.09);
+      bell(1976, 2.9, 0.07);
+      bell(2637, 3.05, 0.05);
+      noise({ start: 3.1, length: 2.6, volume: 0.1, type: 'bandpass', freq: 3200, to: 500 });
+      bell(988, 4.4, 0.04);
     },
     undock: () => {
       noise({ length: 0.25, volume: 0.18, type: 'bandpass', freq: 900, to: 2400 });

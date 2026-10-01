@@ -227,6 +227,8 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   return {
     body,
     meshes,
+    // For the rings: the plane's normal and its edges, to notice the traveler flying through.
+    rings: ring && { normal: [ring.normal.x, ring.normal.y, ring.normal.z], innerKm: look.rings.innerKm, outerKm: look.rings.outerKm },
     spin(elapsed) {
       sphere.rotation.y = -(elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
     },

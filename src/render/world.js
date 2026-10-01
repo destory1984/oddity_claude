@@ -9,6 +9,8 @@ import { createSun } from './sun.js';
 import { createStars } from './stars.js';
 import { createHero } from './hero.js';
 import { createCraft } from './craft.js';
+import { createIce } from './ice.js';
+import { ringCrossing, ringDensity } from '../core/rings.js';
 import { CRAFT } from '../core/craft.js';
 import { normalize } from './math.js';
 
@@ -43,6 +45,9 @@ export async function createWorld(canvas, bodies = BODIES) {
   const earth = bodies.find((b) => b.id === 'earth');
   const heroSun = new Vector3(...normalize(sunBody.position.map((n, i) => n - earth.position[i])));
   const hero = createHero(engine, heroSun);
+  const ice = createIce(hero.scene);
+  // The traveler's place relative to each ringed planet last frame, to catch a crossing.
+  const lastByRings = new Map();
 
   const relative = (body, position) => body.position.map((n, i) => (n - position[i]) / KM_PER_UNIT);
   let elapsed = 0;
@@ -60,9 +65,20 @@ export async function createWorld(canvas, bodies = BODIES) {
       distances[body.id] = length * KM_PER_UNIT;
     }
 
+    let ringCrossed = null;
     for (const item of rendered) {
       const body = now.find((b) => b.id === item.body.id) ?? item.body;
       const rel = relative(body, position);
+      if (item.rings) {
+        const from = position.map((n, i) => n - body.position[i]);
+        const before = lastByRings.get(body.id);
+        const hit = before && dt > 0 && ringCrossing(before, from, item.rings.normal, item.rings.innerKm, item.rings.outerKm);
+        if (hit) {
+          ice.burst(ringDensity(hit.t));
+          ringCrossed = body.id;
+        }
+        lastByRings.set(body.id, from);
+      }
       for (const mesh of item.meshes) mesh.position.set(rel[0], rel[1], rel[2]);
       item.spin(elapsed);
       item.setSun(normalize(sunNow.position.map((n, i) => n - body.position[i])));
@@ -89,6 +105,7 @@ export async function createWorld(canvas, bodies = BODIES) {
     camera.rotationQuaternion = new Quaternion(...multiply(orientation, photoOrientation || [0, 0, 0, 1]));
     const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
     hero.update({ dt, speed, turn, fov: camera.fov, photoOrientation, visible: heroVisible, aspect });
+    ice.update(dt);
 
     camera.computeWorldMatrix(true); // axes below must reflect this frame's rotation
     const axis = (v) => {
@@ -99,6 +116,7 @@ export async function createWorld(canvas, bodies = BODIES) {
       directions,
       distances,
       sunVisibility: visibility,
+      ringCrossed,
       camera: {
         forward: axis(Vector3.Forward()),
         right: axis(Vector3.Right()),

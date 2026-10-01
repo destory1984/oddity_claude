@@ -320,6 +320,7 @@ async function init() {
       heroVisible: photo.heroVisible(),
       turn,
     });
+    if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`);
     world.render();
 
     if (frame++ % HUD_EVERY_N_FRAMES !== 0) return;

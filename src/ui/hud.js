@@ -1,5 +1,5 @@
 import { objectParticle, distanceText } from './messages.js';
-import { keepMarker, spreadArrows, crowdedMoons, nearCentre } from '../core/markers.js';
+import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped } from '../core/markers.js';
 
 const $ = (id) => document.getElementById(id);
 const ARROWS = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
@@ -101,6 +101,13 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         el.classList.toggle('goal', body.id === goalId);
         if (!el.hidden && spot.outside) arrows.push({ el, ...spot });
       }
+      // Labels in view that would cover each other: the nearer thing keeps its label.
+      const inView = placed.filter(({ el, spot }) => !el.hidden && !spot.outside);
+      const covered = overlapped(inView.map(({ body, el, selected: sel }) => {
+        const { left, top, right, bottom } = el.getBoundingClientRect();
+        return { id: body.id, left, top, right, bottom, km: view.distances[body.id] - body.radiusKm, first: sel || body.id === goalId };
+      }));
+      for (const { body, el } of inView) if (covered.has(body.id)) el.hidden = true;
       spreadArrows(arrows, 40, innerHeight).forEach((spot, i) => {
         arrows[i].el.style.top = `${spot.y}px`;
       });

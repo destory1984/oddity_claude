@@ -14,10 +14,12 @@ import { createHud } from './ui/hud.js';
 import { createMinimap } from './ui/minimap.js';
 import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
+import { createWarp } from './ui/warp.js';
+import { teleportSpot } from './core/teleport.js';
 import { eventMessage, limitText, dateText, withParticle } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import {
-  updateProgress, recordPhotos, recordStories, createProgress, summarize, score, isComplete,
+  updateProgress, recordPhotos, recordStories, recordCraft, createProgress, summarize, score, isComplete,
 } from './core/progress.js';
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
@@ -31,12 +33,14 @@ import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
 import {
-  dockable, tooLowToDock, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
+  dockable, tooLowToDock, DOCK_RANGE_KM, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
   releaseDrift,
 } from './core/dock.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
+// After a jump to a body the view is turned this far (radians) off it.
+const VISTA_YAW = 0.3;
 const HUD_EVERY_N_FRAMES = 6;
 
 // For tuning a planet's look: set to e.g. { id: 'jupiter', fromCentreKm: 400000 } to
@@ -77,7 +81,7 @@ let state = START_NEAR ? startNear(START_NEAR) : startAboveEarth();
 let paused = false;
 let selectedId = START_NEAR ? START_NEAR.id : 'earth';
 let dragTurn = [0, 0];
-let progress = loadProgress(BODIES, MISSIONS, STORIES);
+let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
 // The first-visit guide assumes the opening view above Earth.
 let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
@@ -102,6 +106,7 @@ const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? s
 const named = (id) => bodyById(id) ?? craftById(id) ?? sites.find((s) => s.id === id);
 
 const toast = createToast($('toast'));
+const warp = createWarp($('warp'));
 const sound = createSound();
 const canvas = $('space');
 
@@ -236,12 +241,43 @@ async function init() {
     announce({ type: latched ? 'undocked' : 'dockAborted', name });
   }
 
-  // Choosing a craft from close by docks with it.
+  // A place already visited, chosen from far away: appear there behind a flash. A body
+  // is seen from its best side, a craft is docked with, a story place is seen from above.
+  function teleport(id) {
+    sound.cue('warp');
+    warp.play(() => {
+      const target = here(id);
+      const spot = teleportSpot(target, { position: state.position, progress, bodies, parent: target.parent ? here(target.parent) : null });
+      if (!spot) return;
+      if (docked) {
+        docked = null;
+        showCraftCard(null);
+        sound.hush();
+      }
+      input.clear();
+      const facing = lookAtDirection(target.position.map((n, i) => n - spot[i]));
+      // The traveler stands in the middle of the view: on a wide screen turn a little
+      // so a body sits beside them, not behind them.
+      const aside = target.kind !== 'craft' && target.kind !== 'site' && innerWidth / innerHeight >= 1;
+      state = createState(spot, aside ? rotateLocal(facing, VISTA_YAW, 0) : facing);
+      toast.show(eventMessage({ type: 'teleported', name: target.name }));
+      if (target.kind === 'craft' && !tooLowToDock(target, bodies)) dock(target);
+    });
+  }
+
+  // Choosing a craft from close by docks with it; choosing somewhere already visited
+  // from far away jumps there.
   function selectBody(id) {
     selectedId = id;
     hud.showSelection(named(id));
+    if (paused || warp.busy()) return;
+    const chosen = here(id);
+    if (teleportSpot(chosen, { position: state.position, progress, bodies, parent: chosen.parent ? here(chosen.parent) : null })) {
+      teleport(id);
+      return;
+    }
     const target = craft.find((c) => c.id === id);
-    if (target && !docked && !paused && dockable(state.position, [target])) dock(target);
+    if (target && !docked && dockable(state.position, [target])) dock(target);
   }
 
   $('dockTarget').addEventListener('click', () => {
@@ -426,6 +462,12 @@ async function init() {
       const before = progress;
       progress = logged.progress;
       finished = progressChanged(before);
+    }
+    // Craft come within docking range of are remembered, so they can be jumped back to.
+    const met = recordCraft(progress, craft.filter((c) => Math.hypot(...c.position.map((n, i) => n - state.position[i])) <= DOCK_RANGE_KM).map((c) => c.id));
+    if (met.newly.length) {
+      progress = met.progress;
+      saveProgress(progress);
     }
     const told = recordStories(progress, completedStories({
       position: state.position, restingOn: state.restingOn, bodies, craft, sites,

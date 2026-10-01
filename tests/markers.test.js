@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { keepMarker, spreadArrows, crowdedMoons, nearCentre } from '../src/core/markers.js';
+import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped } from '../src/core/markers.js';
 
 test('on-screen bodies always keep their label', () => {
   assert.equal(keepMarker({ outside: false, selected: false, nearest: false, surfaceKm: 1e9 }), true);
@@ -63,4 +63,20 @@ test('a label counts as near the centre within a quarter of the shorter side of 
   // A tall phone: 375 x 812 gives 94 px.
   assert.equal(nearCentre(187, 406 + 90, 375, 812), true);
   assert.equal(nearCentre(187, 406 + 100, 375, 812), false);
+});
+
+test('of labels that overlap, the nearer thing keeps its label and the farther waits', () => {
+  const box = (id, left, top, km, first = false) => ({ id, left, top, right: left + 100, bottom: top + 24, km, first });
+  // Three stacked on each other: only the nearest shows.
+  assert.deepEqual([...overlapped([box('a', 0, 0, 900), box('b', 40, 10, 500), box('c', 80, 5, 700)])], ['c', 'a']);
+  // b is nearest; c overlaps b and goes; a overlaps only c, which is gone, so a shows.
+  assert.deepEqual([...overlapped([box('a', 0, 0, 900), box('b', 190, 0, 500), box('c', 95, 0, 700)])], ['c']);
+  // Apart on screen: all show, whatever their distances.
+  assert.equal(overlapped([box('a', 0, 0, 900), box('b', 0, 40, 500), box('c', 120, 0, 700)]).size, 0);
+  // Two pixels of air count as touching.
+  assert.equal(overlapped([box('a', 0, 0, 1), box('b', 101, 0, 2)]).size, 1);
+  assert.equal(overlapped([box('a', 0, 0, 1), box('b', 103, 0, 2)]).size, 0);
+  // The chosen target is never hidden, even when it is the farther one.
+  assert.deepEqual([...overlapped([box('near', 0, 0, 10), box('chosen', 30, 0, 9000, true)])], ['near']);
+  assert.equal(overlapped([]).size, 0);
 });

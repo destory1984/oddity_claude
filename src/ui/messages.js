@@ -40,6 +40,12 @@ export function eventMessage(event, bodies = []) {
       return `이야기 장소: ${event.name}\n${event.text}`;
     case 'docking':
       return `${event.name}에 도킹 중입니다. 0에 맞춰 붙습니다.`;
+    case 'teleported': {
+      // 로 after a vowel or ㄹ, 으로 after any other final consonant.
+      const code = event.name.charCodeAt(event.name.length - 1);
+      const final = code >= HANGUL_START && code <= HANGUL_END ? (code - HANGUL_START) % 28 : 0;
+      return `${event.name}${final === 0 || final === 8 ? '로' : '으로'} 순간 이동했습니다.`;
+    }
     case 'dockRefused':
       return `${event.name}${hasFinalConsonant(event.name) ? '은' : '는'} 지표면과 너무 가까워 도킹할 수 없습니다.`;
     case 'dockAborted':

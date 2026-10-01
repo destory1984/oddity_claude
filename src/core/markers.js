@@ -35,6 +35,22 @@ export function spreadArrows(arrows, gap, height) {
   return result;
 }
 
+// Labels drawn over each other cannot be read. Of any that overlap, the nearer thing
+// keeps its label and the farther one waits until they have moved apart on screen.
+// labels: [{ id, left, top, right, bottom, km, first }]; first: the chosen target and the
+// guide's goal, which are never hidden. Returns the ids to hide.
+export function overlapped(labels, gap = 2) {
+  const order = [...labels].sort((a, b) => (Boolean(b.first) - Boolean(a.first)) || a.km - b.km);
+  const shown = [];
+  const hidden = new Set();
+  for (const label of order) {
+    const hit = shown.some((s) => label.left < s.right + gap && s.left < label.right + gap && label.top < s.bottom + gap && s.top < label.bottom + gap);
+    if (hit && !label.first) hidden.add(label.id);
+    else shown.push(label);
+  }
+  return hidden;
+}
+
 // From far away a moon sits almost on its planet, and the later label covered the
 // planet's. Hide such moon labels unless the moon is the selected one.
 export function crowdedMoons(spots, gap = 40) {

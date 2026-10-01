@@ -82,6 +82,9 @@ test('docking messages name the craft with the right particle', () => {
   assert.equal(eventMessage({ type: 'docking', name: '허블 우주망원경' }), '허블 우주망원경에 도킹 중입니다. 0에 맞춰 붙습니다.');
   assert.equal(eventMessage({ type: 'dockAborted', name: '허블 우주망원경' }), '허블 우주망원경 도킹을 그만두었습니다.');
   assert.equal(eventMessage({ type: 'dockRefused', name: '달 정찰 궤도선' }), '달 정찰 궤도선은 지표면과 너무 가까워 도킹할 수 없습니다.');
+  assert.equal(eventMessage({ type: 'teleported', name: '화성' }), '화성으로 순간 이동했습니다.');
+  assert.equal(eventMessage({ type: 'teleported', name: '달' }), '달로 순간 이동했습니다.');
+  assert.equal(eventMessage({ type: 'teleported', name: '보이저 1호' }), '보이저 1호로 순간 이동했습니다.');
   assert.equal(eventMessage({ type: 'dockRefused', name: '다누리' }), '다누리는 지표면과 너무 가까워 도킹할 수 없습니다.');
 });
 

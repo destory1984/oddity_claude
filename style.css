@@ -1073,3 +1073,37 @@ nav button {
 body.touch #reverseButton,body.touch #flyButton,body.touch #brake {
   min-height:44px;
 }
+
+/* The flash that covers a jump to a place already visited (ui/warp.js) */
+#warp {
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:0;
+  z-index:50;
+  background:
+    radial-gradient(circle at 50% 50%, #ffffff 0%, #dff1ff 22%, #7fc4ff88 45%, #0b1d3a00 75%),
+    repeating-conic-gradient(from 0deg at 50% 50%, #ffffff00 0deg 5deg, #cfe9ffcc 5.6deg 6deg, #ffffff00 6.6deg 11deg);
+}
+
+#warp.on {
+  animation:warp .9s ease-out both;
+}
+
+@keyframes warp {
+  0% { opacity:0; transform:scale(.3); }
+  30% { opacity:1; transform:scale(1.6); background-color:#ffffff00; }
+  40% { opacity:1; transform:scale(2.2); background-color:#ffffff; }
+  100% { opacity:0; transform:scale(3); background-color:#ffffff00; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #warp {
+    background:#fff;
+  }
+  @keyframes warp {
+    0% { opacity:0; }
+    35% { opacity:1; }
+    100% { opacity:0; }
+  }
+}

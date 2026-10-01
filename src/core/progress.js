@@ -1,14 +1,15 @@
 import { surfaceDistance } from './bodies.js';
 
 // The explorer's log: which bodies were discovered and landed on, which photo
-// missions were completed, which story places were visited. Plain arrays of ids so it
-// stores as JSON.
+// missions were completed, which story places were visited, which craft were met (not
+// scored; it only allows jumping back to them, core/teleport.js). Plain arrays of ids
+// so it stores as JSON.
 
 // A body counts as discovered once the traveler comes this close to its surface.
 export const DISCOVERY_KM = 50000;
 
 export function createProgress() {
-  return { discovered: ['earth'], landed: [], photos: [], stories: [] };
+  return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [] };
 }
 
 // Discovery happens within DISCOVERY_KM of a body's surface.
@@ -42,6 +43,14 @@ export function recordStories(progress, storyIds) {
   return { progress: { ...progress, stories: [...have, ...newly] }, newly };
 }
 
+// Craft the traveler has come within docking range of.
+export function recordCraft(progress, craftIds) {
+  const have = progress.craft ?? [];
+  const newly = craftIds.filter((id) => !have.includes(id));
+  if (newly.length === 0) return { progress, newly };
+  return { progress: { ...progress, craft: [...have, ...newly] }, newly };
+}
+
 export function summarize(progress, bodies, missions, stories = []) {
   return {
     discovered: progress.discovered.length,
@@ -55,18 +64,20 @@ export function summarize(progress, bodies, missions, stories = []) {
 }
 
 // Stored data may be old, edited or broken: keep only known, unique ids.
-export function sanitizeProgress(raw, bodies, missions, stories = []) {
+export function sanitizeProgress(raw, bodies, missions, stories = [], craft = []) {
   const fresh = createProgress();
   if (!raw || typeof raw !== 'object') return fresh;
   const bodyIds = new Set(bodies.map((b) => b.id));
   const missionIds = new Set(missions.map((m) => m.id));
   const storyIds = new Set(stories.map((s) => s.id));
+  const craftIds = new Set(craft.map((c) => c.id));
   const clean = (list, known) => (Array.isArray(list) ? [...new Set(list.filter((id) => known.has(id)))] : []);
   return {
     discovered: [...new Set([...fresh.discovered, ...clean(raw.discovered, bodyIds)])],
     landed: clean(raw.landed, bodyIds),
     photos: clean(raw.photos, missionIds),
     stories: clean(raw.stories, storyIds),
+    craft: clean(raw.craft, craftIds),
   };
 }
 

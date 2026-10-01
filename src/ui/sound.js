@@ -215,6 +215,13 @@ export function createSound() {
       bell(659, 0.9);
       bell(988, 1.08);
     },
+    // A jump: a rush rising to a bright ping.
+    warp: () => {
+      noise({ length: 0.45, volume: 0.22, type: 'bandpass', freq: 300, to: 5000 });
+      tone({ freq: 180, to: 1400, length: 0.35, volume: 0.1 });
+      bell(1319, 0.32, 0.08);
+      bell(1976, 0.42, 0.06);
+    },
     undock: () => {
       noise({ length: 0.25, volume: 0.18, type: 'bandpass', freq: 900, to: 2400 });
       bell(988, 0.02, 0.07);

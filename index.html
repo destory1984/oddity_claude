@@ -18,6 +18,12 @@
   <canvas id="space" aria-label="태양계 비행 화면" tabindex="0"></canvas>
 
   <div id="loading">
+    <div id="loadingHero" aria-hidden="true">
+      <img src="/assets/seora-sprites/loading-1.png" alt="">
+      <img src="/assets/seora-sprites/loading-2.png" alt="">
+      <img src="/assets/seora-sprites/loading-3.png" alt="">
+      <img src="/assets/seora-sprites/loading-4.png" alt="">
+    </div>
     <strong>Space Oddity</strong>
     <span>태양계로 향하는 중…</span>
     <p id="loadError"></p>
@@ -99,7 +105,7 @@
   <div id="toast" role="status" aria-live="polite"></div>
 
   <dialog id="journal" aria-labelledby="journalTitle">
-    <h1 id="journalTitle">탐험 수첩</h1>
+    <h1 id="journalTitle"><img id="journalPortrait" src="/assets/seora-sprites/portrait.png" alt="">탐험 수첩</h1>
     <p id="journalSummary"></p>
     <h2>천체</h2>
     <ul id="journalBodies"></ul>

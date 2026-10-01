@@ -2,154 +2,124 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import {
-  SHEETS, FRAMES, SPRITE_FPS, IDLE_ROUND_S, SHEET_HOLD_S, createSpriteState, flightSheet, stepSprite, spriteFrame, spriteFile,
+  SHEETS, FRAMES, SPRITE_FPS, SHEET_HOLD_S, REST_ACTIONS, FIRST_REST_S, REST_GAP_S, SLEEP_AFTER_S,
+  createSpriteState, flightSheet, modeFor, stepSprite, spriteFrame, spriteFile,
 } from '../src/core/sprite.js';
 
-// Already in flight, showing her back.
-const FLYING = { sheet: 'backward', time: 0, moving: true, since: 0, turn: [0, 0] };
+// Run the sprite for `seconds` with the same input, returning every state on the way.
+function run(state, input, seconds, dt = 1 / 60) {
+  const seen = [];
+  for (let t = 0; t < seconds - 1e-9; t += dt) {
+    state = stepSprite(state, input, dt);
+    seen.push(state);
+  }
+  return { state, seen };
+}
+const sheetsOf = (seen) => [...new Set(seen.map((s) => s.sheet))];
+const FLY = { speed: 500, drive: 1, turn: [0, 0] };
+const STILL = { speed: 0 };
+// In flight, showing her back, past the turn away from the camera.
+const flying = () => run(createSpriteState(), FLY, 1.2).state;
 
-test('eight sheets of four frames, and every drawing is in the assets folder', () => {
-  assert.deepEqual(SHEETS, ['forward', 'backward', 'left', 'right', 'up', 'down', 'brake', 'idle']);
+test('37 sheets of four frames in use, and every drawing is in the assets folder', () => {
+  assert.equal(SHEETS.length, 37);
+  assert.equal(new Set(SHEETS).size, 37);
   assert.equal(FRAMES, 4);
-  assert.deepEqual(SPRITE_FPS, { flight: 10, brake: 5 });
   for (const sheet of SHEETS) {
     for (let frame = 0; frame < FRAMES; frame++) {
       assert.ok(existsSync(`public/assets/${spriteFile(sheet, frame)}`), spriteFile(sheet, frame));
     }
   }
   assert.equal(spriteFile('idle', 0), 'seora-sprites/idle-1.png');
+  for (const f of ['portrait.png', 'loading-1.png', 'loading-4.png']) assert.ok(existsSync(`public/assets/seora-sprites/${f}`), f);
 });
 
-test('the camera is behind her: flying ahead shows her back, reversing shows her front', () => {
-  assert.equal(flightSheet({ drive: 1 }), 'backward');
-  assert.equal(flightSheet({ drive: 0 }), 'backward');
+test('the camera is behind her: flying ahead shows her back straight on, reversing shows her front', () => {
+  assert.equal(flightSheet({ drive: 1 }), 'away');
+  assert.equal(flightSheet({ drive: 0 }), 'away');
   assert.equal(flightSheet({ drive: -1 }), 'forward');
 });
 
-test('sliding and turning show her side; pitching shows up and down', () => {
+test('a turn banks her, still seen from behind; sliding sideways shows her side', () => {
+  assert.equal(flightSheet({ drive: 1, turn: [0.6, 0] }), 'back-right');
+  assert.equal(flightSheet({ drive: 1, turn: [-0.6, 0] }), 'back-left');
+  assert.equal(flightSheet({ drive: 1, turn: [0, 0.6] }), 'back-down');
+  assert.equal(flightSheet({ drive: 1, turn: [0, -0.6] }), 'back-up');
   assert.equal(flightSheet({ drive: 0, strafe: 1 }), 'right');
   assert.equal(flightSheet({ drive: 0, strafe: -1 }), 'left');
-  assert.equal(flightSheet({ drive: 1, turn: [0.6, 0] }), 'right');
-  assert.equal(flightSheet({ drive: 1, turn: [-0.6, 0] }), 'left');
-  assert.equal(flightSheet({ drive: 1, turn: [0, 0.6] }), 'down');
-  assert.equal(flightSheet({ drive: 1, turn: [0, -0.6] }), 'up');
   // The stronger of the two wins; a slight turn is plain flight.
-  assert.equal(flightSheet({ drive: 1, turn: [0.5, 0.9] }), 'down');
-  assert.equal(flightSheet({ drive: 1, turn: [0.9, 0.5] }), 'right');
-  assert.equal(flightSheet({ drive: 1, turn: [0.2, 0.2] }), 'backward');
-  // Thrusting ahead while sliding keeps the rear view unless she is also turning.
-  assert.equal(flightSheet({ drive: 1, strafe: 1 }), 'backward');
+  assert.equal(flightSheet({ drive: 1, turn: [0.5, 0.9] }), 'back-down');
+  assert.equal(flightSheet({ drive: 1, turn: [0.2, 0.2] }), 'away');
+  // A turn sheet stays while the turn only eases, and leaves when it is nearly over.
+  assert.equal(flightSheet({ drive: 1, turn: [0.15, 0] }, 'back-right'), 'back-right');
+  assert.equal(flightSheet({ drive: 1, turn: [0.15, 0] }, 'away'), 'away');
+  assert.equal(flightSheet({ drive: 1, turn: [0.05, 0] }, 'back-right'), 'away');
 });
 
-test('flight loops at ten frames a second and keeps its beat when the sheet changes', () => {
-  let state = createSpriteState();
-  assert.deepEqual(state, { sheet: 'idle', time: 0, moving: false, since: 0, turn: [0, 0] });
-  state = { ...FLYING };
-  assert.equal(spriteFrame(state), 0);
-  for (let i = 0; i < 16; i++) state = stepSprite(state, { speed: 500, drive: 1, turn: [0, 0] }, 0.01);
-  assert.equal(spriteFrame(state), 1);
-  // A steady turn brings her side into view within half a second, on the same beat.
-  let turned = state;
-  let steps = 0;
-  while (turned.sheet !== 'right' && steps < 100) {
-    turned = stepSprite(turned, { speed: 500, drive: 1, turn: [0.8, 0] }, 0.01);
-    steps += 1;
-  }
-  assert.ok(steps > 5 && steps <= 50, `${steps}`);
-  assert.ok(Math.abs(turned.time - state.time - steps * 0.01) < 1e-9);
-  assert.equal(spriteFrame({ sheet: 'backward', time: 0.45 }), 0);
+test('carried somewhere other than where she faces, she leans or turns that way', () => {
+  assert.equal(flightSheet({ heading: [0.05, 0.05, 0.99] }), 'away');
+  assert.equal(flightSheet({ heading: [-0.3, 0, 0.95] }), 'away-left');
+  assert.equal(flightSheet({ heading: [0.3, 0, 0.95] }), 'away-right');
+  assert.equal(flightSheet({ heading: [-0.8, 0, 0.6] }), 'left');
+  assert.equal(flightSheet({ heading: [0.8, 0, 0.6] }), 'right');
+  assert.equal(flightSheet({ heading: [0, 0.9, 0.44] }), 'back-up');
+  assert.equal(flightSheet({ heading: [0, -0.9, 0.44] }), 'back-down');
+  assert.equal(flightSheet({ heading: [0.1, 0.1, -0.98] }), 'forward');
+  // The heading outranks a turn of the view.
+  assert.equal(flightSheet({ drive: 1, turn: [2, 0], heading: [-0.8, 0, 0.6] }), 'left');
 });
 
-test('stopping plays the turn-round once over 0.8 s, then she hovers', () => {
-  let state = { sheet: 'backward', time: 0.3, moving: true };
-  state = stepSprite(state, { speed: 0 }, 0.016);
-  assert.deepEqual(state, { sheet: 'brake', time: 0, moving: false, since: 0, turn: [0, 0] });
-  const frames = [];
-  for (let t = 0; t < 0.79; t += 0.01) {
-    frames.push(spriteFrame(state));
-    state = stepSprite(state, { speed: 0 }, 0.01);
-    assert.equal(state.sheet, 'brake');
-  }
-  assert.deepEqual([...new Set(frames)], [0, 1, 2, 3]);
-  for (let i = 0; i < 3; i++) state = stepSprite(state, { speed: 0 }, 0.01);
+test('what she is doing, most pressing first', () => {
+  assert.equal(modeFor({ speed: 0 }), 'hover');
+  assert.equal(modeFor({ speed: 300 }), 'fly');
+  assert.equal(modeFor({ speed: 0, resting: true }), 'ground');
+  assert.equal(modeFor({ speed: 900, boost: true }), 'sling');
+  assert.equal(modeFor({ speed: 72, held: true }), 'hover');
+  assert.equal(modeFor({ speed: 72, docking: true, held: false }), 'reach');
+  assert.equal(modeFor({ speed: 0, photo: true, resting: true }), 'photo');
+  assert.equal(modeFor({ speed: 0, cheer: true, photo: true }), 'cheer');
+  assert.equal(modeFor({ speed: 500, warp: { phase: 'out', t: 1 }, cheer: true }), 'warp');
+});
+
+test('setting off she turns away from the camera over 0.8 s, then flies at ten frames a second', () => {
+  assert.equal(SPRITE_FPS.brake, 5);
+  const { seen } = run(createSpriteState(), FLY, 1.2);
+  const turn = seen.filter((s) => s.sheet === 'brake');
+  assert.ok(turn.every((s) => s.reverse));
+  assert.deepEqual([...new Set(turn.map(spriteFrame))], [3, 2, 1, 0]);
+  assert.ok(Math.abs(turn.length / 60 - 0.8) < 0.05, `${turn.length / 60}`);
+  assert.deepEqual(sheetsOf(seen), ['brake', 'away']);
+  const flight = run(flying(), FLY, 0.4, 0.01).seen;
+  assert.deepEqual([...new Set(flight.map(spriteFrame))].sort(), [0, 1, 2, 3]);
+});
+
+test('stopping she turns back to face the camera over 0.8 s, then hovers', () => {
+  const { seen, state } = run(flying(), STILL, 1.0);
+  const turn = seen.filter((s) => s.sheet === 'brake');
+  assert.ok(turn.every((s) => !s.reverse));
+  assert.deepEqual([...new Set(turn.map(spriteFrame))], [0, 1, 2, 3]);
+  assert.ok(Math.abs(turn.length / 60 - 0.8) < 0.05);
   assert.equal(state.sheet, 'idle');
-  assert.equal(spriteFrame(state), 0);
-  state = stepSprite(state, { speed: 0 }, 0.4);
-  assert.equal(spriteFrame(state), 0);
-  // Setting off again she turns away from the camera first: the same four drawings
-  // backwards over 0.8 s, then her back in flight.
-  state = stepSprite(state, { speed: 300, drive: 1, turn: [0, 0] }, 0.016);
-  assert.equal(state.sheet, 'brake');
-  assert.equal(state.reverse, true);
-  const away = [];
-  for (let t = 0; t < 0.79; t += 0.01) {
-    away.push(spriteFrame(state));
-    state = stepSprite(state, { speed: 300, drive: 1, turn: [0, 0] }, 0.01);
-  }
-  assert.deepEqual([...new Set(away)], [3, 2, 1, 0]);
-  for (let i = 0; i < 3; i++) state = stepSprite(state, { speed: 300, drive: 1, turn: [0, 0] }, 0.01);
-  assert.equal(state.sheet, 'backward');
-  assert.ok(!state.reverse);
   // Stopping half-way through the turn away turns her back from where she had got to.
-  let half = stepSprite({ sheet: 'idle', time: 1, moving: false }, { speed: 300, drive: 1 }, 0.016);
-  for (let i = 0; i < 25; i++) half = stepSprite(half, { speed: 300, drive: 1 }, 0.01);
+  let half = run(createSpriteState(), FLY, 0.25, 0.01).state;
   assert.equal(spriteFrame(half), 2);
-  half = stepSprite(half, { speed: 0 }, 0.01);
+  half = stepSprite(half, STILL, 0.01);
   assert.equal(half.sheet, 'brake');
   assert.ok(!half.reverse);
   assert.equal(spriteFrame(half), 2);
 });
 
-test('hovering is mostly stillness: in ten seconds two blinks, one glance aside and one wave', () => {
-  assert.equal(IDLE_ROUND_S, 10);
-  const at = (time) => spriteFrame({ sheet: 'idle', time });
-  let still = 0;
-  const seen = new Set();
-  for (let t = 0; t < 10; t += 0.01) {
-    const frame = at(t);
-    seen.add(frame);
-    if (frame === 0) still += 0.01;
-  }
-  assert.deepEqual([...seen].sort(), [0, 1, 2, 3]);
-  assert.ok(still > 7.5, `${still}`);
-  assert.equal(at(1), 0);
-  assert.equal(at(2.55), 1);
-  assert.equal(at(4.4), 2);
-  assert.equal(at(6.1), 1);
-  // The wave: up, rest, up, rest.
-  assert.deepEqual([8.1, 8.4, 8.7, 9.0].map(at), [3, 0, 3, 0]);
-  assert.equal(at(9.5), 0);
-  // The round repeats.
-  assert.equal(at(12.55), 1);
-});
-
-test('latched to a craft she hovers at rest, whatever speed the craft is carrying her at', () => {
-  let state = { sheet: 'backward', time: 0.2, moving: true };
-  state = stepSprite(state, { speed: 72, drive: 1, turn: [0, 0], held: true }, 0.016);
-  assert.equal(state.sheet, 'brake');
-  for (let i = 0; i < 80; i++) {
-    // The craft's speed wavers above and below the "moving" line: she does not react.
-    state = stepSprite(state, { speed: i % 2 ? 0.2 : 140, drive: 1, turn: [0, 0], held: true }, 0.016);
-    assert.ok(state.sheet === 'brake' || state.sheet === 'idle', state.sheet);
-  }
-  assert.equal(state.sheet, 'idle');
-  // While still gliding in (not yet latched) she flies.
-  assert.equal(stepSprite({ ...FLYING }, { speed: 72, drive: 1, turn: [0, 0], held: false }, 0.016).sheet, 'backward');
-});
-
 test('a mouse drag arrives in bursts, and the drawing does not flicker with it', () => {
   assert.equal(SHEET_HOLD_S, 0.3);
-  // W held, dragging left: every other frame carries a big turn, the rest none.
-  let state = { ...FLYING };
-  const seen = [];
+  let state = flying();
+  const changes = [];
   for (let i = 0; i < 180; i++) {
     const before = state.sheet;
     state = stepSprite(state, { speed: 800, drive: 1, turn: [i % 2 ? -1.6 : 0, 0] }, 1 / 60);
-    if (state.sheet !== before) seen.push(state.sheet);
+    if (state.sheet !== before) changes.push(state.sheet);
   }
-  // Three seconds of dragging: she turns to her left side once and stays there.
-  assert.deepEqual(seen, ['left']);
-  // Letting go of the mouse, she comes back to the rear view once, and not at once.
+  // Three seconds of dragging left with W held: she banks left once and stays there.
+  assert.deepEqual(changes, ['back-left']);
   const back = [];
   for (let i = 0; i < 120; i++) {
     const before = state.sheet;
@@ -157,40 +127,113 @@ test('a mouse drag arrives in bursts, and the drawing does not flicker with it',
     if (state.sheet !== before) back.push([state.sheet, i]);
   }
   assert.equal(back.length, 1);
-  assert.equal(back[0][0], 'backward');
-  assert.ok(back[0][1] > 6, `${back[0][1]}`);
-  // Even a turn that swings hard from side to side changes the drawing at most about
-  // three times a second.
-  let changes = 0;
-  for (let i = 0; i < 180; i++) {
-    const before = state.sheet;
-    state = stepSprite(state, { speed: 800, drive: 1, turn: [Math.sin(i / 4) * 3, 0] }, 1 / 60);
-    if (state.sheet !== before) changes += 1;
+  assert.equal(back[0][0], 'away');
+  assert.ok(back[0][1] > 6);
+});
+
+test('hovering is mostly stillness with a blink, and a rest action now and then', () => {
+  assert.equal(FIRST_REST_S, 3);
+  assert.deepEqual(REST_GAP_S, [8, 15]);
+  assert.equal(REST_ACTIONS.length, 13);
+  const { seen } = run(createSpriteState(), STILL, 55, 1 / 30);
+  const idle = seen.filter((s) => s.sheet === 'idle');
+  assert.ok(idle.length / seen.length > 0.75, `${idle.length / seen.length}`);
+  // Hovering shows only eyes open and a short blink.
+  assert.deepEqual([...new Set(idle.map(spriteFrame))].sort(), [0, 1]);
+  assert.ok(idle.filter((s) => s.frame === 1).length / idle.length < 0.06);
+  // The first action comes at three seconds, the rest 8 to 15 seconds apart.
+  const starts = [];
+  seen.forEach((s, i) => {
+    if (s.sheet.startsWith('rest-') && seen[i - 1].sheet === 'idle') starts.push(i / 30);
+  });
+  assert.ok(Math.abs(starts[0] - 3) < 0.1, `${starts[0]}`);
+  assert.ok(starts.length >= 4 && starts.length <= 7, `${starts.length}`);
+  for (let i = 1; i < starts.length; i++) {
+    const gap = starts[i] - starts[i - 1];
+    assert.ok(gap >= 8 && gap <= 18.1, `${gap}`);
   }
-  assert.ok(changes <= 10, `${changes}`);
+  // Not the same action every time, and each runs all four drawings.
+  const actions = sheetsOf(seen.filter((s) => s.sheet.startsWith('rest-')));
+  assert.ok(actions.length >= 3, `${actions}`);
+  for (const name of actions) {
+    assert.deepEqual([...new Set(seen.filter((s) => s.sheet === name).map(spriteFrame))].sort(), [0, 1, 2, 3], name);
+  }
+  // The same again from a fresh start: the order is fixed, not random.
+  assert.deepEqual(run(createSpriteState(), STILL, 55, 1 / 30).seen.map((s) => s.sheet), seen.map((s) => s.sheet));
 });
 
-test('a turn sheet stays while the turn only eases, and leaves when it is nearly over', () => {
-  assert.equal(flightSheet({ drive: 1, turn: [0.15, 0] }, 'right'), 'right');
-  assert.equal(flightSheet({ drive: 1, turn: [0.15, 0] }, 'backward'), 'backward');
-  assert.equal(flightSheet({ drive: 1, turn: [0.05, 0] }, 'right'), 'backward');
-  assert.equal(flightSheet({ drive: 1, turn: [-0.15, 0] }, 'right'), 'backward');
-  assert.equal(flightSheet({ drive: 1, turn: [0, -0.15] }, 'up'), 'up');
+test('after a minute of stillness she dozes off, and wakes when she flies', () => {
+  assert.equal(SLEEP_AFTER_S, 60);
+  let { state } = run(createSpriteState(), STILL, 62, 1 / 30);
+  assert.equal(state.sheet, 'rest-sleep');
+  state = run(state, STILL, 20, 1 / 30).state;
+  assert.equal(state.sheet, 'rest-sleep');
+  state = run(state, FLY, 1.2).state;
+  assert.equal(state.sheet, 'away');
+  // Stopping again starts the minute afresh.
+  state = run(state, STILL, 2).state;
+  assert.equal(state.sheet, 'idle');
 });
 
-test('carried somewhere other than where she faces, she is drawn going that way', () => {
-  // Gliding in to dock with a craft on her left: her left side, not her back.
-  assert.equal(flightSheet({ drive: 1, heading: [-0.8, 0, 0.6] }), 'left');
-  assert.equal(flightSheet({ drive: 1, heading: [0.8, 0, 0.6] }), 'right');
-  assert.equal(flightSheet({ drive: 1, heading: [0, 0.9, 0.44] }), 'up');
-  assert.equal(flightSheet({ drive: 1, heading: [0, -0.9, 0.44] }), 'down');
-  // Nearly straight ahead: her back. Behind the camera: her front, coming toward it.
-  assert.equal(flightSheet({ drive: 1, heading: [0.3, 0.2, 0.93] }), 'backward');
-  assert.equal(flightSheet({ drive: 1, heading: [0.2, 0.1, -0.97] }), 'forward');
-  // The heading outranks a turn of the view.
-  assert.equal(flightSheet({ drive: 1, turn: [2, 0], heading: [-0.8, 0, 0.6] }), 'left');
-  // In flight the drawing follows the heading (after the short hold).
-  let state = { sheet: 'backward', time: 0, moving: true, since: 0, turn: [0, 0] };
-  for (let i = 0; i < 40; i++) state = stepSprite(state, { speed: 400, drive: 1, heading: [-0.8, 0, 0.6] }, 0.01);
-  assert.equal(state.sheet, 'left');
+test('too bright near the Sun she shields her eyes; in the dark and cold she shivers', () => {
+  let { state } = run(createSpriteState(), { speed: 0, bright: true }, 1);
+  assert.equal(state.sheet, 'hurt-bright');
+  state = run(state, { speed: 0, cold: true }, 1).state;
+  assert.equal(state.sheet, 'cold');
+  state = run(state, STILL, 0.1).state;
+  assert.equal(state.sheet, 'idle');
+});
+
+test('docking: her arm goes out as she glides in; once docked she turns round and is at rest', () => {
+  const glide = { speed: 80, drive: 1, docking: true, heading: [0.1, 0, 0.99] };
+  const { seen, state } = run(flying(), glide, 3, 1 / 30);
+  assert.deepEqual(sheetsOf(seen), ['dock-reach']);
+  // The arm goes out over two seconds and stays out.
+  assert.deepEqual([...new Set(seen.map(spriteFrame))], [0, 1, 2, 3]);
+  assert.equal(spriteFrame(state), 3);
+  // A craft well off to the left: her left side, not an arm reaching ahead.
+  assert.equal(run(flying(), { ...glide, heading: [-0.8, 0, 0.6] }, 0.5).state.sheet, 'left');
+  // Latched: she turns to face the camera and hovers, whatever speed the craft carries her at.
+  const held = run(state, { speed: 72, drive: 1, held: true }, 2, 1 / 30);
+  assert.deepEqual(sheetsOf(held.seen), ['brake', 'idle']);
+  let wavering = held.state;
+  for (let i = 0; i < 30; i++) {
+    wavering = stepSprite(wavering, { speed: i % 2 ? 0.2 : 140, drive: 1, held: true }, 1 / 30);
+    assert.equal(wavering.sheet, 'idle');
+  }
+  // Letting go and flying off: she turns away, then flies.
+  assert.deepEqual(sheetsOf(run(held.state, FLY, 1.2).seen), ['brake', 'away']);
+});
+
+test('landing plays once, then she stands; taking off she turns away and flies', () => {
+  const { seen, state } = run(flying(), { speed: 0, resting: true }, 2, 1 / 60);
+  assert.deepEqual(sheetsOf(seen), ['land', 'stand']);
+  assert.ok(Math.abs(seen.filter((s) => s.sheet === 'land').length / 60 - 0.5) < 0.05);
+  assert.deepEqual(sheetsOf(run(state, FLY, 1.2).seen), ['brake', 'away']);
+});
+
+test('a slingshot stretches her out; a jump shrinks her to a star and back', () => {
+  assert.deepEqual(sheetsOf(run(flying(), { speed: 9000, boost: true }, 1).seen), ['sling']);
+  const out = [0, 0.7, 1.4, 2.1, 2.69].map((t) => stepSprite(flying(), { speed: 0, warp: { phase: 'out', t } }, 0.016));
+  assert.ok(out.every((s) => s.sheet === 'warp-out'));
+  assert.deepEqual(out.map(spriteFrame), [0, 1, 2, 3, 3]);
+  const back = [0, 0.7, 1.4, 2.0, 2.59].map((t) => stepSprite(flying(), { speed: 0, warp: { phase: 'in', t } }, 0.016));
+  assert.ok(back.every((s) => s.sheet === 'warp-in'));
+  assert.deepEqual(back.map(spriteFrame), [0, 1, 2, 3, 3]);
+  // After the jump she is simply hovering: no turn-round.
+  assert.equal(stepSprite(back[4], STILL, 0.016).sheet, 'idle');
+});
+
+test('photo mode holds a finished pose, a different one each time; a full journal sets her cheering', () => {
+  let state = stepSprite(createSpriteState(), { speed: 0, photo: true }, 0);
+  assert.equal(state.sheet, 'photo-v');
+  assert.equal(spriteFrame(state), 3);
+  // No time passes in photo mode: the pose does not change.
+  assert.deepEqual(stepSprite(state, { speed: 0, photo: true }, 0), state);
+  state = stepSprite(state, STILL, 0.016);
+  state = stepSprite(state, { speed: 0, photo: true }, 0);
+  assert.equal(state.sheet, 'photo-jump');
+  const cheer = run(createSpriteState(), { speed: 0, cheer: true }, 1);
+  assert.deepEqual(sheetsOf(cheer.seen), ['cheer-big']);
+  assert.deepEqual([...new Set(cheer.seen.map(spriteFrame))].sort(), [0, 1, 2, 3]);
 });

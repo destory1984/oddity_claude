@@ -1,5 +1,5 @@
 import {
-  BODIES, BODY_DATA, TIME_SCALE, placeBodies, bodyById, nearestSurface, nearestLocalBody,
+  BODIES, BODY_DATA, TIME_SCALE, placeBodies, bodyById, nearestSurface, nearestLocalBody, surfaceDistance, AU_KM,
 } from './core/bodies.js';
 import { C, speedLimit } from './core/flight.js';
 import {
@@ -134,7 +134,13 @@ function progressChanged(before) {
   return Boolean(before) && !isComplete(summarize(before, BODIES, MISSIONS, STORIES)) && isComplete(now);
 }
 
+// Until when (performance.now()) the sprite character cheers a completed journal.
+let cheerUntil = 0;
+// The Sun's visibility last frame, for the sprite character shivering in a shadow.
+let sunShown = 1;
+
 function celebrate() {
+  cheerUntil = performance.now() + 6000;
   sound.cue('complete');
   toast.show('태양계 탐험을 모두 마쳤습니다. 수첩이 가득 찼습니다!');
 }
@@ -613,9 +619,20 @@ async function init() {
         drive: docked ? 1 : (state.speed > 0.01 ? state.motionSign : 0),
         strafe: docked ? 0 : ((state.sideSpeed ?? 0) > 0.01 ? state.sideSign : 0),
         held: Boolean(docked) && isDocked(docked),
+        docking: Boolean(docked) && !isDocked(docked),
         heading,
+        resting: Boolean(state.restingOn),
+        boost: Boolean(state.boost),
+        warp: warp.phase(),
+        photo: photo.active() && photo.heroVisible(),
+        cheer: performance.now() < cheerUntil,
+        // Within a solar radius of the Sun's surface it is too bright to look; in a
+        // planet's shadow, or out past Uranus, it is cold.
+        bright: surfaceDistance(state.position, here('sun')) < here('sun').radiusKm,
+        cold: sunShown < 0.05 || surfaceDistance(state.position, here('sun')) > 19 * AU_KM / 100,
       },
     });
+    sunShown = view.sunVisibility;
     if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`);
     if (view.meteorLit && !meteorSeen) {
       meteorSeen = true;

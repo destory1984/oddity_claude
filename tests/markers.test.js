@@ -80,3 +80,16 @@ test('of labels that overlap, the nearer thing keeps its label and the farther w
   assert.deepEqual([...overlapped([box('near', 0, 0, 10), box('chosen', 30, 0, 9000, true)])], ['near']);
   assert.equal(overlapped([]).size, 0);
 });
+
+test('a world keeps its name over a spacecraft or a surface place, even a nearer or chosen one', () => {
+  const box = (id, left, km, extra = {}) => ({ id, left, top: 0, right: left + 100, bottom: 24, km, ...extra });
+  // Hubble is nearer than Earth's surface is and sits on Earth's label: Earth shows.
+  assert.deepEqual([...overlapped([box('earth', 0, 292000), box('hubble', 40, 291500, { minor: true })])], ['hubble']);
+  // Even when Hubble is the chosen target.
+  assert.deepEqual([...overlapped([box('earth', 0, 292000), box('hubble', 40, 291500, { minor: true, first: true })])], ['hubble']);
+  // A chosen craft that covers no world's name stays, over other craft.
+  assert.deepEqual([...overlapped([box('iss', 0, 100, { minor: true }), box('hubble', 40, 900, { minor: true, first: true })])], ['iss']);
+  // Two worlds: the nearer, as before; the chosen world is never hidden.
+  assert.deepEqual([...overlapped([box('earth', 0, 9000), box('moon', 40, 300000)])], ['moon']);
+  assert.deepEqual([...overlapped([box('earth', 0, 9000), box('moon', 40, 300000, { first: true })])], ['earth']);
+});

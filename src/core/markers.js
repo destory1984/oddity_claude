@@ -37,15 +37,20 @@ export function spreadArrows(arrows, gap, height) {
 
 // Labels drawn over each other cannot be read. Of any that overlap, the nearer thing
 // keeps its label and the farther one waits until they have moved apart on screen.
-// labels: [{ id, left, top, right, bottom, km, first }]; first: the chosen target and the
-// guide's goal, which are never hidden. Returns the ids to hide.
+// labels: [{ id, left, top, right, bottom, km, first, minor }]; first: the chosen target
+// and the guide's goal, which are never hidden; minor: a spacecraft or a place on a
+// surface, which gives way to any planet, moon or the Sun however near it is (Hubble's
+// label once stood where Earth's should have been). Returns the ids to hide.
 export function overlapped(labels, gap = 2) {
-  const order = [...labels].sort((a, b) => (Boolean(b.first) - Boolean(a.first)) || a.km - b.km);
+  // Worlds are placed first, then craft and places; within each, the chosen one, then the nearest.
+  const order = [...labels].sort((a, b) => (Boolean(a.minor) - Boolean(b.minor)) || (Boolean(b.first) - Boolean(a.first)) || a.km - b.km);
   const shown = [];
   const hidden = new Set();
   for (const label of order) {
     const hit = shown.some((s) => label.left < s.right + gap && s.left < label.right + gap && label.top < s.bottom + gap && s.top < label.bottom + gap);
-    if (hit && !label.first) hidden.add(label.id);
+    // The chosen target stays, unless it is a craft or place that would cover a world's
+    // name (placed after the worlds and its own kind's chosen one, that is all it can hit).
+    if (hit && (!label.first || label.minor)) hidden.add(label.id);
     else shown.push(label);
   }
   return hidden;

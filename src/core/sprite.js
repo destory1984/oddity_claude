@@ -1,124 +1,233 @@
 // Which drawing of the sprite character to show (render/spriteHero.js draws it).
-// Eight sheets of four frames each, in public/assets/seora-sprites.
+// 37 sheets of four frames each, in public/assets/seora-sprites. (Four more are in the
+// folder but not used: 'backward', the first rear view, which leaned 45 degrees; 'up'
+// and 'down', which show her from the front; and 'dock-hold', a flying pose for riding
+// a craft, dropped because once docked she should look stopped.)
 //
-// The camera sits behind the traveler, so the names read from the camera's side:
-//   'backward' is her back (flying away from the camera: the usual forward flight),
-//   'forward' is her front (coming toward the camera: flying in reverse).
+// The camera sits behind the traveler, so in flight she is seen from behind:
+//   'away'                       flying straight into the screen
+//   'away-left', 'away-right'    the same, leaning about 20 degrees
+//   'back-left', 'back-right'    banking in a turn
+//   'back-up', 'back-down'       climbing, diving
+//   'left', 'right'              side-on (sliding sideways, or carried well off to one side)
+//   'forward'                    her front (coming toward the camera: flying in reverse)
 
-export const SHEETS = ['forward', 'backward', 'left', 'right', 'up', 'down', 'brake', 'idle'];
 export const FRAMES = 4;
-// Frames per second: flight loops, and the turn-round (the four 'brake' drawings,
-// played once: forwards as she stops and turns to face the camera, backwards as she
-// turns away again to fly off). At 8 a second the turn was over in half a second and
-// looked like a snap; at 5 it takes 0.8 s.
-export const SPRITE_FPS = { flight: 10, brake: 5 };
-const TURN_ROUND_S = FRAMES / SPRITE_FPS.brake;
-// Hovering is mostly stillness. The four idle drawings are: 0 eyes open, 1 eyes shut,
-// 2 looking aside, 3 waving. Over a ten-second round she blinks twice, glances aside
-// once and waves once; the rest of the time she just hangs there. (Run as a loop at
-// three frames a second she never stopped fidgeting.)
-export const IDLE_ROUND_S = 10;
-const IDLE_MOMENTS = [
-  { from: 2.5, to: 2.65, frame: 1 },
-  { from: 4.0, to: 4.9, frame: 2 },
-  { from: 6.0, to: 6.15, frame: 1 },
-  { from: 8.0, to: 9.2, frame: 3, flutter: 0.3 },
+export const FLIGHT_SHEETS = ['away', 'away-left', 'away-right', 'back-left', 'back-right', 'back-up', 'back-down', 'left', 'right', 'forward'];
+// What she does now and then while hovering. times: how often the four drawings run.
+export const REST_ACTIONS = [
+  { sheet: 'rest-tilt', times: 1 }, { sheet: 'rest-wave', times: 2 }, { sheet: 'rest-spin', times: 1 },
+  { sheet: 'rest-hop', times: 2 }, { sheet: 'rest-look', times: 1 }, { sheet: 'rest-stretch', times: 1 },
+  { sheet: 'rest-nod', times: 2 }, { sheet: 'rest-sway', times: 2 }, { sheet: 'rest-cheer', times: 1 },
+  { sheet: 'rest-wave2', times: 2 }, { sheet: 'rest-sit', times: 3 }, { sheet: 'rest-star', times: 1 },
+  { sheet: 'rest-ribbon', times: 1 },
 ];
+export const SHEETS = [
+  ...FLIGHT_SHEETS, 'brake', 'idle', ...REST_ACTIONS.map((a) => a.sheet), 'rest-sleep',
+  'dock-reach', 'stand', 'land', 'warp-out', 'warp-in', 'sling', 'photo-v', 'photo-jump',
+  'cheer-big', 'hurt-bright', 'cold',
+];
+
+// Frames per second.
+export const SPRITE_FPS = {
+  flight: 10,
+  // The turn-round: the four 'brake' drawings, forwards as she stops and turns to face
+  // the camera, backwards as she turns away again to fly off. 0.8 s.
+  brake: 5,
+  rest: 4, sleep: 1.5, reach: 2, stand: 3, land: 8, sling: 12, cheer: 8, bright: 4, cold: 6,
+};
+const TURN_ROUND_S = FRAMES / SPRITE_FPS.brake;
 // Slower than this (km/s) she is standing still.
 const MOVING_KM_S = 1;
 // Turning faster than this (radians per second) shows the turn instead of plain flight;
 // once showing, the turn sheet stays until the turn eases below the lower figure.
 const TURN = 0.25;
 const TURN_EASED = 0.1;
-// A heading this far off straight ahead (the sine of about 24 degrees) shows as a side.
-const SIDEWAYS = 0.4;
-// A mouse drag arrives in bursts: a big turn one frame, none the next. Read raw, it
-// flipped her between her back and her side dozens of times a second. So the turn is
+// A mouse drag arrives in bursts: a big turn one frame, none the next. So the turn is
 // smoothed over about a fifth of a second, and a flight sheet, once shown, stays up at
 // least this long.
 const TURN_SMOOTHING = 5;
 export const SHEET_HOLD_S = 0.3;
+// Carried somewhere other than straight ahead: beyond the first figure (the sine of
+// about 9 degrees) she leans that way, beyond the second (27 degrees) she is side-on.
+const LEAN = 0.15;
+const SIDEWAYS = 0.45;
+// Hovering: the first rest action after this long, then one every 8 to 15 seconds;
+// after a minute of stillness she dozes off.
+export const FIRST_REST_S = 3;
+export const REST_GAP_S = [8, 15];
+export const SLEEP_AFTER_S = 60;
+// The jump: how long each half of it takes (ui/warp.js).
+const WARP_OUT_S = 2.7;
+const WARP_IN_S = 2.6;
+
+// Steady numbers in 0..1 for n, the same every time.
+function chance(n) {
+  let x = Math.imul(n + 1, 0x9e3779b1) >>> 0;
+  x = Math.imul(x ^ (x >>> 16), 0x85ebca6b);
+  x = Math.imul(x ^ (x >>> 13), 0xc2b2ae35);
+  return ((x ^ (x >>> 16)) >>> 0) / 4294967296;
+}
 
 export function createSpriteState() {
-  return { sheet: 'idle', time: 0, moving: false, since: 0, turn: [0, 0] };
+  return { mode: 'hover', sheet: 'idle', frame: 0, time: 0, since: 0, turn: [0, 0], rests: 0, still: 0, nextRest: FIRST_REST_S, photos: 0 };
 }
 
 // The flight sheet for what the traveler is doing.
 // drive: 1 forward, -1 reverse, 0 coasting. strafe: 1 right, -1 left, 0 none.
 // turn: [yaw, pitch] in radians per second; yaw > 0 turns right, pitch > 0 noses down.
-// showing: the sheet up now, which a turn that is only easing off does not yet leave.
 // heading: when she is being carried somewhere other than where she faces (gliding in
 // to dock, flung by a slingshot, coasting on a craft's speed), the way she is really
-// going, as a unit vector in her own frame (x right, y up, z ahead). It decides the
-// sheet, so she is never drawn running right toward something on her left.
+// going, as a unit vector in her own frame (x right, y up, z ahead).
+// showing: the sheet up now, which a turn that is only easing off does not yet leave.
 export function flightSheet({ drive = 0, strafe = 0, turn = [0, 0], heading = null }, showing = null) {
   if (heading) {
     const [x, y, z] = heading;
+    if (z < -0.2) return 'forward';
     if (Math.abs(x) > SIDEWAYS && Math.abs(x) >= Math.abs(y)) return x > 0 ? 'right' : 'left';
-    if (Math.abs(y) > SIDEWAYS) return y > 0 ? 'up' : 'down';
-    return z < 0 ? 'forward' : 'backward';
+    if (Math.abs(y) > SIDEWAYS) return y > 0 ? 'back-up' : 'back-down';
+    if (Math.abs(x) > LEAN) return x > 0 ? 'away-right' : 'away-left';
+    return 'away';
   }
   // Sliding sideways with no thrust ahead: she flies side-on.
   if (strafe !== 0 && drive === 0) return strafe > 0 ? 'right' : 'left';
+  if (drive < 0) return 'forward';
   const [yaw, pitch] = turn;
-  if (Math.abs(pitch) > TURN && Math.abs(pitch) >= Math.abs(yaw)) return pitch > 0 ? 'down' : 'up';
-  if (Math.abs(yaw) > TURN) return yaw > 0 ? 'right' : 'left';
-  const still = { right: yaw > TURN_EASED, left: yaw < -TURN_EASED, down: pitch > TURN_EASED, up: pitch < -TURN_EASED };
+  if (Math.abs(pitch) > TURN && Math.abs(pitch) >= Math.abs(yaw)) return pitch > 0 ? 'back-down' : 'back-up';
+  if (Math.abs(yaw) > TURN) return yaw > 0 ? 'back-right' : 'back-left';
+  const still = {
+    'back-right': yaw > TURN_EASED, 'back-left': yaw < -TURN_EASED, 'back-down': pitch > TURN_EASED, 'back-up': pitch < -TURN_EASED,
+  };
   if (still[showing]) return showing;
-  return drive < 0 ? 'forward' : 'backward';
+  return 'away';
 }
 
-// Advance by dt seconds. input: { speed, drive, strafe, turn, held }.
-// held: latched to a craft. She rides at rest, whatever the craft's own speed (which
-// wavers from frame to frame and would flip her between flying and stopping).
+// What she is doing, from most pressing to least.
+// input: { speed, drive, strafe, turn, heading, held, docking, resting, boost, warp,
+//          photo, cheer, bright, cold }
+//   warp: null, or { phase: 'out' | 'in', t } with t seconds into that half of a jump.
+export function modeFor(input) {
+  if (input.warp) return 'warp';
+  if (input.cheer) return 'cheer';
+  if (input.photo) return 'photo';
+  if (input.docking) return 'reach';
+  // Latched to a craft she is at rest, whatever speed the craft carries her at: she
+  // turns to face the camera and hovers, as when she stops anywhere else.
+  if (input.held) return 'hover';
+  if (input.boost) return 'sling';
+  if (input.resting) return 'ground';
+  return input.speed >= MOVING_KM_S ? 'fly' : 'hover';
+}
+
+const loop = (time, fps) => Math.floor(time * fps) % FRAMES;
+const once = (time, fps) => Math.min(FRAMES - 1, Math.floor(time * fps));
+// Facing the camera: these turn round by the 'brake' drawings on the way to and from flight.
+const FACING = ['hover', 'ground', 'photo', 'cheer'];
+
+function hover(state, input, dt, fresh) {
+  // The turn-round, when she has just stopped flying.
+  if (state.sheet === 'brake' && !state.reverse && !fresh) {
+    const time = state.time + dt;
+    if (time < TURN_ROUND_S) return { ...state, time, frame: once(time, SPRITE_FPS.brake) };
+    return { ...state, sheet: 'idle', time: 0, frame: 0, still: 0, nextRest: FIRST_REST_S };
+  }
+  const still = fresh ? 0 : state.still + dt;
+  let { rests, nextRest } = fresh ? { rests: state.rests, nextRest: FIRST_REST_S } : state;
+  // Too bright to look, or shivering: these take the place of everything else.
+  if (input.bright) return { ...state, sheet: 'hurt-bright', time: still, frame: loop(still, SPRITE_FPS.bright), still, rests, nextRest };
+  if (input.cold) return { ...state, sheet: 'cold', time: still, frame: loop(still, SPRITE_FPS.cold), still, rests, nextRest };
+  if (still >= SLEEP_AFTER_S) return { ...state, sheet: 'rest-sleep', time: still, frame: loop(still - SLEEP_AFTER_S, SPRITE_FPS.sleep), still, rests, nextRest };
+  // A rest action under way.
+  const action = REST_ACTIONS.find((a) => a.sheet === state.sheet);
+  if (action && !fresh) {
+    const time = state.time + dt;
+    if (time < (FRAMES * action.times) / SPRITE_FPS.rest) return { ...state, time, frame: loop(time, SPRITE_FPS.rest), still };
+    return { ...state, sheet: 'idle', time: 0, frame: 0, still };
+  }
+  if (still >= nextRest) {
+    const pick = REST_ACTIONS[Math.floor(chance(rests) * REST_ACTIONS.length)];
+    nextRest = still + (FRAMES * pick.times) / SPRITE_FPS.rest + REST_GAP_S[0] + chance(rests + 1000) * (REST_GAP_S[1] - REST_GAP_S[0]);
+    return { ...state, sheet: pick.sheet, time: 0, frame: 0, still, rests: rests + 1, nextRest };
+  }
+  // Just hovering: eyes open, with a blink every four seconds or so.
+  const blink = still % 4 > 3.85;
+  return { ...state, sheet: 'idle', time: still, frame: blink ? 1 : 0, still, rests, nextRest };
+}
+
+// Advance by dt seconds.
 export function stepSprite(state, input, dt) {
-  const moving = !input.held && input.speed >= MOVING_KM_S;
-  if (moving) {
-    // Flight sheets share one beat, so switching between them does not restart the loop.
+  const mode = modeFor(input);
+  const fresh = mode !== state.mode;
+  const from = state.mode;
+  const next = { ...state, mode };
+
+  if (mode === 'warp') {
+    const { phase, t } = input.warp;
+    const span = phase === 'out' ? WARP_OUT_S : WARP_IN_S;
+    return { ...next, sheet: phase === 'out' ? 'warp-out' : 'warp-in', time: t, frame: once(t, FRAMES / span), reverse: false };
+  }
+  if (mode === 'cheer') {
+    const time = fresh ? 0 : state.time + dt;
+    return { ...next, sheet: 'cheer-big', time, frame: loop(time, SPRITE_FPS.cheer), reverse: false };
+  }
+  if (mode === 'photo') {
+    // The game is paused in photo mode, so no time passes: she holds the finished pose.
+    const photos = fresh ? state.photos + 1 : state.photos;
+    return { ...next, sheet: photos % 2 ? 'photo-v' : 'photo-jump', time: 0, frame: FRAMES - 1, photos, reverse: false };
+  }
+  if (mode === 'sling') {
+    const time = fresh ? 0 : state.time + dt;
+    return { ...next, sheet: 'sling', time, frame: loop(time, SPRITE_FPS.sling), reverse: false };
+  }
+  if (mode === 'reach') {
+    // Gliding in to dock: her arm goes out, unless the craft is well off to one side.
+    const time = fresh ? 0 : state.time + dt;
+    const way = input.heading ? flightSheet({ heading: input.heading }) : 'away';
+    if (way === 'left' || way === 'right' || way === 'forward') return { ...next, sheet: way, time, frame: loop(time, SPRITE_FPS.flight), reverse: false };
+    return { ...next, sheet: 'dock-reach', time, frame: once(time, SPRITE_FPS.reach), reverse: false };
+  }
+  if (mode === 'ground') {
+    // Touching down, then standing.
+    if (fresh) return { ...next, sheet: 'land', time: 0, frame: 0, reverse: false };
+    const time = state.time + dt;
+    if (state.sheet === 'land' && time < FRAMES / SPRITE_FPS.land) return { ...next, time, frame: once(time, SPRITE_FPS.land) };
+    if (state.sheet === 'land') return { ...next, sheet: 'stand', time: 0, frame: 0 };
+    return { ...next, sheet: 'stand', time, frame: loop(time, SPRITE_FPS.stand) };
+  }
+  if (mode === 'fly') {
     const raw = input.turn ?? [0, 0];
-    const was = state.moving ? state.turn ?? [0, 0] : [0, 0];
+    const was = from === 'fly' ? state.turn ?? [0, 0] : [0, 0];
     const k = 1 - Math.exp(-dt * TURN_SMOOTHING);
     const turn = was.map((n, i) => n + (raw[i] - n) * k);
-    // Setting off: turn away from the camera first, by the brake drawings in reverse
-    // (from wherever a stop that was still under way had got to).
-    if (!state.moving) {
-      const time = state.sheet === 'brake' ? Math.max(0, TURN_ROUND_S - state.time) : 0;
-      return { sheet: 'brake', reverse: true, time, moving, since: 0, turn };
+    // Setting off from facing the camera: turn away first, by the brake drawings in
+    // reverse (from wherever a stop that was still under way had got to).
+    if (fresh && FACING.includes(from)) {
+      const time = state.sheet === 'brake' && !state.reverse ? Math.max(0, TURN_ROUND_S - state.time) : 0;
+      return { ...next, sheet: 'brake', reverse: true, time, frame: FRAMES - 1 - once(time, SPRITE_FPS.brake), since: 0, turn };
     }
-    if (state.reverse) {
+    if (state.reverse && !fresh) {
       const time = state.time + dt;
-      if (time < TURN_ROUND_S) return { ...state, time, turn };
-      return { sheet: flightSheet({ ...input, turn }), time: 0, moving, since: 0, turn };
+      if (time < TURN_ROUND_S) return { ...next, time, frame: FRAMES - 1 - once(time, SPRITE_FPS.brake), turn };
+      return { ...next, sheet: flightSheet({ ...input, turn }), reverse: false, time: 0, frame: 0, since: 0, turn };
     }
-    const since = (state.since ?? 0) + dt;
+    if (fresh) return { ...next, sheet: flightSheet({ ...input, turn }), reverse: false, time: 0, frame: 0, since: 0, turn };
+    const since = state.since + dt;
+    const time = state.time + dt;
     const wanted = flightSheet({ ...input, turn }, state.sheet);
-    if (wanted === state.sheet || since < SHEET_HOLD_S) return { sheet: state.sheet, time: state.time + dt, moving, since, turn };
-    return { sheet: wanted, time: state.time + dt, moving, since: 0, turn };
+    const sheet = wanted === state.sheet || since < SHEET_HOLD_S ? state.sheet : wanted;
+    return { ...next, sheet, time, frame: loop(time, SPRITE_FPS.flight), since: sheet === state.sheet ? since : 0, turn };
   }
-  const rest = { moving, since: 0, turn: [0, 0] };
-  // Just stopped: the turn-round, once (picking up from where a take-off had got to).
-  if (state.moving) return { sheet: 'brake', time: state.reverse ? Math.max(0, TURN_ROUND_S - state.time) : 0, ...rest };
-  const time = state.time + dt;
-  if (state.sheet === 'brake' && time < TURN_ROUND_S) return { sheet: 'brake', time, ...rest };
-  if (state.sheet !== 'idle') return { sheet: 'idle', time: 0, ...rest };
-  return { sheet: 'idle', time, ...rest };
+  // Hovering. Coming out of flight she turns round to face the camera first.
+  if (fresh && ['fly', 'sling', 'reach'].includes(from)) {
+    const time = state.reverse ? Math.max(0, TURN_ROUND_S - state.time) : 0;
+    return { ...next, sheet: 'brake', reverse: false, time, frame: once(time, SPRITE_FPS.brake), still: 0, turn: [0, 0] };
+  }
+  return hover({ ...next, reverse: false }, input, dt, fresh);
 }
 
 // Which of the four frames (0..3) to show.
-export function spriteFrame({ sheet, time, reverse = false }) {
-  if (sheet === 'brake') {
-    const frame = Math.min(FRAMES - 1, Math.floor(time * SPRITE_FPS.brake));
-    return reverse ? FRAMES - 1 - frame : frame;
-  }
-  if (sheet === 'idle') {
-    const t = time % IDLE_ROUND_S;
-    const now = IDLE_MOMENTS.find((m) => t >= m.from && t < m.to);
-    if (!now) return 0;
-    // The wave: hand up, down to rest, up again.
-    if (now.flutter && Math.floor((t - now.from) / now.flutter) % 2 === 1) return 0;
-    return now.frame;
-  }
-  return Math.floor(time * SPRITE_FPS.flight) % FRAMES;
+export function spriteFrame(state) {
+  return state.frame;
 }
 
 // The file for a sheet and frame, under the site's assets folder.

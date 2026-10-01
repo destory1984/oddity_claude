@@ -7,12 +7,20 @@ const WHITE_MS = 2800;
 
 export function createWarp(element) {
   let busy = false;
+  let startedAt = 0;
   return {
     busy: () => busy,
+    // Which half of the jump is under way and how many seconds into it, or null.
+    phase() {
+      if (!busy) return null;
+      const ms = performance.now() - startedAt;
+      return ms < WHITE_MS ? { phase: 'out', t: ms / 1000 } : { phase: 'in', t: (ms - WHITE_MS) / 1000 };
+    },
     // onWhite runs once, while nothing behind the flash can be seen.
     play(onWhite) {
       if (busy) return;
       busy = true;
+      startedAt = performance.now();
       element.classList.remove('on');
       // Restart the animation even if it has just run.
       void element.offsetWidth;

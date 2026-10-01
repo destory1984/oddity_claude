@@ -56,7 +56,7 @@ export function eventMessage(event, bodies = []) {
       return `${event.name}${towardParticle(event.name)} 순간 이동했습니다.`;
     // Going down to stand beside a place on a surface (core/visit.js).
     case 'visiting':
-      return `${event.name}${towardParticle(event.name)} 내려갑니다.`;
+      return `${event.name}에 착륙합니다. 0에 맞춰 내려섭니다.`;
     case 'visited':
       return `${event.name} 곁에 내려섰습니다. 전진이나 후진을 누르면 떠납니다.`;
     case 'dockRefused':

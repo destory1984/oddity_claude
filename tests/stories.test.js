@@ -14,10 +14,10 @@ const done = (position, restingOn = null, t = 0) => {
   return completedStories({ position, restingOn, bodies, craft: craftAt(t, bodies), sites: storySitesAt(t, bodies) });
 };
 
-test('there are 53 story places, each with a name, a hint and a short story; events have a year', () => {
-  assert.equal(STORIES.length, 53);
-  assert.equal(new Set(STORIES.map((s) => s.id)).size, 53);
-  assert.equal(new Set(STORIES.map((s) => s.name)).size, 53);
+test('there are 71 story places, each with a name, a hint and a short story; events have a year', () => {
+  assert.equal(STORIES.length, 71);
+  assert.equal(new Set(STORIES.map((s) => s.id)).size, 71);
+  assert.equal(new Set(STORIES.map((s) => s.name)).size, 71);
   for (const s of STORIES) {
     assert.ok(s.name && s.nameEn && s.hint, s.id);
     assert.ok(s.year === undefined || s.year > 1900, s.id);
@@ -82,7 +82,7 @@ test("a place's label shows only from within four radii of its body's surface", 
 
 test('the places sit on the surface of their body and move as it spins', () => {
   const sites = storySitesAt(0, BODIES);
-  assert.equal(sites.length, 48);
+  assert.equal(sites.length, 65);
   assert.deepEqual(sites.slice(0, 4).map((s) => s.id), ['apollo11', 'viking1', 'huygens', 'dokdo']);
   for (const site of sites) {
     const body = bodyById(site.parent);
@@ -130,30 +130,52 @@ test('New Horizons, Giotto and Voyager 1: passing close by', () => {
   assert.deepEqual(done(add(halley.position, [0, 500, 0])), ['giotto']);
   assert.deepEqual(done(add(halley.position, [0, 700, 0])), []);
   const voyager = craftAt(0, BODIES).find((c) => c.id === 'voyager1');
-  assert.deepEqual(done(add(voyager.position, [0, 4000, 0])), ['voyager1']);
-  assert.deepEqual(done(add(voyager.position, [0, 9000, 0])), []);
+  // Out where Voyager 1 is, Earth is also the pale blue dot it photographed.
+  assert.deepEqual(done(add(voyager.position, [0, 4000, 0])).sort(), ['paleBlueDot', 'voyager1']);
+  assert.deepEqual(done(add(voyager.position, [0, 9000, 0])), ['paleBlueDot']);
 });
 
-test('twelve famous places on the Moon itself: craters, seas and mountains, with no machine standing there', () => {
+test('twenty famous places on the Moon and nine on Mars: craters, seas and mountains, with no machine standing there', () => {
   const marks = STORIES.filter((s) => s.landmark);
-  assert.deepEqual(marks.map((s) => s.name), [
+  assert.deepEqual(marks.filter((s) => s.body === 'moon').map((s) => s.name), [
     '티코 분화구', '코페르니쿠스 분화구', '고요의 바다', '비의 바다', '폭풍의 대양', '남극-에이트켄 분지',
     '섀클턴 분화구', '아펜니노 산맥', '알프스 계곡', '직선벽', '모스크바의 바다', '치올콥스키 분화구',
+    '맑음의 바다', '위난의 바다', '플라톤 분화구', '아리스타르코스 분화구', '케플러 분화구', '클라비우스 분화구',
+    '무지개의 만', '라이너 감마',
   ]);
+  assert.deepEqual(marks.filter((s) => s.body === 'mars').map((s) => s.name), [
+    '올림푸스산', '마리너 계곡', '타르시스 세 화산', '헬라스 분지', '북극관', '남극관', '코롤료프 분화구', '시도니아의 얼굴',
+    '시르티스 메이저',
+  ]);
+  assert.equal(marks.length, 29);
   for (const s of marks) {
-    assert.equal(s.body, 'moon');
     assert.equal(s.type, 'surface');
     assert.equal(s.year, undefined);
+    assert.ok(Math.abs(s.latDeg) <= 90 && Math.abs(s.lonDeg) <= 180, s.id);
     assert.ok([150, 200, 300].includes(s.withinKm), s.id);
-    assert.match(s.hint, /^달 .+\((북위|남위) [0-9.]+도, (동경|서경) [0-9.]+도\) (150|200|300)km 안에 내려앉기$/, s.id);
+    assert.match(s.hint, /^(달|화성) .+\((북위|남위) [0-9.]+도, (동경|서경) [0-9.]+도\) (150|200|300)km 안에 내려앉기$/, s.id);
   }
+  // The eight added to the Moon are all on the side that faces Earth.
+  for (const s of marks.filter((m) => m.body === 'moon').slice(12)) assert.ok(Math.abs(s.lonDeg) < 90, s.id);
   const sites = storySitesAt(0, BODIES);
-  assert.equal(sites.filter((s) => s.landmark).length, 12);
+  assert.equal(sites.filter((s) => s.landmark).length, 29);
+  // Landing on top of Olympus Mons logs the mountain and nothing else.
+  assert.deepEqual(done(sites.find((s) => s.id === 'olympus').position, 'mars'), ['olympus']);
   assert.equal(sites.find((s) => s.id === 'apollo11').landmark, false);
   // Landing in the middle of the Sea of Tranquility logs the sea, not Apollo 11 beside it.
   assert.deepEqual(done(sites.find((s) => s.id === 'tranquillitatis').position, 'moon'), ['tranquillitatis']);
   // Tycho and Surveyor 7 on its rim are logged together.
   assert.deepEqual(done(sites.find((s) => s.id === 'tycho').position, 'moon').sort(), ['surveyor7', 'tycho']);
+});
+
+test('the Pale Blue Dot: 60 million km from Earth, as far as Voyager 1 was on the game\'s scale', () => {
+  const earth = bodyById('earth');
+  const story = STORIES.find((s) => s.id === 'paleBlueDot');
+  assert.equal(story.type, 'far');
+  assert.equal(story.year, 1990);
+  // Away from the Sun and every planet (straight up out of the plane).
+  assert.deepEqual(done(add(earth.position, [0, 6.1e7, 0])), ['paleBlueDot']);
+  assert.deepEqual(done(add(earth.position, [0, 5.9e7, 0])), []);
 });
 
 test('Rosetta: passing within 300 km of comet 67P', () => {

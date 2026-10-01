@@ -27,14 +27,20 @@ void main(){
   vec3 warm = vec3(1.1, .62, .22);
   vec3 surface = mix(warm, hot, limb) * (.85 + .25 * granules + .1 * cells) * (1. - .6 * spots);
 
-  float corona = exp(-r * 9.) * 2.35 + exp(-r * 4.) * .42 + exp(-r * 1.65) * .075;
+  float ang = atan(p.y, p.x);
+  vec2 dir = vec2(cos(ang), sin(ang));
+  // The corona is not still: broad streamers that slowly swell and shift round the
+  // disc, and finer wisps that stream outward. Calm against the limb, livelier far out.
+  float streams = fbm(dir * 2.2 + vec2(time * .021, -time * .016));
+  float flow = fbm(dir * 5. + vec2(r * 9. - time * .11, r * 6. - time * .07));
+  float alive = mix(1., .5 + .75 * streams + .55 * flow, smoothstep(.129, .4, r));
+  float corona = (exp(-r * 9.) * 2.35 + exp(-r * 4.) * .42 + exp(-r * 1.65) * .075) * alive;
   float rayH = pow(max(0., 1. - abs(p.y) * 22.), 7.) * exp(-abs(p.x) * 2.8) * .34;
   float rayV = pow(max(0., 1. - abs(p.x) * 29.), 8.) * exp(-abs(p.y) * 3.8) * .16;
   float ring = exp(-pow((r - .28) * 15., 2.)) * .045;
   vec3 glow = vec3(1., .51, .12) * (corona + rayH + rayV) * (1. - disc) + vec3(1., .78, .38) * ring;
   // Prominences: arches of glowing gas standing on the limb, seven of them, each
   // slowly swelling and sinking. They are red, and show best when the disc is covered.
-  float ang = atan(p.y, p.x);
   float prom = 0.;
   for (int k = 0; k < 7; k++) {
     float fk = float(k);
@@ -56,7 +62,7 @@ void main(){
   // into two broad streamers.
   float beyond = max(0., r - .129);
   float streamers = pow(.5 + .5 * sin(ang * 2. + .6), 3.);
-  float wisps = .55 + .45 * fbm(vec2(cos(ang), sin(ang)) * 3. + 2.);
+  float wisps = .55 + .45 * fbm(dir * 3. + 2. + vec2(beyond * 7. - time * .05, time * .02));
   float pearl = (exp(-beyond * 14.) * 2.4 + exp(-beyond * 4.5) * 1.1 * (.3 + 1. * streamers)) * wisps * eclipse * (1. - disc);
   // The diamond ring: the last bead of sunlight, a point with a soft halo and four rays.
   vec2 fromBead = p - bead.xy * .129;

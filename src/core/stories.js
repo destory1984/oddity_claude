@@ -5,6 +5,7 @@ import { SPIN_DAY_S, EARTH_START_SPIN, spinAngle, surfaceDirection } from './sur
 //   surface: land on the body within withinKm of the spot (east longitude, north latitude)
 //   land: touch the body anywhere
 //   near: come within withinKm of the target's surface (a body or a spacecraft)
+//   far: go at least beyondKm from the target's centre
 export const STORIES = [
   {
     id: 'apollo11', name: '아폴로 11호 착륙지', nameEn: 'Apollo 11', year: 1969,
@@ -47,6 +48,15 @@ export const STORIES = [
     type: 'near', target: 'voyager1', withinKm: 5000,
     hint: '보이저 1호 5,000km 안까지 따라가기',
     text: '1977년 떠난 보이저 1호는 2012년 8월 태양권을 벗어나 별 사이 공간에 들어섰습니다.',
+  },
+  // The photograph Voyager 1 took looking back from 6 billion km. Distances between
+  // bodies are a hundredth of the real ones here, so that is 60 million km: about as
+  // far from Earth as Pluto's orbit.
+  {
+    id: 'paleBlueDot', name: '창백한 푸른 점', nameEn: 'Pale Blue Dot', year: 1990,
+    type: 'far', target: 'earth', beyondKm: 6e7,
+    hint: '지구에서 6,000만km 넘게 멀어지기 (실제 거리로 60억km, 명왕성 궤도쯤)',
+    text: '1990년 2월 14일 보이저 1호가 60억km 밖에서 돌아본 지구는 한 픽셀도 안 되는 푸른 점이었습니다.',
   },
   // Dokdo, in the East Sea. The map shows 10 km per pixel, so the island cannot be
   // seen; the label marks where it is.
@@ -110,8 +120,8 @@ STORIES.push(
   ...MARS_LANDINGS.map((row) => landing('mars', '화성', row)),
 );
 
-// Famous places on the Moon itself: craters, seas, mountains. No machine stands there,
-// so they get a label and a story but no model (landmark: true).
+// Famous places on the Moon and Mars themselves: craters, seas, mountains. No machine
+// stands there, so they get a label and a story but no model (landmark: true).
 // [id, name, nameEn, latDeg, east lonDeg, withinKm, story].
 const MOON_LANDMARKS = [
   ['tycho', '티코 분화구', 'Tycho', -43.31, -11.36, 150, '1억 800만 년 전에 생긴 지름 85km 분화구입니다. 보름달에 사방으로 뻗은 흰 빛줄기가 여기서 나옵니다.'],
@@ -126,12 +136,34 @@ const MOON_LANDMARKS = [
   ['straightWall', '직선벽', 'Rupes Recta', -21.8, -7.8, 150, '길이 110km, 높이 약 300m의 곧은 단층 절벽입니다. 해가 낮게 비치면 검은 선으로 보입니다.'],
   ['moscoviense', '모스크바의 바다', 'Mare Moscoviense', 27.3, 147.9, 200, '달 뒷면에 드문 바다입니다. 1959년 루나 3호가 처음 찍은 뒷면 사진에서 발견되어 이름이 붙었습니다.'],
   ['tsiolkovskiy', '치올콥스키 분화구', 'Tsiolkovskiy', -20.4, 129.1, 150, '달 뒷면에서 가장 눈에 띄는 분화구입니다. 지름 185km 바닥에 검은 용암이 차 있고 가운데 봉우리가 솟아 있습니다.'],
+  // More of the near side, the face seen from Earth.
+  ['serenitatis', '맑음의 바다', 'Mare Serenitatis', 28.0, 17.5, 200, '지름 670km쯤의 둥근 바다입니다. 지구에서 보면 달 토끼의 머리 자리입니다. 아폴로 17호가 그 가장자리에 내렸습니다.'],
+  ['crisium', '위난의 바다', 'Mare Crisium', 17.0, 59.1, 200, '다른 바다와 떨어져 홀로 있는 지름 550km쯤의 둥근 바다입니다. 달 동쪽 가장자리에 있어 맨눈으로도 보입니다.'],
+  ['plato', '플라톤 분화구', 'Plato', 51.6, -9.4, 150, '지름 100km쯤의 분화구입니다. 바닥을 용암이 매끈하게 채워, 밝은 산맥 사이의 검은 호수처럼 보입니다.'],
+  ['aristarchus', '아리스타르코스 분화구', 'Aristarchus', 23.7, -47.4, 150, '달 앞면에서 가장 밝은 곳입니다. 지름 40km의 젊은 분화구로, 둘레보다 두 배쯤 밝게 빛납니다.'],
+  ['kepler', '케플러 분화구', 'Kepler', 8.1, -38.0, 150, '폭풍의 대양 한가운데 있는 지름 30km쯤의 분화구입니다. 밝은 빛줄기가 300km 넘게 뻗어 있습니다.'],
+  ['clavius', '클라비우스 분화구', 'Clavius', -58.4, -14.4, 150, '지름 231km로 달 앞면에서 손꼽히게 큰 분화구입니다. 2020년 이곳의 햇빛 드는 땅에서 물 분자가 확인됐습니다.'],
+  ['iridum', '무지개의 만', 'Sinus Iridum', 44.1, -31.5, 150, '비의 바다 북서쪽에 반달 모양으로 파인 지름 240km쯤의 만입니다. 쥐라 산맥이 둥글게 둘러싸고 있습니다.'],
+  ['reinerGamma', '라이너 감마', 'Reiner Gamma', 7.5, -59.0, 150, '폭풍의 대양에 그려진 길이 70km쯤의 밝은 소용돌이 무늬입니다. 높낮이가 없는 평지에 색만 다릅니다.'],
 ];
-STORIES.push(...MOON_LANDMARKS.map(([id, name, nameEn, latDeg, lonDeg, withinKm, text]) => ({
-  id, name, nameEn, type: 'surface', body: 'moon', latDeg, lonDeg, withinKm, landmark: true,
-  hint: `달 ${name}(${degrees(latDeg, '북위', '남위')}, ${degrees(lonDeg, '동경', '서경')}) ${withinKm}km 안에 내려앉기`,
+// The sights of Mars: its volcanoes, canyon, basins and ice caps.
+const MARS_LANDMARKS = [
+  ['olympus', '올림푸스산', 'Olympus Mons', 18.65, -133.8, 300, '높이 22km, 지름 600km쯤의 화산입니다. 에베레스트의 두 배 반 높이로, 태양계에서 알려진 가장 큰 화산입니다.'],
+  ['marineris', '마리너 계곡', 'Valles Marineris', -13.9, -59.2, 300, '길이 4,000km, 깊이 7km의 협곡입니다. 화성 둘레의 5분의 1을 가로지르고, 그랜드 캐니언보다 아홉 배 깁니다.'],
+  ['tharsis', '타르시스 세 화산', 'Tharsis Montes', 1.48, -112.96, 200, '높이 14 → 18km의 화산 셋이 700km 간격으로 한 줄로 서 있습니다. 가운데 파보니스산은 적도 위에 있습니다.'],
+  ['hellas', '헬라스 분지', 'Hellas Planitia', -42.4, 70.5, 300, '지름 2,300km, 깊이 7km의 충돌 분지입니다. 화성에서 가장 낮은 곳이고, 바닥의 기압은 평균의 두 배쯤입니다.'],
+  ['northCap', '북극관', 'Planum Boreum', 87.0, 0.0, 300, '지름 1,000km쯤의 얼음 모자입니다. 두께 2km의 물 얼음 위에, 겨울마다 드라이아이스가 1m쯤 덮입니다.'],
+  ['southCap', '남극관', 'Planum Australe', -87.0, 160.0, 300, '화성 남극의 얼음 모자입니다. 물 얼음 위에 드라이아이스가 덮여 있고, 그 층은 여름에도 다 사라지지 않습니다.'],
+  ['korolev', '코롤료프 분화구', 'Korolev', 72.77, 164.58, 150, '지름 82km의 분화구에 두께 1.8km의 물 얼음이 한 해 내내 녹지 않고 차 있습니다.'],
+  ['cydonia', '시도니아의 얼굴', 'Cydonia', 40.75, -9.46, 150, '1976년 바이킹 1호의 사진에서 사람 얼굴처럼 보인 길이 2km쯤의 언덕입니다. 뒤에 또렷한 사진으로 보니 평범한 언덕이었습니다.'],
+  ['syrtis', '시르티스 메이저', 'Syrtis Major', 8.4, 69.5, 300, '1659년 하위헌스가 망원경으로 보고 그린, 다른 행성의 지형으로는 처음 기록된 곳입니다. 어두운 현무암 화산 지대입니다.'],
+];
+const landmark = (body, bodyName) => ([id, name, nameEn, latDeg, lonDeg, withinKm, text]) => ({
+  id, name, nameEn, type: 'surface', body, latDeg, lonDeg, withinKm, landmark: true,
+  hint: `${bodyName} ${name}(${degrees(latDeg, '북위', '남위')}, ${degrees(lonDeg, '동경', '서경')}) ${withinKm}km 안에 내려앉기`,
   text,
-})));
+});
+STORIES.push(...MOON_LANDMARKS.map(landmark('moon', '달')), ...MARS_LANDMARKS.map(landmark('mars', '화성')));
 
 // Rosetta flew beside 67P for two years and set Philae down on it.
 STORIES.push({
@@ -173,6 +205,7 @@ export function completedStories({ position, restingOn, bodies, craft = [], site
       return restingOn === s.body && gap(position, sites.find((site) => site.id === s.id).position) <= s.withinKm;
     }
     const target = bodies.find((b) => b.id === s.target) ?? craft.find((c) => c.id === s.target);
+    if (s.type === 'far') return Boolean(target) && gap(position, target.position) >= s.beyondKm;
     return Boolean(target) && gap(position, target.position) - target.radiusKm <= s.withinKm;
   }).map((s) => s.id);
 }

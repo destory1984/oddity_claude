@@ -165,7 +165,9 @@ export function createSound() {
     }
   }
 
-  function noise({ start = 0, length = 0.1, volume = 0.2, type = 'highpass', freq = 2000, to = freq }) {
+  // attack: seconds to swell from silence. 0 starts at full volume, which is a hard
+  // tick at the front of the sound.
+  function noise({ start = 0, length = 0.1, volume = 0.2, type = 'highpass', freq = 2000, to = freq, attack = 0 }) {
     const t = ctx.currentTime + start;
     const src = ctx.createBufferSource();
     src.buffer = noiseBuffer;
@@ -174,7 +176,12 @@ export function createSound() {
     filter.frequency.setValueAtTime(freq, t);
     if (to !== freq) filter.frequency.exponentialRampToValueAtTime(to, t + length);
     const env = ctx.createGain();
-    env.gain.setValueAtTime(volume, t);
+    if (attack > 0) {
+      env.gain.setValueAtTime(0.0001, t);
+      env.gain.exponentialRampToValueAtTime(volume, t + attack);
+    } else {
+      env.gain.setValueAtTime(volume, t);
+    }
     env.gain.exponentialRampToValueAtTime(0.0001, t + length);
     src.connect(filter).connect(env).connect(sfx);
     src.start(t);
@@ -198,9 +205,11 @@ export function createSound() {
 
   const CUES = {
     discovered: () => [523, 659, 784, 880, 1047].forEach((f, i) => pluck(f, i * 0.1, 0.14)),
+    // Touching down: a soft low thump, no tick. (It was a burst of noise at full volume
+    // with a plucked note, which came out as a hard "tack".)
     landed: () => {
-      noise({ length: 0.12, volume: 0.35, type: 'lowpass', freq: 900, to: 250 });
-      pluck(196, 0.02, 0.18, 0.7);
+      noise({ length: 0.3, volume: 0.16, type: 'lowpass', freq: 420, to: 140, attack: 0.03 });
+      tone({ freq: 174, to: 131, length: 0.55, volume: 0.13 });
     },
     shutter: () => {
       noise({ length: 0.03, volume: 0.3, type: 'bandpass', freq: 2500 });
@@ -208,7 +217,12 @@ export function createSound() {
     },
     mission: () => [784, 988, 784, 1175, 1568].forEach((f, i) => bell(f, i * 0.12)),
     complete: () => [523, 659, 784, 1047, 988, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.16, 0.12)),
-    brake: () => noise({ length: 0.3, volume: 0.22, type: 'bandpass', freq: 2600, to: 500 }),
+    // Stopping: a breath of air sinking away under a soft falling note. (It was a band of
+    // noise that began at full volume, 2,600 Hz: a sharp "tack".)
+    brake: () => {
+      noise({ length: 0.5, volume: 0.09, type: 'lowpass', freq: 1100, to: 260, attack: 0.09 });
+      tone({ freq: 294, to: 196, length: 0.5, volume: 0.06 });
+    },
     click: () => pluck(1319, 0, 0.05, 0.2),
     // Docking: air rushing up as the approach begins, a tick for each count, then the
     // latch: a low clunk and two rising bells. Letting go plays the bells falling.

@@ -75,7 +75,7 @@ function chance(n) {
 }
 
 export function createSpriteState() {
-  return { mode: 'hover', sheet: 'idle', frame: 0, time: 0, since: 0, turn: [0, 0], rests: 0, still: 0, nextRest: FIRST_REST_S, photos: 0 };
+  return { mode: 'hover', sheet: 'idle', frame: 0, time: 0, since: 0, turn: [0, 0], rests: 0, still: 0, nextRest: FIRST_REST_S };
 }
 
 // The flight sheet for what the traveler is doing.
@@ -188,9 +188,9 @@ export function stepSprite(state, input, dt) {
     return { ...next, sheet: 'cheer-big', time, frame: loop(time, SPRITE_FPS.cheer), reverse: false };
   }
   if (mode === 'photo') {
-    // The game is paused in photo mode, so no time passes: she holds the finished pose.
-    const photos = fresh ? state.photos + 1 : state.photos;
-    return { ...next, sheet: photos % 2 ? 'photo-v' : 'photo-jump', time: 0, frame: FRAMES - 1, photos, reverse: false };
+    // The game is paused in photo mode, so no time passes: she holds the finished pose,
+    // two fingers up in a V. (Every other time it was a jump, 'photo-jump'; the drawings stay.)
+    return { ...next, sheet: 'photo-v', time: 0, frame: FRAMES - 1, reverse: false };
   }
   if (mode === 'sling') {
     const time = fresh ? 0 : state.time + dt;

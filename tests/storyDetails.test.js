@@ -15,9 +15,16 @@ test('every story place has a longer telling of three sentences or more', () => 
   }
 });
 
-test('52 of the 53 have a photograph on file, with a caption and a credit; the Ocean of Storms has none', () => {
+// The places added on 2026-10-02 (the Pale Blue Dot, eight more on the Moon, nine on Mars)
+// have no photograph yet.
+const NO_PHOTO = [
+  'paleBlueDot', 'procellarum', 'serenitatis', 'crisium', 'plato', 'aristarchus', 'kepler', 'clavius', 'iridum', 'reinerGamma',
+  'olympus', 'marineris', 'tharsis', 'hellas', 'northCap', 'southCap', 'korolev', 'cydonia', 'syrtis',
+];
+
+test('52 of the 71 have a photograph on file, with a caption and a credit', () => {
   const without = STORIES.filter((s) => !STORY_DETAILS[s.id].photo).map((s) => s.id);
-  assert.deepEqual(without, ['procellarum']);
+  assert.deepEqual(without, NO_PHOTO);
   assert.equal(storyPhotoFile('procellarum'), null);
   const credits = readFileSync('THIRD-PARTY.md', 'utf8');
   let bytes = 0;

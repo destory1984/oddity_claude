@@ -242,7 +242,7 @@ test('a slingshot stretches her out; a jump shrinks her to a star and back', () 
   assert.equal(stepSprite(back[4], STILL, 0.016).sheet, 'idle');
 });
 
-test('photo mode holds a finished pose, a different one each time; a full journal sets her cheering', () => {
+test('photo mode holds the V pose, every time; a full journal sets her cheering', () => {
   let state = stepSprite(createSpriteState(), { speed: 0, photo: true }, 0);
   assert.equal(state.sheet, 'photo-v');
   assert.equal(spriteFrame(state), 3);
@@ -250,7 +250,7 @@ test('photo mode holds a finished pose, a different one each time; a full journa
   assert.deepEqual(stepSprite(state, { speed: 0, photo: true }, 0), state);
   state = stepSprite(state, STILL, 0.016);
   state = stepSprite(state, { speed: 0, photo: true }, 0);
-  assert.equal(state.sheet, 'photo-jump');
+  assert.equal(state.sheet, 'photo-v');
   const cheer = run(createSpriteState(), { speed: 0, cheer: true }, 1);
   assert.deepEqual(sheetsOf(cheer.seen), ['cheer-big']);
   assert.deepEqual([...new Set(cheer.seen.map(spriteFrame))].sort(), [0, 1, 2, 3]);

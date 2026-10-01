@@ -21,7 +21,7 @@ import { addPhoto, removePhoto } from './core/album.js';
 import { teleportSpot } from './core/teleport.js';
 import { behindBody } from './core/markers.js';
 import { FACTS } from './core/facts.js';
-import { eventMessage, limitText, dateText, withParticle, towardParticle } from './ui/messages.js';
+import { eventMessage, limitText, dateText, withParticle } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import {
   updateProgress, recordPhotos, recordStories, recordCraft, createProgress, summarize, score, isComplete,
@@ -43,7 +43,7 @@ import {
   dockable, DOCK_RANGE_KM, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
   releaseDrift, dockingFacing,
 } from './core/dock.js';
-import { standSpot, startVisit, hasArrived, visitStep } from './core/visit.js';
+import { standSpot, startVisit, hasArrived, visitStep, landingCounts } from './core/visit.js';
 import { spinOf } from './core/surface.js';
 
 const $ = (id) => document.getElementById(id);
@@ -262,6 +262,7 @@ async function init() {
   }
 
   function dock(target) {
+    if (visit && !hasArrived(visit)) sound.hush();
     visit = null;
     docked = { ...startDocking(state.position, target, bodies), facing: state.orientation };
     rideDrift = [0, 0, 0];
@@ -295,6 +296,7 @@ async function init() {
     visitKmS = 0;
     input.clear();
     announce({ type: 'visiting', name: place.name });
+    sound.say('Landing in progress.');
   }
 
   // What a target already in the journal is, in a sentence or two: a body's fact, a
@@ -319,6 +321,7 @@ async function init() {
         showCraftCard(null);
         sound.hush();
       }
+      if (visit && !hasArrived(visit)) sound.hush();
       visit = null;
       input.clear();
       const facing = lookAtDirection(target.position.map((n, i) => n - spot[i]));
@@ -581,10 +584,18 @@ async function init() {
       }
     }
     if (visit) {
-      if (!paused && wantsToLeave(intent)) visit = null;
-      else if (dt > 0) {
+      if (!paused && wantsToLeave(intent)) {
+        // Called off part-way down: the count stops.
+        if (!hasArrived(visit)) sound.hush();
+        visit = null;
+      } else if (dt > 0) {
         const place = here(visit.id);
         const from = state.position;
+        // Count down aloud; she touches down as "zero" ends.
+        for (const n of landingCounts(visit.elapsed, visit.elapsed + dt)) {
+          sound.say(String(n));
+          if (n > 0) sound.cue('count');
+        }
         const went = visitStep(state, visit, dt, {
           spot: standBeside(visit.id),
           body: here(place.parent),
@@ -759,7 +770,7 @@ async function init() {
     if (paused) flightLabel = '일시 정지';
     else if (docked && !isDocked(docked)) flightLabel = `${here(docked.id).name}에 도킹 중`;
     else if (docked) flightLabel = `${here(docked.id).name}${withParticle(here(docked.id).name)} 함께 비행`;
-    else if (visit && !hasArrived(visit)) flightLabel = `${here(visit.id).name}${towardParticle(here(visit.id).name)} 내려가는 중`;
+    else if (visit && !hasArrived(visit)) flightLabel = `${here(visit.id).name}에 착륙 중`;
     else if (visit) flightLabel = `${here(visit.id).name} 곁`;
     else if (state.restingOn) flightLabel = `${bodyById(state.restingOn).name} 표면`;
     else if (shownSpeed() < 0.01) flightLabel = '정지 비행';

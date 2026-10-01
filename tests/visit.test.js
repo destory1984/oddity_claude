@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { VISIT_SECONDS, STAND_KM, STAND_UP_KM, standSpot, startVisit, hasArrived, visitStep } from '../src/core/visit.js';
+import { VISIT_SECONDS, STAND_KM, STAND_UP_KM, standSpot, startVisit, hasArrived, visitStep, landingCounts } from '../src/core/visit.js';
 import { STORIES, storySitesAt, completedStories } from '../src/core/stories.js';
 import { bodiesAt } from '../src/core/bodies.js';
 import { createState } from '../src/core/game.js';
@@ -26,7 +26,7 @@ test('an orientation is built from the way ahead and the way up', () => {
 });
 
 test('every surface place has a standing spot 25 km off, 1.5 km up, inside the range that logs its story', () => {
-  assert.equal(SURFACE.length, 48);
+  assert.equal(SURFACE.length, 65);
   for (const timeS of [0, 123456]) {
     const bodies = bodiesAt(timeS);
     const sites = storySitesAt(timeS, bodies);
@@ -56,7 +56,22 @@ test('the spot turns with the ground: the same turn about Y that the body makes'
   forward(multiply(turnAboutY(spun), a.facing)).forEach((n, i) => near(n, forward(b.facing)[i], 1e-9));
 });
 
-test('the glide runs three seconds to the spot, never under the ground, then holds her there', () => {
+test('the landing counts 3 to 0, one a second, after two seconds for "Landing in progress"; she touches down as "zero" ends', () => {
+  near(VISIT_SECONDS, 5.6, 1e-9);
+  assert.deepEqual(landingCounts(0, 1.9), []);
+  assert.deepEqual(landingCounts(1.9, 2), [3]);
+  assert.deepEqual(landingCounts(2.9, 3.1), [2]);
+  assert.deepEqual(landingCounts(3.9, 4.1), [1]);
+  assert.deepEqual(landingCounts(4.9, 5), [0]);
+  assert.deepEqual(landingCounts(5, VISIT_SECONDS + 5), []);
+  const called = [];
+  for (let i = 0; i < 60 * 8; i++) called.push(...landingCounts(i / 60, (i + 1) / 60));
+  assert.deepEqual(called, [3, 2, 1, 0]);
+  // After a stutter only the latest number is said.
+  assert.deepEqual(landingCounts(1.5, 3.2), [2]);
+});
+
+test('the glide runs 5.6 seconds to the spot, never under the ground, then holds her there', () => {
   const story = SURFACE.find((s) => s.body === 'mars');
   const body = { id: 'mars', radiusKm: 3389.5, position: [5000, 0, 0] };
   let timeS = 0;

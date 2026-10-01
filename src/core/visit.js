@@ -6,8 +6,13 @@ import { stopNow } from './game.js';
 import { surfaceDirection, spinOf } from './surface.js';
 import { orientationFrom, rotateLocal, blend, multiply, turnAboutY } from './orientation.js';
 
-// The glide down. (Five seconds at first; that was a long wait.)
-export const VISIT_SECONDS = 3;
+// The glide down runs under a countdown, like docking (core/dock.js): "Landing in
+// progress", then 3 down to 0, one number a second, and she touches down as the word
+// "zero" ends. (It was a silent three seconds before.)
+export const LAND_COUNT_FROM = 3;
+const COUNT_STARTS_S = 2;
+const ZERO_WORD_S = 0.6;
+export const VISIT_SECONDS = COUNT_STARTS_S + LAND_COUNT_FROM + ZERO_WORD_S;
 // Where she stands: this far from the place, toward the equator, and this high (the
 // models are drawn 6 km across from close by, so they fill a seventh of the view).
 export const STAND_KM = 25;
@@ -37,6 +42,17 @@ export function standSpot(story, body, timeS) {
 // faced, and how long the glide has run.
 export function startVisit(state, id, spot) {
   return { id, from: sub(state.position, spot.position), facing: state.orientation, elapsed: 0 };
+}
+
+// The numbers to call out as the glide's clock goes from `before` to `after` seconds.
+// Normally none or one; after a stutter only the latest, so calls never pile up.
+export function landingCounts(before, after) {
+  let latest = null;
+  for (let n = LAND_COUNT_FROM; n >= 0; n--) {
+    const at = COUNT_STARTS_S + (LAND_COUNT_FROM - n);
+    if (at > before && at <= after) latest = n;
+  }
+  return latest === null ? [] : [latest];
 }
 
 // True once the glide is over and she stands at the place.

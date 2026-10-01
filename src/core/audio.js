@@ -6,6 +6,7 @@ export function cueForEvent(event) {
     case 'surfaceReached':
       return 'landed';
     case 'docking':
+    case 'visiting':
       return 'docking';
     case 'docked':
       return 'dock';

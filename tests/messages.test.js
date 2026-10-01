@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  objectParticle, subjectParticle, withParticle, eventMessage, limitText, dateText, distanceText,
+  objectParticle, subjectParticle, withParticle, eventMessage, limitText, dateText, distanceText, markedName,
 } from '../src/ui/messages.js';
 import { BODIES } from '../src/core/bodies.js';
 import { FACTS } from '../src/core/facts.js';
@@ -57,6 +57,11 @@ test('entering the asteroid belt says how empty the real one is', () => {
     eventMessage({ type: 'beltEntered' }),
     '소행성대에 들어섰습니다.\n실제로는 소행성 사이가 평균 100만km쯤 떨어져 있습니다.',
   );
+});
+
+test('a name on screen carries a mark: found or not yet', () => {
+  assert.equal(markedName('달', true), '✓ 달');
+  assert.equal(markedName('트리톤', false), '○ 트리톤');
 });
 
 test('shivering and shielding her eyes come with the reason', () => {

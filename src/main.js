@@ -297,6 +297,14 @@ async function init() {
     announce({ type: 'visiting', name: place.name });
   }
 
+  // What a target already in the journal is, in a sentence or two: a body's fact, a
+  // craft's introduction, a place's story. null for somewhere not yet known.
+  function aboutKnown(target) {
+    if (target.kind === 'craft') return (progress.craft ?? []).includes(target.id) ? craftById(target.id).intro : null;
+    if (target.kind === 'site') return progress.stories.includes(target.id) ? STORIES.find((s) => s.id === target.id).text : null;
+    return progress.discovered.includes(target.id) ? FACTS[target.id] ?? null : null;
+  }
+
   // A place already visited, chosen from far away: appear there behind a flash. A body
   // is seen from its best side, a craft is docked with, a story place is seen from above.
   function teleport(id, anywhere = false) {
@@ -318,8 +326,12 @@ async function init() {
       // so a body sits beside them, not behind them.
       const aside = target.kind !== 'craft' && target.kind !== 'site' && innerWidth / innerHeight >= 1;
       state = createState(spot, aside ? rotateLocal(facing, VISTA_YAW, 0) : facing);
-      toast.show(eventMessage({ type: 'teleported', name: target.name }));
-      if (target.kind === 'craft' && !tooLowToDock(target, bodies)) dock(target);
+      // On arrival, say what this is. A craft about to be docked with shows its card instead.
+      const docking = target.kind === 'craft' && !tooLowToDock(target, bodies);
+      const about = docking ? null : aboutKnown(target);
+      const arrived = eventMessage({ type: 'teleported', name: target.name });
+      toast.show(about ? `${arrived}\n${about}` : arrived);
+      if (docking) dock(target);
     });
   }
 
@@ -356,10 +368,7 @@ async function init() {
       const direction = body.position.map((n, i) => n - state.position[i]);
       state = { ...state, orientation: lookAtDirection(direction) };
       // Somewhere already known: say again what it is.
-      let about = null;
-      if (body.kind === 'craft') about = (progress.craft ?? []).includes(body.id) ? craftById(body.id).intro : null;
-      else if (body.kind === 'site') about = progress.stories.includes(body.id) ? STORIES.find((s) => s.id === body.id).text : null;
-      else if (progress.discovered.includes(body.id)) about = FACTS[body.id] ?? null;
+      const about = aboutKnown(body);
       toast.show(about ? `${hud.faceToast(body)}\n${about}` : hud.faceToast(body));
     },
     onInspect() {
@@ -751,6 +760,7 @@ async function init() {
       C,
       goalId: guideGoal(guide)?.targetId ?? null,
       // A place on the far side of its body, or seen from far away, gets no label.
+      knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...progress.stories]),
       hiddenIds: [
         ...sites.filter((s) => siteHidden(s, here(s.parent), state.position) || (s.id !== selectedId && siteFar(here(s.parent), state.position))).map((s) => s.id),
         ...awayCraft,

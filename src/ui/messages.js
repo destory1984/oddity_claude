@@ -28,6 +28,11 @@ export function towardParticle(word) {
   return final === 0 || final === 8 ? '로' : '으로';
 }
 
+// A name on screen with its mark: ✓ once it is in the journal, ○ until then.
+export function markedName(name, known) {
+  return `${known ? '✓' : '○'} ${name}`;
+}
+
 const nameOf = (bodies, id) => bodies.find((b) => b.id === id)?.name ?? id;
 
 export function eventMessage(event, bodies = []) {

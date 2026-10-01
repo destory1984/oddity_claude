@@ -1,4 +1,4 @@
-import { objectParticle, distanceText } from './messages.js';
+import { objectParticle, distanceText, markedName } from './messages.js';
 import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped } from '../core/markers.js';
 
 const $ = (id) => document.getElementById(id);
@@ -61,7 +61,8 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       $('faceTarget').textContent = `${body.name} 바라보기`;
     },
     // goalId: the body the first-visit guide points at; its label always shows and pulses.
-    update({ view, local, selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [] }) {
+    // knownIds: a Set of what is in the journal (bodies found, craft met, places logged).
+    update({ view, local, selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [], knownIds = null }) {
       $('altitudeLabel').textContent = local.label;
       $('altitude').textContent = fmt(local.altitude);
       const backward = speed > 0.01 && motionSign < 0;
@@ -75,7 +76,10 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       const placed = bodies.map((body) => {
         const el = markers.get(body.id);
         const hidden = body.kind === 'star' && view.sunVisibility < 0.01;
-        const spot = placeMarker(el, view.directions[body.id], view.camera, hidden ? `${body.name} · 가려짐` : body.name);
+        // ✓ somewhere already in the journal, ○ somewhere not yet.
+        const name = knownIds ? markedName(body.name, knownIds.has(body.id)) : body.name;
+        el.classList.toggle('unknown', Boolean(knownIds) && !knownIds.has(body.id));
+        const spot = placeMarker(el, view.directions[body.id], view.camera, hidden ? `${name} · 가려짐` : name);
         // What the traveler is looking toward also says how far its surface is.
         if (!spot.outside && nearCentre(spot.x, spot.y, innerWidth, innerHeight)) {
           el.textContent += ` · ${distanceText(Math.max(0, view.distances[body.id] - body.radiusKm))}`;

@@ -25,12 +25,15 @@
 | `public/assets/planets/rhea.jpg` | NASA/JPL-Caltech/Space Science Institute/Lunar and Planetary Institute, 카시니 컬러 전체 지도 PIA18438를 2048×1024로 줄임. https://science.nasa.gov/photojournal/ | NASA 자료, 저작권 없음 |
 | `public/assets/planets/iapetus.jpg` | NASA/JPL-Caltech/Space Science Institute/Lunar and Planetary Institute, 카시니 컬러 전체 지도 PIA18436를 2048×1024로 줄임. https://science.nasa.gov/photojournal/ | NASA 자료, 저작권 없음 |
 | `public/assets/planets/triton.jpg` | NASA/JPL-Caltech/Lunar and Planetary Institute, 보이저 2호 트리톤 컬러 지도 PIA18668을 2048×1024로 줄임. 보이저가 찍지 못한 북쪽은 한 가지 색으로 채웠다. https://science.nasa.gov/photojournal/ | NASA 자료, 저작권 없음 |
+| `public/assets/planets/ceres.jpg` | USGS Astrogeology, Ceres Dawn FC 전체 지도(DLR, 20픽셀/도, 2015년 10월)를 2048×1024로 줄임. https://planetarymaps.usgs.gov/mosaic/Ceres_Dawn_FC_DLR_global_20ppd_Oct2015.tif | 미국 정부 저작물, 저작권 없음 |
+| `public/assets/planets/pluto.jpg` | USGS Astrogeology, Pluto New Horizons 전체 지도(300m/픽셀, 2017년 7월)를 2048×1024로 줄임. 뉴허라이즌스가 찍지 못한 남쪽은 한 가지 밝기로 채웠다. https://planetarymaps.usgs.gov/mosaic/Pluto_NewHorizons_Global_Mosaic_300m_Jul2017_8bit.tif | 미국 정부 저작물, 저작권 없음 |
+| `public/assets/planets/charon.jpg` | USGS Astrogeology, Charon New Horizons 전체 지도(300m/픽셀, 2017년 7월)를 2048×1024로 줄임. 찍지 못한 남쪽은 한 가지 밝기로 채웠다. https://planetarymaps.usgs.gov/mosaic/Charon_NewHorizons_Global_Mosaic_300m_Jul2017_8bit.tif | 미국 정부 저작물, 저작권 없음 |
 | `src/core/constellations.js` | d3-celestial의 별자리 선과 이름 자료(constellations.lines.json, constellations.json)를 게임용으로 줄인 것. https://github.com/ofrohn/d3-celestial | BSD 3-Clause, Copyright (c) 2015 Olaf Frohn |
 | `@babylonjs/core` (npm) | https://github.com/BabylonJS/Babylon.js | Apache-2.0 |
 
 수성, 금성, 화성, 목성, 토성, 해왕성 지도는 Solar System Scope(https://www.solarsystemscope.com)가 NASA 자료로 만든 것이며 CC BY 4.0 조건으로 쓴다. 예전의 720 → 1440px NASA 3D Resources 지도보다 또렷해서 바꿨다.
 
-NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는다. 캐릭터, 셰이더, 효과음과 게임 코드는 이 저장소에서 직접 만든 것이다. 천왕성, 데이모스, 천왕성의 위성 다섯은 셰이더로 그렸다(천왕성은 무늬가 거의 없고, 나머지는 전체 지도가 없다). 토성 위성의 카시니 지도는 색을 강조한 것이라 게임에서는 채도를 30%쯤으로 낮춰 쓴다.
+NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는다. 캐릭터, 셰이더, 효과음과 게임 코드는 이 저장소에서 직접 만든 것이다. 천왕성, 데이모스, 천왕성의 위성 다섯은 셰이더로 그렸다(천왕성은 무늬가 거의 없고, 나머지는 전체 지도가 없다). 토성 위성의 카시니 지도는 색을 강조한 것이라 게임에서는 채도를 30%쯤으로 낮춰 쓴다. 세레스, 명왕성, 카론의 지도는 흑백이라 게임에서 색조를 입힌다(명왕성은 옅은 갈색). 핼리 혜성의 핵, 코마, 꼬리와 소행성대의 바위는 셰이더로 그렸다.
 
 ## d3-celestial 라이선스 (BSD 3-Clause)
 

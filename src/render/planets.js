@@ -195,6 +195,23 @@ const LOOKS = {
     shader: 'textured', map: 'neptune.jpg', saturation: 1, tint: [0.9, 1, 1.1], base: [0.25, 0.42, 0.85],
     mapWeight: 1, haze: 0.35, detail: 0.12, dayS: 57996,
   },
+  // Ceres, Pluto and Charon: grey USGS maps; the tint gives each its real cast.
+  ceres: {
+    shader: 'textured', map: 'ceres.jpg', saturation: 1, tint: [0.62, 0.6, 0.57], base: [0.3, 0.29, 0.28],
+    mapWeight: 1, haze: 0, detail: 0.12, dayS: 9.074 * 3600,
+  },
+  // Pluto turns backwards once in 6.387 days, the same time Charon takes to circle it,
+  // so each keeps one face toward the other.
+  pluto: {
+    shader: 'textured', map: 'pluto.jpg', saturation: 1, tint: [1.12, 0.96, 0.8], base: [0.62, 0.52, 0.42],
+    mapWeight: 1, haze: 0.15, detail: 0.08, dayS: -6.387 * 86400,
+  },
+  charon: {
+    shader: 'textured', map: 'charon.jpg', saturation: 1, tint: [0.92, 0.9, 0.88], base: [0.45, 0.44, 0.43],
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: 6.387 * 86400,
+  },
+  // The comet's nucleus reflects 4% of sunlight: nearly black.
+  halley: { shader: 'rocky', colorA: [0.05, 0.05, 0.05], colorB: [0.16, 0.15, 0.14], cap: 0, haze: 0, contrast: 0.6, craters: 0.5, dayS: 2.2 * 86400 },
 };
 
 // Rings are a flat square plane; the shader keeps only the annulus between the radii.

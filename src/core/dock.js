@@ -35,6 +35,19 @@ export function dockedState(state, craft, offset) {
   return { ...stopNow(state), restingOn: null, position: craft.position.map((n, i) => n + offset[i]) };
 }
 
+// How fast the docked pair is going, in game km per second of play: the craft's motion
+// round the body it belongs to (Hubble round Earth), or away from the Sun (Voyager).
+// before/after: the craft and bodies one frame apart; dt: that frame in real seconds.
+export function rideSpeed(craftId, craftBefore, craftAfter, bodiesBefore, bodiesAfter, dt) {
+  if (!(dt > 0)) return 0;
+  const anchor = (bodies, parent) => (bodies.find((b) => b.id === parent) ?? bodies.find((b) => b.kind === 'star')).position;
+  const from = craftBefore.find((c) => c.id === craftId);
+  const to = craftAfter.find((c) => c.id === craftId);
+  const a = anchor(bodiesBefore, from.parent);
+  const b = anchor(bodiesAfter, to.parent);
+  return Math.hypot(...to.position.map((n, i) => n - b[i] - (from.position[i] - a[i]))) / dt;
+}
+
 // Any thrust lets go of the craft.
 export function wantsToLeave({ drive = 0, strafe = 0 }) {
   return drive !== 0 || strafe !== 0;

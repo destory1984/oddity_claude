@@ -14,7 +14,7 @@ import { createHud } from './ui/hud.js';
 import { createMinimap } from './ui/minimap.js';
 import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
-import { eventMessage, limitText, dateText } from './ui/messages.js';
+import { eventMessage, limitText, dateText, withParticle } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import {
   updateProgress, recordPhotos, recordStories, createProgress, summarize, score, isComplete,
@@ -30,7 +30,7 @@ import { createJournal } from './ui/journal.js';
 import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
-import { dockable, dockOffset, dockedState, wantsToLeave } from './core/dock.js';
+import { dockable, dockOffset, dockedState, wantsToLeave, rideSpeed } from './core/dock.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
@@ -83,6 +83,10 @@ let simTime = 0;
 let beltSeen = false;
 // The craft the traveler is docked with: { id, offset } (offset from the craft, km).
 let docked = null;
+// While docked, the speed shown is the craft's own (the traveler rides with it).
+let rideKmS = 0;
+// Own speed when flying free, the craft's when docked: for the readout, the pose and the sound.
+const shownSpeed = () => (docked ? rideKmS : totalSpeed(state));
 // Where a body is right now (BODIES is only the starting layout).
 // Spacecraft and telescopes: found and selected like bodies, but they are not in the
 // journal and only slow the traveler nearby (core/craft.js).
@@ -361,9 +365,11 @@ async function init() {
     // Advance the orbits, carry the traveler with a nearby body, then fly.
     if (dt > 0) {
       const before = bodies;
+      const craftBefore = craft;
       simTime += dt * TIME_SCALE;
       bodies = bodiesAt(simTime);
       craft = craftAt(simTime, bodies);
+      if (docked) rideKmS = rideSpeed(docked.id, craftBefore, craft, before, bodies, dt);
       sites = storySitesAt(simTime, bodies);
       state = carryAlong(state, before, bodies);
     }
@@ -426,7 +432,7 @@ async function init() {
       ...slowPoints.map((p) => Math.hypot(...p.map((n, i) => n - state.position[i]))),
     ));
     sound.engine(engineSound({
-      speed: paused ? 0 : totalSpeed(state),
+      speed: paused ? 0 : shownSpeed(),
       maxSpeed: limit,
       thrusting: !paused && input.driving(),
     }), elapsed || 1 / 60);
@@ -439,7 +445,7 @@ async function init() {
       position: state.position,
       orientation: state.orientation,
       dt,
-      speed: totalSpeed(state),
+      speed: shownSpeed(),
       photoOrientation: photo.orientation(),
       heroVisible: photo.heroVisible(),
       turn,
@@ -456,9 +462,9 @@ async function init() {
     const driving = input.driving();
     let flightLabel = '자유 비행';
     if (paused) flightLabel = '일시 정지';
-    else if (docked) flightLabel = `${here(docked.id).name}에 도킹`;
+    else if (docked) flightLabel = `${here(docked.id).name}${withParticle(here(docked.id).name)} 함께 비행`;
     else if (state.restingOn) flightLabel = `${bodyById(state.restingOn).name} 표면`;
-    else if (totalSpeed(state) < 0.01) flightLabel = '정지 비행';
+    else if (shownSpeed() < 0.01) flightLabel = '정지 비행';
     else if (!driving) flightLabel = '관성 비행';
     else if (state.sideSpeed > state.speed) flightLabel = '옆으로 비행';
     else if (state.motionSign < 0) flightLabel = '후진 비행';
@@ -469,7 +475,7 @@ async function init() {
       view,
       local: nearestLocalBody(state.position, bodies),
       selected,
-      speed: totalSpeed(state),
+      speed: shownSpeed(),
       // Only forward/back motion can be 'backward'; a pure slide is not.
       motionSign: state.speed > 0.01 ? state.motionSign : 1,
       limitLabel: limitText(limit / C),

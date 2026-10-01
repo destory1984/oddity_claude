@@ -39,7 +39,7 @@ export function eventMessage(event, bodies = []) {
     case 'story':
       return `이야기 장소: ${event.name}\n${event.text}`;
     case 'docked':
-      return `${event.name}${withParticle(event.name)} 도킹했습니다. 전진이나 후진을 누르면 떨어집니다.`;
+      return `${event.name}${withParticle(event.name)} 도킹했습니다. 이제 함께 날아갑니다. 전진이나 후진을 누르면 떨어집니다.`;
     case 'undocked':
       return `${event.name}${withParticle(event.name)} 도킹을 풀었습니다.`;
     case 'beltEntered':

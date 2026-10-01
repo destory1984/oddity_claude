@@ -15,16 +15,9 @@ test('every story place has a longer telling of three sentences or more', () => 
   }
 });
 
-// The places added on 2026-10-02 (the Pale Blue Dot, eight more on the Moon, nine on Mars)
-// have no photograph yet.
-const NO_PHOTO = [
-  'paleBlueDot', 'procellarum', 'serenitatis', 'crisium', 'plato', 'aristarchus', 'kepler', 'clavius', 'iridum', 'reinerGamma',
-  'olympus', 'marineris', 'tharsis', 'hellas', 'northCap', 'southCap', 'korolev', 'cydonia', 'syrtis',
-];
-
-test('52 of the 71 have a photograph on file, with a caption and a credit', () => {
+test('70 of the 71 have a photograph on file, with a caption and a credit; the Ocean of Storms has none', () => {
   const without = STORIES.filter((s) => !STORY_DETAILS[s.id].photo).map((s) => s.id);
-  assert.deepEqual(without, NO_PHOTO);
+  assert.deepEqual(without, ['procellarum']);
   assert.equal(storyPhotoFile('procellarum'), null);
   const credits = readFileSync('THIRD-PARTY.md', 'utf8');
   let bytes = 0;
@@ -39,6 +32,6 @@ test('52 of the 71 have a photograph on file, with a caption and a credit', () =
     // Where it came from and its licence are written down.
     assert.ok(credits.includes(`| \`${story.id}.jpg\` |`), `${story.id} is not in THIRD-PARTY.md`);
   }
-  assert.equal(readdirSync('public/assets/stories').length, 52);
-  assert.ok(bytes < 2.2e6, `${bytes} bytes of photographs`);
+  assert.equal(readdirSync('public/assets/stories').length, 70);
+  assert.ok(bytes < 3e6, `${bytes} bytes of photographs`);
 });

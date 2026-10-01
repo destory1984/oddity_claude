@@ -37,7 +37,7 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 
 ## 이야기 장소의 사진
 
-`public/assets/stories/` 의 사진 52장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
+`public/assets/stories/` 의 사진 70장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
 
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
@@ -93,6 +93,24 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | `viking2.jpg` | [Ice on Mars Again - GPN-2000-001706.jpg](https://commons.wikimedia.org/wiki/File:Ice_on_Mars_Again_-_GPN-2000-001706.jpg) | NASA | Public domain |
 | `voyager1.jpg` | [Voyager spacecraft.jpg](https://commons.wikimedia.org/wiki/File:Voyager_spacecraft.jpg) | NASA/JPL | Public domain |
 | `zhurong.jpg` | [Tianwen-1 Lander and Zhurong Rover in Southern Utopia Planitia.jpg](https://commons.wikimedia.org/wiki/File:Tianwen-1_Lander_and_Zhurong_Rover_in_Southern_Utopia_Planitia.jpg) | NASA/JPL/UArizona | Public domain |
+| `paleBlueDot.jpg` | [Pale Blue Dot.png](https://commons.wikimedia.org/wiki/File:Pale_Blue_Dot.png) | Voyager 1 | Public domain |
+| `serenitatis.jpg` | [Mare Serenitatis (LRO).png](https://commons.wikimedia.org/wiki/File:Mare_Serenitatis_(LRO).png) | NASA (image by Lunar Reconnaissance Orbiter) | Public domain |
+| `crisium.jpg` | [Mare Crisium (LRO).png](https://commons.wikimedia.org/wiki/File:Mare_Crisium_(LRO).png) | NASA (image by Lunar Reconnaissance Orbiter) | Public domain |
+| `plato.jpg` | [Plato (LRO).png](https://commons.wikimedia.org/wiki/File:Plato_(LRO).png) | NASA (image by Lunar Reconnaissance Orbiter) | Public domain |
+| `aristarchus.jpg` | [Aristarchus and Herodotus craters Apollo 15.jpg](https://commons.wikimedia.org/wiki/File:Aristarchus_and_Herodotus_craters_Apollo_15.jpg) | NASA (Apollo 15) | Public domain |
+| `kepler.jpg` | [Kepler crater 3162 med.jpg](https://commons.wikimedia.org/wiki/File:Kepler_crater_3162_med.jpg) | NASA | Public domain |
+| `clavius.jpg` | [Clavius LROC.jpg](https://commons.wikimedia.org/wiki/File:Clavius_LROC.jpg) | NASA | Public domain |
+| `iridum.jpg` | [Wac sinus iridum300m.png](https://commons.wikimedia.org/wiki/File:Wac_sinus_iridum300m.png) | NASA, LRO | Public domain |
+| `reinerGamma.jpg` | [Reiner-gamma-clem1.jpg](https://commons.wikimedia.org/wiki/File:Reiner-gamma-clem1.jpg) | U.S. Government | Public domain |
+| `olympus.jpg` | [Olympus Mons alt.jpg](https://commons.wikimedia.org/wiki/File:Olympus_Mons_alt.jpg) | Image by NASA, modifications by Seddon | Public domain |
+| `marineris.jpg` | [Mars Valles Marineris.jpeg](https://commons.wikimedia.org/wiki/File:Mars_Valles_Marineris.jpeg) | NASA / USGS (see PIA04304 catalog page) | Public domain |
+| `tharsis.jpg` | [Tharsis mons Viking.jpg](https://commons.wikimedia.org/wiki/File:Tharsis_mons_Viking.jpg) | Viking I | Public domain |
+| `hellas.jpg` | [Hellas basin topo.jpg](https://commons.wikimedia.org/wiki/File:Hellas_basin_topo.jpg) | Martin Pauer (Power) | Public domain |
+| `northCap.jpg` | [PIA01928 Mars Polar Cap During Transition Phase Instrument Checkout.jpg](https://commons.wikimedia.org/wiki/File:PIA01928_Mars_Polar_Cap_During_Transition_Phase_Instrument_Checkout.jpg) | NASA/JPL/MSSS | Public domain |
+| `southCap.jpg` | [South Polar Cap of Mars during Martian South summer 2000.jpg](https://commons.wikimedia.org/wiki/File:South_Polar_Cap_of_Mars_during_Martian_South_summer_2000.jpg) | NASA/JPL/MSSS | Public domain |
+| `korolev.jpg` | [Perspective view of Korolev crater.jpg](https://commons.wikimedia.org/wiki/File:Perspective_view_of_Korolev_crater.jpg) | ESA/DLR/FU Berlin | CC BY-SA 3.0 igo |
+| `cydonia.jpg` | [Face on Mars with Inset.jpg](https://commons.wikimedia.org/wiki/File:Face_on_Mars_with_Inset.jpg) | NASA / JPL / University of Arizona | Public domain |
+| `syrtis.jpg` | [Syrtis Major MC-13.jpg](https://commons.wikimedia.org/wiki/File:Syrtis_Major_MC-13.jpg) | NASA | Public domain |
 
 CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수 있고, 고친 것은 같은 조건으로 내야 한다. 이 저장소의 MIT 라이선스는 이 사진들에 미치지 않는다.
 

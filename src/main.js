@@ -419,7 +419,7 @@ async function init() {
     if (paused) flightLabel = '일시 정지';
     else if (state.restingOn) flightLabel = `${bodyById(state.restingOn).name} 표면`;
     else if (totalSpeed(state) < 0.01) flightLabel = '정지 비행';
-    else if (!driving) flightLabel = '서서히 감속 중';
+    else if (!driving) flightLabel = '관성 비행';
     else if (state.sideSpeed > state.speed) flightLabel = '옆으로 비행';
     else if (state.motionSign < 0) flightLabel = '후진 비행';
     journal.update(progress, state.position, bodies);

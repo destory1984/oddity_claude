@@ -39,12 +39,35 @@ test('full throttle reaches 100c in three seconds in empty space', () => {
   assert.ok(run(state, { drive: 1 }, 170, []).state.speed < MAX_SPEED);
 });
 
-test('releasing input stops within one second from any speed', () => {
+test('releasing the keys keeps the speed: the traveler coasts', () => {
   for (const speed of [C * 0.01, C * 0.1, C * 100]) {
     const state = { ...createState([0, 0, 0], [0, 0, 0, 1], []), speed };
-    const after = run(state, { drive: 0 }, 61, []).state;
-    assert.equal(after.speed, 0);
+    const after = run(state, { drive: 0 }, 300, []).state;
+    assert.equal(after.speed, speed);
+    assert.ok(Math.abs(after.position[2] - speed * 5) < speed * 1e-6, 'five seconds straight ahead');
   }
+});
+
+test('coasting toward a body still slows to its limit and lands without passing through', () => {
+  let state = { ...createState([0, 0, -(1000 + 40000)], facingBall, [ball]), speed: C * 0.1 };
+  const { state: after, events } = run(state, {}, 1200, [ball]);
+  assert.equal(after.restingOn, 'ball');
+  assert.ok(Math.abs(Math.hypot(...after.position) - 1000) < 1e-6);
+  assert.equal(events.filter((e) => e.type === 'surfaceReached').length, 1);
+});
+
+test('pressing the other way while coasting brakes to a stop in one second, then goes back', () => {
+  const state = { ...createState([0, 0, 0], [0, 0, 0, 1], []), speed: C };
+  const braking = run(state, { drive: -1 }, 30, []).state;
+  assert.equal(braking.motionSign, 1);
+  assert.ok(Math.abs(braking.speed - C / 2) < C * 1e-6);
+  const back = run(state, { drive: -1 }, 90, []).state;
+  assert.equal(back.motionSign, -1);
+  assert.ok(back.speed > 0);
+  // Letting go halfway through the braking keeps what speed is left.
+  const let_go = run(braking, {}, 120, []).state;
+  assert.ok(Math.abs(let_go.speed - C / 2) < C * 1e-6);
+  assert.equal(let_go.brakeRate, 0);
 });
 
 test('stopNow halts at once', () => {
@@ -132,10 +155,12 @@ test('forward plus sideways never exceeds the limit', () => {
   assert.ok(state.position[0] > 0 && state.position[2] > 0);
 });
 
-test('releasing A or D stops the slide within one second', () => {
+test('releasing A or D keeps the slide going; Space stops everything', () => {
   const moving = run(createState([0, 0, 0], [0, 0, 0, 1], []), { strafe: 1 }, 120, []).state;
   const after = run(moving, {}, 61, []).state;
-  assert.equal(totalSpeed(after), 0);
+  assert.equal(totalSpeed(after), totalSpeed(moving));
+  assert.ok(after.position[0] > moving.position[0]);
+  assert.equal(totalSpeed(stopNow(after)), 0);
 });
 
 test('sliding sideways into a body stops on its surface', () => {

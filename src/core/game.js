@@ -63,9 +63,11 @@ export function totalSpeed(state) {
   return Math.hypot(state.speed, state.sideSpeed ?? 0);
 }
 
-// One thrust axis: hold a direction to accelerate, let go to brake to a stop in one
-// second, and press the other way to stop first and then accelerate back.
+// One thrust axis: hold a direction to accelerate, let go to coast at the speed
+// reached, and press the other way to brake to a stop in one second and then
+// accelerate back. (Space stops at once; the limit near a body still slows a coast.)
 function thrust(speed, sign, brakeRate, command, throttle, dt, maxSpeed) {
+  if (command === 0) return { speed, sign, brakeRate: 0 };
   if (command !== 0 && command !== sign && speed < STOPPED) sign = command;
   const changingDirection = command !== 0 && command !== sign;
   if (command !== 0 && !changingDirection) {

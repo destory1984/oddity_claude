@@ -65,7 +65,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
     // knownIds: a Set of what is in the journal (bodies found, craft met, places logged).
     update({ view, local, selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [], knownIds = null }) {
       $('altitudeLabel').textContent = local.label;
-      $('altitude').textContent = fmt(local.altitude);
+      $('altitude').textContent = Math.round(local.altitude).toLocaleString('ko-KR');
       const backward = speed > 0.01 && motionSign < 0;
       $('speed').innerHTML = `${backward ? '후진 ' : ''}${fmt(speed)} <small>km/s</small>`;
       $('lightSpeed').textContent = `${backward ? '-' : ''}${(speed / C).toFixed(6)} c`;

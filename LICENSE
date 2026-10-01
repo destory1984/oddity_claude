@@ -12,6 +12,8 @@ This repository is licensed in three parts.
      tails, a white capelet with gold trim over a striped shirt, a long white robe
      with a gold hem, folded brown boots) and the code and data that define and
      draw it, src/render/hero.js and src/render/mageModel.js.
+   - The pixel-art character "Seora": its design and every drawing of it in
+     public/assets/seora-sprites/.
    - The app icons in public/icons/.
    - The game's name and title as a brand: "우주 한량" and
      "Space Oddity — 우주 한량", including their use as the name of an app, game

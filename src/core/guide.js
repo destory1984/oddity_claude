@@ -32,14 +32,17 @@ export function updateGuide(guide, { heading, toMoon, progress }) {
 
   const turned = guide.turned + (guide.heading ? angleBetween(guide.heading, heading) : 0);
   let { step } = guide;
+  // The Moon may already be found when the game opens (today's sky can start beside
+  // it), so finding it only ends the flight; looking and facing are still taught.
+  const found = progress.discovered.includes('moon');
   if (progress.landed.includes('moon')) step = 'photo';
-  else if (progress.discovered.includes('moon')) step = 'land';
   else if (step === 'look') {
     if (turned >= LOOK_AROUND) step = 'face';
-  } else {
-    const off = angleBetween(heading, toMoon);
-    if (off <= FACE) step = 'fly';
-    else if (off > LOST || step !== 'fly') step = 'face';
+  } else if (step === 'face') {
+    if (angleBetween(heading, toMoon) <= FACE) step = found ? 'land' : 'fly';
+  } else if (step === 'fly') {
+    if (found) step = 'land';
+    else if (angleBetween(heading, toMoon) > LOST) step = 'face';
   }
   return { ...guide, step, turned, heading: [...heading] };
 }

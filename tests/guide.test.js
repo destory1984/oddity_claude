@@ -50,8 +50,22 @@ test('discovering the Moon asks for a landing, landing asks for the photo', () =
   assert.equal(guide.step, 'photo');
 });
 
-test('progress made out of order skips ahead, even from the first step', () => {
-  const guide = tick(createGuide(fresh, false), AHEAD, { ...fresh, discovered: ['earth', 'moon'] });
+test('a landing made out of order skips straight to the photo, even from the first step', () => {
+  const guide = tick(createGuide(fresh, false), AHEAD, { ...fresh, discovered: ['earth', 'moon'], landed: ['moon'] });
+  assert.equal(guide.step, 'photo');
+});
+
+test("the Moon already found at the start (today's sky can open beside it): look and face are still taught", () => {
+  const found = { ...fresh, discovered: ['earth', 'moon'] };
+  let guide = tick(createGuide(found, false), AHEAD, found, turnedBy(90));
+  assert.equal(guide.step, 'look');
+  guide = tick(guide, turnedBy(25), found, turnedBy(90));
+  assert.equal(guide.step, 'face');
+  // Facing it, there is nothing left to discover: go and land.
+  guide = tick(guide, turnedBy(88), found, turnedBy(90));
+  assert.equal(guide.step, 'land');
+  // Asked to land, turning away does not send the player back.
+  guide = tick(guide, turnedBy(0), found, turnedBy(90));
   assert.equal(guide.step, 'land');
 });
 

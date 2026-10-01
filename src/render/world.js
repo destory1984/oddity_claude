@@ -47,9 +47,12 @@ export async function createWorld(canvas, bodies = BODIES) {
   const craftMeshes = createCraft(scene, CRAFT);
   const comet = createComet(scene);
 
-  // The character's sunlight is set once from the starting view, as in the prototype.
-  const earth = bodies.find((b) => b.id === 'earth');
-  const heroSun = new Vector3(...normalize(sunBody.position.map((n, i) => n - earth.position[i])));
+  // The character is drawn in the camera's own space, and her light is fixed: from the
+  // right and a little above, where the Sun is in the opening view. It is taken from
+  // the tour layout, whose opening view looks along +z, so it holds in today's sky too.
+  const tourEarth = BODIES.find((b) => b.id === 'earth');
+  const tourSun = BODIES.find((b) => b.kind === 'star');
+  const heroSun = new Vector3(...normalize(tourSun.position.map((n, i) => n - tourEarth.position[i])));
   const hero = createHero(engine, heroSun);
   const ice = createIce(hero.scene);
   // The traveler's place relative to each ringed planet last frame, to catch a crossing.

@@ -19,6 +19,24 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
 
   $('journalButton').addEventListener('click', () => open());
   $('closeJournal').addEventListener('click', () => dialog.close());
+  // Ways out besides the ✕ and Esc: the J key that opened it, and a press outside it.
+  dialog.addEventListener('keydown', (e) => {
+    if (e.code === 'KeyJ' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) dialog.close();
+  });
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+
+  // One part of the journal shows at a time (the whole of it was fourteen screens long
+  // on a phone). The part last looked at is the one it opens on.
+  let tab = 'bodies';
+  function showTab(name) {
+    tab = name;
+    for (const button of $('journalTabs').children) button.setAttribute('aria-selected', String(button.dataset.tab === name));
+    for (const part of $('journalScroll').children) part.hidden = part.dataset.tab !== name;
+    $('journalScroll').scrollTop = 0;
+  }
+  for (const button of $('journalTabs').children) button.addEventListener('click', () => showTab(button.dataset.tab));
   $('resetJournal').addEventListener('click', () => {
     if (window.confirm('탐험 기록을 모두 지울까요? 되돌릴 수 없습니다. 지금 가까이 있는 천체는 곧바로 다시 기록됩니다.')) onReset();
   });
@@ -96,10 +114,29 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   }
 
   // Story places: the story itself shows only after the visit; before, how to get there.
+  // Grouped by where they are, each group under a heading with its count.
   function renderStories() {
-    const list = $('journalStories');
-    list.replaceChildren();
-    for (const story of stories) {
+    const box = $('journalStories');
+    box.replaceChildren();
+    const told = lastProgress.stories ?? [];
+    const groups = [
+      ['지구와 먼 곳', (s) => s.body !== 'moon' && s.body !== 'mars'],
+      ['달', (s) => s.body === 'moon'],
+      ['화성', (s) => s.body === 'mars'],
+    ];
+    for (const [label, belongs] of groups) {
+      const members = stories.filter(belongs);
+      if (!members.length) continue;
+      const heading = document.createElement('h2');
+      heading.textContent = `${label} ${members.filter((s) => told.includes(s.id)).length}/${members.length}`;
+      const list = document.createElement('ul');
+      box.append(heading, list);
+      renderStoryList(list, members);
+    }
+  }
+
+  function renderStoryList(list, members) {
+    for (const story of members) {
       const done = (lastProgress.stories ?? []).includes(story.id);
       const li = document.createElement('li');
       li.className = done ? 'done' : '';
@@ -187,9 +224,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     renderCraft();
     renderAlbum();
     dialog.showModal();
-    // The close button at the foot takes the focus, which scrolls the long list to its
-    // end: start at the top instead.
-    dialog.scrollTop = 0;
+    showTab(tab);
   }
 
   return {

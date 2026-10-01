@@ -872,7 +872,78 @@ body.touch #reticle span {
 /* Explorer's journal */
 #journal {
   width: min(620px, 94vw);
+  height: 88vh;
   max-height: 88vh;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* The title, the summary and the tabs stay put; only the chosen part scrolls. */
+#journal[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.journalHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 0 22px;
+}
+
+.journalHead h1 {
+  margin: 0;
+}
+
+#journal #closeJournal {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 18px;
+}
+
+#journalTabs {
+  flex: none;
+  display: flex;
+  gap: 6px;
+  padding: 10px 22px;
+  overflow-x: auto;
+  border-bottom: 1px solid #ffffff18;
+  scrollbar-width: none;
+}
+
+#journal #journalTabs button {
+  flex: none;
+  min-height: 38px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+#journal #journalTabs button[aria-selected="true"] {
+  background: #ffdfa6;
+  border-color: #ffdfa6;
+  color: #091627;
+}
+
+#journalScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 22px 22px;
+}
+
+#journalScroll section[hidden] {
+  display: none;
+}
+
+#journalStories h2:first-child {
+  margin-top: 8px;
 }
 
 #journal h2 {
@@ -883,7 +954,9 @@ body.touch #reticle span {
 }
 
 #journalSummary {
-  font-size: 14px;
+  margin: 6px 22px 0;
+  font-size: 13px;
+  line-height: 1.6;
   color: #ffdfa6;
 }
 
@@ -1012,15 +1085,61 @@ body.touch #reticle span {
   margin-top: 20px;
 }
 
+/* A phone: the journal fills the screen, and a body takes two short rows (name and
+   marks, then distance and buttons). */
 @media (max-width: 480px) {
-  #journalBodies li {
-    grid-template-columns: 1fr auto;
+  #journal {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
   }
 
-  #journalBodies .marks,
+  .journalHead {
+    padding: max(10px, env(safe-area-inset-top)) 10px 0 14px;
+  }
+
+  .journalHead h1 {
+    font-size: 20px;
+  }
+
+  #journalSummary {
+    margin: 4px 14px 0;
+  }
+
+  #journalTabs {
+    padding: 8px 14px;
+  }
+
+  #journalScroll {
+    padding: 6px 14px max(18px, env(safe-area-inset-bottom));
+  }
+
+  #journal button {
+    min-height: 40px;
+  }
+
+  #journalBodies li {
+    grid-template-columns: 1fr auto auto;
+    gap: 4px 8px;
+  }
+
+  #journalBodies .marks {
+    grid-column: 2 / -1;
+    text-align: right;
+  }
+
   #journalBodies .distance {
     grid-column: 1;
     text-align: left;
+    min-width: 0;
+  }
+
+  #journalBodies .fact {
+    margin-top: 0;
   }
 }
 

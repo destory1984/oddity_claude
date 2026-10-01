@@ -79,7 +79,9 @@ export function eventMessage(event, bodies = []) {
     case 'coldShadow':
       return '춥습니다. 그림자 속이라 햇빛이 들지 않습니다.';
     case 'tooBright':
-      return '눈이 부십니다. 태양 표면에서 태양 반지름(약 70만km) 안에 들어와 있습니다.';
+      return '눈이 부십니다. 태양 표면에서 20만km 안에 들어와 있습니다.';
+    case 'hot':
+      return `덥습니다. 태양에서 ${event.au.toFixed(1)}AU 떨어진 이곳의 햇빛은 지구의 ${(1 / (event.au * event.au)).toFixed(1)}배입니다.`;
     // Lights and plumes (core/glows.js), each told once.
     case 'glow':
       return {

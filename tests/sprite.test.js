@@ -21,9 +21,9 @@ const STILL = { speed: 0 };
 // In flight, showing her back, past the turn away from the camera.
 const flying = () => run(createSpriteState(), FLY, 1.2).state;
 
-test('37 sheets of four frames in use, and every drawing is in the assets folder', () => {
-  assert.equal(SHEETS.length, 37);
-  assert.equal(new Set(SHEETS).size, 37);
+test('38 sheets of four frames in use, and every drawing is in the assets folder', () => {
+  assert.equal(SHEETS.length, 38);
+  assert.equal(new Set(SHEETS).size, 38);
   assert.equal(FRAMES, 4);
   for (const sheet of SHEETS) {
     for (let frame = 0; frame < FRAMES; frame++) {
@@ -190,8 +190,16 @@ test('too bright near the Sun she shields her eyes; in the dark and cold she shi
   const first = cold.findIndex((s) => s.sheet === 'cold');
   assert.equal(cold[first + 60].sheet, 'cold');
   assert.equal(cold[first + 125].sheet, 'idle');
+  // In the heat she fans herself the same way; the glare comes before the heat, the heat before the cold.
+  const hot = run(createSpriteState(), { speed: 0, hot: true }, 55).seen;
+  assert.ok(sheetsOf(hot).includes('hot') && sheetsOf(hot).some((s) => s.startsWith('rest-')));
+  const fanning = hot.findIndex((s) => s.sheet === 'hot');
+  assert.equal(hot[fanning + 60].sheet, 'hot');
+  assert.equal(hot[fanning + 125].sheet, 'idle');
+  assert.ok(!sheetsOf(run(createSpriteState(), { speed: 0, hot: true, bright: true }, 55).seen).includes('hot'));
+  assert.ok(!sheetsOf(run(createSpriteState(), { speed: 0, hot: true, cold: true }, 55).seen).includes('cold'));
   // Where it is neither, never.
-  assert.ok(!sheetsOf(run(createSpriteState(), STILL, 55).seen).some((s) => s === 'cold' || s === 'hurt-bright'));
+  assert.ok(!sheetsOf(run(createSpriteState(), STILL, 55).seen).some((s) => s === 'cold' || s === 'hot' || s === 'hurt-bright'));
 });
 
 test('docking: her arm goes out as she glides in; once docked she turns round and is at rest', () => {

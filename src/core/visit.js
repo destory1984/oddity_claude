@@ -6,8 +6,8 @@ import { stopNow } from './game.js';
 import { surfaceDirection, spinOf } from './surface.js';
 import { orientationFrom, rotateLocal, blend, multiply, turnAboutY } from './orientation.js';
 
-// The glide down.
-export const VISIT_SECONDS = 5;
+// The glide down. (Five seconds at first; that was a long wait.)
+export const VISIT_SECONDS = 3;
 // Where she stands: this far from the place, toward the equator, and this high (the
 // models are drawn 6 km across from close by, so they fill a seventh of the view).
 export const STAND_KM = 25;

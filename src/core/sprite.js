@@ -1,5 +1,5 @@
 // Which drawing of the sprite character to show (render/spriteHero.js draws it).
-// 37 sheets of four frames each, in public/assets/seora-sprites. (Four more are in the
+// 38 sheets of four frames each, in public/assets/seora-sprites. (Four more are in the
 // folder but not used: 'backward', the first rear view, which leaned 45 degrees; 'up'
 // and 'down', which show her from the front; and 'dock-hold', a flying pose for riding
 // a craft, dropped because once docked she should look stopped.)
@@ -25,7 +25,7 @@ export const REST_ACTIONS = [
 export const SHEETS = [
   ...FLIGHT_SHEETS, 'brake', 'idle', ...REST_ACTIONS.map((a) => a.sheet), 'rest-sleep',
   'dock-reach', 'stand', 'land', 'warp-out', 'warp-in', 'sling', 'photo-v', 'photo-jump',
-  'cheer-big', 'hurt-bright', 'cold',
+  'cheer-big', 'hurt-bright', 'cold', 'hot',
 ];
 
 // Frames per second.
@@ -34,7 +34,7 @@ export const SPRITE_FPS = {
   // The turn-round: the four 'brake' drawings, forwards as she stops and turns to face
   // the camera, backwards as she turns away again to fly off. 0.8 s.
   brake: 5,
-  rest: 4, sleep: 1.5, reach: 2, stand: 3, land: 8, sling: 12, cheer: 8, bright: 4, cold: 6,
+  rest: 4, sleep: 1.5, reach: 2, stand: 3, land: 8, sling: 12, cheer: 8, bright: 4, cold: 6, hot: 4,
 };
 const TURN_ROUND_S = FRAMES / SPRITE_FPS.brake;
 // Slower than this (km/s) she is standing still.
@@ -57,10 +57,11 @@ const SIDEWAYS = 0.45;
 export const FIRST_REST_S = 3;
 export const REST_GAP_S = [8, 15];
 export const SLEEP_AFTER_S = 60;
-// Shielding her eyes near the Sun, shivering in the cold: how long each time, and the
+// Shielding her eyes near the Sun, fanning herself in its heat, shivering in the cold:
+// how long each time, and the
 // SPRITE_FPS entry for each sheet.
 export const FEELING_S = 2;
-const FEELINGS = { 'hurt-bright': 'bright', cold: 'cold' };
+const FEELINGS = { 'hurt-bright': 'bright', cold: 'cold', hot: 'hot' };
 // The jump: how long each half of it takes (ui/warp.js).
 const WARP_OUT_S = 2.7;
 const WARP_IN_S = 2.6;
@@ -108,7 +109,7 @@ export function flightSheet({ drive = 0, strafe = 0, turn = [0, 0], heading = nu
 
 // What she is doing, from most pressing to least.
 // input: { speed, drive, strafe, turn, heading, held, docking, resting, boost, warp,
-//          photo, cheer, bright, cold }
+//          photo, cheer, bright, hot, cold }
 //   warp: null, or { phase: 'out' | 'in', t } with t seconds into that half of a jump.
 export function modeFor(input) {
   if (input.warp) return 'warp';
@@ -153,9 +154,9 @@ function hover(state, input, dt, fresh) {
     return { ...state, sheet: 'idle', time: 0, frame: 0, still };
   }
   if (still >= nextRest) {
-    // Too bright to look, or cold: every other rest action is that instead. (It used to
+    // Too bright to look, hot, or cold: every other rest action is that instead. (It used to
     // take the place of everything, and out past Uranus she did nothing but shiver.)
-    const feeling = input.bright ? 'hurt-bright' : input.cold ? 'cold' : null;
+    const feeling = input.bright ? 'hurt-bright' : input.hot ? 'hot' : input.cold ? 'cold' : null;
     if (feeling && rests % 2 === 0) {
       nextRest = still + FEELING_S + REST_GAP_S[0] + chance(rests + 1000) * (REST_GAP_S[1] - REST_GAP_S[0]);
       return { ...state, sheet: feeling, time: 0, frame: 0, still, rests: rests + 1, nextRest };

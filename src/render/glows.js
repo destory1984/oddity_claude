@@ -1,5 +1,5 @@
 import {
-  CreateCylinder, CreateSphere, Mesh, ShaderMaterial, StandardMaterial, Effect, Color3, Vector3, Quaternion, Constants,
+  CreateCylinder, CreatePlane, Mesh, ShaderMaterial, StandardMaterial, DynamicTexture, Effect, Color3, Vector3, Quaternion, Constants,
 } from './babylon.js';
 import veilVert from './shaders/veil.vert?raw';
 import veilFrag from './shaders/veil.frag?raw';
@@ -10,7 +10,66 @@ import {
   PLUMES, PLUME_DAY_S, PLUME_RANGE_RADII, plumeUp,
 } from '../core/glows.js';
 
-const FLASHES = 4;
+const FLASHES = 8;
+// How many different bolts are drawn; each flash shows one of them, turned any way.
+const BOLTS = 4;
+// A flash sits this far above the cloud tops, so it is not half sunk in the globe.
+const FLASH_LIFT_KM = 150;
+
+const seeded = (seed) => () => {
+  seed = (seed * 1664525 + 1013904223) >>> 0;
+  return seed / 4294967296;
+};
+
+// A bolt seen from above: the cloud round it lit unevenly from inside, and the forked
+// channel itself, thin and white. On black, to be added to the picture.
+function boltTexture(scene, n) {
+  const size = 128;
+  const texture = new DynamicTexture(`bolt${n}`, { width: size, height: size }, scene, true);
+  const ctx = texture.getContext();
+  const rand = seeded(977 + n * 131);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, size, size);
+  ctx.globalCompositeOperation = 'lighter';
+  // The lit cloud: a few soft patches of different sizes, off centre.
+  for (let k = 0; k < 5; k++) {
+    const x = size * (0.5 + (rand() - 0.5) * 0.36);
+    const y = size * (0.5 + (rand() - 0.5) * 0.36);
+    const r = size * (0.12 + rand() * 0.2);
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, r);
+    glow.addColorStop(0, 'rgba(150,170,255,0.55)');
+    glow.addColorStop(0.5, 'rgba(90,110,220,0.2)');
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, size, size);
+  }
+  // The channel: a crooked line across the patch, with two or three forks off it.
+  const crooked = (fromX, fromY, heading, length, width, forks) => {
+    let x = fromX;
+    let y = fromY;
+    let angle = heading;
+    const steps = Math.max(3, Math.round(length / 6));
+    for (let i = 0; i < steps; i++) {
+      angle += (rand() - 0.5) * 1.3;
+      const toX = x + Math.cos(angle) * (length / steps);
+      const toY = y + Math.sin(angle) * (length / steps);
+      ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+      ctx.lineWidth = width;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(toX, toY);
+      ctx.stroke();
+      x = toX;
+      y = toY;
+      if (forks > 0 && rand() < 0.3) crooked(x, y, angle + (rand() < 0.5 ? 0.9 : -0.9), length * 0.4, width * 0.6, forks - 1);
+    }
+  };
+  const start = rand() * Math.PI * 2;
+  crooked(size * (0.5 - Math.cos(start) * 0.22), size * (0.5 - Math.sin(start) * 0.22), start, size * 0.46, 2.2, 2);
+  texture.update();
+  return texture;
+}
 
 function veilMaterial(scene, name, { low, high, ripple, nightOnly }) {
   Effect.ShadersStore.veilVertexShader = veilVert;
@@ -72,20 +131,28 @@ export function createGlows(scene, bodies) {
     return { plume, mesh, material };
   });
 
+  const bolts = Array.from({ length: BOLTS }, (_, n) => boltTexture(scene, n));
   const flashes = [];
   for (let i = 0; i < FLASHES; i++) {
     const material = new StandardMaterial(`flash${i}`, scene);
-    material.emissiveColor = new Color3(0.85, 0.9, 1);
+    // The picture alone gives the light (an emissive colour would be added on top of it).
+    material.emissiveTexture = bolts[i % BOLTS];
+    material.emissiveColor = new Color3(0, 0, 0);
     material.diffuseColor = new Color3(0, 0, 0);
     material.specularColor = new Color3(0, 0, 0);
     material.disableLighting = true;
     material.alphaMode = Constants.ALPHA_ADD;
-    const mesh = CreateSphere(`flash${i}`, { diameter: 1, segments: 8 }, scene);
+    material.backFaceCulling = false;
+    material.disableDepthWrite = true;
+    const mesh = CreatePlane(`flash${i}`, { size: 1, sideOrientation: Mesh.DOUBLESIDE }, scene);
     mesh.material = material;
     mesh.isPickable = false;
+    mesh.rotationQuaternion = new Quaternion();
     mesh.setEnabled(false);
     flashes.push({ mesh, material, up: null, age: 0, sizeKm: 0 });
   }
+  // Strokes still to come in the storm that last flashed: [{ in: seconds, up }].
+  let coming = [];
   let wait = 1;
 
   const rel = (km, position) => km.map((n, i) => (n - position[i]) / KM_PER_UNIT);
@@ -127,20 +194,44 @@ export function createGlows(scene, bodies) {
     const distance = Math.hypot(...out);
     const inRange = distance - jupiter.radiusKm <= LIGHTNING_RANGE_KM;
     let lit = false;
+    const strike = (up) => {
+      const free = flashes.find((f) => !f.up);
+      if (!free) return;
+      free.up = up;
+      free.age = 0;
+      free.sizeKm = LIGHTNING_SIZE_KM[0] + Math.random() * (LIGHTNING_SIZE_KM[1] - LIGHTNING_SIZE_KM[0]);
+      free.material.emissiveTexture = bolts[Math.floor(Math.random() * BOLTS)];
+      // Lying flat on the cloud tops, turned any way round.
+      const normal = new Vector3(...up);
+      Quaternion.FromUnitVectorsToRef(Vector3.Forward(), normal, free.mesh.rotationQuaternion);
+      Quaternion.RotationAxis(normal, Math.random() * Math.PI * 2).multiplyToRef(free.mesh.rotationQuaternion, free.mesh.rotationQuaternion);
+    };
     if (inRange) {
       wait -= dt;
-      const free = flashes.find((f) => !f.up);
-      if (wait <= 0 && free) {
+      if (wait <= 0) {
         const toSun = sunFrom(jupiter);
         const spot = meteorSpot(Math.random, [toSun.x, toSun.y, toSun.z], out.map((n) => n / distance));
         wait = lightningGap(Math.random);
         if (spot) {
-          free.up = spot.up;
-          free.age = 0;
-          free.sizeKm = LIGHTNING_SIZE_KM[0] + Math.random() * (LIGHTNING_SIZE_KM[1] - LIGHTNING_SIZE_KM[0]);
+          strike(spot.up);
           lit = true;
+          // A storm flashes several times: one to three more strokes close by, within
+          // half a second.
+          const more = 1 + Math.floor(Math.random() * 3);
+          for (let k = 0; k < more; k++) {
+            const near = spot.up.map((n) => n + (Math.random() - 0.5) * 0.04);
+            const length = Math.hypot(...near);
+            coming.push({ in: 0.08 + Math.random() * 0.42, up: near.map((n) => n / length) });
+          }
         }
       }
+      for (const stroke of coming) {
+        stroke.in -= dt;
+        if (stroke.in <= 0) strike(stroke.up);
+      }
+      coming = coming.filter((stroke) => stroke.in > 0);
+    } else {
+      coming = [];
     }
     for (const flash of flashes) {
       if (!flash.up) continue;
@@ -151,12 +242,12 @@ export function createGlows(scene, bodies) {
         flash.mesh.setEnabled(false);
         continue;
       }
-      // A ball sunk to its middle in the cloud tops shows as a lit patch.
-      const at = rel(jupiter.position.map((n, i) => n + flash.up[i] * jupiter.radiusKm), position);
+      const at = rel(jupiter.position.map((n, i) => n + flash.up[i] * (jupiter.radiusKm + FLASH_LIFT_KM)), position);
       flash.mesh.setEnabled(true);
       flash.mesh.position.set(at[0], at[1], at[2]);
       flash.mesh.scaling.setAll(flash.sizeKm / KM_PER_UNIT);
-      flash.material.alpha = 0.6 * glow;
+      // Just under 1 at the brightest, so the picture is always added, never pasted on.
+      flash.material.alpha = 0.99 * glow;
     }
     return lit;
   }

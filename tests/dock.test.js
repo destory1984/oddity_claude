@@ -82,7 +82,7 @@ test('riding with Voyager 1 shows its speed away from the Sun, and no time passi
 });
 
 test('docking glides in over the countdown instead of jumping', () => {
-  assert.equal(DOCK_SECONDS, 8.1);
+  assert.equal(DOCK_SECONDS, 6.1);
   let dock = startDocking([1000, 2000, 3800], hubble);
   assert.equal(dock.id, 'hubble');
   // At the first instant the traveler has not moved.
@@ -110,24 +110,24 @@ test('docking glides in over the countdown instead of jumping', () => {
   near(dockingOffset({ ...dock, elapsed: 99 })[2], 60, 1e-9);
 });
 
-test('the countdown runs 5 to 0, one a second, and contact comes as the word zero ends', () => {
+test('the countdown runs 3 to 0, one a second, and contact comes as the word zero ends', () => {
   // Nothing is counted for 2.5 seconds, while "Docking in progress" is being said
   // (it takes about two): otherwise the numbers queue up behind it and run late.
   assert.deepEqual(countsBetween(0, 2.4), []);
-  assert.deepEqual(countsBetween(2.4, 2.5), [5]);
+  assert.deepEqual(countsBetween(2.4, 2.5), [3]);
   assert.deepEqual(countsBetween(2.5, 3.4), []);
-  assert.deepEqual(countsBetween(3.4, 3.6), [4]);
+  assert.deepEqual(countsBetween(3.4, 3.6), [2]);
   // Zero is called 0.6 seconds before contact: the time it takes to say it.
   assert.equal(ZERO_WORD_S, 0.6);
-  assert.deepEqual(countsBetween(7.4, 7.5), [0]);
-  near(DOCK_SECONDS - 7.5, ZERO_WORD_S, 1e-9);
-  assert.deepEqual(countsBetween(7.5, DOCK_SECONDS + 5), []);
+  assert.deepEqual(countsBetween(5.4, 5.5), [0]);
+  near(DOCK_SECONDS - 5.5, ZERO_WORD_S, 1e-9);
+  assert.deepEqual(countsBetween(5.5, DOCK_SECONDS + 5), []);
   // Frame by frame, every number is called exactly once, in order.
   const called = [];
   for (let i = 0; i < 60 * 9; i++) called.push(...countsBetween(i / 60, (i + 1) / 60));
-  assert.deepEqual(called, [5, 4, 3, 2, 1, 0]);
+  assert.deepEqual(called, [3, 2, 1, 0]);
   // A long frame (a stutter) calls only the latest number, not a pile of them.
-  assert.deepEqual(countsBetween(2, 5.6), [2]);
+  assert.deepEqual(countsBetween(2, 3.6), [2]);
   assert.equal(isDocked({ elapsed: DOCK_SECONDS - 0.01 }), false);
   assert.equal(isDocked({ elapsed: DOCK_SECONDS }), true);
 });

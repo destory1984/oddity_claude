@@ -7,8 +7,9 @@ import { lookAtDirection, rotateLocal, blend } from './orientation.js';
 // craft are drawn 30 km wide, so 60 km shows the whole craft at arm's length).
 export const DOCK_RANGE_KM = 10000;
 export const DOCK_GAP_KM = 60;
-// The countdown: "Docking in progress", then 5 down to 0, one number a second.
-export const COUNT_FROM = 5;
+// The countdown: "Docking in progress", then 3 down to 0, one number a second. (It
+// counted from 5 at first; that was a long wait.)
+export const COUNT_FROM = 3;
 // The opening words take about two seconds to say; the count waits for them.
 const COUNT_STARTS_S = 2.5;
 // Saying "zero" takes about this long. Contact comes as the word ends, so the count,

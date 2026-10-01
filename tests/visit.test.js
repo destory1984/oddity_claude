@@ -56,7 +56,7 @@ test('the spot turns with the ground: the same turn about Y that the body makes'
   forward(multiply(turnAboutY(spun), a.facing)).forEach((n, i) => near(n, forward(b.facing)[i], 1e-9));
 });
 
-test('the glide runs five seconds to the spot, never under the ground, then holds her there', () => {
+test('the glide runs three seconds to the spot, never under the ground, then holds her there', () => {
   const story = SURFACE.find((s) => s.body === 'mars');
   const body = { id: 'mars', radiusKm: 3389.5, position: [5000, 0, 0] };
   let timeS = 0;

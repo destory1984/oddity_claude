@@ -51,6 +51,11 @@ const MAX_FRAME_GAP_S = 0.5;
 // After a jump to a body the view is turned this far (radians) off it.
 const VISTA_YAW = 0.3;
 const HUD_EVERY_N_FRAMES = 6;
+// The sprite character shields her eyes within this far of the Sun's surface, and fans
+// herself out to this many AU (distances between bodies are a hundredth of the real
+// ones, so Mercury's orbit is 570,000 km from the surface).
+const BRIGHT_KM = 200000;
+const HOT_AU = 0.5;
 
 // For tuning a planet's look: set to e.g. { id: 'jupiter', fromCentreKm: 400000 } to
 // start beside it. null starts above Earth, where the first-visit guide begins.
@@ -395,6 +400,10 @@ async function init() {
     },
   });
   const showStory = (id) => storyCard.show(STORIES.find((s) => s.id === id));
+  // The card for a place just reached opens a moment later, once she has come to rest
+  // and the landing has played: { id, in: seconds of play still to wait }.
+  let cardDue = null;
+  const CARD_AFTER_S = 1.2;
 
   let journalPriorPause = false;
   const journal = createJournal({
@@ -589,7 +598,7 @@ async function init() {
           toast.show(eventMessage({ type: 'visited', name: place.name }));
           sound.cue('landed');
           // Somewhere been before: the card again (a first visit opens it below).
-          if (progress.stories.includes(place.id)) showStory(place.id);
+          if (progress.stories.includes(place.id)) cardDue = { id: place.id, in: CARD_AFTER_S };
         }
       }
     }
@@ -628,8 +637,15 @@ async function init() {
       progress = told.progress;
       finished = progressChanged(before) || finished;
     }
-    // A place reached for the first time opens its card.
-    if (told.newly.length) showStory(told.newly[0]);
+    // A place reached for the first time opens its card, once she has settled.
+    if (told.newly.length) cardDue = { id: told.newly[0], in: CARD_AFTER_S };
+    if (cardDue && dt > 0) {
+      cardDue.in -= dt;
+      if (cardDue.in <= 0) {
+        showStory(cardDue.id);
+        cardDue = null;
+      }
+    }
     for (const event of [...result.events, ...logged.events, ...storyEvents]) {
       const text = eventMessage(event, BODIES);
       if (text) toast.show(text);
@@ -710,9 +726,10 @@ async function init() {
         warp: warp.phase(),
         photo: photo.active() && photo.heroVisible(),
         cheer: performance.now() < cheerUntil,
-        // Within a solar radius of the Sun's surface it is too bright to look; in a
-        // planet's shadow, or out past Uranus, it is cold.
-        bright: surfaceDistance(state.position, here('sun')) < here('sun').radiusKm,
+        // Close over the Sun's surface it is too bright to look; out to half an AU in
+        // full sunlight it is hot; in a planet's shadow, or out past Uranus, it is cold.
+        bright: surfaceDistance(state.position, here('sun')) < BRIGHT_KM,
+        hot: sunShown > 0.5 && surfaceDistance(state.position, here('sun')) < HOT_AU * AU_KM / 100,
         cold: sunShown < 0.05 || surfaceDistance(state.position, here('sun')) > 19 * AU_KM / 100,
       },
     });
@@ -727,6 +744,7 @@ async function init() {
     const sunKm = surfaceDistance(state.position, here('sun'));
     let feeling = null;
     if (view.heroSheet === 'hurt-bright') feeling = { type: 'tooBright' };
+    else if (view.heroSheet === 'hot') feeling = { type: 'hot', au: sunKm * 100 / AU_KM };
     else if (view.heroSheet === 'cold') feeling = sunKm > 19 * AU_KM / 100 ? { type: 'coldFar', au: sunKm * 100 / AU_KM } : { type: 'coldShadow' };
     if (feeling && feelingTold !== feeling.type) {
       feelingTold = feeling.type;

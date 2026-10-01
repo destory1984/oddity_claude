@@ -24,11 +24,13 @@ export function auroraBand(aurora, radiusKm, north = true) {
 
 // Lightning in Jupiter's clouds: seen on the night side from within this far.
 export const LIGHTNING_RANGE_KM = 500000;
-// One flash every 0.3 to 1.6 seconds, 0.4 seconds long, lighting a patch of cloud this
-// wide (real storms light patches hundreds of km across; widened to show from afar).
+// A storm flashes every 0.3 to 1.6 seconds, each stroke 0.4 seconds long: a forked
+// channel and the cloud lit round it, this wide over all (real storms light patches
+// hundreds of km across; widened to show from afar). One to three more strokes follow
+// close by within half a second (render/glows.js).
 export const LIGHTNING_GAP_S = [0.3, 1.6];
 export const LIGHTNING_LIFE_S = 0.4;
-export const LIGHTNING_SIZE_KM = [1500, 4000];
+export const LIGHTNING_SIZE_KM = [4000, 9000];
 
 export function lightningGap(rand) {
   return LIGHTNING_GAP_S[0] + rand() * (LIGHTNING_GAP_S[1] - LIGHTNING_GAP_S[0]);

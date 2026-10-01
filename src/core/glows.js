@@ -22,18 +22,26 @@ export function auroraBand(aurora, radiusKm, north = true) {
   return { foot: at(aurora.baseKm), top: at(aurora.baseKm + aurora.heightKm) };
 }
 
-// Lightning in Jupiter's clouds: seen on the night side from within this far.
-export const LIGHTNING_RANGE_KM = 500000;
-// A storm flashes every 0.3 to 1.6 seconds, each stroke 0.4 seconds long: a forked
-// channel and the cloud lit round it, this wide over all (real storms light patches
-// hundreds of km across; widened to show from afar). One to three more strokes follow
-// close by within half a second (render/glows.js).
-export const LIGHTNING_GAP_S = [0.3, 1.6];
+// Thunderstorms seen from above on a world's night side: a forked channel and the cloud
+// lit round it (render/glows.js). rangeKm: seen from within this far of the surface.
+// gapS: a storm flashes this often; one to three more strokes follow close by within
+// half a second. sizeKm: how wide a flash is over all (real storms light patches tens
+// to hundreds of km across; widened to show from afar). liftKm: how far above the
+// surface it is drawn (above the cloud layer). spread: how far apart the strokes of
+// one storm fall, as a share of the radius.
+export const STORMS = [
+  { id: 'lightning', body: 'jupiter', rangeKm: 500000, gapS: [0.3, 1.6], sizeKm: [4000, 9000], liftKm: 150, spread: 0.04 },
+  { id: 'lightning:earth', body: 'earth', rangeKm: 60000, gapS: [0.5, 2.2], sizeKm: [350, 800], liftKm: 40, spread: 0.05 },
+];
+export const LIGHTNING_RANGE_KM = STORMS[0].rangeKm;
+export const LIGHTNING_GAP_S = STORMS[0].gapS;
+// Each stroke lasts this long.
 export const LIGHTNING_LIFE_S = 0.4;
-export const LIGHTNING_SIZE_KM = [4000, 9000];
+export const LIGHTNING_SIZE_KM = STORMS[0].sizeKm;
 
-export function lightningGap(rand) {
-  return LIGHTNING_GAP_S[0] + rand() * (LIGHTNING_GAP_S[1] - LIGHTNING_GAP_S[0]);
+// Seconds until a storm flashes again (Jupiter's when no storm is given).
+export function lightningGap(rand, storm = STORMS[0]) {
+  return storm.gapS[0] + rand() * (storm.gapS[1] - storm.gapS[0]);
 }
 
 // How bright a flash is `age` seconds in: two quick strokes, then an afterglow dying away.
@@ -74,13 +82,18 @@ export const PLUMES = [
   { id: 'pele', body: 'io', name: '펠레', latDeg: -18.7, lonDeg: 104.7, heightKm: 350, widthKm: 1100 },
   { id: 'loki', body: 'io', name: '로키', latDeg: 13, lonDeg: 51, heightKm: 200, widthKm: 500 },
   { id: 'prometheus', body: 'io', name: '프로메테우스', latDeg: -1.5, lonDeg: -153.9, heightKm: 100, widthKm: 300 },
+  // Dust devils on Mars: whirlwinds that the Sun raises off the warm ground by day. The
+  // real ones are up to 20 km tall and a few hundred metres across; drawn 45 km by 9.
+  ...[[30, -155], [-14, -175], [22, 60], [-28, -45], [8, 110], [-40, 20]].map(([latDeg, lonDeg], i) => ({
+    id: `devil${i + 1}`, body: 'mars', name: '먼지 회오리', latDeg, lonDeg, heightKm: 45, widthKm: 9,
+  })),
   ...[0, 72, 144, 216, 288].map((turnDeg, i) => ({
     id: `tiger${i + 1}`, body: 'enceladus', name: '호랑이 줄무늬', latDeg: -84, lonDeg: turnDeg, heightKm: 450, widthKm: 130,
   })),
 ];
 // Io's day (it keeps one face to Jupiter), for turning its plumes with its ground:
 // the same number as render/planets.js.
-export const PLUME_DAY_S = { io: 152854, enceladus: 1.370218 * 86400 };
+export const PLUME_DAY_S = { io: 152854, enceladus: 1.370218 * 86400, mars: 88643 };
 // Plumes show from within this many radii of the body's surface.
 export const PLUME_RANGE_RADII = 60;
 

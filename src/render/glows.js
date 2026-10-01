@@ -6,7 +6,7 @@ import veilFrag from './shaders/veil.frag?raw';
 import { KM_PER_UNIT, TIME_SCALE } from '../core/bodies.js';
 import { meteorSpot } from '../core/meteors.js';
 import {
-  AURORAS, auroraBand, LIGHTNING_RANGE_KM, LIGHTNING_LIFE_S, LIGHTNING_SIZE_KM, lightningGap, lightningGlow,
+  AURORAS, auroraBand, STORMS, LIGHTNING_LIFE_S, lightningGap, lightningGlow,
   PLUMES, PLUME_DAY_S, PLUME_RANGE_RADII, plumeUp,
   IMPACT_RANGE_KM, IMPACT_LIFE_S, IMPACT_SIZE_KM, impactGap, impactGlow,
 } from '../core/glows.js';
@@ -14,8 +14,6 @@ import {
 const FLASHES = 8;
 // How many different bolts are drawn; each flash shows one of them, turned any way.
 const BOLTS = 4;
-// A flash sits this far above the cloud tops, so it is not half sunk in the globe.
-const FLASH_LIFT_KM = 150;
 
 const seeded = (seed) => () => {
   seed = (seed * 1664525 + 1013904223) >>> 0;
@@ -122,10 +120,11 @@ export function createGlows(scene, bodies) {
 
   const plumes = PLUMES.map((plume) => {
     const ice = plume.body === 'enceladus';
-    const material = veilMaterial(scene, `plume_${plume.id}`, {
-      low: ice ? [0.8, 0.9, 1] : [0.75, 0.8, 1], high: ice ? [0.5, 0.7, 1] : [0.45, 0.55, 0.9], ripple: 0, nightOnly: false,
-    });
-    material.setFloat('strength', ice ? 0.13 : 0.4);
+    const dusty = plume.body === 'mars';
+    const material = veilMaterial(scene, `plume_${plume.id}`, dusty
+      ? { low: [0.95, 0.72, 0.5], high: [0.8, 0.6, 0.42], ripple: 0, nightOnly: false }
+      : { low: ice ? [0.8, 0.9, 1] : [0.75, 0.8, 1], high: ice ? [0.5, 0.7, 1] : [0.45, 0.55, 0.9], ripple: 0, nightOnly: false });
+    material.setFloat('strength', dusty ? 0.45 : ice ? 0.13 : 0.4);
     const mesh = band(scene, `plume_${plume.id}`, (plume.widthKm * 0.04) / KM_PER_UNIT, (plume.widthKm / 2) / KM_PER_UNIT, 24);
     mesh.material = material;
     mesh.scaling.y = plume.heightKm / KM_PER_UNIT;
@@ -133,27 +132,30 @@ export function createGlows(scene, bodies) {
   });
 
   const bolts = Array.from({ length: BOLTS }, (_, n) => boltTexture(scene, n));
-  const flashes = [];
-  for (let i = 0; i < FLASHES; i++) {
-    const material = new StandardMaterial(`flash${i}`, scene);
-    // The picture alone gives the light (an emissive colour would be added on top of it).
-    material.emissiveTexture = bolts[i % BOLTS];
-    material.emissiveColor = new Color3(0, 0, 0);
-    material.diffuseColor = new Color3(0, 0, 0);
-    material.specularColor = new Color3(0, 0, 0);
-    material.disableLighting = true;
-    material.alphaMode = Constants.ALPHA_ADD;
-    material.backFaceCulling = false;
-    material.disableDepthWrite = true;
-    const mesh = CreatePlane(`flash${i}`, { size: 1, sideOrientation: Mesh.DOUBLESIDE }, scene);
-    mesh.material = material;
-    mesh.isPickable = false;
-    mesh.rotationQuaternion = new Quaternion();
-    mesh.setEnabled(false);
-    flashes.push({ mesh, material, up: null, age: 0, sizeKm: 0 });
-  }
-  // Strokes still to come in the storm that last flashed: [{ in: seconds, up }].
-  let coming = [];
+  // One set of flashes for each world with thunderstorms (core/glows.js STORMS).
+  const storms = STORMS.map((storm) => {
+    const flashes = [];
+    for (let i = 0; i < FLASHES; i++) {
+      const material = new StandardMaterial(`flash_${storm.body}${i}`, scene);
+      // The picture alone gives the light (an emissive colour would be added on top of it).
+      material.emissiveTexture = bolts[i % BOLTS];
+      material.emissiveColor = new Color3(0, 0, 0);
+      material.diffuseColor = new Color3(0, 0, 0);
+      material.specularColor = new Color3(0, 0, 0);
+      material.disableLighting = true;
+      material.alphaMode = Constants.ALPHA_ADD;
+      material.backFaceCulling = false;
+      material.disableDepthWrite = true;
+      const mesh = CreatePlane(`flash_${storm.body}${i}`, { size: 1, sideOrientation: Mesh.DOUBLESIDE }, scene);
+      mesh.material = material;
+      mesh.isPickable = false;
+      mesh.rotationQuaternion = new Quaternion();
+      mesh.setEnabled(false);
+      flashes.push({ mesh, material, up: null, age: 0, sizeKm: 0 });
+    }
+    // coming: strokes still to come in the storm that last flashed, [{ in: seconds, up }].
+    return { storm, flashes, coming: [], wait: 1 };
+  });
 
   // Impact flashes on the Moon: a white point in a small warm glow.
   const spark = new DynamicTexture('impactSpark', { width: 64, height: 64 }, scene, true);
@@ -189,14 +191,13 @@ export function createGlows(scene, bodies) {
     impacts.push({ mesh, material, up: null, age: 0, sizeKm: 0 });
   }
   let impactWait = 2;
-  let wait = 1;
 
   const rel = (km, position) => km.map((n, i) => (n - position[i]) / KM_PER_UNIT);
   const height = (body, position) => Math.hypot(...position.map((n, i) => n - body.position[i])) - body.radiusKm;
 
   // now: this frame's bodies (km); position: the traveler (km); elapsed: seconds of
-  // play (the bodies' spin runs off the same clock). Returns 'lightning' or 'impact' in
-  // the frame one flashes, else null.
+  // play (the bodies' spin runs off the same clock). Returns what flashed in this frame
+  // ('lightning', 'lightning:earth', 'impact'), else null.
   function update(dt, elapsed, now, sunPosition, position) {
     const find = (id) => now.find((b) => b.id === id);
     const sunFrom = (body) => new Vector3(...sunPosition.map((n, i) => n - body.position[i])).normalize();
@@ -220,71 +221,79 @@ export function createGlows(scene, bodies) {
       mesh.setEnabled(on);
       if (!on) continue;
       const up = plumeUp(plume, -(elapsed * TIME_SCALE * 2 * Math.PI) / PLUME_DAY_S[plume.body]);
+      // A dust devil is raised by the Sun warming the ground: none at night.
+      if (plume.body === 'mars' && Vector3.Dot(new Vector3(...up), sunFrom(body)) < 0.15) {
+        mesh.setEnabled(false);
+        continue;
+      }
       const middle = rel(body.position.map((n, i) => n + up[i] * (body.radiusKm + plume.heightKm / 2)), position);
       mesh.position.set(middle[0], middle[1], middle[2]);
       Quaternion.FromUnitVectorsToRef(Vector3.Up(), new Vector3(...up), mesh.rotationQuaternion);
     }
 
-    // Lightning: patches of Jupiter's night-side cloud lighting up.
-    const jupiter = find('jupiter');
-    const out = position.map((n, i) => n - jupiter.position[i]);
-    const distance = Math.hypot(...out);
-    const inRange = distance - jupiter.radiusKm <= LIGHTNING_RANGE_KM;
-    let lit = false;
-    const strike = (up) => {
-      const free = flashes.find((f) => !f.up);
-      if (!free) return;
-      free.up = up;
-      free.age = 0;
-      free.sizeKm = LIGHTNING_SIZE_KM[0] + Math.random() * (LIGHTNING_SIZE_KM[1] - LIGHTNING_SIZE_KM[0]);
-      free.material.emissiveTexture = bolts[Math.floor(Math.random() * BOLTS)];
-      // Lying flat on the cloud tops, turned any way round.
-      const normal = new Vector3(...up);
-      Quaternion.FromUnitVectorsToRef(Vector3.Forward(), normal, free.mesh.rotationQuaternion);
-      Quaternion.RotationAxis(normal, Math.random() * Math.PI * 2).multiplyToRef(free.mesh.rotationQuaternion, free.mesh.rotationQuaternion);
-    };
-    if (inRange) {
-      wait -= dt;
-      if (wait <= 0) {
-        const toSun = sunFrom(jupiter);
-        const spot = meteorSpot(Math.random, [toSun.x, toSun.y, toSun.z], out.map((n) => n / distance));
-        wait = lightningGap(Math.random);
-        if (spot) {
-          strike(spot.up);
-          lit = true;
-          // A storm flashes several times: one to three more strokes close by, within
-          // half a second.
-          const more = 1 + Math.floor(Math.random() * 3);
-          for (let k = 0; k < more; k++) {
-            const near = spot.up.map((n) => n + (Math.random() - 0.5) * 0.04);
-            const length = Math.hypot(...near);
-            coming.push({ in: 0.08 + Math.random() * 0.42, up: near.map((n) => n / length) });
+    // Lightning: patches of night-side cloud lighting up, on Jupiter and on Earth.
+    let lit = null;
+    for (const set of storms) {
+      const { storm, flashes } = set;
+      const world = find(storm.body);
+      const out = position.map((n, i) => n - world.position[i]);
+      const distance = Math.hypot(...out);
+      const inRange = distance - world.radiusKm <= storm.rangeKm;
+      const strike = (up) => {
+        const free = flashes.find((f) => !f.up);
+        if (!free) return;
+        free.up = up;
+        free.age = 0;
+        free.sizeKm = storm.sizeKm[0] + Math.random() * (storm.sizeKm[1] - storm.sizeKm[0]);
+        free.material.emissiveTexture = bolts[Math.floor(Math.random() * BOLTS)];
+        // Lying flat on the cloud tops, turned any way round.
+        const normal = new Vector3(...up);
+        Quaternion.FromUnitVectorsToRef(Vector3.Forward(), normal, free.mesh.rotationQuaternion);
+        Quaternion.RotationAxis(normal, Math.random() * Math.PI * 2).multiplyToRef(free.mesh.rotationQuaternion, free.mesh.rotationQuaternion);
+      };
+      if (inRange) {
+        set.wait -= dt;
+        if (set.wait <= 0) {
+          const toSun = sunFrom(world);
+          const spot = meteorSpot(Math.random, [toSun.x, toSun.y, toSun.z], out.map((n) => n / distance));
+          set.wait = lightningGap(Math.random, storm);
+          if (spot) {
+            strike(spot.up);
+            lit = storm.id;
+            // A storm flashes several times: one to three more strokes close by, within
+            // half a second.
+            const more = 1 + Math.floor(Math.random() * 3);
+            for (let k = 0; k < more; k++) {
+              const near = spot.up.map((n) => n + (Math.random() - 0.5) * storm.spread);
+              const length = Math.hypot(...near);
+              set.coming.push({ in: 0.08 + Math.random() * 0.42, up: near.map((n) => n / length) });
+            }
           }
         }
+        for (const stroke of set.coming) {
+          stroke.in -= dt;
+          if (stroke.in <= 0) strike(stroke.up);
+        }
+        set.coming = set.coming.filter((stroke) => stroke.in > 0);
+      } else {
+        set.coming = [];
       }
-      for (const stroke of coming) {
-        stroke.in -= dt;
-        if (stroke.in <= 0) strike(stroke.up);
+      for (const flash of flashes) {
+        if (!flash.up) continue;
+        flash.age += dt;
+        const glow = inRange ? lightningGlow(flash.age) : 0;
+        if (flash.age >= LIGHTNING_LIFE_S || !inRange) {
+          flash.up = null;
+          flash.mesh.setEnabled(false);
+          continue;
+        }
+        const at = rel(world.position.map((n, i) => n + flash.up[i] * (world.radiusKm + storm.liftKm)), position);
+        flash.mesh.setEnabled(true);
+        flash.mesh.position.set(at[0], at[1], at[2]);
+        flash.mesh.scaling.setAll(flash.sizeKm / KM_PER_UNIT);
+        // Just under 1 at the brightest, so the picture is always added, never pasted on.
+        flash.material.alpha = 0.99 * glow;
       }
-      coming = coming.filter((stroke) => stroke.in > 0);
-    } else {
-      coming = [];
-    }
-    for (const flash of flashes) {
-      if (!flash.up) continue;
-      flash.age += dt;
-      const glow = inRange ? lightningGlow(flash.age) : 0;
-      if (flash.age >= LIGHTNING_LIFE_S || !inRange) {
-        flash.up = null;
-        flash.mesh.setEnabled(false);
-        continue;
-      }
-      const at = rel(jupiter.position.map((n, i) => n + flash.up[i] * (jupiter.radiusKm + FLASH_LIFT_KM)), position);
-      flash.mesh.setEnabled(true);
-      flash.mesh.position.set(at[0], at[1], at[2]);
-      flash.mesh.scaling.setAll(flash.sizeKm / KM_PER_UNIT);
-      // Just under 1 at the brightest, so the picture is always added, never pasted on.
-      flash.material.alpha = 0.99 * glow;
     }
     // Impact flashes on the Moon's night side.
     const moon = find('moon');
@@ -323,7 +332,7 @@ export function createGlows(scene, bodies) {
       impact.mesh.scaling.setAll(size / KM_PER_UNIT);
       impact.material.alpha = 0.99 * impactGlow(impact.age);
     }
-    if (lit) return 'lightning';
+    if (lit) return lit;
     return hit ? 'impact' : null;
   }
 

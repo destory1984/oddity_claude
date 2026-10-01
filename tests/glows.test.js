@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  AURORAS, auroraBand, LIGHTNING_GAP_S, LIGHTNING_LIFE_S, lightningGap, lightningGlow,
+  AURORAS, auroraBand, STORMS, LIGHTNING_GAP_S, LIGHTNING_LIFE_S, lightningGap, lightningGlow,
   PLUMES, PLUME_DAY_S, plumeUp, glowNear, TELL_RADII,
   IMPACT_GAP_S, IMPACT_LIFE_S, impactGap, impactGlow,
 } from '../src/core/glows.js';
@@ -28,6 +28,9 @@ test('aurora curtains ring both poles of Earth and Jupiter, standing straight up
 
 test('lightning comes every 0.3 to 1.6 seconds as two strokes and an afterglow', () => {
   assert.equal(lightningGap(() => 0), LIGHTNING_GAP_S[0]);
+  assert.deepEqual(STORMS.map((s) => s.body), ['jupiter', 'earth']);
+  assert.equal(lightningGap(() => 0, STORMS[1]), 0.5);
+  assert.ok(STORMS[1].sizeKm[1] < STORMS[0].sizeKm[0], 'storms on Earth are far smaller');
   near(lightningGap(() => 1), LIGHTNING_GAP_S[1]);
   assert.equal(lightningGlow(-0.01), 0);
   assert.equal(lightningGlow(0.02), 1);
@@ -48,6 +51,7 @@ test('a meteoroid hitting the Moon flashes every 2 to 6 seconds, bright at once 
 
 test('three plumes on Io and five jets round the south pole of Enceladus, turning with the ground', () => {
   assert.equal(PLUMES.filter((p) => p.body === 'io').length, 3);
+  assert.equal(PLUMES.filter((p) => p.body === 'mars').length, 6);
   const jets = PLUMES.filter((p) => p.body === 'enceladus');
   assert.equal(jets.length, 5);
   for (const jet of jets) assert.ok(plumeUp(jet, 0)[1] < -0.99);
@@ -77,7 +81,7 @@ test('each light is told about from nearby, in words', () => {
   assert.equal(glowNear(BODIES, above('io', 5)), 'plume:io');
   assert.equal(glowNear(BODIES, above('enceladus', 5)), 'plume:enceladus');
   assert.equal(glowNear(BODIES, above('neptune', 1)), null);
-  for (const id of ['aurora:earth', 'aurora:jupiter', 'plume:io', 'plume:enceladus', 'lightning']) {
+  for (const id of ['aurora:earth', 'aurora:jupiter', 'plume:io', 'plume:enceladus', 'lightning', 'lightning:earth']) {
     assert.ok(eventMessage({ type: 'glow', id }).length > 20, id);
   }
   assert.equal(eventMessage({ type: 'glow', id: 'nothing' }), null);

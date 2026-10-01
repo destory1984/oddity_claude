@@ -318,8 +318,8 @@ export function createGlows(scene, bodies) {
       const at = rel(moon.position.map((n, i) => n + impact.up[i] * (moon.radiusKm + 5)), position);
       impact.mesh.setEnabled(true);
       impact.mesh.position.set(at[0], at[1], at[2]);
-      // Never smaller on screen than a couple of pixels, however far off.
-      const size = Math.max(impact.sizeKm, Math.hypot(...at) * KM_PER_UNIT * 0.012);
+      // Never smaller on screen than a dozen pixels or so, however far off.
+      const size = Math.max(impact.sizeKm, Math.hypot(...at) * KM_PER_UNIT * 0.03);
       impact.mesh.scaling.setAll(size / KM_PER_UNIT);
       impact.material.alpha = 0.99 * impactGlow(impact.age);
     }

@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped } from '../src/core/markers.js';
+import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody } from '../src/core/markers.js';
 
 test('on-screen bodies always keep their label', () => {
   assert.equal(keepMarker({ outside: false, selected: false, nearest: false, surfaceKm: 1e9 }), true);
@@ -92,4 +92,25 @@ test('a world keeps its name over a spacecraft or a surface place, even a nearer
   // Two worlds: the nearer, as before; the chosen world is never hidden.
   assert.deepEqual([...overlapped([box('earth', 0, 9000), box('moon', 40, 300000)])], ['moon']);
   assert.deepEqual([...overlapped([box('earth', 0, 9000), box('moon', 40, 300000, { first: true })])], ['earth']);
+});
+
+test('what stands behind a planet or a moon gets no label; what is in front of it or beside it does', () => {
+  const earth = { id: 'earth', radiusKm: 6371, position: [0, 0, 0] };
+  const moon = { id: 'moon', radiusKm: 1737, position: [0, 0, 40000] };
+  const bodies = [earth, moon];
+  const here = [0, 0, -20000];
+  // The Moon straight behind Earth; a planet far beyond, the same way.
+  assert.equal(behindBody(moon, here, bodies), true);
+  assert.equal(behindBody({ id: 'venus', radiusKm: 6052, position: [1000, 0, 2e6] }, here, bodies), true);
+  // Earth itself, a craft this side of it, and one out past its edge.
+  assert.equal(behindBody(earth, here, bodies), false);
+  assert.equal(behindBody({ id: 'hubble', kind: 'craft', radiusKm: 0, position: [0, 0, -6900] }, here, bodies), false);
+  assert.equal(behindBody({ id: 'iss', kind: 'craft', radiusKm: 0, position: [9000, 0, 3000] }, here, bodies), false);
+  // A craft in low orbit on the far side.
+  assert.equal(behindBody({ id: 'tiangong', kind: 'craft', radiusKm: 0, position: [0, 0, 6800] }, here, bodies), true);
+  // Something behind the traveler, with Earth ahead: not hidden.
+  assert.equal(behindBody({ id: 'mars', radiusKm: 3390, position: [0, 0, -5e6] }, here, bodies), false);
+  // Standing on the Moon, Earth overhead shows; from the far side it does not.
+  assert.equal(behindBody(earth, [0, 0, 40000 - 1737], bodies), false);
+  assert.equal(behindBody(earth, [0, 0, 40000 + 1737], bodies), true);
 });

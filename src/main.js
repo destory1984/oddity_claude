@@ -20,6 +20,7 @@ import { createWarp } from './ui/warp.js';
 import { slingshot } from './core/slingshot.js';
 import { addPhoto, removePhoto } from './core/album.js';
 import { teleportSpot } from './core/teleport.js';
+import { behindBody } from './core/markers.js';
 import { FACTS } from './core/facts.js';
 import { eventMessage, limitText, dateText, withParticle, towardParticle } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
@@ -799,6 +800,11 @@ async function init() {
       hiddenIds: [
         ...sites.filter((s) => siteHidden(s, here(s.parent), state.position) || (s.id !== selectedId && siteFar(here(s.parent), state.position))).map((s) => s.id),
         ...awayCraft,
+        // Whatever is behind a planet or a moon cannot be seen and gets no label (the
+        // Sun says "가려짐" itself; the chosen target and the guide's goal stay).
+        ...[...bodies, ...craft]
+          .filter((t) => t.kind !== 'star' && t.id !== selectedId && t.id !== guideGoal(guide)?.targetId && behindBody(t, state.position, bodies))
+          .map((t) => t.id),
       ],
     });
     minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId });

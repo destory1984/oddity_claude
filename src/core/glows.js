@@ -53,7 +53,7 @@ export const IMPACT_RANGE_KM = 30000;
 // point of light with a glow this wide round it (the real ones are metres across).
 export const IMPACT_GAP_S = [2, 6];
 export const IMPACT_LIFE_S = 0.35;
-export const IMPACT_SIZE_KM = [80, 200];
+export const IMPACT_SIZE_KM = [220, 480];
 
 export function impactGap(rand) {
   return IMPACT_GAP_S[0] + rand() * (IMPACT_GAP_S[1] - IMPACT_GAP_S[0]);

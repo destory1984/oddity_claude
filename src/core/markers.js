@@ -2,6 +2,8 @@
 
 // Bodies this close get an edge arrow even when off screen, so a neighbor such as
 // the Moon never vanishes while you fly around Earth.
+import { sweepSphere } from './flight.js';
+
 export const NEARBY_KM = 300000;
 
 // always: Earth and the Sun, the two bearings a traveler should never lose.
@@ -68,4 +70,17 @@ export function crowdedMoons(spots, gap = 40) {
     if (Math.abs(moon.x - planet.x) < gap && Math.abs(moon.y - planet.y) < gap) hidden.add(moon.id);
   }
   return hidden;
+}
+
+// True when another body stands between the traveler and the target (a body or a
+// craft; km): the straight line to the target's nearest point passes through that body.
+// Such a thing cannot be seen, so it gets no label. Places on a surface are not asked
+// here: core/stories.js siteHidden answers for them.
+export function behindBody(target, position, bodies) {
+  const to = target.position.map((n, i) => n - position[i]);
+  const distance = Math.hypot(...to);
+  const reach = distance - (target.radiusKm ?? 0);
+  if (!(reach > 0)) return false;
+  const direction = to.map((n) => n / distance);
+  return bodies.some((body) => body.id !== target.id && sweepSphere(position, direction, reach, body.position, body.radiusKm) !== null);
 }

@@ -55,7 +55,9 @@ export function createSpriteHero(engine) {
   // move: { drive, strafe } from the flight state; light: core/heroLight.js heroLighting().
   function update({ dt, speed, turn, fov, photoOrientation, visible, aspect = 16 / 9, light = null, move = {} }) {
     elapsed += dt;
-    state = stepSprite(state, { speed, drive: move.drive ?? 0, strafe: move.strafe ?? 0, turn, held: Boolean(move.held) }, dt);
+    state = stepSprite(state, {
+      speed, drive: move.drive ?? 0, strafe: move.strafe ?? 0, turn, held: Boolean(move.held), heading: move.heading ?? null,
+    }, dt);
     const drawing = drawings[state.sheet][spriteFrame(state)];
     material.diffuseTexture = drawing;
     material.emissiveTexture = drawing;

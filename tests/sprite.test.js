@@ -177,3 +177,20 @@ test('a turn sheet stays while the turn only eases, and leaves when it is nearly
   assert.equal(flightSheet({ drive: 1, turn: [-0.15, 0] }, 'right'), 'backward');
   assert.equal(flightSheet({ drive: 1, turn: [0, -0.15] }, 'up'), 'up');
 });
+
+test('carried somewhere other than where she faces, she is drawn going that way', () => {
+  // Gliding in to dock with a craft on her left: her left side, not her back.
+  assert.equal(flightSheet({ drive: 1, heading: [-0.8, 0, 0.6] }), 'left');
+  assert.equal(flightSheet({ drive: 1, heading: [0.8, 0, 0.6] }), 'right');
+  assert.equal(flightSheet({ drive: 1, heading: [0, 0.9, 0.44] }), 'up');
+  assert.equal(flightSheet({ drive: 1, heading: [0, -0.9, 0.44] }), 'down');
+  // Nearly straight ahead: her back. Behind the camera: her front, coming toward it.
+  assert.equal(flightSheet({ drive: 1, heading: [0.3, 0.2, 0.93] }), 'backward');
+  assert.equal(flightSheet({ drive: 1, heading: [0.2, 0.1, -0.97] }), 'forward');
+  // The heading outranks a turn of the view.
+  assert.equal(flightSheet({ drive: 1, turn: [2, 0], heading: [-0.8, 0, 0.6] }), 'left');
+  // In flight the drawing follows the heading (after the short hold).
+  let state = { sheet: 'backward', time: 0, moving: true, since: 0, turn: [0, 0] };
+  for (let i = 0; i < 40; i++) state = stepSprite(state, { speed: 400, drive: 1, heading: [-0.8, 0, 0.6] }, 0.01);
+  assert.equal(state.sheet, 'left');
+});

@@ -30,6 +30,8 @@ const MOVING_KM_S = 1;
 // once showing, the turn sheet stays until the turn eases below the lower figure.
 const TURN = 0.25;
 const TURN_EASED = 0.1;
+// A heading this far off straight ahead (the sine of about 24 degrees) shows as a side.
+const SIDEWAYS = 0.4;
 // A mouse drag arrives in bursts: a big turn one frame, none the next. Read raw, it
 // flipped her between her back and her side dozens of times a second. So the turn is
 // smoothed over about a fifth of a second, and a flight sheet, once shown, stays up at
@@ -45,7 +47,17 @@ export function createSpriteState() {
 // drive: 1 forward, -1 reverse, 0 coasting. strafe: 1 right, -1 left, 0 none.
 // turn: [yaw, pitch] in radians per second; yaw > 0 turns right, pitch > 0 noses down.
 // showing: the sheet up now, which a turn that is only easing off does not yet leave.
-export function flightSheet({ drive = 0, strafe = 0, turn = [0, 0] }, showing = null) {
+// heading: when she is being carried somewhere other than where she faces (gliding in
+// to dock, flung by a slingshot, coasting on a craft's speed), the way she is really
+// going, as a unit vector in her own frame (x right, y up, z ahead). It decides the
+// sheet, so she is never drawn running right toward something on her left.
+export function flightSheet({ drive = 0, strafe = 0, turn = [0, 0], heading = null }, showing = null) {
+  if (heading) {
+    const [x, y, z] = heading;
+    if (Math.abs(x) > SIDEWAYS && Math.abs(x) >= Math.abs(y)) return x > 0 ? 'right' : 'left';
+    if (Math.abs(y) > SIDEWAYS) return y > 0 ? 'up' : 'down';
+    return z < 0 ? 'forward' : 'backward';
+  }
   // Sliding sideways with no thrust ahead: she flies side-on.
   if (strafe !== 0 && drive === 0) return strafe > 0 ? 'right' : 'left';
   const [yaw, pitch] = turn;

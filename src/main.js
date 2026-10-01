@@ -3,9 +3,11 @@ import {
 } from './core/bodies.js';
 import { C, speedLimit } from './core/flight.js';
 import {
-  createState, step, stopNow, totalSpeed, carryAlong, boostLift, TURN_RATE, START_YAW,
+  createState, step, stopNow, totalSpeed, carryAlong, boostLift, velocity, TURN_RATE, START_YAW,
 } from './core/game.js';
-import { rotateLocal, lookAtDirection, multiply, conjugate, forward } from './core/orientation.js';
+import {
+  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector,
+} from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft } from './core/craft.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
@@ -572,6 +574,18 @@ async function init() {
 
     // Craft that circle a planet or a moon are drawn and named only from near it.
     const awayCraft = hiddenCraft(state.position, bodies, selectedId, craft);
+    // The way she is really going when that is not where she faces: toward the craft
+    // while gliding in to dock, or along a drift she is being carried on. In her own
+    // frame (x right, y up, z ahead), for the sprite character's choice of drawing.
+    let heading = null;
+    const carried = docked && !isDocked(docked)
+      ? here(docked.id).position.map((n, i) => n - state.position[i])
+      : (!docked && state.speed < 0.01 && (state.sideSpeed ?? 0) < 0.01 ? velocity(state) : null);
+    if (carried && Math.hypot(...carried) > 1) {
+      const local = rotateVector(conjugate(state.orientation), carried);
+      const length = Math.hypot(...local);
+      heading = local.map((n) => n / length);
+    }
     const view = world.update({
       bodies,
       craft,
@@ -590,6 +604,7 @@ async function init() {
         drive: docked ? 1 : (state.speed > 0.01 ? state.motionSign : 0),
         strafe: docked ? 0 : ((state.sideSpeed ?? 0) > 0.01 ? state.sideSign : 0),
         held: Boolean(docked) && isDocked(docked),
+        heading,
       },
     });
     if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`);

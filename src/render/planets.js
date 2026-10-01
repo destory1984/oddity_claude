@@ -1,5 +1,5 @@
 import {
-  CreateSphere, CreatePlane, Mesh, ShaderMaterial, Effect, Texture, Vector3, Color3, Constants,
+  CreateSphere, CreatePlane, Mesh, ShaderMaterial, Effect, Texture, Vector3, Color3, Constants, Matrix,
 } from './babylon.js';
 import vertex from './shaders/body.vert?raw';
 import planetFrag from './shaders/planet.frag?raw';
@@ -9,6 +9,7 @@ import gasFrag from './shaders/gas.frag?raw';
 import rockyFrag from './shaders/rocky.frag?raw';
 import ringFrag from './shaders/ring.frag?raw';
 import noiseGlsl from './shaders/noise.glsl?raw';
+import ringsGlsl from './shaders/rings.glsl?raw';
 import texturedFrag from './shaders/textured.frag?raw';
 import { KM_PER_UNIT } from '../core/bodies.js';
 import { normalize } from './math.js';
@@ -25,6 +26,7 @@ const CLOUD_SCALE = 12.776 / 12.742;
 const AIR_SCALE = 13.0 / 12.742;
 
 Effect.IncludesShadersStore.noise = noiseGlsl;
+Effect.IncludesShadersStore.rings = ringsGlsl;
 
 export function shader(scene, name, fragment, uniforms = [], samplers = []) {
   Effect.ShadersStore[`${name}VertexShader`] = vertex;
@@ -157,16 +159,24 @@ function createRings(scene, body, rings, sunDir) {
   const plane = CreatePlane(`${body.id}Rings`, { size: 2 * outer, sideOrientation: Mesh.DOUBLESIDE }, scene);
   plane.rotation.x = Math.PI / 2 + rings.tilt;
   plane.rotation.y = Math.atan2(-sunDir.x, -sunDir.z);
-  const material = shader(scene, 'ring', ringFrag, ['sunLight', 'inner', 'outer']);
+  const material = shader(scene, 'ring', ringFrag, ['sunLight', 'inner', 'outer', 'sunLocal', 'planetRadius']);
   material.setFloat('inner', rings.innerKm / rings.outerKm);
   material.setFloat('outer', 1);
+  material.setFloat('planetRadius', body.radiusKm / rings.outerKm);
   material.setColor3('sunLight', new Color3(0.95, 0.93, 0.9));
   material.backFaceCulling = false;
   material.alphaMode = Constants.ALPHA_COMBINE;
   material.needAlphaBlending = () => true;
   material.disableDepthWrite = true;
   plane.material = material;
-  return plane;
+  // The plane's turn carries the Sun's direction into its own axes (for Saturn's shadow
+  // on the rings) and its normal out to the world (for the rings' shadow on Saturn).
+  const turn = Matrix.RotationYawPitchRoll(plane.rotation.y, plane.rotation.x, 0);
+  const back = turn.clone().invert();
+  const normal = Vector3.TransformNormal(new Vector3(0, 0, 1), turn);
+  const setSun = (dir) => material.setVector3('sunLocal', Vector3.TransformNormal(dir, back));
+  setSun(sunDir);
+  return { plane, normal, setSun };
 }
 
 function createProceduralPlanet(scene, body, look, sunDir) {
@@ -176,7 +186,10 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   let material;
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
-      ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail'], ['map']);
+      ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter'], ['map']);
+    material.setVector3('ringNormal', Vector3.Zero());
+    material.setFloat('ringInner', 1);
+    material.setFloat('ringOuter', 2);
     material.setTexture('map', texture(scene, `planets/${look.map}`));
     material.setColor3('tint', color(look.tint));
     material.setColor3('baseColor', color(look.base));
@@ -203,7 +216,14 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   sphere.material = material;
 
   const meshes = [sphere];
-  if (look.rings) meshes.push(createRings(scene, body, look.rings, sunDir));
+  let ring = null;
+  if (look.rings) {
+    ring = createRings(scene, body, look.rings, sunDir);
+    meshes.push(ring.plane);
+    material.setVector3('ringNormal', ring.normal);
+    material.setFloat('ringInner', look.rings.innerKm / body.radiusKm);
+    material.setFloat('ringOuter', look.rings.outerKm / body.radiusKm);
+  }
   return {
     body,
     meshes,
@@ -212,6 +232,7 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     },
     setSun(dir) {
       material.setVector3('sun', new Vector3(...dir));
+      if (ring) ring.setSun(new Vector3(...dir));
     },
   };
 }

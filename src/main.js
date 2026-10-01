@@ -24,9 +24,27 @@ const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
 const HUD_EVERY_N_FRAMES = 6;
 
-let state = createState(START_POSITION, startOrientation(innerWidth / innerHeight));
+// TEMPORARY (2026-10-01): start beside Saturn while its rings are being tuned.
+// Set to false to start above Earth again.
+const START_AT_SATURN = true;
+
+function saturnStart() {
+  const saturn = bodyById('saturn');
+  const sun = bodyById('sun');
+  // 330,000 km from Saturn's centre, on the sunlit side and well above the
+  // ring plane, so the whole ring system fits in the view. (Saturn moves about 70 km/s
+  // on the game clock, so it stays put for a long look.)
+  const toSun = sun.position.map((n, i) => n - saturn.position[i]);
+  const length = Math.hypot(...toSun);
+  const out = [0.6 * toSun[0] / length, 0.6 * toSun[1] / length + 0.8, 0.6 * toSun[2] / length];
+  const norm = Math.hypot(...out);
+  const position = saturn.position.map((n, i) => n + (out[i] / norm) * 330000);
+  return createState(position, lookAtDirection(saturn.position.map((n, i) => n - position[i])));
+}
+
+let state = START_AT_SATURN ? saturnStart() : createState(START_POSITION, startOrientation(innerWidth / innerHeight));
 let paused = false;
-let selectedId = 'earth';
+let selectedId = START_AT_SATURN ? 'saturn' : 'earth';
 let dragTurn = [0, 0];
 let progress = loadProgress(BODIES, MISSIONS);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
@@ -224,7 +242,7 @@ async function init() {
 
   $('loading').style.display = 'none';
   document.body.dataset.ready = 'true';
-  toast.show('지구 근처에 도착했습니다. 드래그로 둘러보세요.');
+  toast.show(`${bodyById(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);
   progressChanged(null);
   if (score(summarize(progress, BODIES, MISSIONS)).done <= 2) {
     const how = document.body.classList.contains('touch') ? '수첩 버튼' : 'J 키나 수첩 버튼';

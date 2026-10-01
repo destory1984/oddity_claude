@@ -10,7 +10,12 @@ uniform float saturation;
 uniform float mapWeight;
 uniform float haze;
 uniform float detail;
+// Ring plane normal (zero when the planet has no rings) and the ring radii in planet radii.
+uniform vec3 ringNormal;
+uniform float ringInner;
+uniform float ringOuter;
 #include<noise>
+#include<rings>
 void main(){
   vec3 col = texture2D(map, vUV).rgb;
   // Hide the seam where the map's left and right edges meet.
@@ -33,6 +38,16 @@ void main(){
   vec3 V = normalize(-wp);
   float l = dot(N, sun);
   float lit = smoothstep(-.06, .2, l) * max(l, 0.) * 1.15 + .02;
+  // The rings' shadow: follow the sunlight back from this spot to the ring plane and
+  // dim it by how dense the ring is where the ray crosses.
+  float toPlane = dot(sun, ringNormal);
+  if (abs(toPlane) > 1e-4) {
+    float reach = -dot(N, ringNormal) / toPlane;
+    if (reach > 0.) {
+      float rr = length(N + sun * reach);
+      lit *= 1. - .8 * ringProfile((rr - ringInner) / (ringOuter - ringInner)).a;
+    }
+  }
   float facing = max(dot(N, V), 0.);
   // Atmosphere: a soft glow on the lit limb.
   float rim = pow(1. - facing, 3.) * haze * smoothstep(-.25, .35, l);

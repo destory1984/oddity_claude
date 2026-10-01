@@ -6,7 +6,7 @@ import {
   createState, step, stopNow, totalSpeed, carryAlong, boostLift, velocity, TURN_RATE, START_YAW,
 } from './core/game.js';
 import {
-  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector,
+  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft } from './core/craft.js';
 import { skyLabels } from './core/sky.js';
@@ -64,6 +64,7 @@ const INSPECT_CLEAR_KM = 3;
 // 30 km wide and a lander 6 km; a crater or a sea is seen from 500 km.
 function inspectView(target) {
   if (target.kind === 'craft') return { distanceKm: 110, fovDeg: 30 };
+  if (target.id === 'dokdo') return { distanceKm: 30, fovDeg: 40 };
   if (target.kind === 'site') return target.landmark ? { distanceKm: 500, fovDeg: 50 } : { distanceKm: 28, fovDeg: 28 };
   return { distanceKm: target.radiusKm * (target.id === 'saturn' ? 7 : 4), fovDeg: 44 };
 }
@@ -429,11 +430,21 @@ async function init() {
       const body = here(selectedId);
       // The view goes close and circles the target; she herself stays where she is, so
       // the flight heading and any coast in progress are as they were when it closes.
-      photo.orbitAround({
-        id: body.id,
-        facing: lookAtDirection(body.position.map((n, i) => n - state.position[i])),
-        ...inspectView(body),
-      });
+      const toward = body.position.map((n, i) => n - state.position[i]);
+      let facing = lookAtDirection(toward);
+      if (body.kind === 'site') {
+        // A place on the ground is first seen from the side she is on, 15 degrees above
+        // its horizon, with its sky at the top of the view.
+        const ground = here(body.parent);
+        const up = body.position.map((n, i) => (n - ground.position[i]) / ground.radiusKm);
+        const rise = toward.reduce((sum, n, i) => sum + n * up[i], 0);
+        let level = toward.map((n, i) => n - up[i] * rise);
+        if (Math.hypot(...level) < 1e-6) level = [up[1], -up[0], 0];
+        const length = Math.hypot(...level);
+        const tilt = (15 * Math.PI) / 180;
+        facing = orientationFrom(level.map((n, i) => (n / length) * Math.cos(tilt) - up[i] * Math.sin(tilt)), up);
+      }
+      photo.orbitAround({ id: body.id, facing, ...inspectView(body) });
     },
   });
   hud.showSelection(named(selectedId));

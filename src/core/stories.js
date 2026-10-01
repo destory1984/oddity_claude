@@ -59,7 +59,7 @@ export const STORIES = [
     text: '1990년 2월 14일 보이저 1호가 60억km 밖에서 돌아본 지구는 한 픽셀도 안 되는 푸른 점이었습니다.',
   },
   // Dokdo, in the East Sea. The map shows 10 km per pixel, so the island cannot be
-  // seen; the label marks where it is.
+  // seen on it; a drawing of the islets stands there instead (render/craft.js createDokdo).
   {
     id: 'dokdo', name: '독도', nameEn: 'Dokdo',
     type: 'surface', body: 'earth', latDeg: 37.2417, lonDeg: 131.8667, withinKm: 40,

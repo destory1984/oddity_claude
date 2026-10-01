@@ -905,3 +905,18 @@ nav button {
     height:100px;
   }
 }
+
+/* The flight buttons were as tall as the speed readout; about 70% of that is enough. */
+#reverseButton,#flyButton,#brake {
+  min-height:30px;
+  padding:6px 11px;
+  font-size:12px;
+}
+
+#reverseButton kbd,#flyButton kbd,#brake kbd {
+  margin-left:8px;
+}
+
+body.touch #reverseButton,body.touch #flyButton,body.touch #brake {
+  min-height:44px;
+}

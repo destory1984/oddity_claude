@@ -13,7 +13,7 @@ export async function createStars(scene) {
     const t = rand() * Math.PI * 2;
     const r = Math.sqrt(1 - z * z);
     p.position = new Vector3(r * Math.cos(t), z, r * Math.sin(t)).scale(80000);
-    const v = 0.25 + rand() * 0.5;
+    const v = 0.35 + rand() * 0.55;
     p.color = new Color4(v * 0.87, v * 0.93, v, 1);
   });
   await cloud.buildMeshAsync();

@@ -1,6 +1,6 @@
 # 서라 도트 그림 발주서: 사진 찍을 때의 V자 포즈, 착륙하는 모습
 
-게임 "Space Oddity — 우주 한량"의 주인공 서라를 도트 그림으로 그리는 작업이다. 이 문서는 **그림 세 묶음**(V자 포즈 하나, 착륙 둘)을 주문한다. 다른 주문은 `seora-sprite-order.md`, `seora-sprite-order-straight-back.md`, `seora-sprite-order-hot.md` 에 있고, 이 문서만 보고도 작업할 수 있게 규격을 다시 적었다.
+게임 "Space Oddity — 우주 한량"의 주인공 서라를 도트 그림으로 그리는 작업이다. 이 문서는 **그림 세 묶음**(V자 포즈 하나, 착륙 둘)을 주문한다. (세 묶음 모두 2026-10-02에 받아 게임에 넣었다.) 다른 주문은 `seora-sprite-order.md`, `seora-sprite-order-straight-back.md`, `seora-sprite-order-hot.md` 에 있고, 이 문서만 보고도 작업할 수 있게 규격을 다시 적었다.
 
 ## 1. 왜 필요한가
 

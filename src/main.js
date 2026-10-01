@@ -211,6 +211,11 @@ async function init() {
     onJournal: () => journal.open(),
     onMute: () => toggleSound(),
     onMusic: () => toggleMusic(),
+    // A flight key pressed while paused flies on at once (not in photo mode, which is
+    // paused on purpose, nor behind a story card).
+    onMove() {
+      if (paused && !photo.active() && !$('storyCard').open) setPaused(false);
+    },
     onEscape: () => (photo.active() ? photo.toggle() : setPaused(!paused)),
     onWheel: (deltaY) => photo.zoom(deltaY),
     isBlocked: () => $('help').open || $('journal').open,
@@ -770,6 +775,7 @@ async function init() {
         strafe: docked ? 0 : ((state.sideSpeed ?? 0) > 0.01 ? state.sideSign : 0),
         held: Boolean(docked) && isDocked(docked),
         docking: Boolean(docked) && !isDocked(docked),
+        landing: Boolean(gliding),
         heading,
         resting: Boolean(state.restingOn),
         boost: Boolean(state.boost),

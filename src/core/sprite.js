@@ -26,6 +26,10 @@ export const SHEETS = [
   ...FLIGHT_SHEETS, 'brake', 'idle', ...REST_ACTIONS.map((a) => a.sheet), 'rest-sleep',
   'dock-reach', 'stand', 'land', 'warp-out', 'warp-in', 'sling', 'photo-v', 'photo-jump',
   'cheer-big', 'hurt-bright', 'cold', 'hot',
+  // Drawn to order on 2026-10-02 (docs/seora-sprite-order-photo-landing.md): a V sign
+  // that reads at a glance, coming down feet first, and touching down. They take the
+  // place of 'photo-v' and 'land', whose drawings stay in the folder.
+  'photo-v2', 'land-descend', 'land-touch',
 ];
 
 // Frames per second.
@@ -34,7 +38,7 @@ export const SPRITE_FPS = {
   // The turn-round: the four 'brake' drawings, forwards as she stops and turns to face
   // the camera, backwards as she turns away again to fly off. 0.8 s.
   brake: 5,
-  rest: 4, sleep: 1.5, reach: 2, stand: 3, land: 8, sling: 12, cheer: 8, bright: 4, cold: 6, hot: 4,
+  rest: 4, sleep: 1.5, reach: 2, stand: 3, land: 8, descend: 6, sling: 12, cheer: 8, bright: 4, cold: 6, hot: 4,
 };
 const TURN_ROUND_S = FRAMES / SPRITE_FPS.brake;
 // Slower than this (km/s) she is standing still.
@@ -108,14 +112,16 @@ export function flightSheet({ drive = 0, strafe = 0, turn = [0, 0], heading = nu
 }
 
 // What she is doing, from most pressing to least.
-// input: { speed, drive, strafe, turn, heading, held, docking, resting, boost, warp,
-//          photo, cheer, bright, hot, cold }
+// input: { speed, drive, strafe, turn, heading, held, docking, landing, resting, boost,
+//          warp, photo, cheer, bright, hot, cold }
 //   warp: null, or { phase: 'out' | 'in', t } with t seconds into that half of a jump.
 export function modeFor(input) {
   if (input.warp) return 'warp';
   if (input.cheer) return 'cheer';
   if (input.photo) return 'photo';
   if (input.docking) return 'reach';
+  // Gliding down to a place on a surface, under the countdown (core/visit.js).
+  if (input.landing) return 'descend';
   // Latched to a craft she is at rest, whatever speed the craft carries her at: she
   // turns to face the camera and hovers, as when she stops anywhere else.
   if (input.held) return 'hover';
@@ -190,7 +196,8 @@ export function stepSprite(state, input, dt) {
   if (mode === 'photo') {
     // The game is paused in photo mode, so no time passes: she holds the finished pose,
     // two fingers up in a V. (Every other time it was a jump, 'photo-jump'; the drawings stay.)
-    return { ...next, sheet: 'photo-v', time: 0, frame: FRAMES - 1, reverse: false };
+    // Only the last of the four drawings is ever seen.
+    return { ...next, sheet: 'photo-v2', time: 0, frame: FRAMES - 1, reverse: false };
   }
   if (mode === 'sling') {
     const time = fresh ? 0 : state.time + dt;
@@ -203,12 +210,17 @@ export function stepSprite(state, input, dt) {
     if (way === 'left' || way === 'right' || way === 'forward') return { ...next, sheet: way, time, frame: loop(time, SPRITE_FPS.flight), reverse: false };
     return { ...next, sheet: 'dock-reach', time, frame: once(time, SPRITE_FPS.reach), reverse: false };
   }
+  if (mode === 'descend') {
+    // Coming down feet first, seen from behind, hair and sash lifted by the fall.
+    const time = fresh ? 0 : state.time + dt;
+    return { ...next, sheet: 'land-descend', time, frame: loop(time, SPRITE_FPS.descend), reverse: false };
+  }
   if (mode === 'ground') {
     // Touching down, then standing.
-    if (fresh) return { ...next, sheet: 'land', time: 0, frame: 0, reverse: false };
+    if (fresh) return { ...next, sheet: 'land-touch', time: 0, frame: 0, reverse: false };
     const time = state.time + dt;
-    if (state.sheet === 'land' && time < FRAMES / SPRITE_FPS.land) return { ...next, time, frame: once(time, SPRITE_FPS.land) };
-    if (state.sheet === 'land') return { ...next, sheet: 'stand', time: 0, frame: 0 };
+    if (state.sheet === 'land-touch' && time < FRAMES / SPRITE_FPS.land) return { ...next, time, frame: once(time, SPRITE_FPS.land) };
+    if (state.sheet === 'land-touch') return { ...next, sheet: 'stand', time: 0, frame: 0 };
     return { ...next, sheet: 'stand', time, frame: loop(time, SPRITE_FPS.stand) };
   }
   if (mode === 'fly') {
@@ -235,7 +247,7 @@ export function stepSprite(state, input, dt) {
     return { ...next, sheet, time, frame: loop(time, SPRITE_FPS.flight), since: sheet === state.sheet ? since : 0, turn };
   }
   // Hovering. Coming out of flight she turns round to face the camera first.
-  if (fresh && ['fly', 'sling', 'reach'].includes(from)) {
+  if (fresh && ['fly', 'sling', 'reach', 'descend'].includes(from)) {
     const time = state.reverse ? Math.max(0, TURN_ROUND_S - state.time) : 0;
     return { ...next, sheet: 'brake', reverse: false, time, frame: once(time, SPRITE_FPS.brake), still: 0, turn: [0, 0] };
   }

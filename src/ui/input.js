@@ -3,7 +3,10 @@ import { controlIntent, rangeKeepsKey, tracksKey } from '../core/controls.js';
 const $ = (id) => document.getElementById(id);
 const DRAG_RATE = 0.0035;
 
-export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal, onMute, onMusic = () => {}, onEscape, onWheel, isBlocked }) {
+// The keys that fly or turn her: pressing one while paused takes the game off pause (onMove).
+const MOVE_KEYS = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+
+export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal, onMute, onMusic = () => {}, onMove = () => {}, onEscape, onWheel, isBlocked }) {
   const held = new Set();
   let stick = [0, 0];
   let stickId = null;
@@ -40,6 +43,8 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
     if (onRange && rangeKeepsKey(e.code)) return;
     if (onRange && e.code.startsWith('Arrow')) e.target.blur();
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
+    // Before the key is noted as held: taking the game off pause clears the held keys.
+    if (MOVE_KEYS.includes(e.code) && !e.repeat && tracksKey(e)) onMove();
     if (e.code === 'Space' && !e.repeat) onBrake();
     else if (e.code === 'KeyP' && !e.repeat) onTogglePhoto();
     else if (e.code === 'KeyJ' && !e.repeat && tracksKey(e)) onJournal();

@@ -21,9 +21,9 @@ const STILL = { speed: 0 };
 // In flight, showing her back, past the turn away from the camera.
 const flying = () => run(createSpriteState(), FLY, 1.2).state;
 
-test('38 sheets of four frames in use, and every drawing is in the assets folder', () => {
-  assert.equal(SHEETS.length, 38);
-  assert.equal(new Set(SHEETS).size, 38);
+test('41 sheets of four frames in use, and every drawing is in the assets folder', () => {
+  assert.equal(SHEETS.length, 41);
+  assert.equal(new Set(SHEETS).size, 41);
   assert.equal(FRAMES, 4);
   for (const sheet of SHEETS) {
     for (let frame = 0; frame < FRAMES; frame++) {
@@ -225,8 +225,8 @@ test('docking: her arm goes out as she glides in; once docked she turns round an
 
 test('landing plays once, then she stands; taking off she turns away and flies', () => {
   const { seen, state } = run(flying(), { speed: 0, resting: true }, 2, 1 / 60);
-  assert.deepEqual(sheetsOf(seen), ['land', 'stand']);
-  assert.ok(Math.abs(seen.filter((s) => s.sheet === 'land').length / 60 - 0.5) < 0.05);
+  assert.deepEqual(sheetsOf(seen), ['land-touch', 'stand']);
+  assert.ok(Math.abs(seen.filter((s) => s.sheet === 'land-touch').length / 60 - 0.5) < 0.05);
   assert.deepEqual(sheetsOf(run(state, FLY, 1.2).seen), ['brake', 'away']);
 });
 
@@ -242,15 +242,27 @@ test('a slingshot stretches her out; a jump shrinks her to a star and back', () 
   assert.equal(stepSprite(back[4], STILL, 0.016).sheet, 'idle');
 });
 
+test('going down to a place she descends feet first, touches down, then stands; called off, she turns round and hovers', () => {
+  assert.equal(modeFor({ speed: 300, landing: true }), 'descend');
+  assert.equal(modeFor({ speed: 300, landing: true, docking: true }), 'reach');
+  const down = run(createSpriteState(), { speed: 300, landing: true }, 2);
+  assert.deepEqual(sheetsOf(down.seen), ['land-descend']);
+  assert.deepEqual([...new Set(down.seen.map(spriteFrame))].sort(), [0, 1, 2, 3]);
+  const landed = run(down.state, { speed: 0, resting: true }, 2);
+  assert.deepEqual(sheetsOf(landed.seen), ['land-touch', 'stand']);
+  const off = run(down.state, STILL, 2);
+  assert.deepEqual(sheetsOf(off.seen).slice(0, 2), ['brake', 'idle']);
+});
+
 test('photo mode holds the V pose, every time; a full journal sets her cheering', () => {
   let state = stepSprite(createSpriteState(), { speed: 0, photo: true }, 0);
-  assert.equal(state.sheet, 'photo-v');
+  assert.equal(state.sheet, 'photo-v2');
   assert.equal(spriteFrame(state), 3);
   // No time passes in photo mode: the pose does not change.
   assert.deepEqual(stepSprite(state, { speed: 0, photo: true }, 0), state);
   state = stepSprite(state, STILL, 0.016);
   state = stepSprite(state, { speed: 0, photo: true }, 0);
-  assert.equal(state.sheet, 'photo-v');
+  assert.equal(state.sheet, 'photo-v2');
   const cheer = run(createSpriteState(), { speed: 0, cheer: true }, 1);
   assert.deepEqual(sheetsOf(cheer.seen), ['cheer-big']);
   assert.deepEqual([...new Set(cheer.seen.map(spriteFrame))].sort(), [0, 1, 2, 3]);

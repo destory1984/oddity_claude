@@ -1,5 +1,6 @@
 // Docking with a spacecraft or telescope: come close, dock, and ride along with it.
-import { stopNow } from './game.js';
+import { stopNow, CARRY_KM } from './game.js';
+import { nearestSurface } from './bodies.js';
 
 // How close the traveler must be to dock, and how far off they sit once docked (the
 // craft are drawn 30 km wide, so 60 km shows the whole craft at arm's length).
@@ -9,8 +10,11 @@ export const DOCK_GAP_KM = 60;
 export const COUNT_FROM = 5;
 // The opening words take about two seconds to say; the count waits for them.
 const COUNT_STARTS_S = 2.5;
-// The glide from where the traveler was to the docking spot ends on the 0.
-export const DOCK_SECONDS = COUNT_STARTS_S + COUNT_FROM;
+// Saying "zero" takes about this long. Contact comes as the word ends, so the count,
+// the touch, the clunk and the jolt read as one event.
+export const ZERO_WORD_S = 0.6;
+// The glide from where the traveler was to the docking spot.
+export const DOCK_SECONDS = COUNT_STARTS_S + COUNT_FROM + ZERO_WORD_S;
 
 const gap = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
 
@@ -47,10 +51,13 @@ export function startDocking(position, craft) {
   };
 }
 
-// The traveler's offset from the craft right now: eased, slow at both ends.
+// The traveler's offset from the craft right now.
 export function dockingOffset({ from, to, elapsed }) {
   const t = Math.max(0, Math.min(1, elapsed / DOCK_SECONDS));
-  const eased = t * t * t * (t * (6 * t - 15) + 10);
+  // Sets off from rest and is still closing at half its average pace on contact. (An
+  // ease that also slowed to nothing at the end looked like stopping short two
+  // seconds early and hanging there.)
+  const eased = t * t * (2.5 - 1.5 * t);
   return from.map((n, i) => n + (to[i] - n) * eased);
 }
 
@@ -65,16 +72,14 @@ export function countsBetween(before, after) {
   return latest === null ? [] : [latest];
 }
 
-// The latch closes this long after the zero: the voice says "zero", a breath, then the
-// clunk and the hiss (ui/sound.js) and the jolt below.
-export const LATCH_AFTER_S = 2.5;
 export const JOLT_SECONDS = 1.2;
 
-// The knock the craft takes as the latch closes: shoved away from the traveler and
+// The knock the craft takes on contact (the clunk and the hiss in ui/sound.js start at
+// the same moment): shoved away from the traveler and
 // tipped a little, swinging back and forth as it dies away. push is a share of the
 // craft's shown size, tilt is in radians.
 export function latchJolt(dock) {
-  const t = dock.elapsed - DOCK_SECONDS - LATCH_AFTER_S;
+  const t = dock.elapsed - DOCK_SECONDS;
   if (!(t > 0) || t > JOLT_SECONDS) return { push: 0, tilt: 0 };
   const fade = Math.exp(-4.5 * t);
   return { push: 0.09 * fade * Math.sin(20 * t), tilt: 0.06 * fade * Math.sin(27 * t) };
@@ -101,6 +106,18 @@ export function rideSpeed(craftId, craftBefore, craftAfter, bodiesBefore, bodies
   const a = anchor(bodiesBefore, from.parent);
   const b = anchor(bodiesAfter, to.parent);
   return Math.hypot(...to.position.map((n, i) => n - b[i] - (from.position[i] - a[i]))) / dt;
+}
+
+// The speed the traveler keeps on letting go: the craft's velocity (game km per second
+// of play, world axes), measured against the body that carries the traveler along
+// there (within CARRY_KM of its surface), or against the Sun when there is none.
+export function releaseDrift(craftId, craftBefore, craftAfter, bodiesBefore, bodiesAfter, position, dt) {
+  if (!(dt > 0)) return [0, 0, 0];
+  const from = craftBefore.find((c) => c.id === craftId).position;
+  const to = craftAfter.find((c) => c.id === craftId).position;
+  const { body, distance } = nearestSurface(position, bodiesAfter);
+  const carried = body && distance <= CARRY_KM ? bodiesBefore.find((b) => b.id === body.id) : null;
+  return to.map((n, i) => (n - from[i] - (carried ? body.position[i] - carried.position[i] : 0)) / dt);
 }
 
 // Any thrust lets go of the craft.

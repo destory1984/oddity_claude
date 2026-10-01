@@ -225,3 +225,44 @@ test('on a tall phone screen the opening view faces Earth squarely', async () =>
   assert.ok(toEarth[0] * f[0] + toEarth[2] * f[2] > 0.999, 'Earth dead ahead');
   assert.deepEqual(startOrientation(16 / 9), START_ORIENTATION);
 });
+
+test('a drift carries the traveler along whatever way they face, until they stop', () => {
+  // 72 km/s toward +x while facing +z with no keys held.
+  let state = { ...createState([0, 0, 0], [0, 0, 0, 1], []), drift: [72, 0, 0] };
+  const after = run(state, {}, 120, []).state;
+  assert.ok(Math.abs(after.position[0] - 144) < 1e-6, `${after.position[0]}`);
+  assert.ok(Math.abs(after.position[2]) < 1e-9);
+  assert.deepEqual(after.drift, [72, 0, 0]);
+  assert.ok(Math.abs(totalSpeed(after) - 72) < 1e-9);
+  // Turning does not turn the drift.
+  const turned = run(state, { turnX: 1 }, 60, []).state;
+  assert.deepEqual(turned.drift, [72, 0, 0]);
+  // Thrust adds to it; Space ends it.
+  const thrusting = run(state, { drive: 1 }, 60, []).state;
+  assert.ok(thrusting.position[0] > 71 && thrusting.position[2] > 1000);
+  assert.deepEqual(stopNow(after).drift, [0, 0, 0]);
+  assert.equal(totalSpeed(stopNow(after)), 0);
+});
+
+test('a new state has no drift, and an old state without the field still flies', () => {
+  assert.deepEqual(createState([0, 0, 0]).drift, [0, 0, 0]);
+  const { drift, ...old } = createState([0, 0, 0], [0, 0, 0, 1]);
+  const after = run({ ...old, speed: 100 }, {}, 60, []).state;
+  assert.ok(Math.abs(after.position[2] - 100) < 1e-6);
+  assert.deepEqual(after.drift, [0, 0, 0]);
+});
+
+test('drifting into a body lands on it and the drift ends', () => {
+  let state = { ...createState([0, 0, -(1000 + 500)], facingBall, [ball]), drift: [0, 0, 72] };
+  const { state: after, events } = run(state, {}, 600, [ball]);
+  assert.equal(after.restingOn, 'ball');
+  assert.deepEqual(after.drift, [0, 0, 0]);
+  assert.equal(events.filter((e) => e.type === 'surfaceReached').length, 1);
+});
+
+test('a drift faster than the speed limit is cut down to it', () => {
+  // 4 km above the ball the limit is 0.01c.
+  const state = { ...createState([0, 0, -1004], awayFromBall, [ball]), drift: [0, 0, -C] };
+  const after = step(state, {}, DT, [ball]).state;
+  assert.ok(Math.abs(totalSpeed(after) - C * 0.01) < 1e-6);
+});

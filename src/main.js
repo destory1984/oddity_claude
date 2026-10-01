@@ -32,6 +32,7 @@ import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
 import {
   dockable, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
+  releaseDrift,
 } from './core/dock.js';
 
 const $ = (id) => document.getElementById(id);
@@ -87,6 +88,8 @@ let beltSeen = false;
 let docked = null;
 // While docked, the speed shown is the craft's own (the traveler rides with it).
 let rideKmS = 0;
+// The craft's velocity this frame: what the traveler keeps on letting go.
+let rideDrift = [0, 0, 0];
 // Own speed when flying free, the craft's when docked: for the readout, the pose and the sound.
 const shownSpeed = () => (docked ? rideKmS : totalSpeed(state));
 // Where a body is right now (BODIES is only the starting layout).
@@ -211,6 +214,7 @@ async function init() {
 
   function dock(target) {
     docked = startDocking(state.position, target);
+    rideDrift = [0, 0, 0];
     showCraftCard(target);
     input.clear();
     announce({ type: 'docking', name: target.name });
@@ -221,6 +225,8 @@ async function init() {
     const { name } = here(docked.id);
     const latched = isDocked(docked);
     docked = null;
+    // Let go at the craft's speed, not at a standstill: the two fly on side by side.
+    state = { ...state, drift: rideDrift };
     showCraftCard(null);
     sound.hush();
     announce({ type: latched ? 'undocked' : 'dockAborted', name });
@@ -381,7 +387,10 @@ async function init() {
       simTime += dt * TIME_SCALE;
       bodies = bodiesAt(simTime);
       craft = craftAt(simTime, bodies);
-      if (docked) rideKmS = rideSpeed(docked.id, craftBefore, craft, before, bodies, dt);
+      if (docked) {
+        rideKmS = rideSpeed(docked.id, craftBefore, craft, before, bodies, dt);
+        rideDrift = releaseDrift(docked.id, craftBefore, craft, before, bodies, state.position, dt);
+      }
       sites = storySitesAt(simTime, bodies);
       state = carryAlong(state, before, bodies);
     }

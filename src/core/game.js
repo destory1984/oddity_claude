@@ -29,11 +29,14 @@ export function createState(position, orientation = [0, 0, 0, 1]) {
     sideSign: 1,
     sideBrakeRate: 0,
     restingOn: null,
+    // Speed kept from something the traveler rode with (km/s, in world axes): it does
+    // not turn with the traveler and lasts until they stop or land.
+    drift: [0, 0, 0],
   };
 }
 
 export function stopNow(state) {
-  return { ...state, speed: 0, brakeRate: 0, sideSpeed: 0, sideBrakeRate: 0 };
+  return { ...state, speed: 0, brakeRate: 0, sideSpeed: 0, sideBrakeRate: 0, drift: [0, 0, 0] };
 }
 
 // Bodies move along their orbits between frames. Near a body (within CARRY_KM of its
@@ -59,8 +62,16 @@ function pushOut(position, bodies) {
   return null;
 }
 
+// The traveler's velocity: their own thrust along the way they face, plus any drift.
+function velocityOf(state, orientation = state.orientation) {
+  const f = forward(orientation);
+  const r = right(orientation);
+  const drift = state.drift ?? [0, 0, 0];
+  return f.map((n, i) => n * state.speed * state.motionSign + r[i] * (state.sideSpeed ?? 0) * (state.sideSign ?? 1) + drift[i]);
+}
+
 export function totalSpeed(state) {
-  return Math.hypot(state.speed, state.sideSpeed ?? 0);
+  return Math.hypot(...velocityOf(state));
 }
 
 // One thrust axis: hold a direction to accelerate, let go to coast at the speed
@@ -130,11 +141,17 @@ export function step(state, input, dt, bodies = BODIES, slowPoints = []) {
   ));
   [speed, sideSpeed] = capTotal(speed, sideSpeed, limit);
 
-  const f = forward(orientation);
-  const r = right(orientation);
-  const velocity = f.map((n, i) => n * speed * motionSign + r[i] * sideSpeed * sideSign);
-  const combined = Math.hypot(...velocity);
-  const direction = combined > 0 ? velocity.map((n) => n / combined) : f;
+  // A drift is held to the limit too, on its own and together with the thrust.
+  let drift = state.drift ?? [0, 0, 0];
+  const drifting = Math.hypot(...drift);
+  if (drifting > limit) drift = drift.map((n) => (n * limit) / drifting);
+  let velocity = velocityOf({ speed, motionSign, sideSpeed, sideSign, drift }, orientation);
+  let combined = Math.hypot(...velocity);
+  if (combined > limit) {
+    velocity = velocity.map((n) => (n * limit) / combined);
+    combined = limit;
+  }
+  const direction = combined > 0 ? velocity.map((n) => n / combined) : forward(orientation);
   const length = combined * dt;
   let position = state.position;
   let restingOn = state.restingOn;
@@ -147,6 +164,7 @@ export function step(state, input, dt, bodies = BODIES, slowPoints = []) {
       brakeRate = 0;
       sideSpeed = 0;
       sideBrakeRate = 0;
+      drift = [0, 0, 0];
       if (restingOn !== hit.body.id) events.push({ type: 'surfaceReached', bodyId: hit.body.id });
       restingOn = hit.body.id;
     } else {
@@ -159,7 +177,7 @@ export function step(state, input, dt, bodies = BODIES, slowPoints = []) {
 
   return {
     state: {
-      position, orientation, speed, motionSign, brakeRate, sideSpeed, sideSign, sideBrakeRate, restingOn,
+      position, orientation, speed, motionSign, brakeRate, sideSpeed, sideSign, sideBrakeRate, restingOn, drift,
     },
     events,
   };

@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   DOCK_RANGE_KM, DOCK_GAP_KM, DOCK_SECONDS, dockable, dockOffset, dockedState, wantsToLeave, rideSpeed,
-  startDocking, dockingOffset, countsBetween, isDocked, latchJolt, LATCH_AFTER_S, JOLT_SECONDS,
+  startDocking, dockingOffset, countsBetween, isDocked, latchJolt, ZERO_WORD_S, JOLT_SECONDS, releaseDrift,
 } from '../src/core/dock.js';
 import { bodiesAt } from '../src/core/bodies.js';
 import { craftAt } from '../src/core/craft.js';
@@ -68,7 +68,7 @@ test('riding with Voyager 1 shows its speed away from the Sun, and no time passi
 });
 
 test('docking glides in over the countdown instead of jumping', () => {
-  assert.equal(DOCK_SECONDS, 7.5);
+  assert.equal(DOCK_SECONDS, 8.1);
   let dock = startDocking([1000, 2000, 3800], hubble);
   assert.equal(dock.id, 'hubble');
   // At the first instant the traveler has not moved.
@@ -82,25 +82,32 @@ test('docking glides in over the countdown instead of jumping', () => {
   // Always closing in, never past the docking spot, and there at the end.
   for (let i = 1; i < seen.length; i++) assert.ok(seen[i] <= seen[i - 1] + 1e-9 && seen[i] >= 60 - 1e-9);
   near(seen[frames], 60, 1e-6);
-  // Gentle at both ends: the first and last tenth of a second move far less than the middle.
+  // It sets off gently, but does not stop short and hang there: it is still closing
+  // at a good pace when it touches (the jolt is what stops it).
   const half = Math.round(frames / 2);
   const early = seen[0] - seen[6];
   const middle = seen[half - 3] - seen[half + 3];
   const late = seen[frames - 6] - seen[frames];
-  assert.ok(early < middle / 5 && late < middle / 5, `${early} ${middle} ${late}`);
+  assert.ok(early < middle / 5, `${early} ${middle}`);
+  assert.ok(late > middle / 4 && late < middle, `${late} ${middle}`);
+  // In the last two seconds (the 2 and the 1) it covers a real share of the way.
+  assert.ok(seen[frames - 120] - seen[frames] > 60, `${seen[frames - 120] - seen[frames]}`);
   // Long after, it stays put.
   near(dockingOffset({ ...dock, elapsed: 99 })[2], 60, 1e-9);
 });
 
-test('the countdown runs 5 to 0, one a second, and 0 lands exactly when the glide ends', () => {
+test('the countdown runs 5 to 0, one a second, and contact comes as the word zero ends', () => {
   // Nothing is counted for 2.5 seconds, while "Docking in progress" is being said
   // (it takes about two): otherwise the numbers queue up behind it and run late.
   assert.deepEqual(countsBetween(0, 2.4), []);
   assert.deepEqual(countsBetween(2.4, 2.5), [5]);
   assert.deepEqual(countsBetween(2.5, 3.4), []);
   assert.deepEqual(countsBetween(3.4, 3.6), [4]);
-  assert.deepEqual(countsBetween(DOCK_SECONDS - 0.01, DOCK_SECONDS), [0]);
-  assert.deepEqual(countsBetween(DOCK_SECONDS, DOCK_SECONDS + 5), []);
+  // Zero is called 0.6 seconds before contact: the time it takes to say it.
+  assert.equal(ZERO_WORD_S, 0.6);
+  assert.deepEqual(countsBetween(7.4, 7.5), [0]);
+  near(DOCK_SECONDS - 7.5, ZERO_WORD_S, 1e-9);
+  assert.deepEqual(countsBetween(7.5, DOCK_SECONDS + 5), []);
   // Frame by frame, every number is called exactly once, in order.
   const called = [];
   for (let i = 0; i < 60 * 9; i++) called.push(...countsBetween(i / 60, (i + 1) / 60));
@@ -117,13 +124,12 @@ test('docking from inside the docking distance eases outward to it', () => {
   near(Math.hypot(...dockingOffset({ ...dock, elapsed: DOCK_SECONDS })), 60, 1e-9);
 });
 
-test('the latch closes 2.5 seconds after the zero, and jolts the craft for a moment', () => {
-  assert.equal(LATCH_AFTER_S, 2.5);
-  const at = (afterLatch) => latchJolt({ elapsed: DOCK_SECONDS + LATCH_AFTER_S + afterLatch });
-  // Nothing before the latch, and it starts from rest.
-  assert.deepEqual(latchJolt({ elapsed: DOCK_SECONDS + 1 }), { push: 0, tilt: 0 });
+test('on contact the craft is jolted for a moment, at once', () => {
+  const at = (afterContact) => latchJolt({ elapsed: DOCK_SECONDS + afterContact });
+  // Nothing before contact, and it starts from rest.
+  assert.deepEqual(latchJolt({ elapsed: DOCK_SECONDS - 0.5 }), { push: 0, tilt: 0 });
   assert.deepEqual(at(0), { push: 0, tilt: 0 });
-  // A quick shove away within the first tenth of a second...
+  // A quick shove within the first tenth of a second...
   assert.ok(at(0.08).push > 0.04, `${at(0.08).push}`);
   // ...never more than a tenth of the craft's size, or four degrees of tilt...
   let swings = 0;
@@ -138,4 +144,34 @@ test('the latch closes 2.5 seconds after the zero, and jolts the craft for a mom
   assert.ok(swings >= 3, `${swings}`);
   assert.ok(Math.abs(at(1).push) < 0.01);
   assert.deepEqual(at(JOLT_SECONDS + 0.01), { push: 0, tilt: 0 });
+});
+
+test('letting go of Hubble keeps its speed round Earth: 72 km/s, measured against Earth', () => {
+  const dt = 1 / 60;
+  const before = bodiesAt(1000);
+  const after = bodiesAt(1000 + dt * 720);
+  const craftBefore = craftAt(1000, before);
+  const craftAfter = craftAt(1000 + dt * 720, after);
+  const hubbleNow = craftAfter.find((c) => c.id === 'hubble');
+  const drift = releaseDrift('hubble', craftBefore, craftAfter, before, after, hubbleNow.position, dt);
+  near(Math.hypot(...drift), (2 * Math.PI * (6371 + 540)) / 600, 0.5);
+  // Earth's own motion round the Sun is not in it: the traveler is already carried with Earth there.
+  const earthStep = after.find((b) => b.id === 'earth').position.map((n, i) => n - before.find((b) => b.id === 'earth').position[i]);
+  const hubbleStep = hubbleNow.position.map((n, i) => n - craftBefore.find((c) => c.id === 'hubble').position[i]);
+  drift.forEach((n, i) => near(n, (hubbleStep[i] - earthStep[i]) / dt, 1e-6));
+});
+
+test('letting go far from any body keeps the whole speed of the craft', () => {
+  const dt = 1 / 60;
+  const before = bodiesAt(0);
+  const after = bodiesAt(dt * 720);
+  const craftAfter = craftAt(dt * 720, after);
+  const voyager = craftAfter.find((c) => c.id === 'voyager1');
+  near(Math.hypot(...releaseDrift('voyager1', craftAt(0, before), craftAfter, before, after, voyager.position, dt)), 122.4, 0.1);
+  // Webb is 150,000 km from Earth, outside the 50,000 km where Earth carries the traveler,
+  // so it keeps Earth's whole speed round the Sun (about 333 km/s on the game clock).
+  const webb = craftAfter.find((c) => c.id === 'jwst');
+  const speed = Math.hypot(...releaseDrift('jwst', craftAt(0, before), craftAfter, before, after, webb.position, dt));
+  assert.ok(speed > 300 && speed < 350, `${speed}`);
+  assert.deepEqual(releaseDrift('jwst', craftAfter, craftAfter, after, after, webb.position, 0), [0, 0, 0]);
 });

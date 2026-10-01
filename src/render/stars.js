@@ -80,13 +80,11 @@ export async function createStars(scene) {
   sky.alwaysSelectAsActiveMesh = true;
   sky.alphaIndex = 0; // drawn before the rings and the Sun's glare, which do not write depth
 
-  // Constellation stars and other famous stars, larger than the random field and
-  // brighter the lower their magnitude; thin lines join each figure.
-  const named = [...CONSTELLATIONS.flatMap((c) => c.stars), ...BRIGHT_STARS];
+  // Famous stars, large and brighter the lower their magnitude.
   const bright = new PointsCloudSystem('brightStars', 3.2, scene);
   let k = 0;
-  bright.addPoints(named.length, (p) => {
-    const s = named[k++];
+  bright.addPoints(BRIGHT_STARS.length, (p) => {
+    const s = BRIGHT_STARS[k++];
     p.position = skyVector(s.raH, s.decDeg).scale(79600);
     const v = Math.min(1, Math.max(0.5, 1 - s.mag * 0.14));
     p.color = new Color4(v, v, v, 1);
@@ -94,11 +92,26 @@ export async function createStars(scene) {
   await bright.buildMeshAsync();
   bright.mesh.alwaysSelectAsActiveMesh = true;
   bright.mesh.isPickable = false;
+
+  // The 88 constellations: a star at every corner of each figure, joined by thin lines.
+  const corners = new Map();
+  for (const c of CONSTELLATIONS) for (const [raH, decDeg] of c.lines.flat()) corners.set(`${raH},${decDeg}`, [raH, decDeg]);
+  const cornerList = [...corners.values()];
+  const figureStars = new PointsCloudSystem('figureStars', 2.2, scene);
+  let n = 0;
+  figureStars.addPoints(cornerList.length, (p) => {
+    const [raH, decDeg] = cornerList[n++];
+    p.position = skyVector(raH, decDeg).scale(79600);
+    p.color = new Color4(0.8, 0.84, 0.9, 1);
+  });
+  await figureStars.buildMeshAsync();
+  figureStars.mesh.alwaysSelectAsActiveMesh = true;
+  figureStars.mesh.isPickable = false;
   const lines = CreateLineSystem('constellations', {
-    lines: CONSTELLATIONS.flatMap((c) => c.lines.map(([a, b]) => [c.stars[a], c.stars[b]].map((s) => skyVector(s.raH, s.decDeg).scale(79500)))),
+    lines: CONSTELLATIONS.flatMap((c) => c.lines.map((line) => line.map(([raH, decDeg]) => skyVector(raH, decDeg).scale(79500)))),
   }, scene);
-  lines.color = new Color3(0.45, 0.62, 0.85);
-  lines.alpha = 0.3;
+  lines.color = new Color3(0.3, 0.42, 0.6);
+  lines.alpha = 0.22;
   lines.isPickable = false;
   lines.alwaysSelectAsActiveMesh = true;
   return cloud.mesh;

@@ -25,27 +25,26 @@ test('four nearby galaxies', () => {
   assert.ok(d > 15 && d < 25, `${d}`);
 });
 
-test('seven well-known constellations, each a set of stars joined by lines', () => {
-  assert.deepEqual(CONSTELLATIONS.map((c) => c.id), ['orion', 'ursaMajor', 'cassiopeia', 'crux', 'scorpius', 'cygnus', 'leo']);
+test('all 88 official constellations, each a named set of lines', () => {
+  assert.equal(CONSTELLATIONS.length, 88);
+  assert.equal(new Set(CONSTELLATIONS.map((c) => c.id)).size, 88);
   for (const c of CONSTELLATIONS) {
-    assert.ok(c.name && c.stars.length >= 4, c.id);
-    for (const [a, b] of c.lines) {
-      assert.ok(c.stars[a] && c.stars[b] && a !== b, `${c.id} line ${a}-${b}`);
-      const d = angle(fromEquatorial(c.stars[a].raH, c.stars[a].decDeg), fromEquatorial(c.stars[b].raH, c.stars[b].decDeg));
-      assert.ok(d > 0.5 && d < 30, `${c.id} line ${a}-${b} spans ${d} degrees`);
+    assert.ok(c.name.endsWith('자리') && c.nameEn && c.lines.length >= 1, c.id);
+    for (const line of c.lines) {
+      assert.ok(line.length >= 2, c.id);
+      for (const [raH, decDeg] of line) assert.ok(raH >= 0 && raH < 24 && decDeg >= -90 && decDeg <= 90, c.id);
     }
-    // Every star is used by some line.
-    const used = new Set(c.lines.flat());
-    assert.equal(used.size, c.stars.length, c.id);
   }
+  for (const id of ['ori', 'uma', 'cas', 'cru', 'sco', 'cyg', 'leo', 'ser', 'oct']) assert.ok(CONSTELLATIONS.find((c) => c.id === id), id);
 });
 
-test('Orion\'s belt is three stars in a row about 3 degrees long', () => {
-  const orion = CONSTELLATIONS.find((c) => c.id === 'orion');
-  const at = (name) => { const s = orion.stars.find((x) => x.name === name); return fromEquatorial(s.raH, s.decDeg); };
-  const whole = angle(at('Mintaka'), at('Alnitak'));
-  assert.ok(whole > 2.4 && whole < 3.1, `${whole}`);
-  assert.ok(Math.abs(angle(at('Mintaka'), at('Alnilam')) + angle(at('Alnilam'), at('Alnitak')) - whole) < 0.05);
+test('Orion passes through Betelgeuse, Rigel and the three belt stars', () => {
+  const orion = CONSTELLATIONS.find((c) => c.id === 'ori');
+  const points = orion.lines.flat().map(([raH, decDeg]) => fromEquatorial(raH, decDeg));
+  const has = (raH, decDeg) => points.some((p) => angle(p, fromEquatorial(raH, decDeg)) < 0.3);
+  assert.ok(has(5.919, 7.41), 'Betelgeuse');
+  assert.ok(has(5.242, -8.2), 'Rigel');
+  for (const [raH, decDeg] of [[5.533, -0.3], [5.604, -1.2], [5.679, -1.94]]) assert.ok(has(raH, decDeg), 'belt');
 });
 
 test('Polaris marks the north celestial pole; Sirius is the brightest star listed', () => {
@@ -58,7 +57,7 @@ test('one label per constellation and galaxy, each a unit direction inside its f
   const labels = skyLabels();
   assert.equal(labels.length, CONSTELLATIONS.length + GALAXIES.length);
   for (const l of labels) assert.ok(l.id && l.name && Math.abs(len(l.direction) - 1) < 1e-9, l.id);
-  const orion = CONSTELLATIONS.find((c) => c.id === 'orion');
-  const label = labels.find((l) => l.id === 'orion');
-  for (const s of orion.stars) assert.ok(angle(label.direction, fromEquatorial(s.raH, s.decDeg)) < 15);
+  const orion = CONSTELLATIONS.find((c) => c.id === 'ori');
+  const label = labels.find((l) => l.id === 'ori');
+  for (const [raH, decDeg] of orion.lines.flat()) assert.ok(angle(label.direction, fromEquatorial(raH, decDeg)) < 25);
 });

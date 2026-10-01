@@ -217,13 +217,14 @@ export function createSound() {
     },
     mission: () => [784, 988, 784, 1175, 1568].forEach((f, i) => bell(f, i * 0.12)),
     complete: () => [523, 659, 784, 1047, 988, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.16, 0.12)),
-    // Stopping: one soft low "tuk", a foot set down lightly: a short sine dropping from
-    // 150 to 85 Hz with a touch of muffled noise. (Tried before and not liked: a band of
+    // Stopping: one short soft "tuk", a foot set down lightly: a tenth of a second of
+    // sine dropping from 170 to 105 Hz with a touch of muffled noise. (It ran 0.2 s
+    // from 150 Hz at first; the user asked for it shorter.) (Tried before and not liked: a band of
     // noise that began at full volume, 2,600 Hz, a sharp "tack"; a breath of low noise
     // under a falling note; two music-box notes; a shoe skid with two squeaks.)
     brake: () => {
-      tone({ freq: 150, to: 85, length: 0.2, volume: 0.17, attack: 0.008 });
-      noise({ length: 0.07, volume: 0.05, type: 'lowpass', freq: 500, to: 200, attack: 0.01 });
+      tone({ freq: 170, to: 105, length: 0.1, volume: 0.19, attack: 0.005 });
+      noise({ length: 0.035, volume: 0.05, type: 'lowpass', freq: 600, to: 250, attack: 0.005 });
     },
     click: () => pluck(1319, 0, 0.05, 0.2),
     // Docking: air rushing up as the approach begins, a tick for each count, then the

@@ -10,7 +10,7 @@ const sub = (a, b) => a.map((n, i) => n - b[i]);
 const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
-test('the table holds the Sun, all eight planets and twenty moons at real radii', () => {
+test('the table holds the Sun, eight planets, twenty-one moons, two dwarf planets and a comet at real radii', () => {
   assert.deepEqual(
     BODIES.map((b) => b.id),
     [
@@ -18,6 +18,7 @@ test('the table holds the Sun, all eight planets and twenty moons at real radii'
       'jupiter', 'io', 'europa', 'ganymede', 'callisto',
       'saturn', 'mimas', 'enceladus', 'tethys', 'dione', 'rhea', 'titan', 'iapetus',
       'uranus', 'miranda', 'ariel', 'umbriel', 'titania', 'oberon', 'neptune', 'triton',
+      'ceres', 'pluto', 'charon', 'halley',
     ],
   );
   assert.equal(bodyById('ganymede').radiusKm, 2634.1);
@@ -52,7 +53,7 @@ test('no two bodies overlap', () => {
 });
 
 test('planets sit at 1/100 of the real gap from the Sun, moons at 1/10 from their planet', () => {
-  for (const item of BODY_DATA.filter((d) => d.parent)) {
+  for (const item of BODY_DATA.filter((d) => d.parent && !d.ellipse)) {
     const body = bodyById(item.id);
     const parent = bodyById(item.parent);
     const centerDistance = Math.hypot(...sub(body.position, parent.position));

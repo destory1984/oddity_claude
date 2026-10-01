@@ -64,7 +64,7 @@ test('summary counts against every body and mission', () => {
 });
 
 test('sanitizeProgress drops junk from storage and keeps known ids', () => {
-  const junk = { discovered: ['mars', 'pluto', 3], landed: 'moon', photos: ['eclipse', 'eclipse', 'fake'] };
+  const junk = { discovered: ['mars', 'vulcan', 3], landed: 'moon', photos: ['eclipse', 'eclipse', 'fake'] };
   assert.deepEqual(sanitizeProgress(junk, BODIES, MISSIONS), { discovered: ['earth', 'mars'], landed: [], photos: ['eclipse'] });
   assert.deepEqual(sanitizeProgress(null, BODIES, MISSIONS), createProgress());
   assert.deepEqual(sanitizeProgress('nonsense', BODIES, MISSIONS), createProgress());

@@ -1,3 +1,5 @@
+import { ellipsePoint } from './kepler.js';
+
 export const DISTANCE_COMPRESSION = 100;
 // Moons get a gentler squeeze: at 1/100 the Moon hung 3,763 km above Earth and
 // Titan sat inside Saturn's rings. At 1/10 they read as separate worlds.
@@ -5,7 +7,7 @@ export const SATELLITE_COMPRESSION = 10;
 export const KM_PER_UNIT = 1000;
 export const START_ALTITUDE_KM = 9129;
 
-const AU_KM = 149597870.7;
+export const AU_KM = 149597870.7;
 const DAY_S = 86400;
 // Game time runs this many times faster than real time, for spin and orbits alike:
 // one Earth day passes in two minutes, the Moon circles Earth in under an hour.
@@ -138,6 +140,30 @@ export const BODY_DATA = [
     id: 'triton', name: '트리톤', nameEn: 'Triton', kind: 'moon', radiusKm: 1353.4, retrograde: true,
     parent: 'neptune', orbitKm: 354759, periodS: 5.876854 * DAY_S, direction: [0.6, 0.2, 0.77],
   },
+  // Dwarf planets, on flat circles like the planets (Pluto's real orbit is tilted 17
+  // degrees and stretched; that is left out).
+  {
+    id: 'ceres', name: '세레스', nameEn: 'Ceres', kind: 'dwarf', radiusKm: 469.7,
+    parent: 'sun', orbitKm: 2.7692 * AU_KM, periodS: 1680 * DAY_S, direction: [0.5, 0.05, 0.87],
+  },
+  {
+    id: 'pluto', name: '명왕성', nameEn: 'Pluto', kind: 'dwarf', radiusKm: 1188.3,
+    parent: 'sun', orbitKm: 39.482 * AU_KM, periodS: 90560 * DAY_S, direction: [-0.71, 0.1, -0.7],
+  },
+  {
+    id: 'charon', name: '카론', nameEn: 'Charon', kind: 'moon', radiusKm: 606,
+    parent: 'pluto', orbitKm: 19591, periodS: 6.387 * DAY_S, direction: [0.8, 0.1, 0.6],
+  },
+  // Halley's Comet on its real ellipse (0.586 to 35.1 AU, backwards, tilted 18 degrees).
+  // The real comet is near aphelion now, with no tail for decades; the game clock starts
+  // 60 days before perihelion instead, so the tail grows while you watch.
+  {
+    id: 'halley', name: '핼리 혜성', nameEn: "Halley's Comet", kind: 'comet', radiusKm: 5.5, parent: 'sun',
+    ellipse: {
+      semiMajorKm: 17.834 * AU_KM, eccentricity: 0.96714, periodS: 27510 * DAY_S,
+      perihelionAtS: 60 * DAY_S, perihelionDirection: [0.2, 0, -0.98], tiltRad: 0.31, retrograde: true,
+    },
+  },
 ];
 
 const sub = (a, b) => a.map((n, i) => n - b[i]);
@@ -160,21 +186,45 @@ function turnAboutY([x, y, z], angle) {
   return [x * c + z * s, y, -x * s + z * c];
 }
 
+const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+
+// Where a body on an ellipse is: its direction from the Sun and its real distance.
+function onEllipse(ellipse, timeS) {
+  const { x, y, r } = ellipsePoint(ellipse, timeS);
+  const toPerihelion = normalize(ellipse.perihelionDirection);
+  // The planets go from +x toward +z; flat is that way, then the plane is tipped up.
+  const flat = normalize(cross(toPerihelion, [0, 1, 0]));
+  const along = flat.map((n, i) => n * Math.cos(ellipse.tiltRad) + [0, 1, 0][i] * Math.sin(ellipse.tiltRad));
+  const side = ellipse.retrograde ? -y : y;
+  return { direction: normalize(toPerihelion.map((n, i) => n * x + along[i] * side)), sunKm: r };
+}
+
 export function placeBodies(data, timeS = 0) {
   const placed = new Map();
   for (const item of data) {
     let position = [0, 0, 0];
+    let sunKm;
     if (item.parent) {
       const parent = placed.get(item.parent);
       if (!parent) throw new Error(`parent ${item.parent} must come before ${item.id}`);
       const factor = parent.kind === 'star' ? DISTANCE_COMPRESSION : SATELLITE_COMPRESSION;
-      const distance = compressedCenterDistance(item.orbitKm, item.edgeKm ?? parent.radiusKm, item.radiusKm, factor);
-      // Negative: counterclockwise seen from +y (north) in Babylon's left-handed frame.
-      const angle = item.periodS ? ((item.retrograde ? 2 : -2) * Math.PI * timeS) / item.periodS : 0;
-      position = normalize(turnAboutY(item.direction, angle)).map((n, i) => parent.position[i] + n * distance);
+      let direction;
+      let realKm = item.orbitKm;
+      if (item.ellipse) {
+        ({ direction, sunKm } = onEllipse(item.ellipse, timeS));
+        realKm = sunKm;
+      } else {
+        // Negative: counterclockwise seen from +y (north) in Babylon's left-handed frame.
+        const angle = item.periodS ? ((item.retrograde ? 2 : -2) * Math.PI * timeS) / item.periodS : 0;
+        direction = normalize(turnAboutY(item.direction, angle));
+      }
+      const distance = compressedCenterDistance(realKm, item.edgeKm ?? parent.radiusKm, item.radiusKm, factor);
+      position = direction.map((n, i) => parent.position[i] + n * distance);
     }
     const { id, name, nameEn, kind, radiusKm, parent = null } = item;
-    placed.set(id, Object.freeze({ id, name, nameEn, kind, radiusKm, parent, position: Object.freeze(position) }));
+    const body = { id, name, nameEn, kind, radiusKm, parent, position: Object.freeze(position) };
+    if (sunKm !== undefined) body.sunKm = sunKm;
+    placed.set(id, Object.freeze(body));
   }
   return Object.freeze([...placed.values()]);
 }

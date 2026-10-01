@@ -15,7 +15,7 @@ test('at time zero the bodies sit where the static table puts them', () => {
 });
 
 test('every orbiting body has a real orbital period', () => {
-  for (const d of BODY_DATA.filter((x) => x.parent)) assert.ok(d.periodS > 0, d.id);
+  for (const d of BODY_DATA.filter((x) => x.parent)) assert.ok((d.periodS ?? d.ellipse?.periodS) > 0, d.id);
   const days = (id) => BODY_DATA.find((d) => d.id === id).periodS / 86400;
   assert.ok(Math.abs(days('moon') - 27.3217) < 1e-6);
   assert.ok(Math.abs(days('earth') - 365.256) < 1e-6);
@@ -24,7 +24,7 @@ test('every orbiting body has a real orbital period', () => {
 
 test('orbits keep their distance from the parent', () => {
   for (const t of [0, 1e4, 3.3e5, 2e7]) {
-    for (const d of BODY_DATA.filter((x) => x.parent)) {
+    for (const d of BODY_DATA.filter((x) => x.parent && !x.ellipse)) {
       const before = dist(at(0, d.id).position, at(0, d.parent).position);
       const now = dist(at(t, d.id).position, at(t, d.parent).position);
       assert.ok(Math.abs(before - now) < 1e-6, `${d.id} at ${t}`);

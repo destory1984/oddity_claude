@@ -18,6 +18,9 @@ uniform float detail;
 uniform float craters;
 uniform float close;
 uniform float radius;
+// 1 for a world mapped sharply on one side only (Pluto, Charon, Triton: one fly-by
+// each). Where the map is a blur, craters and mottling are drawn in from any distance.
+uniform float patchy;
 // Ring plane normal (zero when the planet has no rings) and the ring radii in planet radii.
 uniform vec3 ringNormal;
 uniform float ringInner;
@@ -59,12 +62,12 @@ vec2 craterField(vec3 p) {
 // Finer and finer craters come in as the camera nears the ground: 60 km ones from
 // three radii up, down to 700 m ones from a twenty-fifth of a radius.
 // Returns the height in scene units (x) and a shade for the colour (y).
-vec2 closeGround(vec3 p) {
+vec2 closeGround(vec3 p, float strength, float height) {
   vec2 sum = vec2(0.);
   float freq = 30.;
   float from = 3.;
   for (int k = 0; k < 5; k++) {
-    float w = craters * (1. - smoothstep(from * .45, from, close));
+    float w = strength * (1. - smoothstep(from * .45, from, height));
     if (w > .002) {
       vec2 f = craterField(p * freq + float(k) * 17.3);
       // The map already shows the largest craters: the widest layer only hints.
@@ -85,6 +88,17 @@ void main(){
   float edge = min(vUV.x, 1. - vUV.x);
   vec3 across = .5 * (texture2D(map, vec2(.001, vUV.y)).rgb + texture2D(map, vec2(.999, vUV.y)).rgb);
   col = mix(across, col, smoothstep(.0002, .001, edge));
+  // How blurred the map is here, 0 (sharp) to 1: how little two softened copies of it
+  // differ, taken over a small neighbourhood so the answer itself is smooth.
+  float blurred = 0.;
+  if (patchy > 0.) {
+    float busy = 0.;
+    for (int k = 0; k < 4; k++) {
+      vec2 at = vUV + vec2(k < 2 ? .012 : -.012, (k == 0 || k == 2) ? .016 : -.016);
+      busy += abs(dot(texture2D(map, at, 2.).rgb - texture2D(map, at, 5.).rgb, vec3(.333)));
+    }
+    blurred = patchy * (1. - smoothstep(.006, .022, busy * .25));
+  }
   float lum = dot(col, vec3(0.299, 0.587, 0.114));
   // Some maps have no data near the poles (black): fill with the base color.
   col = mix(baseColor, col, smoothstep(0.02, 0.08, lum));
@@ -105,8 +119,17 @@ void main(){
   col *= 1. + (grain - .5) * detail;
 
   vec3 N = normalize(n);
-  if (craters > 0. && close < 3.) {
-    vec2 ground = closeGround(lp);
+  // On the blurred side the ground is drawn as if from close by, and more strongly.
+  float strength = mix(craters, 1., blurred);
+  float height = mix(close, min(close, .3), blurred);
+  if (blurred > 0.) {
+    vec3 w3 = abs(lp) / (abs(lp.x) + abs(lp.y) + abs(lp.z));
+    float mottle = fbm(lp.xy * 14.) * w3.z + fbm(lp.yz * 14. + 3.) * w3.x + fbm(lp.zx * 14. + 9.) * w3.y;
+    float fine = fbm(lp.xy * 55. + 1.) * w3.z + fbm(lp.yz * 55. + 5.) * w3.x + fbm(lp.zx * 55. + 2.) * w3.y;
+    col *= 1. + blurred * ((mottle - .5) * .6 + (fine - .5) * .45);
+  }
+  if (strength > 0. && height < 3.) {
+    vec2 ground = closeGround(lp, strength, height);
     col *= 1. + ground.y;
     // Tip the surface by the slope of that ground, so rims catch the Sun and bowls
     // hold shadow (the slope is read from how the height changes across the screen).

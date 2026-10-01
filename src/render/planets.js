@@ -252,6 +252,9 @@ const CRATERS = {
   ceres: 0.9, pluto: 0.35, charon: 0.7,
 };
 
+// Worlds seen closely by one fly-by only: half the map is sharp and half is a blur.
+const PATCHY = ['pluto', 'charon', 'triton'];
+
 function createProceduralPlanet(scene, body, look, sunDir) {
   const diameter = (2 * body.radiusKm) / KM_PER_UNIT;
   const sphere = CreateSphere(body.id, { diameter, segments: body.radiusKm > 20000 ? 96 : 64 }, scene);
@@ -259,7 +262,8 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   let material;
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
-      ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius'], ['map']);
+      ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy'], ['map']);
+    material.setFloat('patchy', PATCHY.includes(body.id) ? 1 : 0);
     material.setFloat('craters', CRATERS[body.id] ?? 0);
     material.setFloat('close', 100);
     material.setFloat('radius', body.radiusKm / KM_PER_UNIT);

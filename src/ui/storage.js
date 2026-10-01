@@ -12,6 +12,25 @@ export function loadProgress(bodies, missions) {
   }
 }
 
+const GUIDE_KEY = 'oddity.guide.v1';
+
+// Whether the first-visit guide was finished or skipped before.
+export function loadGuideDone() {
+  try {
+    return localStorage.getItem(GUIDE_KEY) === 'done';
+  } catch {
+    return false;
+  }
+}
+
+export function saveGuideDone() {
+  try {
+    localStorage.setItem(GUIDE_KEY, 'done');
+  } catch {
+    // The guide simply shows again next time.
+  }
+}
+
 export function saveProgress(progress) {
   try {
     localStorage.setItem(KEY, JSON.stringify(progress));

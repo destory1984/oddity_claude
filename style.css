@@ -422,10 +422,75 @@ kbd {
   pointer-events:none;
   max-width:90vw;
   text-align:center;
+  white-space:pre-line;
 }
 
 #toast.on {
   opacity:1;
+}
+
+/* First-visit guide: one goal line under the toast */
+#guide {
+  position:fixed;
+  top:150px;
+  left:0;
+  right:0;
+  margin:0 auto;
+  width:fit-content;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  max-width:92vw;
+  padding:8px 8px 8px 16px;
+  border:1px solid #ffdfa655;
+  border-radius:24px;
+  background:#0c2236e6;
+  font-size:13px;
+}
+
+#guide[hidden] {
+  display:none;
+}
+
+#guideCount {
+  color:#ffdfa6;
+  font-variant-numeric:tabular-nums;
+}
+
+#guideText {
+  margin:0;
+  word-break:keep-all;
+}
+
+/* On a phone the top is full (readouts left, target right): sit below the minimap. */
+@media (max-width:480px) {
+  #guide {
+    top:300px;
+  }
+}
+
+#guideSkip {
+  width:auto;
+  margin:0;
+  min-height:30px;
+  padding:4px 12px;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.marker.goal {
+  z-index:3;
+  color:#ffdfa6;
+  box-shadow:0 0 0 1px #ffdfa6;
+  animation:goalPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes goalPulse {
+  50% { box-shadow:0 0 0 6px #ffdfa633; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .marker.goal { animation:none; }
 }
 
 dialog {
@@ -774,6 +839,13 @@ body.touch #reticle span {
   padding: 6px 0;
   border-bottom: 1px solid #ffffff12;
   font-size: 13px;
+}
+
+#journalBodies .fact {
+  grid-column: 1 / -1;
+  margin-top: -6px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 #journalBodies .marks {

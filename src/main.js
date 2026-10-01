@@ -17,7 +17,9 @@ import { createToast } from './ui/toast.js';
 import { eventMessage, limitText } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import { updateProgress, recordPhotos, createProgress, summarize, score, isComplete } from './core/progress.js';
-import { loadProgress, saveProgress } from './ui/storage.js';
+import { loadProgress, saveProgress, loadGuideDone, saveGuideDone } from './ui/storage.js';
+import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
+import { createGuideView } from './ui/guide.js';
 import { createJournal } from './ui/journal.js';
 import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
@@ -26,9 +28,9 @@ const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
 const HUD_EVERY_N_FRAMES = 6;
 
-// TEMPORARY (2026-10-01): start beside a planet while its look is being tuned.
-// Set START_NEAR to null to start above Earth again.
-const START_NEAR = { id: 'jupiter', fromCentreKm: 400000 };
+// For tuning a planet's look: set to e.g. { id: 'jupiter', fromCentreKm: 400000 } to
+// start beside it. null starts above Earth, where the first-visit guide begins.
+const START_NEAR = null;
 
 function startNear({ id, fromCentreKm }) {
   const body = bodyById(id);
@@ -50,6 +52,8 @@ let selectedId = START_NEAR ? START_NEAR.id : 'earth';
 let dragTurn = [0, 0];
 let progress = loadProgress(BODIES, MISSIONS);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
+// The first-visit guide assumes the opening view above Earth.
+let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
 let simTime = 0;
 let bodies = bodiesAt(0);
 // Where a body is right now (BODIES is only the starting layout).
@@ -252,10 +256,17 @@ async function init() {
   document.body.dataset.ready = 'true';
   toast.show(`${bodyById(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);
   progressChanged(null);
-  if (score(summarize(progress, BODIES, MISSIONS)).done <= 2) {
-    const how = document.body.classList.contains('touch') ? '수첩 버튼' : 'J 키나 수첩 버튼';
-    toast.show(`${how}으로 탐험 목표를 확인하세요. 행성을 발견하고, 내려앉고, 사진 임무를 채워 보세요.`);
-  }
+  const touch = document.body.classList.contains('touch');
+  const journalHow = touch ? '수첩 버튼' : 'J 키나 수첩 버튼';
+  const guideView = createGuideView({
+    onSkip() {
+      guide = skipGuide(guide);
+      saveGuideDone();
+      guideView.show(null);
+      toast.show(`${journalHow}으로 탐험 목표를 확인하세요.`);
+    },
+  });
+  guideView.show(guideGoal(guide, touch));
 
   // The first frame uploads shaders and textures; count it as zero time so the
   // long-gap guard below does not pause the game before the player does anything.
@@ -295,6 +306,19 @@ async function init() {
       if (cue) sound.cue(cue);
     }
     if (finished) celebrate();
+
+    if (guide.step !== null) {
+      guide = updateGuide(guide, {
+        heading: forward(state.orientation),
+        toMoon: here('moon').position.map((n, i) => n - state.position[i]),
+        progress,
+      });
+      if (guide.finished) {
+        saveGuideDone();
+        toast.show(`첫 탐험을 마쳤습니다. ${journalHow}으로 다음 목적지를 고르세요.`);
+      }
+      guideView.show(guideGoal(guide, touch));
+    }
 
     const turn = dt > 0
       // Sliding sideways leans the character like a gentle turn.
@@ -348,6 +372,7 @@ async function init() {
       flightLabel,
       throttle: input.throttle(),
       C,
+      goalId: guideGoal(guide)?.targetId ?? null,
     });
     minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId });
   });

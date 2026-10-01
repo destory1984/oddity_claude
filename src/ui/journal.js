@@ -1,6 +1,7 @@
 import { summarize } from '../core/progress.js';
 import { surfaceDistance } from '../core/bodies.js';
 import { objectParticle } from './messages.js';
+import { FACTS } from '../core/facts.js';
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
@@ -49,6 +50,12 @@ export function createJournal({ bodies, missions, onGo, onReset, onOpen, onClose
         onGo(body.id);
       });
       li.append(name, marks, distance, go);
+      if (found && FACTS[body.id]) {
+        const fact = document.createElement('small');
+        fact.className = 'fact';
+        fact.textContent = FACTS[body.id];
+        li.append(fact);
+      }
       list.append(li);
     }
 

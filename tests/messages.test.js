@@ -2,6 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { objectParticle, subjectParticle, eventMessage, limitText } from '../src/ui/messages.js';
 import { BODIES } from '../src/core/bodies.js';
+import { FACTS } from '../src/core/facts.js';
 
 test('object particle follows the final consonant', () => {
   assert.equal(objectParticle('달'), '을');
@@ -26,7 +27,11 @@ test('subject particle follows the final consonant', () => {
 });
 
 test('explorer log messages name the body or mission', () => {
-  assert.equal(eventMessage({ type: 'discovered', bodyId: 'mars' }, BODIES), '새 천체 발견: 화성');
+  assert.equal(
+    eventMessage({ type: 'discovered', bodyId: 'mars' }, BODIES),
+    `새 천체 발견: 화성\n${FACTS.mars}`,
+  );
+  assert.equal(eventMessage({ type: 'discovered', bodyId: 'nowhere' }, BODIES), '새 천체 발견: nowhere');
   assert.equal(eventMessage({ type: 'landed', bodyId: 'moon' }, BODIES), '착지 기록: 달. 수첩에 남겼습니다.');
   assert.equal(eventMessage({ type: 'photo', missionName: '지구돋이' }, BODIES), '사진 임무 달성: 지구돋이');
 });

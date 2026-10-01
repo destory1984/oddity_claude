@@ -1,6 +1,9 @@
 const VISIBLE_MS = 3500;
 // While more messages wait, each one stays up this long before the next.
 const QUEUED_MS = 2500;
+// Two-line messages (a discovery with its fact) stay up this much longer.
+const LONG_TEXT = 30;
+const LONG_EXTRA_MS = 2500;
 
 export function createToast(element) {
   let timer = null;
@@ -16,7 +19,8 @@ export function createToast(element) {
 
   function schedule() {
     clearTimeout(timer);
-    timer = setTimeout(next, queue.length ? QUEUED_MS : VISIBLE_MS);
+    const extra = element.textContent.length > LONG_TEXT ? LONG_EXTRA_MS : 0;
+    timer = setTimeout(next, (queue.length ? QUEUED_MS : VISIBLE_MS) + extra);
   }
 
   function next() {

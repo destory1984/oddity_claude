@@ -60,7 +60,8 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       $('targetName').innerHTML = `${body.name} <small>${body.nameEn}</small>`;
       $('faceTarget').textContent = `${body.name} 바라보기`;
     },
-    update({ view, local, selected, speed, motionSign, limitLabel, flightLabel, throttle, C }) {
+    // goalId: the body the first-visit guide points at; its label always shows and pulses.
+    update({ view, local, selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null }) {
       $('altitudeLabel').textContent = local.label;
       $('altitude').textContent = fmt(local.altitude);
       const backward = speed > 0.01 && motionSign < 0;
@@ -81,17 +82,18 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
           selected: selectedHere,
           nearest: body.id === local.body.id,
           surfaceKm: view.distances[body.id] - body.radiusKm,
-          always: body.id === 'earth' || body.kind === 'star',
+          always: body.id === 'earth' || body.kind === 'star' || body.id === goalId,
         });
         return { body, el, spot, keep, selected: selectedHere };
       });
       const crowded = crowdedMoons(placed.map(({ body, spot, selected: sel }) => ({
-        id: body.id, parent: body.kind === 'moon' || body.kind === 'craft' ? body.parent : null, x: spot.x, y: spot.y, outside: spot.outside, selected: sel,
+        id: body.id, parent: body.kind === 'moon' || body.kind === 'craft' ? body.parent : null, x: spot.x, y: spot.y, outside: spot.outside, selected: sel || body.id === goalId,
       })));
       const arrows = [];
       for (const { body, el, spot, keep, selected: sel } of placed) {
         el.hidden = !keep || crowded.has(body.id);
         el.classList.toggle('selected', sel);
+        el.classList.toggle('goal', body.id === goalId);
         if (!el.hidden && spot.outside) arrows.push({ el, ...spot });
       }
       spreadArrows(arrows, 40, innerHeight).forEach((spot, i) => {

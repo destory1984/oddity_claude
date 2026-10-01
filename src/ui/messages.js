@@ -1,3 +1,5 @@
+import { FACTS } from '../core/facts.js';
+
 const HANGUL_START = 0xac00;
 const HANGUL_END = 0xd7a3;
 
@@ -21,8 +23,11 @@ export function eventMessage(event, bodies = []) {
   switch (event.type) {
     case 'surfaceReached':
       return '천체 표면에 도착했습니다. 내부로는 들어갈 수 없습니다.';
-    case 'discovered':
-      return `새 천체 발견: ${nameOf(bodies, event.bodyId)}`;
+    case 'discovered': {
+      // The fact goes on its own line (the toast keeps line breaks).
+      const fact = FACTS[event.bodyId];
+      return `새 천체 발견: ${nameOf(bodies, event.bodyId)}${fact ? `\n${fact}` : ''}`;
+    }
     case 'landed':
       return `착지 기록: ${nameOf(bodies, event.bodyId)}. 수첩에 남겼습니다.`;
     case 'photo':

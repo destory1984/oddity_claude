@@ -90,3 +90,13 @@ test('a steady stream of queued updates does not keep the current message up for
   assert.notEqual(el.shown.length, 1, 'A was never replaced');
   assert.equal(el.shown[1].startsWith('zone'), true);
 });
+
+test('a long message stays up 6 seconds so it can be read', () => {
+  const el = stubElement();
+  const toast = createToast(el);
+  toast.show('새 천체 발견: 화성\n올림푸스 화산은 높이 약 22km로 에베레스트의 2.5배입니다.');
+  vi.advanceTimersByTime(5900);
+  assert.equal(el.classList.contains('on'), true);
+  vi.advanceTimersByTime(200);
+  assert.equal(el.classList.contains('on'), false);
+});

@@ -73,12 +73,14 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
   let elapsed = 0;
 
   // now: where every body is this frame (they orbit); defaults to the starting layout.
-  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn, move = {} }) {
+  // seen: { position, orientation } when the view is from somewhere other than where
+  // the traveler is (looking round a target, ui/photo.js); she herself stays put.
+  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn, move = {}, seen = null }) {
     elapsed += dt;
     // Draw from a point just above the ground when standing on it, and pull the near
     // plane in as the ground gets close; otherwise the planet under the feet is cut away
     // and looks transparent (core/eye.js).
-    const eye = eyeView(traveler, now);
+    const eye = eyeView(seen?.position ?? traveler, now);
     const position = eye.position;
     camera.minZ = eye.nearKm / KM_PER_UNIT;
     const directions = {};
@@ -137,7 +139,7 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
     sun.material.setFloat('eclipse', eclipseDepth(visibility));
     const bead = sunBead(directions[sunNow.id], distances[sunNow.id], sunNow.radiusKm, occluders);
 
-    camera.rotationQuaternion = new Quaternion(...multiply(orientation, photoOrientation || [0, 0, 0, 1]));
+    camera.rotationQuaternion = new Quaternion(...(seen?.orientation ?? multiply(orientation, photoOrientation || [0, 0, 0, 1])));
     const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
     hero.update({
       dt, speed, turn, fov: camera.fov, photoOrientation, visible: heroVisible, aspect, move,
@@ -166,6 +168,8 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       glow: flashed ?? glowNear(now, traveler),
       // The sprite character's drawing; the paper model has none.
       heroSheet: hero.sheet ? hero.sheet() : null,
+      // Where her drawing is on screen: { file, height, up, shape } (render/spriteHero.js).
+      heroCard: hero.card ? hero.card() : null,
       camera: {
         forward: axis(Vector3.Forward()),
         right: axis(Vector3.Right()),

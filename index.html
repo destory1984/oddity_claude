@@ -88,7 +88,7 @@
   </div>
 
   <div id="photoTools" hidden>
-    <div><strong>사진 모드</strong><span>드래그로 구도 조절 · 휠로 확대</span></div>
+    <div><strong>사진 모드</strong><span id="photoHint">드래그로 구도 조절 · 휠로 확대</span></div>
     <label><input type="checkbox" id="showHero" checked> 영웅 표시</label>
     <label>화각 <input type="range" id="fov" min="5" max="95" value="60" aria-label="화각"></label>
     <button id="capture">사진 저장</button>
@@ -171,6 +171,7 @@
       <dt>도킹</dt><dd>탐사선이나 망원경 1만km 안에서 그 이름표나 "도킹" 버튼을 누르면 3부터 0까지 세는 동안 다가가 붙어서 함께 움직입니다. 전진·후진·옆걸음을 누르면 떨어집니다.</dd>
       <dt>순간 이동</dt><dd>한 번 가 본 곳은 멀리서 그 이름표를 누르거나 수첩에서 "순간 이동"을 누르면 6초 뒤 그곳에 나타납니다. 천체는 가장 잘 보이는 자리에, 탐사선은 곁에 나타나 도킹하고, 이야기 장소는 그 위에 나타납니다.</dd>
       <dt>사진</dt><dd>P 키 / 사진 모드 버튼</dd>
+      <dt>확대 관찰</dt><dd>고른 천체나 탐사선, 이야기 장소를 화면 가운데에 두고 가까이에서 봅니다. 드래그하면 그 둘레를 360도 돌아가며 봅니다. 이때 찍은 사진은 사진첩에는 들어가지만 사진 임무로는 치지 않습니다.</dd>
       <dt>앱으로 설치</dt><dd>안드로이드 크롬: 메뉴 ⋮ → 앱 설치. 아이폰 사파리: 공유 → 홈 화면에 추가. 설치하면 인터넷 없이도 열립니다. <button id="installButton" hidden>지금 설치</button></dd>
       <dt>캐릭터</dt><dd><span id="heroNow"></span> 바꾸면 게임이 처음 자리에서 다시 시작합니다(수첩은 그대로). <button id="heroButton"></button></dd>
       <dt>행성 배치</dt><dd><span id="layoutNow"></span> 오늘의 하늘에서는 행성과 달이 오늘 날짜의 실제 방향에 놓이고, 거기서부터 게임 시계(720배)로 움직입니다. 바꾸면 게임이 처음 자리에서 다시 시작합니다(수첩은 그대로). <button id="layoutButton"></button></dd>

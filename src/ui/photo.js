@@ -3,11 +3,17 @@ import { thumbSize } from '../core/album.js';
 
 const $ = (id) => document.getElementById(id);
 const DEFAULT_FOV_DEG = 60;
+// How far the view swings round a target for a drag, against how far it turns in plain photo mode.
+const ORBIT_RATE = 1.6;
 
 export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearInput, onCaptured }) {
   let active = false;
   let priorPause = false;
   let orientation = [0, 0, 0, 1];
+  // Looking round a target ("확대 관찰"): { id, distanceKm, orientation }. The view
+  // circles the target, which stays in the middle; null in plain photo mode.
+  let orbit = null;
+  const HINTS = { look: '드래그로 구도 조절 · 휠로 확대', orbit: '드래그로 둘레를 돌아보기 · 휠로 확대' };
 
   function setFovDeg(deg) {
     const clamped = Math.max(5, Math.min(95, deg));
@@ -22,10 +28,13 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
       priorPause = isPaused();
       setPaused(true);
       orientation = [0, 0, 0, 1];
+      orbit = null;
+      $('photoHint').textContent = HINTS.look;
       $('hud').hidden = true;
       $('photoTools').hidden = false;
     } else {
       setPaused(priorPause);
+      orbit = null;
       $('hud').hidden = false;
       $('photoTools').hidden = true;
       setFovDeg(DEFAULT_FOV_DEG);
@@ -45,6 +54,7 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
       fov: world.fov(),
       aspect: canvas.width / canvas.height,
       heroVisible: $('showHero').checked,
+      orbit,
     };
     try {
       world.render();
@@ -93,13 +103,20 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
     active: () => active,
     orientation: () => (active ? orientation : null),
     heroVisible: () => !active || $('showHero').checked,
-    rotate(dx, dy) { orientation = rotateLocal(orientation, dx, dy); },
+    rotate(dx, dy) {
+      // Circling a target, the drag pulls its surface along with the pointer.
+      if (orbit) orbit = { ...orbit, orientation: rotateLocal(orbit.orientation, dx * ORBIT_RATE, dy * ORBIT_RATE) };
+      else orientation = rotateLocal(orientation, dx, dy);
+    },
     zoom(deltaY) { if (active) setFovDeg((world.fov() * 180) / Math.PI + deltaY * 0.03); },
-    frame(deg, aim) {
+    orbit: () => (active ? orbit : null),
+    // Look round a target from distanceKm away, starting with the view `facing` it.
+    orbitAround({ id, distanceKm, facing, fovDeg }) {
       if (!active) toggle();
-      orientation = aim;
+      orbit = { id, distanceKm, orientation: facing };
+      $('photoHint').textContent = HINTS.orbit;
       $('showHero').checked = false;
-      setFovDeg(deg);
+      setFovDeg(fovDeg);
     },
   };
 }

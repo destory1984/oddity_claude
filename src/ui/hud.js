@@ -25,6 +25,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
     $('markers').append(el);
     return { el, direction: label.direction };
   });
+  let lastMask = null;
   $('faceTarget').addEventListener('click', onFace);
   $('inspectTarget').addEventListener('click', onInspect);
 
@@ -128,6 +129,25 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         el.style.left = `${innerWidth / 2 + px}px`;
         el.style.top = `${innerHeight / 2 + py}px`;
       }
+    },
+    // Labels pass behind the character: her outline is cut out of the label layer, using
+    // the very drawing that is on screen. card: world.update's heroCard, or null.
+    maskHero(card) {
+      let mask = 'none';
+      if (card) {
+        const height = card.height * innerHeight;
+        const width = height * card.shape;
+        const left = innerWidth / 2 - width / 2;
+        const top = innerHeight / 2 - card.up * innerHeight - height / 2;
+        mask = `url("${card.file}") ${left.toFixed(1)}px ${top.toFixed(1)}px / ${width.toFixed(1)}px ${height.toFixed(1)}px no-repeat, linear-gradient(#000, #000)`;
+      }
+      if (mask === lastMask) return;
+      lastMask = mask;
+      const layer = $('markers');
+      layer.style.webkitMask = mask;
+      layer.style.mask = mask;
+      layer.style.webkitMaskComposite = card ? 'xor' : '';
+      layer.style.maskComposite = card ? 'exclude' : '';
     },
     faceToast(body) {
       return `${body.name}${objectParticle(body.name)} 바라봅니다. 위치와 속도는 유지됩니다.`;

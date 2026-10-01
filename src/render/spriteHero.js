@@ -55,6 +55,10 @@ export function createSpriteHero(engine) {
 
   let state = createSpriteState();
   let elapsed = 0;
+  // The drawing on the card now and where the card is on screen, for labels to pass
+  // behind her (ui/hud.js maskHero); null while she is not drawn.
+  let shown = null;
+  let shownFile = null;
 
   // move: { drive, strafe } from the flight state; light: core/heroLight.js heroLighting().
   function update({ dt, speed, turn, fov, photoOrientation, visible, aspect = 16 / 9, light = null, move = {} }) {
@@ -67,6 +71,7 @@ export function createSpriteHero(engine) {
     if (now.isReady()) {
       material.diffuseTexture = now;
       material.emissiveTexture = now;
+      shownFile = base + spriteFile(state.sheet, spriteFrame(state));
     }
     const lit = light ? 0.45 + 0.55 * light.sun.strength : 1;
     material.emissiveColor = new Color3(lit, lit, lit);
@@ -75,9 +80,15 @@ export function createSpriteHero(engine) {
     const afloat = state.mode === 'hover';
     card.position.y = CARD_AT[1] + (afloat ? Math.sin(elapsed * 1.5) * 0.04 : 0);
     card.setEnabled(visible);
+    // As shares of the view's height: the card's height, and how far its middle is
+    // above the middle of the view. (The card faces the camera, 6 units ahead.)
+    const span = 2 * CARD_AT[2] * Math.tan(fov / 2);
+    shown = visible && shownFile && !photoOrientation
+      ? { file: shownFile, height: (CARD_HEIGHT * card.scaling.y) / span, up: card.position.y / span, shape: 192 / 256 }
+      : null;
     camera.fov = fov;
     camera.rotationQuaternion = new Quaternion(...(photoOrientation || [0, 0, 0, 1]));
   }
 
-  return { scene, camera, root: card, update, sheet: () => state.sheet };
+  return { scene, camera, root: card, update, sheet: () => state.sheet, card: () => shown };
 }

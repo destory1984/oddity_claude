@@ -204,6 +204,13 @@ nav {
   font-size:12px;
 }
 
+/* The label layer covers the view, so the character's outline can be cut out of it
+   (ui/hud.js maskHero). */
+#markers {
+  position:absolute;
+  inset:0;
+}
+
 .marker {
   position:absolute;
   white-space:nowrap;

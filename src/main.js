@@ -56,6 +56,17 @@ const HUD_EVERY_N_FRAMES = 6;
 // ones, so Mercury's orbit is 570,000 km from the surface).
 const BRIGHT_KM = 200000;
 const HOT_AU = 0.5;
+// Looking round a target ("확대 관찰"): the view never comes closer to a surface than this.
+const INSPECT_CLEAR_KM = 3;
+
+// How far off and how wide the view is when looking round a target: a body fills about
+// two thirds of the view's height (Saturn stands back for its rings); a craft is drawn
+// 30 km wide and a lander 6 km; a crater or a sea is seen from 500 km.
+function inspectView(target) {
+  if (target.kind === 'craft') return { distanceKm: 110, fovDeg: 30 };
+  if (target.kind === 'site') return target.landmark ? { distanceKm: 500, fovDeg: 50 } : { distanceKm: 28, fovDeg: 28 };
+  return { distanceKm: target.radiusKm * (target.id === 'saturn' ? 7 : 4), fovDeg: 44 };
+}
 
 // For tuning a planet's look: set to e.g. { id: 'jupiter', fromCentreKm: 400000 } to
 // start beside it. null starts above Earth, where the first-visit guide begins.
@@ -213,6 +224,17 @@ async function init() {
     clearInput: () => input.clear(),
     // shot: the camera as it was when the button was pressed (photo.js snapshots it).
     onCaptured(shot) {
+      // Taken while looking round a target: the view was not where she is, so it goes
+      // in the album but is not judged as a mission.
+      if (shot.orbit) {
+        if (shot.thumb) {
+          album = saveAlbum(addPhoto(album, {
+            at: new Date().toISOString(), where: `${here(shot.orbit.id).name} 확대 관찰`, missions: [], image: shot.thumb,
+          }));
+          journal.setAlbum(album);
+        }
+        return;
+      }
       const done = completedMissions({
         position: state.position,
         orientation: multiply(state.orientation, shot.orientation),
@@ -338,6 +360,30 @@ async function init() {
     });
   }
 
+  // Where the view is while looking round a target (photo.orbit()): on a ball about the
+  // target, facing it, and never under the ground. null when not looking round anything.
+  function orbitEye() {
+    const orbit = photo.orbit();
+    if (!orbit) return null;
+    const target = here(orbit.id);
+    let centre = target.position;
+    if (target.kind === 'site') {
+      // The middle of what stands there, not the ground under it.
+      const ground = here(target.parent);
+      centre = centre.map((n, i) => n + ((n - ground.position[i]) / ground.radiusKm) * 2);
+    }
+    const ahead = forward(orbit.orientation);
+    let position = centre.map((n, i) => n - ahead[i] * orbit.distanceKm);
+    const { body, distance } = nearestSurface(position, bodies);
+    if (body && body.id !== target.id && distance < INSPECT_CLEAR_KM) {
+      const up = position.map((n, i) => n - body.position[i]);
+      const height = Math.hypot(...up) || 1;
+      position = body.position.map((n, i) => n + (up[i] / height) * (body.radiusKm + INSPECT_CLEAR_KM));
+      return { position, orientation: lookAtDirection(centre.map((n, i) => n - position[i])) };
+    }
+    return { position, orientation: orbit.orientation };
+  }
+
   // Choosing a craft from close by docks with it; choosing somewhere already visited
   // from far away jumps there.
   function selectBody(id) {
@@ -376,12 +422,13 @@ async function init() {
     },
     onInspect() {
       const body = here(selectedId);
-      const direction = body.position.map((n, i) => n - state.position[i]);
-      const distance = Math.hypot(...direction);
-      const diameterDeg = (2 * Math.asin(Math.min(1, body.radiusKm / distance)) * 180) / Math.PI;
-      // Aim only the photo camera, relative to the body: the flight heading and any
-      // coast in progress stay as they were when photo mode closes.
-      photo.frame(diameterDeg * 1.4, multiply(conjugate(state.orientation), lookAtDirection(direction)));
+      // The view goes close and circles the target; she herself stays where she is, so
+      // the flight heading and any coast in progress are as they were when it closes.
+      photo.orbitAround({
+        id: body.id,
+        facing: lookAtDirection(body.position.map((n, i) => n - state.position[i])),
+        ...inspectView(body),
+      });
     },
   });
   hud.showSelection(named(selectedId));
@@ -714,6 +761,7 @@ async function init() {
       dt,
       speed: shownSpeed(),
       photoOrientation: photo.orientation(),
+      seen: orbitEye(),
       heroVisible: photo.heroVisible(),
       turn,
       // For the sprite character: which way she is thrusting. Docked, she rides ahead.
@@ -736,6 +784,7 @@ async function init() {
       },
     });
     sunShown = view.sunVisibility;
+    hud.maskHero(view.heroCard);
     if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`);
     if (view.meteorLit && !meteorSeen) {
       meteorSeen = true;

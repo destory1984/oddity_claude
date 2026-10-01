@@ -84,6 +84,14 @@ export const BODY_DATA = [
     parent: 'saturn', orbitKm: 238042, periodS: 1.370218 * DAY_S, direction: [-0.9, 0.03, 0.44],
   },
   {
+    id: 'tethys', name: '테티스', nameEn: 'Tethys', kind: 'moon', radiusKm: 531.1, edgeKm: SATURN_RING_EDGE_KM,
+    parent: 'saturn', orbitKm: 294619, periodS: 1.887802 * DAY_S, direction: [0.75, -0.02, 0.66],
+  },
+  {
+    id: 'dione', name: '디오네', nameEn: 'Dione', kind: 'moon', radiusKm: 561.4, edgeKm: SATURN_RING_EDGE_KM,
+    parent: 'saturn', orbitKm: 377396, periodS: 2.736915 * DAY_S, direction: [-0.4, 0.03, -0.92],
+  },
+  {
     id: 'rhea', name: '레아', nameEn: 'Rhea', kind: 'moon', radiusKm: 763.8, edgeKm: SATURN_RING_EDGE_KM,
     parent: 'saturn', orbitKm: 527108, periodS: 4.518212 * DAY_S, direction: [0.2, 0.04, 0.98],
   },

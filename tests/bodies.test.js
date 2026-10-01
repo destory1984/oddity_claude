@@ -10,13 +10,13 @@ const sub = (a, b) => a.map((n, i) => n - b[i]);
 const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
-test('the table holds the Sun, all eight planets and eighteen moons at real radii', () => {
+test('the table holds the Sun, all eight planets and twenty moons at real radii', () => {
   assert.deepEqual(
     BODIES.map((b) => b.id),
     [
       'sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'phobos', 'deimos',
       'jupiter', 'io', 'europa', 'ganymede', 'callisto',
-      'saturn', 'mimas', 'enceladus', 'rhea', 'titan', 'iapetus',
+      'saturn', 'mimas', 'enceladus', 'tethys', 'dione', 'rhea', 'titan', 'iapetus',
       'uranus', 'miranda', 'ariel', 'umbriel', 'titania', 'oberon', 'neptune', 'triton',
     ],
   );
@@ -147,7 +147,7 @@ test('from the start, looking at Earth, the Moon hangs beside it in frame and pa
 test('every moon of Saturn stays outside the rings, in its real order outward', () => {
   const ringOuterKm = 136775;
   const saturn = bodyById('saturn');
-  const out = ['mimas', 'enceladus', 'rhea', 'titan', 'iapetus'].map((id) => {
+  const out = ['mimas', 'enceladus', 'tethys', 'dione', 'rhea', 'titan', 'iapetus'].map((id) => {
     const moon = bodyById(id);
     return Math.hypot(...sub(moon.position, saturn.position)) - moon.radiusKm;
   });

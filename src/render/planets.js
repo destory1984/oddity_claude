@@ -103,25 +103,57 @@ function createEarth(scene, body, sunDir) {
 //   base (Venus's clouds); haze is the limb glow; detail adds fine grain up close.
 const LOOKS = {
   // The Moon is tidally locked: one turn per 27.3-day orbit keeps one face toward Earth.
-  moon: { shader: 'rocky', colorA: [0.33, 0.33, 0.35], colorB: [0.72, 0.71, 0.68], cap: 0, haze: 0, contrast: 0.45, craters: 0.9, dayS: 27.3217 * 86400 },
+  moon: {
+    shader: 'textured', map: 'moon.jpg', saturation: 0.9, tint: [1, 1, 1], base: [0.6, 0.6, 0.6],
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: 27.3217 * 86400,
+  },
   // Small moons: plain cratered rock or ice in each one's own shade. All keep one face
   // to their planet, so a day lasts one orbit.
-  phobos: { shader: 'rocky', colorA: [0.2, 0.18, 0.17], colorB: [0.42, 0.38, 0.35], cap: 0, haze: 0, contrast: 0.5, craters: 1, dayS: 0.31891 * 86400 },
+  phobos: {
+    shader: 'textured', map: 'phobos.jpg', saturation: 0, tint: [0.72, 0.66, 0.6], base: [0.4, 0.36, 0.33],
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: 0.31891 * 86400,
+  },
   deimos: { shader: 'rocky', colorA: [0.24, 0.22, 0.2], colorB: [0.48, 0.44, 0.4], cap: 0, haze: 0, contrast: 0.4, craters: 0.8, dayS: 1.263 * 86400 },
-  mimas: { shader: 'rocky', colorA: [0.5, 0.5, 0.52], colorB: [0.8, 0.8, 0.82], cap: 0, haze: 0, contrast: 0.5, craters: 1, dayS: 0.942422 * 86400 },
-  enceladus: { shader: 'rocky', colorA: [0.78, 0.83, 0.9], colorB: [0.98, 0.99, 1.0], cap: 0, haze: 0, contrast: 0.25, craters: 0.25, dayS: 1.370218 * 86400 },
-  rhea: { shader: 'rocky', colorA: [0.52, 0.52, 0.53], colorB: [0.82, 0.81, 0.8], cap: 0, haze: 0, contrast: 0.45, craters: 0.9, dayS: 4.518212 * 86400 },
-  iapetus: { shader: 'rocky', colorA: [0.16, 0.13, 0.11], colorB: [0.78, 0.76, 0.72], cap: 0, haze: 0, contrast: 0.95, craters: 0.8, dayS: 79.3215 * 86400 },
+  mimas: {
+    shader: 'textured', map: 'mimas.jpg', saturation: 0.3, tint: [1, 1, 1], base: [0.75, 0.75, 0.76],
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: 0.942422 * 86400,
+  },
+  enceladus: {
+    shader: 'textured', map: 'enceladus.jpg', saturation: 0.25, tint: [1.04, 1.04, 1.07], base: [0.9, 0.92, 0.95],
+    mapWeight: 1, haze: 0, detail: 0.06, dayS: 1.370218 * 86400,
+  },
+  tethys: {
+    shader: 'textured', map: 'tethys.jpg', saturation: 0.3, tint: [1, 1, 1], base: [0.8, 0.8, 0.81],
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: 1.887802 * 86400,
+  },
+  dione: {
+    shader: 'textured', map: 'dione.jpg', saturation: 0.3, tint: [1, 1, 1], base: [0.75, 0.75, 0.76],
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: 2.736915 * 86400,
+  },
+  rhea: {
+    shader: 'textured', map: 'rhea.jpg', saturation: 0.3, tint: [1, 1, 1], base: [0.75, 0.75, 0.76],
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: 4.518212 * 86400,
+  },
+  iapetus: {
+    shader: 'textured', map: 'iapetus.jpg', saturation: 0.4, tint: [1, 1, 1], base: [0.6, 0.58, 0.55],
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: 79.3215 * 86400,
+  },
   miranda: { shader: 'rocky', colorA: [0.45, 0.46, 0.48], colorB: [0.78, 0.78, 0.8], cap: 0, haze: 0, contrast: 0.8, craters: 0.7, dayS: 1.413479 * 86400 },
   ariel: { shader: 'rocky', colorA: [0.5, 0.5, 0.52], colorB: [0.82, 0.82, 0.84], cap: 0, haze: 0, contrast: 0.5, craters: 0.6, dayS: 2.520379 * 86400 },
   umbriel: { shader: 'rocky', colorA: [0.2, 0.2, 0.22], colorB: [0.4, 0.4, 0.42], cap: 0, haze: 0, contrast: 0.4, craters: 0.8, dayS: 4.144177 * 86400 },
   titania: { shader: 'rocky', colorA: [0.42, 0.4, 0.4], colorB: [0.7, 0.68, 0.66], cap: 0, haze: 0, contrast: 0.5, craters: 0.7, dayS: 8.705872 * 86400 },
   oberon: { shader: 'rocky', colorA: [0.36, 0.33, 0.32], colorB: [0.64, 0.6, 0.58], cap: 0, haze: 0, contrast: 0.5, craters: 0.9, dayS: 13.463239 * 86400 },
-  triton: { shader: 'rocky', colorA: [0.6, 0.52, 0.5], colorB: [0.92, 0.86, 0.84], cap: 0, haze: 0, contrast: 0.4, craters: 0.25, dayS: -5.876854 * 86400 },
-  mercury: { shader: 'rocky', colorA: [0.4, 0.38, 0.36], colorB: [0.64, 0.62, 0.59], cap: 0, haze: 0, contrast: 0.9, craters: 1, dayS: 5067000 },
+  triton: {
+    shader: 'textured', map: 'triton.jpg', saturation: 0.6, tint: [1.05, 0.98, 0.95], base: [0.75, 0.68, 0.66],
+    mapWeight: 1, haze: 0, detail: 0.08, dayS: -5.876854 * 86400,
+  },
+  mercury: {
+    shader: 'textured', map: 'mercury.jpg', saturation: 0.6, tint: [1, 0.99, 0.97], base: [0.55, 0.53, 0.5],
+    mapWeight: 1, haze: 0, detail: 0.12, dayS: 5067000,
+  },
   venus: {
-    shader: 'textured', map: 'venus.jpg', saturation: 0.3, tint: [1.05, 0.96, 0.8], base: [0.92, 0.82, 0.6],
-    mapWeight: 0.2, haze: 1.1, detail: 0.05, dayS: -20997000,
+    shader: 'textured', map: 'venus.jpg', saturation: 0.9, tint: [1.02, 0.98, 0.9], base: [0.92, 0.82, 0.6],
+    mapWeight: 1, haze: 1.1, detail: 0.03, dayS: -20997000,
   },
   mars: {
     shader: 'textured', map: 'mars.jpg', saturation: 0.85, tint: [1, 0.98, 0.95], base: [0.72, 0.42, 0.26],
@@ -140,7 +172,7 @@ const LOOKS = {
     mapWeight: 1, haze: 0, detail: 0.12, dayS: 152854,
   },
   europa: {
-    shader: 'textured', map: 'europa.jpg', saturation: 1, tint: [1, 1, 1], base: [0.82, 0.76, 0.68],
+    shader: 'textured', map: 'europa.jpg', saturation: 1, tint: [1.03, 0.97, 0.88], base: [0.82, 0.76, 0.68],
     mapWeight: 1, haze: 0, detail: 0.1, dayS: 306822,
   },
   ganymede: {
@@ -148,7 +180,7 @@ const LOOKS = {
     mapWeight: 1, haze: 0, detail: 0.12, dayS: 618153,
   },
   callisto: {
-    shader: 'textured', map: 'callisto.jpg', saturation: 1, tint: [1, 1, 1], base: [0.35, 0.32, 0.28],
+    shader: 'textured', map: 'callisto.jpg', saturation: 1, tint: [0.8, 0.72, 0.62], base: [0.35, 0.32, 0.28],
     mapWeight: 1, haze: 0, detail: 0.14, dayS: 1441931,
   },
   titan: {

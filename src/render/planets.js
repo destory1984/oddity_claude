@@ -110,15 +110,15 @@ const LOOKS = {
     mapWeight: 0.2, haze: 1.1, detail: 0.05, dayS: -20997000,
   },
   mars: {
-    shader: 'textured', map: 'mars.jpg', saturation: 1.05, tint: [1, 0.96, 0.92], base: [0.72, 0.42, 0.26],
+    shader: 'textured', map: 'mars.jpg', saturation: 0.85, tint: [1, 0.98, 0.95], base: [0.72, 0.42, 0.26],
     mapWeight: 1, haze: 0.4, detail: 0.14, dayS: 88643,
   },
   jupiter: {
-    shader: 'textured', map: 'jupiter.jpg', saturation: 0.85, tint: [1.05, 1, 0.95], base: [0.82, 0.7, 0.54],
+    shader: 'textured', map: 'jupiter.jpg', saturation: 1.1, tint: [1.03, 1, 0.96], base: [0.82, 0.7, 0.54],
     mapWeight: 1, haze: 0.2, detail: 0.2, dayS: 35730,
   },
   saturn: {
-    shader: 'textured', map: 'saturn.jpg', saturation: 0.4, tint: [1.02, 0.97, 0.86], base: [0.9, 0.8, 0.6],
+    shader: 'textured', map: 'saturn.jpg', saturation: 1.15, tint: [1.03, 0.99, 0.9], base: [0.9, 0.8, 0.6],
     mapWeight: 1, haze: 0.15, detail: 0.12, dayS: 38362, rings: { innerKm: 74500, outerKm: 136775, tilt: 0.47 },
   },
   io: {
@@ -146,7 +146,7 @@ const LOOKS = {
     bands: 5, turbulence: 0.12, spot: 0, dayS: -62064,
   },
   neptune: {
-    shader: 'textured', map: 'neptune.jpg', saturation: 1.2, tint: [0.72, 0.92, 1.35], base: [0.25, 0.42, 0.85],
+    shader: 'textured', map: 'neptune.jpg', saturation: 1, tint: [0.9, 1, 1.1], base: [0.25, 0.42, 0.85],
     mapWeight: 1, haze: 0.35, detail: 0.12, dayS: 57996,
   },
 };

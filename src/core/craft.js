@@ -15,10 +15,11 @@ const HUBBLE_PERIOD_S = 600;
 export const JWST_FROM_EARTH_KM = 150000;
 
 export const CRAFT = [
-  // Heliocentric distance (2026) and ecliptic direction of travel. The planets' start
-  // layout is not a real date, so only the latitudes (north / south) are meaningful.
-  { id: 'voyager1', name: '보이저 1호', nameEn: 'Voyager 1', kind: 'craft', parent: null, au: 170, lonDeg: 255, latDeg: 35 },
-  { id: 'voyager2', name: '보이저 2호', nameEn: 'Voyager 2', kind: 'craft', parent: null, au: 142, lonDeg: 290, latDeg: -37 },
+  // Heliocentric distance at the start (2026), speed away from the Sun, and ecliptic
+  // direction of travel. The planets' start layout is not a real date, so only the
+  // latitudes (north / south) are meaningful.
+  { id: 'voyager1', name: '보이저 1호', nameEn: 'Voyager 1', kind: 'craft', parent: null, au: 170, kmPerS: 17, lonDeg: 255, latDeg: 35 },
+  { id: 'voyager2', name: '보이저 2호', nameEn: 'Voyager 2', kind: 'craft', parent: null, au: 142, kmPerS: 15.3, lonDeg: 290, latDeg: -37 },
   { id: 'hubble', name: '허블 우주망원경', nameEn: 'Hubble', kind: 'craft', parent: 'earth' },
   { id: 'jwst', name: '제임스 웹 우주망원경', nameEn: 'Webb', kind: 'craft', parent: 'earth' },
 ];
@@ -51,7 +52,8 @@ export function craftAt(timeS, bodies) {
       const length = Math.hypot(...away);
       position = earth.position.map((n, i) => n + (away[i] / length) * JWST_FROM_EARTH_KM);
     } else {
-      const r = (craft.au * AU_KM) / DISTANCE_COMPRESSION;
+      // Still flying straight out; on the game clock about 110 to 120 km each second of play.
+      const r = (craft.au * AU_KM + craft.kmPerS * timeS) / DISTANCE_COMPRESSION;
       const lat = rad(craft.latDeg);
       const lon = rad(craft.lonDeg);
       position = [

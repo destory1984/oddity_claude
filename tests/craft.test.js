@@ -64,3 +64,21 @@ test('near a craft the speed limit falls with distance, as near a planet, but no
   assert.equal(state.restingOn, null);
   assert.ok(state.position[2] > v1.position[2], 'passed through');
 });
+
+test('the Voyagers keep leaving: 17 and 15.3 km/s, shrunk 1/100 like every distance from the Sun', () => {
+  const sunAt = (t) => bodiesAt(t).find((b) => b.kind === 'star').position;
+  const out = (id, t) => dist(craftAt(t, bodiesAt(t)).find((c) => c.id === id).position, sunAt(t));
+  // One second of play is 720 s on the game clock.
+  near(out('voyager1', 720) - out('voyager1', 0), (17 * 720) / 100, 1e-3);
+  near(out('voyager2', 720) - out('voyager2', 0), (15.3 * 720) / 100, 1e-3);
+  // Straight out: the direction from the Sun does not change.
+  const dir = (t) => {
+    const p = craftAt(t, bodiesAt(t)).find((c) => c.id === 'voyager2').position;
+    const s = sunAt(t);
+    const d = out('voyager2', t);
+    return p.map((n, i) => (n - s[i]) / d);
+  };
+  const a = dir(0);
+  const b = dir(5e6);
+  for (let i = 0; i < 3; i++) near(a[i], b[i], 1e-9);
+});

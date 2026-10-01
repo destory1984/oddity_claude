@@ -68,7 +68,7 @@ test('riding with Voyager 1 shows its speed away from the Sun, and no time passi
 });
 
 test('docking glides in over the countdown instead of jumping', () => {
-  assert.equal(DOCK_SECONDS, 6.5);
+  assert.equal(DOCK_SECONDS, 7.5);
   let dock = startDocking([1000, 2000, 3800], hubble);
   assert.equal(dock.id, 'hubble');
   // At the first instant the traveler has not moved.
@@ -93,19 +93,20 @@ test('docking glides in over the countdown instead of jumping', () => {
 });
 
 test('the countdown runs 5 to 0, one a second, and 0 lands exactly when the glide ends', () => {
-  // Nothing is counted while "Docking in progress" is being said.
-  assert.deepEqual(countsBetween(0, 1.4), []);
-  assert.deepEqual(countsBetween(1.4, 1.5), [5]);
-  assert.deepEqual(countsBetween(1.5, 2.4), []);
-  assert.deepEqual(countsBetween(2.4, 2.6), [4]);
+  // Nothing is counted for 2.5 seconds, while "Docking in progress" is being said
+  // (it takes about two): otherwise the numbers queue up behind it and run late.
+  assert.deepEqual(countsBetween(0, 2.4), []);
+  assert.deepEqual(countsBetween(2.4, 2.5), [5]);
+  assert.deepEqual(countsBetween(2.5, 3.4), []);
+  assert.deepEqual(countsBetween(3.4, 3.6), [4]);
   assert.deepEqual(countsBetween(DOCK_SECONDS - 0.01, DOCK_SECONDS), [0]);
   assert.deepEqual(countsBetween(DOCK_SECONDS, DOCK_SECONDS + 5), []);
   // Frame by frame, every number is called exactly once, in order.
   const called = [];
-  for (let i = 0; i < 60 * 8; i++) called.push(...countsBetween(i / 60, (i + 1) / 60));
+  for (let i = 0; i < 60 * 9; i++) called.push(...countsBetween(i / 60, (i + 1) / 60));
   assert.deepEqual(called, [5, 4, 3, 2, 1, 0]);
   // A long frame (a stutter) calls only the latest number, not a pile of them.
-  assert.deepEqual(countsBetween(1, 4.6), [2]);
+  assert.deepEqual(countsBetween(2, 5.6), [2]);
   assert.equal(isDocked({ elapsed: DOCK_SECONDS - 0.01 }), false);
   assert.equal(isDocked({ elapsed: DOCK_SECONDS }), true);
 });

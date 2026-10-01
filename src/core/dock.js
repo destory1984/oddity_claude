@@ -7,7 +7,8 @@ export const DOCK_RANGE_KM = 1000;
 export const DOCK_GAP_KM = 60;
 // The countdown: "Docking in progress", then 5 down to 0, one number a second.
 export const COUNT_FROM = 5;
-const COUNT_STARTS_S = 1.5;
+// The opening words take about two seconds to say; the count waits for them.
+const COUNT_STARTS_S = 2.5;
 // The glide from where the traveler was to the docking spot ends on the 0.
 export const DOCK_SECONDS = COUNT_STARTS_S + COUNT_FROM;
 

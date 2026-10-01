@@ -4,6 +4,7 @@ import {
 import glowVert from './shaders/glow.vert?raw';
 import comaFrag from './shaders/coma.frag?raw';
 import tailFrag from './shaders/tail.frag?raw';
+import dustFrag from './shaders/dust.frag?raw';
 import { AU_KM, KM_PER_UNIT } from '../core/bodies.js';
 import { cometActivity, tailLengthKm, COMA_KM } from '../core/comet.js';
 
@@ -13,6 +14,11 @@ const FULL_GLOW_KM = 60000;
 const CLOSE_GLOW = 0.1;
 // Tail width at its far end, as a share of its length.
 const TAIL_SPREAD = 0.3;
+// The dust tail: shorter and wider than the gas tail, and swept back round the orbit
+// by this much (the tangent of the angle between the two tails, about 21 degrees).
+const DUST_LENGTH = 0.6;
+const DUST_SPREAD = 0.55;
+const DUST_LAG = 0.38;
 
 function glowMaterial(scene, name, fragment) {
   Effect.ShadersStore[`${name}VertexShader`] = glowVert;
@@ -49,11 +55,34 @@ export function createComet(scene) {
     plane.isPickable = false;
   }
 
+  // The dust tail, built the same way.
+  const dustMaterial = glowMaterial(scene, 'dustTail', dustFrag);
+  const dust = new TransformNode('dustTail', scene);
+  for (const turn of [0, Math.PI / 2]) {
+    const plane = CreatePlane(`dustTail${turn}`, { size: 1, sideOrientation: Mesh.DOUBLESIDE }, scene);
+    plane.bakeTransformIntoVertices(Matrix.Translation(0, 0.5, 0));
+    plane.rotation.y = turn;
+    plane.parent = dust;
+    plane.material = dustMaterial;
+    plane.isPickable = false;
+  }
+  // Turn a tail node's +y onto `direction`.
+  const aim = (node, direction) => {
+    const up = Vector3.Up();
+    const axis = Vector3.Cross(up, direction);
+    const angle = Math.acos(Math.max(-1, Math.min(1, Vector3.Dot(up, direction))));
+    node.rotationQuaternion = axis.lengthSquared() < 1e-12 ? Quaternion.Identity() : Quaternion.RotationAxis(axis.normalize(), angle);
+  };
+  // Where the comet was last frame, to know which way it is going.
+  let last = null;
+  let lag = null;
+
   function update(body, travelerKm, sunPositionKm) {
     const activity = cometActivity(body.sunKm / AU_KM);
     const on = activity > 0;
     coma.setEnabled(on);
     tail.setEnabled(on);
+    dust.setEnabled(on);
     if (!on) return;
     const rel = body.position.map((n, i) => (n - travelerKm[i]) / KM_PER_UNIT);
     const near = Math.max(CLOSE_GLOW, Math.min(1, (Math.hypot(...rel) * KM_PER_UNIT) / FULL_GLOW_KM));
@@ -66,14 +95,25 @@ export function createComet(scene) {
     const away = new Vector3(...body.position.map((n, i) => n - sunPositionKm[i])).normalize();
     tail.position.set(rel[0], rel[1], rel[2]);
     tail.scaling.set(length * TAIL_SPREAD, length, length * TAIL_SPREAD);
-    // Turn the node's +y onto the direction away from the Sun.
-    const up = Vector3.Up();
-    const axis = Vector3.Cross(up, away);
-    const angle = Math.acos(Math.max(-1, Math.min(1, Vector3.Dot(up, away))));
-    tail.rotationQuaternion = axis.lengthSquared() < 1e-12
-      ? Quaternion.Identity()
-      : Quaternion.RotationAxis(axis.normalize(), angle);
+    // The gas tail is blown straight away from the Sun by the solar wind.
+    aim(tail, away);
     tailMaterial.setFloat('strength', (0.35 + 0.45 * activity) * near);
+
+    // The dust is heavier: it falls behind along the orbit, so its tail leans back the
+    // way the comet came. Until the comet has been seen to move, lean it in the
+    // planets' plane.
+    if (last) {
+      const moved = new Vector3(...body.position.map((n, i) => n - last[i]));
+      const back = moved.subtract(away.scale(Vector3.Dot(moved, away))).scale(-1);
+      if (back.lengthSquared() > 1e-6) lag = back.normalize();
+    }
+    last = [...body.position];
+    const lean = lag ?? Vector3.Cross(Vector3.Up(), away).normalize();
+    const dustLength = length * DUST_LENGTH;
+    dust.position.set(rel[0], rel[1], rel[2]);
+    dust.scaling.set(dustLength * DUST_SPREAD, dustLength, dustLength * DUST_SPREAD);
+    aim(dust, away.add(lean.scale(DUST_LAG)).normalize());
+    dustMaterial.setFloat('strength', (0.3 + 0.5 * activity) * near);
   }
 
   return { update };

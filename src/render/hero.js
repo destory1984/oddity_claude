@@ -94,9 +94,14 @@ export function createHero(engine, sunDirection) {
   const rig = new TransformNode('heroRig', scene);
   const hero = new TransformNode('hero', scene);
   hero.parent = rig;
-  hero.scaling.setAll(1.3);
+  // Four heads tall. The Blender model is 5.6 (head 0.368 of 2.05); growing the head
+  // 1.566 times about the neck makes it 0.576 of 2.305, and the whole figure is then
+  // shrunk to its old height.
+  const HEAD_SCALE = 1.566;
+  const BODY_SCALE = 2.05 / 2.305;
+  hero.scaling.setAll(1.3 * BODY_SCALE);
   // Her origin is at the belt, lower on her body than the old doll's, so she sits higher.
-  const BASE_Y = -0.87;
+  const BASE_Y = -0.99;
   hero.position.set(0, BASE_Y, 6);
 
   // Strong key light and a soft fill, so every fold shows a light and a dark side.
@@ -173,6 +178,7 @@ export function createHero(engine, sunDirection) {
     paperMesh(`${part.joint}_${part.mat}`, part.tris, materials[part.mat], joints[part.joint]);
   }
   const { torso, skirt, head } = joints;
+  head.scaling.setAll(HEAD_SCALE);
   const limbs = [1, -1].map((s) => ({
     s,
     shoulder: joints[`shoulder${s}`],
@@ -189,6 +195,8 @@ export function createHero(engine, sunDirection) {
       const node = new TransformNode(`tail${tail.s}_${i}`, scene);
       node.parent = parent;
       node.position = new Vector3(...segment.pivot);
+      // The tails grow less than the head (1.2 times), or they would hide her whole back.
+      if (i === 0) node.scaling.setAll(1.2 / HEAD_SCALE);
       for (const [mat, tris] of Object.entries(segment.mats)) paperMesh(`tail${tail.s}_${i}_${mat}`, tris, materials[mat], node);
       parent = node;
       return node;
@@ -222,7 +230,7 @@ export function createHero(engine, sunDirection) {
 
   function update({ dt, speed, turn, fov, photoOrientation, visible, aspect = 16 / 9 }) {
     elapsed += dt;
-    hero.scaling.setAll(heroScaleFor(aspect));
+    hero.scaling.setAll(heroScaleFor(aspect) * BODY_SCALE);
     const smooth = 1 - Math.exp(-dt * 6);
     bank += (clamp(-turn[0] * 1.15, -0.9, 0.9) - bank) * smooth;
     bend += (clamp(turn[1] * 0.38, -0.3, 0.3) - bend) * smooth;

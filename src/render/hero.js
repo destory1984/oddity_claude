@@ -20,32 +20,61 @@ import { clamp } from './math.js';
 // Local axes of the body: +z runs from the feet to the head, +y is the back and -y
 // the front. The flight poses in core/pose.js rotate this whole frame.
 
-// Craft paper: an off-white sheet with faint fibers, tinted by each material's color.
-function paperTexture(scene) {
-  const texture = new DynamicTexture('paper', { width: 256, height: 256 }, scene, true);
+// Craft paper: an off-white sheet tinted by each material's color. `strong` is the
+// clothing's sheet, with cloudy mottling, visible fibers and flecks, like handmade
+// paper; the plain sheet (skin and hair) keeps only a faint grain.
+function paperTexture(scene, strong) {
+  const size = 512;
+  const texture = new DynamicTexture(strong ? 'paperStrong' : 'paper', { width: size, height: size }, scene, true);
   const ctx = texture.getContext();
   ctx.fillStyle = '#f4f1ea';
-  ctx.fillRect(0, 0, 256, 256);
+  ctx.fillRect(0, 0, size, size);
   let seed = 4242;
   const rand = () => {
     seed = (seed * 1664525 + 1013904223) >>> 0;
     return seed / 4294967296;
   };
-  for (let i = 0; i < 900; i++) {
-    const shade = rand() < 0.5 ? 255 : 200;
-    ctx.fillStyle = `rgba(${shade}, ${shade}, ${shade - 8}, ${0.06 + rand() * 0.1})`;
-    ctx.fillRect(rand() * 256, rand() * 256, 1 + rand() * 2, 1 + rand() * 2);
+  const k = strong ? 1 : 0.4;
+  // Cloudy mottling: broad soft patches, darker and lighter.
+  if (strong) {
+    for (let i = 0; i < 70; i++) {
+      const x = rand() * size;
+      const y = rand() * size;
+      const r = 30 + rand() * 70;
+      const dark = rand() < 0.6;
+      const blot = ctx.createRadialGradient(x, y, 0, x, y, r);
+      blot.addColorStop(0, dark ? 'rgba(132, 120, 100, 0.2)' : 'rgba(255, 255, 255, 0.24)');
+      blot.addColorStop(1, dark ? 'rgba(132, 120, 100, 0)' : 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = blot;
+      ctx.fillRect(x - r, y - r, 2 * r, 2 * r);
+    }
   }
-  ctx.lineWidth = 1;
-  for (let i = 0; i < 120; i++) {
-    ctx.strokeStyle = `rgba(180, 175, 165, ${0.05 + rand() * 0.08})`;
-    const x = rand() * 256;
-    const y = rand() * 256;
+  // Flecks.
+  for (let i = 0; i < 3600; i++) {
+    const shade = rand() < 0.5 ? 255 : 170;
+    ctx.fillStyle = `rgba(${shade}, ${shade}, ${shade - 10}, ${(0.16 + rand() * 0.3) * k})`;
+    ctx.fillRect(rand() * size, rand() * size, 1 + rand() * 2.5, 1 + rand() * 2.5);
+  }
+  // Fibers: short pale and dark hairs lying every which way.
+  for (let i = 0; i < (strong ? 900 : 480); i++) {
+    const pale = rand() < 0.4;
+    ctx.strokeStyle = pale
+      ? `rgba(255, 255, 250, ${(0.2 + rand() * 0.3) * k})`
+      : `rgba(104, 94, 78, ${(0.2 + rand() * 0.34) * k})`;
+    ctx.lineWidth = 0.6 + rand() * (strong ? 1.2 : 0.6);
+    const x = rand() * size;
+    const y = rand() * size;
+    const bend = (rand() - 0.5) * 20;
+    const dx = (rand() - 0.5) * 60;
+    const dy = (rand() - 0.5) * 60;
     ctx.beginPath();
     ctx.moveTo(x, y);
-    ctx.lineTo(x + (rand() - 0.5) * 24, y + (rand() - 0.5) * 24);
+    ctx.quadraticCurveTo(x + dx / 2 + bend, y + dy / 2 - bend, x + dx, y + dy);
     ctx.stroke();
   }
+  // Repeat across faces wider than one sheet (the default would smear the edge pixels).
+  texture.wrapU = 1;
+  texture.wrapV = 1;
   texture.update();
   return texture;
 }
@@ -79,13 +108,15 @@ export function createHero(engine, sunDirection) {
 
   // Matte paper: no shine, a little self-light so it never goes black in space.
   // Paper is a single sheet, so both sides are drawn and lit.
-  const grain = paperTexture(scene);
+  const grain = paperTexture(scene, false);
+  const cloth = paperTexture(scene, true);
+  const PLAIN = new Set(['skin', 'silver', 'silver0', 'silver2', 'silver3']);
   const materials = {};
   for (const [name, hex] of Object.entries(MAGE.colors)) {
     const m = new StandardMaterial(name, scene);
     const c = Color3.FromHexString(hex);
     m.diffuseColor = c;
-    m.diffuseTexture = grain;
+    m.diffuseTexture = PLAIN.has(name) ? grain : cloth;
     m.emissiveColor = c.scale(0.14);
     m.specularColor = new Color3(0, 0, 0);
     m.backFaceCulling = false;
@@ -93,7 +124,7 @@ export function createHero(engine, sunDirection) {
     materials[name] = m;
   }
 
-  // Flat triangles with the paper grain projected along each face's main axis.
+  // Flat triangles with the paper sheet laid on each face.
   function paperMesh(name, tris, material, parent) {
     const positions = [];
     const uvs = [];
@@ -102,13 +133,20 @@ export function createHero(engine, sunDirection) {
       const p = [0, 3, 6].map((k) => tris.slice(i + k, i + k + 3));
       const u = [p[1][0] - p[0][0], p[1][1] - p[0][1], p[1][2] - p[0][2]];
       const v = [p[2][0] - p[0][0], p[2][1] - p[0][1], p[2][2] - p[0][2]];
-      const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]].map(Math.abs);
-      const axis = n.indexOf(Math.max(...n));
-      const [a, b] = [[1, 2], [0, 2], [0, 1]][axis];
+      // Lay the sheet flat on the face: two axes in the face's own plane, chosen from
+      // its normal alone so that neighbouring triangles of one panel share them.
+      const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+      const nl = Math.hypot(...n) || 1;
+      const [nx, ny, nz] = n.map((c) => c / nl);
+      const ref = Math.abs(nz) < 0.9 ? [0, 0, 1] : [1, 0, 0];
+      let a = [ny * ref[2] - nz * ref[1], nz * ref[0] - nx * ref[2], nx * ref[1] - ny * ref[0]];
+      const al = Math.hypot(...a) || 1;
+      a = a.map((c) => c / al);
+      const b = [ny * a[2] - nz * a[1], nz * a[0] - nx * a[2], nx * a[1] - ny * a[0]];
       for (const q of p) {
         indices.push(positions.length / 3);
         positions.push(q[0], q[1], q[2]);
-        uvs.push(q[a] * 3, q[b] * 3);
+        uvs.push((q[0] * a[0] + q[1] * a[1] + q[2] * a[2]) * 2.4, (q[0] * b[0] + q[1] * b[1] + q[2] * b[2]) * 2.4);
       }
     }
     const normals = [];

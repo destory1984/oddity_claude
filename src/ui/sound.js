@@ -78,31 +78,64 @@ export function createSound() {
     const data = noiseBuffer.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
 
-    // Flight: paper fluttering in the wind. A band of noise, its loudness chopped by a
-    // flutter oscillator; faster flight flutters quicker and brighter. No tones under
-    // it, so it never hums like an engine.
+    // Flight: a spacecraft's drive. A low hum (two saws a hair apart, so they beat),
+    // a deep sine under it, a rumble of filtered noise and a thin turbine whine on top.
+    // Faster flight raises the hum, opens the filter and winds the whine up.
     const gain = ctx.createGain();
     gain.gain.value = 0;
     gain.connect(sfx);
+    const tone = ctx.createBiquadFilter();
+    tone.type = 'lowpass';
+    tone.frequency.value = 260;
+    tone.Q.value = 1.2;
+    tone.connect(gain);
+    const hums = [0, 7].map((cents) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.value = 55;
+      osc.detune.value = cents;
+      const level = ctx.createGain();
+      level.gain.value = 0.5;
+      osc.connect(level).connect(tone);
+      osc.start();
+      return osc;
+    });
+    const sub = ctx.createOscillator();
+    sub.type = 'sine';
+    sub.frequency.value = 27.5;
+    const subLevel = ctx.createGain();
+    subLevel.gain.value = 0.9;
+    sub.connect(subLevel).connect(gain);
+    sub.start();
     const air = ctx.createBufferSource();
     air.buffer = noiseBuffer;
     air.loop = true;
-    const band = ctx.createBiquadFilter();
-    band.type = 'bandpass';
-    band.frequency.value = 1800;
-    band.Q.value = 0.9;
-    const flutterGain = ctx.createGain();
-    flutterGain.gain.value = 0.5;
-    air.connect(band).connect(flutterGain).connect(gain);
-    const flutter = ctx.createOscillator();
-    flutter.type = 'square';
-    flutter.frequency.value = 9;
-    const flutterDepth = ctx.createGain();
-    flutterDepth.gain.value = 0.35;
-    flutter.connect(flutterDepth).connect(flutterGain.gain);
+    const rumble = ctx.createBiquadFilter();
+    rumble.type = 'lowpass';
+    rumble.frequency.value = 220;
+    const rumbleLevel = ctx.createGain();
+    rumbleLevel.gain.value = 0.55;
+    air.connect(rumble).connect(rumbleLevel).connect(gain);
     air.start();
-    flutter.start();
-    engine = { gain, band, flutter };
+    const whine = ctx.createOscillator();
+    whine.type = 'triangle';
+    whine.frequency.value = 700;
+    const whineLevel = ctx.createGain();
+    whineLevel.gain.value = 0.05;
+    whine.connect(whineLevel).connect(gain);
+    whine.start();
+    // A slow throb, like a drive turning over.
+    const throb = ctx.createOscillator();
+    throb.frequency.value = 5;
+    const throbDepth = ctx.createGain();
+    throbDepth.gain.value = 0.12;
+    const throbbed = ctx.createGain();
+    throbbed.gain.value = 1;
+    throb.connect(throbDepth).connect(throbbed.gain);
+    gain.disconnect();
+    gain.connect(throbbed).connect(sfx);
+    throb.start();
+    engine = { gain, tone, hums, sub, rumble, whine, whineLevel };
 
     return ctx;
   }
@@ -266,17 +299,20 @@ export function createSound() {
       CUES[name]();
     },
     // { gain, pitch, sparkle } from core/audio.js engineSound(); called every frame.
-    engine({ gain, pitch, sparkle }, dt = 1 / 60) {
+    engine({ gain, pitch }) {
       if (!ctx) return;
       const t = ctx.currentTime;
       engine.gain.gain.setTargetAtTime(gain, t, 0.15);
-      // pitch runs 330..660 with speed: flutter 8..20 times a second, brighter band.
-      engine.flutter.frequency.setTargetAtTime(8 + ((pitch - 330) / 330) * 12, t, 0.3);
-      engine.band.frequency.setTargetAtTime(1200 + pitch * 2.5, t, 0.3);
-      // Now and then a soft kalimba note, about `sparkle` per second.
-      if (!muted && sparkle > 0 && Math.random() < sparkle * dt) {
-        pluck(PENTATONIC[Math.floor(Math.random() * PENTATONIC.length)], 0, 0.035, 0.6);
-      }
+      // pitch runs 330..660 with speed: the hum climbs an octave (55 to 110 Hz), the
+      // filter opens, the whine winds up from 700 to 2,100 Hz and grows a little louder.
+      const k = Math.max(0, Math.min(1, (pitch - 330) / 330));
+      const hum = 55 * 2 ** k;
+      for (const osc of engine.hums) osc.frequency.setTargetAtTime(hum, t, 0.4);
+      engine.sub.frequency.setTargetAtTime(hum / 2, t, 0.4);
+      engine.tone.frequency.setTargetAtTime(260 + 700 * k, t, 0.4);
+      engine.rumble.frequency.setTargetAtTime(220 + 500 * k, t, 0.4);
+      engine.whine.frequency.setTargetAtTime(700 + 1400 * k, t, 0.6);
+      engine.whineLevel.gain.setTargetAtTime(0.04 + 0.05 * k, t, 0.6);
     },
     // Called every frame with the mood from core/music.js moodFor(); starts each bar a
     // little ahead of time so the audio clock, not the frame rate, keeps the beat.

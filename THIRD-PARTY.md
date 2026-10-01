@@ -10,7 +10,7 @@
 | `public/assets/planets/jupiter.jpg` | Solar System Scope 지도(2048×1024). https://www.solarsystemscope.com/textures/ | CC BY 4.0 (출처 표시) |
 | `public/assets/planets/saturn.jpg` | Solar System Scope 지도(2048×1024). https://www.solarsystemscope.com/textures/ | CC BY 4.0 (출처 표시) |
 | `public/assets/planets/neptune.jpg` | Solar System Scope 지도(2048×1024). https://www.solarsystemscope.com/textures/ | CC BY 4.0 (출처 표시) |
-| `public/assets/planets/io.jpg` | NASA 3D Resources, Jupiter - Io (A). https://github.com/nasa/NASA-3D-Resources/tree/master/Images%20and%20Textures/Jupiter%20-%20Io%20(A) | NASA 자료, 저작권 없음 (NASA 로고·휘장 제외) |
+| `public/assets/planets/io.jpg` | USGS Astrogeology, Io Galileo SSI / Voyager 컬러 합성 전체 지도(1km/픽셀). https://astrogeology.usgs.gov/search/map/io_galileo_ssi_voyager_color_merged_global_mosaic_1km 를 2048×1024로 줄였다. | 미국 정부 저작물, 저작권 없음 |
 | `public/assets/planets/europa.jpg` | NASA 3D Resources, Jupiter - Europa. https://github.com/nasa/NASA-3D-Resources/tree/master/Images%20and%20Textures/Jupiter%20-%20Europa | NASA 자료, 저작권 없음 (NASA 로고·휘장 제외) |
 | `public/assets/planets/ganymede.jpg` | NASA 3D Resources, Jupiter - Ganymede. https://github.com/nasa/NASA-3D-Resources/tree/master/Images%20and%20Textures/Jupiter%20-%20Ganymede | NASA 자료, 저작권 없음 (NASA 로고·휘장 제외) |
 | `public/assets/planets/callisto.jpg` | NASA 3D Resources, Jupiter - Callisto. https://github.com/nasa/NASA-3D-Resources/tree/master/Images%20and%20Textures/Jupiter%20-%20Callisto | NASA 자료, 저작권 없음 (NASA 로고·휘장 제외) |

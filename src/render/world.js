@@ -11,6 +11,7 @@ import { createHero } from './hero.js';
 import { createCraft } from './craft.js';
 import { createIce } from './ice.js';
 import { ringCrossing, ringDensity } from '../core/rings.js';
+import { eyeView } from '../core/eye.js';
 import { CRAFT } from '../core/craft.js';
 import { normalize } from './math.js';
 
@@ -53,8 +54,14 @@ export async function createWorld(canvas, bodies = BODIES) {
   let elapsed = 0;
 
   // now: where every body is this frame (they orbit); defaults to the starting layout.
-  function update({ bodies: now = bodies, craft = [], position, orientation, dt, speed, photoOrientation, heroVisible, turn }) {
+  function update({ bodies: now = bodies, craft = [], position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn }) {
     elapsed += dt;
+    // Draw from a point just above the ground when standing on it, and pull the near
+    // plane in as the ground gets close; otherwise the planet under the feet is cut away
+    // and looks transparent (core/eye.js).
+    const eye = eyeView(traveler, now);
+    const position = eye.position;
+    camera.minZ = eye.nearKm / KM_PER_UNIT;
     const directions = {};
     const distances = {};
     const sunNow = now.find((b) => b.kind === 'star');
@@ -70,7 +77,7 @@ export async function createWorld(canvas, bodies = BODIES) {
       const body = now.find((b) => b.id === item.body.id) ?? item.body;
       const rel = relative(body, position);
       if (item.rings) {
-        const from = position.map((n, i) => n - body.position[i]);
+        const from = traveler.map((n, i) => n - body.position[i]);
         const before = lastByRings.get(body.id);
         const hit = before && dt > 0 && ringCrossing(before, from, item.rings.normal, item.rings.innerKm, item.rings.outerKm);
         if (hit) {

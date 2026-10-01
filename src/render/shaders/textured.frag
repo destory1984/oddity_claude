@@ -37,7 +37,8 @@ void main(){
   vec3 N = normalize(n);
   vec3 V = normalize(-wp);
   float l = dot(N, sun);
-  float lit = smoothstep(-.06, .2, l) * max(l, 0.) * 1.15 + .02;
+  // The night side keeps a tenth of the light, so a traveler can still see where they fly.
+  float lit = smoothstep(-.06, .2, l) * max(l, 0.) * 1.15 + .1;
   // The rings' shadow: follow the sunlight back from this spot to the ring plane and
   // dim it by how dense the ring is where the ray crosses.
   float toPlane = dot(sun, ringNormal);

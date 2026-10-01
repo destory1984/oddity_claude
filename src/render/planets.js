@@ -136,7 +136,7 @@ const LOOKS = {
     mapWeight: 1, haze: 0.15, detail: 0.12, dayS: 38362, rings: { innerKm: 74500, outerKm: 136775, tilt: 0.47 },
   },
   io: {
-    shader: 'textured', map: 'io.jpg', saturation: 1.1, tint: [1, 1, 0.95], base: [0.82, 0.72, 0.38],
+    shader: 'textured', map: 'io.jpg', saturation: 1.25, tint: [1.06, 1, 0.9], base: [0.82, 0.72, 0.38],
     mapWeight: 1, haze: 0, detail: 0.12, dayS: 152854,
   },
   europa: {

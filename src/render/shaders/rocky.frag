@@ -52,7 +52,7 @@ void main(){
   col = mix(col, vec3(.93, .93, .96), polar * step(.001, cap));
   vec3 V = normalize(-wp);
   float l = dot(N, sun);
-  float lit = max(l, 0.) * 1.2 + .02;
+  float lit = max(l, 0.) * 1.2 + .1;
   float rim = pow(1. - max(dot(N, V), 0.), 3.) * haze * smoothstep(-.2, .4, l);
   gl_FragColor = vec4(pow(max(col, 0.) * lit + colorB * rim, vec3(.9)), 1.);
 }

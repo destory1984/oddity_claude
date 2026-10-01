@@ -28,7 +28,7 @@ void main(){
   vec3 N = normalize(n);
   vec3 V = normalize(-wp);
   float l = dot(N, sun);
-  float lit = smoothstep(-.08, .25, l) * max(l, 0.) * 1.15 + .025;
+  float lit = smoothstep(-.08, .25, l) * max(l, 0.) * 1.15 + .1;
   float limb = pow(max(dot(N, V), 0.), .35);
   gl_FragColor = vec4(pow(col * lit * limb, vec3(.9)), 1.);
 }

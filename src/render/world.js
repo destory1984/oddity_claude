@@ -124,7 +124,7 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
     craftSun.direction = new Vector3(...normalize(sunRel)).scale(-1);
     for (const { id, glow } of comets) glow.update(now.find((b) => b.id === id), position, sunNow.position);
     const meteorLit = meteors.update(dt, now.find((b) => b.id === 'earth'), sunNow.position, position);
-    const lightningLit = glows.update(dt, elapsed, now, sunNow.position, position);
+    const flashed = glows.update(dt, elapsed, now, sunNow.position, position);
     belt.update(position, sunNow.position, directions[sunNow.id]);
 
     const occluders = now.filter((b) => b.kind !== 'star').map((b) => ({
@@ -154,8 +154,9 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       ringCrossed,
       inBelt: inBelt(traveler, sunNow.position),
       meteorLit,
-      // Lights and plumes to tell about: lightning in the frame it flashes, else the one nearby.
-      glow: lightningLit ? 'lightning' : glowNear(now, traveler),
+      // Lights and plumes to tell about: a flash (lightning, an impact on the Moon) in
+      // the frame it happens, else the one nearby.
+      glow: flashed ?? glowNear(now, traveler),
       // The sprite character's drawing; the paper model has none.
       heroSheet: hero.sheet ? hero.sheet() : null,
       camera: {

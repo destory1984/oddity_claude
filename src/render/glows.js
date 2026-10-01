@@ -8,6 +8,7 @@ import { meteorSpot } from '../core/meteors.js';
 import {
   AURORAS, auroraBand, LIGHTNING_RANGE_KM, LIGHTNING_LIFE_S, LIGHTNING_SIZE_KM, lightningGap, lightningGlow,
   PLUMES, PLUME_DAY_S, PLUME_RANGE_RADII, plumeUp,
+  IMPACT_RANGE_KM, IMPACT_LIFE_S, IMPACT_SIZE_KM, impactGap, impactGlow,
 } from '../core/glows.js';
 
 const FLASHES = 8;
@@ -153,13 +154,49 @@ export function createGlows(scene, bodies) {
   }
   // Strokes still to come in the storm that last flashed: [{ in: seconds, up }].
   let coming = [];
+
+  // Impact flashes on the Moon: a white point in a small warm glow.
+  const spark = new DynamicTexture('impactSpark', { width: 64, height: 64 }, scene, true);
+  {
+    const ctx = spark.getContext();
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, 64, 64);
+    const glow = ctx.createRadialGradient(32, 32, 0, 32, 32, 30);
+    glow.addColorStop(0, 'rgba(255,255,255,1)');
+    glow.addColorStop(0.12, 'rgba(255,240,200,0.9)');
+    glow.addColorStop(0.4, 'rgba(255,190,110,0.25)');
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, 64, 64);
+    spark.update();
+  }
+  const impacts = [];
+  for (let i = 0; i < 3; i++) {
+    const material = new StandardMaterial(`impact${i}`, scene);
+    material.emissiveTexture = spark;
+    material.emissiveColor = new Color3(0, 0, 0);
+    material.diffuseColor = new Color3(0, 0, 0);
+    material.specularColor = new Color3(0, 0, 0);
+    material.disableLighting = true;
+    material.alphaMode = Constants.ALPHA_ADD;
+    material.backFaceCulling = false;
+    material.disableDepthWrite = true;
+    const mesh = CreatePlane(`impact${i}`, { size: 1, sideOrientation: Mesh.DOUBLESIDE }, scene);
+    mesh.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    mesh.material = material;
+    mesh.isPickable = false;
+    mesh.setEnabled(false);
+    impacts.push({ mesh, material, up: null, age: 0, sizeKm: 0 });
+  }
+  let impactWait = 2;
   let wait = 1;
 
   const rel = (km, position) => km.map((n, i) => (n - position[i]) / KM_PER_UNIT);
   const height = (body, position) => Math.hypot(...position.map((n, i) => n - body.position[i])) - body.radiusKm;
 
   // now: this frame's bodies (km); position: the traveler (km); elapsed: seconds of
-  // play (the bodies' spin runs off the same clock). Returns true when lightning flashes.
+  // play (the bodies' spin runs off the same clock). Returns 'lightning' or 'impact' in
+  // the frame one flashes, else null.
   function update(dt, elapsed, now, sunPosition, position) {
     const find = (id) => now.find((b) => b.id === id);
     const sunFrom = (body) => new Vector3(...sunPosition.map((n, i) => n - body.position[i])).normalize();
@@ -249,7 +286,45 @@ export function createGlows(scene, bodies) {
       // Just under 1 at the brightest, so the picture is always added, never pasted on.
       flash.material.alpha = 0.99 * glow;
     }
-    return lit;
+    // Impact flashes on the Moon's night side.
+    const moon = find('moon');
+    const fromMoon = position.map((n, i) => n - moon.position[i]);
+    const moonDistance = Math.hypot(...fromMoon);
+    const nearMoon = moonDistance - moon.radiusKm <= IMPACT_RANGE_KM;
+    let hit = false;
+    if (nearMoon) {
+      impactWait -= dt;
+      const free = impacts.find((f) => !f.up);
+      if (impactWait <= 0 && free) {
+        const toSun = sunFrom(moon);
+        const spot = meteorSpot(Math.random, [toSun.x, toSun.y, toSun.z], fromMoon.map((n) => n / moonDistance));
+        impactWait = impactGap(Math.random);
+        if (spot) {
+          free.up = spot.up;
+          free.age = 0;
+          free.sizeKm = IMPACT_SIZE_KM[0] + Math.random() * (IMPACT_SIZE_KM[1] - IMPACT_SIZE_KM[0]);
+          hit = true;
+        }
+      }
+    }
+    for (const impact of impacts) {
+      if (!impact.up) continue;
+      impact.age += dt;
+      if (impact.age >= IMPACT_LIFE_S || !nearMoon) {
+        impact.up = null;
+        impact.mesh.setEnabled(false);
+        continue;
+      }
+      const at = rel(moon.position.map((n, i) => n + impact.up[i] * (moon.radiusKm + 5)), position);
+      impact.mesh.setEnabled(true);
+      impact.mesh.position.set(at[0], at[1], at[2]);
+      // Never smaller on screen than a couple of pixels, however far off.
+      const size = Math.max(impact.sizeKm, Math.hypot(...at) * KM_PER_UNIT * 0.012);
+      impact.mesh.scaling.setAll(size / KM_PER_UNIT);
+      impact.material.alpha = 0.99 * impactGlow(impact.age);
+    }
+    if (lit) return 'lightning';
+    return hit ? 'impact' : null;
   }
 
   return { update };

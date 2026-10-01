@@ -45,6 +45,27 @@ export function lightningGlow(age) {
   return 0.5 * (1 - (age - 0.17) / (LIGHTNING_LIFE_S - 0.17));
 }
 
+// Impact flashes on the Moon: with no air to burn up in, a meteoroid hits the ground
+// as it is and gives a flash a tenth of a second long, seen from Earth through
+// telescopes on the Moon's night side. Shown from within this far of the Moon.
+export const IMPACT_RANGE_KM = 30000;
+// One every 2 to 6 seconds, lasting 0.35 seconds (longer than life, to be noticed), a
+// point of light with a glow this wide round it (the real ones are metres across).
+export const IMPACT_GAP_S = [2, 6];
+export const IMPACT_LIFE_S = 0.35;
+export const IMPACT_SIZE_KM = [80, 200];
+
+export function impactGap(rand) {
+  return IMPACT_GAP_S[0] + rand() * (IMPACT_GAP_S[1] - IMPACT_GAP_S[0]);
+}
+
+// How bright an impact flash is `age` seconds in: full at once, then dying away fast.
+export function impactGlow(age) {
+  if (age < 0 || age >= IMPACT_LIFE_S) return 0;
+  const t = age / IMPACT_LIFE_S;
+  return (1 - t) * (1 - t);
+}
+
 // Plumes: gas and dust (Io) or ice grains (Enceladus) thrown up from the ground.
 // lat/lon in degrees (east positive); heightKm: how high it reaches; widthKm: how wide
 // it is at the top. Io's heights are about the real ones; the jets of Enceladus really

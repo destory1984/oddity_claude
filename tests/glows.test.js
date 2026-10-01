@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   AURORAS, auroraBand, LIGHTNING_GAP_S, LIGHTNING_LIFE_S, lightningGap, lightningGlow,
   PLUMES, PLUME_DAY_S, plumeUp, glowNear, TELL_RADII,
+  IMPACT_GAP_S, IMPACT_LIFE_S, impactGap, impactGlow,
 } from '../src/core/glows.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 import { eventMessage } from '../src/ui/messages.js';
@@ -33,6 +34,16 @@ test('lightning comes every 0.3 to 1.6 seconds as two strokes and an afterglow',
   assert.ok(lightningGlow(0.08) < lightningGlow(0.13));
   assert.ok(lightningGlow(0.3) < lightningGlow(0.2));
   assert.equal(lightningGlow(LIGHTNING_LIFE_S), 0);
+});
+
+test('a meteoroid hitting the Moon flashes every 2 to 6 seconds, bright at once and gone in a third of a second', () => {
+  assert.equal(impactGap(() => 0), IMPACT_GAP_S[0]);
+  near(impactGap(() => 1), IMPACT_GAP_S[1]);
+  assert.equal(impactGlow(-0.01), 0);
+  assert.equal(impactGlow(0), 1);
+  assert.ok(impactGlow(0.1) < 1 && impactGlow(0.2) < impactGlow(0.1));
+  assert.equal(impactGlow(IMPACT_LIFE_S), 0);
+  assert.ok(eventMessage({ type: 'glow', id: 'impact' }).includes('공기가 없어'));
 });
 
 test('three plumes on Io and five jets round the south pole of Enceladus, turning with the ground', () => {

@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { STORIES, storySitesAt, completedStories, siteHidden } from '../src/core/stories.js';
+import { STORIES, storySitesAt, completedStories, siteHidden, siteFar, SITE_SHOWN_KM } from '../src/core/stories.js';
 import { surfaceDirection, spinAngle } from '../src/core/surface.js';
 import { BODIES, bodiesAt, bodyById } from '../src/core/bodies.js';
 import { craftAt } from '../src/core/craft.js';
@@ -14,9 +14,10 @@ const done = (position, restingOn = null, t = 0) => {
   return completedStories({ position, restingOn, bodies, craft: craftAt(t, bodies), sites: storySitesAt(t, bodies) });
 };
 
-test('there are eight story places, each with a name, a hint and a short story; events have a year', () => {
-  assert.equal(STORIES.length, 8);
-  assert.equal(new Set(STORIES.map((s) => s.id)).size, 8);
+test('there are 40 story places, each with a name, a hint and a short story; events have a year', () => {
+  assert.equal(STORIES.length, 40);
+  assert.equal(new Set(STORIES.map((s) => s.id)).size, 40);
+  assert.equal(new Set(STORIES.map((s) => s.name)).size, 40);
   for (const s of STORIES) {
     assert.ok(s.name && s.nameEn && s.hint, s.id);
     assert.ok(s.year === undefined || s.year > 1900, s.id);
@@ -41,9 +42,45 @@ test('the place turns with the body: a quarter turn of spin carries +x to -z', (
   near(spinAngle(100, 25), -Math.PI / 2, 1e-12);
 });
 
-test('four places sit on the surface of their body and move as it spins', () => {
+test('the landers and rovers of the Moon and Mars: 21 on the Moon, 11 on Mars, with Apollo 11 and Viking 1 among them', () => {
+  const on = (body) => STORIES.filter((s) => s.type === 'surface' && s.body === body);
+  assert.equal(on('moon').length, 22);
+  assert.equal(on('mars').length, 12);
+  for (const s of [...on('moon'), ...on('mars')]) {
+    assert.ok(s.year >= 1959 && s.year <= 2025, s.id);
+    assert.ok(Math.abs(s.latDeg) <= 90 && Math.abs(s.lonDeg) <= 180, s.id);
+    assert.equal(s.withinKm, 150);
+    assert.match(s.hint, /^(달|화성) .+\((북위|남위) [0-9.]+도, (동경|서경) [0-9.]+도\) 150km 안에 내려앉기$/, s.id);
+  }
+  const byId = (id) => STORIES.find((s) => s.id === id);
+  assert.equal(byId('change4').hint, '달 뒷면 폰 카르만 분화구(남위 45.4도, 동경 177.6도) 150km 안에 내려앉기');
+  assert.equal(byId('opportunity').hint, '화성 메리디아니 평원(남위 1.9도, 서경 5.5도) 150km 안에 내려앉기');
+  // No two on one body are so close that landing between them is the only way to tell:
+  // each has a spot of its own at least 100 km from the next.
   const sites = storySitesAt(0, BODIES);
-  assert.deepEqual(sites.map((s) => s.id), ['apollo11', 'viking1', 'huygens', 'dokdo']);
+  for (const body of ['moon', 'mars']) {
+    const here = sites.filter((s) => s.parent === body);
+    for (let i = 0; i < here.length; i++) {
+      for (let j = i + 1; j < here.length; j++) {
+        assert.ok(Math.hypot(...sub(here[i].position, here[j].position)) > 100, `${here[i].id} ${here[j].id}`);
+      }
+    }
+  }
+  // Landing on Jezero logs Perseverance and nothing else.
+  assert.deepEqual(done(sites.find((s) => s.id === 'perseverance').position, 'mars'), ['perseverance']);
+});
+
+test("a place's label shows only from within 300,000 km of its body", () => {
+  const moon = bodyById('moon');
+  assert.equal(SITE_SHOWN_KM, 300000);
+  assert.equal(siteFar(moon, add(moon.position, [0, moon.radiusKm + 300000, 0])), false);
+  assert.equal(siteFar(moon, add(moon.position, [0, moon.radiusKm + 300001, 0])), true);
+});
+
+test('the places sit on the surface of their body and move as it spins', () => {
+  const sites = storySitesAt(0, BODIES);
+  assert.equal(sites.length, 36);
+  assert.deepEqual(sites.slice(0, 4).map((s) => s.id), ['apollo11', 'viking1', 'huygens', 'dokdo']);
   for (const site of sites) {
     const body = bodyById(site.parent);
     near(Math.hypot(...sub(site.position, body.position)), body.radiusKm, 1e-6);

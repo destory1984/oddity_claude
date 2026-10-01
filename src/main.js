@@ -19,7 +19,7 @@ import { MISSIONS, completedMissions } from './core/missions.js';
 import {
   updateProgress, recordPhotos, recordStories, createProgress, summarize, score, isComplete,
 } from './core/progress.js';
-import { STORIES, storySitesAt, completedStories, siteHidden } from './core/stories.js';
+import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout,
 } from './ui/storage.js';
@@ -528,8 +528,11 @@ async function init() {
       throttle: input.throttle(),
       C,
       goalId: guideGoal(guide)?.targetId ?? null,
-      // A place on the far side of its body gets no label.
-      hiddenIds: [...sites.filter((s) => siteHidden(s, here(s.parent), state.position)).map((s) => s.id), ...awayCraft],
+      // A place on the far side of its body, or seen from far away, gets no label.
+      hiddenIds: [
+        ...sites.filter((s) => siteHidden(s, here(s.parent), state.position) || (s.id !== selectedId && siteFar(here(s.parent), state.position))).map((s) => s.id),
+        ...awayCraft,
+      ],
     });
     minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId });
   });

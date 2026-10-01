@@ -203,14 +203,17 @@ export function createSound() {
       pluck(392, 0, 0.1, 0.8);
     },
     count: () => tone({ freq: 880, length: 0.09, volume: 0.07 }),
+    // The latch waits for the voice to finish saying "zero" (about 0.7 s), then:
+    // a low clunk, and pshhh, the seal filling with air, bright at first and sinking
+    // as it fades; two rising bells close it.
     dock: () => {
-      noise({ length: 0.16, volume: 0.4, type: 'lowpass', freq: 700, to: 180 });
-      tone({ freq: 98, length: 0.4, volume: 0.22 });
-      // Pshhh: the seal filling with air, bright at first and sinking as it fades.
-      noise({ start: 0.08, length: 1.6, volume: 0.32, type: 'highpass', freq: 4200, to: 1400 });
-      noise({ start: 0.08, length: 0.9, volume: 0.14, type: 'bandpass', freq: 2600, to: 900 });
-      bell(659, 0.5);
-      bell(988, 0.68);
+      const after = 0.7;
+      noise({ start: after, length: 0.16, volume: 0.4, type: 'lowpass', freq: 700, to: 180 });
+      tone({ freq: 98, start: after, length: 0.4, volume: 0.22 });
+      noise({ start: after + 0.08, length: 1.6, volume: 0.32, type: 'highpass', freq: 4200, to: 1400 });
+      noise({ start: after + 0.08, length: 0.9, volume: 0.14, type: 'bandpass', freq: 2600, to: 900 });
+      bell(659, after + 0.5);
+      bell(988, after + 0.68);
     },
     undock: () => {
       noise({ length: 0.25, volume: 0.18, type: 'bandpass', freq: 900, to: 2400 });

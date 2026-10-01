@@ -10,9 +10,9 @@ import { heroScaleFor } from '../core/pose.js';
 // the world can use either.
 
 // The card: 192 x 256 drawings. Its height in the hero scene's units, where the
-// paper model stands about 2.9 tall.
-const CARD_HEIGHT = 3.4;
-const CARD_AT = [0, -0.55, 6];
+// paper model stands about 2.9 tall. (At 3.4 she covered too much of the view.)
+const CARD_HEIGHT = 2.4;
+const CARD_AT = [0, -0.75, 6];
 
 export function createSpriteHero(engine) {
   const scene = new Scene(engine);

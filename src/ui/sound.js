@@ -323,7 +323,8 @@ export function createSound() {
       const words = new SpeechSynthesisUtterance(text);
       words.lang = 'en-US';
       words.rate = 1.2;
-      words.volume = 0.9;
+      // Half of what it was (0.9): the voice stood out over everything else.
+      words.volume = 0.45;
       window.speechSynthesis.speak(words);
     },
     // Stop talking at once (the docking was called off).

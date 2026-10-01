@@ -102,7 +102,7 @@ export async function createStars(scene) {
   figureStars.addPoints(cornerList.length, (p) => {
     const [raH, decDeg] = cornerList[n++];
     p.position = skyVector(raH, decDeg).scale(79600);
-    p.color = new Color4(0.8, 0.84, 0.9, 1);
+    p.color = new Color4(0.6, 0.64, 0.7, 1);
   });
   await figureStars.buildMeshAsync();
   figureStars.mesh.alwaysSelectAsActiveMesh = true;
@@ -110,8 +110,8 @@ export async function createStars(scene) {
   const lines = CreateLineSystem('constellations', {
     lines: CONSTELLATIONS.flatMap((c) => c.lines.map((line) => line.map(([raH, decDeg]) => skyVector(raH, decDeg).scale(79500)))),
   }, scene);
-  lines.color = new Color3(0.4, 0.55, 0.78);
-  lines.alpha = 0.22;
+  lines.color = new Color3(0.2, 0.28, 0.42);
+  lines.alpha = 0.16;
   lines.isPickable = false;
   lines.alwaysSelectAsActiveMesh = true;
   return cloud.mesh;

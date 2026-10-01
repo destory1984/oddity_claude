@@ -57,6 +57,10 @@ const SIDEWAYS = 0.45;
 export const FIRST_REST_S = 3;
 export const REST_GAP_S = [8, 15];
 export const SLEEP_AFTER_S = 60;
+// Shielding her eyes near the Sun, shivering in the cold: how long each time, and the
+// SPRITE_FPS entry for each sheet.
+export const FEELING_S = 2;
+const FEELINGS = { 'hurt-bright': 'bright', cold: 'cold' };
 // The jump: how long each half of it takes (ui/warp.js).
 const WARP_OUT_S = 2.7;
 const WARP_IN_S = 2.6;
@@ -133,9 +137,6 @@ function hover(state, input, dt, fresh) {
   }
   const still = fresh ? 0 : state.still + dt;
   let { rests, nextRest } = fresh ? { rests: state.rests, nextRest: FIRST_REST_S } : state;
-  // Too bright to look, or shivering: these take the place of everything else.
-  if (input.bright) return { ...state, sheet: 'hurt-bright', time: still, frame: loop(still, SPRITE_FPS.bright), still, rests, nextRest };
-  if (input.cold) return { ...state, sheet: 'cold', time: still, frame: loop(still, SPRITE_FPS.cold), still, rests, nextRest };
   if (still >= SLEEP_AFTER_S) return { ...state, sheet: 'rest-sleep', time: still, frame: loop(still - SLEEP_AFTER_S, SPRITE_FPS.sleep), still, rests, nextRest };
   // A rest action under way.
   const action = REST_ACTIONS.find((a) => a.sheet === state.sheet);
@@ -144,7 +145,21 @@ function hover(state, input, dt, fresh) {
     if (time < (FRAMES * action.times) / SPRITE_FPS.rest) return { ...state, time, frame: loop(time, SPRITE_FPS.rest), still };
     return { ...state, sheet: 'idle', time: 0, frame: 0, still };
   }
+  // Shielding her eyes or shivering, under way.
+  const felt = FEELINGS[state.sheet];
+  if (felt && !fresh) {
+    const time = state.time + dt;
+    if (time < FEELING_S) return { ...state, time, frame: loop(time, SPRITE_FPS[felt]), still };
+    return { ...state, sheet: 'idle', time: 0, frame: 0, still };
+  }
   if (still >= nextRest) {
+    // Too bright to look, or cold: every other rest action is that instead. (It used to
+    // take the place of everything, and out past Uranus she did nothing but shiver.)
+    const feeling = input.bright ? 'hurt-bright' : input.cold ? 'cold' : null;
+    if (feeling && rests % 2 === 0) {
+      nextRest = still + FEELING_S + REST_GAP_S[0] + chance(rests + 1000) * (REST_GAP_S[1] - REST_GAP_S[0]);
+      return { ...state, sheet: feeling, time: 0, frame: 0, still, rests: rests + 1, nextRest };
+    }
     const pick = REST_ACTIONS[Math.floor(chance(rests) * REST_ACTIONS.length)];
     nextRest = still + (FRAMES * pick.times) / SPRITE_FPS.rest + REST_GAP_S[0] + chance(rests + 1000) * (REST_GAP_S[1] - REST_GAP_S[0]);
     return { ...state, sheet: pick.sheet, time: 0, frame: 0, still, rests: rests + 1, nextRest };

@@ -150,6 +150,8 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       ringCrossed,
       inBelt: inBelt(traveler, sunNow.position),
       meteorLit,
+      // The sprite character's drawing; the paper model has none.
+      heroSheet: hero.sheet ? hero.sheet() : null,
       camera: {
         forward: axis(Vector3.Forward()),
         right: axis(Vector3.Right()),

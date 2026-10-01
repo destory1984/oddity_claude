@@ -176,12 +176,22 @@ test('after a minute of stillness she dozes off, and wakes when she flies', () =
 });
 
 test('too bright near the Sun she shields her eyes; in the dark and cold she shivers', () => {
-  let { state } = run(createSpriteState(), { speed: 0, bright: true }, 1);
-  assert.equal(state.sheet, 'hurt-bright');
-  state = run(state, { speed: 0, cold: true }, 1).state;
-  assert.equal(state.sheet, 'cold');
-  state = run(state, STILL, 0.1).state;
-  assert.equal(state.sheet, 'idle');
+  // Not all the time: it comes as every other rest action, two seconds long.
+  const bright = run(createSpriteState(), { speed: 0, bright: true }, 55).seen;
+  const cold = run(createSpriteState(), { speed: 0, cold: true }, 55).seen;
+  assert.equal(bright[60].sheet, 'idle');
+  assert.equal(cold[60].sheet, 'idle');
+  assert.ok(sheetsOf(bright).includes('hurt-bright') && !sheetsOf(bright).includes('cold'));
+  assert.ok(sheetsOf(cold).includes('cold'));
+  assert.ok(sheetsOf(cold).some((s) => s.startsWith('rest-')), 'she still does her other rest actions');
+  const shivering = cold.filter((s) => s.sheet === 'cold').length / 60;
+  assert.ok(shivering >= 1.9 && shivering < 55 / 3, `${shivering} s of 55 shivering`);
+  // Each shiver runs its two seconds and ends hovering.
+  const first = cold.findIndex((s) => s.sheet === 'cold');
+  assert.equal(cold[first + 60].sheet, 'cold');
+  assert.equal(cold[first + 125].sheet, 'idle');
+  // Where it is neither, never.
+  assert.ok(!sheetsOf(run(createSpriteState(), STILL, 55).seen).some((s) => s === 'cold' || s === 'hurt-bright'));
 });
 
 test('docking: her arm goes out as she glides in; once docked she turns round and is at rest', () => {

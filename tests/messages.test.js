@@ -59,6 +59,13 @@ test('entering the asteroid belt says how empty the real one is', () => {
   );
 });
 
+test('shivering and shielding her eyes come with the reason', () => {
+  assert.equal(eventMessage({ type: 'coldFar', au: 30.1 }), '춥습니다. 태양에서 30AU 떨어진 이곳의 햇빛은 지구의 900분의 1입니다.');
+  assert.equal(eventMessage({ type: 'coldFar', au: 39.5 }), '춥습니다. 태양에서 40AU 떨어진 이곳의 햇빛은 지구의 1,600분의 1입니다.');
+  assert.equal(eventMessage({ type: 'coldShadow' }), '춥습니다. 그림자 속이라 햇빛이 들지 않습니다.');
+  assert.equal(eventMessage({ type: 'tooBright' }), '눈이 부십니다. 태양 표면에서 태양 반지름(약 70만km) 안에 들어와 있습니다.');
+});
+
 test('reaching a story place names it and tells its story on the next line', () => {
   assert.equal(
     eventMessage({ type: 'story', name: '지오토의 혜성 통과', text: '1986년의 일입니다.' }),

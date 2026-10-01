@@ -58,6 +58,15 @@ export function eventMessage(event, bodies = []) {
       return `${event.name}${withParticle(event.name)} 도킹을 풀었습니다.`;
     case 'meteor':
       return '지구의 밤 쪽에 별똥별이 떨어집니다. 혜성이 흘린 부스러기가 대기에서 타는 빛입니다.';
+    // Why the sprite character shivers or shields her eyes (core/sprite.js).
+    case 'coldFar': {
+      const au = Math.round(event.au);
+      return `춥습니다. 태양에서 ${au}AU 떨어진 이곳의 햇빛은 지구의 ${(au * au).toLocaleString('en-US')}분의 1입니다.`;
+    }
+    case 'coldShadow':
+      return '춥습니다. 그림자 속이라 햇빛이 들지 않습니다.';
+    case 'tooBright':
+      return '눈이 부십니다. 태양 표면에서 태양 반지름(약 70만km) 안에 들어와 있습니다.';
     case 'beltEntered':
       return '소행성대에 들어섰습니다.\n실제로는 소행성 사이가 평균 100만km쯤 떨어져 있습니다.';
     default:

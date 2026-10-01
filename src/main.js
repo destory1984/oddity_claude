@@ -99,6 +99,7 @@ let simTime = 0;
 let beltSeen = false;
 // So does the note on the first shooting star over Earth.
 let meteorSeen = false;
+let feelingTold = null;
 // The fly-by of a planet in progress, watched for a slingshot (core/slingshot.js).
 let pass = null;
 // The craft the traveler is docked with, and the glide toward it (core/dock.js startDocking).
@@ -638,6 +639,17 @@ async function init() {
       meteorSeen = true;
       toast.show(eventMessage({ type: 'meteor' }));
     }
+    // Say why she shivers or shields her eyes: once each time she comes into the cold
+    // or the glare, at the first such drawing.
+    const sunKm = surfaceDistance(state.position, here('sun'));
+    let feeling = null;
+    if (view.heroSheet === 'hurt-bright') feeling = { type: 'tooBright' };
+    else if (view.heroSheet === 'cold') feeling = sunKm > 19 * AU_KM / 100 ? { type: 'coldFar', au: sunKm * 100 / AU_KM } : { type: 'coldShadow' };
+    if (feeling && feelingTold !== feeling.type) {
+      feelingTold = feeling.type;
+      toast.show(eventMessage(feeling));
+    }
+    if (!docked && shownSpeed() > 1) feelingTold = null;
     if (view.inBelt && !beltSeen) {
       beltSeen = true;
       toast.show(eventMessage({ type: 'beltEntered' }));

@@ -904,6 +904,10 @@ nav button {
     width:100px;
     height:100px;
   }
+  /* The touch stick sits at the left edge here; the map moves beside it. */
+  body.touch #minimap {
+    left:124px;
+  }
 }
 
 /* The flight buttons were as tall as the speed readout; about 70% of that is enough. */

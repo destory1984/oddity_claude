@@ -1,5 +1,5 @@
 import {
-  TransformNode, StandardMaterial, DynamicTexture, Color3, Vector3, CreateCylinder, CreateBox,
+  TransformNode, StandardMaterial, DynamicTexture, Color3, Vector3, CreateCylinder, CreateBox, CreateSphere,
 } from './babylon.js';
 import { KM_PER_UNIT } from '../core/bodies.js';
 import { CRAFT_SIZE_KM } from '../core/craft.js';
@@ -21,6 +21,17 @@ const RULES = {
   // Chandra comes within 1,600 km of Earth, so it too must stay small.
   chandra: { visibleKm: 100000, maxKm: 600 },
   euclid: { visibleKm: 400000, maxKm: 4000 },
+  // Low over a planet: small, like Hubble.
+  iss: { visibleKm: 60000, maxKm: 300 },
+  tiangong: { visibleKm: 60000, maxKm: 300 },
+  sputnik: { visibleKm: 60000, maxKm: 300 },
+  mro: { visibleKm: 60000, maxKm: 200 },
+  juno: { visibleKm: 400000, maxKm: 4000 },
+  cassini: { visibleKm: 400000, maxKm: 4000 },
+  parker: { visibleKm: 400000, maxKm: 4000 },
+  roadster: { visibleKm: 400000, maxKm: 4000 },
+  newHorizons: { visibleKm: 3e6, maxKm: Infinity },
+  pioneer10: { visibleKm: 3e6, maxKm: Infinity },
 };
 
 function paint(scene, name, hex, glow = 0.25) {
@@ -274,6 +285,161 @@ function euclid(scene, name, mats) {
   return root;
 }
 
+// The International Space Station: a long truss with four pairs of solar wings at its
+// ends, white radiators, and a row of crew modules across the middle.
+function iss(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(CreateBox(`${name}Truss`, { width: 1, height: 0.035, depth: 0.035 }, scene), root, mats.grey);
+  for (const s of [-1, 1]) {
+    for (const [k, x] of [[0, 0.3], [1, 0.45]]) {
+      for (const up of [-1, 1]) {
+        part(CreateBox(`${name}Wing${s}${k}${up}`, { width: 0.11, height: 0.3, depth: 0.006 }, scene), root, mats.cells, [s * x, up * 0.19, 0.01]);
+      }
+    }
+    part(CreateBox(`${name}Radiator${s}`, { width: 0.07, height: 0.006, depth: 0.2 }, scene), root, mats.white, [s * 0.12, 0, -0.13]);
+  }
+  for (const [i, z, d, length] of [[0, 0.14, 0.07, 0.2], [1, -0.02, 0.075, 0.12], [2, -0.2, 0.065, 0.22]]) {
+    part(cyl(scene, `${name}Module${i}`, { height: length, diameter: d, tessellation: 16 }), root, mats.foil, [0, -0.04, z], [QUARTER, 0, 0]);
+  }
+  part(cyl(scene, `${name}Lab`, { height: 0.2, diameter: 0.065, tessellation: 16 }), root, mats.white, [0, -0.04, 0.2], [0, 0, QUARTER]);
+  return root;
+}
+
+// Tiangong: three modules joined in a T, with a pair of solar wings on each.
+function tiangong(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(cyl(scene, `${name}Core`, { height: 0.55, diameter: 0.12, tessellation: 18 }), root, mats.white, [0, 0, -0.1], [QUARTER, 0, 0]);
+  part(cyl(scene, `${name}Hub`, { height: 0.14, diameter: 0.14, tessellation: 18 }), root, mats.foil, [0, 0, 0.2], [QUARTER, 0, 0]);
+  for (const s of [-1, 1]) {
+    part(cyl(scene, `${name}Lab${s}`, { height: 0.36, diameter: 0.12, tessellation: 18 }), root, mats.white, [s * 0.25, 0, 0.2], [0, 0, QUARTER]);
+    part(CreateBox(`${name}LabWing${s}`, { width: 0.1, height: 0.5, depth: 0.006 }, scene), root, mats.cells, [s * 0.44, 0, 0.2]);
+    part(CreateBox(`${name}CoreWing${s}`, { width: 0.3, height: 0.08, depth: 0.006 }, scene), root, mats.cells, [s * 0.22, 0, -0.3]);
+  }
+  return root;
+}
+
+// Sputnik 1: a polished ball with four whip antennas swept back.
+function sputnik(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  const ball = CreateSphere(`${name}Ball`, { diameter: 0.3, segments: 20 }, scene);
+  part(ball, root, mats.chrome);
+  for (const [i, x, y] of [[0, 1, 1], [1, -1, 1], [2, 1, -1], [3, -1, -1]]) {
+    // Each whip leaves the ball and trails back at about 35 degrees from the axis.
+    const d = [x * 0.4, y * 0.4, -0.82];
+    const whip = part(cyl(scene, `${name}Whip${i}`, { height: 0.8, diameter: 0.012, tessellation: 5 }), root, mats.chrome, d.map((n) => n * 0.53));
+    // Turn the cylinder's own axis (+y) onto d: about x, then about z.
+    whip.rotation.set(Math.atan2(d[2], d[1]), 0, -Math.asin(d[0] / Math.hypot(...d)));
+  }
+  return root;
+}
+
+// MRO: a box bus with two big solar wings and a three-metre dish on top.
+function mro(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(CreateBox(`${name}Bus`, { width: 0.2, height: 0.22, depth: 0.2 }, scene), root, mats.goldFoil);
+  part(cyl(scene, `${name}Dish`, { height: 0.06, diameterTop: 0.36, diameterBottom: 0.06, tessellation: 24 }), root, mats.white, [0, 0.2, 0]);
+  part(cyl(scene, `${name}Camera`, { height: 0.16, diameter: 0.08, tessellation: 14 }), root, mats.dark, [0, -0.17, 0.02]);
+  for (const s of [-1, 1]) {
+    part(CreateBox(`${name}Wing${s}`, { width: 0.36, height: 0.2, depth: 0.008 }, scene), root, mats.cells, [s * 0.3, 0, 0.02], [0, 0, s * 0.25]);
+  }
+  return root;
+}
+
+// Juno: a six-sided body with three long solar wings like a pinwheel and a dish on top.
+function juno(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(cyl(scene, `${name}Bus`, { height: 0.1, diameter: 0.2, tessellation: 6 }), root, mats.goldFoil, [0, 0, 0], [QUARTER, 0, 0]);
+  part(cyl(scene, `${name}Dish`, { height: 0.04, diameterTop: 0.2, diameterBottom: 0.04, tessellation: 20 }), root, mats.white, [0, 0, 0.07], [QUARTER, 0, 0]);
+  for (let k = 0; k < 3; k++) {
+    const arm = new TransformNode(`${name}Arm${k}`, scene);
+    arm.parent = root;
+    arm.rotation.z = (k * 2 * Math.PI) / 3;
+    part(CreateBox(`${name}Wing${k}`, { width: 0.12, height: 0.4, depth: 0.006 }, scene), arm, mats.cells, [0, 0.3, 0]);
+  }
+  return root;
+}
+
+// Cassini: a four-metre white dish over a gold body, the Huygens probe on its side,
+// a long magnetometer boom and three power units at the foot.
+function cassini(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(cyl(scene, `${name}Dish`, { height: 0.08, diameterTop: 0.5, diameterBottom: 0.1, tessellation: 28 }), root, mats.white, [0, 0.3, 0]);
+  part(cyl(scene, `${name}Body`, { height: 0.5, diameter: 0.2, tessellation: 12 }), root, mats.goldFoil);
+  part(cyl(scene, `${name}Huygens`, { height: 0.05, diameter: 0.22, tessellation: 20 }), root, mats.goldFoil, [0, -0.02, 0.13], [QUARTER, 0, 0]);
+  part(cyl(scene, `${name}Boom`, { height: 0.7, diameter: 0.012, tessellation: 5 }), root, mats.grey, [0.42, 0.1, 0], [0, 0, QUARTER]);
+  part(cyl(scene, `${name}Engine`, { height: 0.1, diameterTop: 0.06, diameterBottom: 0.12, tessellation: 14 }), root, mats.dark, [0, -0.3, 0]);
+  for (let k = 0; k < 3; k++) {
+    const a = (k * 2 * Math.PI) / 3;
+    part(cyl(scene, `${name}Power${k}`, { height: 0.14, diameter: 0.04, tessellation: 8 }), root, mats.dark, [Math.cos(a) * 0.14, -0.2, Math.sin(a) * 0.14]);
+  }
+  return root;
+}
+
+// Parker Solar Probe: a white heat shield held toward the Sun, a tapering body in its
+// shadow, two small solar panels and four antennas peeking past the shield.
+function parker(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(cyl(scene, `${name}Shield`, { height: 0.05, diameter: 0.56, tessellation: 6 }), root, mats.white, [0, 0, 0.3], [QUARTER, 0, 0]);
+  part(cyl(scene, `${name}Truss`, { height: 0.2, diameterTop: 0.3, diameterBottom: 0.16, tessellation: 6 }), root, mats.grey, [0, 0, 0.17], [QUARTER, 0, 0]);
+  part(cyl(scene, `${name}Bus`, { height: 0.34, diameter: 0.2, tessellation: 6 }), root, mats.goldFoil, [0, 0, -0.1], [QUARTER, 0, 0]);
+  for (const s of [-1, 1]) {
+    part(CreateBox(`${name}Panel${s}`, { width: 0.22, height: 0.008, depth: 0.12 }, scene), root, mats.cells, [s * 0.2, 0, -0.05], [0, 0, s * 0.6]);
+    part(cyl(scene, `${name}Whip${s}a`, { height: 0.5, diameter: 0.008, tessellation: 4 }), root, mats.grey, [s * 0.3, 0.2, 0.2], [0, 0, -s * 0.9]);
+    part(cyl(scene, `${name}Whip${s}b`, { height: 0.5, diameter: 0.008, tessellation: 4 }), root, mats.grey, [s * 0.3, -0.2, 0.2], [0, 0, s * 0.9]);
+  }
+  return root;
+}
+
+// The Tesla Roadster on its rocket stage: a red open car with Starman at the wheel.
+function roadster(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(cyl(scene, `${name}Stage`, { height: 0.5, diameter: 0.26, tessellation: 20 }), root, mats.white, [0, -0.2, 0], [0, 0, 0]);
+  const car = new TransformNode(`${name}Car`, scene);
+  car.parent = root;
+  car.position.set(0, 0.2, 0);
+  car.rotation.x = -0.35;
+  part(CreateBox(`${name}Body`, { width: 0.2, height: 0.06, depth: 0.46 }, scene), car, mats.red);
+  part(CreateBox(`${name}Nose`, { width: 0.18, height: 0.04, depth: 0.14 }, scene), car, mats.red, [0, 0.03, 0.14], [0.25, 0, 0]);
+  part(CreateBox(`${name}Tail`, { width: 0.19, height: 0.05, depth: 0.14 }, scene), car, mats.red, [0, 0.035, -0.15]);
+  part(CreateBox(`${name}Glass`, { width: 0.18, height: 0.06, depth: 0.01 }, scene), car, mats.dark, [0, 0.07, 0.05], [-0.6, 0, 0]);
+  part(CreateBox(`${name}Seats`, { width: 0.16, height: 0.02, depth: 0.12 }, scene), car, mats.dark, [0, 0.035, -0.03]);
+  // Starman: a white suit and helmet, one arm on the door.
+  part(CreateBox(`${name}Suit`, { width: 0.05, height: 0.07, depth: 0.04 }, scene), car, mats.white, [-0.045, 0.075, -0.04]);
+  part(CreateSphere(`${name}Helmet`, { diameter: 0.045, segments: 10 }, scene), car, mats.white, [-0.045, 0.13, -0.035]);
+  for (const [i, x, z] of [[0, 1, 1], [1, -1, 1], [2, 1, -1], [3, -1, -1]]) {
+    part(cyl(scene, `${name}Wheel${i}`, { height: 0.03, diameter: 0.08, tessellation: 14 }), car, mats.dark, [x * 0.1, -0.03, z * 0.15], [0, 0, QUARTER]);
+  }
+  return root;
+}
+
+// New Horizons: a gold wedge the size of a piano, a white dish on top, and one black
+// power unit sticking out of a corner.
+function newHorizons(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(cyl(scene, `${name}Bus`, { height: 0.12, diameter: 0.5, tessellation: 3 }), root, mats.goldFoil, [0, 0, 0], [QUARTER, 0, 0]);
+  part(cyl(scene, `${name}Dish`, { height: 0.07, diameterTop: 0.42, diameterBottom: 0.08, tessellation: 24 }), root, mats.white, [0, 0, 0.12], [QUARTER, 0, 0]);
+  part(cyl(scene, `${name}Feed`, { height: 0.14, diameter: 0.02, tessellation: 6 }), root, mats.grey, [0, 0, 0.22], [QUARTER, 0, 0]);
+  part(cyl(scene, `${name}Power`, { height: 0.32, diameter: 0.07, tessellation: 10 }), root, mats.dark, [0.36, 0, 0], [0, 0, QUARTER]);
+  part(CreateBox(`${name}Camera`, { width: 0.06, height: 0.06, depth: 0.14 }, scene), root, mats.goldFoil, [-0.14, -0.16, -0.02]);
+  return root;
+}
+
+// Pioneer 10: a 2.7-metre dish on a small six-sided body, two power units out on
+// booms, and a long boom for the magnetometer.
+function pioneer(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(cyl(scene, `${name}Dish`, { height: 0.08, diameterTop: 0.5, diameterBottom: 0.1, tessellation: 26 }), root, mats.white, [0, 0, 0.06], [QUARTER, 0, 0]);
+  part(cyl(scene, `${name}Feed`, { height: 0.2, diameter: 0.015, tessellation: 5 }), root, mats.grey, [0, 0, 0.2], [QUARTER, 0, 0]);
+  part(cyl(scene, `${name}Bus`, { height: 0.1, diameter: 0.24, tessellation: 6 }), root, mats.goldFoil, [0, 0, -0.04], [QUARTER, 0, 0]);
+  part(CreateBox(`${name}Plaque`, { width: 0.07, height: 0.05, depth: 0.004 }, scene), root, mats.gold, [0.06, -0.11, -0.04], [0, 0, 0]);
+  for (const s of [-1, 1]) {
+    part(cyl(scene, `${name}Boom${s}`, { height: 0.34, diameter: 0.01, tessellation: 5 }), root, mats.grey, [s * 0.26, 0.1, -0.04], [0, 0, QUARTER - s * 0.35]);
+    part(cyl(scene, `${name}Power${s}`, { height: 0.1, diameter: 0.045, tessellation: 8 }), root, mats.dark, [s * 0.44, 0.165, -0.04], [0, 0, QUARTER - s * 0.35]);
+  }
+  part(cyl(scene, `${name}MagBoom`, { height: 0.6, diameter: 0.008, tessellation: 4 }), root, mats.grey, [0, -0.4, -0.04]);
+  return root;
+}
+
 export function createCraft(scene, craftList) {
   const mats = {
     white: paint(scene, 'craftWhite', '#e8e6e0'),
@@ -283,11 +449,16 @@ export function createCraft(scene, craftList) {
     gold: paint(scene, 'craftGold', '#e2b648', 0.5),
     solar: paint(scene, 'craftSolar', '#27408f', 0.5),
     shield: paint(scene, 'craftShield', '#6f6384', 0.12),
+    red: paint(scene, 'craftRed', '#b3121d', 0.35),
+    chrome: paint(scene, 'craftChrome', '#d9dde4', 0.3),
     cells: textured(scene, 'craftCells', solarCells(scene), 0.45),
     foil: textured(scene, 'craftFoil', foil(scene), 0.3),
     goldFoil: textured(scene, 'craftGoldFoil', foil(scene, 'craftGoldFoilMap', '#b8892f', [1, 0.78, 0.36]), 0.3),
   };
-  const build = { voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid };
+  const build = {
+    voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid,
+    iss, tiangong, sputnik, mro, juno, cassini, parker, roadster, newHorizons, pioneer10: pioneer,
+  };
   const nodes = new Map(craftList.map((c) => [c.id, build[c.id](scene, c.id, mats)]));
 
   // craft: this frame's positions (km); position: the traveler (km); sunPosition (km).

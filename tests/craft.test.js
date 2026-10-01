@@ -8,14 +8,18 @@ import { createState, step } from '../src/core/game.js';
 const dist = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
 const near = (a, b, eps) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 
-test('seven craft: the two Voyagers and five space telescopes', () => {
-  assert.deepEqual(CRAFT.map((c) => c.id), ['voyager1', 'voyager2', 'hubble', 'jwst', 'kepler', 'chandra', 'euclid']);
+test('seventeen craft: probes, telescopes, space stations, the first satellite and a car', () => {
+  assert.deepEqual(CRAFT.map((c) => c.id), [
+    'voyager1', 'voyager2', 'hubble', 'jwst', 'kepler', 'chandra', 'euclid',
+    'iss', 'tiangong', 'sputnik', 'mro', 'juno', 'cassini', 'parker', 'roadster', 'newHorizons', 'pioneer10',
+  ]);
+  assert.equal(new Set(CRAFT.map((c) => c.name)).size, CRAFT.length);
   for (const c of CRAFT) assert.ok(c.name && c.nameEn && c.kind === 'craft');
 });
 
 test('every craft has a launch year and a short introduction for the docking card', () => {
   for (const c of CRAFT) {
-    assert.ok(c.launched >= 1977 && c.launched <= 2023, c.id);
+    assert.ok(c.launched >= 1957 && c.launched <= 2023, c.id);
     assert.ok(c.intro.length >= 40 && c.intro.length <= 150, `${c.id}: ${c.intro.length}`);
     assert.ok(c.intro.endsWith('.') && !c.intro.includes('~'), c.id);
   }
@@ -139,4 +143,92 @@ test('the Voyagers keep leaving: 17 and 15.3 km/s, shrunk 1/100 like every dista
   const a = dir(0);
   const b = dir(5e6);
   for (let i = 0; i < 3; i++) near(a[i], b[i], 1e-9);
+});
+
+const AU = 149597870.7;
+const bodyOf = (bodies, id) => bodies.find((b) => b.id === id);
+const craftOf = (t, bodies, id) => craftAt(t, bodies).find((c) => c.id === id);
+// Lowest and highest height above a body's surface over one lap of `periodS`.
+function heights(id, parentId, periodS) {
+  const bodies = bodiesAt(0);
+  const parent = bodyOf(bodies, parentId);
+  let lowest = Infinity;
+  let highest = 0;
+  for (let i = 0; i <= 600; i++) {
+    const km = dist(craftOf((i / 600) * periodS, bodies, id).position, parent.position) - parent.radiusKm;
+    lowest = Math.min(lowest, km);
+    highest = Math.max(highest, km);
+  }
+  return [lowest, highest];
+}
+
+test('the stations and the first satellite circle Earth at their own heights', () => {
+  for (const [id, km] of [['iss', 420], ['tiangong', 390], ['sputnik', 900]]) {
+    const [lowest, highest] = heights(id, 'earth', 800 * 720);
+    near(lowest, km, 1e-3);
+    near(highest, km, 1e-3);
+  }
+  // They do not fly in formation: at the start no two of the five near Earth are within 500 km.
+  const bodies = bodiesAt(0);
+  const near5 = ['hubble', 'iss', 'tiangong', 'sputnik', 'chandra'].map((id) => craftOf(0, bodies, id));
+  for (let i = 0; i < near5.length; i++) {
+    for (let j = i + 1; j < near5.length; j++) assert.ok(dist(near5[i].position, near5[j].position) > 500, `${near5[i].id} ${near5[j].id}`);
+  }
+});
+
+test('MRO skims Mars at 300 km; Cassini circles Saturn outside the rings', () => {
+  const [low, high] = heights('mro', 'mars', 600 * 720);
+  near(low, 300, 1e-3);
+  near(high, 300, 1e-3);
+  const [cLow, cHigh] = heights('cassini', 'saturn', 900 * 720);
+  near(cLow + 58232, 160000, 1e-3);
+  near(cHigh + 58232, 160000, 1e-3);
+  assert.ok(cLow + 58232 > 136775);
+});
+
+test('Juno swings from 420 km above Jupiter out to 800,000 km, over the poles', () => {
+  // It whips past its lowest point in minutes, so look at that moment itself (day 6).
+  const start = bodiesAt(0);
+  const jupiter = bodyOf(start, 'jupiter');
+  near(dist(craftOf(6 * 86400, start, 'juno').position, jupiter.position) - jupiter.radiusKm, 420, 1);
+  const [low, high] = heights('juno', 'jupiter', 53 * 86400);
+  assert.ok(low >= 420 - 1);
+  near(high, 803000, 3000);
+  // Polar: a quarter of the way round it is far above the planets' plane.
+  const bodies = bodiesAt(0);
+  let top = 0;
+  for (let i = 0; i <= 200; i++) {
+    const juno = craftOf((i / 200) * 53 * 86400, bodies, 'juno');
+    top = Math.max(top, Math.abs(juno.position[1] - bodyOf(bodies, 'jupiter').position[1]));
+  }
+  assert.ok(top > 50000, `${top}`);
+});
+
+test('Parker dives to 62,000 km above the Sun and out past Venus; the Roadster loops between Earth and Mars', () => {
+  const [pLow, pHigh] = heights('parker', 'sun', 88 * 86400);
+  near(pLow, (6.9e6 - 696340) / 100, 500);
+  near(pHigh, (0.73 * AU - 696340) / 100, 2000);
+  const [rLow, rHigh] = heights('roadster', 'sun', 557 * 86400);
+  near(rLow, (0.986 * AU - 696340) / 100, 2000);
+  near(rHigh, (1.664 * AU - 696340) / 100, 2000);
+});
+
+test('New Horizons and Pioneer 10 are leaving, far beyond Pluto', () => {
+  const bodies = bodiesAt(0);
+  const pluto = dist(bodyOf(bodies, 'pluto').position, bodyOf(bodies, 'sun').position);
+  for (const [id, au, kmPerS] of [['newHorizons', 63, 13.7], ['pioneer10', 140, 11.9]]) {
+    const now = dist(craftOf(0, bodies, id).position, bodyOf(bodies, 'sun').position);
+    assert.ok(now > pluto, id);
+    near(now, (au * AU) / 100, 1);
+    near(dist(craftOf(7200, bodies, id).position, bodyOf(bodies, 'sun').position) - now, (kmPerS * 7200) / 100, 1e-3);
+  }
+});
+
+test('no craft is ever inside a body', () => {
+  for (const t of [0, 1e5, 3.3e6, 2e7, 9e7]) {
+    const bodies = bodiesAt(t);
+    for (const c of craftAt(t, bodies)) {
+      for (const b of bodies) assert.ok(dist(c.position, b.position) > b.radiusKm, `${c.id} inside ${b.id} at ${t}`);
+    }
+  }
 });

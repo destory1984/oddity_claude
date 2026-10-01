@@ -72,10 +72,86 @@ export const CRAFT = [
     launched: 2023,
     intro: '제임스 웹처럼 L2 점 둘레를 돕니다. 6년 동안 하늘의 3분의 1을 찍어, 은하 수십억 개로 암흑 물질과 암흑 에너지의 지도를 만듭니다.',
   },
+  // ring: a circle round the parent, `altitudeKm` above its surface (game km), one lap
+  // every `lapPlayS` seconds of play (real laps of 90 minutes would take 8 seconds, too
+  // fast to catch), tilted `tiltDeg` to the planets' plane, starting `phaseDeg` round.
+  {
+    id: 'iss', name: '국제우주정거장', nameEn: 'ISS', kind: 'craft', parent: 'earth',
+    ring: { altitudeKm: 420, lapPlayS: 540, tiltDeg: 51.6, phaseDeg: 120 },
+    launched: 1998,
+    intro: '여러 나라가 함께 지은 길이 109m의 우주정거장입니다. 지구 420km 위를 92분에 한 바퀴 돌고, 2000년부터 사람이 끊이지 않고 살고 있습니다.',
+  },
+  {
+    id: 'tiangong', name: '톈궁 우주정거장', nameEn: 'Tiangong', kind: 'craft', parent: 'earth',
+    ring: { altitudeKm: 390, lapPlayS: 570, tiltDeg: 41.5, phaseDeg: 240 },
+    launched: 2021,
+    intro: '중국이 지은 우주정거장입니다. 모듈 셋이 T자로 이어져 있고, 우주비행사 셋이 여섯 달씩 머뭅니다.',
+  },
+  {
+    id: 'sputnik', name: '스푸트니크 1호', nameEn: 'Sputnik 1', kind: 'craft', parent: 'earth',
+    ring: { altitudeKm: 900, lapPlayS: 700, tiltDeg: 65, phaseDeg: 300 },
+    launched: 1957,
+    intro: '1957년 10월 4일에 올라간 첫 인공위성입니다. 지름 58cm 공에서 삐삐 소리를 21일 동안 보냈고, 석 달 뒤 대기에서 타 버렸습니다. 여기 있는 것은 그 기념입니다.',
+  },
+  {
+    id: 'mro', name: '화성 정찰 궤도선', nameEn: 'MRO', kind: 'craft', parent: 'mars',
+    ring: { altitudeKm: 300, lapPlayS: 600, tiltDeg: 87, phaseDeg: 0 },
+    launched: 2005,
+    intro: '화성 300km 위에서 지름 50cm 카메라로 표면을 찍습니다. 탁자만 한 것까지 보여서, 화성에 내린 탐사차들의 바퀴 자국도 찍었습니다.',
+  },
+  // loop: a real ellipse (km and seconds, before any squeeze) round the parent or, with
+  // no parent, the Sun; heights shrink by `squeeze` as for moons (10) or planets (100).
+  {
+    id: 'juno', name: '주노', nameEn: 'Juno', kind: 'craft', parent: 'jupiter',
+    loop: { lowKm: 69911 + 4200, highKm: 8.1e6, periodS: 53 * 86400, lowAtS: 6 * 86400, tiltDeg: 90, turnDeg: 30, squeeze: 10 },
+    launched: 2011,
+    intro: '2016년부터 목성의 극 위를 지나며 돕니다. 길이 9m 태양전지 날개 셋을 단, 햇빛만으로 목성까지 간 첫 탐사선입니다.',
+  },
+  {
+    id: 'cassini', name: '카시니', nameEn: 'Cassini', kind: 'craft', parent: 'saturn',
+    ring: { altitudeKm: 160000 - 58232, lapPlayS: 900, tiltDeg: 60, phaseDeg: 45 },
+    launched: 1997,
+    intro: '13년 동안 토성을 294바퀴 돌고 타이탄에 하위헌스를 내려보냈습니다. 2017년 토성 대기로 뛰어들어 임무를 마쳤습니다. 여기 있는 것은 그 기념입니다.',
+  },
+  {
+    id: 'parker', name: '파커 태양 탐사선', nameEn: 'Parker', kind: 'craft', parent: null,
+    loop: { lowKm: 6.9e6, highKm: 0.73 * AU_KM, periodS: 88 * 86400, lowAtS: 20 * 86400, tiltDeg: 3.4, turnDeg: 40, squeeze: 100 },
+    launched: 2018,
+    intro: '태양의 코로나 속을 지나는 탐사선입니다. 가장 가까울 때 초속 190km가 넘어 사람이 만든 가장 빠른 물체이고, 11cm 두께 방패로 1,400도를 견딥니다.',
+  },
+  {
+    id: 'roadster', name: '테슬라 로드스터', nameEn: 'Tesla Roadster', kind: 'craft', parent: null,
+    loop: { lowKm: 0.986 * AU_KM, highKm: 1.664 * AU_KM, periodS: 557 * 86400, lowAtS: 150 * 86400, tiltDeg: 1, turnDeg: 200, squeeze: 100 },
+    launched: 2018,
+    intro: '팰컨 헤비의 첫 발사에 실려 올라간 빨간 전기차입니다. 운전석에 우주복 마네킹 스타맨이 앉아, 557일에 한 바퀴씩 태양을 돕니다.',
+  },
+  {
+    id: 'newHorizons', name: '뉴허라이즌스', nameEn: 'New Horizons', kind: 'craft', parent: null, au: 63, kmPerS: 13.7, lonDeg: 293, latDeg: 2,
+    launched: 2006,
+    intro: '2015년 명왕성을 처음으로 가까이에서 찍었습니다. 그 뒤 카이퍼대의 아로코스를 지나, 지금도 초속 14km로 태양계를 떠나고 있습니다.',
+  },
+  {
+    id: 'pioneer10', name: '파이어니어 10호', nameEn: 'Pioneer 10', kind: 'craft', parent: null, au: 140, kmPerS: 11.9, lonDeg: 80, latDeg: 3,
+    launched: 1972,
+    intro: '소행성대를 처음 건너 1973년 목성을 처음 지나갔습니다. 사람 남녀와 지구의 위치를 새긴 금속판을 싣고 있고, 2003년 교신이 끊겼습니다.',
+  },
 ];
 
 // Shown size: real craft are metres across and would be invisible at this scale.
 export const CRAFT_SIZE_KM = 30;
+
+// A point on a tilted circle or ellipse round `centre`: `out` km away, `angleOrXy` either
+// an angle or the ellipse's own [x, y] direction; then turned `turnDeg` about north.
+function onOrbit(centre, out, [x, y], tiltDeg, turnDeg = 0) {
+  const tilt = rad(tiltDeg);
+  const turn = rad(turnDeg);
+  const flat = [x, y * Math.cos(tilt)];
+  return [
+    centre[0] + out * (flat[0] * Math.cos(turn) - flat[1] * Math.sin(turn)),
+    centre[1] + out * y * Math.sin(tilt),
+    centre[2] + out * (flat[0] * Math.sin(turn) + flat[1] * Math.cos(turn)),
+  ];
+}
 
 export function craftById(id) {
   return CRAFT.find((c) => c.id === id);
@@ -122,6 +198,17 @@ export function craftAt(timeS, bodies) {
         earth.position[1] + (y / r) * out * Math.sin(tilt),
         earth.position[2] + (y / r) * out * Math.cos(tilt),
       ];
+    } else if (craft.ring) {
+      const parent = bodies.find((b) => b.id === craft.parent);
+      const a = (2 * Math.PI * timeS) / (craft.ring.lapPlayS * 720) + rad(craft.ring.phaseDeg);
+      position = onOrbit(parent.position, parent.radiusKm + craft.ring.altitudeKm, [Math.cos(a), Math.sin(a)], craft.ring.tiltDeg);
+    } else if (craft.loop) {
+      const parent = bodies.find((b) => b.id === craft.parent) ?? sun;
+      const { lowKm, highKm, periodS, lowAtS, tiltDeg, turnDeg, squeeze } = craft.loop;
+      const { x, y, r } = ellipsePoint({
+        semiMajorKm: (lowKm + highKm) / 2, eccentricity: (highKm - lowKm) / (highKm + lowKm), periodS, perihelionAtS: lowAtS,
+      }, timeS);
+      position = onOrbit(parent.position, compressedCenterDistance(r, parent.radiusKm, 0, squeeze), [x / r, y / r], tiltDeg, turnDeg);
     } else {
       // Still flying straight out; on the game clock about 110 to 120 km each second of play.
       const r = (craft.au * AU_KM + craft.kmPerS * timeS) / DISTANCE_COMPRESSION;

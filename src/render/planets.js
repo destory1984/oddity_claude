@@ -154,10 +154,13 @@ const LOOKS = {
   venus: {
     shader: 'textured', map: 'venus.jpg', saturation: 0.9, tint: [1.02, 0.98, 0.9], base: [0.92, 0.82, 0.6],
     mapWeight: 1, haze: 1.1, detail: 0.03, dayS: -20997000,
+    rim: [1, 0.9, 0.7], rimLight: 1.2,
   },
   mars: {
     shader: 'textured', map: 'mars.jpg', saturation: 0.85, tint: [1, 0.98, 0.95], base: [0.72, 0.42, 0.26],
     mapWeight: 1, haze: 0.4, detail: 0.14, dayS: SPIN_DAY_S.mars,
+    // Seen from behind, the dust in its air glows blue (the blue sunsets the rovers photograph).
+    rim: [0.4, 0.58, 1], rimLight: 0.9,
   },
   jupiter: {
     shader: 'textured', map: 'jupiter.jpg', saturation: 1.1, tint: [1.03, 1, 0.96], base: [0.82, 0.7, 0.54],
@@ -165,7 +168,7 @@ const LOOKS = {
   },
   saturn: {
     shader: 'textured', map: 'saturn.jpg', saturation: 1.15, tint: [1.03, 0.99, 0.9], base: [0.9, 0.8, 0.6],
-    mapWeight: 1, haze: 0.15, detail: 0.12, dayS: 38362, rings: { innerKm: 74500, outerKm: 136775, tilt: 0.47 },
+    mapWeight: 1, haze: 0.15, detail: 0.12, dayS: 38362, hexagon: 1, rings: { innerKm: 74500, outerKm: 136775, tilt: 0.47 },
   },
   io: {
     shader: 'textured', map: 'io.jpg', saturation: 1.25, tint: [1.06, 1, 0.9], base: [0.82, 0.72, 0.38],
@@ -186,6 +189,8 @@ const LOOKS = {
   titan: {
     shader: 'textured', map: 'titan.jpg', saturation: 0.5, tint: [1, 0.88, 0.72], base: [0.82, 0.6, 0.32],
     mapWeight: 1, haze: 1.2, detail: 0.03, dayS: SPIN_DAY_S.titan,
+    // Backlit, its thick haze is an orange ring; sunlight glints off its northern lakes.
+    rim: [1, 0.62, 0.25], rimLight: 2, glint: 1,
   },
   uranus: {
     shader: 'gas', colorA: [0.62, 0.85, 0.88], colorB: [0.57, 0.81, 0.86], colorC: [0.74, 0.92, 0.94],
@@ -205,6 +210,8 @@ const LOOKS = {
   pluto: {
     shader: 'textured', map: 'pluto.jpg', saturation: 1, tint: [1.12, 0.96, 0.8], base: [0.62, 0.52, 0.42],
     mapWeight: 1, haze: 0.15, detail: 0.08, dayS: -6.387 * 86400,
+    // The blue ring New Horizons saw looking back at Pluto with the Sun behind it.
+    rim: [0.3, 0.52, 1], rimLight: 1.8,
   },
   charon: {
     shader: 'textured', map: 'charon.jpg', saturation: 1, tint: [0.92, 0.9, 0.88], base: [0.45, 0.44, 0.43],
@@ -262,7 +269,12 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   let material;
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
-      ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy'], ['map']);
+      ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy',
+        'rimColor', 'rimLight', 'hexagon', 'glint'], ['map']);
+    material.setColor3('rimColor', color(look.rim ?? [0, 0, 0]));
+    material.setFloat('rimLight', look.rimLight ?? 0);
+    material.setFloat('hexagon', look.hexagon ?? 0);
+    material.setFloat('glint', look.glint ?? 0);
     material.setFloat('patchy', PATCHY.includes(body.id) ? 1 : 0);
     material.setFloat('craters', CRATERS[body.id] ?? 0);
     material.setFloat('close', 100);

@@ -21,6 +21,14 @@ uniform float radius;
 // 1 for a world mapped sharply on one side only (Pluto, Charon, Triton: one fly-by
 // each). Where the map is a blur, craters and mottling are drawn in from any distance.
 uniform float patchy;
+// A thin atmosphere seen from behind, with the Sun beyond: its edge glows in this
+// colour (blue round Pluto, orange round Titan, the blue dusk of Mars). rimLight: how strongly.
+uniform vec3 rimColor;
+uniform float rimLight;
+// 1 for Saturn: the six-sided jet stream round its north pole.
+uniform float hexagon;
+// 1 for Titan: sunlight glinting off the lakes round its north pole.
+uniform float glint;
 // Ring plane normal (zero when the planet has no rings) and the ring radii in planet radii.
 uniform vec3 ringNormal;
 uniform float ringInner;
@@ -118,6 +126,17 @@ void main(){
   }
   col *= 1. + (grain - .5) * detail;
 
+  if (hexagon > 0. && lp.y > .9) {
+    // A hexagon 12 degrees out from the pole (latitude 78), darker and bluer inside,
+    // with a dark rim and the eye of the polar storm in the middle.
+    float polar = acos(clamp(lp.y, -1., 1.));
+    float a = atan(lp.z, lp.x);
+    float side = .19 / cos(mod(a, 1.0472) - .5236);
+    float inside = 1. - smoothstep(side - .012, side + .012, polar);
+    col = mix(col, col * vec3(.7, .8, .98), inside * .6 * hexagon);
+    col *= 1. - .4 * exp(-pow((polar - side) / .012, 2.)) * hexagon;
+    col *= 1. - .55 * exp(-pow(polar / .035, 2.)) * hexagon;
+  }
   vec3 N = normalize(n);
   // On the blurred side the ground is drawn as if from close by, and more strongly.
   float strength = mix(craters, 1., blurred);
@@ -158,5 +177,15 @@ void main(){
   float facing = max(dot(N, V), 0.);
   // Atmosphere: a soft glow on the lit limb.
   float rim = pow(1. - facing, 3.) * haze * smoothstep(-.25, .35, l);
-  gl_FragColor = vec4(pow(col * lit + baseColor * rim, vec3(.92)), 1.);
+  // From behind, the haze scatters sunlight on toward the viewer: a glowing ring.
+  float beyond = max(dot(-V, sun), 0.);
+  // (By the smooth globe, not the cratered ground: its slopes would sparkle.)
+  float limbEdge = 1. - max(dot(normalize(n), V), 0.);
+  vec3 light = col * lit + baseColor * rim + rimColor * pow(limbEdge, 4.) * beyond * beyond * rimLight;
+  if (glint > 0.) {
+    vec3 H = normalize(sun + V);
+    float lakes = smoothstep(.55, .8, lp.y) * smoothstep(.42, .6, fbm(lp.xz * 9. + 3.));
+    light += vec3(1., .86, .6) * pow(max(dot(N, H), 0.), 140.) * lakes * glint * 2.5;
+  }
+  gl_FragColor = vec4(pow(light, vec3(.92)), 1.);
 }

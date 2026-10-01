@@ -23,8 +23,15 @@ This repository is licensed in three parts.
    copyright holder. Forks that reuse the MIT-licensed code must replace the
    character, icons and name with their own.
 
-3. Third-party material keeps its own terms; see THIRD-PARTY.md
-   (NASA images: public domain; Babylon.js: Apache License 2.0).
+3. Third-party material keeps its own terms and is NOT licensed under the MIT
+   License; see THIRD-PARTY.md, which lists each file with its source and licence.
+   - Planet and moon maps: NASA and USGS (public domain); Solar System Scope
+     (CC BY 4.0).
+   - The 52 photographs in public/assets/stories/: 48 are public domain (NASA and
+     others); the rest need attribution: ISRO (GODL-India), ESA (CC BY-SA 3.0
+     IGO, two), and one photograph of Dokdo (CC BY-SA 3.0).
+   - Constellation lines: d3-celestial (BSD 3-Clause). Engine: Babylon.js
+     (Apache License 2.0).
 
 --------------------------------------------------------------------------------
 

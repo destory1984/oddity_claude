@@ -31,9 +31,9 @@ function near(bodyId, distanceKm, fromId = 'sun') {
   return add(body.position, scale(toward, distanceKm));
 }
 
-test('there are seventeen missions with names and hints', () => {
-  assert.equal(MISSIONS.length, 17);
-  assert.equal(new Set(MISSIONS.map((m) => m.id)).size, 17);
+test('there are nineteen missions with names and hints', () => {
+  assert.equal(MISSIONS.length, 19);
+  assert.equal(new Set(MISSIONS.map((m) => m.id)).size, 19);
   for (const m of MISSIONS) assert.ok(m.name && m.hint);
 });
 
@@ -176,4 +176,27 @@ test('heart of the Milky Way: the galactic centre in the middle of the frame', (
   const from = add(bodyById('sun').position, [0, 5e7, 0]);
   assert.ok(shoot(from, add(from, centre)).includes('milkyWayHeart'));
   assert.ok(!shoot(from, add(from, scale(centre, -1))).includes('milkyWayHeart'));
+});
+
+test('Pluto and Charon: both in frame from within 50,000 km of Pluto', () => {
+  const pluto = bodyById('pluto');
+  const charon = bodyById('charon');
+  // Stand off to the side so the two sit next to each other.
+  const side = unit([charon.position[2] - pluto.position[2], 0, pluto.position[0] - charon.position[0]]);
+  const spot = add(pluto.position, scale(side, 20000));
+  const middle = scale(add(pluto.position, charon.position), 0.5);
+  assert.ok(shoot(spot, middle).includes('plutoCharon'));
+  const far = add(pluto.position, scale(side, 200000));
+  assert.ok(!shoot(far, middle).includes('plutoCharon'));
+  // Close, but looking away.
+  assert.ok(!shoot(spot, sub(scale(spot, 2), middle)).includes('plutoCharon'));
+});
+
+test('the comet tail: Halley and the Sun together from within 5,000 km', () => {
+  const halley = bodyById('halley');
+  const away = unit(sub(halley.position, bodyById('sun').position));
+  const behind = add(halley.position, scale(away, 2000));
+  assert.ok(shoot(behind, 'sun').includes('cometTail'));
+  assert.ok(!shoot(add(halley.position, scale(away, 20000)), 'sun').includes('cometTail'));
+  assert.ok(!shoot(behind, add(behind, away)).includes('cometTail'));
 });

@@ -81,3 +81,15 @@ test('score counts every record out of the total', () => {
   const s = summarize({ discovered: ['earth', 'moon'], landed: ['moon'], photos: ['eclipse'] }, BODIES, MISSIONS);
   assert.deepEqual(score(s), { done: 4, total: BODIES.length * 2 + MISSIONS.length });
 });
+
+test('a log saved when there were 75 slots still reads, as 75 of 85', () => {
+  const old = {
+    discovered: BODIES.slice(0, 29).map((b) => b.id),
+    landed: BODIES.slice(0, 29).map((b) => b.id),
+    photos: MISSIONS.slice(0, 17).map((m) => m.id),
+  };
+  const read = sanitizeProgress(JSON.parse(JSON.stringify(old)), BODIES, MISSIONS);
+  const summary = summarize(read, BODIES, MISSIONS);
+  assert.deepEqual(score(summary), { done: 75, total: 85 });
+  assert.equal(isComplete(summary), false);
+});

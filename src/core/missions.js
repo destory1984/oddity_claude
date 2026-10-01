@@ -127,6 +127,18 @@ export const MISSIONS = [
     hint: '궁수자리 쪽 은하 중심을 화면 가운데 10도 안에',
     check: (s) => s.forward.reduce((sum, n, i) => sum + n * GALACTIC_CENTRE[i], 0) > Math.cos(10 * DEG),
   },
+  {
+    id: 'plutoCharon',
+    name: '명왕성과 카론',
+    hint: '명왕성 표면 50,000km 안에서 명왕성과 카론을 한 화면에 (뉴허라이즌스, 2015년)',
+    check: (s) => s.distanceToSurface('pluto') <= 50000 && s.seen('pluto') && s.seen('charon'),
+  },
+  {
+    id: 'cometTail',
+    name: '혜성의 꼬리',
+    hint: '핼리 혜성 5,000km 안에서 혜성과 태양을 한 화면에 (지오토, 1986년)',
+    check: (s) => s.distanceToSurface('halley') <= 5000 && s.seen('halley') && s.frame('sun').visible,
+  },
 ];
 
 export function completedMissions({ position, orientation, fovY, aspect, heroVisible, bodies = BODIES, craft = [] }) {

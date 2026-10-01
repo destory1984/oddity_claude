@@ -75,6 +75,15 @@ export function eventMessage(event, bodies = []) {
       return '춥습니다. 그림자 속이라 햇빛이 들지 않습니다.';
     case 'tooBright':
       return '눈이 부십니다. 태양 표면에서 태양 반지름(약 70만km) 안에 들어와 있습니다.';
+    // Lights and plumes (core/glows.js), each told once.
+    case 'glow':
+      return {
+        'aurora:earth': '지구의 두 극 둘레에 오로라가 떠 있습니다. 밤 쪽에서 보입니다.\n태양에서 날아온 입자가 100km 위 공기를 때려 내는 빛입니다.',
+        'aurora:jupiter': '목성의 두 극에 오로라가 떠 있습니다. 밤 쪽에서 보입니다.\n지구 오로라보다 수백 배 세고, 위성 이오가 뿜은 입자도 보탭니다.',
+        'plume:io': '이오의 화산이 가스를 뿜고 있습니다.\n펠레 화산의 분출은 높이 300km를 넘습니다. 이오는 태양계에서 화산 활동이 가장 활발합니다.',
+        'plume:enceladus': '엔셀라두스의 남극에서 얼음 알갱이가 솟고 있습니다.\n얼음 껍질 아래 바다에서 나온 물이고, 토성의 E 고리를 이룹니다.',
+        lightning: '목성의 밤 쪽 구름에서 번개가 칩니다.\n지구의 번개보다 몇 배 밝습니다.',
+      }[event.id] ?? null;
     case 'beltEntered':
       return '소행성대에 들어섰습니다.\n실제로는 소행성 사이가 평균 100만km쯤 떨어져 있습니다.';
     default:

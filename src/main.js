@@ -40,7 +40,7 @@ import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
 import {
   dockable, tooLowToDock, DOCK_RANGE_KM, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
-  releaseDrift,
+  releaseDrift, dockingFacing,
 } from './core/dock.js';
 import { standSpot, startVisit, hasArrived, visitStep } from './core/visit.js';
 import { spinOf } from './core/surface.js';
@@ -102,6 +102,8 @@ let simTime = 0;
 let beltSeen = false;
 // So does the note on the first shooting star over Earth.
 let meteorSeen = false;
+// Lights and plumes already told about (core/glows.js).
+const glowsTold = new Set();
 let feelingTold = null;
 // The fly-by of a planet in progress, watched for a slingshot (core/slingshot.js).
 let pass = null;
@@ -261,7 +263,7 @@ async function init() {
       return;
     }
     visit = null;
-    docked = startDocking(state.position, target);
+    docked = { ...startDocking(state.position, target), facing: state.orientation };
     rideDrift = [0, 0, 0];
     showCraftCard(target);
     input.clear();
@@ -544,6 +546,9 @@ async function init() {
         }
         if (isDocked(docked) && was < docked.elapsed && !isDocked({ elapsed: was })) announce({ type: 'docked', name: here(docked.id).name });
         state = dockedState(state, here(docked.id), dockingOffset(docked));
+        // Turn aside on the way in, so the craft ends up beside her, not behind her.
+        const facing = dt > 0 ? dockingFacing(docked, docked.facing, state.position, here(docked.id).position, innerWidth >= innerHeight) : null;
+        if (facing) state = { ...state, orientation: facing };
       }
     }
     if (visit) {
@@ -702,6 +707,10 @@ async function init() {
       toast.show(eventMessage(feeling));
     }
     if (!docked && shownSpeed() > 1) feelingTold = null;
+    if (view.glow && !glowsTold.has(view.glow)) {
+      glowsTold.add(view.glow);
+      toast.show(eventMessage({ type: 'glow', id: view.glow }));
+    }
     if (view.inBelt && !beltSeen) {
       beltSeen = true;
       toast.show(eventMessage({ type: 'beltEntered' }));

@@ -14,6 +14,8 @@ import { createCraft, createSiteModels } from './craft.js';
 import { storySitesAt } from '../core/stories.js';
 import { createComet } from './comet.js';
 import { createMeteors } from './meteors.js';
+import { createGlows } from './glows.js';
+import { glowNear } from '../core/glows.js';
 import { createBelt } from './belt.js';
 import { inBelt } from '../core/belt.js';
 import { createIce } from './ice.js';
@@ -54,6 +56,7 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
   // A glow and a tail for each comet.
   const comets = bodies.filter((b) => b.kind === 'comet').map((b) => ({ id: b.id, glow: createComet(scene) }));
   const meteors = createMeteors(scene);
+  const glows = createGlows(scene, bodies);
 
   // The character is drawn in the camera's own space, and her light is fixed: from the
   // right and a little above, where the Sun is in the opening view. It is taken from
@@ -121,6 +124,7 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
     craftSun.direction = new Vector3(...normalize(sunRel)).scale(-1);
     for (const { id, glow } of comets) glow.update(now.find((b) => b.id === id), position, sunNow.position);
     const meteorLit = meteors.update(dt, now.find((b) => b.id === 'earth'), sunNow.position, position);
+    const lightningLit = glows.update(dt, elapsed, now, sunNow.position, position);
     belt.update(position, sunNow.position, directions[sunNow.id]);
 
     const occluders = now.filter((b) => b.kind !== 'star').map((b) => ({
@@ -150,6 +154,8 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       ringCrossed,
       inBelt: inBelt(traveler, sunNow.position),
       meteorLit,
+      // Lights and plumes to tell about: lightning in the frame it flashes, else the one nearby.
+      glow: lightningLit ? 'lightning' : glowNear(now, traveler),
       // The sprite character's drawing; the paper model has none.
       heroSheet: hero.sheet ? hero.sheet() : null,
       camera: {

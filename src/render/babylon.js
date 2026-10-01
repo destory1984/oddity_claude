@@ -25,5 +25,6 @@ export { ShadowGenerator } from '@babylonjs/core/Lights/Shadows/shadowGenerator.
 import '@babylonjs/core/Lights/Shadows/shadowGeneratorSceneComponent.js';
 export { CreateIcoSphere } from '@babylonjs/core/Meshes/Builders/icoSphereBuilder.js';
 export { CreateCylinder } from '@babylonjs/core/Meshes/Builders/cylinderBuilder.js';
+export { CreateLathe } from '@babylonjs/core/Meshes/Builders/latheBuilder.js';
 export { CreatePolyhedron } from '@babylonjs/core/Meshes/Builders/polyhedronBuilder.js';
 export { DynamicTexture } from '@babylonjs/core/Materials/Textures/dynamicTexture.js';

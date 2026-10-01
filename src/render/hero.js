@@ -108,9 +108,12 @@ export function createHero(engine, sunDirection) {
   // direction, casting her own shadows (an arm across the robe, the head on a
   // shoulder) and cut off in a planet's shadow; the glow thrown back by the world
   // below; and a soft fill so the dark side of a fold is never black.
-  const FILL = 0.7;
-  const SUN = 1.9;
-  const BOUNCE = 1.3;
+  // Sun and fill together stay near 1 on a face square to the Sun, so white cloth
+  // keeps its folds even with the Sun straight behind the camera. (At 1.9 and 0.7,
+  // made for a fixed side light, a head-on Sun bleached her to a white outline.)
+  const FILL = 0.46;
+  const SUN = 0.66;
+  const BOUNCE = 0.7;
   const fill = new HemisphericLight('fill', new Vector3(-0.3, 1, -1), scene);
   fill.intensity = FILL;
   fill.groundColor = new Color3(0.3, 0.28, 0.3);

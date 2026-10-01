@@ -38,6 +38,10 @@ export function eventMessage(event, bodies = []) {
       return `사진 임무 달성: ${event.missionName}`;
     case 'story':
       return `이야기 장소: ${event.name}\n${event.text}`;
+    case 'docking':
+      return `${event.name}에 도킹 중입니다. 0에 맞춰 붙습니다.`;
+    case 'dockAborted':
+      return `${event.name} 도킹을 그만두었습니다.`;
     case 'docked':
       return `${event.name}${withParticle(event.name)} 도킹했습니다. 이제 함께 날아갑니다. 전진이나 후진을 누르면 떨어집니다.`;
     case 'undocked':

@@ -53,6 +53,13 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
     if (['MetaLeft', 'MetaRight', 'ControlLeft', 'ControlRight'].includes(e.code)) held.clear();
   });
 
+  // A clicked button keeps the keyboard focus, and Space or Enter would then press it
+  // again: Space is the stop key, so stopping would re-dock, re-pause or re-aim. Hand the
+  // focus back to the view after any click on the flight screen's own buttons.
+  document.addEventListener('click', (e) => {
+    if (e.target.closest?.('#hud button')) canvas.focus({ preventScroll: true });
+  });
+
   canvas.addEventListener('pointerdown', (e) => {
     canvas.focus();
     canvas.setPointerCapture(e.pointerId);

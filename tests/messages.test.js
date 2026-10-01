@@ -79,4 +79,6 @@ test('docking messages name the craft with the right particle', () => {
     '허블 우주망원경과 도킹했습니다. 이제 함께 날아갑니다. 전진이나 후진을 누르면 떨어집니다.',
   );
   assert.equal(eventMessage({ type: 'undocked', name: '보이저 1호' }), '보이저 1호와 도킹을 풀었습니다.');
+  assert.equal(eventMessage({ type: 'docking', name: '허블 우주망원경' }), '허블 우주망원경에 도킹 중입니다. 0에 맞춰 붙습니다.');
+  assert.equal(eventMessage({ type: 'dockAborted', name: '허블 우주망원경' }), '허블 우주망원경 도킹을 그만두었습니다.');
 });

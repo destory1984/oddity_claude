@@ -31,7 +31,7 @@ import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
 import {
-  dockable, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset,
+  dockable, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked,
 } from './core/dock.js';
 
 const $ = (id) => document.getElementById(id);
@@ -203,13 +203,16 @@ async function init() {
   function dock(target) {
     docked = startDocking(state.position, target);
     input.clear();
-    announce({ type: 'docked', name: target.name });
+    announce({ type: 'docking', name: target.name });
+    sound.say('Docking in progress.');
   }
 
   function undock() {
     const { name } = here(docked.id);
+    const latched = isDocked(docked);
     docked = null;
-    announce({ type: 'undocked', name });
+    sound.hush();
+    announce({ type: latched ? 'undocked' : 'dockAborted', name });
   }
 
   // Choosing a craft from close by docks with it.
@@ -274,10 +277,6 @@ async function init() {
       progress = createProgress();
       progressChanged(null);
       journal.update(progress, state.position, bodies);
-    const offer = docked ? null : dockable(state.position, craft);
-    $('dockTarget').hidden = !docked && !offer;
-    if (docked) $('dockTarget').textContent = '도킹 풀기';
-    else if (offer) $('dockTarget').textContent = `${offer.name}에 도킹`;
       $('journal').close();
       toast.show('탐험 기록을 지웠습니다.');
     },
@@ -379,7 +378,14 @@ async function init() {
     if (docked) {
       if (!paused && wantsToLeave(intent)) undock();
       else {
-        docked = { ...docked, elapsed: docked.elapsed + dt };
+        // Count down aloud; on 0 the glide ends and the latch closes.
+        const was = docked.elapsed;
+        docked = { ...docked, elapsed: was + dt };
+        for (const n of countsBetween(was, docked.elapsed)) {
+          sound.say(String(n));
+          if (n > 0) sound.cue('count');
+        }
+        if (isDocked(docked) && was < docked.elapsed && !isDocked({ elapsed: was })) announce({ type: 'docked', name: here(docked.id).name });
         state = dockedState(state, here(docked.id), dockingOffset(docked));
       }
     }
@@ -440,6 +446,7 @@ async function init() {
       speed: paused ? 0 : shownSpeed(),
       maxSpeed: limit,
       thrusting: !paused && input.driving(),
+      docked: Boolean(docked),
     }), elapsed || 1 / 60);
     sound.music(moodFor({ restingOn: state.restingOn, surfaceKm: nearestSurface(state.position, bodies).distance }));
 
@@ -467,6 +474,7 @@ async function init() {
     const driving = input.driving();
     let flightLabel = '자유 비행';
     if (paused) flightLabel = '일시 정지';
+    else if (docked && !isDocked(docked)) flightLabel = `${here(docked.id).name}에 도킹 중`;
     else if (docked) flightLabel = `${here(docked.id).name}${withParticle(here(docked.id).name)} 함께 비행`;
     else if (state.restingOn) flightLabel = `${bodyById(state.restingOn).name} 표면`;
     else if (shownSpeed() < 0.01) flightLabel = '정지 비행';
@@ -474,6 +482,10 @@ async function init() {
     else if (state.sideSpeed > state.speed) flightLabel = '옆으로 비행';
     else if (state.motionSign < 0) flightLabel = '후진 비행';
     journal.update(progress, state.position, bodies);
+    const offer = docked ? null : dockable(state.position, craft);
+    $('dockTarget').hidden = !docked && !offer;
+    if (docked) $('dockTarget').textContent = '도킹 풀기';
+    else if (offer) $('dockTarget').textContent = `${offer.name}에 도킹`;
     // In today's sky the game clock's date rides along with the flight state.
     if (layout === 'today') flightLabel += ` · ${dateText(new Date(openedAt.getTime() + simTime * 1000))}`;
     hud.update({

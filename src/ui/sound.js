@@ -196,6 +196,24 @@ export function createSound() {
     complete: () => [523, 659, 784, 1047, 988, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.16, 0.12)),
     brake: () => noise({ length: 0.3, volume: 0.22, type: 'bandpass', freq: 2600, to: 500 }),
     click: () => pluck(1319, 0, 0.05, 0.2),
+    // Docking: air rushing up as the approach begins, a tick for each count, then the
+    // latch: a low clunk and two rising bells. Letting go plays the bells falling.
+    docking: () => {
+      noise({ length: 1.2, volume: 0.1, type: 'bandpass', freq: 500, to: 1700 });
+      pluck(392, 0, 0.1, 0.8);
+    },
+    count: () => tone({ freq: 880, length: 0.09, volume: 0.07 }),
+    dock: () => {
+      noise({ length: 0.16, volume: 0.4, type: 'lowpass', freq: 700, to: 180 });
+      tone({ freq: 98, length: 0.4, volume: 0.22 });
+      bell(659, 0.12);
+      bell(988, 0.3);
+    },
+    undock: () => {
+      noise({ length: 0.25, volume: 0.18, type: 'bandpass', freq: 900, to: 2400 });
+      bell(988, 0.02, 0.07);
+      bell(659, 0.16, 0.07);
+    },
   };
 
   return {
@@ -238,10 +256,25 @@ export function createSound() {
       saveMusic(on);
       if (ctx) musicBus.gain.setTargetAtTime(on ? 1 : 0, ctx.currentTime, 0.3);
     },
+    // Spoken English, by the browser's own voice (no sound files). Silent when muted
+    // or when the browser has no speech.
+    say(text) {
+      if (muted || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+      const words = new SpeechSynthesisUtterance(text);
+      words.lang = 'en-US';
+      words.rate = 1.15;
+      words.volume = 0.9;
+      window.speechSynthesis.speak(words);
+    },
+    // Stop talking at once (the docking was called off).
+    hush() {
+      window.speechSynthesis?.cancel();
+    },
     muted: () => muted,
     setMuted(value) {
       muted = value;
       saveMuted(muted);
+      if (muted) window.speechSynthesis?.cancel();
       if (ctx) master.gain.setTargetAtTime(muted ? 0 : MASTER_VOLUME, ctx.currentTime, 0.05);
     },
   };

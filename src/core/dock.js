@@ -5,8 +5,11 @@ import { stopNow } from './game.js';
 // craft are drawn 30 km wide, so 60 km shows the whole craft at arm's length).
 export const DOCK_RANGE_KM = 1000;
 export const DOCK_GAP_KM = 60;
-// The glide from where the traveler was to the docking spot.
-export const DOCK_SECONDS = 3;
+// The countdown: "Docking in progress", then 10 down to 0, one number a second.
+export const COUNT_FROM = 10;
+const COUNT_STARTS_S = 1.5;
+// The glide from where the traveler was to the docking spot ends on the 0.
+export const DOCK_SECONDS = COUNT_STARTS_S + COUNT_FROM;
 
 const gap = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
 
@@ -48,6 +51,22 @@ export function dockingOffset({ from, to, elapsed }) {
   const t = Math.max(0, Math.min(1, elapsed / DOCK_SECONDS));
   const eased = t * t * t * (t * (6 * t - 15) + 10);
   return from.map((n, i) => n + (to[i] - n) * eased);
+}
+
+// The numbers to call out as the glide's clock goes from `before` to `after` seconds.
+// Normally none or one; after a stutter only the latest, so calls never pile up.
+export function countsBetween(before, after) {
+  let latest = null;
+  for (let n = COUNT_FROM; n >= 0; n--) {
+    const at = COUNT_STARTS_S + (COUNT_FROM - n);
+    if (at > before && at <= after) latest = n;
+  }
+  return latest === null ? [] : [latest];
+}
+
+// True once the glide is over and the traveler is held at the craft.
+export function isDocked(dock) {
+  return dock.elapsed >= DOCK_SECONDS;
 }
 
 // The traveler held at the craft: carried with it and at rest, free to look around.

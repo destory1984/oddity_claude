@@ -8,7 +8,10 @@ test('each game event maps to one sound cue', () => {
   assert.equal(cueForEvent({ type: 'landed', bodyId: 'mars' }), null, 'the thud already played');
   assert.equal(cueForEvent({ type: 'photo', missionName: 'x' }), 'mission');
   assert.equal(cueForEvent({ type: 'story', name: 'x' }), 'mission');
-  assert.equal(cueForEvent({ type: 'docked', name: 'x' }), 'landed');
+  assert.equal(cueForEvent({ type: 'docking', name: 'x' }), 'docking');
+  assert.equal(cueForEvent({ type: 'docked', name: 'x' }), 'dock');
+  assert.equal(cueForEvent({ type: 'undocked', name: 'x' }), 'undock');
+  assert.equal(cueForEvent({ type: 'dockAborted', name: 'x' }), 'undock');
   assert.equal(cueForEvent({ type: 'other' }), null);
 });
 
@@ -36,4 +39,9 @@ test('the flight tone sits in a light, high register rather than an engine rumbl
   assert.equal(fast.pitch, 660);
   assert.ok(fast.sparkle > slow.sparkle && slow.sparkle > 0, 'more twinkles when faster');
   assert.equal(engineSound({ speed: 0, maxSpeed: 1000, thrusting: false }).sparkle, 0);
+});
+
+test('while docked there is no flight sound, whatever speed the craft is going', () => {
+  assert.equal(engineSound({ speed: 72, maxSpeed: 3000, thrusting: false, docked: true }).gain, 0);
+  assert.ok(engineSound({ speed: 72, maxSpeed: 3000, thrusting: false }).gain > 0);
 });

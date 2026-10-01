@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   DOCK_RANGE_KM, DOCK_GAP_KM, DOCK_SECONDS, dockable, dockOffset, dockedState, wantsToLeave, rideSpeed,
-  startDocking, dockingOffset,
+  startDocking, dockingOffset, countsBetween, isDocked,
 } from '../src/core/dock.js';
 import { bodiesAt } from '../src/core/bodies.js';
 import { craftAt } from '../src/core/craft.js';
@@ -67,31 +67,51 @@ test('riding with Voyager 1 shows its speed away from the Sun, and no time passi
   assert.equal(rideSpeed('voyager1', craftAt(0, before), craftAt(0, before), before, before, 0), 0);
 });
 
-test('docking glides in over three seconds instead of jumping', () => {
-  assert.equal(DOCK_SECONDS, 3);
+test('docking glides in over the countdown instead of jumping', () => {
+  assert.equal(DOCK_SECONDS, 11.5);
   let dock = startDocking([1000, 2000, 3800], hubble);
   assert.equal(dock.id, 'hubble');
   // At the first instant the traveler has not moved.
   assert.deepEqual(dockingOffset(dock), [0, 0, 800]);
+  const frames = Math.round(DOCK_SECONDS * 60);
   const seen = [800];
-  for (let i = 0; i < 180; i++) {
+  for (let i = 0; i < frames; i++) {
     dock = { ...dock, elapsed: dock.elapsed + 1 / 60 };
     seen.push(dockingOffset(dock)[2]);
   }
   // Always closing in, never past the docking spot, and there at the end.
   for (let i = 1; i < seen.length; i++) assert.ok(seen[i] <= seen[i - 1] + 1e-9 && seen[i] >= 60 - 1e-9);
-  near(seen[180], 60, 1e-6);
+  near(seen[frames], 60, 1e-6);
   // Gentle at both ends: the first and last tenth of a second move far less than the middle.
+  const half = Math.round(frames / 2);
   const early = seen[0] - seen[6];
-  const middle = seen[87] - seen[93];
-  const late = seen[174] - seen[180];
+  const middle = seen[half - 3] - seen[half + 3];
+  const late = seen[frames - 6] - seen[frames];
   assert.ok(early < middle / 5 && late < middle / 5, `${early} ${middle} ${late}`);
   // Long after, it stays put.
   near(dockingOffset({ ...dock, elapsed: 99 })[2], 60, 1e-9);
 });
 
+test('the countdown runs 10 to 0, one a second, and 0 lands exactly when the glide ends', () => {
+  // Nothing is counted while "Docking in progress" is being said.
+  assert.deepEqual(countsBetween(0, 1.4), []);
+  assert.deepEqual(countsBetween(1.4, 1.5), [10]);
+  assert.deepEqual(countsBetween(1.5, 2.4), []);
+  assert.deepEqual(countsBetween(2.4, 2.6), [9]);
+  assert.deepEqual(countsBetween(DOCK_SECONDS - 0.01, DOCK_SECONDS), [0]);
+  assert.deepEqual(countsBetween(DOCK_SECONDS, DOCK_SECONDS + 5), []);
+  // Frame by frame, every number is called exactly once, in order.
+  const called = [];
+  for (let i = 0; i < 60 * 13; i++) called.push(...countsBetween(i / 60, (i + 1) / 60));
+  assert.deepEqual(called, [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
+  // A long frame (a stutter) calls only the latest number, not a pile of them.
+  assert.deepEqual(countsBetween(3, 6.6), [5]);
+  assert.equal(isDocked({ elapsed: DOCK_SECONDS - 0.01 }), false);
+  assert.equal(isDocked({ elapsed: DOCK_SECONDS }), true);
+});
+
 test('docking from inside the docking distance eases outward to it', () => {
   const dock = startDocking([1000, 2000, 3010], hubble);
   near(Math.hypot(...dockingOffset(dock)), 10);
-  near(Math.hypot(...dockingOffset({ ...dock, elapsed: 3 })), 60, 1e-9);
+  near(Math.hypot(...dockingOffset({ ...dock, elapsed: DOCK_SECONDS })), 60, 1e-9);
 });

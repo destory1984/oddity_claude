@@ -324,6 +324,10 @@ async function init() {
     sound.setMusic(!sound.musicOn());
     showMusicButton();
   });
+  $('tuneButton').addEventListener('click', () => {
+    sound.unlock();
+    toast.show(`다음 곡: ${sound.nextTune()}. ${sound.musicOn() ? '다음 마디부터 나옵니다.' : '배경 음악이 꺼져 있습니다.'}`, 'tune');
+  });
 
   $('brake').addEventListener('click', brake);
   $('pauseButton').addEventListener('click', () => setPaused(!paused));

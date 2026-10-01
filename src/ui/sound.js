@@ -1,7 +1,7 @@
 // Synthesized game sounds (Web Audio). No sound files: every cue is built from
 // oscillators and a noise buffer, so nothing is downloaded and nothing is licensed.
 
-import { BAR_S, barPlan } from '../core/music.js';
+import { BAR_S, barPlan, tuneFor, nextTuneBar } from '../core/music.js';
 
 const MUTE_KEY = 'oddity.muted';
 const MUSIC_KEY = 'oddity.music';
@@ -146,8 +146,9 @@ export function createSound() {
     for (const freq of plan.pad) padNote(freq, start, PAD_VOLUME);
     tone({ freq: plan.bass, start, length: BAR_S, volume: BASS_VOLUME, out: musicBus });
     for (const note of plan.notes) {
-      tone({ freq: note.freq, start: start + note.at, length: 1.4, volume: note.volume, out: musicBus });
-      tone({ freq: note.freq * 3, start: start + note.at, length: 0.4, volume: note.volume * 0.2, out: musicBus });
+      const { length, overtone, overtoneVolume } = plan.bell;
+      tone({ freq: note.freq, start: start + note.at, length, volume: note.volume, out: musicBus });
+      tone({ freq: note.freq * overtone, start: start + note.at, length: length * 0.3, volume: note.volume * overtoneVolume, out: musicBus });
     }
   }
 
@@ -256,6 +257,11 @@ export function createSound() {
       nextBarAt += BAR_S;
     },
     musicOn: () => musicOn,
+    // Jump to the next tune at the coming bar; returns its name.
+    nextTune() {
+      barNumber = nextTuneBar(barNumber);
+      return tuneFor(barNumber).name;
+    },
     setMusic(on) {
       musicOn = on;
       saveMusic(on);

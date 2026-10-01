@@ -1,5 +1,6 @@
 import {
   TransformNode, StandardMaterial, DynamicTexture, Color3, Vector3, CreateCylinder, CreateBox, CreateSphere,
+  CreateRibbon, Mesh,
 } from './babylon.js';
 import { KM_PER_UNIT } from '../core/bodies.js';
 import { CRAFT_SIZE_KM } from '../core/craft.js';
@@ -390,25 +391,102 @@ function parker(scene, name, mats) {
   return root;
 }
 
-// The Tesla Roadster on its rocket stage: a red open car with Starman at the wheel.
+// A thin cylinder from one point to another.
+function rod(scene, name, parent, material, from, to, diameter, tessellation = 8) {
+  const d = to.map((n, i) => n - from[i]);
+  const length = Math.hypot(...d);
+  const mesh = part(cyl(scene, name, { height: length, diameter, tessellation }), parent, material, from.map((n, i) => n + d[i] / 2));
+  // Turn the cylinder's own axis (+y) onto d: about x, then about z.
+  mesh.rotation.set(Math.atan2(d[2], d[1]), 0, -Math.asin(d[0] / length));
+  return mesh;
+}
+
+// The Roadster's body as slices from tail to nose: [z, underside, top, half-width].
+// A high tail, a low nose, widest at the doors.
+const ROADSTER_HULL = [
+  [-0.221, -0.012, 0.04, 0.06],
+  [-0.2, -0.03, 0.057, 0.088],
+  [-0.13, -0.036, 0.063, 0.098],
+  [-0.05, -0.036, 0.056, 0.1],
+  [0.05, -0.036, 0.052, 0.1],
+  [0.12, -0.036, 0.04, 0.096],
+  [0.18, -0.03, 0.024, 0.086],
+  [0.21, -0.022, 0.01, 0.066],
+  [0.222, -0.014, 0.0, 0.04],
+];
+
+// The slices joined into one smooth skin, each a box with rounded corners.
+function roadsterHull(scene, name) {
+  const AROUND = 20;
+  const round = (v, power) => Math.sign(v) * Math.abs(v) ** power;
+  const slice = ([z, low, high, half]) => {
+    const middle = (low + high) / 2;
+    const path = [];
+    for (let k = 0; k < AROUND; k++) {
+      const a = (k * 2 * Math.PI) / AROUND;
+      path.push(new Vector3(half * round(Math.cos(a), 0.45), middle + ((high - low) / 2) * round(Math.sin(a), 0.6), z));
+    }
+    return path;
+  };
+  // A slice squeezed to a point closes each end.
+  const tip = ([z, low, high]) => slice([z, (low + high) / 2, (low + high) / 2, 0]);
+  const pathArray = [tip(ROADSTER_HULL[0]), ...ROADSTER_HULL.map(slice), tip(ROADSTER_HULL[ROADSTER_HULL.length - 1])];
+  return CreateRibbon(name, { pathArray, closePath: true, sideOrientation: Mesh.DOUBLESIDE }, scene);
+}
+
+// The Tesla Roadster on its rocket stage: a red open car with Starman at the wheel,
+// one arm on the door, tipped nose-up on the mount the way the launch cameras saw it.
 function roadster(scene, name, mats) {
   const root = new TransformNode(name, scene);
-  part(cyl(scene, `${name}Stage`, { height: 0.5, diameter: 0.26, tessellation: 20 }), root, mats.white, [0, -0.2, 0], [0, 0, 0]);
+  const rig = new TransformNode(`${name}Rig`, scene);
+  rig.parent = root;
+  rig.position.y = 0.22;
+  const up = (id, options, material, y) => part(cyl(scene, `${name}${id}`, { tessellation: 28, ...options }), rig, material, [0, y, 0]);
+  // The stage, shortened: tank, two weld bands, the engine's bell underneath.
+  up('Stage', { height: 0.4, diameter: 0.3 }, mats.white, -0.3);
+  up('Band0', { height: 0.008, diameter: 0.304 }, mats.grey, -0.16);
+  up('Band1', { height: 0.008, diameter: 0.304 }, mats.grey, -0.44);
+  up('Dome', { height: 0.03, diameterTop: 0.27, diameterBottom: 0.1 }, mats.dark, -0.515);
+  up('Bell', { height: 0.15, diameterTop: 0.06, diameterBottom: 0.21 }, mats.grey, -0.605);
+  up('Throat', { height: 0.004, diameter: 0.2 }, mats.dark, -0.679);
+  up('Adapter', { height: 0.08, diameterTop: 0.11, diameterBottom: 0.22 }, mats.dark, -0.06);
+  up('Mount', { height: 0.06, diameter: 0.05, tessellation: 10 }, mats.grey, 0.005);
+
   const car = new TransformNode(`${name}Car`, scene);
-  car.parent = root;
-  car.position.set(0, 0.2, 0);
-  car.rotation.x = -0.35;
-  part(CreateBox(`${name}Body`, { width: 0.2, height: 0.06, depth: 0.46 }, scene), car, mats.red);
-  part(CreateBox(`${name}Nose`, { width: 0.18, height: 0.04, depth: 0.14 }, scene), car, mats.red, [0, 0.03, 0.14], [0.25, 0, 0]);
-  part(CreateBox(`${name}Tail`, { width: 0.19, height: 0.05, depth: 0.14 }, scene), car, mats.red, [0, 0.035, -0.15]);
-  part(CreateBox(`${name}Glass`, { width: 0.18, height: 0.06, depth: 0.01 }, scene), car, mats.dark, [0, 0.07, 0.05], [-0.6, 0, 0]);
-  part(CreateBox(`${name}Seats`, { width: 0.16, height: 0.02, depth: 0.12 }, scene), car, mats.dark, [0, 0.035, -0.03]);
-  // Starman: a white suit and helmet, one arm on the door.
-  part(CreateBox(`${name}Suit`, { width: 0.05, height: 0.07, depth: 0.04 }, scene), car, mats.white, [-0.045, 0.075, -0.04]);
-  part(CreateSphere(`${name}Helmet`, { diameter: 0.045, segments: 10 }, scene), car, mats.white, [-0.045, 0.13, -0.035]);
-  for (const [i, x, z] of [[0, 1, 1], [1, -1, 1], [2, 1, -1], [3, -1, -1]]) {
-    part(cyl(scene, `${name}Wheel${i}`, { height: 0.03, diameter: 0.08, tessellation: 14 }), car, mats.dark, [x * 0.1, -0.03, z * 0.15], [0, 0, QUARTER]);
+  car.parent = rig;
+  car.position.set(0, 0.062, 0);
+  car.rotation.set(-0.35, 0, 0.12);
+  part(roadsterHull(scene, `${name}Body`), car, mats.paint);
+  part(CreateBox(`${name}Cockpit`, { width: 0.15, height: 0.03, depth: 0.13 }, scene), car, mats.dark, [0, 0.045, -0.01]);
+  for (const s of [-1, 1]) {
+    part(CreateBox(`${name}Seat${s}`, { width: 0.052, height: 0.062, depth: 0.014 }, scene), car, mats.dark, [s * 0.042, 0.082, -0.072], [-0.2, 0, 0]);
+    part(CreateBox(`${name}Mirror${s}`, { width: 0.022, height: 0.012, depth: 0.008 }, scene), car, mats.paint, [s * 0.106, 0.064, 0.05]);
+    part(CreateSphere(`${name}Lamp${s}`, { diameter: 0.032, segments: 8 }, scene), car, mats.lamp, [s * 0.056, 0.01, 0.193], [0, 0, 0], [1, 0.55, 1]);
+    part(CreateBox(`${name}TailLamp${s}`, { width: 0.032, height: 0.012, depth: 0.01 }, scene), car, mats.tail, [s * 0.046, 0.03, -0.214]);
+    for (const z of [-0.135, 0.135]) {
+      part(cyl(scene, `${name}Tyre${s}${z}`, { height: 0.032, diameter: 0.076, tessellation: 18 }), car, mats.dark, [s * 0.085, -0.03, z], [0, 0, QUARTER]);
+      part(cyl(scene, `${name}Hub${s}${z}`, { height: 0.035, diameter: 0.044, tessellation: 10 }), car, mats.chrome, [s * 0.085, -0.03, z], [0, 0, QUARTER]);
+    }
   }
+  // Windscreen: glass in a dark frame, raked back.
+  const screen = new TransformNode(`${name}Screen`, scene);
+  screen.parent = car;
+  screen.position.set(0, 0.05, 0.068);
+  screen.rotation.x = -0.75;
+  part(CreateBox(`${name}Glass`, { width: 0.16, height: 0.052, depth: 0.003 }, scene), screen, mats.glass, [0, 0.026, 0]);
+  part(CreateBox(`${name}Header`, { width: 0.17, height: 0.005, depth: 0.006 }, scene), screen, mats.dark, [0, 0.054, 0]);
+  for (const s of [-1, 1]) {
+    part(CreateBox(`${name}Pillar${s}`, { width: 0.005, height: 0.056, depth: 0.006 }, scene), screen, mats.dark, [s * 0.0825, 0.027, 0]);
+  }
+  part(cyl(scene, `${name}Wheel`, { height: 0.004, diameter: 0.036, tessellation: 14 }), car, mats.dark, [-0.042, 0.074, 0.026], [QUARTER - 0.4, 0, 0]);
+  // Starman: a white suit and helmet with a dark visor, right hand on the wheel,
+  // left arm resting on the door.
+  part(CreateBox(`${name}Suit`, { width: 0.05, height: 0.06, depth: 0.032 }, scene), car, mats.white, [-0.042, 0.084, -0.05], [-0.15, 0, 0]);
+  part(CreateSphere(`${name}Helmet`, { diameter: 0.046, segments: 12 }, scene), car, mats.white, [-0.042, 0.134, -0.054]);
+  part(CreateSphere(`${name}Visor`, { diameter: 0.036, segments: 12 }, scene), car, mats.dark, [-0.042, 0.135, -0.045]);
+  rod(scene, `${name}ArmRight`, car, mats.white, [-0.018, 0.102, -0.05], [-0.036, 0.08, 0.02], 0.015);
+  rod(scene, `${name}ArmLeft`, car, mats.white, [-0.068, 0.102, -0.05], [-0.1, 0.068, -0.012], 0.015);
+  rod(scene, `${name}ForearmLeft`, car, mats.white, [-0.1, 0.068, -0.012], [-0.102, 0.066, 0.026], 0.015);
   return root;
 }
 
@@ -449,12 +527,19 @@ export function createCraft(scene, craftList) {
     gold: paint(scene, 'craftGold', '#e2b648', 0.5),
     solar: paint(scene, 'craftSolar', '#27408f', 0.5),
     shield: paint(scene, 'craftShield', '#6f6384', 0.12),
-    red: paint(scene, 'craftRed', '#b3121d', 0.35),
+    lamp: paint(scene, 'craftLamp', '#fff4d6', 0.9),
+    tail: paint(scene, 'craftTail', '#ff3b24', 0.9),
     chrome: paint(scene, 'craftChrome', '#d9dde4', 0.3),
     cells: textured(scene, 'craftCells', solarCells(scene), 0.45),
     foil: textured(scene, 'craftFoil', foil(scene), 0.3),
     goldFoil: textured(scene, 'craftGoldFoil', foil(scene, 'craftGoldFoilMap', '#b8892f', [1, 0.78, 0.36]), 0.3),
   };
+  // Car paint: a deep cherry red with a sharp highlight.
+  mats.paint = paint(scene, 'craftPaint', '#b3121d', 0.35);
+  mats.paint.specularColor = new Color3(0.9, 0.9, 0.9);
+  mats.paint.specularPower = 48;
+  mats.glass = paint(scene, 'craftGlass', '#9fc4d8', 0.3);
+  mats.glass.alpha = 0.4;
   const build = {
     voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid,
     iss, tiangong, sputnik, mro, juno, cassini, parker, roadster, newHorizons, pioneer10: pioneer,

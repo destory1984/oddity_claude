@@ -21,8 +21,8 @@ import { clamp } from './math.js';
 // the front. The flight poses in core/pose.js rotate this whole frame.
 
 // Craft paper: an off-white sheet tinted by each material's color. `strong` is the
-// clothing's sheet, with cloudy mottling, visible fibers and flecks, like handmade
-// paper; the plain sheet (skin and hair) keeps only a faint grain.
+// clothing's sheet, with visible fibers and flecks like handmade paper (kept light,
+// so the cloth does not look stained); the plain sheet (skin and hair) keeps only a faint grain.
 function paperTexture(scene, strong) {
   const size = 512;
   const texture = new DynamicTexture(strong ? 'paperStrong' : 'paper', { width: size, height: size }, scene, true);
@@ -43,7 +43,7 @@ function paperTexture(scene, strong) {
       const r = 30 + rand() * 70;
       const dark = rand() < 0.6;
       const blot = ctx.createRadialGradient(x, y, 0, x, y, r);
-      blot.addColorStop(0, dark ? 'rgba(132, 120, 100, 0.2)' : 'rgba(255, 255, 255, 0.24)');
+      blot.addColorStop(0, dark ? 'rgba(150, 142, 128, 0.05)' : 'rgba(255, 255, 255, 0.14)');
       blot.addColorStop(1, dark ? 'rgba(132, 120, 100, 0)' : 'rgba(255, 255, 255, 0)');
       ctx.fillStyle = blot;
       ctx.fillRect(x - r, y - r, 2 * r, 2 * r);
@@ -52,7 +52,7 @@ function paperTexture(scene, strong) {
   // Flecks.
   for (let i = 0; i < 3600; i++) {
     const shade = rand() < 0.5 ? 255 : 170;
-    ctx.fillStyle = `rgba(${shade}, ${shade}, ${shade - 10}, ${(0.16 + rand() * 0.3) * k})`;
+    ctx.fillStyle = `rgba(${shade}, ${shade}, ${shade - 10}, ${(0.08 + rand() * 0.16) * k})`;
     ctx.fillRect(rand() * size, rand() * size, 1 + rand() * 2.5, 1 + rand() * 2.5);
   }
   // Fibers: short pale and dark hairs lying every which way.
@@ -60,7 +60,7 @@ function paperTexture(scene, strong) {
     const pale = rand() < 0.4;
     ctx.strokeStyle = pale
       ? `rgba(255, 255, 250, ${(0.2 + rand() * 0.3) * k})`
-      : `rgba(104, 94, 78, ${(0.2 + rand() * 0.34) * k})`;
+      : `rgba(128, 120, 106, ${(0.1 + rand() * 0.16) * k})`;
     ctx.lineWidth = 0.6 + rand() * (strong ? 1.2 : 0.6);
     const x = rand() * size;
     const y = rand() * size;

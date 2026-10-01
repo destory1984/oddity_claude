@@ -19,21 +19,29 @@ test('seventeen craft: probes, telescopes, space stations, the first satellite a
   for (const c of CRAFT) assert.ok(c.name && c.nameEn && c.kind === 'craft');
 });
 
-test("Earth's seven craft show only from within 300,000 km of Earth; the rest always", () => {
+test("Earth's seven craft and the Roadster show only from within 300,000 km of Earth; the rest always", () => {
   const bodies = bodiesAt(0);
   const earth = bodies.find((b) => b.id === 'earth');
   const out = (km) => [earth.position[0], earth.position[1] + earth.radiusKm + km, earth.position[2]];
   assert.equal(EARTH_CRAFT_SHOWN_KM, 300000);
   assert.deepEqual(hiddenCraft(out(500), bodies), []);
   assert.deepEqual(hiddenCraft(out(300000), bodies), []);
-  assert.deepEqual(hiddenCraft(out(300001), bodies), ['hubble', 'jwst', 'chandra', 'euclid', 'iss', 'tiangong', 'sputnik']);
+  assert.deepEqual(hiddenCraft(out(300001), bodies), ['hubble', 'jwst', 'chandra', 'euclid', 'iss', 'tiangong', 'sputnik', 'roadster']);
+  // The Roadster is millions of km from Earth, so it also shows from beside the car.
+  const craft = craftAt(0, bodies);
+  const car = craft.find((c) => c.id === 'roadster');
+  assert.ok(dist(car.position, earth.position) > 1e6);
+  const off = (km) => [car.position[0], car.position[1] + km, car.position[2]];
+  assert.ok(!hiddenCraft(off(300000), bodies, null, craft).includes('roadster'));
+  assert.ok(hiddenCraft(off(300001), bodies, null, craft).includes('roadster'));
+  assert.ok(hiddenCraft(off(100), bodies, null, craft).includes('hubble'));
   // Webb and Euclid, the farthest of them, are well inside the line.
   for (const c of craftAt(0, bodies).filter((x) => x.parent === 'earth')) {
     assert.ok(dist(c.position, earth.position) < EARTH_CRAFT_SHOWN_KM / 1.5, c.id);
   }
   // The chosen target keeps its label wherever the traveler is.
   assert.ok(!hiddenCraft(out(5e6), bodies, 'jwst').includes('jwst'));
-  assert.equal(hiddenCraft(out(5e6), bodies, 'jwst').length, 6);
+  assert.equal(hiddenCraft(out(5e6), bodies, 'jwst').length, 7);
 });
 
 test('every craft has a launch year and a short introduction for the docking card', () => {

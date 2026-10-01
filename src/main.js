@@ -471,7 +471,7 @@ async function init() {
     sound.music(moodFor({ restingOn: state.restingOn, surfaceKm: nearestSurface(state.position, bodies).distance }));
 
     // Earth's craft are drawn and named only from near Earth.
-    const awayCraft = hiddenCraft(state.position, bodies, selectedId);
+    const awayCraft = hiddenCraft(state.position, bodies, selectedId, craft);
     const view = world.update({
       bodies,
       craft,

@@ -153,18 +153,28 @@ function onOrbit(centre, out, [x, y], tiltDeg, turnDeg = 0) {
   ];
 }
 
-// The seven that fly round Earth (Hubble, the stations, Webb out at L2...) show only
-// from within this far of Earth's surface; from farther off their names would only
+// The seven that fly round Earth (Hubble, the stations, Webb out at L2...) and the
+// Roadster show only from within this far of Earth's surface; from farther off their names would only
 // crowd round the planet.
 export const EARTH_CRAFT_SHOWN_KM = 300000;
 
-// The ids of Earth's craft to leave undrawn and unnamed from where the traveler is.
-// keepId: the chosen target, which stays.
-export function hiddenCraft(position, bodies, keepId = null) {
+// The Roadster goes round the Sun some four million km from Earth. It follows the same
+// rule, and also shows from this close to the car itself, or nobody could ever reach it.
+const ALSO_FROM_EARTH = ['roadster'];
+
+// The ids of the craft to leave undrawn and unnamed from where the traveler is.
+// keepId: the chosen target, which stays. craft: this frame's positions (craftAt).
+export function hiddenCraft(position, bodies, keepId = null, craft = []) {
   const earth = bodies.find((b) => b.id === 'earth');
-  const surfaceKm = Math.hypot(...position.map((n, i) => n - earth.position[i])) - earth.radiusKm;
-  if (surfaceKm <= EARTH_CRAFT_SHOWN_KM) return [];
-  return CRAFT.filter((c) => c.parent === 'earth' && c.id !== keepId).map((c) => c.id);
+  const from = (point) => Math.hypot(...position.map((n, i) => n - point[i]));
+  if (from(earth.position) - earth.radiusKm <= EARTH_CRAFT_SHOWN_KM) return [];
+  const beside = (id) => {
+    const there = craft.find((c) => c.id === id);
+    return Boolean(there) && from(there.position) <= EARTH_CRAFT_SHOWN_KM;
+  };
+  return CRAFT
+    .filter((c) => c.id !== keepId && (c.parent === 'earth' || (ALSO_FROM_EARTH.includes(c.id) && !beside(c.id))))
+    .map((c) => c.id);
 }
 
 export function craftById(id) {

@@ -20,7 +20,8 @@ import { createWarp } from './ui/warp.js';
 import { slingshot } from './core/slingshot.js';
 import { addPhoto, removePhoto } from './core/album.js';
 import { teleportSpot } from './core/teleport.js';
-import { eventMessage, limitText, dateText, withParticle } from './ui/messages.js';
+import { FACTS } from './core/facts.js';
+import { eventMessage, limitText, dateText, withParticle, towardParticle } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import {
   updateProgress, recordPhotos, recordStories, recordCraft, createProgress, summarize, score, isComplete,
@@ -41,6 +42,8 @@ import {
   dockable, tooLowToDock, DOCK_RANGE_KM, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
   releaseDrift,
 } from './core/dock.js';
+import { standSpot, startVisit, hasArrived, visitStep } from './core/visit.js';
+import { spinOf } from './core/surface.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
@@ -109,7 +112,11 @@ let rideKmS = 0;
 // The craft's velocity this frame: what the traveler keeps on letting go.
 let rideDrift = [0, 0, 0];
 // Own speed when flying free, the craft's when docked: for the readout, the pose and the sound.
-const shownSpeed = () => (docked ? rideKmS : totalSpeed(state));
+// Going down to stand beside a place on a surface (core/visit.js startVisit), and how
+// fast the glide is carrying her.
+let visit = null;
+let visitKmS = 0;
+const shownSpeed = () => (docked ? rideKmS : visit ? visitKmS : totalSpeed(state));
 // Where a body is right now (BODIES is only the starting layout).
 // Spacecraft and telescopes: found and selected like bodies, but they are not in the
 // journal and only slow the traveler nearby (core/craft.js).
@@ -253,6 +260,7 @@ async function init() {
       toast.show(eventMessage({ type: 'dockRefused', name: target.name }));
       return;
     }
+    visit = null;
     docked = startDocking(state.position, target);
     rideDrift = [0, 0, 0];
     showCraftCard(target);
@@ -272,6 +280,21 @@ async function init() {
     announce({ type: latched ? 'undocked' : 'dockAborted', name });
   }
 
+  // Where to stand beside a place on a surface right now.
+  const standBeside = (id) => {
+    const story = STORIES.find((s) => s.id === id);
+    return standSpot(story, here(story.body), simTime);
+  };
+
+  // A place whose name shows (near its body, this side of the horizon): glide down and
+  // stand beside it.
+  function goDownTo(place) {
+    visit = startVisit(state, place.id, standBeside(place.id));
+    visitKmS = 0;
+    input.clear();
+    announce({ type: 'visiting', name: place.name });
+  }
+
   // A place already visited, chosen from far away: appear there behind a flash. A body
   // is seen from its best side, a craft is docked with, a story place is seen from above.
   function teleport(id, anywhere = false) {
@@ -286,6 +309,7 @@ async function init() {
         showCraftCard(null);
         sound.hush();
       }
+      visit = null;
       input.clear();
       const facing = lookAtDirection(target.position.map((n, i) => n - spot[i]));
       // The traveler stands in the middle of the view: on a wide screen turn a little
@@ -310,6 +334,9 @@ async function init() {
     }
     const target = craft.find((c) => c.id === id);
     if (target && !docked && dockable(state.position, [target])) dock(target);
+    const place = sites.find((s) => s.id === id);
+    if (place && !docked && visit?.id !== id
+      && !siteHidden(place, here(place.parent), state.position) && !siteFar(here(place.parent), state.position)) goDownTo(place);
   }
 
   $('dockTarget').addEventListener('click', () => {
@@ -326,7 +353,12 @@ async function init() {
       const body = here(selectedId);
       const direction = body.position.map((n, i) => n - state.position[i]);
       state = { ...state, orientation: lookAtDirection(direction) };
-      toast.show(hud.faceToast(body));
+      // Somewhere already known: say again what it is.
+      let about = null;
+      if (body.kind === 'craft') about = (progress.craft ?? []).includes(body.id) ? craftById(body.id).intro : null;
+      else if (body.kind === 'site') about = progress.stories.includes(body.id) ? STORIES.find((s) => s.id === body.id).text : null;
+      else if (progress.discovered.includes(body.id)) about = FACTS[body.id] ?? null;
+      toast.show(about ? `${hud.faceToast(body)}\n${about}` : hud.faceToast(body));
     },
     onInspect() {
       const body = here(selectedId);
@@ -514,6 +546,24 @@ async function init() {
         state = dockedState(state, here(docked.id), dockingOffset(docked));
       }
     }
+    if (visit) {
+      if (!paused && wantsToLeave(intent)) visit = null;
+      else if (dt > 0) {
+        const place = here(visit.id);
+        const from = state.position;
+        const went = visitStep(state, visit, dt, {
+          spot: standBeside(visit.id),
+          body: here(place.parent),
+          spun: spinOf(place.parent, simTime) - spinOf(place.parent, simTime - dt * TIME_SCALE),
+        });
+        ({ state, visit } = went);
+        visitKmS = hasArrived(visit) ? 0 : Math.hypot(...state.position.map((n, i) => n - from[i])) / dt;
+        if (went.arrived) {
+          toast.show(eventMessage({ type: 'visited', name: place.name }));
+          sound.cue('landed');
+        }
+      }
+    }
     const slowPoints = craft.map((c) => c.position);
     const result = step(state, intent, dt, bodies, slowPoints);
     state = result.state;
@@ -594,8 +644,10 @@ async function init() {
     // while gliding in to dock, or along a drift she is being carried on. In her own
     // frame (x right, y up, z ahead), for the sprite character's choice of drawing.
     let heading = null;
+    const gliding = visit && !hasArrived(visit);
     const carried = docked && !isDocked(docked)
       ? here(docked.id).position.map((n, i) => n - state.position[i])
+      : gliding ? standBeside(visit.id).position.map((n, i) => n - state.position[i])
       : (!docked && state.speed < 0.01 && (state.sideSpeed ?? 0) < 0.01 ? velocity(state) : null);
     if (carried && Math.hypot(...carried) > 1) {
       const local = rotateVector(conjugate(state.orientation), carried);
@@ -663,6 +715,8 @@ async function init() {
     if (paused) flightLabel = '일시 정지';
     else if (docked && !isDocked(docked)) flightLabel = `${here(docked.id).name}에 도킹 중`;
     else if (docked) flightLabel = `${here(docked.id).name}${withParticle(here(docked.id).name)} 함께 비행`;
+    else if (visit && !hasArrived(visit)) flightLabel = `${here(visit.id).name}${towardParticle(here(visit.id).name)} 내려가는 중`;
+    else if (visit) flightLabel = `${here(visit.id).name} 곁`;
     else if (state.restingOn) flightLabel = `${bodyById(state.restingOn).name} 표면`;
     else if (shownSpeed() < 0.01) flightLabel = '정지 비행';
     else if (!driving) flightLabel = '관성 비행';

@@ -56,3 +56,46 @@ export function right(q) {
 export function up(q) {
   return rotateVector(q, [0, 1, 0]);
 }
+
+// The orientation that looks along `ahead` with `above` up (as near as it can be while
+// square to `ahead`).
+export function orientationFrom(ahead, above) {
+  const unit = (v) => {
+    const length = Math.hypot(...v) || 1;
+    return v.map((n) => n / length);
+  };
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const f = unit(ahead);
+  const r = unit(cross(above, f));
+  const u = cross(f, r);
+  // The rotation whose columns are r, u, f, as a quaternion.
+  const trace = r[0] + u[1] + f[2];
+  if (trace > 0) {
+    const s = Math.sqrt(trace + 1) * 2;
+    return [(u[2] - f[1]) / s, (f[0] - r[2]) / s, (r[1] - u[0]) / s, s / 4];
+  }
+  if (r[0] > u[1] && r[0] > f[2]) {
+    const s = Math.sqrt(1 + r[0] - u[1] - f[2]) * 2;
+    return [s / 4, (u[0] + r[1]) / s, (f[0] + r[2]) / s, (u[2] - f[1]) / s];
+  }
+  if (u[1] > f[2]) {
+    const s = Math.sqrt(1 + u[1] - r[0] - f[2]) * 2;
+    return [(u[0] + r[1]) / s, s / 4, (f[1] + u[2]) / s, (f[0] - r[2]) / s];
+  }
+  const s = Math.sqrt(1 + f[2] - r[0] - u[1]) * 2;
+  return [(f[0] + r[2]) / s, (f[1] + u[2]) / s, s / 4, (r[1] - u[0]) / s];
+}
+
+// Part-way from orientation a to b (t from 0 to 1), by the short way round.
+export function blend(a, b, t) {
+  const same = a.reduce((sum, n, i) => sum + n * b[i], 0) >= 0 ? 1 : -1;
+  const out = a.map((n, i) => n + (b[i] * same - n) * t);
+  const length = Math.hypot(...out) || 1;
+  return out.map((n) => n / length);
+}
+
+// A turn of `angle` radians about the world Y axis, to apply in front of an
+// orientation: multiply(turnAboutY(angle), q).
+export function turnAboutY(angle) {
+  return axisRotation(angle, 1);
+}

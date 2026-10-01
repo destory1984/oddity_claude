@@ -21,6 +21,13 @@ export function subjectParticle(word) {
   return hasFinalConsonant(word) ? '이' : '가';
 }
 
+// 로 after a vowel or ㄹ, 으로 after any other final consonant.
+export function towardParticle(word) {
+  const code = word.charCodeAt(word.length - 1);
+  const final = code >= HANGUL_START && code <= HANGUL_END ? (code - HANGUL_START) % 28 : 0;
+  return final === 0 || final === 8 ? '로' : '으로';
+}
+
 const nameOf = (bodies, id) => bodies.find((b) => b.id === id)?.name ?? id;
 
 export function eventMessage(event, bodies = []) {
@@ -40,12 +47,13 @@ export function eventMessage(event, bodies = []) {
       return `이야기 장소: ${event.name}\n${event.text}`;
     case 'docking':
       return `${event.name}에 도킹 중입니다. 0에 맞춰 붙습니다.`;
-    case 'teleported': {
-      // 로 after a vowel or ㄹ, 으로 after any other final consonant.
-      const code = event.name.charCodeAt(event.name.length - 1);
-      const final = code >= HANGUL_START && code <= HANGUL_END ? (code - HANGUL_START) % 28 : 0;
-      return `${event.name}${final === 0 || final === 8 ? '로' : '으로'} 순간 이동했습니다.`;
-    }
+    case 'teleported':
+      return `${event.name}${towardParticle(event.name)} 순간 이동했습니다.`;
+    // Going down to stand beside a place on a surface (core/visit.js).
+    case 'visiting':
+      return `${event.name}${towardParticle(event.name)} 내려갑니다.`;
+    case 'visited':
+      return `${event.name} 곁에 내려섰습니다. 전진이나 후진을 누르면 떠납니다.`;
     case 'slingshot':
       return `${nameOf(bodies, event.bodyId)} 스윙바이! 제한 속도의 ${event.factor.toFixed(1)}배로 튕겨 나갑니다. Space로 멈춥니다.`;
     case 'dockRefused':

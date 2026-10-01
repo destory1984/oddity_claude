@@ -33,3 +33,10 @@ export function surfaceDirection(latDeg, lonDeg, spinRad) {
   const s = Math.sin(spinRad);
   return [x * c + z * s, Math.sin(lat), -x * s + z * c];
 }
+
+// How far the body with this id has turned at game time timeS (0 for one that carries
+// no places).
+export function spinOf(bodyId, timeS) {
+  if (!SPIN_DAY_S[bodyId]) return 0;
+  return spinAngle(SPIN_DAY_S[bodyId], timeS, bodyId === 'earth' ? EARTH_START_SPIN : 0);
+}

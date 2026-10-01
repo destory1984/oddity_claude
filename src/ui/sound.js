@@ -48,6 +48,7 @@ export function createSound() {
   let master;
   let noiseBuffer;
   let engine;
+  const FLIGHT_VOLUME = 0.5;
   let muted = loadMuted();
   let musicOn = loadMusic();
   let musicBus;
@@ -78,10 +79,10 @@ export function createSound() {
     const data = noiseBuffer.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
 
-    // Flight: the rush of air past someone flying, as in the films (there is no air out
-    // here; it is a game). A wide band of noise for the rush, a low one under it for
-    // weight, and a higher one chopped unevenly for the cape snapping. Faster flight
-    // slides the rush upward. Setting off adds a rising whoosh (engine() below).
+    // Flight: a quiet wind and nothing else (there is no air out here; it is a game).
+    // A soft band of noise with a lower one under it, swelling slowly like gusts.
+    // Faster flight slides it a little higher. (It had a snapping cape and a whoosh on
+    // setting off at first; those were too much.)
     const gain = ctx.createGain();
     gain.gain.value = 0;
     gain.connect(sfx);
@@ -90,43 +91,25 @@ export function createSound() {
     air.loop = true;
     const rush = ctx.createBiquadFilter();
     rush.type = 'bandpass';
-    rush.frequency.value = 400;
-    rush.Q.value = 0.7;
+    rush.frequency.value = 300;
+    rush.Q.value = 0.6;
     const rushLevel = ctx.createGain();
-    rushLevel.gain.value = 1.4;
+    rushLevel.gain.value = 1;
     air.connect(rush).connect(rushLevel).connect(gain);
     const low = ctx.createBiquadFilter();
     low.type = 'lowpass';
-    low.frequency.value = 180;
+    low.frequency.value = 160;
     const lowLevel = ctx.createGain();
-    lowLevel.gain.value = 0.9;
+    lowLevel.gain.value = 0.8;
     air.connect(low).connect(lowLevel).connect(gain);
-    const cape = ctx.createBiquadFilter();
-    cape.type = 'bandpass';
-    cape.frequency.value = 2400;
-    cape.Q.value = 1.5;
-    const capeLevel = ctx.createGain();
-    capeLevel.gain.value = 0.25;
-    air.connect(cape).connect(capeLevel).connect(gain);
-    // Two flutters that drift in and out of step, so the snapping is never regular.
-    const flaps = [7.3, 11.9].map((hz) => {
-      const osc = ctx.createOscillator();
-      osc.frequency.value = hz;
-      const depth = ctx.createGain();
-      depth.gain.value = 0.11;
-      osc.connect(depth).connect(capeLevel.gain);
-      osc.start();
-      return osc;
-    });
-    // A slow swell, like gusts.
     const gust = ctx.createOscillator();
-    gust.frequency.value = 0.37;
+    gust.frequency.value = 0.23;
     const gustDepth = ctx.createGain();
-    gustDepth.gain.value = 0.25;
+    gustDepth.gain.value = 0.2;
     gust.connect(gustDepth).connect(rushLevel.gain);
     gust.start();
     air.start();
-    engine = { gain, rush, low, cape, flaps, loud: 0, whooshedAt: -10 };
+    engine = { gain, rush, low };
 
     return ctx;
   }
@@ -293,23 +276,12 @@ export function createSound() {
     engine({ gain, pitch }) {
       if (!ctx) return;
       const t = ctx.currentTime;
-      engine.gain.gain.setTargetAtTime(gain, t, 0.15);
-      // pitch runs 330..660 with speed: the rush slides from 400 up to 1,600 Hz and
-      // the cape snaps faster.
+      // Half as loud as the first flight sounds were.
+      engine.gain.gain.setTargetAtTime(gain * FLIGHT_VOLUME, t, 0.3);
+      // pitch runs 330..660 with speed: the wind slides from 300 up to 750 Hz.
       const k = Math.max(0, Math.min(1, (pitch - 330) / 330));
-      engine.rush.frequency.setTargetAtTime(400 * 4 ** k, t, 0.4);
-      engine.low.frequency.setTargetAtTime(180 + 220 * k, t, 0.4);
-      engine.cape.frequency.setTargetAtTime(2400 + 1600 * k, t, 0.4);
-      engine.flaps[0].frequency.setTargetAtTime(7.3 + 6 * k, t, 0.5);
-      engine.flaps[1].frequency.setTargetAtTime(11.9 + 9 * k, t, 0.5);
-      // Setting off (the volume steps up from coasting or silence to thrust): whoosh,
-      // a narrow band of noise swept up through two octaves in half a second.
-      if (!muted && gain >= 0.08 && engine.loud < 0.08 && t - engine.whooshedAt > 0.8) {
-        engine.whooshedAt = t;
-        noise({ length: 0.55, volume: 0.5, type: 'bandpass', freq: 300, to: 2600 });
-        noise({ start: 0.05, length: 0.7, volume: 0.25, type: 'lowpass', freq: 500, to: 120 });
-      }
-      engine.loud = gain;
+      engine.rush.frequency.setTargetAtTime(300 + 450 * k, t, 0.5);
+      engine.low.frequency.setTargetAtTime(160 + 120 * k, t, 0.5);
     },
     // Called every frame with the mood from core/music.js moodFor(); starts each bar a
     // little ahead of time so the audio clock, not the frame rate, keeps the beat.

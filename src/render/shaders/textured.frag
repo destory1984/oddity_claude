@@ -18,10 +18,12 @@ uniform float ringOuter;
 #include<rings>
 void main(){
   vec3 col = texture2D(map, vUV).rgb;
-  // Hide the seam where the map's left and right edges meet.
+  // Hide the seam where the map's left and right edges meet: over the last third of a
+  // degree each side, fade to the average of the two edges. (A band of three degrees
+  // each side showed from close by as 170 km of smeared streaks across the Moon.)
   float edge = min(vUV.x, 1. - vUV.x);
-  vec3 across = .5 * (texture2D(map, vec2(.004, vUV.y)).rgb + texture2D(map, vec2(.996, vUV.y)).rgb);
-  col = mix(across, col, smoothstep(.002, .008, edge));
+  vec3 across = .5 * (texture2D(map, vec2(.001, vUV.y)).rgb + texture2D(map, vec2(.999, vUV.y)).rgb);
+  col = mix(across, col, smoothstep(.0002, .001, edge));
   float lum = dot(col, vec3(0.299, 0.587, 0.114));
   // Some maps have no data near the poles (black): fill with the base color.
   col = mix(baseColor, col, smoothstep(0.02, 0.08, lum));

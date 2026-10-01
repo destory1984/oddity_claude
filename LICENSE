@@ -8,10 +8,10 @@ This repository is licensed in three parts.
    except the material listed in parts 2 and 3.
 
 2. Reserved: all rights reserved, NOT licensed under the MIT License
-   - The player character: its design (a faceless paper doll with pink twin tails,
-     a white beret with a gold star, a white capelet over a red dress with gold trim,
-     folded brown boots) and the code that defines and
-     draws it, src/render/hero.js.
+   - The player character: its design (a faceless papercraft mage with silver twin
+     tails, a white capelet with gold trim over a striped shirt, a long white robe
+     with a gold hem, folded brown boots) and the code and data that define and
+     draw it, src/render/hero.js and src/render/mageModel.js.
    - The app icons in public/icons/.
    - The game's name and title as a brand: "우주 한량" and
      "Space Oddity — 우주 한량", including their use as the name of an app, game

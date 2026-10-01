@@ -13,6 +13,7 @@ import ringsGlsl from './shaders/rings.glsl?raw';
 import texturedFrag from './shaders/textured.frag?raw';
 import { KM_PER_UNIT } from '../core/bodies.js';
 import { normalize } from './math.js';
+import { SPIN_DAY_S } from '../core/surface.js';
 
 const SIDEREAL_DAY_S = 86164;
 // Real rotation is too slow to see (Earth turns 1.25 degrees in five minutes), so
@@ -105,7 +106,7 @@ const LOOKS = {
   // The Moon is tidally locked: one turn per 27.3-day orbit keeps one face toward Earth.
   moon: {
     shader: 'textured', map: 'moon.jpg', saturation: 0.9, tint: [1, 1, 1], base: [0.6, 0.6, 0.6],
-    mapWeight: 1, haze: 0, detail: 0.1, dayS: 27.3217 * 86400,
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: SPIN_DAY_S.moon,
   },
   // Small moons: plain cratered rock or ice in each one's own shade. All keep one face
   // to their planet, so a day lasts one orbit.
@@ -157,7 +158,7 @@ const LOOKS = {
   },
   mars: {
     shader: 'textured', map: 'mars.jpg', saturation: 0.85, tint: [1, 0.98, 0.95], base: [0.72, 0.42, 0.26],
-    mapWeight: 1, haze: 0.4, detail: 0.14, dayS: 88643,
+    mapWeight: 1, haze: 0.4, detail: 0.14, dayS: SPIN_DAY_S.mars,
   },
   jupiter: {
     shader: 'textured', map: 'jupiter.jpg', saturation: 1.1, tint: [1.03, 1, 0.96], base: [0.82, 0.7, 0.54],
@@ -185,7 +186,7 @@ const LOOKS = {
   },
   titan: {
     shader: 'textured', map: 'titan.jpg', saturation: 0.5, tint: [1, 0.88, 0.72], base: [0.82, 0.6, 0.32],
-    mapWeight: 1, haze: 1.2, detail: 0.03, dayS: 1377648,
+    mapWeight: 1, haze: 1.2, detail: 0.03, dayS: SPIN_DAY_S.titan,
   },
   uranus: {
     shader: 'gas', colorA: [0.62, 0.85, 0.88], colorB: [0.57, 0.81, 0.86], colorC: [0.74, 0.92, 0.94],

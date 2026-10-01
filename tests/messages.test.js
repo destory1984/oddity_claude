@@ -56,3 +56,10 @@ test('entering the asteroid belt says how empty the real one is', () => {
     '소행성대에 들어섰습니다.\n실제로는 소행성 사이가 평균 100만km쯤 떨어져 있습니다.',
   );
 });
+
+test('reaching a story place names it and tells its story on the next line', () => {
+  assert.equal(
+    eventMessage({ type: 'story', name: '지오토의 혜성 통과', text: '1986년의 일입니다.' }),
+    '이야기 장소: 지오토의 혜성 통과\n1986년의 일입니다.',
+  );
+});

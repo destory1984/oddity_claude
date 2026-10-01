@@ -237,6 +237,17 @@ nav {
   color:#ffdfa6;
 }
 
+.marker.site {
+  color:#ffdfa6;
+}
+
+.marker.site:before,
+.marker.site.inView:before {
+  content:"✦";
+  color:#ffdfa6;
+  font-size:11px;
+}
+
 .marker.sun:before {
   content:"☀";
   color:#ffdfa6;
@@ -868,19 +879,22 @@ body.touch #reticle span {
   font-size: 12px;
 }
 
-#journalMissions li {
+#journalMissions li,
+#journalStories li {
   padding: 6px 0;
   font-size: 13px;
   color: var(--muted);
 }
 
-#journalMissions li strong {
+#journalMissions li strong,
+#journalStories li strong {
   display: block;
   font-weight: 400;
   color: #b6cbe0;
 }
 
-#journalMissions li.done strong {
+#journalMissions li.done strong,
+#journalStories li.done strong {
   color: #7fe3c5;
 }
 

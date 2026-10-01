@@ -16,7 +16,10 @@ import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
 import { eventMessage, limitText } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
-import { updateProgress, recordPhotos, createProgress, summarize, score, isComplete } from './core/progress.js';
+import {
+  updateProgress, recordPhotos, recordStories, createProgress, summarize, score, isComplete,
+} from './core/progress.js';
+import { STORIES, storySitesAt, completedStories, siteHidden } from './core/stories.js';
 import { loadProgress, saveProgress, loadGuideDone, saveGuideDone } from './ui/storage.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
 import { createGuideView } from './ui/guide.js';
@@ -50,7 +53,7 @@ let state = START_NEAR ? startNear(START_NEAR) : createState(START_POSITION, sta
 let paused = false;
 let selectedId = START_NEAR ? START_NEAR.id : 'earth';
 let dragTurn = [0, 0];
-let progress = loadProgress(BODIES, MISSIONS);
+let progress = loadProgress(BODIES, MISSIONS, STORIES);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
 // The first-visit guide assumes the opening view above Earth.
 let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
@@ -62,8 +65,10 @@ let bodies = bodiesAt(0);
 // Spacecraft and telescopes: found and selected like bodies, but they are not in the
 // journal and only slow the traveler nearby (core/craft.js).
 let craft = craftAt(0, bodies);
-const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id);
-const named = (id) => bodyById(id) ?? craftById(id);
+// Story places on a surface: named and selected like craft, turning with their body.
+let sites = storySitesAt(0, bodies);
+const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? sites.find((s) => s.id === id);
+const named = (id) => bodyById(id) ?? craftById(id) ?? sites.find((s) => s.id === id);
 
 const toast = createToast($('toast'));
 const sound = createSound();
@@ -74,10 +79,10 @@ const canvas = $('space');
 // showing what was just achieved.
 function progressChanged(before) {
   saveProgress(progress);
-  const now = summarize(progress, BODIES, MISSIONS);
+  const now = summarize(progress, BODIES, MISSIONS, STORIES);
   const { done, total } = score(now);
   $('journalButton').textContent = `수첩 ${done}/${total}`;
-  return Boolean(before) && !isComplete(summarize(before, BODIES, MISSIONS)) && isComplete(now);
+  return Boolean(before) && !isComplete(summarize(before, BODIES, MISSIONS, STORIES)) && isComplete(now);
 }
 
 function celebrate() {
@@ -166,7 +171,7 @@ async function init() {
     hud.showSelection(named(id));
   }
 
-  const hud = createHud([...BODIES, ...craft], {
+  const hud = createHud([...BODIES, ...craft, ...sites], {
     skyLabels: skyLabels(),
     onSelect: selectBody,
     onFace() {
@@ -192,6 +197,7 @@ async function init() {
   const journal = createJournal({
     bodies: BODIES,
     missions: MISSIONS,
+    stories: STORIES,
     onOpen() {
       journalPriorPause = paused;
       setPaused(true);
@@ -288,6 +294,7 @@ async function init() {
       simTime += dt * TIME_SCALE;
       bodies = bodiesAt(simTime);
       craft = craftAt(simTime, bodies);
+      sites = storySitesAt(simTime, bodies);
       state = carryAlong(state, before, bodies);
     }
     const intent = input.intent();
@@ -301,7 +308,19 @@ async function init() {
       progress = logged.progress;
       finished = progressChanged(before);
     }
-    for (const event of [...result.events, ...logged.events]) {
+    const told = recordStories(progress, completedStories({
+      position: state.position, restingOn: state.restingOn, bodies, craft, sites,
+    }));
+    const storyEvents = told.newly.map((id) => {
+      const story = STORIES.find((s) => s.id === id);
+      return { type: 'story', name: story.name, text: story.text };
+    });
+    if (told.newly.length) {
+      const before = progress;
+      progress = told.progress;
+      finished = progressChanged(before) || finished;
+    }
+    for (const event of [...result.events, ...logged.events, ...storyEvents]) {
       const text = eventMessage(event, BODIES);
       if (text) toast.show(text);
       const cue = cueForEvent(event);
@@ -341,6 +360,7 @@ async function init() {
     const view = world.update({
       bodies,
       craft,
+      sites,
       position: state.position,
       orientation: state.orientation,
       dt,
@@ -379,6 +399,8 @@ async function init() {
       throttle: input.throttle(),
       C,
       goalId: guideGoal(guide)?.targetId ?? null,
+      // A place on the far side of its body gets no label.
+      hiddenIds: sites.filter((s) => siteHidden(s, here(s.parent), state.position)).map((s) => s.id),
     });
     minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId });
   });

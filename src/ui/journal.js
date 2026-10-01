@@ -7,7 +7,7 @@ const $ = (id) => document.getElementById(id);
 const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, onGo, onReset, onOpen, onClose }) {
+export function createJournal({ bodies, missions, stories = [], onGo, onReset, onOpen, onClose }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -23,9 +23,9 @@ export function createJournal({ bodies, missions, onGo, onReset, onOpen, onClose
 
   function render() {
     const progress = lastProgress;
-    const s = summarize(progress, bodies, missions);
+    const s = summarize(progress, bodies, missions, stories);
     $('journalSummary').textContent =
-      `발견 ${s.discovered}/${s.bodies} · 착지 ${s.landed}/${s.bodies} · 사진 ${s.photos}/${s.missions}`;
+      `발견 ${s.discovered}/${s.bodies} · 착지 ${s.landed}/${s.bodies} · 사진 ${s.photos}/${s.missions} · 이야기 ${s.stories}/${s.storyTotal}`;
 
     const list = $('journalBodies');
     list.replaceChildren();
@@ -74,10 +74,28 @@ export function createJournal({ bodies, missions, onGo, onReset, onOpen, onClose
     }
   }
 
+  // Story places: the story itself shows only after the visit; before, how to get there.
+  function renderStories() {
+    const list = $('journalStories');
+    list.replaceChildren();
+    for (const story of stories) {
+      const done = (lastProgress.stories ?? []).includes(story.id);
+      const li = document.createElement('li');
+      li.className = done ? 'done' : '';
+      const title = document.createElement('strong');
+      title.textContent = `${done ? '✓' : '○'} ${story.name} (${story.year}년)`;
+      const line = document.createElement('span');
+      line.textContent = done ? story.text : story.hint;
+      li.append(title, line);
+      list.append(li);
+    }
+  }
+
   function open() {
     if (dialog.open) return;
     onOpen();
     render();
+    renderStories();
     dialog.showModal();
   }
 

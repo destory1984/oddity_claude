@@ -8,6 +8,7 @@ export function cueForEvent(event) {
     case 'discovered':
       return 'discovered';
     case 'photo':
+    case 'story':
       return 'mission';
     default:
       // 'landed' is logged in the same frame as 'surfaceReached', which already thuds.

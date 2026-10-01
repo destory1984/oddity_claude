@@ -1,6 +1,9 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { createProgress, updateProgress, recordPhotos, summarize, sanitizeProgress, isComplete, score } from '../src/core/progress.js';
+import {
+  createProgress, updateProgress, recordPhotos, recordStories, summarize, sanitizeProgress, isComplete, score,
+} from '../src/core/progress.js';
+import { STORIES } from '../src/core/stories.js';
 import { BODIES, START_POSITION, bodyById } from '../src/core/bodies.js';
 import { MISSIONS } from '../src/core/missions.js';
 
@@ -11,7 +14,7 @@ const above = (id, km) => {
 };
 
 test('a new log knows Earth only', () => {
-  assert.deepEqual(createProgress(), { discovered: ['earth'], landed: [], photos: [] });
+  assert.deepEqual(createProgress(), { discovered: ['earth'], landed: [], photos: [], stories: [] });
 });
 
 test('entering 50,000 km of a surface discovers the body once', () => {
@@ -59,13 +62,18 @@ test('recordPhotos keeps the first completion only', () => {
 test('summary counts against every body and mission', () => {
   const progress = { discovered: ['earth', 'moon'], landed: ['moon'], photos: ['eclipse'] };
   assert.deepEqual(summarize(progress, BODIES, MISSIONS), {
-    discovered: 2, landed: 1, photos: 1, bodies: BODIES.length, missions: MISSIONS.length,
+    discovered: 2, landed: 1, photos: 1, stories: 0, bodies: BODIES.length, missions: MISSIONS.length, storyTotal: 0,
   });
+  const withStories = summarize({ ...progress, stories: ['giotto'] }, BODIES, MISSIONS, STORIES);
+  assert.equal(withStories.stories, 1);
+  assert.equal(withStories.storyTotal, 7);
 });
 
 test('sanitizeProgress drops junk from storage and keeps known ids', () => {
   const junk = { discovered: ['mars', 'vulcan', 3], landed: 'moon', photos: ['eclipse', 'eclipse', 'fake'] };
-  assert.deepEqual(sanitizeProgress(junk, BODIES, MISSIONS), { discovered: ['earth', 'mars'], landed: [], photos: ['eclipse'] });
+  assert.deepEqual(sanitizeProgress(junk, BODIES, MISSIONS), { discovered: ['earth', 'mars'], landed: [], photos: ['eclipse'], stories: [] });
+  const kept = sanitizeProgress({ stories: ['giotto', 'giotto', 'atlantis', 7] }, BODIES, MISSIONS, STORIES);
+  assert.deepEqual(kept.stories, ['giotto']);
   assert.deepEqual(sanitizeProgress(null, BODIES, MISSIONS), createProgress());
   assert.deepEqual(sanitizeProgress('nonsense', BODIES, MISSIONS), createProgress());
 });
@@ -92,4 +100,26 @@ test('a log saved when there were 75 slots still reads, as 75 of 85', () => {
   const summary = summarize(read, BODIES, MISSIONS);
   assert.deepEqual(score(summary), { done: 75, total: 85 });
   assert.equal(isComplete(summary), false);
+  // With the seven story places the same log is 75 of 92.
+  assert.deepEqual(score(summarize(sanitizeProgress(old, BODIES, MISSIONS, STORIES), BODIES, MISSIONS, STORIES)), { done: 75, total: 92 });
+});
+
+test('recordStories keeps the first visit only', () => {
+  let { progress, newly } = recordStories(createProgress(), ['cassini']);
+  assert.deepEqual(newly, ['cassini']);
+  ({ progress, newly } = recordStories(progress, ['cassini', 'giotto']));
+  assert.deepEqual(newly, ['giotto']);
+  assert.deepEqual(progress.stories, ['cassini', 'giotto']);
+  assert.deepEqual(recordStories(progress, ['giotto']).newly, []);
+  // A log from before story places existed has no list yet.
+  assert.deepEqual(recordStories({ discovered: ['earth'], landed: [], photos: [] }, ['giotto']).progress.stories, ['giotto']);
+});
+
+test('the tour is not complete until every story place is visited', () => {
+  const all = {
+    discovered: BODIES.map((b) => b.id), landed: BODIES.map((b) => b.id), photos: MISSIONS.map((m) => m.id),
+    stories: STORIES.map((s) => s.id),
+  };
+  assert.equal(isComplete(summarize(all, BODIES, MISSIONS, STORIES)), true);
+  assert.equal(isComplete(summarize({ ...all, stories: all.stories.slice(1) }, BODIES, MISSIONS, STORIES)), false);
 });

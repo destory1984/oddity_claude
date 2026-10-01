@@ -4,9 +4,9 @@ const KEY = 'oddity.progress.v1';
 
 // Storage can be missing or refuse writes (private windows, blocked site data).
 // Every call is guarded; without storage the log lasts only for this page.
-export function loadProgress(bodies, missions) {
+export function loadProgress(bodies, missions, stories) {
   try {
-    return sanitizeProgress(JSON.parse(localStorage.getItem(KEY)), bodies, missions);
+    return sanitizeProgress(JSON.parse(localStorage.getItem(KEY)), bodies, missions, stories);
   } catch {
     return createProgress();
   }

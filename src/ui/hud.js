@@ -10,7 +10,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
   const markers = new Map();
   for (const body of bodies) {
     const el = document.createElement('button');
-    el.className = body.kind === 'star' ? 'marker sun' : 'marker';
+    el.className = { star: 'marker sun', site: 'marker site' }[body.kind] ?? 'marker';
     el.textContent = body.name;
     el.addEventListener('click', () => onSelect(body.id));
     $('markers').append(el);
@@ -61,7 +61,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       $('faceTarget').textContent = `${body.name} 바라보기`;
     },
     // goalId: the body the first-visit guide points at; its label always shows and pulses.
-    update({ view, local, selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null }) {
+    update({ view, local, selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [] }) {
       $('altitudeLabel').textContent = local.label;
       $('altitude').textContent = fmt(local.altitude);
       const backward = speed > 0.01 && motionSign < 0;
@@ -87,11 +87,11 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         return { body, el, spot, keep, selected: selectedHere };
       });
       const crowded = crowdedMoons(placed.map(({ body, spot, selected: sel }) => ({
-        id: body.id, parent: body.kind === 'moon' || body.kind === 'craft' ? body.parent : null, x: spot.x, y: spot.y, outside: spot.outside, selected: sel || body.id === goalId,
+        id: body.id, parent: ['moon', 'craft', 'site'].includes(body.kind) ? body.parent : null, x: spot.x, y: spot.y, outside: spot.outside, selected: sel || body.id === goalId,
       })));
       const arrows = [];
       for (const { body, el, spot, keep, selected: sel } of placed) {
-        el.hidden = !keep || crowded.has(body.id);
+        el.hidden = !keep || crowded.has(body.id) || hiddenIds.includes(body.id);
         el.classList.toggle('selected', sel);
         el.classList.toggle('goal', body.id === goalId);
         if (!el.hidden && spot.outside) arrows.push({ el, ...spot });

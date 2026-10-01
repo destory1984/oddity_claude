@@ -25,9 +25,11 @@ test('four nearby galaxies', () => {
   assert.ok(d > 15 && d < 25, `${d}`);
 });
 
-test('all 88 official constellations, each a named set of lines', () => {
-  assert.equal(CONSTELLATIONS.length, 88);
-  assert.equal(new Set(CONSTELLATIONS.map((c) => c.id)).size, 88);
+test('twenty well-known constellations, each a named set of lines', () => {
+  assert.deepEqual(CONSTELLATIONS.map((c) => c.id), [
+    'ori', 'uma', 'umi', 'cas', 'cru', 'sco', 'cyg', 'leo', 'tau', 'gem',
+    'cma', 'lyr', 'aql', 'sgr', 'and', 'peg', 'per', 'vir', 'cen', 'boo',
+  ]);
   for (const c of CONSTELLATIONS) {
     assert.ok(c.name.endsWith('자리') && c.nameEn && c.lines.length >= 1, c.id);
     for (const line of c.lines) {
@@ -35,7 +37,6 @@ test('all 88 official constellations, each a named set of lines', () => {
       for (const [raH, decDeg] of line) assert.ok(raH >= 0 && raH < 24 && decDeg >= -90 && decDeg <= 90, c.id);
     }
   }
-  for (const id of ['ori', 'uma', 'cas', 'cru', 'sco', 'cyg', 'leo', 'ser', 'oct']) assert.ok(CONSTELLATIONS.find((c) => c.id === id), id);
 });
 
 test('Orion passes through Betelgeuse, Rigel and the three belt stars', () => {

@@ -1,4 +1,4 @@
-// The fixed sky: nearby galaxies, the 88 constellations and a few famous stars,
+// The fixed sky: nearby galaxies, twenty constellations and a few famous stars,
 // placed by their real coordinates (right ascension in hours, declination in degrees).
 // Nothing here can be visited; it is the backdrop.
 

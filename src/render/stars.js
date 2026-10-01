@@ -93,7 +93,7 @@ export async function createStars(scene) {
   bright.mesh.alwaysSelectAsActiveMesh = true;
   bright.mesh.isPickable = false;
 
-  // The 88 constellations: a star at every corner of each figure, joined by thin lines.
+  // The constellations: a star at every corner of each figure, joined by thin lines.
   const corners = new Map();
   for (const c of CONSTELLATIONS) for (const [raH, decDeg] of c.lines.flat()) corners.set(`${raH},${decDeg}`, [raH, decDeg]);
   const cornerList = [...corners.values()];
@@ -110,7 +110,7 @@ export async function createStars(scene) {
   const lines = CreateLineSystem('constellations', {
     lines: CONSTELLATIONS.flatMap((c) => c.lines.map((line) => line.map(([raH, decDeg]) => skyVector(raH, decDeg).scale(79500)))),
   }, scene);
-  lines.color = new Color3(0.3, 0.42, 0.6);
+  lines.color = new Color3(0.4, 0.55, 0.78);
   lines.alpha = 0.22;
   lines.isPickable = false;
   lines.alwaysSelectAsActiveMesh = true;

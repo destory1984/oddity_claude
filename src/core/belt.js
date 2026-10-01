@@ -6,10 +6,14 @@ export const BELT = {
   innerKm: (2.2 * AU_KM) / DISTANCE_COMPRESSION,
   outerKm: (3.2 * AU_KM) / DISTANCE_COMPRESSION,
   halfHeightKm: 20000,
-  // Space is cut into cubes this wide; each may hold one rock.
-  cellKm: 20000,
+  // Space is cut into cubes this wide; each may hold one rock. At 2,000 km the nearest
+  // rocks are a couple of thousand km off, where a 150 km rock spans a few degrees.
+  cellKm: 2000,
 };
 const ROCK_SHARE = 0.4;
+// Cells looked at on each side of the traveler's own: 5 x 5 x 5 in all.
+const REACH = 2;
+export const MAX_ROCKS = (2 * REACH + 1) ** 3;
 
 export function inBelt(position, sunPosition) {
   const dx = position[0] - sunPosition[0];
@@ -33,22 +37,22 @@ function cellNumbers(i, j, k) {
   return [next(), next(), next(), next(), next()];
 }
 
-// The rocks in the 27 cells round the traveler. Real asteroids are far smaller and a
+// The rocks in the 125 cells round the traveler. Real asteroids are far smaller and a
 // million km apart; these are enlarged and crowded so there is something to see.
 export function rocksNear(position, sunPosition) {
   const { cellKm } = BELT;
   const base = position.map((n, a) => Math.floor((n - sunPosition[a]) / cellKm));
   const rocks = [];
-  for (let i = base[0] - 1; i <= base[0] + 1; i++) {
-    for (let j = base[1] - 1; j <= base[1] + 1; j++) {
-      for (let k = base[2] - 1; k <= base[2] + 1; k++) {
+  for (let i = base[0] - REACH; i <= base[0] + REACH; i++) {
+    for (let j = base[1] - REACH; j <= base[1] + REACH; j++) {
+      for (let k = base[2] - REACH; k <= base[2] + REACH; k++) {
         const [has, x, y, z, size] = cellNumbers(i, j, k);
         if (has >= ROCK_SHARE) continue;
         const at = [
           sunPosition[0] + (i + x) * cellKm, sunPosition[1] + (j + y) * cellKm, sunPosition[2] + (k + z) * cellKm,
         ];
         if (!inBelt(at, sunPosition)) continue;
-        rocks.push({ position: at, radiusKm: 10 + size * 50, seed: Math.floor(has * 1e6) });
+        rocks.push({ position: at, radiusKm: 30 + size * 120, seed: Math.floor(has * 1e6) });
       }
     }
   }

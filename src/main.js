@@ -55,6 +55,8 @@ let progress = loadProgress(BODIES, MISSIONS);
 // The first-visit guide assumes the opening view above Earth.
 let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
 let simTime = 0;
+// The note on entering the asteroid belt shows once per visit to the game.
+let beltSeen = false;
 let bodies = bodiesAt(0);
 // Where a body is right now (BODIES is only the starting layout).
 // Spacecraft and telescopes: found and selected like bodies, but they are not in the
@@ -348,6 +350,10 @@ async function init() {
       turn,
     });
     if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`);
+    if (view.inBelt && !beltSeen) {
+      beltSeen = true;
+      toast.show(eventMessage({ type: 'beltEntered' }));
+    }
     world.render();
 
     if (frame++ % HUD_EVERY_N_FRAMES !== 0) return;

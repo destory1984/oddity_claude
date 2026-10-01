@@ -10,6 +10,8 @@ import { createStars } from './stars.js';
 import { createHero } from './hero.js';
 import { createCraft } from './craft.js';
 import { createComet } from './comet.js';
+import { createBelt } from './belt.js';
+import { inBelt } from '../core/belt.js';
 import { createIce } from './ice.js';
 import { ringCrossing, ringDensity } from '../core/rings.js';
 import { eyeView } from '../core/eye.js';
@@ -36,6 +38,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   const rendered = createBodyMeshes(scene, bodies, sunBody);
   const sun = createSun(scene, sunBody);
   await createStars(scene);
+  const belt = await createBelt(scene);
   // Lights only matter to the spacecraft; planets and the Sun use their own shaders.
   const craftFill = new HemisphericLight('craftFill', new Vector3(0, 1, 0), scene);
   craftFill.intensity = 0.35;
@@ -105,6 +108,7 @@ export async function createWorld(canvas, bodies = BODIES) {
     craftSun.direction = new Vector3(...normalize(sunRel)).scale(-1);
     const halley = now.find((b) => b.kind === 'comet');
     if (halley) comet.update(halley, position, sunNow.position);
+    belt.update(position, sunNow.position, directions[sunNow.id]);
 
     const occluders = now.filter((b) => b.kind !== 'star').map((b) => ({
       direction: directions[b.id], distance: distances[b.id], radius: b.radiusKm,
@@ -128,6 +132,7 @@ export async function createWorld(canvas, bodies = BODIES) {
       distances,
       sunVisibility: visibility,
       ringCrossed,
+      inBelt: inBelt(traveler, sunNow.position),
       camera: {
         forward: axis(Vector3.Forward()),
         right: axis(Vector3.Right()),

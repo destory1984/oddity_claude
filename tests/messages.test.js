@@ -49,3 +49,10 @@ test('the live limit reads like 0.12c, 3.4c or 42c', () => {
 test('speed zone events are gone', () => {
   assert.equal(eventMessage({ type: 'zoneChanged', from: 'near', to: 'far' }), null);
 });
+
+test('entering the asteroid belt says how empty the real one is', () => {
+  assert.equal(
+    eventMessage({ type: 'beltEntered' }),
+    '소행성대에 들어섰습니다.\n실제로는 소행성 사이가 평균 100만km쯤 떨어져 있습니다.',
+  );
+});

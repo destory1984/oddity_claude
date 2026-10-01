@@ -179,6 +179,7 @@ async function init() {
     onTogglePhoto: () => photo.toggle(),
     onJournal: () => journal.open(),
     onMute: () => toggleSound(),
+    onMusic: () => toggleMusic(),
     onEscape: () => (photo.active() ? photo.toggle() : setPaused(!paused)),
     onWheel: (deltaY) => photo.zoom(deltaY),
     isBlocked: () => $('help').open || $('journal').open,
@@ -379,7 +380,8 @@ async function init() {
 
   function showSoundButton() {
     $('soundButton').textContent = sound.muted() ? '🔇' : '🔊';
-    $('soundButton').setAttribute('aria-label', sound.muted() ? '소리 켜기' : '소리 끄기');
+    $('soundButton').setAttribute('aria-label', sound.muted() ? '효과음 켜기' : '효과음 끄기');
+    $('soundButton').title = sound.muted() ? '효과음 꺼짐 (M)' : '효과음 켜짐 (M)';
   }
   function toggleSound() {
     sound.unlock();
@@ -393,15 +395,22 @@ async function init() {
     document.addEventListener(type, () => sound.unlock(), { capture: true });
   }
   $('capture').addEventListener('click', () => sound.cue('shutter'));
+  // Music has its own switch, in the top bar (and the same one in the help dialog).
   function showMusicButton() {
-    $('musicButton').textContent = sound.musicOn() ? '배경 음악 끄기' : '배경 음악 켜기';
+    const on = sound.musicOn();
+    $('musicButton').textContent = on ? '배경 음악 끄기' : '배경 음악 켜기';
+    $('bgmButton').classList.toggle('off', !on);
+    $('bgmButton').setAttribute('aria-label', on ? '배경 음악 끄기' : '배경 음악 켜기');
+    $('bgmButton').title = on ? '배경 음악 켜짐 (B)' : '배경 음악 꺼짐 (B)';
   }
-  showMusicButton();
-  $('musicButton').addEventListener('click', () => {
+  function toggleMusic() {
     sound.unlock();
     sound.setMusic(!sound.musicOn());
     showMusicButton();
-  });
+  }
+  showMusicButton();
+  $('musicButton').addEventListener('click', toggleMusic);
+  $('bgmButton').addEventListener('click', toggleMusic);
   $('tuneButton').addEventListener('click', () => {
     sound.unlock();
     toast.show(`다음 곡: ${sound.nextTune()}. ${sound.musicOn() ? '다음 마디부터 나옵니다.' : '배경 음악이 꺼져 있습니다.'}`, 'tune');

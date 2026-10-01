@@ -1065,6 +1065,7 @@ nav button {
   }
 
   #soundButton,
+  #bgmButton,
   #helpButton {
     min-width: 32px;
   }
@@ -1167,4 +1168,10 @@ body.touch #reverseButton,body.touch #flyButton,body.touch #brake {
     53.3% { opacity:1; }
     100% { opacity:0; }
   }
+}
+
+/* The music switch in the top bar: struck through and dim when off */
+#bgmButton.off {
+  opacity:.45;
+  text-decoration:line-through;
 }

@@ -51,6 +51,9 @@ export function createSound() {
   let muted = loadMuted();
   let musicOn = loadMusic();
   let musicBus;
+  // Effects (cues, the flight sound) go through their own switch, so effects and music
+  // can be turned off separately. `muted` means the effects are off.
+  let sfx;
   // When the next bar of music starts (audio clock) and which bar it is.
   let nextBarAt = 0;
   let barNumber = 0;
@@ -62,8 +65,11 @@ export function createSound() {
     if (!AudioContextClass) return null;
     ctx = new AudioContextClass();
     master = ctx.createGain();
-    master.gain.value = muted ? 0 : MASTER_VOLUME;
+    master.gain.value = MASTER_VOLUME;
     master.connect(ctx.destination);
+    sfx = ctx.createGain();
+    sfx.gain.value = muted ? 0 : 1;
+    sfx.connect(master);
     musicBus = ctx.createGain();
     musicBus.gain.value = musicOn ? 1 : 0;
     musicBus.connect(master);
@@ -77,7 +83,7 @@ export function createSound() {
     // it, so it never hums like an engine.
     const gain = ctx.createGain();
     gain.gain.value = 0;
-    gain.connect(master);
+    gain.connect(sfx);
     const air = ctx.createBufferSource();
     air.buffer = noiseBuffer;
     air.loop = true;
@@ -101,7 +107,7 @@ export function createSound() {
     return ctx;
   }
 
-  function tone({ freq, to = freq, type = 'sine', start = 0, length = 0.2, volume = 0.2, out = master }) {
+  function tone({ freq, to = freq, type = 'sine', start = 0, length = 0.2, volume = 0.2, out = sfx }) {
     const t = ctx.currentTime + start;
     const osc = ctx.createOscillator();
     const env = ctx.createGain();
@@ -163,7 +169,7 @@ export function createSound() {
     const env = ctx.createGain();
     env.gain.setValueAtTime(volume, t);
     env.gain.exponentialRampToValueAtTime(0.0001, t + length);
-    src.connect(filter).connect(env).connect(master);
+    src.connect(filter).connect(env).connect(sfx);
     src.start(t);
     src.stop(t + length + 0.05);
   }
@@ -266,7 +272,7 @@ export function createSound() {
     // Called every frame with the mood from core/music.js moodFor(); starts each bar a
     // little ahead of time so the audio clock, not the frame rate, keeps the beat.
     music(mood) {
-      if (!ctx || muted || !musicOn || ctx.state !== 'running') return;
+      if (!ctx || !musicOn || ctx.state !== 'running') return;
       const now = ctx.currentTime;
       // After a pause or a hidden tab, pick up from now rather than catching up.
       if (nextBarAt < now) nextBarAt = now + 0.1;
@@ -308,7 +314,7 @@ export function createSound() {
       muted = value;
       saveMuted(muted);
       if (muted) window.speechSynthesis?.cancel();
-      if (ctx) master.gain.setTargetAtTime(muted ? 0 : MASTER_VOLUME, ctx.currentTime, 0.05);
+      if (ctx) sfx.gain.setTargetAtTime(muted ? 0 : 1, ctx.currentTime, 0.05);
     },
   };
 }

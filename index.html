@@ -27,7 +27,8 @@
     <header>
       <div class="brand"><strong>Space Oddity</strong><span>우주 한량</span></div>
       <nav>
-        <button id="soundButton" aria-label="소리 끄기">🔊</button>
+        <button id="soundButton" aria-label="효과음 끄기">🔊</button>
+        <button id="bgmButton" aria-label="배경 음악 끄기">♪</button>
         <button id="helpButton" aria-label="조작 안내">?</button>
         <button id="pauseButton">일시 정지</button>
         <button id="journalButton">수첩</button>
@@ -138,7 +139,7 @@
       <dt>앱으로 설치</dt><dd>안드로이드 크롬: 메뉴 ⋮ → 앱 설치. 아이폰 사파리: 공유 → 홈 화면에 추가. 설치하면 인터넷 없이도 열립니다. <button id="installButton" hidden>지금 설치</button></dd>
       <dt>캐릭터</dt><dd><span id="heroNow"></span> 바꾸면 게임이 처음 자리에서 다시 시작합니다(수첩은 그대로). <button id="heroButton"></button></dd>
       <dt>행성 배치</dt><dd><span id="layoutNow"></span> 오늘의 하늘에서는 행성과 달이 오늘 날짜의 실제 방향에 놓이고, 거기서부터 게임 시계(720배)로 움직입니다. 바꾸면 게임이 처음 자리에서 다시 시작합니다(수첩은 그대로). <button id="layoutButton"></button></dd>
-      <dt>소리</dt><dd>M 키 / 🔊 버튼으로 켜고 끕니다.</dd>
+      <dt>소리</dt><dd>효과음은 M 키 / 🔊 버튼, 배경 음악은 B 키 / ♪ 버튼으로 따로 켜고 끕니다.</dd>
       <dt>배경 음악</dt><dd>여섯 곡(오르골, 새벽, 먼 바다, 자장가, 별무리, 깊은 밤)이 2분쯤씩 차례로 흐릅니다. 천체 가까이에서는 음이 잦고, 먼 우주에서는 낮고 드물며, 표면에 서면 화음만 남습니다. <button id="musicButton"></button> <button id="tuneButton">다음 곡</button></dd>
       <dt>탐험 수첩</dt><dd>J 키 / 수첩 버튼. 새 천체를 발견하고, 표면에 내려앉고, 사진 임무를 달성하면 기록됩니다.</dd>
     </dl>

@@ -3,7 +3,7 @@ import { controlIntent, rangeKeepsKey, tracksKey } from '../core/controls.js';
 const $ = (id) => document.getElementById(id);
 const DRAG_RATE = 0.0035;
 
-export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal, onMute, onEscape, onWheel, isBlocked }) {
+export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal, onMute, onMusic = () => {}, onEscape, onWheel, isBlocked }) {
   const held = new Set();
   let stick = [0, 0];
   let stickId = null;
@@ -44,6 +44,7 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
     else if (e.code === 'KeyP' && !e.repeat) onTogglePhoto();
     else if (e.code === 'KeyJ' && !e.repeat && tracksKey(e)) onJournal();
     else if (e.code === 'KeyM' && !e.repeat && tracksKey(e)) onMute();
+    else if (e.code === 'KeyB' && !e.repeat && tracksKey(e)) onMusic();
     else if (e.code === 'Escape' && !e.repeat) onEscape();
     if (tracksKey(e)) held.add(e.code);
   });

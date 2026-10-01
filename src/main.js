@@ -5,10 +5,11 @@ import { C, speedLimit } from './core/flight.js';
 import {
   createState, step, stopNow, totalSpeed, carryAlong, TURN_RATE, startOrientation,
 } from './core/game.js';
-import { rotateLocal, lookAtDirection, multiply, conjugate } from './core/orientation.js';
+import { rotateLocal, lookAtDirection, multiply, conjugate, forward } from './core/orientation.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
 import { createHud } from './ui/hud.js';
+import { createMinimap } from './ui/minimap.js';
 import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
 import { eventMessage, limitText } from './ui/messages.js';
@@ -129,11 +130,13 @@ async function init() {
     },
   });
 
+  function selectBody(id) {
+    selectedId = id;
+    hud.showSelection(bodyById(id));
+  }
+
   const hud = createHud(BODIES, {
-    onSelect(id) {
-      selectedId = id;
-      hud.showSelection(bodyById(id));
-    },
+    onSelect: selectBody,
     onFace() {
       const body = here(selectedId);
       const direction = body.position.map((n, i) => n - state.position[i]);
@@ -151,6 +154,7 @@ async function init() {
     },
   });
   hud.showSelection(bodyById(selectedId));
+  const minimap = createMinimap($('minimap'), { onPick: selectBody });
 
   let journalPriorPause = false;
   const journal = createJournal({
@@ -312,6 +316,7 @@ async function init() {
       throttle: input.throttle(),
       C,
     });
+    minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId });
   });
 
   // Read-only diagnostics for verification. No travel shortcuts.

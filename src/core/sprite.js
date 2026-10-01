@@ -7,20 +7,15 @@
 
 export const SHEETS = ['forward', 'backward', 'left', 'right', 'up', 'down', 'brake', 'idle'];
 export const FRAMES = 4;
-// Frames per second: flight loops, the side-on loops (at ten a second her whole body
-// flickered; they change more from frame to frame than the rear view does), the stop
-// (played once), and hovering.
-export const SPRITE_FPS = { flight: 10, side: 5, brake: 8, idle: 3 };
-// A flight sheet stays up at least this long, so a wobble of the hand does not flip
-// her between her back and her side several times a second.
-export const SHEET_HOLD_S = 0.35;
+// Frames per second: flight loops, the stop (played once), and hovering.
+export const SPRITE_FPS = { flight: 10, brake: 8, idle: 3 };
 // Slower than this (km/s) she is standing still.
 const MOVING_KM_S = 1;
 // Turning faster than this (radians per second) shows the turn instead of plain flight.
 const TURN = 0.25;
 
 export function createSpriteState() {
-  return { sheet: 'idle', time: 0, moving: false, since: 0 };
+  return { sheet: 'idle', time: 0, moving: false };
 }
 
 // The flight sheet for what the traveler is doing.
@@ -40,25 +35,21 @@ export function stepSprite(state, input, dt) {
   const moving = input.speed >= MOVING_KM_S;
   if (moving) {
     // Flight sheets share one beat, so switching between them does not restart the loop.
-    if (!state.moving) return { sheet: flightSheet(input), time: 0, moving, since: 0 };
-    const since = (state.since ?? 0) + dt;
-    const wanted = flightSheet(input);
-    if (wanted === state.sheet || since < SHEET_HOLD_S) return { sheet: state.sheet, time: state.time + dt, moving, since };
-    return { sheet: wanted, time: state.time + dt, moving, since: 0 };
+    const flying = state.moving;
+    return { sheet: flightSheet(input), time: flying ? state.time + dt : 0, moving };
   }
   // Just stopped: the braking drawings, once.
-  if (state.moving) return { sheet: 'brake', time: 0, moving, since: 0 };
+  if (state.moving) return { sheet: 'brake', time: 0, moving };
   const time = state.time + dt;
-  if (state.sheet === 'brake' && time < FRAMES / SPRITE_FPS.brake) return { sheet: 'brake', time, moving, since: 0 };
-  if (state.sheet !== 'idle') return { sheet: 'idle', time: 0, moving, since: 0 };
-  return { sheet: 'idle', time, moving, since: 0 };
+  if (state.sheet === 'brake' && time < FRAMES / SPRITE_FPS.brake) return { sheet: 'brake', time, moving };
+  if (state.sheet !== 'idle') return { sheet: 'idle', time: 0, moving };
+  return { sheet: 'idle', time, moving };
 }
 
 // Which of the four frames (0..3) to show.
 export function spriteFrame({ sheet, time }) {
   if (sheet === 'brake') return Math.min(FRAMES - 1, Math.floor(time * SPRITE_FPS.brake));
-  const side = sheet === 'left' || sheet === 'right';
-  const fps = sheet === 'idle' ? SPRITE_FPS.idle : side ? SPRITE_FPS.side : SPRITE_FPS.flight;
+  const fps = sheet === 'idle' ? SPRITE_FPS.idle : SPRITE_FPS.flight;
   return Math.floor(time * fps) % FRAMES;
 }
 

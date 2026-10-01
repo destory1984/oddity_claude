@@ -26,27 +26,27 @@ const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
 const HUD_EVERY_N_FRAMES = 6;
 
-// TEMPORARY (2026-10-01): start beside Saturn while its rings are being tuned.
-// Set to false to start above Earth again.
-const START_AT_SATURN = true;
+// TEMPORARY (2026-10-01): start beside a planet while its look is being tuned.
+// Set START_NEAR to null to start above Earth again.
+const START_NEAR = { id: 'jupiter', fromCentreKm: 400000 };
 
-function saturnStart() {
-  const saturn = bodyById('saturn');
+function startNear({ id, fromCentreKm }) {
+  const body = bodyById(id);
   const sun = bodyById('sun');
-  // 330,000 km from Saturn's centre, on the sunlit side and well above the
-  // ring plane, so the whole ring system fits in the view. (Saturn moves about 70 km/s
-  // on the game clock, so it stays put for a long look.)
-  const toSun = sun.position.map((n, i) => n - saturn.position[i]);
+  // On the sunlit side and a little above the planet's orbit, looking at it, far enough
+  // that the whole disc fits in the view. (Planets move about 70 to 180 km/s on the game
+  // clock, so it stays put for a long look.)
+  const toSun = sun.position.map((n, i) => n - body.position[i]);
   const length = Math.hypot(...toSun);
-  const out = [0.6 * toSun[0] / length, 0.6 * toSun[1] / length + 0.8, 0.6 * toSun[2] / length];
+  const out = [0.9 * toSun[0] / length, 0.9 * toSun[1] / length + 0.35, 0.9 * toSun[2] / length];
   const norm = Math.hypot(...out);
-  const position = saturn.position.map((n, i) => n + (out[i] / norm) * 330000);
-  return createState(position, lookAtDirection(saturn.position.map((n, i) => n - position[i])));
+  const position = body.position.map((n, i) => n + (out[i] / norm) * fromCentreKm);
+  return createState(position, lookAtDirection(body.position.map((n, i) => n - position[i])));
 }
 
-let state = START_AT_SATURN ? saturnStart() : createState(START_POSITION, startOrientation(innerWidth / innerHeight));
+let state = START_NEAR ? startNear(START_NEAR) : createState(START_POSITION, startOrientation(innerWidth / innerHeight));
 let paused = false;
-let selectedId = START_AT_SATURN ? 'saturn' : 'earth';
+let selectedId = START_NEAR ? START_NEAR.id : 'earth';
 let dragTurn = [0, 0];
 let progress = loadProgress(BODIES, MISSIONS);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).

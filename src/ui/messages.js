@@ -56,6 +56,8 @@ export function eventMessage(event, bodies = []) {
       return `${event.name}${withParticle(event.name)} 도킹했습니다. 이제 함께 날아갑니다. 전진이나 후진을 누르면 떨어집니다.`;
     case 'undocked':
       return `${event.name}${withParticle(event.name)} 도킹을 풀었습니다.`;
+    case 'meteor':
+      return '지구의 밤 쪽에 별똥별이 떨어집니다. 혜성이 흘린 부스러기가 대기에서 타는 빛입니다.';
     case 'beltEntered':
       return '소행성대에 들어섰습니다.\n실제로는 소행성 사이가 평균 100만km쯤 떨어져 있습니다.';
     default:

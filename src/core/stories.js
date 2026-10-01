@@ -110,6 +110,14 @@ STORIES.push(
   ...MARS_LANDINGS.map((row) => landing('mars', '화성', row)),
 );
 
+// Rosetta flew beside 67P for two years and set Philae down on it.
+STORIES.push({
+  id: 'rosetta', name: '로제타와 필레', nameEn: 'Rosetta', year: 2014,
+  type: 'near', target: 'churyumov', withinKm: 300,
+  hint: '추류모프-게라시멘코 혜성의 핵 300km 안을 지나기',
+  text: '2014년 11월 12일 로제타의 착륙선 필레가 이 혜성에 내렸습니다. 혜성에 내린 첫 탐사선입니다.',
+});
+
 // A place's label shows only from within this many of its body's radii above the
 // surface (the Moon: 6,950 km; Mars: 13,560 km), like the craft that circle a planet
 // (core/craft.js hiddenCraft). From farther off the names pile up on the disc.

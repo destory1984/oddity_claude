@@ -165,6 +165,25 @@ export const BODY_DATA = [
       perihelionAtS: 60 * DAY_S, perihelionDirection: [0.2, 0, -0.98], tiltRad: 0.31, retrograde: true,
     },
   },
+  // Hale-Bopp, the great comet of 1997: 0.914 AU at its closest, some 350 AU at its
+  // farthest, once in about 2,400 years, on a path standing almost upright to the
+  // planets'. It is far out now; here it starts 20 days after perihelion.
+  {
+    id: 'haleBopp', name: '헤일-밥 혜성', nameEn: 'Hale-Bopp', kind: 'comet', radiusKm: 30, parent: 'sun',
+    ellipse: {
+      semiMajorKm: 177.4 * AU_KM, eccentricity: 0.99485, periodS: 876600 * DAY_S,
+      perihelionAtS: -20 * DAY_S, perihelionDirection: [-0.7, 0, 0.71], tiltRad: 1.56, retrograde: false,
+    },
+  },
+  // 67P/Churyumov-Gerasimenko, where Rosetta's lander Philae came down: 1.243 to 5.68 AU,
+  // once in 6.44 years. Here it reaches perihelion 40 days in.
+  {
+    id: 'churyumov', name: '추류모프-게라시멘코 혜성', nameEn: '67P', kind: 'comet', radiusKm: 2, parent: 'sun',
+    ellipse: {
+      semiMajorKm: 3.463 * AU_KM, eccentricity: 0.641, periodS: 2352 * DAY_S,
+      perihelionAtS: 40 * DAY_S, perihelionDirection: [0.9, 0, 0.44], tiltRad: 0.123, retrograde: false,
+    },
+  },
 ];
 
 const sub = (a, b) => a.map((n, i) => n - b[i]);

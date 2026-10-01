@@ -212,6 +212,8 @@ const LOOKS = {
   },
   // The comet's nucleus reflects 4% of sunlight: nearly black.
   halley: { shader: 'rocky', colorA: [0.05, 0.05, 0.05], colorB: [0.16, 0.15, 0.14], cap: 0, haze: 0, contrast: 0.6, craters: 0.5, dayS: 2.2 * 86400 },
+  haleBopp: { shader: 'rocky', colorA: [0.06, 0.06, 0.06], colorB: [0.2, 0.19, 0.18], cap: 0, haze: 0, contrast: 0.6, craters: 0.4, dayS: 40860 },
+  churyumov: { shader: 'rocky', colorA: [0.05, 0.05, 0.05], colorB: [0.15, 0.14, 0.13], cap: 0, haze: 0, contrast: 0.7, craters: 0.6, dayS: 44640 },
 };
 
 // Rings are a flat square plane; the shader keeps only the annulus between the radii.

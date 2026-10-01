@@ -12,6 +12,7 @@ import { createHero } from './hero.js';
 import { createCraft, createSiteModels } from './craft.js';
 import { storySitesAt } from '../core/stories.js';
 import { createComet } from './comet.js';
+import { createMeteors } from './meteors.js';
 import { createBelt } from './belt.js';
 import { inBelt } from '../core/belt.js';
 import { createIce } from './ice.js';
@@ -48,7 +49,9 @@ export async function createWorld(canvas, bodies = BODIES) {
   craftSun.intensity = 1.1;
   const craftMeshes = createCraft(scene, CRAFT);
   const siteModels = createSiteModels(scene, storySitesAt(0, bodies));
-  const comet = createComet(scene);
+  // A glow and a tail for each comet.
+  const comets = bodies.filter((b) => b.kind === 'comet').map((b) => ({ id: b.id, glow: createComet(scene) }));
+  const meteors = createMeteors(scene);
 
   // The character is drawn in the camera's own space, and her light is fixed: from the
   // right and a little above, where the Sun is in the opening view. It is taken from
@@ -113,8 +116,8 @@ export async function createWorld(canvas, bodies = BODIES) {
     craftMeshes.update(craft, position, sunNow.position, jolt, hiddenCraft);
     siteModels.update(sites, now, position);
     craftSun.direction = new Vector3(...normalize(sunRel)).scale(-1);
-    const halley = now.find((b) => b.kind === 'comet');
-    if (halley) comet.update(halley, position, sunNow.position);
+    for (const { id, glow } of comets) glow.update(now.find((b) => b.id === id), position, sunNow.position);
+    const meteorLit = meteors.update(dt, now.find((b) => b.id === 'earth'), sunNow.position, position);
     belt.update(position, sunNow.position, directions[sunNow.id]);
 
     const occluders = now.filter((b) => b.kind !== 'star').map((b) => ({
@@ -143,6 +146,7 @@ export async function createWorld(canvas, bodies = BODIES) {
       sunVisibility: visibility,
       ringCrossed,
       inBelt: inBelt(traveler, sunNow.position),
+      meteorLit,
       camera: {
         forward: axis(Vector3.Forward()),
         right: axis(Vector3.Right()),

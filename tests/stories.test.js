@@ -14,10 +14,10 @@ const done = (position, restingOn = null, t = 0) => {
   return completedStories({ position, restingOn, bodies, craft: craftAt(t, bodies), sites: storySitesAt(t, bodies) });
 };
 
-test('there are 40 story places, each with a name, a hint and a short story; events have a year', () => {
-  assert.equal(STORIES.length, 40);
-  assert.equal(new Set(STORIES.map((s) => s.id)).size, 40);
-  assert.equal(new Set(STORIES.map((s) => s.name)).size, 40);
+test('there are 41 story places, each with a name, a hint and a short story; events have a year', () => {
+  assert.equal(STORIES.length, 41);
+  assert.equal(new Set(STORIES.map((s) => s.id)).size, 41);
+  assert.equal(new Set(STORIES.map((s) => s.name)).size, 41);
   for (const s of STORIES) {
     assert.ok(s.name && s.nameEn && s.hint, s.id);
     assert.ok(s.year === undefined || s.year > 1900, s.id);
@@ -132,6 +132,12 @@ test('New Horizons, Giotto and Voyager 1: passing close by', () => {
   const voyager = craftAt(0, BODIES).find((c) => c.id === 'voyager1');
   assert.deepEqual(done(add(voyager.position, [0, 4000, 0])), ['voyager1']);
   assert.deepEqual(done(add(voyager.position, [0, 9000, 0])), []);
+});
+
+test('Rosetta: passing within 300 km of comet 67P', () => {
+  const comet = bodyById('churyumov');
+  assert.deepEqual(done(add(comet.position, [0, 250, 0])), ['rosetta']);
+  assert.deepEqual(done(add(comet.position, [0, 400, 0])), []);
 });
 
 test('a place on the far side of its body is hidden from the traveler', () => {

@@ -89,6 +89,8 @@ let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
 let simTime = 0;
 // The note on entering the asteroid belt shows once per visit to the game.
 let beltSeen = false;
+// So does the note on the first shooting star over Earth.
+let meteorSeen = false;
 // The fly-by of a planet in progress, watched for a slingshot (core/slingshot.js).
 let pass = null;
 // The craft the traveler is docked with, and the glide toward it (core/dock.js startDocking).
@@ -557,6 +559,10 @@ async function init() {
       turn,
     });
     if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`);
+    if (view.meteorLit && !meteorSeen) {
+      meteorSeen = true;
+      toast.show(eventMessage({ type: 'meteor' }));
+    }
     if (view.inBelt && !beltSeen) {
       beltSeen = true;
       toast.show(eventMessage({ type: 'beltEntered' }));

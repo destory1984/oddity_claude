@@ -57,8 +57,9 @@ test('moons ride along with their planet', () => {
 test('orbits run counterclockwise seen from the north (+y), like the real solar system', () => {
   // In Babylon's left-handed frame seen from +y, +x is right and +z is up on screen,
   // so counterclockwise turns +x toward +z: the tangent at (x, z) is (-z, x).
-  // (Triton is the exception; it has its own test below.)
-  for (const d of BODY_DATA.filter((x) => x.parent && !x.retrograde)) {
+  // (Triton is the exception; it has its own test below. Comets on ellipses have no
+  // periodS of their own here and are checked in newBodies and meteors tests.)
+  for (const d of BODY_DATA.filter((x) => x.parent && !x.retrograde && !x.ellipse)) {
     const offset = (t) => sub(at(t, d.id).position, at(t, d.parent).position);
     const a = offset(0);
     const b = offset(d.periodS / 1000);

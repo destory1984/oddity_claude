@@ -14,6 +14,8 @@ const COLORS = {
   ceres: '#b5aea6',
   pluto: '#d9bfa5',
   halley: '#bfe6ff',
+  haleBopp: '#bfe6ff',
+  churyumov: '#bfe6ff',
 };
 const EDGE_PX = 8;
 

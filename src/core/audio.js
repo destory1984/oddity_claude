@@ -4,6 +4,7 @@
 export function cueForEvent(event) {
   switch (event.type) {
     case 'surfaceReached':
+    case 'docked':
       return 'landed';
     case 'discovered':
       return 'discovered';

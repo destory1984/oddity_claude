@@ -1,6 +1,8 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { objectParticle, subjectParticle, eventMessage, limitText, dateText } from '../src/ui/messages.js';
+import {
+  objectParticle, subjectParticle, withParticle, eventMessage, limitText, dateText,
+} from '../src/ui/messages.js';
 import { BODIES } from '../src/core/bodies.js';
 import { FACTS } from '../src/core/facts.js';
 
@@ -67,4 +69,14 @@ test('reaching a story place names it and tells its story on the next line', () 
 test("the game clock's date reads like 2026.10.1", () => {
   assert.equal(dateText(new Date(2026, 9, 1, 15)), '2026.10.1');
   assert.equal(dateText(new Date(2027, 0, 31)), '2027.1.31');
+});
+
+test('docking messages name the craft with the right particle', () => {
+  assert.equal(withParticle('허블 우주망원경'), '과');
+  assert.equal(withParticle('보이저 1호'), '와');
+  assert.equal(
+    eventMessage({ type: 'docked', name: '허블 우주망원경' }),
+    '허블 우주망원경과 도킹했습니다. 전진이나 후진을 누르면 떨어집니다.',
+  );
+  assert.equal(eventMessage({ type: 'undocked', name: '보이저 1호' }), '보이저 1호와 도킹을 풀었습니다.');
 });

@@ -30,6 +30,7 @@ import { createJournal } from './ui/journal.js';
 import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
+import { dockable, dockOffset, dockedState, wantsToLeave } from './core/dock.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
@@ -80,6 +81,8 @@ let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
 let simTime = 0;
 // The note on entering the asteroid belt shows once per visit to the game.
 let beltSeen = false;
+// The craft the traveler is docked with: { id, offset } (offset from the craft, km).
+let docked = null;
 // Where a body is right now (BODIES is only the starting layout).
 // Spacecraft and telescopes: found and selected like bodies, but they are not in the
 // journal and only slow the traveler nearby (core/craft.js).
@@ -185,10 +188,38 @@ async function init() {
     },
   });
 
+  function announce(event) {
+    toast.show(eventMessage(event));
+    const cue = cueForEvent(event);
+    if (cue) sound.cue(cue);
+  }
+
+  function dock(target) {
+    docked = { id: target.id, offset: dockOffset(state.position, target) };
+    input.clear();
+    announce({ type: 'docked', name: target.name });
+  }
+
+  function undock() {
+    const { name } = here(docked.id);
+    docked = null;
+    announce({ type: 'undocked', name });
+  }
+
+  // Choosing a craft from close by docks with it.
   function selectBody(id) {
     selectedId = id;
     hud.showSelection(named(id));
+    const target = craft.find((c) => c.id === id);
+    if (target && !docked && !paused && dockable(state.position, [target])) dock(target);
   }
+
+  $('dockTarget').addEventListener('click', () => {
+    if (docked) return undock();
+    const target = dockable(state.position, craft);
+    if (target) dock(target);
+    return undefined;
+  });
 
   const hud = createHud([...BODIES, ...craft, ...sites], {
     skyLabels: skyLabels(),
@@ -237,6 +268,10 @@ async function init() {
       progress = createProgress();
       progressChanged(null);
       journal.update(progress, state.position, bodies);
+    const offer = docked ? null : dockable(state.position, craft);
+    $('dockTarget').hidden = !docked && !offer;
+    if (docked) $('dockTarget').textContent = '도킹 풀기';
+    else if (offer) $('dockTarget').textContent = `${offer.name}에 도킹`;
       $('journal').close();
       toast.show('탐험 기록을 지웠습니다.');
     },
@@ -333,6 +368,10 @@ async function init() {
       state = carryAlong(state, before, bodies);
     }
     const intent = input.intent();
+    if (docked) {
+      if (!paused && wantsToLeave(intent)) undock();
+      else state = dockedState(state, here(docked.id), docked.offset);
+    }
     const slowPoints = craft.map((c) => c.position);
     const result = step(state, intent, dt, bodies, slowPoints);
     state = result.state;
@@ -417,6 +456,7 @@ async function init() {
     const driving = input.driving();
     let flightLabel = '자유 비행';
     if (paused) flightLabel = '일시 정지';
+    else if (docked) flightLabel = `${here(docked.id).name}에 도킹`;
     else if (state.restingOn) flightLabel = `${bodyById(state.restingOn).name} 표면`;
     else if (totalSpeed(state) < 0.01) flightLabel = '정지 비행';
     else if (!driving) flightLabel = '관성 비행';

@@ -8,6 +8,7 @@ test('each game event maps to one sound cue', () => {
   assert.equal(cueForEvent({ type: 'landed', bodyId: 'mars' }), null, 'the thud already played');
   assert.equal(cueForEvent({ type: 'photo', missionName: 'x' }), 'mission');
   assert.equal(cueForEvent({ type: 'story', name: 'x' }), 'mission');
+  assert.equal(cueForEvent({ type: 'docked', name: 'x' }), 'landed');
   assert.equal(cueForEvent({ type: 'other' }), null);
 });
 

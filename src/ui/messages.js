@@ -13,6 +13,10 @@ export function objectParticle(word) {
   return hasFinalConsonant(word) ? '을' : '를';
 }
 
+export function withParticle(word) {
+  return hasFinalConsonant(word) ? '과' : '와';
+}
+
 export function subjectParticle(word) {
   return hasFinalConsonant(word) ? '이' : '가';
 }
@@ -34,6 +38,10 @@ export function eventMessage(event, bodies = []) {
       return `사진 임무 달성: ${event.missionName}`;
     case 'story':
       return `이야기 장소: ${event.name}\n${event.text}`;
+    case 'docked':
+      return `${event.name}${withParticle(event.name)} 도킹했습니다. 전진이나 후진을 누르면 떨어집니다.`;
+    case 'undocked':
+      return `${event.name}${withParticle(event.name)} 도킹을 풀었습니다.`;
     case 'beltEntered':
       return '소행성대에 들어섰습니다.\n실제로는 소행성 사이가 평균 100만km쯤 떨어져 있습니다.';
     default:

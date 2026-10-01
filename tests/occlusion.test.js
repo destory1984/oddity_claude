@@ -32,3 +32,18 @@ test('a planet at the Sun edge dims it partly, and the dimmest occluder wins', (
   assert.ok(partial > 0 && partial < 1, `edge case should be partial, got ${partial}`);
   assert.ok(sunVisibility(sunDir, SUN_DISTANCE, SUN_RADIUS, [edge, full]) < 0.01);
 });
+
+test('visibility is the uncovered share of the disc area, not of its width', () => {
+  // A small body crossing the middle of the Sun (a transit) covers 1% of the disc.
+  const transit = { direction: [1, 0, 0], distance: SUN_DISTANCE / 2, radius: SUN_RADIUS / 20 };
+  const seen = sunVisibility(sunDir, SUN_DISTANCE, SUN_RADIUS, [transit]);
+  assert.ok(Math.abs(seen - 0.99) < 0.002, `transit leaves 99%, got ${seen}`);
+  // A body a little wider than the Sun whose edge reaches a quarter of the way across
+  // covers about 15.5% (checked by counting random points).
+  const sunAngular = Math.asin(SUN_RADIUS / SUN_DISTANCE);
+  const big = Math.asin(6371 / 15000);
+  const sep = big + sunAngular / 2;
+  const quarter = { direction: [Math.cos(sep), Math.sin(sep), 0], distance: 15000, radius: 6371 };
+  const left = sunVisibility(sunDir, SUN_DISTANCE, SUN_RADIUS, [quarter]);
+  assert.ok(Math.abs(left - 0.845) < 0.005, `quarter-width cover leaves about 84.5%, got ${left}`);
+});

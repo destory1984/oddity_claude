@@ -295,7 +295,7 @@
 | `src/core/missions.js` | 사진 임무 정의와 판정 |
 | `src/core/progress.js` | 발견·착지·사진 기록, 요약, 정리, 완주 |
 | `src/core/minimap.js` | 미니맵 좌표(제곱근 축척), 비행 방향, 누른 행성 찾기 |
-| `src/core/occlusion.js` | 태양 가림 정도 |
+| `src/core/occlusion.js` | 태양 원반에서 가려지지 않은 넓이의 비율. 가려지지 않은 부분은 밝기를 그대로 두고, 둘레의 빛 번짐만 이 비율로 줄인다 |
 | `src/core/pose.js` | 비행 자세, 관절 제한, 뒤돌아보기, 귀여운 동작, 화면 비율별 캐릭터 크기 |
 | `src/core/audio.js` | 사건별 소리, 비행음 세기 |
 | `src/core/markers.js` | 화면 밖 화살표 규칙과 겹침 풀기 |

@@ -24,7 +24,10 @@ void main(){
   float rayV = pow(max(0., 1. - abs(p.x) * 29.), 8.) * exp(-abs(p.y) * 3.8) * .16;
   float ring = exp(-pow((r - .28) * 15., 2.)) * .045;
   vec3 glow = vec3(1., .51, .12) * (corona + rayH + rayV) * (1. - disc) + vec3(1., .78, .38) * ring;
-  vec3 col = (surface * disc * 1.35 + glow) * .8;
+  // The planet in front already hides the covered part of the disc; what is left keeps
+  // its full surface brightness. Only the glare around it fades with the covered area.
+  // (Additive blending multiplies the colour by alpha, so visibility goes in once.)
+  vec3 col = (surface * disc * 1.35 + glow * visibility) * .8;
   float a = clamp(disc + corona * .38 + rayH + rayV + ring, 0., 1.);
-  gl_FragColor = vec4(col * visibility, a * visibility);
+  gl_FragColor = vec4(col, a);
 }

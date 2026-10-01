@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { sunVisibility } from '../src/core/occlusion.js';
+import { sunVisibility, eclipseDepth, sunBead } from '../src/core/occlusion.js';
 
 const SUN_RADIUS = 696340;
 const SUN_DISTANCE = 2.19e6;
@@ -46,4 +46,29 @@ test('visibility is the uncovered share of the disc area, not of its width', () 
   const quarter = { direction: [Math.cos(sep), Math.sin(sep), 0], distance: 15000, radius: 6371 };
   const left = sunVisibility(sunDir, SUN_DISTANCE, SUN_RADIUS, [quarter]);
   assert.ok(Math.abs(left - 0.845) < 0.005, `quarter-width cover leaves about 84.5%, got ${left}`);
+});
+
+test('the corona comes out over the last eighth of the disc', () => {
+  assert.equal(eclipseDepth(1), 0);
+  assert.equal(eclipseDepth(0.12), 0);
+  assert.equal(eclipseDepth(0), 1);
+  assert.ok(eclipseDepth(0.06) > 0.4 && eclipseDepth(0.06) < 0.6);
+});
+
+test('the diamond ring shows with a sliver left, on the side away from the body in front', () => {
+  // A body as big in the sky as the Sun, slid a little way up (+y) off its centre.
+  const sunAngular = Math.asin(SUN_RADIUS / SUN_DISTANCE);
+  const distance = 50000;
+  const radius = distance * Math.sin(sunAngular);
+  const at = (offset) => ({ direction: [Math.cos(offset), Math.sin(offset), 0], distance, radius });
+  const sliver = sunBead(sunDir, SUN_DISTANCE, SUN_RADIUS, [at(sunAngular * 0.02)]);
+  assert.ok(sliver.strength > 0.5, `${sliver.strength}`);
+  // The body is above the centre, so the bead is at the bottom edge.
+  assert.ok(sliver.direction[1] < -0.99 && Math.abs(sliver.direction[0]) < 1e-6);
+  // None when the Sun is clear, half covered, or wholly covered.
+  assert.equal(sunBead(sunDir, SUN_DISTANCE, SUN_RADIUS, []).strength, 0);
+  assert.equal(sunBead(sunDir, SUN_DISTANCE, SUN_RADIUS, [at(sunAngular)]).strength, 0);
+  assert.equal(sunBead(sunDir, SUN_DISTANCE, SUN_RADIUS, [{ ...at(0), radius: radius * 1.2 }]).strength, 0);
+  // A body beyond the Sun does nothing.
+  assert.equal(sunBead(sunDir, SUN_DISTANCE, SUN_RADIUS, [{ ...at(sunAngular * 0.02), distance: SUN_DISTANCE * 2 }]).strength, 0);
 });

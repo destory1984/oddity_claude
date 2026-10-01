@@ -2,6 +2,10 @@ precision highp float;
 varying vec2 vUV;
 uniform float visibility;
 uniform float time;
+// How far into an eclipse (0 none, 1 total), and the last bead of sunlight at the
+// covered Sun's edge: xy the way to it from the centre, z how bright.
+uniform float eclipse;
+uniform vec3 bead;
 #include<noise>
 void main(){
   vec2 p = (vUV - .5) * 2.;
@@ -28,10 +32,43 @@ void main(){
   float rayV = pow(max(0., 1. - abs(p.x) * 29.), 8.) * exp(-abs(p.y) * 3.8) * .16;
   float ring = exp(-pow((r - .28) * 15., 2.)) * .045;
   vec3 glow = vec3(1., .51, .12) * (corona + rayH + rayV) * (1. - disc) + vec3(1., .78, .38) * ring;
+  // Prominences: arches of glowing gas standing on the limb, seven of them, each
+  // slowly swelling and sinking. They are red, and show best when the disc is covered.
+  float ang = atan(p.y, p.x);
+  float prom = 0.;
+  for (int k = 0; k < 7; k++) {
+    float fk = float(k);
+    float at = fk * .8976 + .5 * sin(fk * 12.9898);
+    float width = .1 + .2 * fract(sin(fk * 78.233) * 43758.5);
+    float height = (.007 + .02 * fract(sin(fk * 39.3) * 9871.3)) * (.75 + .25 * sin(time * .35 + fk * 2.1));
+    float da = atan(sin(ang - at), cos(ang - at));
+    float x = da / width;
+    if (abs(x) < 1.) {
+      // Lopsided and a little ragged, not a neat hoop.
+      float arch = .129 + height * sqrt(1. - x * x) * (.75 + .5 * fbm(vec2(x * 2.5 + fk * 7., time * .2)));
+      float thick = .002 + .002 * fbm(vec2(ang * 30., time * .5 + fk));
+      prom += exp(-pow((r - arch) / thick, 2.)) * (.6 + .4 * fbm(vec2(ang * 60. + fk, time * .8)));
+      prom += .16 * (1. - smoothstep(.129, arch, r));
+    }
+  }
+  prom *= 1. - disc;
+  // The corona seen in a total eclipse: a pearly glow hugging the black disc, drawn out
+  // into two broad streamers.
+  float beyond = max(0., r - .129);
+  float streamers = pow(.5 + .5 * sin(ang * 2. + .6), 3.);
+  float wisps = .55 + .45 * fbm(vec2(cos(ang), sin(ang)) * 3. + 2.);
+  float pearl = (exp(-beyond * 14.) * 2.4 + exp(-beyond * 4.5) * 1.1 * (.3 + 1. * streamers)) * wisps * eclipse * (1. - disc);
+  // The diamond ring: the last bead of sunlight, a point with a soft halo and four rays.
+  vec2 fromBead = p - bead.xy * .129;
+  float bd = length(fromBead);
+  float diamond = (exp(-bd * 90.) * 3. + exp(-bd * 28.) * .4
+    + pow(max(0., 1. - abs(fromBead.y) * 40.), 6.) * exp(-abs(fromBead.x) * 9.) * .5
+    + pow(max(0., 1. - abs(fromBead.x) * 40.), 6.) * exp(-abs(fromBead.y) * 9.) * .5) * bead.z;
   // The planet in front already hides the covered part of the disc; what is left keeps
   // its full surface brightness. Only the glare around it fades with the covered area.
   // (Additive blending multiplies the colour by alpha, so visibility goes in once.)
-  vec3 col = (surface * disc * 1.35 + glow * visibility) * .68;
-  float a = clamp(disc + corona * .38 + rayH + rayV + ring, 0., 1.);
+  vec3 col = (surface * disc * 1.35 + glow * visibility + vec3(1., .3, .27) * prom * .9
+    + vec3(.86, .9, 1.) * pearl + vec3(1., .97, .9) * diamond) * .68;
+  float a = clamp(disc + corona * .38 + rayH + rayV + ring + prom + pearl + diamond, 0., 1.);
   gl_FragColor = vec4(col, a);
 }

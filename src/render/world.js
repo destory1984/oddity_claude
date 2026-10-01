@@ -3,7 +3,7 @@ import {
 } from './babylon.js';
 import { BODIES, KM_PER_UNIT } from '../core/bodies.js';
 import { multiply } from '../core/orientation.js';
-import { sunVisibility } from '../core/occlusion.js';
+import { sunVisibility, eclipseDepth, sunBead } from '../core/occlusion.js';
 import { heroLighting } from '../core/heroLight.js';
 import { createBodyMeshes } from './planets.js';
 import { createSun } from './sun.js';
@@ -133,6 +133,8 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
     const visibility = sunVisibility(directions[sunNow.id], distances[sunNow.id], sunNow.radiusKm, occluders);
     sun.material.setFloat('visibility', visibility);
     sun.material.setFloat('time', elapsed);
+    sun.material.setFloat('eclipse', eclipseDepth(visibility));
+    const bead = sunBead(directions[sunNow.id], distances[sunNow.id], sunNow.radiusKm, occluders);
 
     camera.rotationQuaternion = new Quaternion(...multiply(orientation, photoOrientation || [0, 0, 0, 1]));
     const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
@@ -147,6 +149,10 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       const d = camera.getDirection(v);
       return [d.x, d.y, d.z];
     };
+    // The bead of the diamond ring, in the Sun billboard's own axes (the camera's).
+    const [right, up] = [axis(Vector3.Right()), axis(Vector3.Up())];
+    const across = (a) => bead.direction.reduce((sum, n, i) => sum + n * a[i], 0);
+    sun.material.setVector3('bead', new Vector3(across(right), across(up), bead.strength));
     return {
       directions,
       distances,

@@ -9,7 +9,8 @@ import { createBodyMeshes } from './planets.js';
 import { createSun } from './sun.js';
 import { createStars } from './stars.js';
 import { createHero } from './hero.js';
-import { createCraft } from './craft.js';
+import { createCraft, createSiteModels } from './craft.js';
+import { storySitesAt } from '../core/stories.js';
 import { createComet } from './comet.js';
 import { createBelt } from './belt.js';
 import { inBelt } from '../core/belt.js';
@@ -46,6 +47,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   const craftSun = new DirectionalLight('craftSun', new Vector3(0, 0, 1), scene);
   craftSun.intensity = 1.1;
   const craftMeshes = createCraft(scene, CRAFT);
+  const siteModels = createSiteModels(scene, storySitesAt(0, bodies));
   const comet = createComet(scene);
 
   // The character is drawn in the camera's own space, and her light is fixed: from the
@@ -109,6 +111,7 @@ export async function createWorld(canvas, bodies = BODIES) {
       distances[c.id] = length * KM_PER_UNIT;
     }
     craftMeshes.update(craft, position, sunNow.position, jolt, hiddenCraft);
+    siteModels.update(sites, now, position);
     craftSun.direction = new Vector3(...normalize(sunRel)).scale(-1);
     const halley = now.find((b) => b.kind === 'comet');
     if (halley) comet.update(halley, position, sunNow.position);

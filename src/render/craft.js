@@ -1,5 +1,5 @@
 import {
-  TransformNode, StandardMaterial, DynamicTexture, Color3, Vector3, CreateCylinder, CreateBox, CreateSphere,
+  TransformNode, StandardMaterial, DynamicTexture, Color3, Vector3, Quaternion, CreateCylinder, CreateBox, CreateSphere,
   CreateRibbon, Mesh,
 } from './babylon.js';
 import { KM_PER_UNIT } from '../core/bodies.js';
@@ -590,7 +590,128 @@ function lucy(scene, name, mats) {
   return root;
 }
 
-export function createCraft(scene, craftList) {
+// ---- What stands at the story places on the Moon and Mars -------------------------
+// Each is about one unit across with its feet at y = 0 and +y up, away from the ground.
+
+// A lander on four splayed legs: a gold descent stage, a silver cabin, a dish.
+// flag: the Apollo landings also planted one.
+function lander(scene, name, mats, { flag = false } = {}) {
+  const root = new TransformNode(name, scene);
+  part(cyl(scene, `${name}Stage`, { height: 0.2, diameter: 0.52, tessellation: 8 }), root, mats.goldFoil, [0, 0.27, 0]);
+  part(cyl(scene, `${name}Bell`, { height: 0.12, diameterTop: 0.08, diameterBottom: 0.18, tessellation: 12 }), root, mats.dark, [0, 0.12, 0]);
+  part(CreateBox(`${name}Cabin`, { width: 0.3, height: 0.24, depth: 0.28 }, scene), root, mats.foil, [0, 0.49, 0]);
+  part(cyl(scene, `${name}Hatch`, { height: 0.02, diameter: 0.12, tessellation: 12 }), root, mats.dark, [0, 0.47, 0.145], [QUARTER, 0, 0]);
+  rod(scene, `${name}Mast`, root, mats.grey, [0.08, 0.6, -0.06], [0.14, 0.78, -0.1], 0.012, 5);
+  part(cyl(scene, `${name}Dish`, { height: 0.03, diameterTop: 0.16, diameterBottom: 0.03, tessellation: 16 }), root, mats.white, [0.14, 0.8, -0.1]);
+  for (const [i, x, z] of [[0, 1, 1], [1, -1, 1], [2, 1, -1], [3, -1, -1]]) {
+    rod(scene, `${name}Leg${i}`, root, mats.grey, [x * 0.2, 0.3, z * 0.2], [x * 0.42, 0.02, z * 0.42], 0.022, 6);
+    part(cyl(scene, `${name}Pad${i}`, { height: 0.02, diameter: 0.11, tessellation: 10 }), root, mats.grey, [x * 0.42, 0.01, z * 0.42]);
+  }
+  if (flag) {
+    rod(scene, `${name}Pole`, root, mats.grey, [0.62, 0, 0.2], [0.62, 0.46, 0.2], 0.012, 5);
+    part(CreateBox(`${name}Flag`, { width: 0.2, height: 0.12, depth: 0.006 }, scene), root, mats.white, [0.725, 0.4, 0.2]);
+    part(CreateBox(`${name}Canton`, { width: 0.08, height: 0.06, depth: 0.008 }, scene), root, mats.solar, [0.665, 0.43, 0.2]);
+    for (const y of [0.345, 0.375]) {
+      part(CreateBox(`${name}Stripe${y}`, { width: 0.2, height: 0.012, depth: 0.008 }, scene), root, mats.tail, [0.725, y, 0.2]);
+    }
+  }
+  return root;
+}
+
+// A rover: a box on wheels with a camera mast. wheels: 6, or 8 for the Lunokhods.
+// power: 'solar' (a panel on top), 'lid' (the Lunokhods' hinged solar lid) or 'rtg'
+// (a dark power unit slanting up at the back, as on Curiosity).
+function rover(scene, name, mats, { wheels = 6, power = 'solar' } = {}) {
+  const root = new TransformNode(name, scene);
+  const tub = power === 'lid';
+  if (tub) part(cyl(scene, `${name}Tub`, { height: 0.16, diameterTop: 0.46, diameterBottom: 0.34, tessellation: 16 }), root, mats.foil, [0, 0.22, 0]);
+  else part(CreateBox(`${name}Body`, { width: 0.5, height: 0.13, depth: 0.3 }, scene), root, mats.white, [0, 0.21, 0]);
+  const perSide = wheels / 2;
+  for (const s of [-1, 1]) {
+    for (let k = 0; k < perSide; k++) {
+      const x = perSide === 1 ? 0 : -0.21 + (0.42 * k) / (perSide - 1);
+      part(cyl(scene, `${name}Wheel${s}${k}`, { height: 0.06, diameter: 0.15, tessellation: 12 }), root, mats.dark, [x, 0.075, s * 0.2], [QUARTER, 0, 0]);
+      part(cyl(scene, `${name}Hub${s}${k}`, { height: 0.065, diameter: 0.06, tessellation: 8 }), root, mats.grey, [x, 0.075, s * 0.2], [QUARTER, 0, 0]);
+    }
+  }
+  rod(scene, `${name}Mast`, root, mats.grey, [0.17, 0.27, 0.06], [0.17, 0.56, 0.06], 0.02, 6);
+  part(CreateBox(`${name}Head`, { width: 0.07, height: 0.06, depth: 0.14 }, scene), root, mats.white, [0.17, 0.59, 0.06]);
+  part(CreateBox(`${name}Eyes`, { width: 0.012, height: 0.03, depth: 0.1 }, scene), root, mats.dark, [0.208, 0.59, 0.06]);
+  if (power === 'solar') part(CreateBox(`${name}Panel`, { width: 0.5, height: 0.012, depth: 0.42 }, scene), root, mats.cells, [-0.03, 0.285, 0]);
+  if (power === 'lid') part(cyl(scene, `${name}Lid`, { height: 0.012, diameter: 0.44, tessellation: 16 }), root, mats.cells, [-0.2, 0.46, 0], [0, 0, -1.0]);
+  if (power === 'rtg') part(cyl(scene, `${name}Rtg`, { height: 0.22, diameter: 0.09, tessellation: 10 }), root, mats.dark, [-0.3, 0.33, 0], [0, 0, -0.9]);
+  if (power !== 'lid') part(cyl(scene, `${name}Antenna`, { height: 0.015, diameter: 0.14, tessellation: 6 }), root, mats.gold, [-0.12, 0.34, -0.08], [0, 0, 0.3]);
+  return root;
+}
+
+// An early probe: a ball that opened four petals to stand itself upright (Luna 9,
+// Mars 3), or, for Luna 2, what was left where it hit.
+function capsule(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(CreateSphere(`${name}Ball`, { diameter: 0.4, segments: 14 }, scene), root, mats.chrome, [0, 0.22, 0]);
+  for (let k = 0; k < 4; k++) {
+    const a = (k * Math.PI) / 2;
+    part(CreateBox(`${name}Petal${k}`, { width: 0.2, height: 0.01, depth: 0.34 }, scene), root, mats.foil,
+      [Math.sin(a) * 0.3, 0.04, Math.cos(a) * 0.3], [-0.25, a, 0]);
+    rod(scene, `${name}Whip${k}`, root, mats.grey, [Math.sin(a + 0.8) * 0.1, 0.38, Math.cos(a + 0.8) * 0.1], [Math.sin(a + 0.8) * 0.3, 0.72, Math.cos(a + 0.8) * 0.3], 0.01, 4);
+  }
+  return root;
+}
+
+// Which model stands at which place; any other place on the Moon or Mars gets a lander.
+const SITE_MODEL = {
+  apollo11: [lander, { flag: true }], apollo12: [lander, { flag: true }], apollo14: [lander, { flag: true }],
+  apollo15: [lander, { flag: true }], apollo16: [lander, { flag: true }], apollo17: [lander, { flag: true }],
+  lunokhod1: [rover, { wheels: 8, power: 'lid' }], lunokhod2: [rover, { wheels: 8, power: 'lid' }],
+  spirit: [rover, {}], opportunity: [rover, {}], zhurong: [rover, {}],
+  curiosity: [rover, { power: 'rtg' }], perseverance: [rover, { power: 'rtg' }],
+  luna2: [capsule, {}], luna9: [capsule, {}], mars3: [capsule, {}],
+};
+// Shown from this far; drawn this big (they are metres across, like the craft in
+// orbit, and would be invisible at their real size).
+const SITE_VISIBLE_KM = 6000;
+const SITE_MIN_KM = 6;
+const SITE_MAX_KM = 30;
+
+// siteList: story places on a surface (core/stories.js storySitesAt). Only those on the
+// Moon, Mars and Titan get a model: Dokdo is an island, not a machine.
+export function createSiteModels(scene, siteList) {
+  const mats = craftMaterials(scene);
+  const nodes = new Map();
+  for (const site of siteList) {
+    if (!['moon', 'mars', 'titan'].includes(site.parent)) continue;
+    const [build, options] = SITE_MODEL[site.id] ?? [lander, {}];
+    const node = build(scene, `site_${site.id}`, mats, options);
+    node.rotationQuaternion = new Quaternion();
+    node.setEnabled(false);
+    nodes.set(site.id, node);
+  }
+
+  // sites, bodies: this frame's positions (km); position: the traveler (km).
+  function update(sites, bodies, position) {
+    for (const site of sites) {
+      const node = nodes.get(site.id);
+      if (!node) continue;
+      const rel = site.position.map((n, i) => (n - position[i]) / KM_PER_UNIT);
+      const distanceKm = Math.hypot(...rel) * KM_PER_UNIT;
+      node.setEnabled(distanceKm < SITE_VISIBLE_KM);
+      if (!node.isEnabled()) continue;
+      const body = bodies.find((b) => b.id === site.parent);
+      const up = new Vector3(...site.position.map((n, i) => n - body.position[i])).normalize();
+      // Stand it on the ground: turn the model's +y onto the local "up".
+      Quaternion.FromUnitVectorsToRef(Vector3.Up(), up, node.rotationQuaternion);
+      node.scaling.setAll(Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT)) / KM_PER_UNIT);
+      node.position.set(rel[0], rel[1], rel[2]);
+    }
+  }
+
+  return { update, has: (id) => nodes.has(id) };
+}
+
+// The shared paints and drawn sheets, made once per scene.
+const MATERIALS = new WeakMap();
+function craftMaterials(scene) {
+  if (MATERIALS.has(scene)) return MATERIALS.get(scene);
   const mats = {
     white: paint(scene, 'craftWhite', '#e8e6e0'),
     silver: paint(scene, 'craftSilver', '#8f939c', 0.15),
@@ -612,6 +733,12 @@ export function createCraft(scene, craftList) {
   mats.paint.specularPower = 48;
   mats.glass = paint(scene, 'craftGlass', '#9fc4d8', 0.3);
   mats.glass.alpha = 0.4;
+  MATERIALS.set(scene, mats);
+  return mats;
+}
+
+export function createCraft(scene, craftList) {
+  const mats = craftMaterials(scene);
   const build = {
     voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid,
     iss, tiangong, sputnik, mro, juno, cassini, parker, roadster, newHorizons, pioneer10: pioneer,

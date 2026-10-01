@@ -76,7 +76,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect }) {
         return { body, el, spot, keep, selected: selectedHere };
       });
       const crowded = crowdedMoons(placed.map(({ body, spot, selected: sel }) => ({
-        id: body.id, parent: body.kind === 'moon' ? body.parent : null, x: spot.x, y: spot.y, outside: spot.outside, selected: sel,
+        id: body.id, parent: body.kind === 'moon' || body.kind === 'craft' ? body.parent : null, x: spot.x, y: spot.y, outside: spot.outside, selected: sel,
       })));
       const arrows = [];
       for (const { body, el, spot, keep, selected: sel } of placed) {

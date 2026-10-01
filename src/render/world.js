@@ -1,4 +1,6 @@
-import { Engine, Scene, FreeCamera, Vector3, Color4, Quaternion } from './babylon.js';
+import {
+  Engine, Scene, FreeCamera, Vector3, Color4, Quaternion, HemisphericLight, DirectionalLight,
+} from './babylon.js';
 import { BODIES, KM_PER_UNIT } from '../core/bodies.js';
 import { multiply } from '../core/orientation.js';
 import { sunVisibility } from '../core/occlusion.js';
@@ -6,6 +8,8 @@ import { createBodyMeshes } from './planets.js';
 import { createSun } from './sun.js';
 import { createStars } from './stars.js';
 import { createHero } from './hero.js';
+import { createCraft } from './craft.js';
+import { CRAFT } from '../core/craft.js';
 import { normalize } from './math.js';
 
 // Floating origin: the player stays at the scene origin and every body is placed
@@ -28,6 +32,12 @@ export async function createWorld(canvas, bodies = BODIES) {
   const rendered = createBodyMeshes(scene, bodies, sunBody);
   const sun = createSun(scene, sunBody);
   await createStars(scene);
+  // Lights only matter to the spacecraft; planets and the Sun use their own shaders.
+  const craftFill = new HemisphericLight('craftFill', new Vector3(0, 1, 0), scene);
+  craftFill.intensity = 0.35;
+  const craftSun = new DirectionalLight('craftSun', new Vector3(0, 0, 1), scene);
+  craftSun.intensity = 1.1;
+  const craftMeshes = createCraft(scene, CRAFT);
 
   // The character's sunlight is set once from the starting view, as in the prototype.
   const earth = bodies.find((b) => b.id === 'earth');
@@ -38,7 +48,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   let elapsed = 0;
 
   // now: where every body is this frame (they orbit); defaults to the starting layout.
-  function update({ bodies: now = bodies, position, orientation, dt, speed, photoOrientation, heroVisible, turn }) {
+  function update({ bodies: now = bodies, craft = [], position, orientation, dt, speed, photoOrientation, heroVisible, turn }) {
     elapsed += dt;
     const directions = {};
     const distances = {};
@@ -59,6 +69,15 @@ export async function createWorld(canvas, bodies = BODIES) {
     }
     const sunRel = relative(sunNow, position);
     sun.mesh.position.set(sunRel[0], sunRel[1], sunRel[2]);
+
+    for (const c of craft) {
+      const rel = relative(c, position);
+      const length = Math.hypot(...rel);
+      directions[c.id] = rel.map((n) => n / length);
+      distances[c.id] = length * KM_PER_UNIT;
+    }
+    craftMeshes.update(craft, position, sunNow.position);
+    craftSun.direction = new Vector3(...normalize(sunRel)).scale(-1);
 
     const occluders = now.filter((b) => b.kind !== 'star').map((b) => ({
       direction: directions[b.id], distance: distances[b.id], radius: b.radiusKm,

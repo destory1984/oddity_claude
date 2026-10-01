@@ -90,7 +90,15 @@ function capTotal(main, side, maxSpeed) {
   return [main * k, side * k];
 }
 
-export function step(state, input, dt, bodies = BODIES) {
+// The speed allowed at a spot: set by the nearest surface, and also by the nearest
+// slow point (a spacecraft), which lowers the limit the same way but blocks nothing.
+function limitAt(position, bodies, slowPoints) {
+  let km = nearestSurface(position, bodies).distance;
+  for (const point of slowPoints) km = Math.min(km, Math.hypot(...point.map((n, i) => n - position[i])));
+  return speedLimit(km);
+}
+
+export function step(state, input, dt, bodies = BODIES, slowPoints = []) {
   const events = [];
   if (!(dt > 0)) return { state, events };
 
@@ -107,7 +115,7 @@ export function step(state, input, dt, bodies = BODIES) {
     state.orientation, turnX * TURN_RATE * dt, turnY * TURN_RATE * dt, roll * ROLL_RATE * dt,
   );
 
-  const limit = speedLimit(nearestSurface(state.position, bodies).distance);
+  const limit = limitAt(state.position, bodies, slowPoints);
   let [speed, sideSpeed] = capTotal(state.speed, state.sideSpeed ?? 0, limit);
   let { motionSign, brakeRate } = state;
   let sideSign = state.sideSign ?? 1;
@@ -142,7 +150,7 @@ export function step(state, input, dt, bodies = BODIES) {
       position = state.position.map((n, i) => n + direction[i] * length);
       restingOn = null;
       // Having moved closer, never carry more speed than the new spot allows.
-      [speed, sideSpeed] = capTotal(speed, sideSpeed, speedLimit(nearestSurface(position, bodies).distance));
+      [speed, sideSpeed] = capTotal(speed, sideSpeed, limitAt(position, bodies, slowPoints));
     }
   }
 

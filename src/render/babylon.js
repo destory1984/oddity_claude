@@ -7,6 +7,7 @@ export { FreeCamera } from '@babylonjs/core/Cameras/freeCamera.js';
 export { Vector3, Quaternion, Matrix } from '@babylonjs/core/Maths/math.vector.js';
 export { Color3, Color4 } from '@babylonjs/core/Maths/math.color.js';
 export { CreateSphere } from '@babylonjs/core/Meshes/Builders/sphereBuilder.js';
+export { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder.js';
 export { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder.js';
 export { CreateRibbon } from '@babylonjs/core/Meshes/Builders/ribbonBuilder.js';
 export { Mesh } from '@babylonjs/core/Meshes/mesh.js';

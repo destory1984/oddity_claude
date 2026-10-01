@@ -6,6 +6,7 @@ import {
   createState, step, stopNow, totalSpeed, carryAlong, TURN_RATE, startOrientation,
 } from './core/game.js';
 import { rotateLocal, lookAtDirection, multiply, conjugate, forward } from './core/orientation.js';
+import { CRAFT, craftAt, craftById } from './core/craft.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
 import { createHud } from './ui/hud.js';
@@ -51,7 +52,11 @@ let progress = loadProgress(BODIES, MISSIONS);
 let simTime = 0;
 let bodies = bodiesAt(0);
 // Where a body is right now (BODIES is only the starting layout).
-const here = (id) => bodyById(id, bodies);
+// Spacecraft and telescopes: found and selected like bodies, but they are not in the
+// journal and only slow the traveler nearby (core/craft.js).
+let craft = craftAt(0, bodies);
+const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id);
+const named = (id) => bodyById(id) ?? craftById(id);
 
 const toast = createToast($('toast'));
 const sound = createSound();
@@ -150,10 +155,10 @@ async function init() {
 
   function selectBody(id) {
     selectedId = id;
-    hud.showSelection(bodyById(id));
+    hud.showSelection(named(id));
   }
 
-  const hud = createHud(BODIES, {
+  const hud = createHud([...BODIES, ...craft], {
     onSelect: selectBody,
     onFace() {
       const body = here(selectedId);
@@ -171,7 +176,7 @@ async function init() {
       photo.frame(diameterDeg * 1.4, multiply(conjugate(state.orientation), lookAtDirection(direction)));
     },
   });
-  hud.showSelection(bodyById(selectedId));
+  hud.showSelection(named(selectedId));
   const minimap = createMinimap($('minimap'), { onPick: selectBody });
 
   let journalPriorPause = false;
@@ -266,10 +271,12 @@ async function init() {
       const before = bodies;
       simTime += dt * TIME_SCALE;
       bodies = bodiesAt(simTime);
+      craft = craftAt(simTime, bodies);
       state = carryAlong(state, before, bodies);
     }
     const intent = input.intent();
-    const result = step(state, intent, dt, bodies);
+    const slowPoints = craft.map((c) => c.position);
+    const result = step(state, intent, dt, bodies, slowPoints);
     state = result.state;
     const logged = updateProgress(progress, state, bodies);
     let finished = false;
@@ -292,7 +299,10 @@ async function init() {
       : [0, 0];
     dragTurn = [0, 0];
 
-    const limit = speedLimit(nearestSurface(state.position, bodies).distance);
+    const limit = speedLimit(Math.min(
+      nearestSurface(state.position, bodies).distance,
+      ...slowPoints.map((p) => Math.hypot(...p.map((n, i) => n - state.position[i]))),
+    ));
     sound.engine(engineSound({
       speed: paused ? 0 : totalSpeed(state),
       maxSpeed: limit,
@@ -301,6 +311,7 @@ async function init() {
 
     const view = world.update({
       bodies,
+      craft,
       position: state.position,
       orientation: state.orientation,
       dt,

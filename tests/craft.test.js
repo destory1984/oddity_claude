@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  CRAFT, craftAt, hiddenCraft, EARTH_CRAFT_SHOWN_KM, HUBBLE_ALTITUDE_KM, JWST_FROM_EARTH_KM, CHANDRA_PERIOD_S,
+  CRAFT, craftAt, hiddenCraft, CRAFT_SHOWN_KM, HUBBLE_ALTITUDE_KM, JWST_FROM_EARTH_KM, CHANDRA_PERIOD_S,
 } from '../src/core/craft.js';
 import { bodiesAt } from '../src/core/bodies.js';
 import { C } from '../src/core/flight.js';
@@ -10,43 +10,67 @@ import { createState, step } from '../src/core/game.js';
 const dist = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
 const near = (a, b, eps) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 
-test('seventeen craft: probes, telescopes, space stations, the first satellite and a car', () => {
+test('twenty-two craft: probes, telescopes, space stations, the first satellite and a car', () => {
   assert.deepEqual(CRAFT.map((c) => c.id), [
     'voyager1', 'voyager2', 'hubble', 'jwst', 'kepler', 'chandra', 'euclid',
     'iss', 'tiangong', 'sputnik', 'mro', 'juno', 'cassini', 'parker', 'roadster', 'newHorizons', 'pioneer10',
+    'danuri', 'lro', 'europaClipper', 'lucy', 'pioneer11',
   ]);
   assert.equal(new Set(CRAFT.map((c) => c.name)).size, CRAFT.length);
   for (const c of CRAFT) assert.ok(c.name && c.nameEn && c.kind === 'craft');
 });
 
-test("Earth's seven craft and the Roadster show only from within 300,000 km of Earth; the rest always", () => {
+test('a craft that circles a planet or a moon shows only from within 300,000 km of it', () => {
   const bodies = bodiesAt(0);
-  const earth = bodies.find((b) => b.id === 'earth');
-  const out = (km) => [earth.position[0], earth.position[1] + earth.radiusKm + km, earth.position[2]];
-  assert.equal(EARTH_CRAFT_SHOWN_KM, 300000);
-  assert.deepEqual(hiddenCraft(out(500), bodies), []);
-  assert.deepEqual(hiddenCraft(out(300000), bodies), []);
-  assert.deepEqual(hiddenCraft(out(300001), bodies), ['hubble', 'jwst', 'chandra', 'euclid', 'iss', 'tiangong', 'sputnik', 'roadster']);
-  // The Roadster is millions of km from Earth, so it also shows from beside the car.
   const craft = craftAt(0, bodies);
-  const car = craft.find((c) => c.id === 'roadster');
-  assert.ok(dist(car.position, earth.position) > 1e6);
-  const off = (km) => [car.position[0], car.position[1] + km, car.position[2]];
-  assert.ok(!hiddenCraft(off(300000), bodies, null, craft).includes('roadster'));
-  assert.ok(hiddenCraft(off(300001), bodies, null, craft).includes('roadster'));
-  assert.ok(hiddenCraft(off(100), bodies, null, craft).includes('hubble'));
-  // Webb and Euclid, the farthest of them, are well inside the line.
-  for (const c of craftAt(0, bodies).filter((x) => x.parent === 'earth')) {
-    assert.ok(dist(c.position, earth.position) < EARTH_CRAFT_SHOWN_KM / 1.5, c.id);
+  const body = (id) => bodies.find((b) => b.id === id);
+  const above = (b, km) => [b.position[0], b.position[1] + b.radiusKm + km, b.position[2]];
+  assert.equal(CRAFT_SHOWN_KM, 300000);
+  const homes = {
+    earth: ['hubble', 'jwst', 'chandra', 'euclid', 'iss', 'tiangong', 'sputnik', 'roadster'],
+    moon: ['danuri', 'lro'],
+    mars: ['mro'],
+    jupiter: ['juno'],
+    saturn: ['cassini'],
+  };
+  const all = Object.values(homes).flat();
+  // High over the Sun's pole, far from every planet: all of them are hidden...
+  const nowhere = above(body('sun'), 5e7);
+  assert.deepEqual([...hiddenCraft(nowhere, bodies, null, craft)].sort(), [...all].sort());
+  // ...and the ones that roam the solar system on their own never are.
+  for (const id of ['voyager1', 'voyager2', 'kepler', 'parker', 'newHorizons', 'pioneer10', 'europaClipper', 'lucy', 'pioneer11']) {
+    assert.ok(!all.includes(id), id);
   }
+  // Near its own body each one shows, right up to the line.
+  for (const [home, ids] of Object.entries(homes)) {
+    const close = hiddenCraft(above(body(home), 300000), bodies, null, craft);
+    for (const id of ids) assert.ok(!close.includes(id), `${id} from ${home}`);
+  }
+  // From Saturn: Cassini shows, Earth's and Jupiter's do not.
+  const fromSaturn = hiddenCraft(above(body('saturn'), 1000), bodies, null, craft);
+  assert.ok(!fromSaturn.includes('cassini'));
+  for (const id of ['hubble', 'iss', 'juno', 'mro', 'danuri', 'roadster']) assert.ok(fromSaturn.includes(id), id);
+  // Just past the line over Earth, Earth's own go (the Moon's stay while the Moon is near).
+  const pastEarth = hiddenCraft(above(body('earth'), 300001), bodies);
+  for (const id of ['hubble', 'jwst', 'chandra', 'euclid', 'iss', 'tiangong', 'sputnik', 'roadster']) assert.ok(pastEarth.includes(id), id);
+  // The Roadster is millions of km from Earth, and Juno swings far out from Jupiter:
+  // each also shows from beside the craft itself.
+  for (const id of ['roadster', 'juno']) {
+    const it = craft.find((c) => c.id === id);
+    const off = (km) => [it.position[0], it.position[1], it.position[2] + km];
+    assert.ok(!hiddenCraft(off(300000), bodies, null, craft).includes(id), id);
+  }
+  const car = craft.find((c) => c.id === 'roadster');
+  assert.ok(dist(car.position, body('earth').position) > 1e6);
+  assert.ok(hiddenCraft([car.position[0], car.position[1] + 300001, car.position[2]], bodies, null, craft).includes('roadster'));
   // The chosen target keeps its label wherever the traveler is.
-  assert.ok(!hiddenCraft(out(5e6), bodies, 'jwst').includes('jwst'));
-  assert.equal(hiddenCraft(out(5e6), bodies, 'jwst').length, 7);
+  assert.ok(!hiddenCraft(nowhere, bodies, 'jwst', craft).includes('jwst'));
+  assert.equal(hiddenCraft(nowhere, bodies, 'jwst', craft).length, all.length - 1);
 });
 
 test('every craft has a launch year and a short introduction for the docking card', () => {
   for (const c of CRAFT) {
-    assert.ok(c.launched >= 1957 && c.launched <= 2023, c.id);
+    assert.ok(c.launched >= 1957 && c.launched <= 2024, c.id);
     assert.ok(c.intro.length >= 40 && c.intro.length <= 150, `${c.id}: ${c.intro.length}`);
     assert.ok(c.intro.endsWith('.') && !c.intro.includes('~'), c.id);
   }
@@ -240,10 +264,37 @@ test('Parker dives to 62,000 km above the Sun and out past Venus; the Roadster l
   near(rHigh, (1.664 * AU - 696340) / 100, 2000);
 });
 
-test('New Horizons and Pioneer 10 are leaving, far beyond Pluto', () => {
+test('Danuri and LRO skim the Moon, over its poles, apart from each other', () => {
+  for (const [id, km, lapS] of [['danuri', 100, 500], ['lro', 120, 430]]) {
+    const [low, high] = heights(id, 'moon', lapS * 720);
+    near(low, km, 1e-3);
+    near(high, km, 1e-3);
+  }
+  const bodies = bodiesAt(0);
+  assert.ok(dist(craftOf(0, bodies, 'danuri').position, craftOf(0, bodies, 'lro').position) > 1000);
+  // Docked 60 km off, the traveler is still above the ground.
+  assert.ok(100 - 60 > 0 && 120 - 60 > 0);
+});
+
+test('Europa Clipper and Lucy are on long loops from Earth out to Jupiter', () => {
+  const [cLow, cHigh] = heights('europaClipper', 'sun', 1994 * 86400);
+  near(cLow, (1.0 * AU - 696340) / 100, 5000);
+  near(cHigh, (5.2 * AU - 696340) / 100, 5000);
+  const [lLow, lHigh] = heights('lucy', 'sun', 2191 * 86400);
+  near(lLow, (1.0 * AU - 696340) / 100, 5000);
+  near(lHigh, (5.7 * AU - 696340) / 100, 5000);
+  // At the start both are already on their way: past Mars, short of Jupiter.
+  const bodies = bodiesAt(0);
+  const out = (id) => dist(craftOf(0, bodies, id).position, bodyOf(bodies, 'sun').position);
+  const mars = dist(bodyOf(bodies, 'mars').position, bodyOf(bodies, 'sun').position);
+  const jupiter = dist(bodyOf(bodies, 'jupiter').position, bodyOf(bodies, 'sun').position);
+  for (const id of ['europaClipper', 'lucy']) assert.ok(out(id) > mars && out(id) < jupiter, `${id} ${out(id)}`);
+});
+
+test('New Horizons and the two Pioneers are leaving, far beyond Pluto', () => {
   const bodies = bodiesAt(0);
   const pluto = dist(bodyOf(bodies, 'pluto').position, bodyOf(bodies, 'sun').position);
-  for (const [id, au, kmPerS] of [['newHorizons', 63, 13.7], ['pioneer10', 140, 11.9]]) {
+  for (const [id, au, kmPerS] of [['newHorizons', 63, 13.7], ['pioneer10', 140, 11.9], ['pioneer11', 114, 11.2]]) {
     const now = dist(craftOf(0, bodies, id).position, bodyOf(bodies, 'sun').position);
     assert.ok(now > pluto, id);
     near(now, (au * AU) / 100, 1);

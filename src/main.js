@@ -474,7 +474,7 @@ async function init() {
     }), elapsed || 1 / 60);
     sound.music(moodFor({ restingOn: state.restingOn, surfaceKm: nearestSurface(state.position, bodies).distance }));
 
-    // Earth's craft are drawn and named only from near Earth.
+    // Craft that circle a planet or a moon are drawn and named only from near it.
     const awayCraft = hiddenCraft(state.position, bodies, selectedId, craft);
     const view = world.update({
       bodies,

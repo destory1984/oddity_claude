@@ -135,6 +135,35 @@ export const CRAFT = [
     launched: 1972,
     intro: '소행성대를 처음 건너 1973년 목성을 처음 지나갔습니다. 사람 남녀와 지구의 위치를 새긴 금속판을 싣고 있고, 2003년 교신이 끊겼습니다.',
   },
+  {
+    id: 'danuri', name: '다누리', nameEn: 'Danuri', kind: 'craft', parent: 'moon',
+    ring: { altitudeKm: 100, lapPlayS: 500, tiltDeg: 90, phaseDeg: 0 },
+    launched: 2022,
+    intro: '한국의 첫 달 탐사선입니다. 달 100km 위를 돌며 표면과 자원을 찍고, 햇빛이 들지 않는 극지 분화구 속까지 들여다보는 카메라를 실었습니다.',
+  },
+  {
+    id: 'lro', name: '달 정찰 궤도선', nameEn: 'LRO', kind: 'craft', parent: 'moon',
+    ring: { altitudeKm: 120, lapPlayS: 430, tiltDeg: 86, phaseDeg: 150 },
+    launched: 2009,
+    intro: '2009년부터 달을 돌며 표면 전체의 지도를 만들었습니다. 50cm까지 보는 카메라로 아폴로 착륙선과 우주비행사가 걸어간 자국도 찍었습니다.',
+  },
+  {
+    id: 'europaClipper', name: '유로파 클리퍼', nameEn: 'Europa Clipper', kind: 'craft', parent: null,
+    loop: { lowKm: 1.0 * AU_KM, highKm: 5.2 * AU_KM, periodS: 1994 * 86400, lowAtS: -200 * 86400, tiltDeg: 2, turnDeg: 310, squeeze: 100 },
+    launched: 2024,
+    intro: '목성의 얼음 위성 유로파로 가는 중입니다. 2030년에 도착해 얼음 밑 바다를 49번 스쳐 지나며 살핍니다. 태양전지 날개를 펴면 30m가 넘습니다.',
+  },
+  {
+    id: 'lucy', name: '루시', nameEn: 'Lucy', kind: 'craft', parent: null,
+    loop: { lowKm: 1.0 * AU_KM, highKm: 5.7 * AU_KM, periodS: 2191 * 86400, lowAtS: -400 * 86400, tiltDeg: 5, turnDeg: 120, squeeze: 100 },
+    launched: 2021,
+    intro: '목성과 같은 궤도를 도는 트로이 소행성들을 처음 찾아갑니다. 12년 동안 소행성 여럿을 지나가며, 지름 7m 둥근 태양전지판 둘을 달았습니다.',
+  },
+  {
+    id: 'pioneer11', name: '파이어니어 11호', nameEn: 'Pioneer 11', kind: 'craft', parent: null, au: 114, kmPerS: 11.2, lonDeg: 285, latDeg: 14,
+    launched: 1973,
+    intro: '1979년 토성을 처음으로 지나간 탐사선입니다. 10호와 같은 금속판을 싣고 반대쪽으로 태양계를 떠나고 있으며, 1995년 교신이 끊겼습니다.',
+  },
 ];
 
 // Shown size: real craft are metres across and would be invisible at this scale.
@@ -153,28 +182,29 @@ function onOrbit(centre, out, [x, y], tiltDeg, turnDeg = 0) {
   ];
 }
 
-// The seven that fly round Earth (Hubble, the stations, Webb out at L2...) and the
-// Roadster show only from within this far of Earth's surface; from farther off their names would only
-// crowd round the planet.
-export const EARTH_CRAFT_SHOWN_KM = 300000;
-
-// The Roadster goes round the Sun some four million km from Earth. It follows the same
-// rule, and also shows from this close to the car itself, or nobody could ever reach it.
-const ALSO_FROM_EARTH = ['roadster'];
+// A craft that goes round a planet or a moon shows only from within this far of that
+// body's surface, or of the craft itself (Juno swings 800,000 km out from Jupiter).
+// From farther off their names would only crowd round the planet.
+export const CRAFT_SHOWN_KM = 300000;
+// The Roadster goes round the Sun some four million km from Earth, but counts as Earth's.
+const HOME = { roadster: 'earth' };
 
 // The ids of the craft to leave undrawn and unnamed from where the traveler is.
 // keepId: the chosen target, which stays. craft: this frame's positions (craftAt).
 export function hiddenCraft(position, bodies, keepId = null, craft = []) {
-  const earth = bodies.find((b) => b.id === 'earth');
   const from = (point) => Math.hypot(...position.map((n, i) => n - point[i]));
-  if (from(earth.position) - earth.radiusKm <= EARTH_CRAFT_SHOWN_KM) return [];
+  const nearBody = (id) => {
+    const body = bodies.find((b) => b.id === id);
+    return from(body.position) - body.radiusKm <= CRAFT_SHOWN_KM;
+  };
   const beside = (id) => {
     const there = craft.find((c) => c.id === id);
-    return Boolean(there) && from(there.position) <= EARTH_CRAFT_SHOWN_KM;
+    return Boolean(there) && from(there.position) <= CRAFT_SHOWN_KM;
   };
-  return CRAFT
-    .filter((c) => c.id !== keepId && (c.parent === 'earth' || (ALSO_FROM_EARTH.includes(c.id) && !beside(c.id))))
-    .map((c) => c.id);
+  return CRAFT.filter((c) => {
+    const home = c.parent ?? HOME[c.id];
+    return c.id !== keepId && Boolean(home) && !nearBody(home) && !beside(c.id);
+  }).map((c) => c.id);
 }
 
 export function craftById(id) {

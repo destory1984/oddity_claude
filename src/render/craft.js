@@ -33,6 +33,12 @@ const RULES = {
   roadster: { visibleKm: 400000, maxKm: 4000 },
   newHorizons: { visibleKm: 3e6, maxKm: Infinity },
   pioneer10: { visibleKm: 3e6, maxKm: Infinity },
+  // 100 km over the Moon: smaller still.
+  danuri: { visibleKm: 30000, maxKm: 60 },
+  lro: { visibleKm: 30000, maxKm: 60 },
+  europaClipper: { visibleKm: 400000, maxKm: 4000 },
+  lucy: { visibleKm: 400000, maxKm: 4000 },
+  pioneer11: { visibleKm: 3e6, maxKm: Infinity },
 };
 
 function paint(scene, name, hex, glow = 0.25) {
@@ -502,7 +508,7 @@ function newHorizons(scene, name, mats) {
   return root;
 }
 
-// Pioneer 10: a 2.7-metre dish on a small six-sided body, two power units out on
+// Pioneer 10 and 11 (twins): a 2.7-metre dish on a small six-sided body, two power units out on
 // booms, and a long boom for the magnetometer.
 function pioneer(scene, name, mats) {
   const root = new TransformNode(name, scene);
@@ -515,6 +521,72 @@ function pioneer(scene, name, mats) {
     part(cyl(scene, `${name}Power${s}`, { height: 0.1, diameter: 0.045, tessellation: 8 }), root, mats.dark, [s * 0.44, 0.165, -0.04], [0, 0, QUARTER - s * 0.35]);
   }
   part(cyl(scene, `${name}MagBoom`, { height: 0.6, diameter: 0.008, tessellation: 4 }), root, mats.grey, [0, -0.4, -0.04]);
+  return root;
+}
+
+// Danuri: a gold-wrapped box with a solar wing on each side and a dish on a boom.
+function danuri(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(CreateBox(`${name}Bus`, { width: 0.24, height: 0.26, depth: 0.24 }, scene), root, mats.goldFoil);
+  for (const s of [-1, 1]) {
+    part(cyl(scene, `${name}Arm${s}`, { height: 0.08, diameter: 0.014, tessellation: 6 }), root, mats.grey, [s * 0.16, 0, 0], [0, 0, QUARTER]);
+    part(CreateBox(`${name}Wing${s}`, { width: 0.3, height: 0.2, depth: 0.008 }, scene), root, mats.cells, [s * 0.35, 0, 0.02]);
+  }
+  part(cyl(scene, `${name}Boom`, { height: 0.16, diameter: 0.012, tessellation: 6 }), root, mats.grey, [0.05, 0.2, -0.05]);
+  part(cyl(scene, `${name}Dish`, { height: 0.04, diameterTop: 0.2, diameterBottom: 0.04, tessellation: 20 }), root, mats.white, [0.05, 0.3, -0.05]);
+  part(cyl(scene, `${name}Camera`, { height: 0.08, diameter: 0.07, tessellation: 12 }), root, mats.dark, [-0.05, -0.16, 0.04]);
+  part(CreateBox(`${name}Shadow`, { width: 0.08, height: 0.06, depth: 0.08 }, scene), root, mats.dark, [0.06, -0.15, -0.04]);
+  return root;
+}
+
+// LRO: a tall silver box, one solar array of three panels out to one side, a dish on
+// a long boom, and the telescope-like cameras looking down.
+function lro(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(CreateBox(`${name}Bus`, { width: 0.2, height: 0.36, depth: 0.2 }, scene), root, mats.foil);
+  part(CreateBox(`${name}Deck`, { width: 0.21, height: 0.02, depth: 0.21 }, scene), root, mats.goldFoil, [0, -0.19, 0]);
+  for (let k = 0; k < 3; k++) {
+    part(CreateBox(`${name}Panel${k}`, { width: 0.14, height: 0.3, depth: 0.008 }, scene), root, mats.cells, [0.2 + k * 0.15, 0.02, 0.03]);
+  }
+  rod(scene, `${name}Boom`, root, mats.grey, [-0.1, 0.1, 0], [-0.34, 0.2, 0], 0.012, 6);
+  part(cyl(scene, `${name}Dish`, { height: 0.035, diameterTop: 0.16, diameterBottom: 0.03, tessellation: 20 }), root, mats.white, [-0.34, 0.215, 0]);
+  for (const [i, x] of [[0, -0.04], [1, 0.05]]) {
+    part(cyl(scene, `${name}Camera${i}`, { height: 0.1, diameter: 0.06, tessellation: 12 }), root, mats.dark, [x, -0.24, 0.03]);
+  }
+  return root;
+}
+
+// Europa Clipper: a slim body, a three-metre dish, and two solar wings that span more
+// than thirty metres with the radar's rods across them.
+function europaClipper(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(cyl(scene, `${name}Body`, { height: 0.34, diameter: 0.1, tessellation: 14 }), root, mats.foil);
+  part(cyl(scene, `${name}Vault`, { height: 0.1, diameter: 0.13, tessellation: 14 }), root, mats.goldFoil, [0, 0.1, 0]);
+  part(cyl(scene, `${name}Dish`, { height: 0.04, diameterTop: 0.24, diameterBottom: 0.05, tessellation: 24 }), root, mats.white, [0, 0.08, 0.09], [QUARTER, 0, 0]);
+  part(cyl(scene, `${name}Engine`, { height: 0.05, diameterTop: 0.04, diameterBottom: 0.08, tessellation: 12 }), root, mats.dark, [0, -0.19, 0]);
+  for (const s of [-1, 1]) {
+    part(CreateBox(`${name}Wing${s}`, { width: 0.4, height: 0.16, depth: 0.006 }, scene), root, mats.cells, [s * 0.27, -0.02, 0]);
+    for (const x of [0.17, 0.37]) {
+      part(cyl(scene, `${name}Radar${s}${x}`, { height: 0.3, diameter: 0.008, tessellation: 5 }), root, mats.grey, [s * x, -0.02, -0.012]);
+    }
+  }
+  part(cyl(scene, `${name}MagBoom`, { height: 0.3, diameter: 0.008, tessellation: 5 }), root, mats.grey, [0.08, -0.26, -0.06], [0.5, 0, -0.5]);
+  return root;
+}
+
+// Lucy: a small body between two round solar arrays, each wider than the craft is
+// long, with a dish facing home and the cameras on a platform below.
+function lucy(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(CreateBox(`${name}Bus`, { width: 0.12, height: 0.16, depth: 0.12 }, scene), root, mats.goldFoil);
+  part(cyl(scene, `${name}Dish`, { height: 0.03, diameterTop: 0.15, diameterBottom: 0.03, tessellation: 20 }), root, mats.white, [0, 0.02, 0.08], [QUARTER, 0, 0]);
+  for (const s of [-1, 1]) {
+    part(cyl(scene, `${name}Arm${s}`, { height: 0.06, diameter: 0.014, tessellation: 6 }), root, mats.grey, [s * 0.08, 0, 0], [0, 0, QUARTER]);
+    part(cyl(scene, `${name}Array${s}`, { height: 0.006, diameter: 0.4, tessellation: 10 }), root, mats.cells, [s * 0.3, 0, 0], [QUARTER, 0, 0]);
+    part(cyl(scene, `${name}Hub${s}`, { height: 0.012, diameter: 0.04, tessellation: 10 }), root, mats.grey, [s * 0.3, 0, 0], [QUARTER, 0, 0]);
+  }
+  part(CreateBox(`${name}Platform`, { width: 0.1, height: 0.05, depth: 0.09 }, scene), root, mats.dark, [0, -0.11, 0.01]);
+  part(cyl(scene, `${name}Camera`, { height: 0.07, diameter: 0.04, tessellation: 10 }), root, mats.white, [0.02, -0.16, 0.02]);
   return root;
 }
 
@@ -543,6 +615,7 @@ export function createCraft(scene, craftList) {
   const build = {
     voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid,
     iss, tiangong, sputnik, mro, juno, cassini, parker, roadster, newHorizons, pioneer10: pioneer,
+    danuri, lro, europaClipper, lucy, pioneer11: pioneer,
   };
   const nodes = new Map(craftList.map((c) => [c.id, build[c.id](scene, c.id, mats)]));
 

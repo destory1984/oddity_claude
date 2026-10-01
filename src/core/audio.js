@@ -25,10 +25,11 @@ export function cueForEvent(event) {
   }
 }
 
-// Flight sound: silent at rest, a low idle while coasting; under thrust a spacecraft's
-// drive, humming higher and whining more with speed (ui/sound.js). gain is linear
-// volume (0..0.25), pitch 330..660 sets how far the drive is wound up. (sparkle, the
-// kalimba notes per second of the first flight sound, is no longer played.)
+// Flight sound: silent at rest, a quiet rush of air while coasting; under thrust the
+// rush is louder and slides higher with speed, and setting off whooshes (ui/sound.js).
+// gain is linear volume (0..0.25; 0.08 and up means thrust), pitch 330..660 sets how
+// high the rush sits. (sparkle, the kalimba notes per second of the first flight sound,
+// is no longer played.)
 // Docked, the traveler is carried: no wind, whatever speed the craft is going.
 export function engineSound({ speed, maxSpeed, thrusting, docked = false }) {
   if (docked) return { gain: 0, pitch: 330, sparkle: 0 };

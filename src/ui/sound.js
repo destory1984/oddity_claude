@@ -78,64 +78,55 @@ export function createSound() {
     const data = noiseBuffer.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
 
-    // Flight: a spacecraft's drive. A low hum (two saws a hair apart, so they beat),
-    // a deep sine under it, a rumble of filtered noise and a thin turbine whine on top.
-    // Faster flight raises the hum, opens the filter and winds the whine up.
+    // Flight: the rush of air past someone flying, as in the films (there is no air out
+    // here; it is a game). A wide band of noise for the rush, a low one under it for
+    // weight, and a higher one chopped unevenly for the cape snapping. Faster flight
+    // slides the rush upward. Setting off adds a rising whoosh (engine() below).
     const gain = ctx.createGain();
     gain.gain.value = 0;
     gain.connect(sfx);
-    const tone = ctx.createBiquadFilter();
-    tone.type = 'lowpass';
-    tone.frequency.value = 260;
-    tone.Q.value = 1.2;
-    tone.connect(gain);
-    const hums = [0, 7].map((cents) => {
-      const osc = ctx.createOscillator();
-      osc.type = 'sawtooth';
-      osc.frequency.value = 55;
-      osc.detune.value = cents;
-      const level = ctx.createGain();
-      level.gain.value = 0.5;
-      osc.connect(level).connect(tone);
-      osc.start();
-      return osc;
-    });
-    const sub = ctx.createOscillator();
-    sub.type = 'sine';
-    sub.frequency.value = 27.5;
-    const subLevel = ctx.createGain();
-    subLevel.gain.value = 0.9;
-    sub.connect(subLevel).connect(gain);
-    sub.start();
     const air = ctx.createBufferSource();
     air.buffer = noiseBuffer;
     air.loop = true;
-    const rumble = ctx.createBiquadFilter();
-    rumble.type = 'lowpass';
-    rumble.frequency.value = 220;
-    const rumbleLevel = ctx.createGain();
-    rumbleLevel.gain.value = 0.55;
-    air.connect(rumble).connect(rumbleLevel).connect(gain);
+    const rush = ctx.createBiquadFilter();
+    rush.type = 'bandpass';
+    rush.frequency.value = 400;
+    rush.Q.value = 0.7;
+    const rushLevel = ctx.createGain();
+    rushLevel.gain.value = 1.4;
+    air.connect(rush).connect(rushLevel).connect(gain);
+    const low = ctx.createBiquadFilter();
+    low.type = 'lowpass';
+    low.frequency.value = 180;
+    const lowLevel = ctx.createGain();
+    lowLevel.gain.value = 0.9;
+    air.connect(low).connect(lowLevel).connect(gain);
+    const cape = ctx.createBiquadFilter();
+    cape.type = 'bandpass';
+    cape.frequency.value = 2400;
+    cape.Q.value = 1.5;
+    const capeLevel = ctx.createGain();
+    capeLevel.gain.value = 0.25;
+    air.connect(cape).connect(capeLevel).connect(gain);
+    // Two flutters that drift in and out of step, so the snapping is never regular.
+    const flaps = [7.3, 11.9].map((hz) => {
+      const osc = ctx.createOscillator();
+      osc.frequency.value = hz;
+      const depth = ctx.createGain();
+      depth.gain.value = 0.11;
+      osc.connect(depth).connect(capeLevel.gain);
+      osc.start();
+      return osc;
+    });
+    // A slow swell, like gusts.
+    const gust = ctx.createOscillator();
+    gust.frequency.value = 0.37;
+    const gustDepth = ctx.createGain();
+    gustDepth.gain.value = 0.25;
+    gust.connect(gustDepth).connect(rushLevel.gain);
+    gust.start();
     air.start();
-    const whine = ctx.createOscillator();
-    whine.type = 'triangle';
-    whine.frequency.value = 700;
-    const whineLevel = ctx.createGain();
-    whineLevel.gain.value = 0.05;
-    whine.connect(whineLevel).connect(gain);
-    whine.start();
-    // A slow throb, like a drive turning over.
-    const throb = ctx.createOscillator();
-    throb.frequency.value = 5;
-    const throbDepth = ctx.createGain();
-    throbDepth.gain.value = 0.12;
-    const throbbed = ctx.createGain();
-    throbbed.gain.value = 1;
-    throb.connect(throbDepth).connect(throbbed.gain);
-    gain.disconnect();
-    gain.connect(throbbed).connect(sfx);
-    throb.start();
-    engine = { gain, tone, hums, sub, rumble, whine, whineLevel };
+    engine = { gain, rush, low, cape, flaps, loud: 0, whooshedAt: -10 };
 
     return ctx;
   }
@@ -303,16 +294,22 @@ export function createSound() {
       if (!ctx) return;
       const t = ctx.currentTime;
       engine.gain.gain.setTargetAtTime(gain, t, 0.15);
-      // pitch runs 330..660 with speed: the hum climbs an octave (55 to 110 Hz), the
-      // filter opens, the whine winds up from 700 to 2,100 Hz and grows a little louder.
+      // pitch runs 330..660 with speed: the rush slides from 400 up to 1,600 Hz and
+      // the cape snaps faster.
       const k = Math.max(0, Math.min(1, (pitch - 330) / 330));
-      const hum = 55 * 2 ** k;
-      for (const osc of engine.hums) osc.frequency.setTargetAtTime(hum, t, 0.4);
-      engine.sub.frequency.setTargetAtTime(hum / 2, t, 0.4);
-      engine.tone.frequency.setTargetAtTime(260 + 700 * k, t, 0.4);
-      engine.rumble.frequency.setTargetAtTime(220 + 500 * k, t, 0.4);
-      engine.whine.frequency.setTargetAtTime(700 + 1400 * k, t, 0.6);
-      engine.whineLevel.gain.setTargetAtTime(0.04 + 0.05 * k, t, 0.6);
+      engine.rush.frequency.setTargetAtTime(400 * 4 ** k, t, 0.4);
+      engine.low.frequency.setTargetAtTime(180 + 220 * k, t, 0.4);
+      engine.cape.frequency.setTargetAtTime(2400 + 1600 * k, t, 0.4);
+      engine.flaps[0].frequency.setTargetAtTime(7.3 + 6 * k, t, 0.5);
+      engine.flaps[1].frequency.setTargetAtTime(11.9 + 9 * k, t, 0.5);
+      // Setting off (the volume steps up from coasting or silence to thrust): whoosh,
+      // a narrow band of noise swept up through two octaves in half a second.
+      if (!muted && gain >= 0.08 && engine.loud < 0.08 && t - engine.whooshedAt > 0.8) {
+        engine.whooshedAt = t;
+        noise({ length: 0.55, volume: 0.5, type: 'bandpass', freq: 300, to: 2600 });
+        noise({ start: 0.05, length: 0.7, volume: 0.25, type: 'lowpass', freq: 500, to: 120 });
+      }
+      engine.loud = gain;
     },
     // Called every frame with the mood from core/music.js moodFor(); starts each bar a
     // little ahead of time so the audio clock, not the frame rate, keeps the beat.

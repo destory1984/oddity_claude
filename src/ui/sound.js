@@ -217,15 +217,13 @@ export function createSound() {
     },
     mission: () => [784, 988, 784, 1175, 1568].forEach((f, i) => bell(f, i * 0.12)),
     complete: () => [523, 659, 784, 1047, 988, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.16, 0.12)),
-    // Stopping: shoes skidding to a halt. The soles scrape for a fifth of a second (a
-    // band of noise sliding down, swelling in so there is no tick), then squeak twice as
-    // they grip: short rising chirps, the second smaller. (It was a band of noise that
-    // began at full volume, 2,600 Hz, a sharp "tack"; then a breath of low noise under a
-    // falling note; then two music-box notes. The user asked for the sound of shoes.)
+    // Stopping: one soft low "tuk", a foot set down lightly: a short sine dropping from
+    // 150 to 85 Hz with a touch of muffled noise. (Tried before and not liked: a band of
+    // noise that began at full volume, 2,600 Hz, a sharp "tack"; a breath of low noise
+    // under a falling note; two music-box notes; a shoe skid with two squeaks.)
     brake: () => {
-      noise({ length: 0.24, volume: 0.1, type: 'bandpass', freq: 1900, to: 800, attack: 0.025 });
-      tone({ freq: 1500, to: 2400, type: 'triangle', start: 0.17, length: 0.09, volume: 0.04, attack: 0.012 });
-      tone({ freq: 1700, to: 2600, type: 'triangle', start: 0.29, length: 0.06, volume: 0.022, attack: 0.012 });
+      tone({ freq: 150, to: 85, length: 0.2, volume: 0.17, attack: 0.008 });
+      noise({ length: 0.07, volume: 0.05, type: 'lowpass', freq: 500, to: 200, attack: 0.01 });
     },
     click: () => pluck(1319, 0, 0.05, 0.2),
     // Docking: air rushing up as the approach begins, a tick for each count, then the

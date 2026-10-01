@@ -59,8 +59,6 @@ export function eventMessage(event, bodies = []) {
       return `${event.name}${towardParticle(event.name)} 내려갑니다.`;
     case 'visited':
       return `${event.name} 곁에 내려섰습니다. 전진이나 후진을 누르면 떠납니다.`;
-    case 'slingshot':
-      return `${nameOf(bodies, event.bodyId)} 스윙바이! 제한 속도의 ${event.factor.toFixed(1)}배로 튕겨 나갑니다. Space로 멈춥니다.`;
     case 'dockRefused':
       return `${event.name}${hasFinalConsonant(event.name) ? '은' : '는'} 지표면과 너무 가까워 도킹할 수 없습니다.`;
     case 'dockAborted':

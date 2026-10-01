@@ -228,13 +228,6 @@ export function createSound() {
       bell(659, 0.9);
       bell(988, 1.08);
     },
-    // A slingshot: the air tearing past, a rising note, and three bells as the planet
-    // falls behind.
-    sling: () => {
-      noise({ length: 1.8, volume: 0.26, type: 'bandpass', freq: 500, to: 4200 });
-      tone({ freq: 147, to: 880, length: 1.4, volume: 0.1 });
-      [784, 1175, 1568].forEach((f, i) => bell(f, 0.5 + i * 0.14, 0.08));
-    },
     // A jump, six seconds like the flash (ui/warp.js). All bells and clear tones, no low
     // noise: music-box notes climbing a five-note scale faster and faster for 2.6 s, a
     // bright chord as the screen goes white, then a few slow chimes drifting down as

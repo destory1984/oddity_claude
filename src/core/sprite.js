@@ -119,6 +119,7 @@ export function modeFor(input) {
   // Latched to a craft she is at rest, whatever speed the craft carries her at: she
   // turns to face the camera and hovers, as when she stops anywhere else.
   if (input.held) return 'hover';
+  // (Nothing sets boost now: the slingshot was taken out of the game. The drawings stay.)
   if (input.boost) return 'sling';
   if (input.resting) return 'ground';
   return input.speed >= MOVING_KM_S ? 'fly' : 'hover';

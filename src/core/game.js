@@ -32,7 +32,8 @@ export function createState(position, orientation = [0, 0, 0, 1]) {
     // Speed kept from something the traveler rode with (km/s, in world axes): it does
     // not turn with the traveler and lasts until they stop or land.
     drift: [0, 0, 0],
-    // A slingshot's fling (core/slingshot.js): { factor, seconds, total }, or null.
+    // A fling that lifts the speed limit for a while: { factor, seconds, total }, or
+    // null. (The slingshot that set it was taken out of the game; nothing sets it now.)
     boost: null,
   };
 }

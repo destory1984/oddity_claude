@@ -17,7 +17,6 @@ import { createMinimap } from './ui/minimap.js';
 import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
 import { createWarp } from './ui/warp.js';
-import { slingshot } from './core/slingshot.js';
 import { addPhoto, removePhoto } from './core/album.js';
 import { teleportSpot } from './core/teleport.js';
 import { behindBody } from './core/markers.js';
@@ -112,8 +111,6 @@ let meteorSeen = false;
 // Lights and plumes already told about (core/glows.js).
 const glowsTold = new Set();
 let feelingTold = null;
-// The fly-by of a planet in progress, watched for a slingshot (core/slingshot.js).
-let pass = null;
 // The craft the traveler is docked with, and the glide toward it (core/dock.js startDocking).
 let docked = null;
 // While docked, the speed shown is the craft's own (the traveler rides with it).
@@ -606,13 +603,6 @@ async function init() {
     const slowPoints = craft.map((c) => c.position);
     const result = step(state, intent, dt, bodies, slowPoints);
     state = result.state;
-    // Flying fast past a planet flings the traveler off on the way out.
-    const swing = docked ? { pass: null, flung: null } : slingshot(pass, state, bodies);
-    pass = swing.pass;
-    if (swing.flung) {
-      state = swing.flung.state;
-      result.events.push({ type: 'slingshot', bodyId: swing.flung.bodyId, factor: swing.flung.factor });
-    }
     const logged = updateProgress(progress, state, bodies);
     let finished = false;
     if (logged.events.length) {

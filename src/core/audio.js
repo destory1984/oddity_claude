@@ -5,8 +5,6 @@ export function cueForEvent(event) {
   switch (event.type) {
     case 'surfaceReached':
       return 'landed';
-    case 'slingshot':
-      return 'sling';
     case 'docking':
       return 'docking';
     case 'docked':

@@ -14,6 +14,8 @@ export const TIME_SCALE = 720;
 // Parents must be listed before their children. orbitKm is the real mean
 // distance (semi-major axis); directions are fixed, not today's positions.
 // Planets are spread around the Sun so trips go in many directions.
+const SATURN_RING_EDGE_KM = 136775;
+
 export const BODY_DATA = [
   { id: 'sun', name: '태양', nameEn: 'Sun', kind: 'star', radiusKm: 696340, parent: null },
   {
@@ -36,6 +38,15 @@ export const BODY_DATA = [
   {
     id: 'mars', name: '화성', nameEn: 'Mars', kind: 'planet', radiusKm: 3389.5,
     parent: 'sun', orbitKm: 227939200, periodS: 686.98 * DAY_S, direction: [-0.34, -0.02, -0.94],
+  },
+  // Mars's two captured lumps: Phobos laps the planet in 7.7 hours.
+  {
+    id: 'phobos', name: '포보스', nameEn: 'Phobos', kind: 'moon', radiusKm: 11.3,
+    parent: 'mars', orbitKm: 9376, periodS: 0.31891 * DAY_S, direction: [0.8, 0.02, 0.6],
+  },
+  {
+    id: 'deimos', name: '데이모스', nameEn: 'Deimos', kind: 'moon', radiusKm: 6.2,
+    parent: 'mars', orbitKm: 23463, periodS: 1.263 * DAY_S, direction: [-0.5, -0.02, 0.87],
   },
   {
     id: 'jupiter', name: '목성', nameEn: 'Jupiter', kind: 'planet', radiusKm: 69911,
@@ -62,17 +73,62 @@ export const BODY_DATA = [
     id: 'saturn', name: '토성', nameEn: 'Saturn', kind: 'planet', radiusKm: 58232,
     parent: 'sun', orbitKm: 1433530000, periodS: 10759.22 * DAY_S, direction: [0.94, 0.04, 0.34],
   },
+  // Saturn's moons. Its rings reach 136,775 km, farther out than the 1/10 rule would
+  // put the inner moons, so for Saturn the shrinking gap is measured from the ring edge.
   {
-    id: 'titan', name: '타이탄', nameEn: 'Titan', kind: 'moon', radiusKm: 2574.7,
+    id: 'mimas', name: '미마스', nameEn: 'Mimas', kind: 'moon', radiusKm: 198.2, edgeKm: SATURN_RING_EDGE_KM,
+    parent: 'saturn', orbitKm: 185539, periodS: 0.942422 * DAY_S, direction: [0.5, 0.02, -0.87],
+  },
+  {
+    id: 'enceladus', name: '엔셀라두스', nameEn: 'Enceladus', kind: 'moon', radiusKm: 252.1, edgeKm: SATURN_RING_EDGE_KM,
+    parent: 'saturn', orbitKm: 238042, periodS: 1.370218 * DAY_S, direction: [-0.9, 0.03, 0.44],
+  },
+  {
+    id: 'rhea', name: '레아', nameEn: 'Rhea', kind: 'moon', radiusKm: 763.8, edgeKm: SATURN_RING_EDGE_KM,
+    parent: 'saturn', orbitKm: 527108, periodS: 4.518212 * DAY_S, direction: [0.2, 0.04, 0.98],
+  },
+  {
+    id: 'titan', name: '타이탄', nameEn: 'Titan', kind: 'moon', radiusKm: 2574.7, edgeKm: SATURN_RING_EDGE_KM,
     parent: 'saturn', orbitKm: 1221870, periodS: 15.945 * DAY_S, direction: [-0.7, 0.1, -0.7],
+  },
+  {
+    id: 'iapetus', name: '이아페투스', nameEn: 'Iapetus', kind: 'moon', radiusKm: 734.5, edgeKm: SATURN_RING_EDGE_KM,
+    parent: 'saturn', orbitKm: 3560820, periodS: 79.3215 * DAY_S, direction: [0.9, -0.2, -0.38],
   },
   {
     id: 'uranus', name: '천왕성', nameEn: 'Uranus', kind: 'planet', radiusKm: 25362,
     parent: 'sun', orbitKm: 2872460000, periodS: 30688.5 * DAY_S, direction: [-0.87, 0.02, 0.5],
   },
+  // Uranus's five round moons. (Really they circle over its tipped-over equator; here
+  // every orbit lies flat, like the others.)
+  {
+    id: 'miranda', name: '미란다', nameEn: 'Miranda', kind: 'moon', radiusKm: 235.8,
+    parent: 'uranus', orbitKm: 129390, periodS: 1.413479 * DAY_S, direction: [0.7, 0.02, 0.71],
+  },
+  {
+    id: 'ariel', name: '아리엘', nameEn: 'Ariel', kind: 'moon', radiusKm: 578.9,
+    parent: 'uranus', orbitKm: 191020, periodS: 2.520379 * DAY_S, direction: [-0.8, -0.03, 0.6],
+  },
+  {
+    id: 'umbriel', name: '움브리엘', nameEn: 'Umbriel', kind: 'moon', radiusKm: 584.7,
+    parent: 'uranus', orbitKm: 266300, periodS: 4.144177 * DAY_S, direction: [-0.3, 0.02, -0.95],
+  },
+  {
+    id: 'titania', name: '티타니아', nameEn: 'Titania', kind: 'moon', radiusKm: 788.4,
+    parent: 'uranus', orbitKm: 435910, periodS: 8.705872 * DAY_S, direction: [0.95, 0.03, -0.3],
+  },
+  {
+    id: 'oberon', name: '오베론', nameEn: 'Oberon', kind: 'moon', radiusKm: 761.4,
+    parent: 'uranus', orbitKm: 583520, periodS: 13.463239 * DAY_S, direction: [-0.6, -0.04, 0.8],
+  },
   {
     id: 'neptune', name: '해왕성', nameEn: 'Neptune', kind: 'planet', radiusKm: 24622,
     parent: 'sun', orbitKm: 4495060000, periodS: 60182 * DAY_S, direction: [0.17, -0.03, -0.98],
+  },
+  // Triton, a captured world, is the one large moon that orbits backwards.
+  {
+    id: 'triton', name: '트리톤', nameEn: 'Triton', kind: 'moon', radiusKm: 1353.4, retrograde: true,
+    parent: 'neptune', orbitKm: 354759, periodS: 5.876854 * DAY_S, direction: [0.6, 0.2, 0.77],
   },
 ];
 
@@ -104,9 +160,9 @@ export function placeBodies(data, timeS = 0) {
       const parent = placed.get(item.parent);
       if (!parent) throw new Error(`parent ${item.parent} must come before ${item.id}`);
       const factor = parent.kind === 'star' ? DISTANCE_COMPRESSION : SATELLITE_COMPRESSION;
-      const distance = compressedCenterDistance(item.orbitKm, parent.radiusKm, item.radiusKm, factor);
+      const distance = compressedCenterDistance(item.orbitKm, item.edgeKm ?? parent.radiusKm, item.radiusKm, factor);
       // Negative: counterclockwise seen from +y (north) in Babylon's left-handed frame.
-      const angle = item.periodS ? (-2 * Math.PI * timeS) / item.periodS : 0;
+      const angle = item.periodS ? ((item.retrograde ? 2 : -2) * Math.PI * timeS) / item.periodS : 0;
       position = normalize(turnAboutY(item.direction, angle)).map((n, i) => parent.position[i] + n * distance);
     }
     const { id, name, nameEn, kind, radiusKm, parent = null } = item;
@@ -145,7 +201,8 @@ export function nearestSurface(position, bodies = BODIES) {
 }
 
 export function nearestLocalBody(position, bodies = BODIES) {
-  const local = bodies.filter((body) => body.kind === 'planet' || body.kind === 'moon');
+  // The Sun and the planets only: with eighteen moons the label would keep flipping.
+  const local = bodies.filter((body) => body.kind !== 'moon');
   const { body, distance } = nearestSurface(position, local);
   return { body, altitude: distance, label: `${body.name} 상공` };
 }

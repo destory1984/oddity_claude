@@ -57,7 +57,8 @@ test('moons ride along with their planet', () => {
 test('orbits run counterclockwise seen from the north (+y), like the real solar system', () => {
   // In Babylon's left-handed frame seen from +y, +x is right and +z is up on screen,
   // so counterclockwise turns +x toward +z: the tangent at (x, z) is (-z, x).
-  for (const d of BODY_DATA.filter((x) => x.parent)) {
+  // (Triton is the exception; it has its own test below.)
+  for (const d of BODY_DATA.filter((x) => x.parent && !x.retrograde)) {
     const offset = (t) => sub(at(t, d.id).position, at(t, d.parent).position);
     const a = offset(0);
     const b = offset(d.periodS / 1000);
@@ -65,4 +66,16 @@ test('orbits run counterclockwise seen from the north (+y), like the real solar 
     const tangent = [-a[2], a[0]];
     assert.ok(move[0] * tangent[0] + move[1] * tangent[1] > 0, `${d.id} goes clockwise`);
   }
+});
+
+test('Triton goes round Neptune backwards, the other moons forwards', () => {
+  // Seen from the north (+y), forward orbits turn counterclockwise: in Babylon's
+  // left-handed axes the angle atan2(z, x) falls with time.
+  const turn = (id, parentId) => {
+    const a = sub(at(0, id).position, at(0, parentId).position);
+    const b = sub(at(3600, id).position, at(3600, parentId).position);
+    return a[0] * b[2] - a[2] * b[0];
+  };
+  assert.ok(turn('triton', 'neptune') * turn('moon', 'earth') < 0);
+  assert.ok(turn('titania', 'uranus') * turn('moon', 'earth') > 0);
 });

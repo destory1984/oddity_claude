@@ -10,10 +10,15 @@ const sub = (a, b) => a.map((n, i) => n - b[i]);
 const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
-test('the table holds the Sun, all eight planets and six large moons at real radii', () => {
+test('the table holds the Sun, all eight planets and eighteen moons at real radii', () => {
   assert.deepEqual(
     BODIES.map((b) => b.id),
-    ['sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'jupiter', 'io', 'europa', 'ganymede', 'callisto', 'saturn', 'titan', 'uranus', 'neptune'],
+    [
+      'sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'phobos', 'deimos',
+      'jupiter', 'io', 'europa', 'ganymede', 'callisto',
+      'saturn', 'mimas', 'enceladus', 'rhea', 'titan', 'iapetus',
+      'uranus', 'miranda', 'ariel', 'umbriel', 'titania', 'oberon', 'neptune', 'triton',
+    ],
   );
   assert.equal(bodyById('ganymede').radiusKm, 2634.1);
   assert.equal(bodyById('titan').parent, 'saturn');
@@ -51,7 +56,8 @@ test('planets sit at 1/100 of the real gap from the Sun, moons at 1/10 from thei
     const body = bodyById(item.id);
     const parent = bodyById(item.parent);
     const centerDistance = Math.hypot(...sub(body.position, parent.position));
-    const radii = body.radiusKm + parent.radiusKm;
+    // Saturn's inner moons are measured from the edge of the rings, not the cloud tops.
+    const radii = body.radiusKm + (item.edgeKm ?? parent.radiusKm);
     const factor = parent.kind === 'star' ? 100 : 10;
     assert.ok(centerDistance > radii);
     near(centerDistance - radii, (item.orbitKm - radii) / factor);
@@ -94,21 +100,24 @@ test('nearestSurface picks the closest surface and handles an empty list', () =>
   assert.deepEqual(nearestSurface(point, []), { body: null, distance: Infinity });
 });
 
-test('altitude label follows the nearest planet or moon, never the Sun', () => {
+test('altitude label follows the nearest planet or the Sun, never a moon', () => {
   const start = nearestLocalBody(START_POSITION);
   assert.equal(start.body.id, 'earth');
   assert.equal(start.label, '지구 상공');
   near(start.altitude, 9129);
 
+  // Right above the Moon the label still counts from Earth.
   const moon = bodyById('moon');
+  const earth = bodyById('earth');
   const nearMoon = [moon.position[0], moon.position[1], moon.position[2] + 2000];
   const result = nearestLocalBody(nearMoon);
-  assert.equal(result.label, '달 상공');
-  near(result.altitude, 262.6);
+  assert.equal(result.label, '지구 상공');
+  near(result.altitude, Math.hypot(...sub(nearMoon, earth.position)) - earth.radiusKm);
 
   const sun = bodyById('sun');
   const nearSun = [sun.position[0], sun.position[1] + sun.radiusKm + 10, sun.position[2]];
-  assert.notEqual(nearestLocalBody(nearSun).body.id, 'sun');
+  assert.equal(nearestLocalBody(nearSun).label, '태양 상공');
+  near(nearestLocalBody(nearSun).altitude, 10);
 });
 
 test('a body grows in view as the traveler approaches it', () => {
@@ -133,4 +142,25 @@ test('from the start, looking at Earth, the Moon hangs beside it in frame and pa
   const toViewer = sub(START_POSITION, moon.position);
   const cos = dot(toSun, toViewer) / (Math.hypot(...toSun) * Math.hypot(...toViewer));
   assert.ok(Math.acos(cos) < (100 * Math.PI) / 180);
+});
+
+test('every moon of Saturn stays outside the rings, in its real order outward', () => {
+  const ringOuterKm = 136775;
+  const saturn = bodyById('saturn');
+  const out = ['mimas', 'enceladus', 'rhea', 'titan', 'iapetus'].map((id) => {
+    const moon = bodyById(id);
+    return Math.hypot(...sub(moon.position, saturn.position)) - moon.radiusKm;
+  });
+  assert.ok(out[0] > ringOuterKm, `Mimas at ${out[0]}`);
+  for (let i = 1; i < out.length; i++) assert.ok(out[i] > out[i - 1], `order at ${i}`);
+});
+
+test('small moons keep their real sizes and parents', () => {
+  assert.equal(bodyById('phobos').radiusKm, 11.3);
+  assert.equal(bodyById('deimos').parent, 'mars');
+  assert.equal(bodyById('triton').parent, 'neptune');
+  for (const id of ['miranda', 'ariel', 'umbriel', 'titania', 'oberon']) assert.equal(bodyById(id).parent, 'uranus');
+  const mars = bodyById('mars');
+  const d = (id) => Math.hypot(...sub(bodyById(id).position, mars.position));
+  assert.ok(d('phobos') < d('deimos'));
 });

@@ -21,8 +21,10 @@ test('entering 50,000 km of a surface discovers the body once', () => {
   result = updateProgress(result.progress, at(above('mars', 49000)), BODIES);
   assert.deepEqual(result.events, [{ type: 'discovered', bodyId: 'mars' }]);
   assert.ok(result.progress.discovered.includes('mars'));
+  // Closer in, Mars is not found again (its two little moons, a few thousand km up, are).
   result = updateProgress(result.progress, at(above('mars', 100)), BODIES);
-  assert.deepEqual(result.events, []);
+  assert.deepEqual(result.events.filter((e) => e.bodyId === 'mars'), []);
+  assert.deepEqual(result.events.map((e) => e.bodyId).sort(), ['deimos', 'phobos']);
 });
 
 test('touching a surface records a landing once, and discovers it too', () => {

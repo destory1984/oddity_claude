@@ -18,11 +18,23 @@ const EDGE_PX = 8;
 export function createMinimap(canvas, { onPick }) {
   const ctx = canvas.getContext('2d');
   let dots = [];
+  // Every circle that can be named on hover: the Sun, the planets and the traveler.
+  let named = [];
+  let hover = null;
 
-  canvas.addEventListener('pointerdown', (e) => {
+  const pointAt = (e) => {
     const rect = canvas.getBoundingClientRect();
-    const id = pickNearest([e.clientX - rect.left - rect.width / 2, e.clientY - rect.top - rect.height / 2], dots);
+    return [e.clientX - rect.left - rect.width / 2, e.clientY - rect.top - rect.height / 2];
+  };
+  canvas.addEventListener('pointerdown', (e) => {
+    const id = pickNearest(pointAt(e), dots);
     if (id) onPick(id);
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    hover = pickNearest(pointAt(e), named, 10);
+  });
+  canvas.addEventListener('pointerleave', () => {
+    hover = null;
   });
 
   function draw({ bodies, position, heading, selectedId }) {
@@ -61,6 +73,7 @@ export function createMinimap(canvas, { onPick }) {
     const selected = bodies.find((b) => b.id === selectedId);
     const ringed = selected?.kind === 'moon' ? selected.parent : selectedId;
     dots = [];
+    named = [];
     for (const body of [sun, ...planets]) {
       const [x, y] = at(body.position);
       ctx.fillStyle = COLORS[body.id] ?? '#cfe3f3';
@@ -74,6 +87,7 @@ export function createMinimap(canvas, { onPick }) {
         ctx.stroke();
       }
       if (body.kind === 'planet') dots.push({ id: body.id, x, y });
+      named.push({ id: body.id, x, y, name: body.name });
     }
 
     const [px, py] = at(position);
@@ -90,6 +104,21 @@ export function createMinimap(canvas, { onPick }) {
       ctx.arc(px, py, 3, 0, Math.PI * 2);
     }
     ctx.fill();
+    named.push({ id: 'me', x: px, y: py, name: '나' });
+
+    // The name of the circle under the pointer, kept inside the map.
+    const shown = named.find((n) => n.id === hover);
+    if (shown) {
+      ctx.font = '12px sans-serif';
+      const width = ctx.measureText(shown.name).width + 12;
+      const x = Math.max(-size / 2 + 2, Math.min(size / 2 - width - 2, shown.x - width / 2));
+      const y = shown.y < -size / 2 + 30 ? shown.y + 10 : shown.y - 26;
+      ctx.fillStyle = 'rgba(7, 21, 34, 0.9)';
+      ctx.fillRect(x, y, width, 18);
+      ctx.fillStyle = '#e6f2fb';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(shown.name, x + 6, y + 9.5);
+    }
   }
 
   return { draw };

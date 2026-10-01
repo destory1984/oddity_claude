@@ -14,7 +14,11 @@ void main(){
   float limb = .45 + .55 * pow(mu, .6);
   float granules = fbm(q * 18. + vec2(time * .06, -time * .04));
   float cells = fbm(q * 55. - vec2(time * .1, time * .07));
-  float spots = smoothstep(.72, .8, fbm(q * 3.5 + 7.3));
+  // Sunspots ride the Sun's rotation: one turn in 25.4 days, 51 minutes on the game
+  // clock. The disc is treated as a ball turning about the screen's vertical axis.
+  float lon = atan(q.x, mu) + time * 6.28318 / 3048.;
+  float lat = asin(clamp(q.y, -1., 1.));
+  float spots = smoothstep(.72, .8, fbm(vec2(cos(lon), sin(lon)) * 2.6 + vec2(lat * 4.2, lat * 1.7 + 7.3)));
   vec3 hot = vec3(1.25, 1.12, .9);
   vec3 warm = vec3(1.1, .62, .22);
   vec3 surface = mix(warm, hot, limb) * (.85 + .25 * granules + .1 * cells) * (1. - .6 * spots);

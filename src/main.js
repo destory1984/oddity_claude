@@ -7,6 +7,7 @@ import {
 } from './core/game.js';
 import { rotateLocal, lookAtDirection, multiply, conjugate, forward } from './core/orientation.js';
 import { CRAFT, craftAt, craftById } from './core/craft.js';
+import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
 import { createHud } from './ui/hud.js';
@@ -159,6 +160,7 @@ async function init() {
   }
 
   const hud = createHud([...BODIES, ...craft], {
+    skyLabels: skyLabels(),
     onSelect: selectBody,
     onFace() {
       const body = here(selectedId);

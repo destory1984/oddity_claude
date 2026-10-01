@@ -6,7 +6,7 @@ const ARROWS = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
 const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 1 });
 const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
 
-export function createHud(bodies, { onSelect, onFace, onInspect }) {
+export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] }) {
   const markers = new Map();
   for (const body of bodies) {
     const el = document.createElement('button');
@@ -16,6 +16,15 @@ export function createHud(bodies, { onSelect, onFace, onInspect }) {
     $('markers').append(el);
     markers.set(body.id, el);
   }
+  // Names of constellations and galaxies: plain text on the sky, not targets.
+  const skyNames = skyLabels.map((label) => {
+    const el = document.createElement('span');
+    el.className = 'skyLabel';
+    el.textContent = label.name;
+    el.hidden = true;
+    $('markers').append(el);
+    return { el, direction: label.direction };
+  });
   $('faceTarget').addEventListener('click', onFace);
   $('inspectTarget').addEventListener('click', onInspect);
 
@@ -72,6 +81,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect }) {
           selected: selectedHere,
           nearest: body.id === local.body.id,
           surfaceKm: view.distances[body.id] - body.radiusKm,
+          always: body.id === 'earth' || body.kind === 'star',
         });
         return { body, el, spot, keep, selected: selectedHere };
       });
@@ -87,6 +97,16 @@ export function createHud(bodies, { onSelect, onFace, onInspect }) {
       spreadArrows(arrows, 40, innerHeight).forEach((spot, i) => {
         arrows[i].el.style.top = `${spot.y}px`;
       });
+      const focal = innerHeight / (2 * Math.tan(view.camera.fov / 2));
+      for (const { el, direction } of skyNames) {
+        const z = dot(direction, view.camera.forward);
+        const px = (dot(direction, view.camera.right) / Math.max(0.001, z)) * focal;
+        const py = (-dot(direction, view.camera.up) / Math.max(0.001, z)) * focal;
+        el.hidden = z <= 0.2 || Math.abs(px) > innerWidth / 2 || Math.abs(py) > innerHeight / 2;
+        if (el.hidden) continue;
+        el.style.left = `${innerWidth / 2 + px}px`;
+        el.style.top = `${innerHeight / 2 + py}px`;
+      }
     },
     faceToast(body) {
       return `${body.name}${objectParticle(body.name)} 바라봅니다. 위치와 속도는 유지됩니다.`;

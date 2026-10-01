@@ -217,6 +217,16 @@ nav {
   transform:translate(-50%,-50%);
 }
 
+.skyLabel {
+  position:absolute;
+  white-space:nowrap;
+  font-size:11px;
+  letter-spacing:.08em;
+  color:#b8cde0cc;
+  transform:translate(-50%,14px);
+  pointer-events:none;
+}
+
 .marker:before {
   content:"◇";
   margin-right:7px;

@@ -4,8 +4,9 @@
 // the Moon never vanishes while you fly around Earth.
 export const NEARBY_KM = 300000;
 
-export function keepMarker({ outside, selected, nearest, surfaceKm }) {
-  return !outside || selected || nearest || surfaceKm <= NEARBY_KM;
+// always: Earth and the Sun, the two bearings a traveler should never lose.
+export function keepMarker({ outside, selected, nearest, surfaceKm, always = false }) {
+  return !outside || selected || nearest || always || surfaceKm <= NEARBY_KM;
 }
 
 // Arrows closer than `gap` pixels (in both x and y) are pushed apart vertically,

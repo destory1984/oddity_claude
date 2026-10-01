@@ -4,7 +4,7 @@
 
 import {
   Scene, FreeCamera, Vector3, TransformNode, HemisphericLight, DirectionalLight,
-  StandardMaterial, Color3, Quaternion, Mesh, VertexData, DynamicTexture,
+  StandardMaterial, Color3, Quaternion, Mesh, VertexData, DynamicTexture, ShadowGenerator,
 } from './babylon.js';
 import { MAGE } from './mageModel.js';
 import {
@@ -104,12 +104,26 @@ export function createHero(engine, sunDirection) {
   const BASE_Y = -0.99;
   hero.position.set(0, BASE_Y, 6);
 
-  // Strong key light and a soft fill, so every fold shows a light and a dark side.
+  // Lit the way the place really is (core/heroLight.js): sunlight from the Sun's true
+  // direction, casting her own shadows (an arm across the robe, the head on a
+  // shoulder) and cut off in a planet's shadow; the glow thrown back by the world
+  // below; and a soft fill so the dark side of a fold is never black.
+  const FILL = 0.7;
+  const SUN = 1.9;
+  const BOUNCE = 1.3;
   const fill = new HemisphericLight('fill', new Vector3(-0.3, 1, -1), scene);
-  fill.intensity = 0.7;
+  fill.intensity = FILL;
   fill.groundColor = new Color3(0.3, 0.28, 0.3);
   const direct = new DirectionalLight('sunlight', sunDirection.negate(), scene);
-  direct.intensity = 1.9;
+  direct.intensity = SUN;
+  const bounce = new DirectionalLight('bounce', new Vector3(0, 1, 0), scene);
+  bounce.intensity = 0;
+  bounce.specular = new Color3(0, 0, 0);
+  const shadows = new ShadowGenerator(1024, direct);
+  shadows.usePercentageCloserFiltering = true;
+  shadows.bias = 0.004;
+  shadows.normalBias = 0.02;
+  shadows.setDarkness(0.35);
 
   // Matte paper: no shine, a little self-light so it never goes black in space.
   // Paper is a single sheet, so both sides are drawn and lit.
@@ -162,6 +176,8 @@ export function createHero(engine, sunDirection) {
     data.applyToMesh(mesh);
     mesh.parent = parent;
     mesh.material = material;
+    mesh.receiveShadows = true;
+    shadows.addShadowCaster(mesh);
     return mesh;
   }
 
@@ -230,8 +246,23 @@ export function createHero(engine, sunDirection) {
     }
   }
 
-  function update({ dt, speed, turn, fov, photoOrientation, visible, aspect = 16 / 9 }) {
+  // light: from core/heroLight.js heroLighting(); directions point toward each source.
+  function relight(light) {
+    const toSun = new Vector3(...light.sun.direction);
+    direct.direction = toSun.negate();
+    // The shadow map is drawn from a point back along the light, clear of the figure.
+    direct.position = toSun.scale(12).add(hero.position);
+    direct.intensity = SUN * light.sun.strength;
+    // In a planet's shadow only starlight and the fill are left.
+    fill.intensity = FILL * (0.35 + 0.65 * light.sun.strength);
+    bounce.direction = new Vector3(...light.bounce.direction).negate();
+    bounce.diffuse = new Color3(...light.bounce.color);
+    bounce.intensity = BOUNCE * light.bounce.strength;
+  }
+
+  function update({ dt, speed, turn, fov, photoOrientation, visible, aspect = 16 / 9, light = null }) {
     elapsed += dt;
+    if (light) relight(light);
     hero.scaling.setAll(heroScaleFor(aspect) * BODY_SCALE);
     const smooth = 1 - Math.exp(-dt * 6);
     bank += (clamp(-turn[0] * 1.15, -0.9, 0.9) - bank) * smooth;

@@ -4,6 +4,7 @@ import {
 import { BODIES, KM_PER_UNIT } from '../core/bodies.js';
 import { multiply } from '../core/orientation.js';
 import { sunVisibility } from '../core/occlusion.js';
+import { heroLighting } from '../core/heroLight.js';
 import { createBodyMeshes } from './planets.js';
 import { createSun } from './sun.js';
 import { createStars } from './stars.js';
@@ -122,7 +123,10 @@ export async function createWorld(canvas, bodies = BODIES) {
 
     camera.rotationQuaternion = new Quaternion(...multiply(orientation, photoOrientation || [0, 0, 0, 1]));
     const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
-    hero.update({ dt, speed, turn, fov: camera.fov, photoOrientation, visible: heroVisible, aspect });
+    hero.update({
+      dt, speed, turn, fov: camera.fov, photoOrientation, visible: heroVisible, aspect,
+      light: heroLighting({ position: traveler, orientation, bodies: now, sunVisibility: visibility }),
+    });
     ice.update(dt);
 
     camera.computeWorldMatrix(true); // axes below must reflect this frame's rotation

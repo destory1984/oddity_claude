@@ -35,6 +35,7 @@ import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
 import { createGuideView } from './ui/guide.js';
 import { createJournal } from './ui/journal.js';
+import { createStoryCard } from './ui/storyCard.js';
 import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
@@ -380,8 +381,24 @@ async function init() {
   hud.showSelection(named(selectedId));
   const minimap = createMinimap($('minimap'), { onPick: selectBody });
 
+  // The card at a story place; the game waits while it is open.
+  let cardPriorPause = false;
+  const storyCard = createStoryCard({
+    onOpen() {
+      cardPriorPause = paused;
+      setPaused(true);
+      input.clear();
+    },
+    onClose() {
+      setPaused(cardPriorPause);
+      previous = null;
+    },
+  });
+  const showStory = (id) => storyCard.show(STORIES.find((s) => s.id === id));
+
   let journalPriorPause = false;
   const journal = createJournal({
+    onDetail: showStory,
     bodies: BODIES,
     missions: MISSIONS,
     stories: STORIES,
@@ -571,6 +588,8 @@ async function init() {
         if (went.arrived) {
           toast.show(eventMessage({ type: 'visited', name: place.name }));
           sound.cue('landed');
+          // Somewhere been before: the card again (a first visit opens it below).
+          if (progress.stories.includes(place.id)) showStory(place.id);
         }
       }
     }
@@ -609,6 +628,8 @@ async function init() {
       progress = told.progress;
       finished = progressChanged(before) || finished;
     }
+    // A place reached for the first time opens its card.
+    if (told.newly.length) showStory(told.newly[0]);
     for (const event of [...result.events, ...logged.events, ...storyEvents]) {
       const text = eventMessage(event, BODIES);
       if (text) toast.show(text);

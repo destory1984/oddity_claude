@@ -35,6 +35,67 @@
 
 NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는다. 캐릭터, 셰이더, 효과음과 게임 코드는 이 저장소에서 직접 만든 것이다. 천왕성, 데이모스, 천왕성의 위성 다섯은 셰이더로 그렸다(천왕성은 무늬가 거의 없고, 나머지는 전체 지도가 없다). 토성 위성의 카시니 지도는 색을 강조한 것이라 게임에서는 채도를 30%쯤으로 낮춰 쓴다. 세레스, 명왕성, 카론의 지도는 흑백이라 게임에서 색조를 입힌다(명왕성은 옅은 갈색). 핼리 혜성의 핵, 코마, 꼬리와 소행성대의 바위는 셰이더로 그렸다.
 
+## 이야기 장소의 사진
+
+`public/assets/stories/` 의 사진 52장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
+
+| 파일 | 원본 | 만든 이 | 라이선스 |
+|---|---|---|---|
+| `aitken.jpg` | [South Pole–Aitken basin on the Moon's farside.png](https://commons.wikimedia.org/wiki/File:South_Pole%E2%80%93Aitken_basin_on_the_Moon%27s_farside.png) | NASA (the outline of South Pole–Aitken basin is own work) | Public domain |
+| `alpineValley.jpg` | [Vallis Alpes - LROC - WAC.JPG](https://commons.wikimedia.org/wiki/File:Vallis_Alpes_-_LROC_-_WAC.JPG) | NASA / LRO_LROC_TEAM | Public domain |
+| `apennines.jpg` | [Montes Apenninus (LRO).png](https://commons.wikimedia.org/wiki/File:Montes_Apenninus_(LRO).png) | NASA (image by Lunar Reconnaissance Orbiter) | Public domain |
+| `apollo11.jpg` | [Aldrin Apollo 11.jpg](https://commons.wikimedia.org/wiki/File:Aldrin_Apollo_11.jpg) | Neil A. Armstrong | Public domain |
+| `apollo12.jpg` | [Surveyor 3-Apollo 12.jpg](https://commons.wikimedia.org/wiki/File:Surveyor_3-Apollo_12.jpg) | NASA, Alan L. Bean | Public domain |
+| `apollo14.jpg` | [Apollo 14 Shepard.jpg](https://commons.wikimedia.org/wiki/File:Apollo_14_Shepard.jpg) | Edgar D. Mitchell / NASA | Public domain |
+| `apollo15.jpg` | [Apollo 15 flag, rover, LM, Irwin cropped.jpg](https://commons.wikimedia.org/wiki/File:Apollo_15_flag,_rover,_LM,_Irwin_cropped.jpg) | Astronaut David R. Scott, Apollo 15 commander. | Public domain |
+| `apollo16.jpg` | [John W. Young on the Moon.jpg](https://commons.wikimedia.org/wiki/File:John_W._Young_on_the_Moon.jpg) | Charlie Duke | Public domain |
+| `apollo17.jpg` | [Moon-apollo17-schmitt boulder.jpg](https://commons.wikimedia.org/wiki/File:Moon-apollo17-schmitt_boulder.jpg) | Eugene A. Cernan | Public domain |
+| `beagle2.jpg` | [PIA19107-Beagle2-Found-MRO-20140629.jpg](https://commons.wikimedia.org/wiki/File:PIA19107-Beagle2-Found-MRO-20140629.jpg) | http://www.nasa.gov/jpl/lost-2003-mars-lander-found-by-mars- | Public domain |
+| `blueGhost.jpg` | [Blue Ghost Lunar Lander Seen From Above (LROC1407).gif](https://commons.wikimedia.org/wiki/File:Blue_Ghost_Lunar_Lander_Seen_From_Above_(LROC1407).gif) | NASA/GSFC/Arizona State University | Public domain |
+| `cassini.jpg` | [Cassini grand finale 2017-04-26 saturn.jpg](https://commons.wikimedia.org/wiki/File:Cassini_grand_finale_2017-04-26_saturn.jpg) | NASA/JPL-Caltech/Space Science Institute | Public domain |
+| `chandrayaan3.jpg` | [Chandrayaan-3 – Image of Vikram lander on lunar surface taken by Pragyan rover at 0735 IST, 30 August 2023 (taken using rover navigation camera or Navcam).webp](https://commons.wikimedia.org/wiki/File:Chandrayaan-3_%E2%80%93_Image_of_Vikram_lander_on_lunar_surface_taken_by_Pragyan_rover_at_0735_IST,_30_August_2023_(taken_using_rover_navigation_camera_or_Navcam).webp) | Indian Space Research Organisation | GODL-India |
+| `change3.jpg` | [Chang'e-3 lunar landing site.jpg](https://commons.wikimedia.org/wiki/File:Chang%27e-3_lunar_landing_site.jpg) | NASA s file is in th | Public domain |
+| `change4.jpg` | [LRO Chang'e 4, first look.png](https://commons.wikimedia.org/wiki/File:LRO_Chang%27e_4,_first_look.png) | NASA/GSFC/Arizona State University | Public domain |
+| `change5.jpg` | [Chang'e 5 as seen by LRO 01.png](https://commons.wikimedia.org/wiki/File:Chang%27e_5_as_seen_by_LRO_01.png) | NASA/GSFC/Arizona State University | Public domain |
+| `change6.jpg` | [First Look- Chang'e 6 (LROC1374).jpg](https://commons.wikimedia.org/wiki/File:First_Look-_Chang%27e_6_(LROC1374).jpg) | NASA/GSFC/Arizona State University | Public domain |
+| `copernicus.jpg` | [Crater Copernicus on the Moon (opo9914b).jpg](https://commons.wikimedia.org/wiki/File:Crater_Copernicus_on_the_Moon_(opo9914b).jpg) | John Caldwell (York University, Ontario), Alex Storrs (STScI | Public domain |
+| `curiosity.jpg` | [PIA16239 High-Resolution Self-Portrait by Curiosity Rover Arm Camera.jpg](https://commons.wikimedia.org/wiki/File:PIA16239_High-Resolution_Self-Portrait_by_Curiosity_Rover_Arm_Camera.jpg) | NASA/JPL-Caltech/Malin Space Science Systems Derivative work | Public domain |
+| `dokdo.jpg` | [Dokdo Island.jpg](https://commons.wikimedia.org/wiki/File:Dokdo_Island.jpg) | Morales9199 | CC BY-SA 3.0 |
+| `giotto.jpg` | [Comet Halley close up-cropped.jpg](https://commons.wikimedia.org/wiki/File:Comet_Halley_close_up-cropped.jpg) | ESA/MPS | CC BY-SA 3.0 igo |
+| `huygens.jpg` | [Huygens surface color.jpg](https://commons.wikimedia.org/wiki/File:Huygens_surface_color.jpg) | ESA/NASA/JPL/University of Arizona | Public domain |
+| `imbrium.jpg` | [Mare Imbrium (LRO).png](https://commons.wikimedia.org/wiki/File:Mare_Imbrium_(LRO).png) | NASA (image by Lunar Reconnaissance Orbiter) | Public domain |
+| `insight.jpg` | [PIA25287-InSights Final Selfie main.png](https://commons.wikimedia.org/wiki/File:PIA25287-InSights_Final_Selfie_main.png) | NASA/JPL-Caltech | Public domain |
+| `luna16.jpg` | [Luna 16 descent stage.png](https://commons.wikimedia.org/wiki/File:Luna_16_descent_stage.png) | NASA/GSFC/Arizona State University | Public domain |
+| `luna2.jpg` | [Luna 1 - 2 Spacecraft.png](https://commons.wikimedia.org/wiki/File:Luna_1_-_2_Spacecraft.png) | NASA/NSSDCA (public domain) | Public domain |
+| `luna24.jpg` | [Luna24 rev fig.png](https://commons.wikimedia.org/wiki/File:Luna24_rev_fig.png) | LRO | Public domain |
+| `luna9.jpg` | [First Photo from the Surface of the Moon.jpg](https://commons.wikimedia.org/wiki/File:First_Photo_from_the_Surface_of_the_Moon.jpg) | "Image Credit: National Space Science Data Center" (NASA, US | Public domain |
+| `lunokhod1.jpg` | [Lunokhod 1 Revisited (LROC402 - M175502049R LR1 thumb).png](https://commons.wikimedia.org/wiki/File:Lunokhod_1_Revisited_(LROC402_-_M175502049R_LR1_thumb).png) | NASA/GSFC/Arizona State University | Public domain |
+| `lunokhod2.jpg` | [LRO Lunokhod 2.jpg](https://commons.wikimedia.org/wiki/File:LRO_Lunokhod_2.jpg) | Lunar Reconnaissance Orbiter, NASA | Public domain |
+| `mars3.jpg` | [Mars3 lander2 vsm.jpg](https://commons.wikimedia.org/wiki/File:Mars3_lander2_vsm.jpg) | NASA | Public domain |
+| `moscoviense.jpg` | [Mare Moscoviense 5124 med.jpg](https://commons.wikimedia.org/wiki/File:Mare_Moscoviense_5124_med.jpg) | NASA | Public domain |
+| `newHorizons.jpg` | [Global LORRI mosaic of Pluto in true colour.jpg](https://commons.wikimedia.org/wiki/File:Global_LORRI_mosaic_of_Pluto_in_true_colour.jpg) | NASA/JHUAPL/SwRI | Public domain |
+| `odysseus.jpg` | [LRO Odysseus.jpg](https://commons.wikimedia.org/wiki/File:LRO_Odysseus.jpg) | NASA | Public domain |
+| `opportunity.jpg` | [PIA07372-MarsOpportunityRover-SelfPortrait-20041220-crop-rotate-sm.jpg](https://commons.wikimedia.org/wiki/File:PIA07372-MarsOpportunityRover-SelfPortrait-20041220-crop-rotate-sm.jpg) | NASA/JPL/Cornell | Public domain |
+| `pathfinder.jpg` | [Yogi Rock.jpg](https://commons.wikimedia.org/wiki/File:Yogi_Rock.jpg) | NASA | Public domain |
+| `perseverance.jpg` | [Mars 2020 selfie containing both perseverance rover and ingenuity.gif](https://commons.wikimedia.org/wiki/File:Mars_2020_selfie_containing_both_perseverance_rover_and_ingenuity.gif) | NASA | Public domain |
+| `phoenix.jpg` | [PIA10903- "Dodo-Goldilocks" Trench.jpg](https://commons.wikimedia.org/wiki/File:PIA10903-_%22Dodo-Goldilocks%22_Trench.jpg) | NASA/JPL-Caltech/University of Arizona/Texas A&amp;M Univers | Public domain |
+| `rosetta.jpg` | [Comet 67P on 19 September 2014 NavCam mosaic.jpg](https://commons.wikimedia.org/wiki/File:Comet_67P_on_19_September_2014_NavCam_mosaic.jpg) | ESA/Rosetta/NAVCAM, CC BY-SA IGO 3.0 | CC BY-SA 3.0 igo |
+| `shackleton.jpg` | [Shackleton Crater.jpg](https://commons.wikimedia.org/wiki/File:Shackleton_Crater.jpg) | LROC (Lunar Reconnaissance Orbiter) and ShadowCam teams with | Public domain |
+| `slim.jpg` | [SLIM landing site.jpg](https://commons.wikimedia.org/wiki/File:SLIM_landing_site.jpg) | NASA, PM3 | Public domain |
+| `spirit.jpg` | [PIA04181-Spirit Rover-Vista from Husband Hill.png](https://commons.wikimedia.org/wiki/File:PIA04181-Spirit_Rover-Vista_from_Husband_Hill.png) | NASA | Public domain |
+| `straightWall.jpg` | [Rupes Recta (LROC287 - recta thumb2).png](https://commons.wikimedia.org/wiki/File:Rupes_Recta_(LROC287_-_recta_thumb2).png) | NASA/GSFC/Arizona State University | Public domain |
+| `surveyor1.jpg` | [Surveyor 1 shadow lunarsurface.jpg](https://commons.wikimedia.org/wiki/File:Surveyor_1_shadow_lunarsurface.jpg) | NASA/JPL | Public domain |
+| `surveyor7.jpg` | [Tycho Crater Panorama.jpg](https://commons.wikimedia.org/wiki/File:Tycho_Crater_Panorama.jpg) | Courtesy NASA/JPL-Caltech | Public domain |
+| `tranquillitatis.jpg` | [Mare Tranquillitatis.jpg](https://commons.wikimedia.org/wiki/File:Mare_Tranquillitatis.jpg) | http://lunar.arc.nasa.gov/science/atlas/mare/mtranquillitati | Public domain |
+| `tsiolkovskiy.jpg` | [Tsiolkovskiy crater Apollo 15.jpg](https://commons.wikimedia.org/wiki/File:Tsiolkovskiy_crater_Apollo_15.jpg) | NASA | Public domain |
+| `tycho.jpg` | [LRO WAC Tycho crater mosaic.jpg](https://commons.wikimedia.org/wiki/File:LRO_WAC_Tycho_crater_mosaic.jpg) | NASA/GSFC/Arizona State University | Public domain |
+| `viking1.jpg` | [First Mars Surface Photo (9467449402).jpg](https://commons.wikimedia.org/wiki/File:First_Mars_Surface_Photo_(9467449402).jpg) | NASA on The Commons | No restrictions |
+| `viking2.jpg` | [Ice on Mars Again - GPN-2000-001706.jpg](https://commons.wikimedia.org/wiki/File:Ice_on_Mars_Again_-_GPN-2000-001706.jpg) | NASA | Public domain |
+| `voyager1.jpg` | [Voyager spacecraft.jpg](https://commons.wikimedia.org/wiki/File:Voyager_spacecraft.jpg) | NASA/JPL | Public domain |
+| `zhurong.jpg` | [Tianwen-1 Lander and Zhurong Rover in Southern Utopia Planitia.jpg](https://commons.wikimedia.org/wiki/File:Tianwen-1_Lander_and_Zhurong_Rover_in_Southern_Utopia_Planitia.jpg) | NASA/JPL/UArizona | Public domain |
+
+CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수 있고, 고친 것은 같은 조건으로 내야 한다. 이 저장소의 MIT 라이선스는 이 사진들에 미치지 않는다.
+
 ## d3-celestial 라이선스 (BSD 3-Clause)
 
 Copyright (c) 2015, Olaf Frohn. All rights reserved.

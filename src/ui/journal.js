@@ -14,7 +14,7 @@ function hasFinalRieulOrNone(word) {
 const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {} }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -108,6 +108,17 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const line = document.createElement('span');
       line.textContent = done ? story.text : story.hint;
       li.append(title, line);
+      // A place already visited opens its card again: the photograph and the longer telling.
+      if (done && onDetail) {
+        const more = document.createElement('button');
+        more.textContent = '자세히';
+        more.setAttribute('aria-label', `${story.name} 자세히`);
+        more.addEventListener('click', () => {
+          dialog.close();
+          onDetail(story.id);
+        });
+        li.append(more);
+      }
       // Only places on a surface have somewhere to appear.
       if (done && story.type === 'surface') li.append(jumpButton(story.id, story.name));
       list.append(li);

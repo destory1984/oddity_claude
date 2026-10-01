@@ -1211,3 +1211,68 @@ body.touch #reverseButton,body.touch #flyButton,body.touch #brake {
   vertical-align:middle;
   image-rendering:pixelated;
 }
+
+/* The card at a story place: a photograph and the longer telling. */
+#storyCard {
+  width:min(600px,92vw);
+  max-height:90vh;
+  overflow-y:auto;
+}
+
+#storyCardYear {
+  font-size:12px;
+  letter-spacing:.08em;
+  color:#ffdfa6;
+}
+
+#storyCard h1 {
+  margin:4px 0 2px;
+}
+
+#storyCardEn {
+  display:block;
+  color:#7f97ad;
+  font-size:12px;
+  margin-bottom:14px;
+}
+
+#storyCardFigure {
+  margin:0 0 14px;
+}
+
+#storyCardFigure[hidden] {
+  display:none;
+}
+
+#storyCardPhoto {
+  display:block;
+  max-width:100%;
+  max-height:46vh;
+  margin:0 auto;
+  border-radius:8px;
+  background:#02070d;
+}
+
+#storyCardFigure figcaption {
+  margin-top:8px;
+  font-size:12px;
+  line-height:1.6;
+  color:#b6cbe0;
+}
+
+#storyCardCredit {
+  display:block;
+  color:#7f97ad;
+  font-size:11px;
+}
+
+#storyCardText,
+#storyCardFigure figcaption {
+  word-break:keep-all;
+}
+
+#storyCardText {
+  font-size:14px;
+  line-height:1.9;
+  color:#dbe8f5;
+}

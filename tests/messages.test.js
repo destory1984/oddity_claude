@@ -81,6 +81,8 @@ test('docking messages name the craft with the right particle', () => {
   assert.equal(eventMessage({ type: 'undocked', name: '보이저 1호' }), '보이저 1호와 도킹을 풀었습니다.');
   assert.equal(eventMessage({ type: 'docking', name: '허블 우주망원경' }), '허블 우주망원경에 도킹 중입니다. 0에 맞춰 붙습니다.');
   assert.equal(eventMessage({ type: 'dockAborted', name: '허블 우주망원경' }), '허블 우주망원경 도킹을 그만두었습니다.');
+  assert.equal(eventMessage({ type: 'dockRefused', name: '달 정찰 궤도선' }), '달 정찰 궤도선은 지표면과 너무 가까워 도킹할 수 없습니다.');
+  assert.equal(eventMessage({ type: 'dockRefused', name: '다누리' }), '다누리는 지표면과 너무 가까워 도킹할 수 없습니다.');
 });
 
 test('distances read in km, then in 만 and 억 as they grow', () => {

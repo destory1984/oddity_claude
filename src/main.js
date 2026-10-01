@@ -31,7 +31,7 @@ import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
 import {
-  dockable, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
+  dockable, tooLowToDock, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
   releaseDrift,
 } from './core/dock.js';
 
@@ -213,6 +213,10 @@ async function init() {
   }
 
   function dock(target) {
+    if (tooLowToDock(target, bodies)) {
+      toast.show(eventMessage({ type: 'dockRefused', name: target.name }));
+      return;
+    }
     docked = startDocking(state.position, target);
     rideDrift = [0, 0, 0];
     showCraftCard(target);

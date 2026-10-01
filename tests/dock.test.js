@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  DOCK_RANGE_KM, DOCK_GAP_KM, DOCK_SECONDS, dockable, dockOffset, dockedState, wantsToLeave, rideSpeed,
+  DOCK_RANGE_KM, DOCK_GAP_KM, DOCK_MIN_ALTITUDE_KM, tooLowToDock, DOCK_SECONDS, dockable, dockOffset, dockedState, wantsToLeave, rideSpeed,
   startDocking, dockingOffset, countsBetween, isDocked, latchJolt, ZERO_WORD_S, JOLT_SECONDS, releaseDrift,
 } from '../src/core/dock.js';
 import { bodiesAt } from '../src/core/bodies.js';
@@ -18,6 +18,17 @@ test('a craft can be docked with from within 10,000 km, not from farther', () =>
   assert.equal(dockable([1000, 2000, 12900], [hubble]).id, 'hubble');
   assert.equal(dockable([1000, 2000, 13001], [hubble]), null);
   assert.equal(dockable([0, 0, 0], []), null);
+});
+
+test('a craft less than 200 km above a surface cannot be docked with: LRO and Danuri, not the others', () => {
+  assert.equal(DOCK_MIN_ALTITUDE_KM, 200);
+  const bodies = bodiesAt(0);
+  const low = craftAt(0, bodies).filter((c) => tooLowToDock(c, bodies)).map((c) => c.id);
+  assert.deepEqual(low, ['danuri', 'lro']);
+  const moon = bodies.find((b) => b.id === 'moon');
+  const at = (km) => ({ id: 'x', position: [moon.position[0], moon.position[1] + moon.radiusKm + km, moon.position[2]] });
+  assert.equal(tooLowToDock(at(199), bodies), true);
+  assert.equal(tooLowToDock(at(201), bodies), false);
 });
 
 test('with two craft in range the nearer one is offered', () => {

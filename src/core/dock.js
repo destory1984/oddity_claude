@@ -16,6 +16,15 @@ export const ZERO_WORD_S = 0.6;
 // The glide from where the traveler was to the docking spot.
 export const DOCK_SECONDS = COUNT_STARTS_S + COUNT_FROM + ZERO_WORD_S;
 
+// A craft flying lower than this over a surface cannot be docked with: sitting 60 km
+// off it, the traveler would be skimming the ground (LRO and Danuri over the Moon).
+export const DOCK_MIN_ALTITUDE_KM = 200;
+
+// True when the craft is too close to the ground to dock with.
+export function tooLowToDock(craft, bodies) {
+  return nearestSurface(craft.position, bodies).distance < DOCK_MIN_ALTITUDE_KM;
+}
+
 const gap = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
 
 // The nearest craft within docking range, or null.

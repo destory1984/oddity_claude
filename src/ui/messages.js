@@ -40,6 +40,8 @@ export function eventMessage(event, bodies = []) {
       return `이야기 장소: ${event.name}\n${event.text}`;
     case 'docking':
       return `${event.name}에 도킹 중입니다. 0에 맞춰 붙습니다.`;
+    case 'dockRefused':
+      return `${event.name}${hasFinalConsonant(event.name) ? '은' : '는'} 지표면과 너무 가까워 도킹할 수 없습니다.`;
     case 'dockAborted':
       return `${event.name} 도킹을 그만두었습니다.`;
     case 'docked':

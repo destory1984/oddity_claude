@@ -208,7 +208,7 @@ const LOOKS = {
   },
   charon: {
     shader: 'textured', map: 'charon.jpg', saturation: 1, tint: [0.92, 0.9, 0.88], base: [0.45, 0.44, 0.43],
-    mapWeight: 1, haze: 0, detail: 0.1, dayS: 6.387 * 86400,
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: -6.387 * 86400,
   },
   // The comet's nucleus reflects 4% of sunlight: nearly black.
   halley: { shader: 'rocky', colorA: [0.05, 0.05, 0.05], colorB: [0.16, 0.15, 0.14], cap: 0, haze: 0, contrast: 0.6, craters: 0.5, dayS: 2.2 * 86400 },

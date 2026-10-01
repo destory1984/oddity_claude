@@ -1,10 +1,12 @@
-import { AU_KM, DISTANCE_COMPRESSION } from './bodies.js';
+import { AU_KM, BODY_DATA, compressedCenterDistance } from './bodies.js';
 
 // The asteroid belt: scenery, not bodies. Nothing here is landed on, logged or hit.
-// Distances are game km (after the 1/100 squeeze), measured from the Sun's centre.
+// Distances are game km from the Sun's centre, squeezed exactly as the planets are
+// (the Sun's radius is kept, the gap beyond it shrinks to 1/100), so Ceres is inside.
+const SUN_RADIUS_KM = BODY_DATA.find((d) => d.kind === 'star').radiusKm;
 export const BELT = {
-  innerKm: (2.2 * AU_KM) / DISTANCE_COMPRESSION,
-  outerKm: (3.2 * AU_KM) / DISTANCE_COMPRESSION,
+  innerKm: compressedCenterDistance(2.2 * AU_KM, SUN_RADIUS_KM, 0),
+  outerKm: compressedCenterDistance(3.2 * AU_KM, SUN_RADIUS_KM, 0),
   halfHeightKm: 20000,
   // Space is cut into cubes this wide; each may hold one rock. At 2,000 km the nearest
   // rocks are a couple of thousand km off, where a 150 km rock spans a few degrees.

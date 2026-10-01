@@ -5,9 +5,10 @@ import { BELT, MAX_ROCKS, inBelt, rocksNear, beltPoints } from '../src/core/belt
 const SUN = [0, 0, 0];
 const mid = (BELT.innerKm + BELT.outerKm) / 2;
 
-test('the belt spans 2.2 to 3.2 AU after the 1/100 squeeze', () => {
-  assert.ok(Math.abs(BELT.innerKm - 2.2 * 149597870.7 / 100) < 1);
-  assert.ok(Math.abs(BELT.outerKm - 3.2 * 149597870.7 / 100) < 1);
+test('the belt spans 2.2 to 3.2 AU, squeezed the way the planets are (from the surface of the Sun)', () => {
+  const squeezed = (au) => 696340 + (au * 149597870.7 - 696340) / 100;
+  assert.ok(Math.abs(BELT.innerKm - squeezed(2.2)) < 1);
+  assert.ok(Math.abs(BELT.outerKm - squeezed(3.2)) < 1);
 });
 
 test('inside and outside the belt', () => {

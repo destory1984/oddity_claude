@@ -144,14 +144,15 @@ export const BODY_DATA = [
   // degrees and stretched; that is left out).
   {
     id: 'ceres', name: '세레스', nameEn: 'Ceres', kind: 'dwarf', radiusKm: 469.7,
-    parent: 'sun', orbitKm: 2.7692 * AU_KM, periodS: 1680 * DAY_S, direction: [0.5, 0.05, 0.87],
+    parent: 'sun', orbitKm: 2.7692 * AU_KM, periodS: 1680 * DAY_S, direction: [0.5, 0.002, 0.87],
   },
   {
     id: 'pluto', name: '명왕성', nameEn: 'Pluto', kind: 'dwarf', radiusKm: 1188.3,
     parent: 'sun', orbitKm: 39.482 * AU_KM, periodS: 90560 * DAY_S, direction: [-0.71, 0.1, -0.7],
   },
   {
-    id: 'charon', name: '카론', nameEn: 'Charon', kind: 'moon', radiusKm: 606,
+    // Pluto lies on its side and spins backwards; Charon circles it the same way.
+    id: 'charon', name: '카론', nameEn: 'Charon', kind: 'moon', radiusKm: 606, retrograde: true,
     parent: 'pluto', orbitKm: 19591, periodS: 6.387 * DAY_S, direction: [0.8, 0.1, 0.6],
   },
   // Halley's Comet on its real ellipse (0.586 to 35.1 AU, backwards, tilted 18 degrees).
@@ -259,7 +260,8 @@ export function nearestSurface(position, bodies = BODIES) {
 }
 
 export function nearestLocalBody(position, bodies = BODIES) {
-  // The Sun and the planets only: with eighteen moons the label would keep flipping.
+  // Everything but moons (the Sun, planets, dwarf planets, the comet): with so many
+  // moons the label would keep flipping.
   const local = bodies.filter((body) => body.kind !== 'moon');
   const { body, distance } = nearestSurface(position, local);
   return { body, altitude: distance, label: `${body.name} 상공` };

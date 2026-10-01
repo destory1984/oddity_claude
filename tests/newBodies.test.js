@@ -2,6 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { BODIES, BODY_DATA, AU_KM, bodiesAt, bodyById, nearestLocalBody } from '../src/core/bodies.js';
 import { carryAlong, createState } from '../src/core/game.js';
+import { inBelt } from '../src/core/belt.js';
 
 const DAY = 86400;
 const sub = (a, b) => a.map((n, i) => n - b[i]);
@@ -79,4 +80,20 @@ test('the altitude label names dwarf planets and the comet', () => {
 test('only bodies on an ellipse carry their real distance from the Sun', () => {
   assert.equal(bodyById('earth').sunKm, undefined);
   assert.ok(BODY_DATA.find((d) => d.id === 'halley').ellipse);
+});
+
+test('Charon circles Pluto backwards, the way Pluto spins, so each keeps one face to the other', () => {
+  const swirl = (id, parentId, t) => {
+    const from = (time) => sub(at(time, id).position, at(time, parentId).position);
+    const a = from(t);
+    const b = from(t + 3600);
+    return a[2] * (b[0] - a[0]) - a[0] * (b[2] - a[2]);
+  };
+  assert.ok(swirl('charon', 'pluto', 0) * swirl('moon', 'earth', 0) < 0);
+});
+
+test('Ceres lives inside the asteroid belt, all the way round its orbit', () => {
+  for (const t of [0, 400 * DAY, 800 * DAY, 1200 * DAY]) {
+    assert.equal(inBelt(at(t, 'ceres').position, at(t, 'sun').position), true, `day ${t / DAY}`);
+  }
 });

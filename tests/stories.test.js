@@ -14,10 +14,10 @@ const done = (position, restingOn = null, t = 0) => {
   return completedStories({ position, restingOn, bodies, craft: craftAt(t, bodies), sites: storySitesAt(t, bodies) });
 };
 
-test('there are 41 story places, each with a name, a hint and a short story; events have a year', () => {
-  assert.equal(STORIES.length, 41);
-  assert.equal(new Set(STORIES.map((s) => s.id)).size, 41);
-  assert.equal(new Set(STORIES.map((s) => s.name)).size, 41);
+test('there are 53 story places, each with a name, a hint and a short story; events have a year', () => {
+  assert.equal(STORIES.length, 53);
+  assert.equal(new Set(STORIES.map((s) => s.id)).size, 53);
+  assert.equal(new Set(STORIES.map((s) => s.name)).size, 53);
   for (const s of STORIES) {
     assert.ok(s.name && s.nameEn && s.hint, s.id);
     assert.ok(s.year === undefined || s.year > 1900, s.id);
@@ -43,7 +43,7 @@ test('the place turns with the body: a quarter turn of spin carries +x to -z', (
 });
 
 test('the landers and rovers of the Moon and Mars: 21 on the Moon, 11 on Mars, with Apollo 11 and Viking 1 among them', () => {
-  const on = (body) => STORIES.filter((s) => s.type === 'surface' && s.body === body);
+  const on = (body) => STORIES.filter((s) => s.type === 'surface' && s.body === body && !s.landmark);
   assert.equal(on('moon').length, 22);
   assert.equal(on('mars').length, 12);
   for (const s of [...on('moon'), ...on('mars')]) {
@@ -59,7 +59,7 @@ test('the landers and rovers of the Moon and Mars: 21 on the Moon, 11 on Mars, w
   // each has a spot of its own at least 100 km from the next.
   const sites = storySitesAt(0, BODIES);
   for (const body of ['moon', 'mars']) {
-    const here = sites.filter((s) => s.parent === body);
+    const here = sites.filter((s) => s.parent === body && !s.landmark);
     for (let i = 0; i < here.length; i++) {
       for (let j = i + 1; j < here.length; j++) {
         assert.ok(Math.hypot(...sub(here[i].position, here[j].position)) > 100, `${here[i].id} ${here[j].id}`);
@@ -82,7 +82,7 @@ test("a place's label shows only from within four radii of its body's surface", 
 
 test('the places sit on the surface of their body and move as it spins', () => {
   const sites = storySitesAt(0, BODIES);
-  assert.equal(sites.length, 36);
+  assert.equal(sites.length, 48);
   assert.deepEqual(sites.slice(0, 4).map((s) => s.id), ['apollo11', 'viking1', 'huygens', 'dokdo']);
   for (const site of sites) {
     const body = bodyById(site.parent);
@@ -132,6 +132,28 @@ test('New Horizons, Giotto and Voyager 1: passing close by', () => {
   const voyager = craftAt(0, BODIES).find((c) => c.id === 'voyager1');
   assert.deepEqual(done(add(voyager.position, [0, 4000, 0])), ['voyager1']);
   assert.deepEqual(done(add(voyager.position, [0, 9000, 0])), []);
+});
+
+test('twelve famous places on the Moon itself: craters, seas and mountains, with no machine standing there', () => {
+  const marks = STORIES.filter((s) => s.landmark);
+  assert.deepEqual(marks.map((s) => s.name), [
+    '티코 분화구', '코페르니쿠스 분화구', '고요의 바다', '비의 바다', '폭풍의 대양', '남극-에이트켄 분지',
+    '섀클턴 분화구', '아펜니노 산맥', '알프스 계곡', '직선벽', '모스크바의 바다', '치올콥스키 분화구',
+  ]);
+  for (const s of marks) {
+    assert.equal(s.body, 'moon');
+    assert.equal(s.type, 'surface');
+    assert.equal(s.year, undefined);
+    assert.ok([150, 200, 300].includes(s.withinKm), s.id);
+    assert.match(s.hint, /^달 .+\((북위|남위) [0-9.]+도, (동경|서경) [0-9.]+도\) (150|200|300)km 안에 내려앉기$/, s.id);
+  }
+  const sites = storySitesAt(0, BODIES);
+  assert.equal(sites.filter((s) => s.landmark).length, 12);
+  assert.equal(sites.find((s) => s.id === 'apollo11').landmark, false);
+  // Landing in the middle of the Sea of Tranquility logs the sea, not Apollo 11 beside it.
+  assert.deepEqual(done(sites.find((s) => s.id === 'tranquillitatis').position, 'moon'), ['tranquillitatis']);
+  // Tycho and Surveyor 7 on its rim are logged together.
+  assert.deepEqual(done(sites.find((s) => s.id === 'tycho').position, 'moon').sort(), ['surveyor7', 'tycho']);
 });
 
 test('Rosetta: passing within 300 km of comet 67P', () => {

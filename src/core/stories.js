@@ -110,6 +110,29 @@ STORIES.push(
   ...MARS_LANDINGS.map((row) => landing('mars', '화성', row)),
 );
 
+// Famous places on the Moon itself: craters, seas, mountains. No machine stands there,
+// so they get a label and a story but no model (landmark: true).
+// [id, name, nameEn, latDeg, east lonDeg, withinKm, story].
+const MOON_LANDMARKS = [
+  ['tycho', '티코 분화구', 'Tycho', -43.31, -11.36, 150, '1억 800만 년 전에 생긴 지름 85km 분화구입니다. 보름달에 사방으로 뻗은 흰 빛줄기가 여기서 나옵니다.'],
+  ['copernicus', '코페르니쿠스 분화구', 'Copernicus', 9.62, -20.08, 150, '지름 93km, 깊이 3.8km의 분화구입니다. 계단처럼 층진 벽과 가운데 봉우리가 뚜렷합니다.'],
+  ['tranquillitatis', '고요의 바다', 'Mare Tranquillitatis', 8.5, 31.4, 200, '용암이 굳어 생긴 어두운 평원입니다. 1969년 사람이 처음 달에 내린 곳이 이 바다의 남서쪽입니다.'],
+  ['imbrium', '비의 바다', 'Mare Imbrium', 32.8, -15.6, 200, '39억 년 전 큰 충돌로 생긴 지름 1,100km 분지에 용암이 찬 곳입니다. 달 앞면의 둥근 바다 가운데 가장 큽니다.'],
+  ['procellarum', '폭풍의 대양', 'Oceanus Procellarum', 18.4, -57.4, 200, '달에서 가장 넓은 바다로 남북으로 2,500km가 넘습니다. 달의 바다 가운데 홀로 대양이라 불립니다.'],
+  ['aitken', '남극-에이트켄 분지', 'South Pole-Aitken', -53, -169, 300, '지름 약 2,500km, 깊이 8km로 달에서 가장 크고 오래된 충돌 분지입니다. 달 뒷면 남쪽을 거의 다 차지합니다.'],
+  ['shackleton', '섀클턴 분화구', 'Shackleton', -89.67, 129.78, 150, '달 남극에 있는 지름 21km 분화구입니다. 바닥에 햇빛이 한 번도 들지 않아 얼음이 있을 것으로 봅니다.'],
+  ['apennines', '아펜니노 산맥', 'Montes Apenninus', 18.9, -3.7, 150, '비의 바다 가장자리를 따라 600km 뻗은 산맥입니다. 가장 높은 하위헌스산은 5,500m입니다.'],
+  ['alpineValley', '알프스 계곡', 'Vallis Alpes', 48.5, 3.2, 150, '알프스 산맥을 가로지르는 길이 166km, 폭 10km의 곧은 골짜기입니다.'],
+  ['straightWall', '직선벽', 'Rupes Recta', -21.8, -7.8, 150, '길이 110km, 높이 약 300m의 곧은 단층 절벽입니다. 해가 낮게 비치면 검은 선으로 보입니다.'],
+  ['moscoviense', '모스크바의 바다', 'Mare Moscoviense', 27.3, 147.9, 200, '달 뒷면에 드문 바다입니다. 1959년 루나 3호가 처음 찍은 뒷면 사진에서 발견되어 이름이 붙었습니다.'],
+  ['tsiolkovskiy', '치올콥스키 분화구', 'Tsiolkovskiy', -20.4, 129.1, 150, '달 뒷면에서 가장 눈에 띄는 분화구입니다. 지름 185km 바닥에 검은 용암이 차 있고 가운데 봉우리가 솟아 있습니다.'],
+];
+STORIES.push(...MOON_LANDMARKS.map(([id, name, nameEn, latDeg, lonDeg, withinKm, text]) => ({
+  id, name, nameEn, type: 'surface', body: 'moon', latDeg, lonDeg, withinKm, landmark: true,
+  hint: `달 ${name}(${degrees(latDeg, '북위', '남위')}, ${degrees(lonDeg, '동경', '서경')}) ${withinKm}km 안에 내려앉기`,
+  text,
+})));
+
 // Rosetta flew beside 67P for two years and set Philae down on it.
 STORIES.push({
   id: 'rosetta', name: '로제타와 필레', nameEn: 'Rosetta', year: 2014,
@@ -136,7 +159,7 @@ export function storySitesAt(timeS, bodies) {
     const start = s.body === 'earth' ? EARTH_START_SPIN : 0;
     const up = surfaceDirection(s.latDeg, s.lonDeg, spinAngle(SPIN_DAY_S[s.body], timeS, start));
     return {
-      id: s.id, name: s.name, nameEn: s.nameEn, kind: 'site', parent: s.body, radiusKm: 0,
+      id: s.id, name: s.name, nameEn: s.nameEn, kind: 'site', parent: s.body, radiusKm: 0, landmark: Boolean(s.landmark),
       position: body.position.map((n, i) => n + up[i] * body.radiusKm),
     };
   });

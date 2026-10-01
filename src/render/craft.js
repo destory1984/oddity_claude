@@ -674,12 +674,13 @@ const SITE_MIN_KM = 6;
 const SITE_MAX_KM = 30;
 
 // siteList: story places on a surface (core/stories.js storySitesAt). Only those on the
-// Moon, Mars and Titan get a model: Dokdo is an island, not a machine.
+// Moon, Mars and Titan get a model: Dokdo is an island, not a machine, and neither are
+// the Moon's craters and seas.
 export function createSiteModels(scene, siteList) {
   const mats = craftMaterials(scene);
   const nodes = new Map();
   for (const site of siteList) {
-    if (!['moon', 'mars', 'titan'].includes(site.parent)) continue;
+    if (!['moon', 'mars', 'titan'].includes(site.parent) || site.landmark) continue;
     const [build, options] = SITE_MODEL[site.id] ?? [lander, {}];
     const node = build(scene, `site_${site.id}`, mats, options);
     node.rotationQuaternion = new Quaternion();

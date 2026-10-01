@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   DOCK_RANGE_KM, DOCK_GAP_KM, DOCK_SECONDS, dockable, dockOffset, dockedState, wantsToLeave, rideSpeed,
-  startDocking, dockingOffset, countsBetween, isDocked,
+  startDocking, dockingOffset, countsBetween, isDocked, latchJolt, LATCH_AFTER_S, JOLT_SECONDS,
 } from '../src/core/dock.js';
 import { bodiesAt } from '../src/core/bodies.js';
 import { craftAt } from '../src/core/craft.js';
@@ -115,4 +115,27 @@ test('docking from inside the docking distance eases outward to it', () => {
   const dock = startDocking([1000, 2000, 3010], hubble);
   near(Math.hypot(...dockingOffset(dock)), 10);
   near(Math.hypot(...dockingOffset({ ...dock, elapsed: DOCK_SECONDS })), 60, 1e-9);
+});
+
+test('the latch closes 2.5 seconds after the zero, and jolts the craft for a moment', () => {
+  assert.equal(LATCH_AFTER_S, 2.5);
+  const at = (afterLatch) => latchJolt({ elapsed: DOCK_SECONDS + LATCH_AFTER_S + afterLatch });
+  // Nothing before the latch, and it starts from rest.
+  assert.deepEqual(latchJolt({ elapsed: DOCK_SECONDS + 1 }), { push: 0, tilt: 0 });
+  assert.deepEqual(at(0), { push: 0, tilt: 0 });
+  // A quick shove away within the first tenth of a second...
+  assert.ok(at(0.08).push > 0.04, `${at(0.08).push}`);
+  // ...never more than a tenth of the craft's size, or four degrees of tilt...
+  let swings = 0;
+  let last = 0;
+  for (let t = 0; t <= JOLT_SECONDS; t += 1 / 120) {
+    const { push, tilt } = at(t);
+    assert.ok(Math.abs(push) <= 0.1 && Math.abs(tilt) <= 0.07);
+    if (push * last < 0) swings += 1;
+    if (push !== 0) last = push;
+  }
+  // ...swinging back and forth a few times as it dies away, then still.
+  assert.ok(swings >= 3, `${swings}`);
+  assert.ok(Math.abs(at(1).push) < 0.01);
+  assert.deepEqual(at(JOLT_SECONDS + 0.01), { push: 0, tilt: 0 });
 });

@@ -2,6 +2,7 @@
 // oscillators and a noise buffer, so nothing is downloaded and nothing is licensed.
 
 import { BAR_S, barPlan } from '../core/music.js';
+import { LATCH_AFTER_S } from '../core/dock.js';
 
 const MUTE_KEY = 'oddity.muted';
 const MUSIC_KEY = 'oddity.music';
@@ -207,7 +208,7 @@ export function createSound() {
     // half a second), then: a low clunk, and pshhh, the seal filling with air, bright at
     // first and sinking as it fades; two rising bells close it.
     dock: () => {
-      const after = 2.5;
+      const after = LATCH_AFTER_S;
       noise({ start: after, length: 0.16, volume: 0.4, type: 'lowpass', freq: 700, to: 180 });
       tone({ freq: 98, start: after, length: 0.4, volume: 0.22 });
       noise({ start: after + 0.08, length: 1.6, volume: 0.32, type: 'highpass', freq: 4200, to: 1400 });

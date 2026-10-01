@@ -65,6 +65,21 @@ export function countsBetween(before, after) {
   return latest === null ? [] : [latest];
 }
 
+// The latch closes this long after the zero: the voice says "zero", a breath, then the
+// clunk and the hiss (ui/sound.js) and the jolt below.
+export const LATCH_AFTER_S = 2.5;
+export const JOLT_SECONDS = 1.2;
+
+// The knock the craft takes as the latch closes: shoved away from the traveler and
+// tipped a little, swinging back and forth as it dies away. push is a share of the
+// craft's shown size, tilt is in radians.
+export function latchJolt(dock) {
+  const t = dock.elapsed - DOCK_SECONDS - LATCH_AFTER_S;
+  if (!(t > 0) || t > JOLT_SECONDS) return { push: 0, tilt: 0 };
+  const fade = Math.exp(-4.5 * t);
+  return { push: 0.09 * fade * Math.sin(20 * t), tilt: 0.06 * fade * Math.sin(27 * t) };
+}
+
 // True once the glide is over and the traveler is held at the craft.
 export function isDocked(dock) {
   return dock.elapsed >= DOCK_SECONDS;

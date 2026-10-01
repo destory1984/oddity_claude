@@ -291,7 +291,8 @@ export function createCraft(scene, craftList) {
   const nodes = new Map(craftList.map((c) => [c.id, build[c.id](scene, c.id, mats)]));
 
   // craft: this frame's positions (km); position: the traveler (km); sunPosition (km).
-  function update(craft, position, sunPosition) {
+  // jolt: { id, push, tilt } for the craft being docked with (core/dock.js latchJolt).
+  function update(craft, position, sunPosition, jolt = null) {
     for (const c of craft) {
       const node = nodes.get(c.id);
       const rel = c.position.map((n, i) => (n - position[i]) / KM_PER_UNIT);
@@ -303,6 +304,15 @@ export function createCraft(scene, craftList) {
       node.scaling.setAll(sizeKm / KM_PER_UNIT);
       node.position.set(rel[0], rel[1], rel[2]);
       node.lookAt(new Vector3(...sunPosition.map((n, i) => (n - position[i]) / KM_PER_UNIT)));
+      if (jolt?.id === c.id && (jolt.push || jolt.tilt)) {
+        // Knocked sideways as the traveler sees it (a shove along the line of sight
+        // would not show), a little away, and tipped about its own sunward axis.
+        const away = new Vector3(rel[0], rel[1], rel[2]).normalize();
+        const across = Vector3.Cross(away, Vector3.Up()).normalize();
+        const reach = (jolt.push * sizeKm) / KM_PER_UNIT;
+        node.position.addInPlace(across.scale(reach)).addInPlace(away.scale(reach * 0.5));
+        node.rotate(Vector3.Forward(), jolt.tilt);
+      }
     }
   }
 

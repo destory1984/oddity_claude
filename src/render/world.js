@@ -62,7 +62,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   let elapsed = 0;
 
   // now: where every body is this frame (they orbit); defaults to the starting layout.
-  function update({ bodies: now = bodies, craft = [], sites = [], position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn }) {
+  function update({ bodies: now = bodies, craft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn }) {
     elapsed += dt;
     // Draw from a point just above the ground when standing on it, and pull the near
     // plane in as the ground gets close; otherwise the planet under the feet is cut away
@@ -107,7 +107,7 @@ export async function createWorld(canvas, bodies = BODIES) {
       directions[c.id] = rel.map((n) => n / length);
       distances[c.id] = length * KM_PER_UNIT;
     }
-    craftMeshes.update(craft, position, sunNow.position);
+    craftMeshes.update(craft, position, sunNow.position, jolt);
     craftSun.direction = new Vector3(...normalize(sunRel)).scale(-1);
     const halley = now.find((b) => b.kind === 'comet');
     if (halley) comet.update(halley, position, sunNow.position);

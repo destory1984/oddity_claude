@@ -31,7 +31,7 @@ import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
 import {
-  dockable, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked,
+  dockable, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
 } from './core/dock.js';
 
 const $ = (id) => document.getElementById(id);
@@ -465,6 +465,7 @@ async function init() {
       bodies,
       craft,
       sites,
+      jolt: docked ? { id: docked.id, ...latchJolt(docked) } : null,
       position: state.position,
       orientation: state.orientation,
       dt,

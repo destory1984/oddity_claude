@@ -14,11 +14,12 @@ const done = (position, restingOn = null, t = 0) => {
   return completedStories({ position, restingOn, bodies, craft: craftAt(t, bodies), sites: storySitesAt(t, bodies) });
 };
 
-test('there are seven story places, each with a name, a year, a hint and a short story', () => {
-  assert.equal(STORIES.length, 7);
-  assert.equal(new Set(STORIES.map((s) => s.id)).size, 7);
+test('there are eight story places, each with a name, a hint and a short story; events have a year', () => {
+  assert.equal(STORIES.length, 8);
+  assert.equal(new Set(STORIES.map((s) => s.id)).size, 8);
   for (const s of STORIES) {
-    assert.ok(s.name && s.nameEn && s.hint && s.year > 1900, s.id);
+    assert.ok(s.name && s.nameEn && s.hint, s.id);
+    assert.ok(s.year === undefined || s.year > 1900, s.id);
     assert.ok(s.text.length <= 90 && s.text.endsWith('.') && !s.text.includes('~'), `${s.id}: ${s.text.length}`);
   }
 });
@@ -40,9 +41,9 @@ test('the place turns with the body: a quarter turn of spin carries +x to -z', (
   near(spinAngle(100, 25), -Math.PI / 2, 1e-12);
 });
 
-test('three places sit on the surface of their body and move as it spins', () => {
+test('four places sit on the surface of their body and move as it spins', () => {
   const sites = storySitesAt(0, BODIES);
-  assert.deepEqual(sites.map((s) => s.id), ['apollo11', 'viking1', 'huygens']);
+  assert.deepEqual(sites.map((s) => s.id), ['apollo11', 'viking1', 'huygens', 'dokdo']);
   for (const site of sites) {
     const body = bodyById(site.parent);
     near(Math.hypot(...sub(site.position, body.position)), body.radiusKm, 1e-6);
@@ -99,4 +100,24 @@ test('a place on the far side of its body is hidden from the traveler', () => {
   const up = unit(sub(site.position, moon.position));
   assert.equal(siteHidden(site, moon, add(site.position, up, 5000)), false);
   assert.equal(siteHidden(site, moon, add(moon.position, up, -8000)), true);
+});
+
+test('Dokdo lies in the East Sea and turns with Earth from its starting spin', () => {
+  const dokdo = storySitesAt(0, BODIES).find((s) => s.id === 'dokdo');
+  assert.equal(dokdo.parent, 'earth');
+  // Earth starts turned 1.35 rad (render/planets.js), unlike the other bodies.
+  const earth = bodyById('earth');
+  const expected = surfaceDirection(37.2417, 131.8667, spinAngle(86164, 0, 1.35));
+  near(Math.hypot(...sub(sub(dokdo.position, earth.position), expected.map((n) => n * earth.radiusKm))), 0, 1e-6);
+  near(spinAngle(86164, 86164 / 4, 1.35), 1.35 - Math.PI / 2, 1e-12);
+});
+
+test('landing on Dokdo counts; landing 100 km away does not', () => {
+  const dokdo = storySitesAt(0, BODIES).find((s) => s.id === 'dokdo');
+  assert.deepEqual(done(dokdo.position, 'earth'), ['dokdo']);
+  const earth = bodyById('earth');
+  const up = unit(sub(dokdo.position, earth.position));
+  const side = unit([up[2], 0, -up[0]]);
+  const away = add(earth.position, unit(add(up, side, 100 / earth.radiusKm)), earth.radiusKm);
+  assert.deepEqual(done(away, 'earth'), []);
 });

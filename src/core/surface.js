@@ -8,12 +8,17 @@ export const SPIN_DAY_S = {
   moon: 27.3217 * 86400,
   mars: 88643,
   titan: 1377648,
+  earth: 86164,
 };
 
+// Earth alone starts part-way through its turn, so the opening view shows it half lit
+// with the Pacific in front.
+export const EARTH_START_SPIN = 1.35;
+
 // How far a body has turned at game time timeS: eastward, so the angle is negative
-// (the same as sphere.rotation.y in render/planets.js).
-export function spinAngle(dayS, timeS) {
-  return -(timeS * 2 * Math.PI) / dayS;
+// (the same as sphere.rotation.y in render/planets.js). startRad is where it began.
+export function spinAngle(dayS, timeS, startRad = 0) {
+  return startRad - (timeS * 2 * Math.PI) / dayS;
 }
 
 // Unit vector from a body's centre to the place at this latitude and east longitude,

@@ -66,7 +66,7 @@ test('summary counts against every body and mission', () => {
   });
   const withStories = summarize({ ...progress, stories: ['giotto'] }, BODIES, MISSIONS, STORIES);
   assert.equal(withStories.stories, 1);
-  assert.equal(withStories.storyTotal, 7);
+  assert.equal(withStories.storyTotal, 8);
 });
 
 test('sanitizeProgress drops junk from storage and keeps known ids', () => {
@@ -100,8 +100,8 @@ test('a log saved when there were 75 slots still reads, as 75 of 85', () => {
   const summary = summarize(read, BODIES, MISSIONS);
   assert.deepEqual(score(summary), { done: 75, total: 85 });
   assert.equal(isComplete(summary), false);
-  // With the seven story places the same log is 75 of 92.
-  assert.deepEqual(score(summarize(sanitizeProgress(old, BODIES, MISSIONS, STORIES), BODIES, MISSIONS, STORIES)), { done: 75, total: 92 });
+  // With the eight story places the same log is 75 of 93.
+  assert.deepEqual(score(summarize(sanitizeProgress(old, BODIES, MISSIONS, STORIES), BODIES, MISSIONS, STORIES)), { done: 75, total: 93 });
 });
 
 test('recordStories keeps the first visit only', () => {

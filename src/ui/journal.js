@@ -83,7 +83,7 @@ export function createJournal({ bodies, missions, stories = [], onGo, onReset, o
       const li = document.createElement('li');
       li.className = done ? 'done' : '';
       const title = document.createElement('strong');
-      title.textContent = `${done ? '✓' : '○'} ${story.name} (${story.year}년)`;
+      title.textContent = `${done ? '✓' : '○'} ${story.name}${story.year ? ` (${story.year}년)` : ''}`;
       const line = document.createElement('span');
       line.textContent = done ? story.text : story.hint;
       li.append(title, line);

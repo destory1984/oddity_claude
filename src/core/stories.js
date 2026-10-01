@@ -1,4 +1,4 @@
-import { SPIN_DAY_S, spinAngle, surfaceDirection } from './surface.js';
+import { SPIN_DAY_S, EARTH_START_SPIN, spinAngle, surfaceDirection } from './surface.js';
 
 // Story places: spots where something real happened. Reaching one logs it in the
 // journal and tells its story. Each is added by hand.
@@ -48,6 +48,14 @@ export const STORIES = [
     hint: '보이저 1호 5,000km 안까지 따라가기',
     text: '1977년 떠난 보이저 1호는 2012년 8월 태양권을 벗어나 별 사이 공간에 들어섰습니다.',
   },
+  // Dokdo, in the East Sea. The map shows 10 km per pixel, so the island cannot be
+  // seen; the label marks where it is.
+  {
+    id: 'dokdo', name: '독도', nameEn: 'Dokdo',
+    type: 'surface', body: 'earth', latDeg: 37.2417, lonDeg: 131.8667, withinKm: 40,
+    hint: '지구 동해의 독도(북위 37.2도, 동경 131.9도) 40km 안에 내려앉기',
+    text: '대한민국의 가장 동쪽 섬입니다. 울릉도에서 87.4km 떨어져 있고, 동도와 서도와 89개의 바위섬으로 이루어져 있습니다.',
+  },
 ];
 
 const gap = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
@@ -57,7 +65,8 @@ const gap = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
 export function storySitesAt(timeS, bodies) {
   return STORIES.filter((s) => s.type === 'surface').map((s) => {
     const body = bodies.find((b) => b.id === s.body);
-    const up = surfaceDirection(s.latDeg, s.lonDeg, spinAngle(SPIN_DAY_S[s.body], timeS));
+    const start = s.body === 'earth' ? EARTH_START_SPIN : 0;
+    const up = surfaceDirection(s.latDeg, s.lonDeg, spinAngle(SPIN_DAY_S[s.body], timeS, start));
     return {
       id: s.id, name: s.name, nameEn: s.nameEn, kind: 'site', parent: s.body, radiusKm: 0,
       position: body.position.map((n, i) => n + up[i] * body.radiusKm),

@@ -1,7 +1,9 @@
+#extension GL_OES_standard_derivatives : enable
 precision highp float;
 varying vec3 n;
 varying vec3 wp;
 varying vec2 vUV;
+varying vec3 lp;
 uniform vec3 sun;
 uniform sampler2D map;
 uniform vec3 tint;
@@ -10,12 +12,71 @@ uniform float saturation;
 uniform float mapWeight;
 uniform float haze;
 uniform float detail;
+// Close-up ground for airless, cratered worlds. craters: 0 (none: clouds, ice, gas) to 1
+// (the Moon). close: the camera's height above the ground in body radii. radius: the
+// body's radius in scene units.
+uniform float craters;
+uniform float close;
+uniform float radius;
 // Ring plane normal (zero when the planet has no rings) and the ring radii in planet radii.
 uniform vec3 ringNormal;
 uniform float ringInner;
 uniform float ringOuter;
 #include<noise>
 #include<rings>
+
+vec3 hash3(vec3 p) {
+  p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
+  return fract(sin(p) * 43758.5453);
+}
+
+// Bowl-shaped craters with raised rims, scattered in 3D so there is no seam. Two of
+// every five cells stay empty, so the ground is not evenly pocked.
+// x: the ground's height in cells (a bowl is a fifth as deep as it is wide, as real
+// simple craters are); y: a shade for the colour (rims pale, floors a little darker).
+vec2 craterField(vec3 p) {
+  vec3 i = floor(p);
+  vec3 f = fract(p);
+  vec2 sum = vec2(0.);
+  for (int x = -1; x <= 1; x++) {
+    for (int y = -1; y <= 1; y++) {
+      for (int z = -1; z <= 1; z++) {
+        vec3 g = vec3(float(x), float(y), float(z));
+        vec3 o = hash3(i + g);
+        if (o.y > .6) continue;
+        float d = length(g + o - f);
+        float size = .1 + .34 * o.x * o.x;
+        float rim = smoothstep(size * 1.5, size, d) * smoothstep(size * .8, size, d);
+        float bowl = 1. - smoothstep(0., size, d);
+        sum += vec2(size * (rim * .08 - bowl * bowl * .4), rim * .12 - bowl * .1);
+      }
+    }
+  }
+  return sum;
+}
+
+// The map shows 2.7 km a pixel at best, so from close by the ground would be a blur.
+// Finer and finer craters come in as the camera nears the ground: 60 km ones from
+// three radii up, down to 700 m ones from a twenty-fifth of a radius.
+// Returns the height in scene units (x) and a shade for the colour (y).
+vec2 closeGround(vec3 p) {
+  vec2 sum = vec2(0.);
+  float freq = 30.;
+  float from = 3.;
+  for (int k = 0; k < 5; k++) {
+    float w = craters * (1. - smoothstep(from * .45, from, close));
+    if (w > .002) {
+      vec2 f = craterField(p * freq + float(k) * 17.3);
+      // The map already shows the largest craters: the widest layer only hints.
+      float keep = k == 0 ? .4 : 1.;
+      sum += w * keep * vec2(f.x * radius / freq, f.y);
+    }
+    freq *= 3.;
+    from *= .34;
+  }
+  return sum;
+}
+
 void main(){
   vec3 col = texture2D(map, vUV).rgb;
   // Hide the seam where the map's left and right edges meet: over the last third of a
@@ -34,9 +95,29 @@ void main(){
   float ang = vUV.x * 6.28318;
   // Stretched along longitude, like wind-drawn bands and dust streaks.
   float grain = fbm(vec2(cos(ang), sin(ang)) * 6. + vec2(vUV.y * 160., 5.)) * .6 + fbm(vec2(cos(ang), sin(ang)) * 24. + vec2(vUV.y * 90., 9.)) * .4;
+  // A cratered world has no wind: its grain is the same in every direction (the
+  // stretched kind showed from close by as streaks across the Moon).
+  if (craters > 0.) {
+    vec3 w3 = abs(lp) / (abs(lp.x) + abs(lp.y) + abs(lp.z));
+    float even = fbm(lp.xy * 190.) * w3.z + fbm(lp.yz * 190. + 7.) * w3.x + fbm(lp.zx * 190. + 13.) * w3.y;
+    grain = mix(grain, even, min(1., craters * 3.));
+  }
   col *= 1. + (grain - .5) * detail;
 
   vec3 N = normalize(n);
+  if (craters > 0. && close < 3.) {
+    vec2 ground = closeGround(lp);
+    col *= 1. + ground.y;
+    // Tip the surface by the slope of that ground, so rims catch the Sun and bowls
+    // hold shadow (the slope is read from how the height changes across the screen).
+    vec3 sx = dFdx(wp);
+    vec3 sy = dFdy(wp);
+    vec3 r1 = cross(sy, N);
+    vec3 r2 = cross(N, sx);
+    float det = dot(sx, r1);
+    vec3 grad = sign(det) * (dFdx(ground.x) * r1 + dFdy(ground.x) * r2);
+    N = normalize(abs(det) * N - 1.6 * grad);
+  }
   vec3 V = normalize(-wp);
   float l = dot(N, sun);
   // The night side keeps a tenth of the light, so a traveler can still see where they fly.

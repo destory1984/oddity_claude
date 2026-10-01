@@ -102,6 +102,7 @@ export async function createWorld(canvas, bodies = BODIES) {
       }
       for (const mesh of item.meshes) mesh.position.set(rel[0], rel[1], rel[2]);
       item.spin(elapsed);
+      item.setClose?.(Math.max(0, (Math.hypot(...rel) * KM_PER_UNIT) / body.radiusKm - 1));
       item.setSun(normalize(sunNow.position.map((n, i) => n - body.position[i])));
     }
     const sunRel = relative(sunNow, position);

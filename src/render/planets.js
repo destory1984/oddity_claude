@@ -244,6 +244,14 @@ function createRings(scene, body, rings, sunDir) {
   return { plane, normal, setSun };
 }
 
+// How cratered each mapped world is, for the close-up ground (textured.frag): 1 for the
+// Moon, little for young or icy surfaces, none (left out) under clouds.
+const CRATERS = {
+  moon: 1, mercury: 1, mars: 0.35, phobos: 1, callisto: 1, ganymede: 0.6, europa: 0.08, io: 0.1,
+  mimas: 0.9, enceladus: 0.3, tethys: 0.8, dione: 0.7, rhea: 0.8, iapetus: 0.8, triton: 0.25,
+  ceres: 0.9, pluto: 0.35, charon: 0.7,
+};
+
 function createProceduralPlanet(scene, body, look, sunDir) {
   const diameter = (2 * body.radiusKm) / KM_PER_UNIT;
   const sphere = CreateSphere(body.id, { diameter, segments: body.radiusKm > 20000 ? 96 : 64 }, scene);
@@ -251,7 +259,10 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   let material;
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
-      ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter'], ['map']);
+      ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius'], ['map']);
+    material.setFloat('craters', CRATERS[body.id] ?? 0);
+    material.setFloat('close', 100);
+    material.setFloat('radius', body.radiusKm / KM_PER_UNIT);
     material.setVector3('ringNormal', Vector3.Zero());
     material.setFloat('ringInner', 1);
     material.setFloat('ringOuter', 2);
@@ -296,6 +307,10 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     rings: ring && { normal: [ring.normal.x, ring.normal.y, ring.normal.z], innerKm: look.rings.innerKm, outerKm: look.rings.outerKm },
     spin(elapsed) {
       sphere.rotation.y = -(elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
+    },
+    // heightRadii: the camera's height above the ground, in this body's radii.
+    setClose(heightRadii) {
+      if (look.shader === 'textured') material.setFloat('close', heightRadii);
     },
     setSun(dir) {
       material.setVector3('sun', new Vector3(...dir));

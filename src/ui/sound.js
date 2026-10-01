@@ -203,11 +203,11 @@ export function createSound() {
       pluck(392, 0, 0.1, 0.8);
     },
     count: () => tone({ freq: 880, length: 0.09, volume: 0.07 }),
-    // The latch waits for the voice to finish saying "zero" (about 0.7 s), then:
-    // a low clunk, and pshhh, the seal filling with air, bright at first and sinking
-    // as it fades; two rising bells close it.
+    // The latch waits two seconds after the voice has said "zero" (which takes about
+    // half a second), then: a low clunk, and pshhh, the seal filling with air, bright at
+    // first and sinking as it fades; two rising bells close it.
     dock: () => {
-      const after = 0.7;
+      const after = 2.5;
       noise({ start: after, length: 0.16, volume: 0.4, type: 'lowpass', freq: 700, to: 180 });
       tone({ freq: 98, start: after, length: 0.4, volume: 0.22 });
       noise({ start: after + 0.08, length: 1.6, volume: 0.32, type: 'highpass', freq: 4200, to: 1400 });

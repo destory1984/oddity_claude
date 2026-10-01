@@ -1,4 +1,4 @@
-import { surfaceDistance } from './bodies.js';
+import { surfaceDistance, BODY_DATA } from './bodies.js';
 
 // The explorer's log: which bodies were discovered and landed on, which photo
 // missions were completed, which story places were visited, which craft were met (not
@@ -7,6 +7,23 @@ import { surfaceDistance } from './bodies.js';
 
 // A body counts as discovered once the traveler comes this close to its surface.
 export const DISCOVERY_KM = 50000;
+
+// The order the journal lists bodies in: the Sun, then everything that circles it from
+// the nearest out (by mean distance), each followed by its moons from the largest down.
+// Returns [{ body, moon }].
+export function journalOrder(bodies) {
+  const data = (b) => BODY_DATA.find((d) => d.id === b.id) ?? b;
+  const reach = (b) => data(b).orbitKm ?? data(b).ellipse?.semiMajorKm ?? 0;
+  const out = [];
+  for (const body of bodies.filter((b) => b.kind === 'star')) out.push({ body, moon: false });
+  const round = bodies.filter((b) => b.kind !== 'star' && b.kind !== 'moon').sort((a, b) => reach(a) - reach(b));
+  for (const body of round) {
+    out.push({ body, moon: false });
+    const moons = bodies.filter((b) => b.kind === 'moon' && b.parent === body.id).sort((a, b) => b.radiusKm - a.radiusKm);
+    for (const moon of moons) out.push({ body: moon, moon: true });
+  }
+  return out;
+}
 
 export function createProgress() {
   return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [] };

@@ -1,4 +1,4 @@
-import { summarize } from '../core/progress.js';
+import { summarize, journalOrder } from '../core/progress.js';
 import { surfaceDistance } from '../core/bodies.js';
 import { objectParticle } from './messages.js';
 import { FACTS } from '../core/facts.js';
@@ -48,12 +48,13 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
 
     const list = $('journalBodies');
     list.replaceChildren();
-    for (const body of bodies) {
+    for (const { body, moon } of journalOrder(bodies)) {
       const found = progress.discovered.includes(body.id);
       const landed = progress.landed.includes(body.id);
       const li = document.createElement('li');
       const name = document.createElement('strong');
-      name.textContent = found ? body.name : `${body.name} (미발견)`;
+      // A moon sits under its planet, four spaces in.
+      name.textContent = `${moon ? '    ' : ''}${found ? body.name : `${body.name} (미발견)`}`;
       const marks = document.createElement('span');
       marks.className = 'marks';
       marks.textContent = `${found ? '발견 ✓' : '발견 —'}  ${landed ? '착지 ✓' : '착지 —'}`;

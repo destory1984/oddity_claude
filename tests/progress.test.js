@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  createProgress, updateProgress, recordPhotos, recordStories, summarize, sanitizeProgress, isComplete, score,
+  createProgress, updateProgress, recordPhotos, recordStories, summarize, sanitizeProgress, isComplete, score, journalOrder,
 } from '../src/core/progress.js';
 import { STORIES } from '../src/core/stories.js';
 import { BODIES, START_POSITION, bodyById } from '../src/core/bodies.js';
@@ -12,6 +12,21 @@ const above = (id, km) => {
   const b = bodyById(id);
   return [b.position[0], b.position[1] + b.radiusKm + km, b.position[2]];
 };
+
+test('the journal lists the Sun, then each world by distance with its moons under it, largest first', () => {
+  const order = journalOrder(BODIES);
+  assert.equal(order.length, BODIES.length);
+  const ids = order.map((o) => o.body.id);
+  assert.equal(new Set(ids).size, BODIES.length);
+  assert.deepEqual(ids.slice(0, 8), ['sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'phobos', 'deimos']);
+  const where = (id) => ids.indexOf(id);
+  assert.deepEqual(ids.slice(where('jupiter'), where('jupiter') + 5), ['jupiter', 'ganymede', 'callisto', 'io', 'europa']);
+  assert.deepEqual(ids.slice(where('saturn') + 1, where('saturn') + 3), ['titan', 'rhea']);
+  assert.ok(where('mars') < where('ceres') && where('ceres') < where('jupiter'));
+  assert.ok(where('uranus') < where('neptune') && where('neptune') + 1 === where('triton') && where('triton') < where('pluto'));
+  assert.equal(where('pluto') + 1, where('charon'));
+  for (const { body, moon } of order) assert.equal(moon, body.kind === 'moon', body.id);
+});
 
 test('a new log knows Earth only', () => {
   assert.deepEqual(createProgress(), { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [] });

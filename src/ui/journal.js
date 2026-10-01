@@ -2,6 +2,7 @@ import { summarize } from '../core/progress.js';
 import { surfaceDistance } from '../core/bodies.js';
 import { objectParticle } from './messages.js';
 import { FACTS } from '../core/facts.js';
+import { photoCaption, ALBUM_MAX } from '../core/album.js';
 
 const $ = (id) => document.getElementById(id);
 // 로 after a vowel or ㄹ, 으로 after any other final consonant.
@@ -13,7 +14,7 @@ function hasFinalRieulOrNone(word) {
 const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {} }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -112,6 +113,42 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     }
   }
 
+  // The album: small copies of saved photos, newest first. Pressing one makes it large.
+  let album = [];
+  function renderAlbum() {
+    const grid = $('journalAlbum');
+    grid.replaceChildren();
+    $('albumNote').textContent = album.length
+      ? `사진 모드에서 저장한 사진 ${album.length}장입니다(최근 ${ALBUM_MAX}장까지). 사진을 누르면 크게 보입니다.`
+      : '사진 모드에서 "사진 저장"을 누르면 여기에 모입니다.';
+    album.forEach((entry, index) => {
+      const caption = photoCaption(entry, missions);
+      const figure = document.createElement('figure');
+      const img = document.createElement('img');
+      img.src = entry.image;
+      img.alt = caption.title;
+      img.addEventListener('click', () => figure.classList.toggle('big'));
+      const text = document.createElement('figcaption');
+      const title = document.createElement('strong');
+      title.textContent = caption.title;
+      text.append(title);
+      for (const m of caption.met) {
+        const line = document.createElement('span');
+        line.textContent = `✓ ${m.name}: ${m.hint}`;
+        text.append(line);
+      }
+      const remove = document.createElement('button');
+      remove.textContent = '지우기';
+      remove.setAttribute('aria-label', `${caption.title} 사진 지우기`);
+      remove.addEventListener('click', () => {
+        album = onDeletePhoto(index);
+        renderAlbum();
+      });
+      figure.append(img, text, remove);
+      grid.append(figure);
+    });
+  }
+
   // Craft are not scored: the list only says which have been met and offers the jump.
   function renderCraft() {
     const list = $('journalCraft');
@@ -136,6 +173,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     render();
     renderStories();
     renderCraft();
+    renderAlbum();
     dialog.showModal();
     // The close button at the foot takes the focus, which scrolls the long list to its
     // end: start at the top instead.
@@ -145,6 +183,9 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   return {
     open,
     isOpen: () => dialog.open,
+    setAlbum(photos) {
+      album = photos;
+    },
     // Remembered for the next open; the open list is not rebuilt so focus stays put.
     update(progress, position, current = bodies) {
       lastProgress = progress;

@@ -958,6 +958,54 @@ body.touch #reticle span {
   margin-top: 6px;
 }
 
+/* The photo album in the journal: a grid of small copies; a pressed one fills the row */
+#journalAlbum {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+#journalAlbum figure {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+#journalAlbum figure.big {
+  grid-column: 1 / -1;
+}
+
+#journalAlbum img {
+  display: block;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #ffffff22;
+  cursor: zoom-in;
+}
+
+#journalAlbum figure.big img {
+  cursor: zoom-out;
+}
+
+#journalAlbum figcaption strong,
+#journalAlbum figcaption span {
+  display: block;
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+#journalAlbum figcaption strong {
+  color: #b6cbe0;
+}
+
+#journalAlbum figcaption span {
+  color: #7fe3c5;
+}
+
+#journalAlbum button {
+  margin-top: 6px;
+}
+
 .journalActions {
   display: flex;
   justify-content: space-between;

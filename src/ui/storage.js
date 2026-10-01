@@ -1,4 +1,5 @@
 import { createProgress, sanitizeProgress } from '../core/progress.js';
+import { sanitizeAlbum } from '../core/album.js';
 
 const KEY = 'oddity.progress.v1';
 
@@ -55,5 +56,30 @@ export function saveProgress(progress) {
     localStorage.setItem(KEY, JSON.stringify(progress));
   } catch {
     // Keep playing; the log simply is not kept.
+  }
+}
+
+const ALBUM_KEY = 'oddity.album.v1';
+
+export function loadAlbum(missions) {
+  try {
+    return sanitizeAlbum(JSON.parse(localStorage.getItem(ALBUM_KEY)), missions);
+  } catch {
+    return [];
+  }
+}
+
+// Returns the album as stored. If the browser is out of room, the oldest photos are
+// dropped until it fits (or nothing is kept).
+export function saveAlbum(album) {
+  let keep = album;
+  for (;;) {
+    try {
+      localStorage.setItem(ALBUM_KEY, JSON.stringify(keep));
+      return keep;
+    } catch {
+      if (keep.length === 0) return keep;
+      keep = keep.slice(0, -1);
+    }
   }
 }

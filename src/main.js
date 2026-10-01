@@ -16,6 +16,7 @@ import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
 import { createWarp } from './ui/warp.js';
 import { slingshot } from './core/slingshot.js';
+import { addPhoto, removePhoto } from './core/album.js';
 import { teleportSpot } from './core/teleport.js';
 import { eventMessage, limitText, dateText, withParticle } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
@@ -24,7 +25,7 @@ import {
 } from './core/progress.js';
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
-  loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout,
+  loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
@@ -83,6 +84,8 @@ let paused = false;
 let selectedId = START_NEAR ? START_NEAR.id : 'earth';
 let dragTurn = [0, 0];
 let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT);
+// Small copies of saved photos, shown in the journal (core/album.js).
+let album = loadAlbum(MISSIONS);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
 // The first-visit guide assumes the opening view above Earth.
 let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
@@ -193,6 +196,16 @@ async function init() {
         bodies,
         craft,
       });
+      if (shot.thumb) {
+        const local = nearestLocalBody(state.position, bodies);
+        album = saveAlbum(addPhoto(album, {
+          at: new Date().toISOString(),
+          where: `${local.label} ${Math.round(local.altitude).toLocaleString('ko-KR')}km`,
+          missions: done,
+          image: shot.thumb,
+        }));
+        journal.setAlbum(album);
+      }
       const before = progress;
       const result = recordPhotos(progress, done);
       if (!result.newly.length) return;
@@ -321,6 +334,10 @@ async function init() {
     missions: MISSIONS,
     stories: STORIES,
     craft: CRAFT,
+    onDeletePhoto(index) {
+      album = saveAlbum(removePhoto(album, index));
+      return album;
+    },
     // The journal's "순간 이동": jump there from anywhere.
     onJump(id) {
       selectedId = id;
@@ -351,6 +368,7 @@ async function init() {
       toast.show('탐험 기록을 지웠습니다.');
     },
   });
+  journal.setAlbum(album);
   // Opened before the first frame, the journal still has something to show.
   journal.update(progress, state.position, bodies);
 

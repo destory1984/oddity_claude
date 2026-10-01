@@ -1,4 +1,5 @@
 import { rotateLocal } from '../core/orientation.js';
+import { thumbSize } from '../core/album.js';
 
 const $ = (id) => document.getElementById(id);
 const DEFAULT_FOV_DEG = 60;
@@ -47,6 +48,17 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
     };
     try {
       world.render();
+      // A small copy for the album, taken from the same frame as the saved photo.
+      try {
+        const { width, height } = thumbSize(canvas.width, canvas.height);
+        const small = document.createElement('canvas');
+        small.width = width;
+        small.height = height;
+        small.getContext('2d').drawImage(canvas, 0, 0, width, height);
+        shot.thumb = small.toDataURL('image/jpeg', 0.8);
+      } catch {
+        shot.thumb = null;
+      }
       const blob = await new Promise((resolve, reject) => {
         canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('이미지 생성 실패'))), 'image/png');
       });

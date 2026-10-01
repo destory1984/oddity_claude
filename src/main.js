@@ -801,7 +801,7 @@ async function init() {
     const sunKm = surfaceDistance(state.position, here('sun'));
     let feeling = null;
     if (view.heroSheet === 'hurt-bright') feeling = { type: 'tooBright' };
-    else if (view.heroSheet === 'hot') feeling = { type: 'hot', au: sunKm * 100 / AU_KM };
+    else if (view.heroSheet === 'hot' || view.heroSheet === 'hot-wipe') feeling = { type: 'hot', au: sunKm * 100 / AU_KM };
     else if (view.heroSheet === 'cold') feeling = sunKm > 19 * AU_KM / 100 ? { type: 'coldFar', au: sunKm * 100 / AU_KM } : { type: 'coldShadow' };
     if (feeling && feelingTold !== feeling.type) {
       feelingTold = feeling.type;

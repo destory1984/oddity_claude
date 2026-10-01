@@ -30,6 +30,8 @@ export const SHEETS = [
   // that reads at a glance, coming down feet first, and touching down. They take the
   // place of 'photo-v' and 'land', whose drawings stay in the folder.
   'photo-v2', 'land-descend', 'land-touch',
+  // Wiping her brow with a sleeve: takes turns with 'hot' (fanning herself).
+  'hot-wipe',
 ];
 
 // Frames per second.
@@ -65,7 +67,7 @@ export const SLEEP_AFTER_S = 60;
 // how long each time, and the
 // SPRITE_FPS entry for each sheet.
 export const FEELING_S = 2;
-const FEELINGS = { 'hurt-bright': 'bright', cold: 'cold', hot: 'hot' };
+const FEELINGS = { 'hurt-bright': 'bright', cold: 'cold', hot: 'hot', 'hot-wipe': 'hot' };
 // The jump: how long each half of it takes (ui/warp.js).
 const WARP_OUT_S = 2.7;
 const WARP_IN_S = 2.6;
@@ -163,7 +165,9 @@ function hover(state, input, dt, fresh) {
   if (still >= nextRest) {
     // Too bright to look, hot, or cold: every other rest action is that instead. (It used to
     // take the place of everything, and out past Uranus she did nothing but shiver.)
-    const feeling = input.bright ? 'hurt-bright' : input.hot ? 'hot' : input.cold ? 'cold' : null;
+    // In the heat she fans herself one time and wipes her brow the next.
+    const heat = (rests / 2) % 2 < 1 ? 'hot' : 'hot-wipe';
+    const feeling = input.bright ? 'hurt-bright' : input.hot ? heat : input.cold ? 'cold' : null;
     if (feeling && rests % 2 === 0) {
       nextRest = still + FEELING_S + REST_GAP_S[0] + chance(rests + 1000) * (REST_GAP_S[1] - REST_GAP_S[0]);
       return { ...state, sheet: feeling, time: 0, frame: 0, still, rests: rests + 1, nextRest };

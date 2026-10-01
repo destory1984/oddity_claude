@@ -21,9 +21,9 @@ const STILL = { speed: 0 };
 // In flight, showing her back, past the turn away from the camera.
 const flying = () => run(createSpriteState(), FLY, 1.2).state;
 
-test('41 sheets of four frames in use, and every drawing is in the assets folder', () => {
-  assert.equal(SHEETS.length, 41);
-  assert.equal(new Set(SHEETS).size, 41);
+test('42 sheets of four frames in use, and every drawing is in the assets folder', () => {
+  assert.equal(SHEETS.length, 42);
+  assert.equal(new Set(SHEETS).size, 42);
   assert.equal(FRAMES, 4);
   for (const sheet of SHEETS) {
     for (let frame = 0; frame < FRAMES; frame++) {
@@ -252,6 +252,15 @@ test('going down to a place she descends feet first, touches down, then stands; 
   assert.deepEqual(sheetsOf(landed.seen), ['land-touch', 'stand']);
   const off = run(down.state, STILL, 2);
   assert.deepEqual(sheetsOf(off.seen).slice(0, 2), ['brake', 'idle']);
+});
+
+test('in the heat she fans herself and wipes her brow by turns, two seconds each', () => {
+  const { seen } = run(createSpriteState(), { speed: 0, hot: true }, 120);
+  const heat = seen.filter((s) => s.sheet === 'hot' || s.sheet === 'hot-wipe');
+  const turns = heat.map((s) => s.sheet).filter((sheet, i, all) => sheet !== all[i - 1]);
+  assert.ok(turns.length >= 3, String(turns));
+  assert.deepEqual(turns.slice(0, 3), ['hot', 'hot-wipe', 'hot']);
+  assert.deepEqual([...new Set(heat.filter((s) => s.sheet === 'hot-wipe').map(spriteFrame))].sort(), [0, 1, 2, 3]);
 });
 
 test('photo mode holds the V pose, every time; a full journal sets her cheering', () => {

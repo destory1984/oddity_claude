@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { objectParticle, subjectParticle, eventMessage, limitText } from '../src/ui/messages.js';
+import { objectParticle, subjectParticle, eventMessage, limitText, dateText } from '../src/ui/messages.js';
 import { BODIES } from '../src/core/bodies.js';
 import { FACTS } from '../src/core/facts.js';
 
@@ -62,4 +62,9 @@ test('reaching a story place names it and tells its story on the next line', () 
     eventMessage({ type: 'story', name: '지오토의 혜성 통과', text: '1986년의 일입니다.' }),
     '이야기 장소: 지오토의 혜성 통과\n1986년의 일입니다.',
   );
+});
+
+test("the game clock's date reads like 2026.10.1", () => {
+  assert.equal(dateText(new Date(2026, 9, 1, 15)), '2026.10.1');
+  assert.equal(dateText(new Date(2027, 0, 31)), '2027.1.31');
 });

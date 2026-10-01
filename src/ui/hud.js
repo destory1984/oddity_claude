@@ -77,7 +77,8 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         const hidden = body.kind === 'star' && view.sunVisibility < 0.01;
         const spot = placeMarker(el, view.directions[body.id], view.camera, hidden ? `${body.name} · 가려짐` : body.name);
         const selectedHere = body.id === selected.id;
-        const keep = keepMarker({
+        // A story place gets no off-screen arrow unless it is the chosen target.
+        const keep = (body.kind !== 'site' || !spot.outside || selectedHere) && keepMarker({
           outside: spot.outside,
           selected: selectedHere,
           nearest: body.id === local.body.id,

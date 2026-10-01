@@ -1,9 +1,9 @@
 import {
-  BODIES, START_POSITION, TIME_SCALE, bodiesAt, bodyById, nearestSurface, nearestLocalBody,
+  BODIES, BODY_DATA, TIME_SCALE, placeBodies, bodyById, nearestSurface, nearestLocalBody,
 } from './core/bodies.js';
 import { C, speedLimit } from './core/flight.js';
 import {
-  createState, step, stopNow, totalSpeed, carryAlong, TURN_RATE, startOrientation,
+  createState, step, stopNow, totalSpeed, carryAlong, TURN_RATE, START_YAW,
 } from './core/game.js';
 import { rotateLocal, lookAtDirection, multiply, conjugate, forward } from './core/orientation.js';
 import { CRAFT, craftAt, craftById } from './core/craft.js';
@@ -14,13 +14,16 @@ import { createHud } from './ui/hud.js';
 import { createMinimap } from './ui/minimap.js';
 import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
-import { eventMessage, limitText } from './ui/messages.js';
+import { eventMessage, limitText, dateText } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import {
   updateProgress, recordPhotos, recordStories, createProgress, summarize, score, isComplete,
 } from './core/progress.js';
 import { STORIES, storySitesAt, completedStories, siteHidden } from './core/stories.js';
-import { loadProgress, saveProgress, loadGuideDone, saveGuideDone } from './ui/storage.js';
+import {
+  loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout,
+} from './ui/storage.js';
+import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
 import { createGuideView } from './ui/guide.js';
 import { createJournal } from './ui/journal.js';
@@ -35,9 +38,17 @@ const HUD_EVERY_N_FRAMES = 6;
 // start beside it. null starts above Earth, where the first-visit guide begins.
 const START_NEAR = null;
 
+// Two layouts: 'tour' is the hand-made one (planets spread round the Sun); 'today' puts
+// the planets where they really are on the day the game is opened.
+const layout = loadLayout();
+const openedAt = new Date();
+const bodyData = layout === 'today' ? todayData(openedAt) : BODY_DATA;
+const bodiesAt = (timeS) => placeBodies(bodyData, timeS);
+let bodies = bodiesAt(0);
+
 function startNear({ id, fromCentreKm }) {
-  const body = bodyById(id);
-  const sun = bodyById('sun');
+  const body = bodyById(id, bodies);
+  const sun = bodyById('sun', bodies);
   // On the sunlit side and a little above the planet's orbit, looking at it, far enough
   // that the whole disc fits in the view. (Planets move about 70 to 180 km/s on the game
   // clock, so it stays put for a long look.)
@@ -49,7 +60,15 @@ function startNear({ id, fromCentreKm }) {
   return createState(position, lookAtDirection(body.position.map((n, i) => n - position[i])));
 }
 
-let state = START_NEAR ? startNear(START_NEAR) : createState(START_POSITION, startOrientation(innerWidth / innerHeight));
+// Above Earth, facing it; a wide screen turns a little toward the Sun so Earth sits on
+// the left and the Sun's edge on the right (a tall phone screen has no room for both).
+function startAboveEarth() {
+  const { position, forward: toEarth } = startAbove(bodies);
+  const facing = lookAtDirection(toEarth);
+  return createState(position, innerWidth / innerHeight < 1 ? facing : rotateLocal(facing, START_YAW, 0));
+}
+
+let state = START_NEAR ? startNear(START_NEAR) : startAboveEarth();
 let paused = false;
 let selectedId = START_NEAR ? START_NEAR.id : 'earth';
 let dragTurn = [0, 0];
@@ -60,7 +79,6 @@ let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
 let simTime = 0;
 // The note on entering the asteroid belt shows once per visit to the game.
 let beltSeen = false;
-let bodies = bodiesAt(0);
 // Where a body is right now (BODIES is only the starting layout).
 // Spacecraft and telescopes: found and selected like bodies, but they are not in the
 // journal and only slow the traveler nearby (core/craft.js).
@@ -109,7 +127,7 @@ let world;
 
 async function init() {
   try {
-    world = await createWorld(canvas);
+    world = await createWorld(canvas, bodies);
   } catch (e) {
     console.error(e);
     $('loadError').textContent = `${e.message} 최신 Chrome이나 Edge에서 하드웨어 가속을 켜고 다시 열어 주세요.`;
@@ -250,6 +268,13 @@ async function init() {
     $('help').addEventListener('close', () => setPaused(prior), { once: true });
   });
   $('closeHelp').addEventListener('click', () => $('help').close());
+  // Switching the layout moves every planet, so the game starts over (the log is kept).
+  $('layoutNow').textContent = layout === 'today' ? '지금: 오늘의 하늘(오늘 날짜의 실제 위치).' : '지금: 여행 배치(행성을 태양 둘레에 고루 흩어 놓음).';
+  $('layoutButton').textContent = layout === 'today' ? '여행 배치로 바꾸기' : '오늘의 하늘로 바꾸기';
+  $('layoutButton').addEventListener('click', () => {
+    saveLayout(layout === 'today' ? 'tour' : 'today');
+    location.reload();
+  });
   window.addEventListener('blur', () => {
     input.clear();
     if (!photo.active()) setPaused(true);
@@ -387,6 +412,8 @@ async function init() {
     else if (state.sideSpeed > state.speed) flightLabel = '옆으로 비행';
     else if (state.motionSign < 0) flightLabel = '후진 비행';
     journal.update(progress, state.position, bodies);
+    // In today's sky the game clock's date rides along with the flight state.
+    if (layout === 'today') flightLabel += ` · ${dateText(new Date(openedAt.getTime() + simTime * 1000))}`;
     hud.update({
       view,
       local: nearestLocalBody(state.position, bodies),

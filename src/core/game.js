@@ -6,7 +6,8 @@ export const TURN_RATE = 0.7;
 export const ROLL_RATE = 0.9;
 // Opening view: turned about 31 degrees from Earth toward the Sun, so a wide screen
 // shows Earth on the left and the edge of the Sun and its glow on the right.
-export const START_ORIENTATION = rotateLocal([0, 0, 0, 1], 0.55, 0);
+export const START_YAW = 0.55;
+export const START_ORIENTATION = rotateLocal([0, 0, 0, 1], START_YAW, 0);
 
 // A tall phone screen is too narrow to fit the Sun beside Earth, so it faces Earth.
 export function startOrientation(aspect) {

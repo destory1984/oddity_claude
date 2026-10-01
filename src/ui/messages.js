@@ -41,6 +41,11 @@ export function eventMessage(event, bodies = []) {
   }
 }
 
+// The game clock's date in today's-sky mode, in the player's own time zone.
+export function dateText(date) {
+  return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`;
+}
+
 // The live speed limit as a multiple of light speed.
 export function limitText(ratio) {
   if (ratio < 1) return `${ratio.toFixed(2)}c`;

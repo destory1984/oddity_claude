@@ -31,6 +31,25 @@ export function saveGuideDone() {
   }
 }
 
+const LAYOUT_KEY = 'oddity.layout.v1';
+
+// 'tour' (the hand-made layout) unless the player chose today's sky.
+export function loadLayout() {
+  try {
+    return localStorage.getItem(LAYOUT_KEY) === 'today' ? 'today' : 'tour';
+  } catch {
+    return 'tour';
+  }
+}
+
+export function saveLayout(layout) {
+  try {
+    localStorage.setItem(LAYOUT_KEY, layout);
+  } catch {
+    // The choice simply does not stick.
+  }
+}
+
 export function saveProgress(progress) {
   try {
     localStorage.setItem(KEY, JSON.stringify(progress));

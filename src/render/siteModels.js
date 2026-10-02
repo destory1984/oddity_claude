@@ -1,10 +1,10 @@
 import { TransformNode, CreateSphere } from './babylon.js';
 import {
-  QUARTER, part, group, aim, box, drum, rod, dish, wing, rtg, nozzle, fuse,
+  QUARTER, part, group, aim, box, drum, rod, dish, wing, rtg, nozzle, truss, fuse,
 } from './craftParts.js';
 
-// What stands at the story places on the Moon, Mars and Titan: the landers and rovers
-// themselves, each about one unit across with its feet at y = 0 and +y up, away from
+// What stands at the story places on the Moon, Mars and Titan, and at Earth's two launch
+// pads: the landers and rovers themselves and the rockets on their pads, each about one unit across with its feet at y = 0 and +y up, away from
 // the ground. Built from the parts in craftParts.js, like the craft in orbit.
 
 const sphere = (scene, name, parent, material, diameter, position, scaling = [1, 1, 1]) => part(
@@ -400,6 +400,69 @@ function huygens(scene, name, mats) {
   return fuse(scene, root);
 }
 
+// A launch pad with its rocket standing ready: the platform, the service tower with
+// its swing arms, and the rocket. Taller than the landers (1.6 units), as it was.
+//   saturn: Apollo 11's Saturn V at pad 39A: three white stages narrowing upward with
+//     black bands, five engines, the spacecraft and its escape tower; a red tower.
+//   nuri: Nuri at Naro: a slim white rocket of one width with the flag on its side; a
+//     blue tower.
+function launchPad(scene, name, mats, { rocket = 'saturn' } = {}) {
+  const root = new TransformNode(name, scene);
+  const saturn = rocket === 'saturn';
+  // The platform, and the flame trench cut under the rocket.
+  box(scene, `${name}Apron`, root, mats.grey, [1.3, 0.04, 0.9], [0, 0.02, 0]);
+  box(scene, `${name}Deck`, root, mats.silver, [0.62, 0.1, 0.5], [0.08, 0.09, 0]);
+  box(scene, `${name}Trench`, root, mats.black, [0.2, 0.06, 0.92], [0.16, 0.035, 0]);
+  // The tower beside the rocket, a crane on its top, arms reaching across.
+  const towerX = -0.2;
+  const top = saturn ? 1.5 : 1.2;
+  truss(scene, `${name}Tower`, root, saturn ? mats.red : mats.solar, [towerX, 0.14, 0], [towerX, top, 0], 0.16, saturn ? 9 : 7, 0.014);
+  box(scene, `${name}TowerBase`, root, mats.dark, [0.2, 0.06, 0.2], [towerX, 0.17, 0]);
+  rod(scene, `${name}Crane`, root, mats.grey, [towerX - 0.14, top + 0.03, 0], [towerX + 0.3, top + 0.03, 0], 0.02, 5);
+  rod(scene, `${name}Mast`, root, mats.grey, [towerX, top, 0], [towerX, top + 0.14, 0], 0.012, 5);
+  const rocketX = 0.16;
+  const base = 0.2;
+  const band = (id, y, diameter, height = 0.03) => drum(scene, `${name}Band${id}`, root, mats.black, { height, diameter: diameter * 1.01 }, [rocketX, y, 0]);
+  let arms;
+  if (saturn) {
+    // First stage and its five engines.
+    for (const [x, z] of [[0, 0], ...round(4, 0.055, 0.785)]) nozzle(scene, `${name}F1${x}${z}`, root, mats.dark, [rocketX + x, base, z], [0, -1, 0], 0.07, 0.07);
+    drum(scene, `${name}S1`, root, mats.white, { height: 0.5, diameter: 0.2 }, [rocketX, base + 0.25, 0]);
+    for (const [x, z, a] of round(4, 0.1, 0.785)) box(scene, `${name}Fin${a}`, root, mats.black, [0.05, 0.1, 0.012], [rocketX + x * 1.15, base + 0.05, z * 1.15], [0, -a, 0]);
+    band('S1a', base + 0.12, 0.2, 0.08);
+    band('S1b', base + 0.47, 0.2, 0.05);
+    // Second stage, the cone up to the third, and the third.
+    drum(scene, `${name}S2`, root, mats.white, { height: 0.3, diameter: 0.2 }, [rocketX, base + 0.65, 0]);
+    band('S2', base + 0.79, 0.2, 0.025);
+    drum(scene, `${name}Cone2`, root, mats.white, { height: 0.07, diameterTop: 0.13, diameterBottom: 0.2 }, [rocketX, base + 0.835, 0]);
+    drum(scene, `${name}S3`, root, mats.white, { height: 0.2, diameter: 0.13 }, [rocketX, base + 0.97, 0]);
+    band('S3', base + 1.06, 0.13, 0.02);
+    // The lunar module's shroud, the service module, the capsule and the escape tower.
+    drum(scene, `${name}Shroud`, root, mats.white, { height: 0.08, diameterTop: 0.08, diameterBottom: 0.13 }, [rocketX, base + 1.11, 0]);
+    drum(scene, `${name}Service`, root, mats.chrome, { height: 0.07, diameter: 0.08 }, [rocketX, base + 1.185, 0]);
+    drum(scene, `${name}Capsule`, root, mats.silver, { height: 0.06, diameterTop: 0.02, diameterBottom: 0.08 }, [rocketX, base + 1.25, 0]);
+    rod(scene, `${name}Escape`, root, mats.white, [rocketX, base + 1.28, 0], [rocketX, base + 1.4, 0], 0.016, 6);
+    arms = [0.45, 0.7, 0.95, 1.15, 1.38];
+  } else {
+    for (const [x, z] of round(4, 0.035, 0.785)) nozzle(scene, `${name}Engine${x}${z}`, root, mats.dark, [rocketX + x, base, z], [0, -1, 0], 0.06, 0.05);
+    drum(scene, `${name}S1`, root, mats.white, { height: 0.5, diameter: 0.13 }, [rocketX, base + 0.25, 0]);
+    band('S1', base + 0.5, 0.13, 0.02);
+    drum(scene, `${name}S2`, root, mats.white, { height: 0.26, diameter: 0.13 }, [rocketX, base + 0.64, 0]);
+    band('S2', base + 0.77, 0.13, 0.015);
+    drum(scene, `${name}S3`, root, mats.white, { height: 0.12, diameter: 0.13 }, [rocketX, base + 0.84, 0]);
+    drum(scene, `${name}Fairing`, root, mats.white, { height: 0.16, diameterTop: 0.012, diameterBottom: 0.13 }, [rocketX, base + 0.98, 0]);
+    // The flag on the side that faces away from the tower.
+    box(scene, `${name}Flag`, root, mats.taegukgi, [0.004, 0.06, 0.09], [rocketX + 0.066, base + 0.36, 0]);
+    arms = [0.4, 0.7, 0.95];
+  }
+  for (const y of arms) {
+    box(scene, `${name}Arm${y}`, root, mats.grey, [rocketX - towerX - 0.08, 0.022, 0.04], [(rocketX + towerX) / 2, y, 0]);
+  }
+  // Four lightning masts at the corners of the apron.
+  for (const [x, z, a] of round(4, 1, 0.785)) rod(scene, `${name}Rod${a}`, root, mats.grey, [x * 0.58, 0.04, z * 0.4], [x * 0.58, saturn ? 0.5 : 0.9, z * 0.4], 0.01, 4);
+  return fuse(scene, root);
+}
+
 // Which model stands at which place.
 const apolloLm = [apollo, {}];
 export const SITE_BUILD = {
@@ -418,4 +481,5 @@ export const SITE_BUILD = {
   curiosity: [rover, { power: 'rtg' }], perseverance: [rover, { power: 'rtg', helicopter: true }],
   phoenix: [fanLander, {}], insight: [fanLander, { insight: true }],
   huygens: [huygens, {}],
+  lc39a: [launchPad, { rocket: 'saturn' }], naro: [launchPad, { rocket: 'nuri' }],
 };

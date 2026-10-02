@@ -1,6 +1,7 @@
 // Synthesized game sounds (Web Audio). No sound files: every cue is built from
 // oscillators and a noise buffer, so nothing is downloaded and nothing is licensed.
 
+import { englishVoice } from '../core/voice.js';
 import { BAR_S, barPlan, tuneFor, nextTuneBar } from '../core/music.js';
 
 const MUTE_KEY = 'oddity.muted';
@@ -322,6 +323,13 @@ export function createSound() {
       if (window.speechSynthesis.speaking || window.speechSynthesis.pending) window.speechSynthesis.cancel();
       const words = new SpeechSynthesisUtterance(text);
       words.lang = 'en-US';
+      // An English speaker by name: with the language alone, a device set to Korean
+      // used its Korean voice. (The list fills in a moment after the page opens.)
+      const voice = englishVoice(window.speechSynthesis.getVoices());
+      if (voice) {
+        words.voice = voice;
+        words.lang = voice.lang.replace('_', '-');
+      }
       words.rate = 1.2;
       // Half of what it was (0.9): the voice stood out over everything else.
       words.volume = 0.45;

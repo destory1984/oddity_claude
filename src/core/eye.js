@@ -9,10 +9,15 @@ export const NEAR_KM = 10;
 const EYE_SHARE = 0.002;
 const EYE_MIN_KM = 0.02;
 
+// How high above a body's ground the eye is held.
+export function eyeHeightKm(body) {
+  return Math.max(EYE_MIN_KM, body.radiusKm * EYE_SHARE);
+}
+
 export function eyeView(position, bodies) {
   const { body, distance } = nearestSurface(position, bodies);
   if (!body) return { position, nearKm: NEAR_KM };
-  const eye = Math.max(EYE_MIN_KM, body.radiusKm * EYE_SHARE);
+  const eye = eyeHeightKm(body);
   let altitude = distance;
   let at = position;
   if (altitude < eye) {

@@ -409,7 +409,7 @@ async function init() {
   // Where to stand beside a place on a surface right now.
   const standBeside = (id) => {
     const story = STORIES.find((s) => s.id === id);
-    return standSpot(story, here(story.body), simTime);
+    return standSpot(story, here(story.body), simTime, innerWidth / innerHeight < 0.75);
   };
 
   // A place whose name shows (near its body, this side of the horizon): glide down and

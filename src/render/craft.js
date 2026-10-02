@@ -110,14 +110,16 @@ function createDokdo(scene) {
 }
 
 // siteList: story places on a surface (core/stories.js storySitesAt). Those on the
-// Moon, Mars and Titan get a model, and Dokdo a drawing; the craters, seas and
+// Moon, Mars and Titan and Earth's two launch pads get a model, and Dokdo a drawing; the craters, seas and
 // mountains have nothing standing on them.
 export function createSiteModels(scene, siteList) {
   const mats = craftMaterials(scene);
   const nodes = new Map();
   const dokdo = siteList.some((s) => s.id === 'dokdo') ? createDokdo(scene) : null;
   for (const site of siteList) {
-    if (!['moon', 'mars', 'titan'].includes(site.parent) || site.landmark) continue;
+    if (site.landmark) continue;
+    // Elsewhere only what has a model of its own: Earth's two launch pads.
+    if (!['moon', 'mars', 'titan'].includes(site.parent) && !SITE_BUILD[site.id]) continue;
     const [build, options] = SITE_BUILD[site.id] ?? DEFAULT_SITE;
     const node = build(scene, `site_${site.id}`, mats, options);
     node.rotationQuaternion = new Quaternion();

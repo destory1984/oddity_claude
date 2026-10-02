@@ -3,6 +3,7 @@
 // second at its equator), so the traveler is held to the spot and turns with it, as
 // when docked with a craft. Any thrust lets go.
 import { stopNow } from './game.js';
+import { eyeHeightKm } from './eye.js';
 import { surfaceDirection, spinOf } from './surface.js';
 import { orientationFrom, rotateLocal, blend, multiply, turnAboutY } from './orientation.js';
 
@@ -20,6 +21,15 @@ export const STAND_UP_KM = 1.5;
 // She looks at the middle of the model, turned a little so it stands beside her.
 const MODEL_MIDDLE_KM = 2;
 const ASIDE_YAW = 0.3;
+// A tall narrow screen (a phone) shows 15 degrees to each side, not 40: from 25 km and
+// turned 17 degrees the model was half off the left edge. There she stands farther
+// back (still inside every place's range; the smallest is 40 km) and turns less.
+export const NARROW_STAND_KM = 36;
+const NARROW_YAW = 0.15;
+const DOWN_MOST = 0.4;
+// There she also looks a little above it, so it stands beside her and not beside the
+// speech bubble over her head.
+const NARROW_PITCH = -0.1;
 
 const RAD = Math.PI / 180;
 const sub = (a, b) => a.map((n, i) => n - b[i]);
@@ -28,14 +38,20 @@ const sub = (a, b) => a.map((n, i) => n - b[i]);
 // time timeS: fixed to the ground, so it turns with the body.
 // Returns { position, up, facing }: where, which way is up there, and the orientation
 // that looks at the place from there.
-export function standSpot(story, body, timeS) {
+export function standSpot(story, body, timeS, narrow = false) {
   const spin = spinOf(story.body, timeS);
-  const shiftDeg = (STAND_KM / body.radiusKm) / RAD;
+  const shiftDeg = ((narrow ? NARROW_STAND_KM : STAND_KM) / body.radiusKm) / RAD;
   const up = surfaceDirection(story.latDeg - (story.latDeg < 0 ? -1 : 1) * shiftDeg, story.lonDeg, spin);
   const siteUp = surfaceDirection(story.latDeg, story.lonDeg, spin);
   const position = body.position.map((n, i) => n + up[i] * (body.radiusKm + STAND_UP_KM));
   const target = body.position.map((n, i) => n + siteUp[i] * (body.radiusKm + MODEL_MIDDLE_KM));
-  return { position, up, facing: rotateLocal(orientationFrom(sub(target, position), up), ASIDE_YAW, 0) };
+  // The view is drawn from the eye, which is held higher than she stands on a big body
+  // (core/eye.js: 12.7 km on Earth, 6.8 km on Mars). Aimed from where she stands, the
+  // place fell 18 degrees below the middle of the view on Earth, behind the buttons.
+  // Not steeper than about 22 degrees down: on Jupiter the eye is 143 km up.
+  const eyeUp = Math.min(Math.max(STAND_UP_KM, eyeHeightKm(body)), (narrow ? NARROW_STAND_KM : STAND_KM) * DOWN_MOST);
+  const eye = body.position.map((n, i) => n + up[i] * (body.radiusKm + eyeUp));
+  return { position, up, facing: rotateLocal(orientationFrom(sub(target, eye), up), narrow ? NARROW_YAW : ASIDE_YAW, narrow ? NARROW_PITCH : 0) };
 }
 
 // A visit under way: where the traveler was relative to the standing spot, how they

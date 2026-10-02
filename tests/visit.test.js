@@ -1,9 +1,10 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { VISIT_SECONDS, STAND_KM, STAND_UP_KM, standSpot, startVisit, hasArrived, visitStep, landingCounts } from '../src/core/visit.js';
+import { VISIT_SECONDS, STAND_KM, NARROW_STAND_KM, STAND_UP_KM, standSpot, startVisit, hasArrived, visitStep, landingCounts } from '../src/core/visit.js';
 import { STORIES, storySitesAt, completedStories } from '../src/core/stories.js';
 import { bodiesAt } from '../src/core/bodies.js';
 import { createState } from '../src/core/game.js';
+import { eyeHeightKm } from '../src/core/eye.js';
 import { spinOf } from '../src/core/surface.js';
 import { forward, up, orientationFrom, blend, turnAboutY, multiply, rotateVector } from '../src/core/orientation.js';
 
@@ -37,11 +38,23 @@ test('every surface place has a standing spot 25 km off, 1.5 km up, inside the r
       near(gap(spot.position, body.position), body.radiusKm + STAND_UP_KM);
       const away = gap(spot.position, site.position);
       assert.ok(away > STAND_KM - 1 && away < STAND_KM + 1 && away < story.withinKm, `${story.id} ${away}`);
-      // She faces the place (turned 0.3 rad aside), head up.
+      // She faces the place (turned 0.3 rad aside), head up; on a big body she looks
+      // down at it, as the eye is held 0.2% of the radius above the ground.
       const toSite = site.position.map((n, i) => n - spot.position[i]);
-      assert.ok(dot(forward(spot.facing), toSite) / Math.hypot(...toSite) > 0.9, story.id);
-      assert.ok(dot(up(spot.facing), spot.up) > 0.95, story.id);
+      assert.ok(dot(forward(spot.facing), toSite) / Math.hypot(...toSite) > 0.8, story.id);
+      assert.ok(dot(up(spot.facing), spot.up) > 0.85, story.id);
+      // From the eye, the middle of the model (2 km up) is level with the middle of the view.
+      const eyeAt = body.position.map((n, i) => n + spot.up[i] * (body.radiusKm + Math.max(STAND_UP_KM, eyeHeightKm(body))));
+      const middle = site.position.map((n, i) => n + ((n - body.position[i]) / body.radiusKm) * 2);
+      if (eyeHeightKm(body) <= STAND_KM * 0.4) near(dot(up(spot.facing), middle.map((n, i) => n - eyeAt[i])), 0, 1e-3);
       assert.ok(completedStories({ position: spot.position, restingOn: story.body, bodies, sites }).includes(story.id), story.id);
+      // On a narrow screen she stands 36 km off, still inside the range, turned less.
+      const far = standSpot(story, body, timeS, true);
+      const farAway = gap(far.position, site.position);
+      assert.ok(farAway > NARROW_STAND_KM - 1 && farAway < NARROW_STAND_KM + 1 && farAway < story.withinKm, `${story.id} ${farAway}`);
+      const toSiteFar = site.position.map((n, i) => n - far.position[i]);
+      assert.ok(dot(forward(far.facing), toSiteFar) / Math.hypot(...toSiteFar) > dot(forward(spot.facing), toSite) / Math.hypot(...toSite), story.id);
+      assert.ok(completedStories({ position: far.position, restingOn: story.body, bodies, sites }).includes(story.id), story.id);
     }
   }
 });

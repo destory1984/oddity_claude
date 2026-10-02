@@ -85,7 +85,7 @@ export const MISSIONS = [
   {
     id: 'saturnShadow',
     name: '토성의 그늘에서',
-    hint: '토성 뒤에 숨어 태양이 가려진 채, 토성이 화면 높이의 30% 이상 (카시니, 2013년)',
+    hint: '토성 뒤에 숨어 태양이 가려진 채, 토성이 화면 높이의 30% 이상 (카시니, 2006년)',
     check: (s) => s.sunShown < 0.1 && s.seen('saturn') && s.frame('saturn').fill >= 0.3
       && s.frame('sun').distance > gap(s.frame('saturn').body.position, s.frame('sun').body.position),
   },

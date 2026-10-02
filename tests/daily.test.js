@@ -12,7 +12,7 @@ const fresh = createProgress();
 const far = { ...fresh, discovered: ['earth', 'moon', 'mars', 'jupiter', 'io'], craft: ['voyager1'] };
 
 test('on the day of a real event the errand is its place, with the year', () => {
-  const apollo = dailyRequest('2026-07-20', fresh);
+  const apollo = dailyRequest('2026-07-21', fresh);
   assert.deepEqual({ kind: apollo.kind, id: apollo.id, year: apollo.year }, { kind: 'day', id: 'apollo11', year: 1969 });
   assert.equal(apollo.text, '1969년 오늘이 그날이란다. 아폴로 11호 착륙지에 다녀와 다오.');
   assert.equal(dailyRequest('2031-10-04', far).id, 'sputnik');

@@ -100,7 +100,7 @@ const PLAIN = [
 // By the photo missions it met: these come before the place.
 const BY_MISSION = {
   eclipse: '나는 평생 개기일식을 못 봤단다. 네가 봤으니 됐다.',
-  earthrise: '달에서 지구가 뜨는 걸 보다니. 1968년 신문에서 본 그 사진 같구나.',
+  earthrise: '달에서 지구가 뜨는 걸 보다니. 1968년 아폴로 8호가 찍은 그 사진 같구나.',
   paleBlueDot: '저 점 안에 내가 있단다. 손 흔든 거 봤느냐.',
 };
 const STARS = [

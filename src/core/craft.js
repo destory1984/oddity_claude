@@ -50,7 +50,7 @@ export const CRAFT = [
   {
     id: 'hubble', name: '허블 우주망원경', nameEn: 'Hubble', kind: 'craft', parent: 'earth',
     launched: 1990,
-    intro: '지구 540km 위를 95분에 한 바퀴 돕니다. 지름 2.4m 거울로 우주의 나이와 팽창 속도를 쟀고, 우주비행사들이 다섯 번 올라가 고쳤습니다.',
+    intro: '지구 500km쯤 위를 95분에 한 바퀴 돕니다. 지름 2.4m 거울로 우주의 나이와 팽창 속도를 쟀고, 우주비행사들이 다섯 번 올라가 고쳤습니다.',
   },
   {
     id: 'jwst', name: '제임스 웹 우주망원경', nameEn: 'Webb', kind: 'craft', parent: 'earth',
@@ -139,7 +139,7 @@ export const CRAFT = [
     id: 'danuri', name: '다누리', nameEn: 'Danuri', kind: 'craft', parent: 'moon',
     ring: { altitudeKm: 100, lapPlayS: 3600, tiltDeg: 90, phaseDeg: 0 },
     launched: 2022,
-    intro: '한국의 첫 달 탐사선입니다. 달 100km 위를 돌며 표면과 자원을 찍고, 햇빛이 들지 않는 극지 분화구 속까지 들여다보는 카메라를 실었습니다.',
+    intro: '한국의 첫 달 탐사선입니다. 달 100km 위에서 시작해 지금은 60km까지 내려가며 표면과 자원을 찍고, 햇빛이 들지 않는 극지 분화구 속까지 들여다보는 카메라를 실었습니다.',
   },
   {
     id: 'lro', name: '달 정찰 궤도선', nameEn: 'LRO', kind: 'craft', parent: 'moon',

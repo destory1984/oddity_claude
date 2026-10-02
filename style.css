@@ -1563,3 +1563,23 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 #heroSay.on {
   opacity:1;
 }
+
+/* The scene at grandmother's gate, after the last page (ui/noteCard.js). */
+#gateScene {
+  width:min(420px,92vw);
+  text-align:center;
+}
+
+#gateLine {
+  display:block;
+  margin:18px 0 8px;
+  font-size:22px;
+  font-weight:500;
+  color:#ffdfa6;
+}
+
+/* The last slot while it is shut: grandmother's clipping. */
+#journal li.clipping span {
+  color:#e6d3a8;
+  font-family:"Gowun Batang","Nanum Myeongjo","AppleMyungjo","Batang",serif;
+}

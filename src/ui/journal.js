@@ -12,9 +12,11 @@ function hasFinalRieulOrNone(word) {
   return [0, 8].includes((code - 0xac00) % 28);
 }
 const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
+// The last slot before it opens (core/story.js LAST_SLOT).
+const CLIPPING = '1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.';
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {} }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -127,12 +129,14 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     missionList.replaceChildren();
     for (const mission of missions) {
       const done = progress.photos.includes(mission.id);
+      // The last slot, still shut: only grandmother's clipping shows.
+      const shut = !done && mission.id === lastSlot && lastShut(progress);
       const li = document.createElement('li');
-      li.className = done ? 'done' : '';
+      li.className = done ? 'done' : shut ? 'clipping' : '';
       const title = document.createElement('strong');
       title.textContent = `${done ? '✓' : '○'} ${mission.name}`;
       const hint = document.createElement('span');
-      hint.textContent = mission.hint;
+      hint.textContent = shut ? CLIPPING : mission.hint;
       li.append(title, hint);
       missionList.append(li);
     }
@@ -164,11 +168,13 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     for (const story of members) {
       const done = (lastProgress.stories ?? []).includes(story.id);
       const li = document.createElement('li');
-      li.className = done ? 'done' : '';
+      const last = !done && story.id === lastSlot;
+      const shut = last && lastShut(lastProgress);
+      li.className = done ? 'done' : shut ? 'clipping' : '';
       const title = document.createElement('strong');
       title.textContent = `${done ? '✓' : '○'} ${story.name}${story.year ? ` (${story.year}년)` : ''}`;
       const line = document.createElement('span');
-      line.textContent = done ? story.text : story.hint;
+      line.textContent = done ? story.text : shut ? CLIPPING : last ? `${story.hint}. 거기서 지구를 사진에 담기` : story.hint;
       li.append(title, line);
       // A place already visited opens its card again: the photograph and the longer telling.
       if (done && onDetail) {

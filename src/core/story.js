@@ -2,8 +2,10 @@
 // between the pages of her journal. She never appears; only her handwriting does. Every
 // event in a note really happened. The notes come out in the order of their years.
 //
-// when: 'start' (a new log), { landed: bodyId } (the first landing there), or
-// { slots: n } (that many journal slots filled).
+// when: 'start' (a new log), { landed: bodyId } (the first landing there),
+// { slots: n } (that many journal slots filled), or 'complete' (every slot filled).
+// gate: the last note only. The scene at grandmother's gate that follows it, where the
+// line is spoken instead of going into a speech bubble.
 // scene: a line of plain telling above the paper. text: grandmother's hand.
 // line: what Seora says once the note is put away (반말, 25 characters at most).
 export const NOTES = [
@@ -49,25 +51,67 @@ export const NOTES = [
     button: '쪽지를 접는다',
     line: '희미해도 봤잖아. 난 가까이서 볼게!',
   },
+  {
+    id: 'last',
+    when: 'complete',
+    scene: '마지막 칸을 채우자 수첩 맨 뒷장이 열렸다.',
+    title: '이 수첩을 다 채운 사람에게',
+    text: '1990년 신문에서 사진 한 장을 봤단다.\n60억 km 밖에서 찍은 지구가 먼지 한 톨 같더구나.\n\n'
+      + '언젠가 그 자리에서 우리 집을 돌아보고 싶었는데, 나는 못 갔다.\n\n'
+      + '이 장을 읽는 사람은 갔다 왔구나. 와서 얘기해 주련.',
+    button: '수첩을 덮는다',
+    line: '할머니, 나 왔어!',
+    gate: '할머니 댁 대문 앞. 서라가 문을 두드린다.',
+  },
 ];
 
 export function noteById(id) {
   return NOTES.find((n) => n.id === id) ?? null;
 }
 
-function met(when, progress, done) {
+function met(when, progress, done, total) {
   if (when === 'start') return true;
+  if (when === 'complete') return done >= total;
   if (when.landed) return progress.landed.includes(when.landed);
   return done >= when.slots;
 }
 
-// The note to bring out now, or null. done: how many journal slots are filled
-// (core/progress.js score). Only the earliest unread note is ever due, so they come in
+// The note to bring out now, or null. done, total: how many journal slots are filled,
+// out of how many (core/progress.js score). Only the earliest unread note is ever due, so they come in
 // order even on a log that was far along before the story was added.
-export function dueNote(progress, done) {
+export function dueNote(progress, done, total = Infinity) {
   const read = progress.notes ?? [];
   const next = NOTES.find((n) => !read.includes(n.id));
-  return next && met(next.when, progress, done) ? next : null;
+  return next && met(next.when, progress, done, total) ? next : null;
+}
+
+// The last slot: the Pale Blue Dot, a photo mission and a story place with the same id
+// (two slots). Grandmother's clipping of the 1990 photograph is at the back of the
+// journal; the slots stay shut until every other one is filled, and then one photograph
+// of Earth as a dot, taken at least this far from it, fills both.
+export const LAST_SLOT = 'paleBlueDot';
+export const LAST_SLOT_KM = 6e7;
+
+export function lastSlotOpen(progress, done, total) {
+  const have = Number(progress.photos.includes(LAST_SLOT)) + Number((progress.stories ?? []).includes(LAST_SLOT));
+  return done - have >= total - 2;
+}
+
+// What a saved photo fills. missionIds: the missions it meets (core/missions.js);
+// earthKm: how far she is from Earth's centre. Returns the missions to record, the
+// story places to record, and why the last slot was held back ('locked', 'near') or null.
+// A log from before the story may already have one or both of the two slots: they are
+// kept, and nothing more is said about them.
+export function photoSlots(missionIds, { open, earthKm, progress }) {
+  if (!missionIds.includes(LAST_SLOT)) return { missions: missionIds, stories: [], held: null };
+  const hasPhoto = progress.photos.includes(LAST_SLOT);
+  if (hasPhoto && (progress.stories ?? []).includes(LAST_SLOT)) return { missions: missionIds, stories: [], held: null };
+  if (open && earthKm >= LAST_SLOT_KM) return { missions: missionIds, stories: [LAST_SLOT], held: null };
+  return {
+    missions: hasPhoto ? missionIds : missionIds.filter((id) => id !== LAST_SLOT),
+    stories: [],
+    held: open ? 'near' : 'locked',
+  };
 }
 
 // Beside each of the 35 bodies in the journal: grandmother's memo (what she saw from

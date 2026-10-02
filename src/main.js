@@ -38,7 +38,9 @@ import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
-import { NOTES, MEMOS, dueNote, noteById } from './core/story.js';
+import {
+  NOTES, MEMOS, dueNote, noteById, LAST_SLOT, lastSlotOpen, photoSlots,
+} from './core/story.js';
 import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
@@ -168,6 +170,14 @@ function progressChanged(before) {
   return Boolean(before) && !isComplete(summarize(before, BODIES, MISSIONS, STORIES)) && isComplete(now);
 }
 
+// How many journal slots are filled, out of how many.
+const tally = () => score(summarize(progress, BODIES, MISSIONS, STORIES));
+// Whether the last slot (the Pale Blue Dot) may be filled yet (core/story.js).
+function lastOpen() {
+  const { done, total } = tally();
+  return lastSlotOpen(progress, done, total);
+}
+
 // Until when (performance.now()) the sprite character cheers a completed journal.
 let cheerUntil = 0;
 // The Sun's visibility last frame, for the sprite character shivering in a shadow.
@@ -249,7 +259,8 @@ async function init() {
         }
         return;
       }
-      const done = completedMissions({
+      // The last slot is held back until the rest is done and she is far enough out.
+      const slots = photoSlots(completedMissions({
         position: state.position,
         orientation: multiply(state.orientation, shot.orientation),
         fovY: shot.fov,
@@ -257,7 +268,12 @@ async function init() {
         heroVisible: shot.heroVisible,
         bodies,
         craft,
+      }), {
+        open: lastOpen(),
+        earthKm: Math.hypot(...here('earth').position.map((n, i) => n - state.position[i])),
+        progress,
       });
+      const done = slots.missions;
       if (shot.thumb) {
         const local = nearestLocalBody(state.position, bodies);
         album = saveAlbum(addPhoto(album, {
@@ -270,13 +286,21 @@ async function init() {
       }
       const before = progress;
       const result = recordPhotos(progress, done);
-      if (!result.newly.length) return;
-      progress = result.progress;
+      const told = recordStories(result.progress, slots.stories);
+      if (slots.held === 'locked') toast.show('창백한 푸른 점은 수첩의 마지막 칸입니다. 나머지 칸을 모두 채우면 열립니다.');
+      if (slots.held === 'near') toast.show('마지막 칸은 지구에서 6,000만km 넘게 떨어져서 찍어야 채워집니다.');
+      if (!result.newly.length && !told.newly.length) return;
+      progress = told.progress;
       const finished = progressChanged(before);
       for (const id of result.newly) {
         const event = { type: 'photo', missionName: MISSIONS.find((mm) => mm.id === id).name };
         toast.show(eventMessage(event));
         sound.cue(cueForEvent(event));
+      }
+      for (const id of told.newly) {
+        const story = STORIES.find((s) => s.id === id);
+        toast.show(eventMessage({ type: 'story', name: story.name, text: story.text }));
+        say.show('저 점이 지구야? 진짜 작다.');
       }
       if (finished) celebrate();
     },
@@ -493,7 +517,8 @@ async function init() {
       previous = null;
       if (!first) return;
       noteWait = NOTE_GAP_S;
-      say.show(note.line);
+      // The last line was spoken at the gate.
+      if (!note.gate) say.show(note.line);
     },
   });
 
@@ -507,6 +532,8 @@ async function init() {
     },
     notes: NOTES,
     memos: MEMOS,
+    lastSlot: LAST_SLOT,
+    lastShut: () => !lastOpen(),
     onNote(id) {
       noteCard.show(noteById(id), false);
       notePriorPause = journalPriorPause;
@@ -731,9 +758,11 @@ async function init() {
       progress = met.progress;
       saveProgress(progress);
     }
+    // The Pale Blue Dot is not logged by going far: it is the last slot, filled by a
+    // photograph (photoSlots above).
     const told = recordStories(progress, completedStories({
       position: state.position, restingOn: state.restingOn, bodies, craft, sites,
-    }));
+    }).filter((id) => id !== LAST_SLOT));
     const storyEvents = told.newly.map((id) => {
       const story = STORIES.find((s) => s.id === id);
       return { type: 'story', name: story.name, text: story.text };
@@ -764,7 +793,8 @@ async function init() {
 
     // A note that has fallen due comes out once she is at rest from whatever she was
     // doing: not during a glide or a jump, nor on top of a story card.
-    const note = dueNote(progress, score(summarize(progress, BODIES, MISSIONS, STORIES)).done);
+    const filled = tally();
+    const note = dueNote(progress, filled.done, filled.total);
     if (note?.id !== noteDueId) {
       noteDueId = note?.id ?? null;
       if (note) noteWait = Math.max(noteWait, NOTE_AFTER_S);

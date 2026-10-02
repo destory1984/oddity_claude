@@ -15,9 +15,12 @@ export function cacheVersion(entries) {
   return createHash('sha256').update(entries.join('\n')).digest('hex').slice(0, 8);
 }
 
-export function renderServiceWorker(template, entries) {
+// stamp: a digest of what is in the public files. Their names carry no hash, so a
+// picture redrawn under the same name (a new crane, a new frame) would otherwise leave
+// the version, and the copy in an installed game, unchanged.
+export function renderServiceWorker(template, entries, stamp = '') {
   return template
-    .replaceAll('__VERSION__', cacheVersion(entries))
+    .replaceAll('__VERSION__', cacheVersion(stamp ? [...entries, stamp] : entries))
     .replaceAll('__PRECACHE__', JSON.stringify(entries));
 }
 
@@ -29,6 +32,16 @@ function listFiles(dir, base = dir) {
   });
 }
 
+// One digest over the contents of the given files, in name order.
+export function contentStamp(dir, files) {
+  const hash = createHash('sha256');
+  for (const file of [...files].sort()) {
+    hash.update(file);
+    hash.update(fs.readFileSync(path.join(dir, file)));
+  }
+  return hash.digest('hex').slice(0, 16);
+}
+
 // Vite plugin: emits sw.js with the full file list. A new build with different files
 // produces a different worker, so browsers install it and drop the old cache.
 export function serviceWorkerPlugin({ template = 'src/sw.js', publicDir = 'public' } = {}) {
@@ -36,8 +49,9 @@ export function serviceWorkerPlugin({ template = 'src/sw.js', publicDir = 'publi
     name: 'space-oddity-service-worker',
     apply: 'build',
     generateBundle(_, bundle) {
-      const entries = precacheEntries(Object.keys(bundle), listFiles(publicDir));
-      const source = renderServiceWorker(fs.readFileSync(template, 'utf8'), entries);
+      const publicFiles = listFiles(publicDir);
+      const entries = precacheEntries(Object.keys(bundle), publicFiles);
+      const source = renderServiceWorker(fs.readFileSync(template, 'utf8'), entries, contentStamp(publicDir, publicFiles));
       this.emitFile({ type: 'asset', fileName: 'sw.js', source });
     },
   };

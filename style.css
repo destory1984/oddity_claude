@@ -1973,21 +1973,30 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 /* ---- The pixel skin of the flight screen (docs/art-order-ui.md) ----
-   Frames are small pixel-art pictures stretched by border-image (build/ui-frames.py);
-   icons are white pixel drawings (public/assets/ui/icon-*.png). The text keeps the
-   screen font: only frames, buttons and icons are pixel art. */
+   A frame is drawn with shadows, not a picture: four 2 px strips on the sides, which
+   leaves the corner pixel out as on an old console, and a dark edge behind them. No
+   picture is stretched, so nothing blurs and no seam shows. Icons are white pixel
+   drawings (public/assets/ui/icon-*.png). The text keeps the screen font. */
+:root {
+  --px-line:#cfd0f2;
+  --px-edge:#050a22;
+  --px-fill:#0a1132eb;
+  --px-gold:#f6b951;
+}
+
 #hud nav button,
 #targetPanel button,
 footer button,
 #guide button,
 #photoTools button {
-  border:12px solid transparent;
-  border-image:url("/assets/ui/frame-button.png") 12 fill / 12px stretch;
+  --line:var(--px-line);
+  border:0;
   border-radius:0;
-  background:none;
+  background:var(--px-fill);
   backdrop-filter:none;
-  image-rendering:pixelated;
-  padding:0 6px;
+  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line),
+    0 0 0 2px var(--px-edge),
+    -4px 0 0 0 var(--px-edge), 4px 0 0 0 var(--px-edge), 0 -4px 0 0 var(--px-edge), 0 4px 0 0 var(--px-edge);
 }
 
 #hud nav button:hover,
@@ -1995,8 +2004,7 @@ footer button,
 footer button:hover,
 #guide button:hover,
 #photoTools button:hover {
-  background:none;
-  filter:brightness(1.35);
+  background:#16226aeb;
 }
 
 #hud nav button:active,
@@ -2004,24 +2012,41 @@ footer button:hover,
 footer button:active,
 #guide button:active,
 #photoTools button:active {
-  border-image-source:url("/assets/ui/frame-button-down.png");
+  --line:var(--px-gold);
+  background:#1a2a6c;
+}
+
+/* Saving the photo is the one thing to press there: gold, with dark letters. */
+#photoTools #capture {
+  --line:#fff3c4;
+  background:#f6b951;
+  color:#081725;
+  font-weight:600;
+}
+
+#photoTools #capture:hover {
+  background:#ffd07a;
 }
 
 #photoTools button:disabled {
-  border-image-source:url("/assets/ui/frame-button-off.png");
+  --line:#7a7fa0;
   opacity:1;
   color:#7a7fa0;
 }
 
 /* The six buttons at the top: an icon each; the journal's also shows the count. The
    words stay as the button's name for screen readers. */
+#hud nav {
+  gap:12px;
+}
+
 #hud nav button {
   display:inline-flex;
   align-items:center;
   justify-content:center;
   gap:8px;
-  width:48px;
-  min-height:48px;
+  width:44px;
+  min-height:44px;
   padding:0;
   font-size:0;
 }
@@ -2052,13 +2077,14 @@ footer button:active,
 
 #hud nav #journalButton {
   width:auto;
-  padding:0 6px 0 2px;
+  padding:0 10px 0 8px;
   font-size:14px;
   font-variant-numeric:tabular-nums;
 }
 
+/* Stopped: the pause button is lined in gold. */
 #hud nav #pauseButton.paused {
-  border-image-source:url("/assets/ui/frame-pill.png");
+  --line:var(--px-gold);
 }
 
 /* A phone: the six buttons take the whole top row, each big enough for a finger; the
@@ -2075,97 +2101,126 @@ footer button:active,
   }
 
   #hud nav {
-    gap:5px;
+    gap:10px;
   }
 
   #hud nav button {
-    min-width:48px;
+    min-width:44px;
     padding:0;
     font-size:0;
   }
 
   #hud nav #journalButton {
-    width:auto;
-    gap:5px;
-    padding:0 3px 0 0;
+    gap:6px;
+    padding:0 8px 0 6px;
     font-size:12px;
+  }
+
+  /* The goal line sits under a two-line notice, not behind it. */
+  #guide {
+    top:372px;
   }
 }
 
 #targetPanel button {
-  min-height:42px;
-  padding:0 8px;
+  min-height:38px;
+  padding:8px 14px;
+  margin-top:14px;
 }
 
 #reverseButton,#flyButton,#brake {
-  min-height:38px;
-  padding:0 5px;
+  min-height:34px;
+  padding:6px 12px;
 }
 
 /* Names of bodies, craft and places: a thin blue line round a faint fill, so the sky
    shows through; the chosen one and the goal are lined in gold. */
 .marker {
-  border:6px solid transparent;
-  border-image:url("/assets/ui/frame-label.png") 6 fill / 6px stretch;
+  --line:#3d5bb5;
+  border:0;
   border-radius:0;
-  background:none;
+  background:#0a113278;
   backdrop-filter:none;
-  image-rendering:pixelated;
+  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line);
   min-height:0;
-  padding:1px 6px;
+  padding:4px 9px;
   color:#dfe6ff;
 }
 
 .marker:hover {
-  background:none;
-  filter:brightness(1.35);
+  background:#16226aaa;
 }
 
 .marker.inView {
-  background:none;
+  background:#0a113278;
 }
 
 .marker.selected,
 .marker.goal {
-  border-image-source:url("/assets/ui/frame-label-gold.png");
+  --line:var(--px-gold);
+  background:#0a1132aa;
+}
+
+/* The goal pulses with a ring of its own outside the line. */
+.marker.goal {
+  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line);
+  outline:2px solid #f6b95155;
+  outline-offset:4px;
+  animation:goalRing 1.4s ease-in-out infinite;
+}
+
+@keyframes goalRing {
+  50% { outline-offset:8px; outline-color:#f6b95100; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .marker.goal { animation:none; }
 }
 
 #toast {
-  border:6px solid transparent;
-  border-image:url("/assets/ui/frame-toast.png") 6 fill / 6px stretch;
+  --line:#3d5bb5;
+  border:0;
   border-radius:0;
-  background:none;
-  image-rendering:pixelated;
-  padding:6px 14px;
+  background:#08112be6;
+  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line);
+  padding:10px 18px;
 }
 
 #guide {
-  border:12px solid transparent;
-  border-image:url("/assets/ui/frame-pill.png") 12 fill / 12px stretch;
+  --line:var(--px-gold);
+  border:0;
   border-radius:0;
-  background:none;
-  image-rendering:pixelated;
-  padding:0 2px 0 8px;
+  background:var(--px-fill);
+  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line),
+    0 0 0 2px var(--px-edge),
+    -4px 0 0 0 var(--px-edge), 4px 0 0 0 var(--px-edge), 0 -4px 0 0 var(--px-edge), 0 4px 0 0 var(--px-edge);
+  padding:8px 10px 8px 14px;
 }
 
 #guide button {
-  min-height:36px;
-  border-width:8px;
-  border-image-width:8px;
+  min-height:32px;
+  padding:4px 12px;
+}
+
+#guide #guideJump {
+  --line:var(--px-gold);
+  border:0;
+  border-radius:0;
+  color:#f6b951;
 }
 
 /* Seora's bubble: paper with a navy pixel line, and a stepped point under it. */
 #heroSay {
-  border:8px solid transparent;
-  border-image:url("/assets/ui/frame-bubble.png") 8 fill / 8px stretch;
+  --line:#1a2894;
+  border:0;
   border-radius:0;
-  background:none;
-  image-rendering:pixelated;
-  padding:3px 9px;
+  background:#fffdf4;
+  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line);
+  padding:8px 14px;
 }
 
 #heroSay::after {
-  bottom:-16px;
+  bottom:-12px;
   width:16px;
   height:10px;
   background:url("/assets/ui/bubble-tail.png") center / contain no-repeat;
@@ -2184,9 +2239,10 @@ input[type=range] {
   accent-color:#f6b951;
 }
 
+
 /* ---- The journal as a paper notebook (docs/art-order-ui.md) ----
    A worn leather cover round a cream page, brown ink, index tabs, and small buttons
-   lined like a rubber stamp. The same paper as grandmother's notes. */
+   lined in brown like a rubber stamp's edge. The same paper as grandmother's notes. */
 #journal {
   border:12px solid transparent;
   border-image:url("/assets/ui/frame-book.png") 12 fill / 12px stretch;
@@ -2229,46 +2285,51 @@ input[type=range] {
 #journal #journalNotes button,
 #journal #dailyGo,
 #journal #closeJournal {
-  border:6px solid transparent;
-  border-image:url("/assets/ui/frame-paper-button.png") 6 fill / 6px stretch;
+  --line:#5a3d22;
+  border:0;
   border-radius:0;
-  background:none;
+  background:#faf3de;
   backdrop-filter:none;
-  image-rendering:pixelated;
+  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line);
   color:#3b2a1a;
-  padding:0 8px;
 }
 
 #journal button:hover {
-  background:none;
-  filter:brightness(.94);
+  background:#f0e4c2;
 }
 
 #journal button:active {
-  border-image-source:url("/assets/ui/frame-paper-button-down.png");
+  background:#e3d2a6;
 }
 
 #journal button:focus-visible {
   outline-color:#1a2894;
-  outline-offset:2px;
+  outline-offset:4px;
 }
 
 /* Index tabs: the chosen one is gold and stands a little taller. */
+#journalTabs {
+  gap:6px;
+  padding-top:6px;
+}
+
 #journal #journalTabs button {
-  border-image-source:url("/assets/ui/frame-tab.png");
-  min-height:34px;
-  padding:0 9px;
+  background:#dcc9a0;
+  min-height:32px;
+  padding:4px 11px;
+  margin-bottom:2px;
 }
 
 #journal #journalTabs button[aria-selected="true"] {
-  border-image-source:url("/assets/ui/frame-tab-on.png");
-  background:none;
+  background:#f2c14e;
   color:#3b2a1a;
   font-weight:600;
-  min-height:40px;
+  min-height:38px;
 }
 
 #journal #closeJournal {
+  width:40px;
+  height:40px;
   font-weight:700;
 }
 

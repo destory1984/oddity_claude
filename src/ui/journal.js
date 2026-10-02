@@ -76,6 +76,9 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     $('journalDaily').hidden = !today;
     if (!today) return;
     $('dailyText').textContent = `${today.done ? '★' : '☆'} 오늘의 부탁: ${today.text}`;
+    // The last seven days, today last.
+    $('dailyWeek').setAttribute('aria-label', `지난 7일 가운데 ${today.week.filter(Boolean).length}일 해냄`);
+    $('dailyWeek').replaceChildren(...today.week.map((did) => (did ? picture('notebook/day-star.png', '') : document.createElement('i'))));
     $('dailyCount').textContent = `해낸 날 ${today.days}일${today.streak > 1 ? ` · ${today.streak}일째 이어서` : ''}`;
     $('dailyGo').hidden = today.done;
   }
@@ -198,7 +201,9 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const solved = done && (lastProgress.quiz ?? []).includes(story.id);
       li.className = solved ? 'done solved' : done ? 'done' : shut ? 'clipping' : '';
       const title = document.createElement('strong');
-      title.textContent = `${solved ? '◎' : done ? '✓' : '○'} ${story.name}${story.year ? ` (${story.year}년)` : ''}`;
+      title.textContent = `${done ? '✓' : '○'} ${story.name}${story.year ? ` (${story.year}년)` : ''}`;
+      // Its question answered right: grandmother's red ring before the name.
+      if (solved) title.prepend(picture('notebook/mark-right.png', '문제를 맞힘'));
       const line = document.createElement('span');
       line.textContent = done ? story.text : shut ? CLIPPING : last ? `${story.hint}. 거기서 지구를 사진에 담기` : story.hint;
       li.append(title, line);

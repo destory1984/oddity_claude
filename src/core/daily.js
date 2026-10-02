@@ -109,3 +109,10 @@ export function streak(daily, today) {
   }
   return count;
 }
+
+// Whether each of the last seven days was done, today last.
+export function lastWeek(daily, today) {
+  const done = new Set(daily.days.map(dayNumber));
+  const n = dayNumber(today);
+  return [6, 5, 4, 3, 2, 1, 0].map((back) => done.has(n - back));
+}

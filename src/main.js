@@ -39,7 +39,8 @@ import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
-import { dailyRequest, requestTarget, requestMet, recordDay, streak } from './core/daily.js';
+import { dailyRequest, requestTarget, requestMet, recordDay, streak, lastWeek } from './core/daily.js';
+import { palFor } from './core/pal.js';
 import {
   LANDED, IDLE, AGAIN, IDLE_AFTER_S, IDLE_GAP_S, freshLine, milestoneLine,
 } from './core/lines.js';
@@ -663,6 +664,8 @@ async function init() {
     const count = repliesDue.length;
     repliesDue = [];
     noteCard.show({
+      image: 'mailbox.png',
+      imageAlt: '아침의 대문 옆 나무 우편함. 우표와 소인이 찍힌 누런 봉투가 반쯤 나와 있다',
       scene: count > 1 ? `우편함에 할머니의 답장이 ${count}통 와 있다.` : '우편함에 할머니의 답장이 와 있다.',
       title: '서라에게',
       text: texts.join('\n\n'),
@@ -693,6 +696,7 @@ async function init() {
       done: requestDone(),
       days: daily.days.length,
       streak: streak(daily, today),
+      week: lastWeek(daily, today),
       go() {
         selectedId = requestTarget(request);
         hud.showSelection(named(selectedId));
@@ -973,6 +977,8 @@ async function init() {
       const run = streak(daily, today);
       toast.show(`오늘의 부탁을 해냈습니다. 수첩에 별이 붙었습니다(해낸 날 ${daily.days.length}일${run > 1 ? `, ${run}일째 이어서` : ''}).`);
       say.show(run > 0 && run % 7 === 0 ? '일주일 내내 했어! 대단하지?' : '부탁 끝! 할머니 좋아하시겠다.');
+      // Seven days running: a stamp of seven stars.
+      if (run > 0 && run % 7 === 0) stampDown('notebook/stamp-week.png');
       sound.cue('discovered');
     }
     photoSubject = null;
@@ -1124,6 +1130,8 @@ async function init() {
         warp: warp.phase(),
         photo: photo.active() && photo.heroVisible(),
         cheer: performance.now() < cheerUntil,
+        // The companion earned last (core/pal.js); drawn beside the sprite character only.
+        pal: palFor({ ...tally(), allTours: allToursDone(progress) }),
         read: performance.now() < readUntil,
         // Getting up as soon as she moves off.
         sit: performance.now() < sitUntil && Boolean(visit) && hasArrived(visit),

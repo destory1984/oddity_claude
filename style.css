@@ -1916,3 +1916,53 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   color:#3b2a1a;
   cursor:default;
 }
+
+/* The last seven days of today's request: a star for a day done, a dot for one not. */
+#dailyWeek {
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+}
+
+#dailyWeek img {
+  width:16px;
+  height:16px;
+  image-rendering:pixelated;
+}
+
+#dailyWeek i {
+  width:16px;
+  height:16px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#dailyWeek i::before {
+  content:"";
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:#b79a6a;
+}
+
+/* Grandmother's red pencil: a ring for right, a triangle for not yet. */
+#storyQuizResult img,
+#journalStories li.solved strong img {
+  width:20px;
+  height:20px;
+  margin-right:6px;
+  vertical-align:-5px;
+  image-rendering:pixelated;
+}
+
+#journalStories li.solved strong img {
+  width:16px;
+  height:16px;
+  margin-right:4px;
+  padding:2px;
+  border-radius:3px;
+  background:#f2e6c8;
+  vertical-align:-4px;
+  box-sizing:content-box;
+}

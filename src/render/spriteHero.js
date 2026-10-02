@@ -3,6 +3,7 @@ import {
 } from './babylon.js';
 import { FLIGHT_SHEETS, FRAMES, createSpriteState, stepSprite, spriteFrame, spriteFile } from '../core/sprite.js';
 import { heroScaleFor } from '../core/pose.js';
+import { PAL_FPS, PAL_FRAMES, palFile } from '../core/pal.js';
 
 // A trial of the character as pixel-art drawings instead of the folded-paper model:
 // one flat card that always faces the camera, showing one of 152 drawings chosen by
@@ -13,6 +14,10 @@ import { heroScaleFor } from '../core/pose.js';
 // paper model stands about 2.9 tall. (At 3.4 she covered too much of the view.)
 const CARD_HEIGHT = 2.4;
 const CARD_AT = [0, -0.75, 6];
+// The companion beside her (core/pal.js): 64 x 64 drawings on a card of its own, up by
+// her left shoulder as the camera sees her.
+const PAL_SIZE = (CARD_HEIGHT * 64) / 256;
+const PAL_OFFSET = [-0.82, 0.78];
 
 export function createSpriteHero(engine) {
   const scene = new Scene(engine);
@@ -53,6 +58,26 @@ export function createSpriteHero(engine) {
   material.backFaceCulling = false;
   card.material = material;
 
+  const palCard = CreatePlane('heroPal', { width: PAL_SIZE, height: PAL_SIZE }, scene);
+  palCard.billboardMode = Mesh.BILLBOARDMODE_ALL;
+  palCard.isPickable = false;
+  palCard.setEnabled(false);
+  const palMaterial = new StandardMaterial('heroPal', scene);
+  palMaterial.disableLighting = true;
+  palMaterial.useAlphaFromDiffuseTexture = true;
+  palMaterial.backFaceCulling = false;
+  palCard.material = palMaterial;
+  const palDrawings = new Map();
+  function palDrawing(id, frame) {
+    const file = palFile(id, frame);
+    if (!palDrawings.has(file)) {
+      const texture = new Texture(base + file, scene, true, true, Texture.NEAREST_SAMPLINGMODE);
+      texture.hasAlpha = true;
+      palDrawings.set(file, texture);
+    }
+    return palDrawings.get(file);
+  }
+
   let state = createSpriteState();
   let elapsed = 0;
   // The drawing on the card now and where the card is on screen, for labels to pass
@@ -80,6 +105,19 @@ export function createSpriteHero(engine) {
     const afloat = state.mode === 'hover';
     card.position.y = CARD_AT[1] + (afloat ? Math.sin(elapsed * 1.5) * 0.04 : 0);
     card.setEnabled(visible);
+    // The companion keeps its place by her shoulder and is hidden with her.
+    const pal = move.pal ?? null;
+    const palNow = pal ? palDrawing(pal, Math.floor(elapsed * PAL_FPS) % PAL_FRAMES) : null;
+    palCard.setEnabled(Boolean(pal) && visible && palNow.isReady());
+    if (palNow?.isReady()) {
+      for (let frame = 0; frame < PAL_FRAMES; frame++) palDrawing(pal, frame);
+      palMaterial.diffuseTexture = palNow;
+      palMaterial.emissiveTexture = palNow;
+      palMaterial.emissiveColor = new Color3(lit, lit, lit);
+      const scale = card.scaling.y;
+      palCard.scaling.setAll(scale);
+      palCard.position.set(CARD_AT[0] + PAL_OFFSET[0] * scale, card.position.y + PAL_OFFSET[1] * scale, CARD_AT[2]);
+    }
     // As shares of the view's height: the card's height, and how far its middle is
     // above the middle of the view. (The card faces the camera, 6 units ahead.)
     const span = 2 * CARD_AT[2] * Math.tan(fov / 2);

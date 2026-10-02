@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  dailyRequest, requestTarget, requestMet, createDaily, sanitizeDaily, recordDay, streak, ANNIVERSARY_COUNT,
+  dailyRequest, requestTarget, requestMet, createDaily, sanitizeDaily, recordDay, streak, lastWeek, ANNIVERSARY_COUNT,
 } from '../src/core/daily.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 import { STORIES } from '../src/core/stories.js';
@@ -78,6 +78,8 @@ test('days done are kept once, and the run of days counts back from today or yes
   assert.equal(streak(daily, '2026-10-03'), 2);
   assert.equal(streak(daily, '2026-10-04'), 0);
   assert.equal(streak(createDaily(), '2026-10-02'), 0);
+  // 26 Sept to 2 Oct: the 28th, the 1st and the 2nd were done.
+  assert.deepEqual(lastWeek(daily, '2026-10-02'), [false, false, true, false, false, true, true]);
   assert.deepEqual(sanitizeDaily({ days: ['2026-10-02', 'junk', 3, '2026-10-02'] }), { days: ['2026-10-02'] });
   assert.deepEqual(sanitizeDaily(null), createDaily());
 });

@@ -5,6 +5,7 @@ import {
 } from '../src/core/story.js';
 import { STORIES } from '../src/core/stories.js';
 import { CRAFT } from '../src/core/craft.js';
+import { existsSync } from 'node:fs';
 import { createProgress, recordNote, sanitizeProgress } from '../src/core/progress.js';
 import { BODIES } from '../src/core/bodies.js';
 import { MISSIONS } from '../src/core/missions.js';
@@ -23,6 +24,11 @@ test("grandmother's notes come in the order of their years, each with a line fro
     assert.ok(!note.text.includes('~'), note.id);
   }
   assert.equal(noteById('y1969').title, '1969.7.21');
+  // Every note has its scene drawn, on file, with words for those who cannot see it.
+  for (const note of NOTES) {
+    assert.ok(existsSync(`public/assets/notebook/${note.image}`), note.id);
+    assert.ok(note.imageAlt.length >= 10, note.id);
+  }
   assert.equal(noteById('nothing'), null);
 });
 

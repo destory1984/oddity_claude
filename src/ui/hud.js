@@ -3,7 +3,8 @@ import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped } from '
 
 const $ = (id) => document.getElementById(id);
 const ARROWS = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
-const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 1 });
+// Whole numbers only: the altitude and the speed are shown without a decimal.
+const fmt = (n) => Math.round(n).toLocaleString('ko-KR');
 const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
 
 export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] }) {
@@ -65,7 +66,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
     // knownIds: a Set of what is in the journal (bodies found, craft met, places logged).
     update({ view, local, selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [], knownIds = null }) {
       $('altitudeLabel').textContent = local.label;
-      $('altitude').textContent = Math.round(local.altitude).toLocaleString('ko-KR');
+      $('altitude').textContent = fmt(local.altitude);
       const backward = speed > 0.01 && motionSign < 0;
       $('speed').innerHTML = `${backward ? '후진 ' : ''}${fmt(speed)} <small>km/s</small>`;
       $('lightSpeed').textContent = `${backward ? '-' : ''}${(speed / C).toFixed(6)} c`;

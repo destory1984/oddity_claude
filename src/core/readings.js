@@ -1,7 +1,9 @@
 // Something to read about each body and each craft, shown while it is looked at closely
 // (ui/inspectInfo.js). Two paragraphs each. A story place has its own longer telling in
-// core/storyDetails.js. These are first drafts written from memory and not yet checked
-// against sources: keep to what is widely documented, and no figure without a unit.
+// core/storyDetails.js. Written from memory, then gone over once against sources on
+// 2026-10-03 (doubtful claims looked up, the rest held against well-known figures): keep
+// to what is widely documented, and no figure without a unit. The answers of
+// core/readingQuiz.js are phrases of these texts: a change here may need one there.
 import { SPIN_DAY_S } from './surface.js';
 import { AU_KM } from './bodies.js';
 

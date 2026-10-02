@@ -1968,3 +1968,383 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   vertical-align:-4px;
   box-sizing:content-box;
 }
+
+/* ---- The pixel skin of the flight screen (docs/art-order-ui.md) ----
+   Frames are small pixel-art pictures stretched by border-image (build/ui-frames.py);
+   icons are white pixel drawings (public/assets/ui/icon-*.png). The text keeps the
+   screen font: only frames, buttons and icons are pixel art. */
+#hud nav button,
+#targetPanel button,
+footer button,
+#guide button,
+#photoTools button {
+  border:12px solid transparent;
+  border-image:url("/assets/ui/frame-button.png") 12 fill / 12px stretch;
+  border-radius:0;
+  background:none;
+  backdrop-filter:none;
+  image-rendering:pixelated;
+  padding:0 6px;
+}
+
+#hud nav button:hover,
+#targetPanel button:hover,
+footer button:hover,
+#guide button:hover,
+#photoTools button:hover {
+  background:none;
+  filter:brightness(1.35);
+}
+
+#hud nav button:active,
+#targetPanel button:active,
+footer button:active,
+#guide button:active,
+#photoTools button:active {
+  border-image-source:url("/assets/ui/frame-button-down.png");
+}
+
+#photoTools button:disabled {
+  border-image-source:url("/assets/ui/frame-button-off.png");
+  opacity:1;
+  color:#7a7fa0;
+}
+
+/* The six buttons at the top: an icon each; the journal's also shows the count. The
+   words stay as the button's name for screen readers. */
+#hud nav button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:48px;
+  min-height:48px;
+  padding:0;
+  font-size:0;
+}
+
+#hud nav button::before {
+  content:"";
+  flex:none;
+  width:24px;
+  height:24px;
+  background:center / contain no-repeat;
+  image-rendering:pixelated;
+}
+
+#hud nav #soundButton::before { background-image:url("/assets/ui/icon-sound-on.png"); }
+#hud nav #soundButton.off::before { background-image:url("/assets/ui/icon-sound-off.png"); }
+#hud nav #bgmButton::before { background-image:url("/assets/ui/icon-music-on.png"); }
+#hud nav #bgmButton.off::before { background-image:url("/assets/ui/icon-music-off.png"); }
+#hud nav #helpButton::before { background-image:url("/assets/ui/icon-help.png"); }
+#hud nav #pauseButton::before { background-image:url("/assets/ui/icon-pause.png"); }
+#hud nav #pauseButton.paused::before { background-image:url("/assets/ui/icon-play.png"); }
+#hud nav #journalButton::before { background-image:url("/assets/ui/icon-journal.png"); }
+#hud nav #photoButton::before { background-image:url("/assets/ui/icon-camera.png"); }
+
+#hud nav #bgmButton.off {
+  opacity:1;
+  text-decoration:none;
+}
+
+#hud nav #journalButton {
+  width:auto;
+  padding:0 6px 0 2px;
+  font-size:14px;
+  font-variant-numeric:tabular-nums;
+}
+
+#hud nav #pauseButton.paused {
+  border-image-source:url("/assets/ui/frame-pill.png");
+}
+
+/* A phone: the six buttons take the whole top row, each big enough for a finger; the
+   title gives way to them. */
+@media (max-width: 480px) {
+  header {
+    left:12px;
+    right:12px;
+    justify-content:center;
+  }
+
+  .brand {
+    display:none;
+  }
+
+  #hud nav {
+    gap:5px;
+  }
+
+  #hud nav button {
+    min-width:48px;
+    padding:0;
+    font-size:0;
+  }
+
+  #hud nav #journalButton {
+    width:auto;
+    gap:5px;
+    padding:0 3px 0 0;
+    font-size:12px;
+  }
+}
+
+#targetPanel button {
+  min-height:42px;
+  padding:0 8px;
+}
+
+#reverseButton,#flyButton,#brake {
+  min-height:38px;
+  padding:0 5px;
+}
+
+/* Names of bodies, craft and places: a thin blue line round a faint fill, so the sky
+   shows through; the chosen one and the goal are lined in gold. */
+.marker {
+  border:6px solid transparent;
+  border-image:url("/assets/ui/frame-label.png") 6 fill / 6px stretch;
+  border-radius:0;
+  background:none;
+  backdrop-filter:none;
+  image-rendering:pixelated;
+  min-height:0;
+  padding:1px 6px;
+  color:#dfe6ff;
+}
+
+.marker:hover {
+  background:none;
+  filter:brightness(1.35);
+}
+
+.marker.inView {
+  background:none;
+}
+
+.marker.selected,
+.marker.goal {
+  border-image-source:url("/assets/ui/frame-label-gold.png");
+}
+
+#toast {
+  border:6px solid transparent;
+  border-image:url("/assets/ui/frame-toast.png") 6 fill / 6px stretch;
+  border-radius:0;
+  background:none;
+  image-rendering:pixelated;
+  padding:6px 14px;
+}
+
+#guide {
+  border:12px solid transparent;
+  border-image:url("/assets/ui/frame-pill.png") 12 fill / 12px stretch;
+  border-radius:0;
+  background:none;
+  image-rendering:pixelated;
+  padding:0 2px 0 8px;
+}
+
+#guide button {
+  min-height:36px;
+  border-width:8px;
+  border-image-width:8px;
+}
+
+/* Seora's bubble: paper with a navy pixel line, and a stepped point under it. */
+#heroSay {
+  border:8px solid transparent;
+  border-image:url("/assets/ui/frame-bubble.png") 8 fill / 8px stretch;
+  border-radius:0;
+  background:none;
+  image-rendering:pixelated;
+  padding:3px 9px;
+}
+
+#heroSay::after {
+  bottom:-16px;
+  width:16px;
+  height:10px;
+  background:url("/assets/ui/bubble-tail.png") center / contain no-repeat;
+  transform:translateX(-50%);
+  border-radius:0;
+  image-rendering:pixelated;
+}
+
+/* The map and the thrust bar: a pale ring with a dark edge, a gold handle. */
+#minimap {
+  border-radius:50%;
+  box-shadow:0 0 0 2px #cfd0f2, 0 0 0 4px #050a22;
+}
+
+input[type=range] {
+  accent-color:#f6b951;
+}
+
+/* ---- The journal as a paper notebook (docs/art-order-ui.md) ----
+   A worn leather cover round a cream page, brown ink, index tabs, and small buttons
+   lined like a rubber stamp. The same paper as grandmother's notes. */
+#journal {
+  border:12px solid transparent;
+  border-image:url("/assets/ui/frame-book.png") 12 fill / 12px stretch;
+  border-radius:0;
+  background:none;
+  color:#3b2a1a;
+  scrollbar-color:#8a5428 #e3d2a6;
+}
+
+#journal p,
+#journal .muted {
+  color:#6b5236;
+}
+
+#journal h2 {
+  color:#3b2a1a;
+  font-weight:600;
+}
+
+#journalSummary,
+#journal #journalSummary {
+  color:#3b2a1a;
+  font-weight:600;
+}
+
+/* Faint ruled lines that scroll with the page. */
+#journalScroll {
+  background:repeating-linear-gradient(#0000 0 27px, #b79a6a2e 27px 28px) local;
+}
+
+#journalTabs {
+  border-bottom:2px solid #5a3d22;
+  padding-bottom:0;
+  gap:2px;
+  align-items:flex-end;
+}
+
+#journal button,
+#journal #journalTabs button,
+#journal #journalNotes button,
+#journal #dailyGo,
+#journal #closeJournal {
+  border:6px solid transparent;
+  border-image:url("/assets/ui/frame-paper-button.png") 6 fill / 6px stretch;
+  border-radius:0;
+  background:none;
+  backdrop-filter:none;
+  image-rendering:pixelated;
+  color:#3b2a1a;
+  padding:0 8px;
+}
+
+#journal button:hover {
+  background:none;
+  filter:brightness(.94);
+}
+
+#journal button:active {
+  border-image-source:url("/assets/ui/frame-paper-button-down.png");
+}
+
+#journal button:focus-visible {
+  outline-color:#1a2894;
+  outline-offset:2px;
+}
+
+/* Index tabs: the chosen one is gold and stands a little taller. */
+#journal #journalTabs button {
+  border-image-source:url("/assets/ui/frame-tab.png");
+  min-height:34px;
+  padding:0 9px;
+}
+
+#journal #journalTabs button[aria-selected="true"] {
+  border-image-source:url("/assets/ui/frame-tab-on.png");
+  background:none;
+  color:#3b2a1a;
+  font-weight:600;
+  min-height:40px;
+}
+
+#journal #closeJournal {
+  font-weight:700;
+}
+
+#journalBodies li,
+#journalTours li {
+  border-bottom:1px solid #b79a6a99;
+}
+
+#journalBodies li strong,
+#journalMissions li strong,
+#journalStories li strong,
+#journalCraft li strong,
+#journalTours li strong {
+  color:#3b2a1a;
+  font-weight:600;
+}
+
+#journalBodies .fact,
+#journalBodies .marks,
+#journalBodies .distance,
+#journalMissions li,
+#journalStories li,
+#journalCraft li,
+#journalTours li,
+#journalAlbum figure,
+#journalNotes,
+#dailyCount {
+  color:#7a5a36;
+}
+
+#journalMissions li.done strong,
+#journalStories li.done strong,
+#journalCraft li.done strong,
+#journalTours li.done strong,
+#journalAlbum figcaption span {
+  color:#2f6b3a;
+}
+
+#journalTours li.going strong {
+  color:#a35a00;
+}
+
+/* Grandmother writes in brown ink, Seora in navy. */
+#journalBodies .memo,
+#journalTours .memo,
+#journal li.clipping span,
+#journalAlbum figcaption .sent {
+  color:#7a4a1c;
+}
+
+#journalBodies .said {
+  color:#1a2894;
+}
+
+#journalAlbum figcaption strong {
+  color:#3b2a1a;
+}
+
+#journalAlbum img {
+  border-color:#5a3d22;
+}
+
+/* Slips laid on the page: a shade lighter than the page, with a thin edge. */
+#journalDaily,
+#journalCrane,
+#journalAlbum .reply {
+  background:#fffaf0;
+  border:1px solid #b79a6a;
+}
+
+#journalTours .stamp {
+  background:#fffaf0;
+  border:1px solid #b79a6a66;
+}
+
+#journalStories li.solved {
+  border-left-color:#c98a1a;
+}
+
+#journalStories li.solved strong img {
+  background:none;
+}

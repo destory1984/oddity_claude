@@ -175,7 +175,10 @@ function progressChanged(before) {
   saveProgress(progress);
   const now = summarize(progress, BODIES, MISSIONS, STORIES);
   const { done, total } = score(now);
-  $('journalButton').textContent = `수첩 ${done}/${total}`;
+  // The button shows a notebook icon and the count; its name says the rest.
+  $('journalButton').textContent = `${done}/${total}`;
+  $('journalButton').setAttribute('aria-label', `수첩 ${done}/${total}`);
+  $('journalButton').title = '탐험 수첩 (J)';
   // Eighty, a hundred and twenty, a hundred and sixty slots: Seora counts aloud.
   const counted = before ? milestoneLine(score(summarize(before, BODIES, MISSIONS, STORIES)).done, done) : null;
   if (counted) say.show(counted);
@@ -227,6 +230,8 @@ function setPaused(value) {
   paused = value;
   input?.clear();
   $('pauseButton').textContent = paused ? '비행 계속' : '일시 정지';
+  $('pauseButton').title = paused ? '비행 계속' : '일시 정지 (Esc)';
+  $('pauseButton').classList.toggle('paused', paused);
 }
 
 function brake() {
@@ -761,6 +766,7 @@ async function init() {
 
   function showSoundButton() {
     $('soundButton').textContent = sound.muted() ? '🔇' : '🔊';
+    $('soundButton').classList.toggle('off', sound.muted());
     $('soundButton').setAttribute('aria-label', sound.muted() ? '효과음 켜기' : '효과음 끄기');
     $('soundButton').title = sound.muted() ? '효과음 꺼짐 (M)' : '효과음 켜짐 (M)';
   }

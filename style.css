@@ -17,7 +17,9 @@ html,body {
   overflow:hidden;
   background:#02040b;
   color:var(--ink);
-  font-family:"Segoe UI","Malgun Gothic",sans-serif;
+  /* Pretendard is shipped with the game (public/fonts/pretendard, the author's own web
+     files, unmodified); the others are what a device has if it fails to load. */
+  font-family:"Pretendard Variable",Pretendard,"Segoe UI","Malgun Gothic",sans-serif;
 }
 
 button,input {

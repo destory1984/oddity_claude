@@ -42,3 +42,14 @@ test('the page links the manifest and the iPhone icon, and the worker template h
   assert.match(worker, /__VERSION__/);
   assert.match(worker, /__PRECACHE__/);
 });
+
+test('the screen font is shipped with the game, with its licence, and is the first choice', () => {
+  const css = fs.readFileSync('public/fonts/pretendard/pretendardvariable-dynamic-subset.css', 'utf8');
+  const files = [...css.matchAll(/url\(\.\/(woff2-dynamic-subset\/[^)]+\.woff2)\)/g)].map((m) => m[1]);
+  assert.equal(new Set(files).size, 92);
+  for (const file of new Set(files)) assert.ok(fs.existsSync(`public/fonts/pretendard/${file}`), file);
+  assert.match(css, /font-display: swap/);
+  assert.match(fs.readFileSync('public/fonts/pretendard/LICENSE.txt', 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/);
+  assert.match(fs.readFileSync('index.html', 'utf8'), /href="\/fonts\/pretendard\/pretendardvariable-dynamic-subset\.css"/);
+  assert.match(fs.readFileSync('style.css', 'utf8'), /font-family:"Pretendard Variable",Pretendard,/);
+});

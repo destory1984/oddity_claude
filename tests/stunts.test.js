@@ -103,6 +103,12 @@ test('a lap of Earth: all the way round inside 1,000 km, turning back unwinds it
   let lapped = null;
   for (let deg = 2; deg <= 366 && lapped === null; deg += 2) ({ run: tilted, done: lapped } = stepStunt(tilted, at(ring(deg)), 1));
   assert.ok(lapped !== null, 'the lap is done within one turn and a little');
+  // Hanging still in the band before setting off is not on the clock.
+  let waits = startStunt('earthLap');
+  ({ run: waits } = hold(waits, at(ring(0)), 30));
+  assert.equal(waits.seconds, 0);
+  ({ run: waits } = stepStunt(waits, at(ring(10)), 1));
+  assert.equal(waits.seconds, 1);
   // Back and forth over the same stretch gets nowhere.
   let wig = startStunt('earthLap');
   for (let i = 0; i < 80; i++) ({ run: wig } = stepStunt(wig, at(ring(i % 2 ? 20 : 0)), 1));

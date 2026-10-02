@@ -11,6 +11,8 @@ export const MOON_SKIM_MIN_KM = 1000;
 export const EARTH_LAP_KM = 1000;
 // The lap's way round is settled this far (radians) from where it began.
 const LAP_AXIS_AFTER = 0.15;
+// And its clock starts this far from there (about 35 km over the ground).
+const LAP_STARTS_AT = 0.005;
 
 // better: which way a record is beaten. unit: what the value is counted in.
 export const STUNTS = [
@@ -87,7 +89,8 @@ export function stepStunt(run, sample, dt) {
       const off = cross(run.from.start, out);
       const far = Math.atan2(Math.hypot(...off), dot(run.from.start, out));
       const axis = far >= LAP_AXIS_AFTER ? unit(off) : null;
-      return { run: { ...run, seconds, angle: far, from: { ...run.from, out, axis } }, done: null };
+      // Hanging in the band getting ready is not on the clock: it starts as she sets off.
+      return { run: { ...run, seconds: far < LAP_STARTS_AT ? 0 : seconds, angle: far, from: { ...run.from, out, axis } }, done: null };
     }
     // After that each step is counted round that way; turning back unwinds the angle.
     const { axis } = run.from;

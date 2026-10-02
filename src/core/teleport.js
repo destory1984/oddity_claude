@@ -48,7 +48,12 @@ export function farFrom(target, position) {
   const km = gap(position, target.position);
   if (target.kind === 'craft') return km > DOCK_RANGE_KM;
   if (target.kind === 'site') return km > 2000;
-  return km > 2 * (RINGED[target.id]?.radii ?? VISTA_RADII) * target.radiusKm;
+  return km > 2 * vistaKm(target);
+}
+
+// How far from a body's centre its best view is.
+export function vistaKm(body) {
+  return (RINGED[body.id]?.radii ?? VISTA_RADII) * body.radiusKm;
 }
 
 // Where to stand to see a body at its best: sunlit, with the night edge showing, the

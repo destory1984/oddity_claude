@@ -1452,7 +1452,6 @@ body.touch #reverseButton,body.touch #flyButton,body.touch #brake {
   .brand,
   #surfaceInfo,
   #lightSpeed,
-  .throttle > div:first-child,
   .throttle .rangeLabels {
     display: none;
   }
@@ -2042,7 +2041,9 @@ footer button:active,
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:7px;
+  /* No gap: the button's words (font-size 0, for screen readers) still count as a second
+     item, and a gap beside them pushed the icon 3.5px off the middle. */
+  gap:0;
   width:44px;
   min-height:44px;
   padding:0;
@@ -2075,6 +2076,7 @@ footer button:active,
 }
 
 #hud nav #journalButton {
+  gap:7px;
   width:auto;
   padding:0 12px 0 10px;
   font-size:13px;
@@ -2575,5 +2577,65 @@ dialog:where(:not(#journal)) button:hover {
 
   #help dd {
     line-height:1.6;
+  }
+}
+
+/* A phone: the stamp comes down at the lower left, clear of the notice and of Seora's
+   bubble (at the right of the middle it covered the end of both). */
+@media (max-width: 480px) {
+  #stampFx {
+    right:auto;
+    left:7vw;
+    top:auto;
+    bottom:150px;
+  }
+}
+
+/* The three flight buttons in the order of the motion: back, stop, forward. */
+#brake {
+  order:1;
+}
+
+#flyButton {
+  order:2;
+}
+
+/* A phone: one row of three equal buttons above the thrust bar, under the right thumb.
+   (They stood apart: two on one line 118px from each other, the third under one of them.) */
+@media (max-width: 480px) {
+  #reverseButton,
+  #brake,
+  #flyButton {
+    position:absolute;
+    bottom:92px;
+    width:68px;
+    min-height:44px;
+    padding:0;
+    font-size:14px;
+  }
+
+  #reverseButton { right:152px; }
+  #brake { right:76px; }
+  #flyButton { right:0; }
+
+  #reverseButton kbd,
+  #brake kbd,
+  #flyButton kbd {
+    display:none;
+  }
+}
+
+/* A phone: the thrust bar keeps its name and its value on one small line above it. (They
+   were hidden with the rest of the small print, and the bar alone said nothing.) */
+@media (max-width: 480px) {
+  .throttle > div:first-child {
+    margin-bottom:4px;
+    font-size:11px;
+    color:#c3cdea;
+  }
+
+  .throttle output {
+    font-size:11px;
+    color:#eef3ff;
   }
 }

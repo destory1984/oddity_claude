@@ -120,3 +120,24 @@ test('with two or more waiting, each makes way sooner, and none is lost', () => 
   assert.equal(el.textContent, 'D');
   assert.deepEqual(el.shown, ['A', 'B', 'C', 'D']);
 });
+
+test('a notice of the moment is dropped when its time has passed in the queue', () => {
+  const el = stubElement();
+  const toast = createToast(el);
+  toast.show('A');
+  toast.show('landing, 3..0', null, 2);
+  toast.show('B');
+  toast.show('lightning', null, 60);
+  vi.advanceTimersByTime(60000);
+  assert.deepEqual(el.shown, ['A', 'B', 'lightning']);
+});
+
+test('a notice of the moment comes up when nothing is in its way', () => {
+  const el = stubElement();
+  const toast = createToast(el);
+  toast.show('landing, 3..0', null, 3);
+  toast.show('A');
+  toast.show('soon', null, 30);
+  vi.advanceTimersByTime(60000);
+  assert.deepEqual(el.shown, ['landing, 3..0', 'A', 'soon']);
+});

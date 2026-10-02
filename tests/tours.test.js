@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, advanceTour, allToursDone, stampFile, CRANE_FILE,
+  TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, stopHint, advanceTour, allToursDone, stampFile, CRANE_FILE,
 } from '../src/core/tours.js';
 import { existsSync } from 'node:fs';
 import { BODIES, bodyById } from '../src/core/bodies.js';
@@ -75,12 +75,31 @@ test('a stop is reached at its story place, within discovery range of a body, wi
   const above = (km) => [jupiter.position[0], jupiter.position[1] + jupiter.radiusKm + km, jupiter.position[2]];
   const at = (position, storiesNow = []) => ({ storiesNow, position, bodies: BODIES, craft });
   assert.equal(stopReached({ body: 'jupiter' }, at(above(40000))), true);
-  assert.equal(stopReached({ body: 'jupiter' }, at(above(60000))), false);
+  // As near as the jump puts her counts too: five radii from a body's centre, nine for Saturn.
+  assert.equal(stopReached({ body: 'jupiter' }, at(above(60000))), true);
+  assert.equal(stopReached({ body: 'jupiter' }, at(above(jupiter.radiusKm * 6))), false);
+  for (const id of ['jupiter', 'saturn', 'haleBopp']) {
+    const body = bodyById(id);
+    const spot = teleportSpot(body, { position: [0, 0, 0], progress: createProgress(), bodies: BODIES, anywhere: true, known: true });
+    assert.equal(stopReached({ body: id }, at(spot)), true, id);
+  }
+  const moon = bodyById('moon');
+  assert.equal(stopReached({ body: 'moon' }, at(moon.position.map((n, i) => n + (i === 1 ? moon.radiusKm + 60000 : 0)))), false);
   const danuri = craft.find((c) => c.id === 'danuri');
   assert.equal(stopReached({ craft: 'danuri' }, at(danuri.position.map((n, i) => n + (i === 1 ? 9000 : 0)))), true);
   assert.equal(stopReached({ craft: 'danuri' }, at(danuri.position.map((n, i) => n + (i === 1 ? 11000 : 0)))), false);
   assert.equal(stopReached({ story: 'luna9' }, at([0, 0, 0], ['luna2', 'luna9'])), true);
   assert.equal(stopReached({ story: 'luna9' }, at([0, 0, 0], ['luna2'])), false);
+});
+
+test('a stop the jump does not reach by itself says what is left to do', () => {
+  assert.equal(stopHint({ story: 'voyager2Uranus' }), '천왕성 구름 꼭대기 81,500km 안을 지나기');
+  assert.equal(stopHint({ story: 'apollo11' }), null);
+  assert.equal(stopHint({ body: 'jupiter' }), null);
+  assert.equal(stopHint({ craft: 'danuri' }), null);
+  for (const tour of TOURS) {
+    for (const stop of tour.stops) assert.ok(stopHint(stop) === null || stopHint(stop).length > 5, tour.id);
+  }
 });
 
 test('the log keeps the tours done and the one under way; junk is dropped', () => {

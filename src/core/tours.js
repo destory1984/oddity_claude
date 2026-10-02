@@ -3,6 +3,7 @@ import { STORIES } from './stories.js';
 import { CRAFT } from './craft.js';
 import { DISCOVERY_KM } from './progress.js';
 import { DOCK_RANGE_KM } from './dock.js';
+import { vistaKm } from './teleport.js';
 
 // The nine tours (docs/스토리-할머니의-수첩.md §6): the routes grandmother wrote at the
 // back of her journal, "가 보고 싶은 길". A tour is three to six stops gone round in
@@ -152,6 +153,15 @@ export function stopTarget(stop) {
   return story.type === 'surface' ? story.id : story.target ?? story.body;
 }
 
+// What is still to do after the jump near a stop, when being near is not enough: a
+// fly-by has to come closer than the jump puts her (Voyager 2's Uranus: within 81,500 km,
+// and the jump stops 101,000 km up). null when the jump or a landing does it.
+export function stopHint(stop) {
+  if (!stop.story) return null;
+  const story = storyOf(stop);
+  return story.type === 'surface' ? null : story.hint;
+}
+
 // The tour under way and the stop she is heading for: { tour, stop, step } or null.
 export function currentStop(progress) {
   const tour = progress.tour ? tourById(progress.tour.id) : null;
@@ -169,9 +179,19 @@ export function quitTour(progress) {
 
 // Whether she is at the stop right now. storiesNow: the story places she is at
 // (core/stories.js completedStories); bodies, craft: this frame's positions.
+// The jump's spot counts with this much to spare.
+const VISTA_SLACK = 1.1;
+
 export function stopReached(stop, { storiesNow, position, bodies, craft }) {
   if (stop.story) return storiesNow.includes(stop.story);
-  if (stop.body) return surfaceDistance(position, bodies.find((b) => b.id === stop.body)) <= DISCOVERY_KM;
+  if (stop.body) {
+    // Near enough to find it, or as near as the jump to it puts her: a giant's best
+    // view is far outside the finding range (Jupiter's is 280,000 km up), and the
+    // tour stood still there.
+    const body = bodies.find((b) => b.id === stop.body);
+    const km = surfaceDistance(position, body);
+    return km <= DISCOVERY_KM || km + body.radiusKm <= vistaKm(body) * VISTA_SLACK;
+  }
   const target = craft.find((c) => c.id === stop.craft);
   return Math.hypot(...target.position.map((n, i) => n - position[i])) <= DOCK_RANGE_KM;
 }

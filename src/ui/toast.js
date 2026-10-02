@@ -30,6 +30,8 @@ export function createToast(element) {
   }
 
   function next() {
+    // A notice of the moment that has waited past its time is no longer true: skip it.
+    while (queue.length && queue[0].until < Date.now()) queue.shift();
     if (queue.length) {
       const item = queue.shift();
       display(item.text, item.kind);
@@ -40,7 +42,10 @@ export function createToast(element) {
   return {
     // kind: messages of the same kind replace each other while waiting in the queue,
     // so a burst of updates does not replay one by one.
-    show(text, kind = null) {
+    // keepS: a notice of the moment ("landing, 3..0", a flash of lightning) is dropped
+    // if it has not come up within this many seconds; at a tour's stop it came up
+    // 12 s late, after the landing was over.
+    show(text, kind = null, keepS = Infinity) {
       const showing = element.classList.contains('on');
       if (showing && element.textContent === text) {
         // Same text while visible: extend it without re-announcing to screen readers.
@@ -53,8 +58,9 @@ export function createToast(element) {
       }
       const wasEmpty = queue.length === 0;
       const same = kind ? queue.findIndex((item) => item.kind === kind) : -1;
-      if (same >= 0) queue[same] = { text, kind };
-      else if (!queue.some((item) => item.text === text)) queue.push({ text, kind });
+      const until = Date.now() + keepS * 1000;
+      if (same >= 0) queue[same] = { text, kind, until };
+      else if (!queue.some((item) => item.text === text)) queue.push({ text, kind, until });
       // Only the first waiting message shortens the current one; later ones keep
       // the existing deadline so a steady stream cannot hold a message up forever.
       if (wasEmpty && queue.length) schedule();

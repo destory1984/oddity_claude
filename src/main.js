@@ -45,7 +45,7 @@ import {
   LANDED, IDLE, AGAIN, IDLE_AFTER_S, IDLE_GAP_S, freshLine, milestoneLine,
 } from './core/lines.js';
 import {
-  TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, advanceTour, allToursDone, stampFile, CRANE_FILE,
+  TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, stopHint, advanceTour, allToursDone, stampFile, CRANE_FILE,
 } from './core/tours.js';
 import {
   NOTES, MEMOS, GREETINGS, dueNote, noteById, LAST_SLOT, lastSlotOpen, photoSlots,
@@ -209,6 +209,11 @@ const READ_MS = 2000;
 const SIT_MS = 4000;
 
 // The stamp that comes down in the middle of the view when a tour is gone round.
+// Notices of the moment are dropped when they could not come up in time (ui/toast.js):
+// a count that is running, and things seen in passing.
+const MOMENT_S = 3;
+const SIGHT_S = 8;
+
 function stampDown(file) {
   const fx = $('stampFx');
   fx.src = `${import.meta.env.BASE_URL}assets/${file}`;
@@ -364,8 +369,8 @@ async function init() {
     },
   });
 
-  function announce(event) {
-    toast.show(eventMessage(event));
+  function announce(event, keepS) {
+    toast.show(eventMessage(event), null, keepS);
     const cue = cueForEvent(event);
     if (cue) sound.cue(cue);
   }
@@ -413,7 +418,7 @@ async function init() {
     visit = startVisit(state, place.id, standBeside(place.id));
     visitKmS = 0;
     input.clear();
-    announce({ type: 'visiting', name: place.name });
+    announce({ type: 'visiting', name: place.name }, MOMENT_S);
     sound.say('Landing in progress.');
   }
 
@@ -449,9 +454,14 @@ async function init() {
       state = createState(spot, aside ? rotateLocal(facing, VISTA_YAW, 0) : facing);
       // On arrival, say what this is. A craft about to be docked with shows its card instead.
       const docking = target.kind === 'craft';
-      const about = docking ? null : aboutKnown(target);
+      // On a tour, a stop the jump alone does not reach says what is left to do.
+      const leg = known ? currentStop(progress) : null;
+      const todo = leg ? stopHint(leg.stop) : null;
+      const about = todo ? `할 일: ${todo}` : docking ? null : aboutKnown(target);
       const arrived = eventMessage({ type: 'teleported', name: target.name });
-      toast.show(about ? `${arrived}\n${about}` : arrived);
+      // A tour's jump: its notices replace one another (kind 'tour'), so word of the
+      // stop reached is not kept waiting behind this one.
+      toast.show(about ? `${arrived}\n${about}` : arrived, known ? 'tour' : null);
       if (docking) dock(target);
     });
   }
@@ -600,7 +610,7 @@ async function init() {
     saveProgress(progress);
     aimAtStop();
     const now = currentStop(progress);
-    toast.show(`코스 "${now.tour.name}"을 시작합니다. 첫 곳은 ${stopName(now.stop)}입니다.\n화면 위의 "근처로"를 누르면 그 가까이로 순간 이동합니다.`);
+    toast.show(`코스 "${now.tour.name}"을 시작합니다. 첫 곳은 ${stopName(now.stop)}입니다.\n화면 위의 "근처로"를 누르면 그 가까이로 순간 이동합니다.`, 'tour');
   }
   function endTour() {
     progress = quitTour(progress);
@@ -957,7 +967,7 @@ async function init() {
         ({ state, visit } = went);
         visitKmS = hasArrived(visit) ? 0 : Math.hypot(...state.position.map((n, i) => n - from[i])) / dt;
         if (went.arrived) {
-          toast.show(eventMessage({ type: 'visited', name: place.name }));
+          toast.show(eventMessage({ type: 'visited', name: place.name }), null, SIGHT_S);
           sound.cue('landed');
           // Somewhere been before: the card again (a first visit opens it below).
           if (progress.stories.includes(place.id)) cardDue = { id: place.id, in: CARD_AFTER_S, again: true };
@@ -1026,7 +1036,7 @@ async function init() {
         const finish = () => {
           cheerUntil = performance.now() + 6000;
           sound.cue('complete');
-          toast.show(`코스 "${leg.tour.name}"을 다 돌았습니다. 수첩의 코스 갈래에 도장이 찍혔습니다.`);
+          toast.show(`코스 "${leg.tour.name}"을 다 돌았습니다. 수첩의 코스 갈래에 도장이 찍혔습니다.`, 'tour');
           // Not under the white of a jump: the stamp waits until the flash has cleared.
           const after = warp.busy() ? 3600 : 0;
           setTimeout(() => stampDown(stampFile(leg.tour)), after);
@@ -1038,7 +1048,7 @@ async function init() {
         else finish();
       } else {
         aimAtStop();
-        toast.show(`${leg.tour.name} ${leg.step + 1}/${leg.tour.stops.length}: ${stopName(leg.stop)}에 왔습니다. 다음은 ${stopName(currentStop(progress).stop)}입니다.`);
+        toast.show(`${leg.tour.name} ${leg.step + 1}/${leg.tour.stops.length}: ${stopName(leg.stop)}에 왔습니다. 다음은 ${stopName(currentStop(progress).stop)}입니다.`, 'tour');
       }
     }
     if (cardDue && dt > 0) {
@@ -1181,10 +1191,10 @@ async function init() {
     sunShown = view.sunVisibility;
     hud.maskHero(view.heroCard);
     say.place(view.heroCard);
-    if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`);
+    if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`, null, SIGHT_S);
     if (view.meteorLit && !meteorSeen) {
       meteorSeen = true;
-      toast.show(eventMessage({ type: 'meteor' }));
+      toast.show(eventMessage({ type: 'meteor' }), null, SIGHT_S);
     }
     // Say why she shivers or shields her eyes: once each time she comes into the cold
     // or the glare, at the first such drawing.
@@ -1195,16 +1205,16 @@ async function init() {
     else if (view.heroSheet === 'cold') feeling = sunKm > 19 * AU_KM / 100 ? { type: 'coldFar', au: sunKm * 100 / AU_KM } : { type: 'coldShadow' };
     if (feeling && feelingTold !== feeling.type) {
       feelingTold = feeling.type;
-      toast.show(eventMessage(feeling));
+      toast.show(eventMessage(feeling), null, SIGHT_S);
     }
     if (!docked && shownSpeed() > 1) feelingTold = null;
     if (view.glow && !glowsTold.has(view.glow)) {
       glowsTold.add(view.glow);
-      toast.show(eventMessage({ type: 'glow', id: view.glow }));
+      toast.show(eventMessage({ type: 'glow', id: view.glow }), null, SIGHT_S);
     }
     if (view.inBelt && !beltSeen) {
       beltSeen = true;
-      toast.show(eventMessage({ type: 'beltEntered' }));
+      toast.show(eventMessage({ type: 'beltEntered' }), null, SIGHT_S);
     }
     world.render();
 

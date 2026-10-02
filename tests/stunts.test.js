@@ -1,13 +1,12 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, sanitizeStunts, recordText, stuntById, COMET_S,
+  STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, sanitizeStunts, recordText, valueText, stuntById,
 } from '../src/core/stunts.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 
 const earth = bodyById('earth');
 const moon = bodyById('moon');
-const halley = bodyById('halley');
 // A point `km` above a body's surface, along a direction from its centre.
 const above = (body, km, dir = [1, 0, 0]) => body.position.map((n, i) => n + dir[i] * (body.radiusKm + km));
 const at = (position, restingOn = null, jumped = false) => ({ position, restingOn, bodies: BODIES, jumped });
@@ -18,12 +17,12 @@ function hold(run, sample, n, dt = 1) {
   return { run, done };
 }
 
-test('four stunts, each with a name, what to do and a line of hers', () => {
-  assert.deepEqual(STUNTS.map((s) => s.id), ['moonRun', 'moonSkim', 'earthLap', 'cometChase']);
+test('three stunts, each with a name, what to do and a line of hers', () => {
+  assert.deepEqual(STUNTS.map((s) => s.id), ['moonRun', 'moonSkim', 'earthLap']);
   for (const s of STUNTS) {
     assert.ok(s.name && s.todo && !s.todo.includes('~'), s.id);
     assert.ok(s.line.length <= 25 && (s.line.match(/!/g) ?? []).length <= 1, s.id);
-    assert.ok(['less', 'more', 'none'].includes(s.better), s.id);
+    assert.ok(['less', 'more'].includes(s.better) && ['초', 'km'].includes(s.unit), s.id);
   }
   assert.equal(startStunt('nothing'), null);
   assert.equal(stuntById('moonRun').name, '달까지 달리기');
@@ -59,16 +58,30 @@ test('a jump starts a stunt over, and landing back on Earth resets the clock', (
   assert.match(stuntStatus(back.run), /준비됐습니다/);
 });
 
-test('skimming the Moon: inside 100 km without touching, ten seconds or more', () => {
+test('skimming the Moon: ground covered inside 100 km without touching, 1,000 km or more', () => {
+  // Along the Moon's side at 60 km up, 300 km a step.
+  const along = (n, km = 60) => above(moon, km).map((v, i) => v + (i === 2 ? n * 300 : 0));
+  // (The steps are short beside the Moon's radius, so the height stays inside the band.)
   let run = startStunt('moonSkim');
-  ({ run } = hold(run, at(above(moon, 60)), 12));
-  assert.equal(run.seconds, 12);
-  assert.equal(stepStunt(run, at(above(moon, 300)), 1).done, 12);
-  // Too short, or ended by touching down after too short a time: nothing.
-  let brief = startStunt('moonSkim');
-  ({ run: brief } = hold(brief, at(above(moon, 60)), 4));
-  assert.equal(stepStunt(brief, at(above(moon, 0), 'moon'), 1).done, null);
-  // Standing on the Moon is not skimming.
+  for (let n = 0; n <= 1; n++) ({ run } = stepStunt(run, at(along(n)), 1));
+  assert.equal(run.km, 300);
+  assert.equal(stuntStatus(run), '달 스치기 300km');
+  // Hanging still covers no ground however long it lasts.
+  ({ run } = hold(run, at(along(1)), 50));
+  assert.equal(run.km, 300);
+  // Leaving the band before 1,000 km: nothing, and it starts over.
+  const early = stepStunt(run, at(above(moon, 400)), 1);
+  assert.equal(early.done, null);
+  assert.equal(early.run.km, 0);
+  // 1,200 km covered in small steps round the Moon, then climbing out: it counts.
+  const ring = (deg) => above(moon, 50, [Math.cos((deg * Math.PI) / 180), 0, Math.sin((deg * Math.PI) / 180)]);
+  let far = startStunt('moonSkim');
+  for (let deg = 0; deg <= 40; deg += 1) ({ run: far } = stepStunt(far, at(ring(deg)), 0.1));
+  assert.ok(far.km > 1200 && far.km < 1260, String(far.km));
+  const out = stepStunt(far, at(above(moon, 300)), 0.1);
+  assert.equal(out.done, far.km);
+  // Touching down ends it too; standing on the Moon is not skimming.
+  assert.equal(stepStunt(far, at(above(moon, 0), 'moon'), 0.1).done, far.km);
   assert.equal(hold(startStunt('moonSkim'), at(above(moon, 0), 'moon'), 20).run.going, false);
 });
 
@@ -92,17 +105,6 @@ test('a lap of Earth: all the way round inside 1,000 km, turning back unwinds it
   assert.equal(stepStunt(out, at(ring(190, 0), 'earth'), 1).run.going, false);
 });
 
-test('chasing the comet: thirty seconds inside 500 km of Halley, not standing on it', () => {
-  const near = hold(startStunt('cometChase'), at(above(halley, 200)), COMET_S);
-  assert.equal(near.done, COMET_S);
-  let run = startStunt('cometChase');
-  ({ run } = hold(run, at(above(halley, 200)), 20));
-  assert.equal(stuntStatus(run), '혜성 따라잡기 20/30초');
-  ({ run } = stepStunt(run, at(above(halley, 900)), 1));
-  assert.equal(run.seconds, 0);
-  assert.equal(hold(startStunt('cometChase'), at(above(halley, 0), 'halley'), 40).done, null);
-});
-
 test('the best of each is kept: less time for a run, more for a skim', () => {
   let records = {};
   let best;
@@ -112,13 +114,12 @@ test('the best of each is kept: less time for a run, more for a skim', () => {
   assert.equal(best, false);
   ({ records, best } = recordStunt(records, 'moonRun', 15.26));
   assert.deepEqual([records.moonRun, best], [15.26, true]);
-  ({ records } = recordStunt(records, 'moonSkim', 12));
-  assert.equal(recordStunt(records, 'moonSkim', 30).best, true);
-  assert.equal(recordStunt(records, 'moonSkim', 11).best, false);
-  ({ records } = recordStunt(records, 'cometChase', 30));
-  assert.equal(recordStunt(records, 'cometChase', 30).best, false);
+  ({ records } = recordStunt(records, 'moonSkim', 1200.4));
+  assert.equal(recordStunt(records, 'moonSkim', 3000).best, true);
+  assert.equal(recordStunt(records, 'moonSkim', 1100).best, false);
   assert.equal(recordText('moonRun', records), '기록 15.3초');
-  assert.equal(recordText('cometChase', records), '해냈음');
+  assert.equal(recordText('moonSkim', records), '기록 1,200km');
+  assert.equal(valueText('moonSkim', 2140.6), '2,141km');
   assert.equal(recordText('earthLap', records), '아직 기록 없음');
   assert.deepEqual(sanitizeStunts({ moonRun: 15.26, moonSkim: -1, earthLap: 'x', other: 3 }), { moonRun: 15.26 });
   assert.deepEqual(sanitizeStunts(null), {});

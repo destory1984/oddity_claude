@@ -3,18 +3,17 @@
 // in the browser. One is under way at a time; a jump (teleport) starts it over.
 import { surfaceDistance } from './bodies.js';
 
+// There is no gravity here and she can hang still anywhere, so staying somewhere is no
+// feat: each stunt is about covering ground.
 export const MOON_SKIM_KM = 100;
-export const MOON_SKIM_MIN_S = 10;
+export const MOON_SKIM_MIN_KM = 1000;
 export const EARTH_LAP_KM = 1000;
-export const COMET_KM = 500;
-export const COMET_S = 30;
 
-// better: which way a record is beaten. 'none': done is done.
+// better: which way a record is beaten. unit: what the value is counted in.
 export const STUNTS = [
-  { id: 'moonRun', name: '달까지 달리기', todo: '지구 표면에서 떠나 달 표면에 닿기. 걸린 시간을 잰다', better: 'less', line: '달까지 금방이네!' },
-  { id: 'moonSkim', name: '달 스치기', todo: '달 표면 100km 안을 닿지 않고 10초 넘게 날기. 버틴 시간을 잰다', better: 'more', line: '아슬아슬했어!' },
-  { id: 'earthLap', name: '지구 한 바퀴', todo: '지구 표면 1,000km 안에서 한 바퀴 돌기. 걸린 시간을 잰다', better: 'less', line: '지구 한 바퀴 돌았다!' },
-  { id: 'cometChase', name: '혜성 따라잡기', todo: '핼리 혜성 500km 안에서 내려앉지 않고 30초 붙어 있기', better: 'none', line: '혜성 꼬리 잡았다!' },
+  { id: 'moonRun', name: '달까지 달리기', todo: '지구 표면에서 떠나 달 표면에 닿기. 걸린 시간을 잰다', better: 'less', unit: '초', line: '달까지 금방이네!' },
+  { id: 'moonSkim', name: '달 스치기', todo: '달 표면 100km 안을 닿지도 벗어나지도 않고 1,000km 넘게 날기. 날아간 거리를 잰다', better: 'more', unit: 'km', line: '아슬아슬했어!' },
+  { id: 'earthLap', name: '지구 한 바퀴', todo: '지구 표면 1,000km 안에서 한 바퀴 돌기. 걸린 시간을 잰다', better: 'less', unit: '초', line: '지구 한 바퀴 돌았다!' },
 ];
 
 export function stuntById(id) {
@@ -23,10 +22,10 @@ export function stuntById(id) {
 
 // A stunt just taken up: waiting for its starting condition.
 export function startStunt(id) {
-  return stuntById(id) ? { id, going: false, seconds: 0, angle: 0, from: null } : null;
+  return stuntById(id) ? { id, going: false, seconds: 0, angle: 0, km: 0, from: null } : null;
 }
 
-const WAIT = (run) => ({ ...run, going: false, seconds: 0, angle: 0, from: null });
+const WAIT = (run) => ({ ...run, going: false, seconds: 0, angle: 0, km: 0, from: null });
 const sub = (a, b) => a.map((n, i) => n - b[i]);
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
@@ -37,7 +36,8 @@ const unit = (v) => {
 
 // One frame of the stunt under way. sample: { position, restingOn (a body's id or null),
 // bodies, jumped (a teleport happened) }; dt: play seconds. Returns { run, done } where
-// done is null or the value reached (seconds), and run is then back to waiting.
+// done is null or the value reached (seconds, or km for the skim), and run is then back
+// to waiting.
 export function stepStunt(run, sample, dt) {
   const { position, restingOn, bodies, jumped } = sample;
   if (jumped) return { run: WAIT(run), done: null };
@@ -51,17 +51,15 @@ export function stepStunt(run, sample, dt) {
     return { run: { ...run, seconds: run.seconds + dt }, done: null };
   }
 
-  if (run.id === 'moonSkim' || run.id === 'cometChase') {
-    const skim = run.id === 'moonSkim';
-    const target = body(skim ? 'moon' : 'halley');
-    const near = surfaceDistance(position, target) <= (skim ? MOON_SKIM_KM : COMET_KM) && restingOn !== target.id;
-    if (near) {
-      const seconds = run.seconds + dt;
-      if (!skim && seconds >= COMET_S) return { run: WAIT(run), done: COMET_S };
-      return { run: { ...run, going: true, seconds }, done: null };
-    }
+  if (run.id === 'moonSkim') {
+    const moon = body('moon');
+    const inBand = surfaceDistance(position, moon) <= MOON_SKIM_KM && restingOn !== 'moon';
     // Out of the band, or touched down: a skim long enough counts, the rest starts over.
-    return { run: WAIT(run), done: skim && run.going && run.seconds >= MOON_SKIM_MIN_S ? run.seconds : null };
+    if (!inBand) return { run: WAIT(run), done: run.going && run.km >= MOON_SKIM_MIN_KM ? run.km : null };
+    // The ground covered is measured beside the Moon, which is itself moving.
+    const beside = sub(position, moon.position);
+    const km = run.going ? run.km + Math.hypot(...sub(beside, run.from)) : 0;
+    return { run: { ...run, going: true, seconds: run.seconds + dt, km, from: beside }, done: null };
   }
 
   if (run.id === 'earthLap') {
@@ -90,19 +88,16 @@ export function stuntStatus(run) {
     if (run.going) return `${stunt.name} ${s}초`;
     return run.from === 'earth' ? `${stunt.name}: 준비됐습니다. 떠나면 시계가 갑니다` : `${stunt.name}: 지구 표면에 내려서면 준비됩니다`;
   }
-  if (run.id === 'moonSkim') return run.going ? `${stunt.name} ${s}초` : `${stunt.name}: 달 표면 100km 안으로`;
-  if (run.id === 'earthLap') return run.going ? `${stunt.name} ${Math.floor((Math.abs(run.angle) / (2 * Math.PI)) * 100)}% · ${s}초` : `${stunt.name}: 지구 표면 1,000km 안으로`;
-  return run.going ? `${stunt.name} ${s}/${COMET_S}초` : `${stunt.name}: 핼리 혜성 500km 안으로`;
+  if (run.id === 'moonSkim') return run.going ? `${stunt.name} ${Math.floor(run.km).toLocaleString('ko-KR')}km` : `${stunt.name}: 달 표면 100km 안으로`;
+  return run.going ? `${stunt.name} ${Math.floor((Math.abs(run.angle) / (2 * Math.PI)) * 100)}% · ${s}초` : `${stunt.name}: 지구 표면 1,000km 안으로`;
 }
 
-// Records: { stunt id: best seconds }. Returns the records after a result and whether it
+// Records: { stunt id: best value }. Returns the records after a result and whether it
 // was a new best (the first result always is).
 export function recordStunt(records, id, value) {
   const stunt = stuntById(id);
   const had = records[id];
-  const best = had === undefined
-    || (stunt.better === 'less' && value < had)
-    || (stunt.better === 'more' && value > had);
+  const best = had === undefined || (stunt.better === 'less' ? value < had : value > had);
   return { records: best ? { ...records, [id]: value } : records, best };
 }
 
@@ -114,7 +109,10 @@ export function sanitizeStunts(raw) {
 
 // A record as the journal shows it.
 export function recordText(id, records) {
-  const value = records[id];
-  if (value === undefined) return '아직 기록 없음';
-  return stuntById(id).better === 'none' ? '해냈음' : `기록 ${value.toFixed(1)}초`;
+  return records[id] === undefined ? '아직 기록 없음' : `기록 ${valueText(id, records[id])}`;
+}
+
+// A value with its unit: '8.3초', '2,140km'.
+export function valueText(id, value) {
+  return stuntById(id).unit === 'km' ? `${Math.round(value).toLocaleString('ko-KR')}km` : `${value.toFixed(1)}초`;
 }

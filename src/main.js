@@ -60,7 +60,7 @@ import {
 import { inspectLight } from './core/lamp.js';
 import { READINGS, bodyFacts } from './core/readings.js';
 import { readingQuizFor, readingKey } from './core/readingQuiz.js';
-import { STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, recordText, stuntById } from './core/stunts.js';
+import { STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, recordText, valueText, stuntById } from './core/stunts.js';
 import { STORY_DETAILS } from './core/storyDetails.js';
 import { STORY_MORE } from './core/storyMore.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
@@ -708,14 +708,13 @@ ${STORY_MORE[target.id]}` : told };
     toast.show('묘기를 그만두었습니다. 수첩의 코스 갈래에서 다시 할 수 있습니다.');
   }
   function finishStunt(value) {
-    const { id, name, better, line } = stuntById(stunt.id);
+    const { id, name, line } = stuntById(stunt.id);
     const result = recordStunt(stuntRecords, id, value);
     stuntRecords = result.records;
     saveStunts(stuntRecords);
     stunt = null;
-    const told = better === 'none' ? '해냈습니다' : `${value.toFixed(1)}초`;
-    const beside = better === 'none' ? '' : result.best ? ' 새 기록입니다.' : ` 가장 좋은 기록은 ${stuntRecords[id].toFixed(1)}초입니다.`;
-    toast.show(`묘기 "${name}": ${told}.${beside}\n수첩의 코스 갈래에서 다시 할 수 있습니다.`);
+    const beside = result.best ? '새 기록입니다.' : `가장 좋은 기록은 ${valueText(id, stuntRecords[id])}입니다.`;
+    toast.show(`묘기 "${name}": ${valueText(id, value)}. ${beside}\n수첩의 코스 갈래에서 다시 할 수 있습니다.`);
     say.show(line);
     sound.cue('discovered');
   }

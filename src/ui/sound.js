@@ -2,7 +2,7 @@
 // oscillators and a noise buffer, so nothing is downloaded and nothing is licensed.
 
 import { englishVoice } from '../core/voice.js';
-import { BAR_S, barPlan, tuneFor, nextTuneBar } from '../core/music.js';
+import { BAR_S, barPlan, tuneFor, nextTuneBar, tuneOrder, barInOrder } from '../core/music.js';
 
 const MUTE_KEY = 'oddity.muted';
 const MUSIC_KEY = 'oddity.music';
@@ -58,7 +58,9 @@ export function createSound() {
   let sfx;
   // When the next bar of music starts (audio clock) and which bar it is.
   let nextBarAt = 0;
+  // Bars played so far; the tunes go round in an order drawn afresh each sitting.
   let barNumber = 0;
+  const order = tuneOrder();
 
   // Browsers only allow audio after a user gesture, so this runs on the first key or tap.
   function ensure() {
@@ -299,7 +301,7 @@ export function createSound() {
       // After a pause or a hidden tab, pick up from now rather than catching up.
       if (nextBarAt < now) nextBarAt = now + 0.1;
       if (nextBarAt - now > 0.5) return;
-      playBar(barPlan(barNumber, mood), nextBarAt - now);
+      playBar(barPlan(barInOrder(barNumber, order), mood), nextBarAt - now);
       barNumber += 1;
       nextBarAt += BAR_S;
     },
@@ -307,7 +309,7 @@ export function createSound() {
     // Jump to the next tune at the coming bar; returns its name.
     nextTune() {
       barNumber = nextTuneBar(barNumber);
-      return tuneFor(barNumber).name;
+      return tuneFor(barInOrder(barNumber, order)).name;
     },
     setMusic(on) {
       musicOn = on;

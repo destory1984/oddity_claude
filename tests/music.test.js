@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  BAR_S, BARS_PER_TUNE, CHORDS, MELODY, TUNES, barPlan, moodFor, tuneFor, nextTuneBar,
+  BAR_S, BARS_PER_TUNE, CHORDS, MELODY, TUNES, barPlan, moodFor, tuneFor, nextTuneBar, tuneOrder, barInOrder,
 } from '../src/core/music.js';
 
 const BARS = BARS_PER_TUNE * TUNES.length;
@@ -119,4 +119,30 @@ test('the mood follows where the traveler is', () => {
   assert.equal(moodFor({ restingOn: null, surfaceKm: 9000 }), 'near');
   assert.equal(moodFor({ restingOn: null, surfaceKm: 300000 }), 'near');
   assert.equal(moodFor({ restingOn: null, surfaceKm: 300001 }), 'deep');
+});
+
+test('each sitting the tunes go round in a chance order, every tune once a round', () => {
+  // A stand-in for chance: always the last place, then the first.
+  assert.deepEqual(tuneOrder(() => 0.999), TUNES.map((_, i) => i));
+  const turned = tuneOrder(() => 0);
+  assert.deepEqual([...turned].sort((a, b) => a - b), TUNES.map((_, i) => i));
+  assert.notDeepEqual(turned, TUNES.map((_, i) => i));
+  const firsts = new Set();
+  for (let k = 0; k < 200; k++) firsts.add(tuneOrder()[0]);
+  assert.ok(firsts.size >= 8, `${firsts.size}`);
+
+  const order = [3, 0, 10, 1, 2, 4, 5, 6, 7, 8, 9];
+  assert.equal(tuneFor(barInOrder(0, order)).id, TUNES[3].id);
+  assert.equal(tuneFor(barInOrder(15, order)).id, TUNES[3].id);
+  assert.equal(tuneFor(barInOrder(16, order)).id, TUNES[0].id);
+  assert.equal(tuneFor(barInOrder(32, order)).id, TUNES[10].id);
+  // Skipping to the next tune lands on its first bar.
+  assert.equal(barInOrder(nextTuneBar(5), order) % BARS_PER_TUNE, 0);
+  // A round later the same tune comes back, with other notes.
+  const again = TUNES.length * BARS_PER_TUNE;
+  assert.equal(tuneFor(barInOrder(again, order)).id, TUNES[3].id);
+  assert.notEqual(barInOrder(again, order), barInOrder(0, order));
+  const heard = new Set();
+  for (let p = 0; p < again; p += BARS_PER_TUNE) heard.add(tuneFor(barInOrder(p, order)).id);
+  assert.equal(heard.size, TUNES.length);
 });

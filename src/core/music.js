@@ -155,6 +155,26 @@ export function nextTuneBar(bar) {
   return (Math.floor(bar / BARS_PER_TUNE) + 1) * BARS_PER_TUNE;
 }
 
+// The tunes in a chance order for one sitting (random: a function giving 0..1), so the
+// game does not open with the same tune every time. Every tune comes once a round.
+export function tuneOrder(random = Math.random) {
+  const order = TUNES.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return order;
+}
+
+// The bar number to play at `position` (bars played so far in this sitting) when the
+// tunes go round in `order`: the same place in the tune, in a later round each time
+// round, so a tune's notes differ from its last turn.
+export function barInOrder(position, order) {
+  const turn = Math.floor(position / BARS_PER_TUNE);
+  const round = Math.floor(turn / order.length);
+  return (round * TUNES.length + order[turn % order.length]) * BARS_PER_TUNE + (position % BARS_PER_TUNE);
+}
+
 // What to play in bar number `bar`:
 // { bass, pad: [3 Hz], notes: [{ freq, at, volume }], bell: { length, overtone, overtoneVolume } }.
 export function barPlan(bar, mood) {

@@ -69,3 +69,45 @@ export function dueNote(progress, done) {
   const next = NOTES.find((n) => !read.includes(n.id));
   return next && met(next.when, progress, done) ? next : null;
 }
+
+// Beside each of the 35 bodies in the journal: grandmother's memo (what she saw from
+// Earth, or read, in a short record; "봤다" for what an amateur's telescope or the naked
+// eye shows, "읽었다" for the rest) and Seora's line on getting there (the speech bubble
+// at the discovery, then under the memo). Numbers in a line equal core/facts.js.
+export const MEMOS = {
+  sun: { memo: '2009.7.22. 부분일식. 해가 80%쯤 가려졌다. 필터를 대고 봤다.', line: '더워, 부채 어디 갔지.' },
+  mercury: { memo: '해 뜨기 전 동쪽 하늘 낮은 곳. 평생 몇 번밖에 못 봤다.', line: '낮이랑 밤이 600도 차이래.' },
+  venus: { memo: '2012.6.6. 금성이 해 앞을 지나감. 검은 점 하나를 봤다. 다음은 2117년.', line: '하루가 일 년보다 길대. 이상해!' },
+  earth: { memo: '1972.12. 아폴로 17호가 찍은 둥근 지구. 잡지에서 오려 붙이고 한참 봤다.', line: '우리 집이다. 바다가 71%래.' },
+  moon: { memo: '1969.7.21. 사람이 달에 내렸다. 이웃집 마당 텔레비전으로 봤다.', line: '달이다! 할머니 수첩 첫 장이네.' },
+  mars: { memo: '2003.8.27. 6만 년 만에 가장 가까이 옴. 망원경으로 흰 극관을 봤다.', line: '산 높이가 22km래. 못 올라가.' },
+  phobos: { memo: '1877년 아사프 홀이 발견. 내 망원경으로는 안 보인다. 책에서 읽었다.', line: '감자처럼 생겼어. 진짜야!' },
+  deimos: { memo: '1877년 발견. 포보스보다 엿새 먼저 찾았다고 책에서 읽었다.', line: '지름이 12km래. 동네만 해.' },
+  jupiter: { memo: '1994.7. 슈메이커-레비 혜성이 목성에 부딪힘. 망원경으로 검은 멍을 봤다.', line: '멍은 없어! 대신 붉은 점이 엄청 커.' },
+  io: { memo: '목성 옆 점 넷 가운데 가장 안쪽. 이틀이 안 돼 한 바퀴 도는 걸 봤다.', line: '화산이 400개 넘는대. 뜨거워!' },
+  europa: { memo: '목성 옆 점 넷 가운데 가장 작은 것. 맑은 밤에 봤다.', line: '얼음 밑에 바다가 있대.' },
+  ganymede: { memo: '목성 옆 점 넷 가운데 가장 밝은 것. 쌍안경으로도 봤다.', line: '수성보다 크대. 달 맞아?' },
+  callisto: { memo: '목성 옆 점 넷 가운데 가장 멀리 떨어진 것. 가장 어둡다. 봤다.', line: '구덩이투성이야. 곰보빵 같아.' },
+  saturn: { memo: '1995. 고리가 옆으로 누워 실처럼 가늘어짐. 며칠은 아예 사라진 걸 봤다.', line: '고리가 다 얼음 조각이래. 반짝반짝.' },
+  titan: { memo: '토성 옆의 작은 점. 봤다. 2005.1 하위헌스가 내렸다는 건 신문에서.', line: '주황색 안개야. 비도 온대!' },
+  rhea: { memo: '1672년 카시니가 발견. 책에서 읽었다.', line: '토성에서 두 번째로 크대.' },
+  iapetus: { memo: '1671년 카시니가 발견. 토성 한쪽에서만 보였다고 책에서 읽었다.', line: '반은 까맣고 반은 하얘!' },
+  dione: { memo: '1684년 카시니가 테티스와 함께 발견. 책에서 읽었다.', line: '작은 달 둘이랑 같이 돈대.' },
+  tethys: { memo: '1684년 카시니가 발견. 책에서 읽었다.', line: '통째로 얼음이래. 빙수다!' },
+  enceladus: { memo: '1789년 허셜이 발견. 2005년 물기둥을 찾았다고 신문에서 읽었다.', line: '물을 뿜어! 분수 같아.' },
+  mimas: { memo: '1789년 허셜이 발견. 1980년 보이저가 찍은 큰 구덩이를 신문에서 읽었다.', line: '구덩이가 눈알처럼 커!' },
+  uranus: { memo: '망원경으로 푸른 점 하나를 봤다. 1977.3 고리가 발견됐다고 읽었다.', line: '누워서 굴러가. 98도래!' },
+  miranda: { memo: '1948년 카이퍼가 발견. 1986.1 보이저 2호가 지나갔다고 신문에서 읽었다.', line: '절벽이 20km래. 아찔해.' },
+  ariel: { memo: '1851년 라셀이 발견. 책에서 읽었다.', line: '여기서 제일 밝은 달이래.' },
+  umbriel: { memo: '1851년 라셀이 아리엘과 함께 발견. 책에서 읽었다.', line: '여긴 제일 어두운 달이래.' },
+  titania: { memo: '1787년 허셜이 발견. 천왕성을 찾고 6년 뒤라고 책에서 읽었다.', line: '천왕성 달 중에 대장이야.' },
+  oberon: { memo: '1787년 허셜이 티타니아와 같은 날 발견. 책에서 읽었다.', line: '1787년에 찾았대. 오래됐다.' },
+  neptune: { memo: '1989.8. 보이저 2호가 지나감. 푸른 사진은 신문에서, 점 하나는 망원경으로 봤다.', line: '바람이 시속 2,000km래!' },
+  triton: { memo: '1846년 라셀이 발견. 해왕성을 찾고 17일 뒤라고 책에서 읽었다.', line: '영하 235도래. 얼음 분수도 있어.' },
+  ceres: { memo: '1801.1.1 피아치가 발견. 처음엔 행성이라 불렀다고 책에서 읽었다.', line: '소행성대에서 제일 큰 애야.' },
+  pluto: { memo: '1930년 톰보가 발견. 2006.8 행성에서 빠졌다고 신문에서 읽었다.', line: '하트가 있어! 진짜 하트야.' },
+  charon: { memo: '1978년 크리스티가 발견. 사진 속 혹 하나로 찾았다고 읽었다.', line: '명왕성 반만 해. 둘이 마주 돌아.' },
+  halley: { memo: '1986.3. 새벽 지평선 가까이. 생각보다 희미했다. 그래도 봤다.', line: '할머니가 희미했다던 그 혜성이다!' },
+  haleBopp: { memo: '1997.3. 맨눈으로 꼬리까지. 평생 가장 밝은 혜성. 저녁마다 봤다.', line: '핼리보다 다섯 배 크대!' },
+  churyumov: { memo: '1969년 발견. 내 수첩과 같은 해. 2014년 로제타 소식을 신문에서 읽었다.', line: '고무 오리다! 두 덩이야.' },
+};

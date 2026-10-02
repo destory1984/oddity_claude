@@ -14,7 +14,7 @@ function hasFinalRieulOrNone(word) {
 const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {} }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -105,10 +105,19 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       });
       li.append(name, marks, distance, go);
       if (found) li.append(jumpButton(body.id, body.name));
-      if (found && FACTS[body.id]) {
+      // Grandmother's memo is there from the start; Seora's line joins it once she has
+      // been there. Without the story, the fact as before.
+      const entry = memos[body.id];
+      if (entry) {
+        const memo = document.createElement('small');
+        memo.className = 'memo';
+        memo.textContent = entry.memo;
+        li.append(memo);
+      }
+      if (found && (entry || FACTS[body.id])) {
         const fact = document.createElement('small');
-        fact.className = 'fact';
-        fact.textContent = FACTS[body.id];
+        fact.className = entry ? 'fact said' : 'fact';
+        fact.textContent = entry ? `서라: ${entry.line}` : FACTS[body.id];
         li.append(fact);
       }
       list.append(li);

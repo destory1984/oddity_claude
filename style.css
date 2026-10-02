@@ -990,6 +990,24 @@ body.touch #reticle span {
   font-size: 12px;
 }
 
+/* Grandmother's hand beside the slot, and Seora's line under it. */
+#journalBodies .memo {
+  grid-column: 1 / -1;
+  margin-top: -6px;
+  color: #e6d3a8;
+  font-size: 13px;
+  font-family: "Gowun Batang","Nanum Myeongjo","AppleMyungjo","Batang",serif;
+  word-break: keep-all;
+}
+
+#journalBodies .memo + .fact {
+  margin-top: -8px;
+}
+
+#journalBodies .said {
+  color: #cfe3f5;
+}
+
 #journalBodies .marks {
   color: var(--muted);
   white-space: pre;
@@ -1145,7 +1163,9 @@ body.touch #reticle span {
     min-width: 0;
   }
 
-  #journalBodies .fact {
+  #journalBodies .fact,
+  #journalBodies .memo,
+  #journalBodies .memo + .fact {
     margin-top: 0;
   }
 }

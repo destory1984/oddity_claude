@@ -38,7 +38,7 @@ import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
-import { NOTES, dueNote, noteById } from './core/story.js';
+import { NOTES, MEMOS, dueNote, noteById } from './core/story.js';
 import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
@@ -506,6 +506,7 @@ async function init() {
       cardPriorPause = journalPriorPause;
     },
     notes: NOTES,
+    memos: MEMOS,
     onNote(id) {
       noteCard.show(noteById(id), false);
       notePriorPause = journalPriorPause;
@@ -756,6 +757,8 @@ async function init() {
       if (text) toast.show(text);
       const cue = cueForEvent(event);
       if (cue) sound.cue(cue);
+      // Somewhere new: Seora says her line (the same one the journal keeps).
+      if (event.type === 'discovered' && MEMOS[event.bodyId]) say.show(MEMOS[event.bodyId].line);
     }
     if (finished) celebrate();
 

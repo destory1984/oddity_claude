@@ -31,7 +31,8 @@ export function createProgress() {
   return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], notes: [], tours: [], tour: null, quiz: [] };
 }
 
-// A story card's question answered right (core/storyQuiz.js). Not scored.
+// A question answered right: a story card's (core/storyQuiz.js) or the one under a
+// body's or a craft's reading (core/readingQuiz.js). Not scored.
 export function recordQuiz(progress, id) {
   const have = progress.quiz ?? [];
   if (have.includes(id)) return progress;
@@ -115,7 +116,7 @@ export function sanitizeProgress(raw, bodies, missions, stories = [], craft = []
     notes: clean(raw.notes, new Set(notes.map((n) => n.id))),
     tours: clean(raw.tours, new Set(tours.map((t) => t.id))),
     tour: underWay(raw.tour, tours),
-    quiz: clean(raw.quiz, storyIds),
+    quiz: clean(raw.quiz, new Set([...storyIds, ...bodyIds, ...craftIds])),
   };
 }
 

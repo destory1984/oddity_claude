@@ -2839,3 +2839,62 @@ html.shell body {
 #inspectText p:last-child {
   margin-bottom:0;
 }
+
+#inspectQuiz {
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px solid var(--glass-line);
+}
+
+#inspectQuiz[hidden] {
+  display:none;
+}
+
+#inspectQuizQuestion {
+  margin:0 0 8px;
+  font-size:14px;
+  color:var(--gold);
+  word-break:keep-all;
+}
+
+#inspectQuizChoices {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+#inspectQuizChoices button {
+  flex:1 1 30%;
+  min-height:40px;
+  padding:6px 10px;
+  border:1px solid var(--glass-line);
+  border-radius:10px;
+  background:#182a5c99;
+  backdrop-filter:none;
+  font-size:14px;
+  color:#eef3ff;
+  word-break:keep-all;
+}
+
+#inspectQuizChoices button.right {
+  border-color:var(--gold);
+  background:#6b571c99;
+  color:#fff3c4;
+}
+
+#inspectQuizChoices button.wrong {
+  border-color:#e08a8a;
+  background:#5c1f2a99;
+}
+
+#inspectQuizChoices button:disabled {
+  opacity:1;
+  cursor:default;
+}
+
+#inspectQuizResult {
+  min-height:1.5em;
+  margin:8px 0 0;
+  font-size:13px;
+  color:#9fb0d8;
+}

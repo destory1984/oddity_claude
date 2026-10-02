@@ -112,7 +112,11 @@ function seed(id) {
 // The question for a story place: { question, choices: [three, in a steady shuffled
 // order], right: the index of the answer }, or null where there is none.
 export function quizFor(id) {
-  const quiz = QUIZ[id];
+  return arrange(id, QUIZ[id]);
+}
+
+// quiz: { question, answer, wrong: [two] } → the three choices in their steady order.
+export function arrange(id, quiz) {
   if (!quiz) return null;
   const right = seed(id) % 3;
   const choices = [...quiz.wrong];

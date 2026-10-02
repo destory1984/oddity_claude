@@ -1,5 +1,6 @@
 import { createProgress, sanitizeProgress } from '../core/progress.js';
 import { sanitizeAlbum } from '../core/album.js';
+import { createDaily, sanitizeDaily } from '../core/daily.js';
 
 const KEY = 'oddity.progress.v1';
 
@@ -103,5 +104,24 @@ export function saveHeroKind(kind) {
     localStorage.setItem(HERO_KEY, kind);
   } catch {
     // The choice lasts only for this page.
+  }
+}
+
+const DAILY_KEY = 'oddity.daily.v1';
+
+// The days today's request was done (core/daily.js).
+export function loadDaily() {
+  try {
+    return sanitizeDaily(JSON.parse(localStorage.getItem(DAILY_KEY)));
+  } catch {
+    return createDaily();
+  }
+}
+
+export function saveDaily(daily) {
+  try {
+    localStorage.setItem(DAILY_KEY, JSON.stringify(daily));
+  } catch {
+    // The star lasts only for this page.
   }
 }

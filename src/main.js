@@ -30,7 +30,7 @@ import {
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
-  loadHeroKind, saveHeroKind,
+  loadHeroKind, saveHeroKind, loadDaily, saveDaily,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
@@ -39,6 +39,7 @@ import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
+import { dailyRequest, requestTarget, requestMet, recordDay, streak } from './core/daily.js';
 import {
   LANDED, IDLE, AGAIN, IDLE_AFTER_S, IDLE_GAP_S, freshLine, milestoneLine,
 } from './core/lines.js';
@@ -188,6 +189,13 @@ function lastOpen() {
   return lastSlotOpen(progress, done, total);
 }
 
+// Today's request (core/daily.js): fixed when the game is opened, from the date and
+// from where she has been. `daily` keeps the days one was done.
+const today = dayOf(openedAt);
+const request = dailyRequest(today, progress);
+let daily = loadDaily();
+const requestDone = () => daily.days.includes(today);
+
 // Until when (performance.now()) the sprite character cheers a completed journal.
 let cheerUntil = 0;
 // The Sun's visibility last frame, for the sprite character shivering in a shadow.
@@ -284,6 +292,15 @@ async function init() {
         progress,
       });
       const done = slots.missions;
+      // Today's request may be a photo of a body: the subject of this one.
+      photoSubject = ratePhoto({
+        position: state.position,
+        orientation: multiply(state.orientation, shot.orientation),
+        fovY: shot.fov,
+        aspect: shot.aspect,
+        heroVisible: shot.heroVisible,
+        bodies,
+      }).subject;
       if (shot.thumb) {
         const local = nearestLocalBody(state.position, bodies);
         // How it is framed: kept with the photo, for grandmother's stars if it is sent.
@@ -512,6 +529,8 @@ async function init() {
   }
   // The place whose card opened on reaching it: greeted once the card is put away.
   let greetAfterCard = null;
+  // The subject of a photo just saved, until the next frame has looked at it.
+  let photoSubject = null;
   // Lines said in this visit to the game (core/lines.js): she does not repeat herself.
   const saidLines = new Set();
   function sayFresh(list) {
@@ -645,6 +664,19 @@ async function init() {
     },
     notes: NOTES,
     memos: MEMOS,
+    daily: () => ({
+      text: request.text,
+      done: requestDone(),
+      days: daily.days.length,
+      streak: streak(daily, today),
+      go() {
+        selectedId = requestTarget(request);
+        hud.showSelection(named(selectedId));
+        const target = here(selectedId);
+        state = { ...state, orientation: lookAtDirection(target.position.map((n, i) => n - state.position[i])) };
+        toast.show(hud.faceToast(target));
+      },
+    }),
     onTourStart: beginTour,
     onTourQuit: endTour,
     lastSlot: LAST_SLOT,
@@ -775,6 +807,8 @@ async function init() {
   document.body.dataset.ready = 'true';
   toast.show(`${bodyById(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);
   progressChanged(null);
+  if (!requestDone()) toast.show(`오늘의 부탁: ${request.text}
+수첩을 열면 다시 볼 수 있습니다.`);
   const touch = document.body.classList.contains('touch');
   const journalHow = touch ? '수첩 버튼' : 'J 키나 수첩 버튼';
   const guideView = createGuideView({
@@ -907,6 +941,17 @@ async function init() {
     }
     // A place reached for the first time opens its card, once she has settled.
     if (told.newly.length) cardDue = { id: told.newly[0], in: CARD_AFTER_S };
+    // Today's request, done: a star for the day. (A photo is looked at once, while the
+    // game is still stopped in photo mode.)
+    if (!requestDone() && requestMet(request, { storiesNow, position: state.position, bodies, craft, photoSubject })) {
+      daily = recordDay(daily, today);
+      saveDaily(daily);
+      const run = streak(daily, today);
+      toast.show(`오늘의 부탁을 해냈습니다. 수첩에 별이 붙었습니다(해낸 날 ${daily.days.length}일${run > 1 ? `, ${run}일째 이어서` : ''}).`);
+      say.show(run > 0 && run % 7 === 0 ? '일주일 내내 했어! 대단하지?' : '부탁 끝! 할머니 좋아하시겠다.');
+      sound.cue('discovered');
+    }
+    photoSubject = null;
     // A tour under way: at its next stop, Seora says her line and the tour moves on.
     const leg = guide.step === null ? currentStop(progress) : null;
     // Her line at a tour's stop is not talked over by the line for finding the body.

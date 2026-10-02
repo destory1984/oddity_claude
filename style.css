@@ -1658,3 +1658,43 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   display:block;
   margin-top:6px;
 }
+
+/* Today's request in the journal: grandmother's slip, a star once done. */
+#journalDaily {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:4px 10px;
+  margin:8px 22px 0;
+  padding:8px 10px;
+  border-radius:3px;
+  background:#f2e6c8;
+  color:#3b2a1a;
+  font-size:13px;
+}
+
+#journalDaily[hidden] {
+  display:none;
+}
+
+#dailyText {
+  flex:1 1 220px;
+  font-family:"Gowun Batang","Nanum Myeongjo","AppleMyungjo","Batang",serif;
+  word-break:keep-all;
+}
+
+#dailyCount {
+  color:#7a5a36;
+  font-size:12px;
+}
+
+#journal #dailyGo {
+  width:auto;
+  min-height:30px;
+  margin:0;
+  padding:3px 10px;
+  font-size:12px;
+  color:#3b2a1a;
+  border-color:#b79a6a;
+  background:#0000;
+}

@@ -18,7 +18,7 @@ const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
 const CLIPPING = '1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.';
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onTourStart = null, onTourQuit = null }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onTourStart = null, onTourQuit = null, daily = null }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -56,6 +56,20 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       onJump(id);
     });
     return jump;
+  }
+
+  // Today's request (core/daily.js): daily() gives { text, done, days, streak } or null.
+  $('dailyGo').addEventListener('click', () => {
+    dialog.close();
+    daily().go();
+  });
+  function renderDaily() {
+    const today = daily ? daily() : null;
+    $('journalDaily').hidden = !today;
+    if (!today) return;
+    $('dailyText').textContent = `${today.done ? '★' : '☆'} 오늘의 부탁: ${today.text}`;
+    $('dailyCount').textContent = `해낸 날 ${today.days}일${today.streak > 1 ? ` · ${today.streak}일째 이어서` : ''}`;
+    $('dailyGo').hidden = today.done;
   }
 
   let lastProgress = null;
@@ -309,6 +323,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     if (dialog.open) return;
     onOpen();
     render();
+    renderDaily();
     renderStories();
     renderCraft();
     renderTours();

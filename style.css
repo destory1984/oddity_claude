@@ -1972,16 +1972,14 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   box-sizing:content-box;
 }
 
-/* ---- The pixel skin of the flight screen (docs/art-order-ui.md) ----
-   A frame is drawn with shadows, not a picture: four 2 px strips on the sides, which
-   leaves the corner pixel out as on an old console, and a dark edge behind them. No
-   picture is stretched, so nothing blurs and no seam shows. Icons are white pixel
-   drawings (public/assets/ui/icon-*.png). The text keeps the screen font. */
+/* ---- The skin of the flight screen: smooth glass ----
+   Rounded navy glass with a thin pale line; icons are smooth line drawings
+   (public/assets/ui/icon-*.svg). The user chose this over two pixel-art tries, which
+   looked like a game of the 1970s. Gold marks what is chosen, pressed or stopped. */
 :root {
-  --px-line:#cfd0f2;
-  --px-edge:#050a22;
-  --px-fill:#0a1132eb;
-  --px-gold:#f6b951;
+  --glass-fill:#0d1a3acc;
+  --glass-line:#9fb4ff66;
+  --gold:#f6b951;
 }
 
 #hud nav button,
@@ -1989,14 +1987,12 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 footer button,
 #guide button,
 #photoTools button {
-  --line:var(--px-line);
-  border:0;
-  border-radius:0;
-  background:var(--px-fill);
-  backdrop-filter:none;
-  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line),
-    0 0 0 2px var(--px-edge),
-    -4px 0 0 0 var(--px-edge), 4px 0 0 0 var(--px-edge), 0 -4px 0 0 var(--px-edge), 0 4px 0 0 var(--px-edge);
+  border:1px solid var(--glass-line);
+  border-radius:12px;
+  background:var(--glass-fill);
+  backdrop-filter:blur(8px);
+  box-shadow:0 2px 10px #0006;
+  color:#eef3ff;
 }
 
 #hud nav button:hover,
@@ -2004,7 +2000,8 @@ footer button,
 footer button:hover,
 #guide button:hover,
 #photoTools button:hover {
-  background:#16226aeb;
+  background:#182a5ccc;
+  border-color:#c3d0ffaa;
 }
 
 #hud nav button:active,
@@ -2012,14 +2009,14 @@ footer button:hover,
 footer button:active,
 #guide button:active,
 #photoTools button:active {
-  --line:var(--px-gold);
-  background:#1a2a6c;
+  border-color:var(--gold);
+  background:#1c2f6ae6;
 }
 
 /* Saving the photo is the one thing to press there: gold, with dark letters. */
 #photoTools #capture {
-  --line:#fff3c4;
-  background:#f6b951;
+  border-color:#fff3c4;
+  background:var(--gold);
   color:#081725;
   font-weight:600;
 }
@@ -2029,22 +2026,20 @@ footer button:active,
 }
 
 #photoTools button:disabled {
-  --line:#7a7fa0;
-  opacity:1;
-  color:#7a7fa0;
+  opacity:.5;
 }
 
 /* The six buttons at the top: an icon each; the journal's also shows the count. The
    words stay as the button's name for screen readers. */
 #hud nav {
-  gap:12px;
+  gap:9px;
 }
 
 #hud nav button {
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:8px;
+  gap:7px;
   width:44px;
   min-height:44px;
   padding:0;
@@ -2057,34 +2052,36 @@ footer button:active,
   width:24px;
   height:24px;
   background:center / contain no-repeat;
-  image-rendering:pixelated;
 }
 
-#hud nav #soundButton::before { background-image:url("/assets/ui/icon-sound-on.png"); }
-#hud nav #soundButton.off::before { background-image:url("/assets/ui/icon-sound-off.png"); }
-#hud nav #bgmButton::before { background-image:url("/assets/ui/icon-music-on.png"); }
-#hud nav #bgmButton.off::before { background-image:url("/assets/ui/icon-music-off.png"); }
-#hud nav #helpButton::before { background-image:url("/assets/ui/icon-help.png"); }
-#hud nav #pauseButton::before { background-image:url("/assets/ui/icon-pause.png"); }
-#hud nav #pauseButton.paused::before { background-image:url("/assets/ui/icon-play.png"); }
-#hud nav #journalButton::before { background-image:url("/assets/ui/icon-journal.png"); }
-#hud nav #photoButton::before { background-image:url("/assets/ui/icon-camera.png"); }
+#hud nav #soundButton::before { background-image:url("/assets/ui/icon-sound-on.svg"); }
+#hud nav #soundButton.off::before { background-image:url("/assets/ui/icon-sound-off.svg"); }
+#hud nav #bgmButton::before { background-image:url("/assets/ui/icon-music-on.svg"); }
+#hud nav #bgmButton.off::before { background-image:url("/assets/ui/icon-music-off.svg"); }
+#hud nav #helpButton::before { background-image:url("/assets/ui/icon-help.svg"); }
+#hud nav #pauseButton::before { background-image:url("/assets/ui/icon-pause.svg"); }
+#hud nav #pauseButton.paused::before { background-image:url("/assets/ui/icon-play.svg"); }
+#hud nav #journalButton::before { background-image:url("/assets/ui/icon-journal.svg"); }
+#hud nav #photoButton::before { background-image:url("/assets/ui/icon-camera.svg"); }
 
+/* Switched off: the icon says so itself (a cross, a stroke); the button only dims a little. */
+#hud nav #soundButton.off,
 #hud nav #bgmButton.off {
-  opacity:1;
+  opacity:.8;
   text-decoration:none;
 }
 
 #hud nav #journalButton {
   width:auto;
-  padding:0 10px 0 8px;
-  font-size:14px;
+  padding:0 12px 0 10px;
+  font-size:13px;
+  font-weight:600;
   font-variant-numeric:tabular-nums;
 }
 
 /* Stopped: the pause button is lined in gold. */
 #hud nav #pauseButton.paused {
-  --line:var(--px-gold);
+  border-color:var(--gold);
 }
 
 /* A phone: the six buttons take the whole top row, each big enough for a finger; the
@@ -2101,7 +2098,7 @@ footer button:active,
   }
 
   #hud nav {
-    gap:10px;
+    gap:8px;
   }
 
   #hud nav button {
@@ -2112,7 +2109,7 @@ footer button:active,
 
   #hud nav #journalButton {
     gap:6px;
-    padding:0 8px 0 6px;
+    padding:0 10px 0 8px;
     font-size:12px;
   }
 
@@ -2124,130 +2121,96 @@ footer button:active,
 
 #targetPanel button {
   min-height:38px;
-  padding:8px 14px;
-  margin-top:14px;
+  padding:8px 16px;
+  font-weight:500;
 }
 
 #reverseButton,#flyButton,#brake {
-  min-height:34px;
-  padding:6px 12px;
+  min-height:36px;
+  padding:6px 14px;
+  font-weight:500;
 }
 
-/* Names of bodies, craft and places: a thin blue line round a faint fill, so the sky
-   shows through; the chosen one and the goal are lined in gold. */
+/* Names of bodies, craft and places: fainter glass, so the sky shows through; the
+   chosen one and the goal are lined in gold. */
 .marker {
-  --line:#3d5bb5;
-  border:0;
-  border-radius:0;
-  background:#0a113278;
+  border:1px solid #9fb4ff40;
+  border-radius:10px;
+  background:#0d1a3a99;
   backdrop-filter:none;
-  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line);
+  box-shadow:none;
   min-height:0;
-  padding:4px 9px;
+  padding:5px 11px;
   color:#dfe6ff;
 }
 
 .marker:hover {
-  background:#16226aaa;
+  background:#182a5ccc;
 }
 
 .marker.inView {
-  background:#0a113278;
+  background:#0d1a3a99;
 }
 
 .marker.selected,
 .marker.goal {
-  --line:var(--px-gold);
-  background:#0a1132aa;
-}
-
-/* The goal pulses with a ring of its own outside the line. */
-.marker.goal {
-  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line);
-  outline:2px solid #f6b95155;
-  outline-offset:4px;
-  animation:goalRing 1.4s ease-in-out infinite;
-}
-
-@keyframes goalRing {
-  50% { outline-offset:8px; outline-color:#f6b95100; }
-}
-
-@media (prefers-reduced-motion:reduce) {
-  .marker.goal { animation:none; }
+  border-color:var(--gold);
+  background:#0d1a3acc;
 }
 
 #toast {
-  --line:#3d5bb5;
-  border:0;
-  border-radius:0;
-  background:#08112be6;
-  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line);
+  border:1px solid #9fb4ff40;
+  border-radius:10px;
+  background:#0d1a3ae6;
   padding:10px 18px;
 }
 
 #guide {
-  --line:var(--px-gold);
-  border:0;
-  border-radius:0;
-  background:var(--px-fill);
-  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line),
-    0 0 0 2px var(--px-edge),
-    -4px 0 0 0 var(--px-edge), 4px 0 0 0 var(--px-edge), 0 -4px 0 0 var(--px-edge), 0 4px 0 0 var(--px-edge);
-  padding:8px 10px 8px 14px;
+  border:1px solid var(--gold);
+  border-radius:14px;
+  background:var(--glass-fill);
+  backdrop-filter:blur(8px);
+  padding:6px 8px 6px 14px;
 }
 
 #guide button {
   min-height:32px;
   padding:4px 12px;
+  border-radius:10px;
 }
 
 #guide #guideJump {
-  --line:var(--px-gold);
-  border:0;
-  border-radius:0;
-  color:#f6b951;
+  border-color:var(--gold);
+  color:var(--gold);
 }
 
-/* Seora's bubble: paper with a navy pixel line, and a stepped point under it. */
+/* Seora's bubble: soft paper with a small point under it. */
 #heroSay {
-  --line:#1a2894;
   border:0;
-  border-radius:0;
+  border-radius:16px;
   background:#fffdf4;
-  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line);
-  padding:8px 14px;
+  box-shadow:0 2px 10px #0006;
+  padding:9px 15px;
 }
 
-#heroSay::after {
-  bottom:-12px;
-  width:16px;
-  height:10px;
-  background:url("/assets/ui/bubble-tail.png") center / contain no-repeat;
-  transform:translateX(-50%);
-  border-radius:0;
-  image-rendering:pixelated;
-}
-
-/* The map and the thrust bar: a pale ring with a dark edge, a gold handle. */
+/* The map and the thrust bar. */
 #minimap {
   border-radius:50%;
-  box-shadow:0 0 0 2px #cfd0f2, 0 0 0 4px #050a22;
+  box-shadow:0 0 0 1px var(--glass-line), 0 2px 10px #0006;
 }
 
 input[type=range] {
-  accent-color:#f6b951;
+  accent-color:#9fb4ff;
 }
 
-
-/* ---- The journal as a paper notebook (docs/art-order-ui.md) ----
-   A worn leather cover round a cream page, brown ink, index tabs, and small buttons
-   lined in brown like a rubber stamp's edge. The same paper as grandmother's notes. */
+/* ---- The journal as a paper notebook ----
+   A cream page in a brown cover, brown ink, index tabs, and small rounded buttons with
+   a thin brown line. The same paper as grandmother's notes. */
 #journal {
-  border:12px solid transparent;
-  border-image:url("/assets/ui/frame-book.png") 12 fill / 12px stretch;
-  border-radius:0;
-  background:none;
+  border:4px solid #6b3d1e;
+  border-radius:14px;
+  background:#f2e6c8;
+  box-shadow:0 0 0 2px #2b170c, inset 0 0 0 2px #d9c79b, 0 30px 100px #000a;
   color:#3b2a1a;
   scrollbar-color:#8a5428 #e3d2a6;
 }
@@ -2273,51 +2236,48 @@ input[type=range] {
   background:repeating-linear-gradient(#0000 0 27px, #b79a6a2e 27px 28px) local;
 }
 
-#journalTabs {
-  border-bottom:2px solid #5a3d22;
-  padding-bottom:0;
-  gap:2px;
-  align-items:flex-end;
-}
-
 #journal button,
 #journal #journalTabs button,
 #journal #journalNotes button,
 #journal #dailyGo,
 #journal #closeJournal {
-  --line:#5a3d22;
-  border:0;
-  border-radius:0;
-  background:#faf3de;
+  border:1.5px solid #6b4a26;
+  border-radius:9px;
+  background:#fbf4e0;
   backdrop-filter:none;
-  box-shadow:-2px 0 0 0 var(--line), 2px 0 0 0 var(--line), 0 -2px 0 0 var(--line), 0 2px 0 0 var(--line);
+  box-shadow:0 1px 0 #6b4a2640;
   color:#3b2a1a;
 }
 
 #journal button:hover {
-  background:#f0e4c2;
+  background:#f3e8c8;
 }
 
 #journal button:active {
-  background:#e3d2a6;
+  background:#e6d6ab;
 }
 
 #journal button:focus-visible {
   outline-color:#1a2894;
-  outline-offset:4px;
+  outline-offset:3px;
 }
 
-/* Index tabs: the chosen one is gold and stands a little taller. */
+/* Index tabs: rounded at the top, standing on the line; the chosen one is gold. */
 #journalTabs {
-  gap:6px;
+  border-bottom:2px solid #6b4a26;
+  padding-bottom:0;
   padding-top:6px;
+  gap:4px;
+  align-items:flex-end;
 }
 
 #journal #journalTabs button {
+  border-radius:9px 9px 0 0;
+  border-bottom:0;
   background:#dcc9a0;
+  box-shadow:none;
   min-height:32px;
   padding:4px 11px;
-  margin-bottom:2px;
 }
 
 #journal #journalTabs button[aria-selected="true"] {
@@ -2330,6 +2290,7 @@ input[type=range] {
 #journal #closeJournal {
   width:40px;
   height:40px;
+  border-radius:50%;
   font-weight:700;
 }
 

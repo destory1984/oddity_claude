@@ -11,14 +11,15 @@ import ringFrag from './shaders/ring.frag?raw';
 import noiseGlsl from './shaders/noise.glsl?raw';
 import ringsGlsl from './shaders/rings.glsl?raw';
 import texturedFrag from './shaders/textured.frag?raw';
-import { KM_PER_UNIT } from '../core/bodies.js';
+import { KM_PER_UNIT, TIME_SCALE } from '../core/bodies.js';
 import { normalize } from './math.js';
 import { SPIN_DAY_S, EARTH_START_SPIN } from '../core/surface.js';
 
 const SIDEREAL_DAY_S = SPIN_DAY_S.earth;
 // Real rotation is too slow to see (Earth turns 1.25 degrees in five minutes), so
-// every body spins 720 times faster: one Earth day passes in two minutes.
-const SPIN_SPEEDUP = 720;
+// every body spins with the game clock (core/bodies.js TIME_SCALE, 180 times real
+// time): one Earth day passes in eight minutes.
+const SPIN_SPEEDUP = TIME_SCALE;
 // Clouds drift a little faster than the ground so the weather visibly moves.
 const CLOUD_DRIFT = 1.08;
 // Shell sizes relative to the Earth sphere, kept from the prototype (12.776 and 13.0 over 12.742).

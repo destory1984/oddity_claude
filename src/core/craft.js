@@ -1,16 +1,16 @@
 // Spacecraft and telescopes. They are not bodies: nothing lands on them, they are
 // not in the journal and they block nothing. Flying near one only lowers the speed
 // limit, like nearing a surface (see step() in game.js).
-import { DISTANCE_COMPRESSION, SATELLITE_COMPRESSION, compressedCenterDistance } from './bodies.js';
+import { DISTANCE_COMPRESSION, SATELLITE_COMPRESSION, TIME_SCALE, compressedCenterDistance } from './bodies.js';
 import { ellipsePoint } from './kepler.js';
 
 const AU_KM = 149597870.7;
 const rad = (deg) => (deg * Math.PI) / 180;
 
 export const HUBBLE_ALTITUDE_KM = 540;
-// The real orbit takes 95 minutes, which is 8 s on the game clock (720x): too fast to
-// catch at the 0.01c limit. One lap in ten minutes of play keeps it at 72 km/s.
-const HUBBLE_PERIOD_S = 600;
+// The real orbit takes 95 minutes, which is 32 s on the game clock (180x): too fast to
+// catch at the 0.01c limit. One lap in forty minutes of play keeps it at 18 km/s.
+const HUBBLE_PERIOD_S = 2400;
 // Webb is at the Sun-Earth L2 point, 1.5 million km behind Earth. Gaps around a
 // planet shrink 1/10 here, as for moons.
 export const JWST_FROM_EARTH_KM = 150000;
@@ -73,29 +73,29 @@ export const CRAFT = [
     intro: '제임스 웹처럼 L2 점 둘레를 돕니다. 6년 동안 하늘의 3분의 1을 찍어, 은하 수십억 개로 암흑 물질과 암흑 에너지의 지도를 만듭니다.',
   },
   // ring: a circle round the parent, `altitudeKm` above its surface (game km), one lap
-  // every `lapPlayS` seconds of play (real laps of 90 minutes would take 8 seconds, too
+  // every `lapPlayS` seconds of play (real laps of 90 minutes would take 30 seconds, too
   // fast to catch), tilted `tiltDeg` to the planets' plane, starting `phaseDeg` round.
   {
     id: 'iss', name: '국제우주정거장', nameEn: 'ISS', kind: 'craft', parent: 'earth',
-    ring: { altitudeKm: 420, lapPlayS: 540, tiltDeg: 51.6, phaseDeg: 120 },
+    ring: { altitudeKm: 420, lapPlayS: 2160, tiltDeg: 51.6, phaseDeg: 120 },
     launched: 1998,
     intro: '여러 나라가 함께 지은 길이 109m의 우주정거장입니다. 지구 420km 위를 92분에 한 바퀴 돌고, 2000년부터 사람이 끊이지 않고 살고 있습니다.',
   },
   {
     id: 'tiangong', name: '톈궁 우주정거장', nameEn: 'Tiangong', kind: 'craft', parent: 'earth',
-    ring: { altitudeKm: 390, lapPlayS: 570, tiltDeg: 41.5, phaseDeg: 240 },
+    ring: { altitudeKm: 390, lapPlayS: 2280, tiltDeg: 41.5, phaseDeg: 240 },
     launched: 2021,
     intro: '중국이 지은 우주정거장입니다. 모듈 셋이 T자로 이어져 있고, 우주비행사 셋이 여섯 달씩 머뭅니다.',
   },
   {
     id: 'sputnik', name: '스푸트니크 1호', nameEn: 'Sputnik 1', kind: 'craft', parent: 'earth',
-    ring: { altitudeKm: 900, lapPlayS: 700, tiltDeg: 65, phaseDeg: 300 },
+    ring: { altitudeKm: 900, lapPlayS: 2800, tiltDeg: 65, phaseDeg: 300 },
     launched: 1957,
     intro: '1957년 10월 4일에 올라간 첫 인공위성입니다. 지름 58cm 공에서 삐삐 소리를 21일 동안 보냈고, 석 달 뒤 대기에서 타 버렸습니다. 여기 있는 것은 그 기념입니다.',
   },
   {
     id: 'mro', name: '화성 정찰 궤도선', nameEn: 'MRO', kind: 'craft', parent: 'mars',
-    ring: { altitudeKm: 300, lapPlayS: 600, tiltDeg: 87, phaseDeg: 0 },
+    ring: { altitudeKm: 300, lapPlayS: 2400, tiltDeg: 87, phaseDeg: 0 },
     launched: 2005,
     intro: '화성 300km 위에서 지름 50cm 카메라로 표면을 찍습니다. 탁자만 한 것까지 보여서, 화성에 내린 탐사차들의 바퀴 자국도 찍었습니다.',
   },
@@ -109,7 +109,7 @@ export const CRAFT = [
   },
   {
     id: 'cassini', name: '카시니', nameEn: 'Cassini', kind: 'craft', parent: 'saturn',
-    ring: { altitudeKm: 160000 - 58232, lapPlayS: 900, tiltDeg: 60, phaseDeg: 45 },
+    ring: { altitudeKm: 160000 - 58232, lapPlayS: 3600, tiltDeg: 60, phaseDeg: 45 },
     launched: 1997,
     intro: '13년 동안 토성을 294바퀴 돌고 타이탄에 하위헌스를 내려보냈습니다. 2017년 토성 대기로 뛰어들어 임무를 마쳤습니다. 여기 있는 것은 그 기념입니다.',
   },
@@ -137,13 +137,13 @@ export const CRAFT = [
   },
   {
     id: 'danuri', name: '다누리', nameEn: 'Danuri', kind: 'craft', parent: 'moon',
-    ring: { altitudeKm: 100, lapPlayS: 500, tiltDeg: 90, phaseDeg: 0 },
+    ring: { altitudeKm: 100, lapPlayS: 2000, tiltDeg: 90, phaseDeg: 0 },
     launched: 2022,
     intro: '한국의 첫 달 탐사선입니다. 달 100km 위를 돌며 표면과 자원을 찍고, 햇빛이 들지 않는 극지 분화구 속까지 들여다보는 카메라를 실었습니다.',
   },
   {
     id: 'lro', name: '달 정찰 궤도선', nameEn: 'LRO', kind: 'craft', parent: 'moon',
-    ring: { altitudeKm: 120, lapPlayS: 430, tiltDeg: 86, phaseDeg: 150 },
+    ring: { altitudeKm: 120, lapPlayS: 1720, tiltDeg: 86, phaseDeg: 150 },
     launched: 2009,
     intro: '2009년부터 달을 돌며 표면 전체의 지도를 만들었습니다. 50cm까지 보는 카메라로 아폴로 착륙선과 우주비행사가 걸어간 자국도 찍었습니다.',
   },
@@ -223,7 +223,7 @@ export function craftAt(timeS, bodies) {
   return CRAFT.map((craft) => {
     let position;
     if (craft.id === 'hubble') {
-      const a = (2 * Math.PI * timeS) / (HUBBLE_PERIOD_S * 720);
+      const a = (2 * Math.PI * timeS) / (HUBBLE_PERIOD_S * TIME_SCALE);
       const r = earth.radiusKm + HUBBLE_ALTITUDE_KM;
       // A 28.5 degree inclined circle.
       const tilt = rad(28.5);
@@ -259,7 +259,7 @@ export function craftAt(timeS, bodies) {
       ];
     } else if (craft.ring) {
       const parent = bodies.find((b) => b.id === craft.parent);
-      const a = (2 * Math.PI * timeS) / (craft.ring.lapPlayS * 720) + rad(craft.ring.phaseDeg);
+      const a = (2 * Math.PI * timeS) / (craft.ring.lapPlayS * TIME_SCALE) + rad(craft.ring.phaseDeg);
       position = onOrbit(parent.position, parent.radiusKm + craft.ring.altitudeKm, [Math.cos(a), Math.sin(a)], craft.ring.tiltDeg);
     } else if (craft.loop) {
       const parent = bodies.find((b) => b.id === craft.parent) ?? sun;

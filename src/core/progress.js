@@ -116,7 +116,8 @@ export function sanitizeProgress(raw, bodies, missions, stories = [], craft = []
     notes: clean(raw.notes, new Set(notes.map((n) => n.id))),
     tours: clean(raw.tours, new Set(tours.map((t) => t.id))),
     tour: underWay(raw.tour, tours),
-    quiz: clean(raw.quiz, new Set([...storyIds, ...bodyIds, ...craftIds])),
+    // A reading's question is kept as 'r:' and its id (core/readingQuiz.js readingKey).
+    quiz: clean(raw.quiz, new Set([...storyIds, ...[...bodyIds, ...craftIds].map((id) => `r:${id}`)])),
   };
 }
 

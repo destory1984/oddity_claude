@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { READING_QUIZ, readingQuizFor } from '../src/core/readingQuiz.js';
+import { READING_QUIZ, readingQuizFor, readingKey } from '../src/core/readingQuiz.js';
 import { READINGS } from '../src/core/readings.js';
 import { BODIES } from '../src/core/bodies.js';
 import { CRAFT } from '../src/core/craft.js';
@@ -38,8 +38,13 @@ test('the three choices come in a steady order, the answer not always first', ()
 });
 
 test('a reading question answered right is kept beside the story ones', () => {
-  const once = recordQuiz(recordQuiz(createProgress(), 'saturn'), 'hubble');
-  assert.deepEqual(once.quiz, ['saturn', 'hubble']);
-  const read = sanitizeProgress({ quiz: ['saturn', 'hubble', 'apollo11', 'forged', 'saturn'] }, BODIES, MISSIONS, STORIES, CRAFT);
-  assert.deepEqual(read.quiz, ['saturn', 'hubble', 'apollo11']);
+  const once = recordQuiz(recordQuiz(createProgress(), readingKey('saturn')), readingKey('hubble'));
+  assert.deepEqual(once.quiz, ['r:saturn', 'r:hubble']);
+  const read = sanitizeProgress({ quiz: ['r:saturn', 'r:hubble', 'apollo11', 'forged', 'r:saturn', 'saturn', 'r:apollo11'] }, BODIES, MISSIONS, STORIES, CRAFT);
+  assert.deepEqual(read.quiz, ['r:saturn', 'r:hubble', 'apollo11']);
+  // Voyager 1 is a craft and a story place: the two questions are kept apart.
+  const both = sanitizeProgress({ quiz: ['voyager1'] }, BODIES, MISSIONS, STORIES, CRAFT);
+  assert.deepEqual(both.quiz, ['voyager1']);
+  assert.ok(STORIES.some((s) => s.id === 'voyager1') && CRAFT.some((c) => c.id === 'voyager1'));
+  assert.ok(!both.quiz.includes(readingKey('voyager1')));
 });

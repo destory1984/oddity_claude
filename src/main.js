@@ -59,7 +59,7 @@ import {
 } from './core/dock.js';
 import { inspectLight } from './core/lamp.js';
 import { READINGS, bodyFacts } from './core/readings.js';
-import { readingQuizFor } from './core/readingQuiz.js';
+import { readingQuizFor, readingKey } from './core/readingQuiz.js';
 import { STORY_DETAILS } from './core/storyDetails.js';
 import { STORY_MORE } from './core/storyMore.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
@@ -525,7 +525,7 @@ ${STORY_MORE[target.id]}` : told };
   }
   function readingQuiz(id) {
     const quiz = READINGS[id] ? readingQuizFor(id) : null;
-    return quiz && { ...quiz, id, solved: (progress.quiz ?? []).includes(id) };
+    return quiz && { ...quiz, id: readingKey(id), solved: (progress.quiz ?? []).includes(readingKey(id)) };
   }
   const inspectInfo = createInspectInfo({
     onSolve(id) {

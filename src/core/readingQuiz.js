@@ -66,6 +66,10 @@ const ROWS = [
 
 export const READING_QUIZ = Object.fromEntries(ROWS.map(([id, question, answer, ...wrong]) => [id, { question, answer, wrong }]));
 
+// How a reading's question is kept in progress.quiz. Three craft share their id with a
+// story place (voyager1, cassini, newHorizons), whose card has a question of its own.
+export const readingKey = (id) => `r:${id}`;
+
 // The question for a body or a craft: { question, choices, right }, or null.
 export function readingQuizFor(id) {
   return arrange(id, READING_QUIZ[id]);

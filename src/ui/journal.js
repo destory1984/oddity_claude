@@ -5,6 +5,7 @@ import { FACTS } from '../core/facts.js';
 import { photoCaption, ALBUM_MAX } from '../core/album.js';
 import { starText, postageFile, cardWords } from '../core/postcard.js';
 import { postcardBlob, saveBlob } from './postcardImage.js';
+import { readingKey } from '../core/readingQuiz.js';
 import { TOURS, stopName, stampFile, sceneFile } from '../core/tours.js';
 
 const $ = (id) => document.getElementById(id);
@@ -122,7 +123,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const marks = document.createElement('span');
       marks.className = 'marks';
       // The question under its reading, answered right (core/readingQuiz.js).
-      const solved = found && (progress.quiz ?? []).includes(body.id);
+      const solved = found && (progress.quiz ?? []).includes(readingKey(body.id));
       marks.textContent = `${found ? '발견 ✓' : '발견 —'}  ${landed ? '착지 ✓' : '착지 —'}${solved ? '  문제 ✓' : ''}`;
       const distance = document.createElement('span');
       distance.className = 'distance';
@@ -325,7 +326,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const li = document.createElement('li');
       li.className = met ? 'done' : '';
       const title = document.createElement('strong');
-      const solved = met && (lastProgress.quiz ?? []).includes(c.id);
+      const solved = met && (lastProgress.quiz ?? []).includes(readingKey(c.id));
       title.textContent = `${met ? '✓' : '○'} ${c.name} (${c.launched}년)${solved ? ' · 문제 ✓' : ''}`;
       const line = document.createElement('span');
       line.textContent = met ? c.intro : '아직 만나지 못했습니다.';

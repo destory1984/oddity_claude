@@ -682,6 +682,7 @@ async function init() {
   // answers the first reading with a line of her own.
   let notePriorPause = false;
   let noteWait = 0;
+  let dailyDue = !requestDone();
   let noteDueId = null;
   const noteCard = createNoteCard({
     onOpen() {
@@ -695,7 +696,7 @@ async function init() {
       if (!first) return;
       noteWait = NOTE_GAP_S;
       // The last line was spoken at the gate.
-      if (!note.gate) say.show(note.line);
+      if (!note.gate && note.line) say.show(note.line);
       // One of grandmother's notes (not a reply): she reads it over once more.
       if (note.id && !note.gate) readUntil = performance.now() + READ_MS;
     },
@@ -898,8 +899,6 @@ async function init() {
   document.body.dataset.ready = 'true';
   toast.show(`${bodyById(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);
   progressChanged(null);
-  if (!requestDone()) toast.show(`오늘의 부탁: ${request.text}
-수첩을 열면 다시 볼 수 있습니다.`);
   const touch = document.body.classList.contains('touch');
   const journalHow = touch ? '수첩 버튼' : 'J 키나 수첩 버튼';
   const guideView = createGuideView({
@@ -1117,7 +1116,20 @@ async function init() {
     noteWait = Math.max(0, noteWait - dt);
     const calm = dt > 0 && noteWait === 0 && !cardDue && !storyCard.isOpen() && !warp.busy()
       && !(docked && !isDocked(docked)) && !(visit && !hasArrived(visit));
-    if (note && calm) {
+    // Today's request comes on a sheet of its own as the day's play begins, and the
+    // game waits until it is put away with its button (as a passing notice it was
+    // gone in six seconds). Only the very first note, which opens the story, goes before it.
+    const settled = dt > 0 && !noteCard.isOpen() && !cardDue && !storyCard.isOpen() && !warp.busy()
+      && !(docked && !isDocked(docked)) && !(visit && !hasArrived(visit));
+    if (dailyDue && settled && (progress.notes ?? []).length > 0) {
+      dailyDue = false;
+      noteCard.show({
+        scene: '수첩 사이에 오늘 날짜가 적힌 쪽지가 끼워져 있다.',
+        title: '오늘의 부탁',
+        text: `${request.text}\n\n수첩을 열면 다시 볼 수 있단다.`,
+        button: '확인',
+      });
+    } else if (note && calm) {
       progress = recordNote(progress, note.id);
       saveProgress(progress);
       noteCard.show(note);

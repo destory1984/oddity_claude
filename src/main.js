@@ -18,7 +18,7 @@ import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
 import { createWarp } from './ui/warp.js';
 import { addPhoto, removePhoto, photoPlace } from './core/album.js';
-import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor } from './core/postcard.js';
+import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } from './core/postcard.js';
 import { teleportSpot } from './core/teleport.js';
 import { behindBody } from './core/markers.js';
 import { FACTS } from './core/facts.js';
@@ -347,12 +347,19 @@ async function init() {
           heroVisible: shot.heroVisible,
           bodies,
         });
+        // A story place she stands at that grandmother has a word about (core/postcard.js).
+        const placesNow = completedStories({ position: state.position, restingOn: state.restingOn, bodies, craft, sites });
+        const storyPlace = cardPlace(placesNow);
+        // Standing at a place on a surface: its name is where the photo was taken.
+        const stoodAt = STORIES.find((story) => story.type === 'surface' && placesNow.includes(story.id));
         album = saveAlbum(addPhoto(album, {
           at: new Date().toISOString(),
           // Docked, or far from every body with a craft in reach: the craft is the place.
-          where: photoPlace(local.label, local.altitude, (docked ? here(docked.id) : local.altitude >= 1e5 ? dockable(state.position, craft) : null)?.name),
+          // Standing at a story place: that place.
+          where: photoPlace(local.label, local.altitude, (docked ? here(docked.id) : local.altitude >= 1e5 ? dockable(state.position, craft) : stoodAt)?.name),
           missions: done,
           image: shot.thumb,
+          ...(storyPlace ? { place: storyPlace } : {}),
           rate: { stars, subject },
         }));
         journal.setAlbum(album);

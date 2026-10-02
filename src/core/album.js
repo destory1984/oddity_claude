@@ -6,7 +6,8 @@ export const ALBUM_MAX = 24;
 export const THUMB_WIDTH = 480;
 
 // entry: { at: ISO time, where: '달 상공 1,200km', missions: [mission ids], image: data URL }
-// and, for postcards (core/postcard.js): rate { stars, subject }, sent 'YYYY-MM-DD',
+// and, for postcards (core/postcard.js): rate { stars, subject }, place (a story place
+// she stood at that grandmother has a word about), sent 'YYYY-MM-DD',
 // reply (grandmother's words, once they have come).
 // When the album is full the oldest photo goes, but a postcard still waiting for its
 // reply is kept as long as anything else can go instead.
@@ -41,6 +42,7 @@ export function sanitizeAlbum(raw, missions = []) {
         missions: Array.isArray(e.missions) ? [...new Set(e.missions.filter((id) => known.has(id)))] : [],
         image: e.image,
       };
+      if (typeof e.place === 'string' && /^[A-Za-z0-9]{1,30}$/.test(e.place)) entry.place = e.place;
       const stars = e.rate?.stars;
       if ([0, 1, 2, 3].includes(stars)) entry.rate = { stars, subject: typeof e.rate.subject === 'string' ? e.rate.subject.slice(0, 20) : null };
       if (typeof e.sent === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.sent)) {
@@ -67,11 +69,11 @@ export function photoCaption(entry, missions) {
   return { title: `${day} · ${entry.where}`, met };
 }
 
-// Where a photo was taken, for its caption: beside a craft, or over the nearest body with
+// Where a photo was taken, for its caption: beside a craft or a story place, or over the nearest body with
 // the height. Far out the plain number grows too long to read ("명왕성 상공
 // 212,468,948km"), so from 100,000 km it is told in 만 and 억, as a distance from the body.
-export function photoPlace(label, altitudeKm, craftName = null) {
-  if (craftName) return `${craftName} 곁`;
+export function photoPlace(label, altitudeKm, besideName = null) {
+  if (besideName) return `${besideName} 곁`;
   const km = Math.round(altitudeKm);
   if (km < 1e5) return `${label} ${km.toLocaleString('ko-KR')}km`;
   const from = label.replace(/ 상공$/, '에서');

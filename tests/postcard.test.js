@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, starText, postageFile, cardWords,
+  ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, starText, postageFile, cardWords, cardPlace,
 } from '../src/core/postcard.js';
 import { existsSync } from 'node:fs';
 import { MISSIONS } from '../src/core/missions.js';
@@ -131,4 +131,18 @@ test('a postcard picture says where it was taken, the day and the missions it me
   const earthrise = MISSIONS.find((m) => m.id === 'earthrise');
   assert.deepEqual(cardWords(entry, MISSIONS), { place: '토성 상공 120,000km', day: `2026.10.3 · ${earthrise.name}` });
   assert.deepEqual(cardWords({ at: '2026-01-05T12:00:00.000Z', where: '달 상공 5km' }), { place: '달 상공 5km', day: '2026.1.5' });
+});
+
+test('a photo from the plain of the film gets her correction, once', () => {
+  assert.equal(cardPlace(['pathfinder', 'acidalia']), 'acidalia');
+  assert.equal(cardPlace(['apollo11']), null);
+  const photo = { missions: [], place: 'acidalia', rate: { stars: 1, subject: 'mars' } };
+  const first = replyFor(photo, 0, []);
+  assert.ok(first.startsWith('영화에서 본 그 평원이구나. 그런데 그 장면은 요르단 사막에서 찍었단다.'));
+  // The second time she speaks of Mars, as for any photo of it.
+  assert.ok(replyFor(photo, 1, [first]).startsWith('2003년에 망원경으로 본 붉은 점이'));
+  assert.ok(replyFor({ missions: [], place: 'wadiRum', rate: { stars: 2, subject: 'earth' } }).startsWith('2015년 극장에서 본 화성이'));
+  // A mission met still comes first, and an unknown place changes nothing.
+  assert.ok(replyFor({ ...photo, missions: ['eclipse'] }).startsWith('나는 평생 개기일식을'));
+  assert.ok(replyFor({ missions: [], place: 'nowhere', rate: { stars: 1, subject: 'mars' } }).startsWith('2003년에'));
 });

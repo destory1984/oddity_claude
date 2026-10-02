@@ -93,3 +93,10 @@ test('where a photo was taken: the height, in 만 and 억 far out, or the craft 
   assert.equal(photoPlace('명왕성 상공', 99940000), '명왕성에서 9,994만km');
   assert.equal(photoPlace('명왕성 상공', 212468948, '보이저 1호'), '보이저 1호 곁');
 });
+
+test('the story place kept with a photo survives a reload, a broken one does not', () => {
+  const base = { at: '2026-10-03T12:00:00.000Z', where: '화성 상공 0km', missions: [], image: 'data:image/jpeg;base64,AAA' };
+  assert.equal(sanitizeAlbum([{ ...base, place: 'acidalia' }], MISSIONS)[0].place, 'acidalia');
+  assert.ok(!('place' in sanitizeAlbum([{ ...base, place: '<b>x</b>' }], MISSIONS)[0]));
+  assert.ok(!('place' in sanitizeAlbum([base], MISSIONS)[0]));
+});

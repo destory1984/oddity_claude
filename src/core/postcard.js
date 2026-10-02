@@ -103,6 +103,17 @@ const BY_MISSION = {
   earthrise: '달에서 지구가 뜨는 걸 보다니. 1968년 아폴로 8호가 찍은 그 사진 같구나.',
   paleBlueDot: '저 점 안에 내가 있단다. 손 흔든 거 봤느냐.',
 };
+// By the story place the photo was taken at (an album entry's `place`): the two ends of
+// the ninth tour. Seora thinks the film was shot on Mars; grandmother puts it right. The
+// film is not named anywhere.
+const BY_PLACE = {
+  acidalia: '영화에서 본 그 평원이구나. 그런데 그 장면은 요르단 사막에서 찍었단다.',
+  wadiRum: '2015년 극장에서 본 화성이 바로 그 사막이란다. 지구인 줄 몰랐지.',
+};
+// The place to keep with a photo, of the story places she is at (core/stories.js
+// completedStories), or null.
+export const cardPlace = (storyIds) => storyIds.find((id) => BY_PLACE[id]) ?? null;
+
 // What she says when a place or a picture she has already answered comes again.
 const AGAIN = {
   sun: '또 해구나. 눈 조심하렴. 나는 2009년 일식 때도 필터를 꼭 댔단다.',
@@ -142,7 +153,9 @@ export function replyFor(entry, n = 0, earlier = []) {
   // counts as said.
   const opening = (line) => line.slice(0, line.indexOf('.') + 1) || line;
   const said = (line) => earlier.some((text) => text.startsWith(opening(line)));
-  const own = [BY_MISSION[mission] ?? HEARTS[key], AGAIN[key]].find((line) => line && !said(line));
+  // A mission met comes first; then the story place it was taken at; then the body.
+  const lines = mission ? [BY_MISSION[mission], AGAIN[mission]] : [BY_PLACE[entry.place], HEARTS[key], AGAIN[key]];
+  const own = lines.find((line) => line && !said(line));
   const heart = own ?? PLAIN[n % PLAIN.length];
   return entry.rate ? `${heart} ${STARS[entry.rate.stars]}` : heart;
 }

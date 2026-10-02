@@ -508,9 +508,11 @@ async function init() {
       && !siteHidden(place, here(place.parent), state.position) && !siteFar(here(place.parent), state.position)) goDownTo(place);
   }
 
+  const onGround = () => Boolean(state.restingOn || visit);
+
   $('dockTarget').addEventListener('click', () => {
     if (docked) return undock();
-    const target = dockable(state.position, craft);
+    const target = onGround() ? null : dockable(state.position, craft);
     if (target) dock(target);
     return undefined;
   });
@@ -1233,7 +1235,9 @@ async function init() {
     else if (state.sideSpeed > state.speed) flightLabel = '옆으로 비행';
     else if (state.motionSign < 0) flightLabel = '후진 비행';
     journal.update(progress, state.position, bodies);
-    const offer = docked ? null : dockable(state.position, craft);
+    // Not while she stands on the ground or is going down to a place: the station
+    // passing overhead put a docking button over a launch pad. (Its name tag still docks.)
+    const offer = docked || onGround() ? null : dockable(state.position, craft);
     $('dockTarget').hidden = !docked && !offer;
     if (docked) $('dockTarget').textContent = '도킹 풀기';
     else if (offer) $('dockTarget').textContent = `${offer.name}에 도킹`;

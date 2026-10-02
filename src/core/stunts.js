@@ -9,6 +9,8 @@ import { CASSINI_GAP } from './rings.js';
 export const MOON_SKIM_KM = 100;
 export const MOON_SKIM_MIN_KM = 1000;
 export const EARTH_LAP_KM = 1000;
+// The lap's way round is settled this far (radians) from where it began.
+const LAP_AXIS_AFTER = 0.15;
 
 // better: which way a record is beaten. unit: what the value is counted in.
 export const STUNTS = [
@@ -77,15 +79,21 @@ export function stepStunt(run, sample, dt) {
     const inBand = surfaceDistance(position, earth) <= EARTH_LAP_KM && restingOn !== 'earth';
     if (!inBand) return { run: WAIT(run), done: null };
     const out = unit(sub(position, earth.position));
-    if (!run.going) return { run: { ...run, going: true, seconds: 0, angle: 0, from: { out, axis: null } }, done: null };
-    // The way round is fixed by the first stretch flown; turning back unwinds the angle.
-    const turn = cross(run.from.out, out);
-    const axis = run.from.axis ?? (Math.hypot(...turn) > 1e-9 ? unit(turn) : null);
-    const step = axis ? Math.atan2(dot(axis, turn), dot(run.from.out, out)) : 0;
-    const angle = run.angle + step;
+    if (!run.going) return { run: { ...run, going: true, seconds: 0, angle: 0, from: { out, axis: null, start: out } }, done: null };
     const seconds = run.seconds + dt;
+    // The way round is fixed once she is a fair arc from where she began (her first few
+    // km may be a drift some other way); until then the angle is simply how far that is.
+    if (!run.from.axis) {
+      const off = cross(run.from.start, out);
+      const far = Math.atan2(Math.hypot(...off), dot(run.from.start, out));
+      const axis = far >= LAP_AXIS_AFTER ? unit(off) : null;
+      return { run: { ...run, seconds, angle: far, from: { ...run.from, out, axis } }, done: null };
+    }
+    // After that each step is counted round that way; turning back unwinds the angle.
+    const { axis } = run.from;
+    const angle = run.angle + Math.atan2(dot(axis, cross(run.from.out, out)), dot(run.from.out, out));
     if (Math.abs(angle) >= 2 * Math.PI - 1e-6) return { run: WAIT(run), done: seconds };
-    return { run: { ...run, seconds, angle, from: { out, axis } }, done: null };
+    return { run: { ...run, seconds, angle, from: { ...run.from, out } }, done: null };
   }
   return { run, done: null };
 }
@@ -115,7 +123,7 @@ export function recordStunt(records, id, value) {
 // Stored data may be old, edited or broken: keep only known stunts with sane numbers.
 export function sanitizeStunts(raw) {
   if (!raw || typeof raw !== 'object') return {};
-  return Object.fromEntries(STUNTS.flatMap((s) => (Number.isFinite(raw[s.id]) && raw[s.id] > 0 && raw[s.id] < 1e6 ? [[s.id, raw[s.id]]] : [])));
+  return Object.fromEntries(STUNTS.flatMap((s) => (Number.isFinite(raw[s.id]) && raw[s.id] > 0 && raw[s.id] < 1e12 ? [[s.id, raw[s.id]]] : [])));
 }
 
 // A record as the journal shows it.

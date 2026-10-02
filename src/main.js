@@ -213,6 +213,8 @@ let stunt = null;
 let stuntJumped = false;
 // A ring plane crossed last frame ({ body, t }), for the stunt through the gap.
 let ringHit = null;
+// A jump happened this frame: the straight line of the jump is not a flight through rings.
+let ringSkip = false;
 const requestDone = () => daily.days.includes(today);
 
 // Until when (performance.now()) the sprite character cheers a completed journal.
@@ -1164,6 +1166,7 @@ ${STORY_MORE[target.id]}` : told };
       stunt = stepped.run;
       if (stepped.done !== null) finishStunt(stepped.done);
     }
+    ringSkip = stuntJumped;
     stuntJumped = false;
     // A tour under way: at its next stop, Seora says her line and the tour moves on.
     const leg = guide.step === null ? currentStop(progress) : null;
@@ -1361,8 +1364,8 @@ ${STORY_MORE[target.id]}` : told };
     sunShown = view.sunVisibility;
     hud.maskHero(view.heroCard);
     say.place(view.heroCard);
-    ringHit = view.ringCrossed ? { body: view.ringCrossed, t: view.ringAt } : null;
-    if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`, null, SIGHT_S);
+    ringHit = view.ringCrossed && !ringSkip ? { body: view.ringCrossed, t: view.ringAt } : null;
+    if (ringHit) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`, null, SIGHT_S);
     if (view.meteorLit && !meteorSeen) {
       meteorSeen = true;
       toast.show(eventMessage({ type: 'meteor' }), null, SIGHT_S);

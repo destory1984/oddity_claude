@@ -103,6 +103,10 @@ const BY_MISSION = {
   earthrise: '달에서 지구가 뜨는 걸 보다니. 1968년 아폴로 8호가 찍은 그 사진 같구나.',
   paleBlueDot: '저 점 안에 내가 있단다. 손 흔든 거 봤느냐.',
 };
+// A line from one of the tables below by a key read from storage, which may be anything
+// ("constructor" is a key of every plain object).
+const lineOf = (table, key) => (typeof key === 'string' && Object.hasOwn(table, key) ? table[key] : undefined);
+
 // By the story place the photo was taken at (an album entry's `place`): the two ends of
 // the ninth tour. Seora thinks the film was shot on Mars; grandmother puts it right. The
 // film is not named anywhere.
@@ -112,7 +116,7 @@ const BY_PLACE = {
 };
 // The place to keep with a photo, of the story places she is at (core/stories.js
 // completedStories), or null.
-export const cardPlace = (storyIds) => storyIds.find((id) => BY_PLACE[id]) ?? null;
+export const cardPlace = (storyIds) => storyIds.find((id) => lineOf(BY_PLACE, id)) ?? null;
 
 // What she says when a place or a picture she has already answered comes again.
 const AGAIN = {
@@ -147,14 +151,14 @@ const STARS = [
 // earlier: the replies she has already written. A place answered before gets her second
 // line, and after that a plain one: she does not say the same thing twice.
 export function replyFor(entry, n = 0, earlier = []) {
-  const mission = (entry.missions ?? []).find((id) => BY_MISSION[id]);
+  const mission = (entry.missions ?? []).find((id) => lineOf(BY_MISSION, id));
   const key = mission ?? entry.rate?.subject;
   // Known by its first sentence, so a line reworded later (the earthrise one was) still
   // counts as said.
   const opening = (line) => line.slice(0, line.indexOf('.') + 1) || line;
   const said = (line) => earlier.some((text) => text.startsWith(opening(line)));
   // A mission met comes first; then the story place it was taken at; then the body.
-  const lines = mission ? [BY_MISSION[mission], AGAIN[mission]] : [BY_PLACE[entry.place], HEARTS[key], AGAIN[key]];
+  const lines = mission ? [BY_MISSION[mission], lineOf(AGAIN, mission)] : [lineOf(BY_PLACE, entry.place), lineOf(HEARTS, key), lineOf(AGAIN, key)];
   const own = lines.find((line) => line && !said(line));
   const heart = own ?? PLAIN[n % PLAIN.length];
   return entry.rate ? `${heart} ${STARS[entry.rate.stars]}` : heart;

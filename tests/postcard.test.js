@@ -146,3 +146,10 @@ test('a photo from the plain of the film gets her correction, once', () => {
   assert.ok(replyFor({ ...photo, missions: ['eclipse'] }).startsWith('나는 평생 개기일식을'));
   assert.ok(replyFor({ missions: [], place: 'nowhere', rate: { stars: 1, subject: 'mars' } }).startsWith('2003년에'));
 });
+
+test('a key from edited storage that is a name on every object does not become a reply', () => {
+  const odd = { missions: ['constructor'], place: 'constructor', rate: { stars: 1, subject: 'toString' } };
+  assert.ok(replyFor(odd, 0, []).startsWith('별이 참 많구나.'));
+  assert.ok(replyFor(odd, 1, ['고맙다.']).startsWith('네가 본 것을 나도 보는구나.'));
+  assert.equal(cardPlace(['constructor', 'wadiRum']), 'wadiRum');
+});

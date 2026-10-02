@@ -94,6 +94,15 @@ test('a lap of Earth: all the way round inside 1,000 km, turning back unwinds it
   assert.match(stuntStatus(run), /지구 한 바퀴 97% · 35초/);
   ({ run, done } = stepStunt(run, at(ring(360)), 1));
   assert.equal(done, 36);
+  // A drift some other way at the start does not fix the way round: 70 km north first,
+  // then all the way round the equator.
+  const north = above(earth, 400, [Math.cos(0.01), Math.sin(0.01), 0]);
+  let tilted = startStunt('earthLap');
+  ({ run: tilted } = stepStunt(tilted, at(ring(0)), 1));
+  ({ run: tilted } = stepStunt(tilted, at(north), 1));
+  let lapped = null;
+  for (let deg = 2; deg <= 366 && lapped === null; deg += 2) ({ run: tilted, done: lapped } = stepStunt(tilted, at(ring(deg)), 1));
+  assert.ok(lapped !== null, 'the lap is done within one turn and a little');
   // Back and forth over the same stretch gets nowhere.
   let wig = startStunt('earthLap');
   for (let i = 0; i < 80; i++) ({ run: wig } = stepStunt(wig, at(ring(i % 2 ? 20 : 0)), 1));
@@ -122,6 +131,8 @@ test('the best of each is kept: less time for a run, more for a skim', () => {
   assert.equal(valueText('moonSkim', 2140.6), '2,141km');
   assert.equal(recordText('earthLap', records), '아직 기록 없음');
   assert.deepEqual(sanitizeStunts({ moonRun: 15.26, moonSkim: -1, earthLap: 'x', other: 3 }), { moonRun: 15.26 });
+  // A very long skim is kept.
+  assert.deepEqual(sanitizeStunts({ moonSkim: 1200000 }), { moonSkim: 1200000 });
   assert.deepEqual(sanitizeStunts(null), {});
 });
 

@@ -181,7 +181,8 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const members = stories.filter(belongs);
       if (!members.length) continue;
       const heading = document.createElement('h2');
-      heading.textContent = `${label} ${members.filter((s) => told.includes(s.id)).length}/${members.length}`;
+      const solvedCount = members.filter((s) => (lastProgress.quiz ?? []).includes(s.id)).length;
+      heading.textContent = `${label} ${members.filter((s) => told.includes(s.id)).length}/${members.length}${solvedCount ? ` · 맞힌 문제 ${solvedCount}` : ''}`;
       const list = document.createElement('ul');
       box.append(heading, list);
       renderStoryList(list, members);
@@ -194,9 +195,10 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const li = document.createElement('li');
       const last = !done && story.id === lastSlot;
       const shut = last && lastShut(lastProgress);
-      li.className = done ? 'done' : shut ? 'clipping' : '';
+      const solved = done && (lastProgress.quiz ?? []).includes(story.id);
+      li.className = solved ? 'done solved' : done ? 'done' : shut ? 'clipping' : '';
       const title = document.createElement('strong');
-      title.textContent = `${done ? '✓' : '○'} ${story.name}${story.year ? ` (${story.year}년)` : ''}`;
+      title.textContent = `${solved ? '◎' : done ? '✓' : '○'} ${story.name}${story.year ? ` (${story.year}년)` : ''}`;
       const line = document.createElement('span');
       line.textContent = done ? story.text : shut ? CLIPPING : last ? `${story.hint}. 거기서 지구를 사진에 담기` : story.hint;
       li.append(title, line);

@@ -25,7 +25,7 @@ import { FACTS } from './core/facts.js';
 import { eventMessage, limitText, dateText, withParticle } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import {
-  updateProgress, recordPhotos, recordStories, recordCraft, recordNote, createProgress, summarize, score, isComplete,
+  updateProgress, recordPhotos, recordStories, recordCraft, recordNote, recordQuiz, createProgress, summarize, score, isComplete,
 } from './core/progress.js';
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
@@ -603,6 +603,11 @@ async function init() {
   // The card at a story place; the game waits while it is open.
   let cardPriorPause = false;
   const storyCard = createStoryCard({
+    isSolved: (id) => (progress.quiz ?? []).includes(id),
+    onSolve(id) {
+      progress = recordQuiz(progress, id);
+      saveProgress(progress);
+    },
     onOpen() {
       cardPriorPause = paused;
       setPaused(true);

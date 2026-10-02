@@ -28,7 +28,14 @@ export function journalOrder(bodies) {
 }
 
 export function createProgress() {
-  return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], notes: [], tours: [], tour: null };
+  return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], notes: [], tours: [], tour: null, quiz: [] };
+}
+
+// A story card's question answered right (core/storyQuiz.js). Not scored.
+export function recordQuiz(progress, id) {
+  const have = progress.quiz ?? [];
+  if (have.includes(id)) return progress;
+  return { ...progress, quiz: [...have, id] };
 }
 
 // A note from grandmother that has been read (core/story.js). Not scored.
@@ -108,6 +115,7 @@ export function sanitizeProgress(raw, bodies, missions, stories = [], craft = []
     notes: clean(raw.notes, new Set(notes.map((n) => n.id))),
     tours: clean(raw.tours, new Set(tours.map((t) => t.id))),
     tour: underWay(raw.tour, tours),
+    quiz: clean(raw.quiz, storyIds),
   };
 }
 

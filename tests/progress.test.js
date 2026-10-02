@@ -29,7 +29,7 @@ test('the journal lists the Sun, then each world by distance with its moons unde
 });
 
 test('a new log knows Earth only', () => {
-  assert.deepEqual(createProgress(), { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], notes: [], tours: [], tour: null });
+  assert.deepEqual(createProgress(), { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], notes: [], tours: [], tour: null, quiz: [] });
 });
 
 test('entering 50,000 km of a surface discovers the body once', () => {
@@ -86,7 +86,7 @@ test('summary counts against every body and mission', () => {
 
 test('sanitizeProgress drops junk from storage and keeps known ids', () => {
   const junk = { discovered: ['mars', 'vulcan', 3], landed: 'moon', photos: ['eclipse', 'eclipse', 'fake'] };
-  assert.deepEqual(sanitizeProgress(junk, BODIES, MISSIONS), { discovered: ['earth', 'mars'], landed: [], photos: ['eclipse'], stories: [], craft: [], notes: [], tours: [], tour: null });
+  assert.deepEqual(sanitizeProgress(junk, BODIES, MISSIONS), { discovered: ['earth', 'mars'], landed: [], photos: ['eclipse'], stories: [], craft: [], notes: [], tours: [], tour: null, quiz: [] });
   const kept = sanitizeProgress({ stories: ['giotto', 'giotto', 'atlantis', 7] }, BODIES, MISSIONS, STORIES);
   assert.deepEqual(kept.stories, ['giotto']);
   assert.deepEqual(sanitizeProgress(null, BODIES, MISSIONS), createProgress());

@@ -1625,29 +1625,34 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 /* The tours in the journal: the route's name, grandmother's memo, the stops in order. */
-#journalTours li {
+#journalTours li,
+#journalStunts li {
   padding:10px 0;
   border-bottom:1px solid #ffffff12;
   font-size:13px;
   color:var(--muted);
 }
 
-#journalTours li strong {
+#journalTours li strong,
+#journalStunts li strong {
   display:block;
   font-weight:400;
   font-size:14px;
   color:#b6cbe0;
 }
 
-#journalTours li.done strong {
+#journalTours li.done strong,
+#journalStunts li.done strong {
   color:#7fe3c5;
 }
 
-#journalTours li.going strong {
+#journalTours li.going strong,
+#journalStunts li.going strong {
   color:#ffdfa6;
 }
 
-#journalTours .memo {
+#journalTours .memo,
+#journalStunts .memo {
   display:block;
   margin:2px 0 4px;
   color:#e6d3a8;
@@ -1655,13 +1660,15 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   word-break:keep-all;
 }
 
-#journalTours .stops {
+#journalTours .stops,
+#journalStunts .stops {
   display:block;
   line-height:1.7;
   word-break:keep-all;
 }
 
-#journalTours li button {
+#journalTours li button,
+#journalStunts li button {
   display:block;
   margin-top:6px;
 }
@@ -1724,7 +1731,8 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 /* A tour's stamp beside its name; the clipping in the last slot; stars on a reply. */
-#journalTours li {
+#journalTours li,
+#journalStunts li {
   position:relative;
 }
 
@@ -1742,7 +1750,9 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 #journalTours li.done strong,
-#journalTours li.done .memo {
+#journalStunts li.done strong,
+#journalTours li.done .memo,
+#journalStunts li.done .memo {
   padding-right:64px;
 }
 
@@ -2337,7 +2347,8 @@ input[type=range] {
 }
 
 #journalBodies li,
-#journalTours li {
+#journalTours li,
+#journalStunts li {
   border-bottom:1px solid #b79a6a99;
 }
 
@@ -2345,7 +2356,8 @@ input[type=range] {
 #journalMissions li strong,
 #journalStories li strong,
 #journalCraft li strong,
-#journalTours li strong {
+#journalTours li strong,
+#journalStunts li strong {
   color:#3b2a1a;
   font-weight:600;
 }
@@ -2357,6 +2369,7 @@ input[type=range] {
 #journalStories li,
 #journalCraft li,
 #journalTours li,
+#journalStunts li,
 #journalAlbum figure,
 #journalNotes,
 #dailyCount {
@@ -2367,17 +2380,20 @@ input[type=range] {
 #journalStories li.done strong,
 #journalCraft li.done strong,
 #journalTours li.done strong,
+#journalStunts li.done strong,
 #journalAlbum figcaption span {
   color:#2f6b3a;
 }
 
-#journalTours li.going strong {
+#journalTours li.going strong,
+#journalStunts li.going strong {
   color:#a35a00;
 }
 
 /* Grandmother writes in brown ink, Seora in navy. */
 #journalBodies .memo,
 #journalTours .memo,
+#journalStunts .memo,
 #journal li.clipping span,
 #journalAlbum figcaption .sent {
   color:#7a4a1c;
@@ -2449,6 +2465,7 @@ html.shell body {
 
 #journalBodies .memo,
 #journalTours .memo,
+#journalStunts .memo,
 #journal li.clipping span,
 #journalCrane,
 #dailyText {

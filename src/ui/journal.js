@@ -28,7 +28,7 @@ function picture(file, alt, className = '') {
 const CLIPPING = '1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.';
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onTourStart = null, onTourQuit = null, daily = null }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -379,6 +379,36 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     }
   }
 
+  // Stunt flights (core/stunts.js): what each asks, the best so far, and a button.
+  // stunts: { all(): [{ id, name, todo, record, on }], start(id), quit() }.
+  function renderStunts() {
+    const list = $('journalStunts');
+    list.replaceChildren();
+    if (!stunts) return;
+    for (const stunt of stunts.all()) {
+      const li = document.createElement('li');
+      li.className = stunt.on ? 'going' : '';
+      const title = document.createElement('strong');
+      title.textContent = `${stunt.name}${stunt.on ? ' · 하는 중' : ''}`;
+      const todo = document.createElement('span');
+      todo.className = 'stops';
+      todo.textContent = `${stunt.todo}.`;
+      const record = document.createElement('span');
+      record.className = 'memo';
+      record.textContent = stunt.record;
+      const button = document.createElement('button');
+      button.textContent = stunt.on ? '그만두기' : '해 보기';
+      button.setAttribute('aria-label', `${stunt.name} ${button.textContent}`);
+      button.addEventListener('click', () => {
+        dialog.close();
+        if (stunt.on) stunts.quit();
+        else stunts.start(stunt.id);
+      });
+      li.append(title, todo, record, button);
+      list.append(li);
+    }
+  }
+
   function open() {
     if (dialog.open) return;
     onOpen();
@@ -387,6 +417,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     renderStories();
     renderCraft();
     renderTours();
+    renderStunts();
     renderAlbum();
     dialog.showModal();
     showTab(tab);

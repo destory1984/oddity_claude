@@ -1,6 +1,7 @@
 import { createProgress, sanitizeProgress } from '../core/progress.js';
 import { sanitizeAlbum } from '../core/album.js';
 import { createDaily, sanitizeDaily } from '../core/daily.js';
+import { sanitizeStunts } from '../core/stunts.js';
 
 const KEY = 'oddity.progress.v1';
 
@@ -123,6 +124,25 @@ export function saveDaily(daily) {
     localStorage.setItem(DAILY_KEY, JSON.stringify(daily));
   } catch {
     // The star lasts only for this page.
+  }
+}
+
+const STUNT_KEY = 'oddity.stunts.v1';
+
+// The best of each stunt flight (core/stunts.js).
+export function loadStunts() {
+  try {
+    return sanitizeStunts(JSON.parse(localStorage.getItem(STUNT_KEY)));
+  } catch {
+    return {};
+  }
+}
+
+export function saveStunts(records) {
+  try {
+    localStorage.setItem(STUNT_KEY, JSON.stringify(records));
+  } catch {
+    // The record lasts only for this page.
   }
 }
 

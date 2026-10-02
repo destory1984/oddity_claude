@@ -30,7 +30,7 @@ import {
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
-  loadHeroKind, saveHeroKind, loadDaily, saveDaily, loadScreen, saveScreen,
+  loadHeroKind, saveHeroKind, loadDaily, saveDaily, loadScreen, saveScreen, loadStunts, saveStunts,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
@@ -60,6 +60,7 @@ import {
 import { inspectLight } from './core/lamp.js';
 import { READINGS, bodyFacts } from './core/readings.js';
 import { readingQuizFor, readingKey } from './core/readingQuiz.js';
+import { STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, recordText, stuntById } from './core/stunts.js';
 import { STORY_DETAILS } from './core/storyDetails.js';
 import { STORY_MORE } from './core/storyMore.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
@@ -205,6 +206,11 @@ function lastOpen() {
 const today = dayOf(openedAt);
 const request = dailyRequest(today, progress);
 let daily = loadDaily();
+// Stunt flights (core/stunts.js): the best of each, the one under way, and whether a
+// jump happened since the last frame (a jump starts a stunt over).
+let stuntRecords = loadStunts();
+let stunt = null;
+let stuntJumped = false;
 const requestDone = () => daily.days.includes(today);
 
 // Until when (performance.now()) the sprite character cheers a completed journal.
@@ -463,6 +469,7 @@ async function init() {
       }
       if (visit && !hasArrived(visit)) sound.hush();
       visit = null;
+      stuntJumped = true;
       input.clear();
       const facing = lookAtDirection(target.position.map((n, i) => n - spot[i]));
       // The traveler stands in the middle of the view: on a wide screen turn a little
@@ -682,7 +689,39 @@ ${STORY_MORE[target.id]}` : told };
       jump: true,
     };
   }
+  // A stunt flight: taken up from the journal, given up from the goal line.
+  function beginStunt(id) {
+    if (guide.step !== null) {
+      toast.show('첫 안내를 마치거나 건너뛴 뒤에 할 수 있습니다.');
+      return;
+    }
+    if (currentStop(progress)) {
+      toast.show('코스를 마치거나 그만둔 뒤에 할 수 있습니다.');
+      return;
+    }
+    stunt = startStunt(id);
+    const { name, todo } = stuntById(id);
+    toast.show(`묘기 "${name}": ${todo}.\n순간 이동을 쓰면 처음부터 다시 잽니다. 화면 위의 "그만두기"로 그만둡니다.`);
+  }
+  function quitStunt() {
+    stunt = null;
+    toast.show('묘기를 그만두었습니다. 수첩의 코스 갈래에서 다시 할 수 있습니다.');
+  }
+  function finishStunt(value) {
+    const { id, name, better, line } = stuntById(stunt.id);
+    const result = recordStunt(stuntRecords, id, value);
+    stuntRecords = result.records;
+    saveStunts(stuntRecords);
+    stunt = null;
+    const told = better === 'none' ? '해냈습니다' : `${value.toFixed(1)}초`;
+    const beside = better === 'none' ? '' : result.best ? ' 새 기록입니다.' : ` 가장 좋은 기록은 ${stuntRecords[id].toFixed(1)}초입니다.`;
+    toast.show(`묘기 "${name}": ${told}.${beside}\n수첩의 코스 갈래에서 다시 할 수 있습니다.`);
+    say.show(line);
+    sound.cue('discovered');
+  }
+  const stuntGoal = () => ({ count: '묘기', text: stuntStatus(stunt), quit: true });
   function beginTour(id) {
+    stunt = null;
     // A tour takes over from the first-visit guide.
     if (guide.step !== null) {
       guide = skipGuide(guide);
@@ -815,6 +854,11 @@ ${STORY_MORE[target.id]}` : told };
     }),
     onTourStart: beginTour,
     onTourQuit: endTour,
+    stunts: {
+      all: () => STUNTS.map((s) => ({ ...s, record: recordText(s.id, stuntRecords), on: stunt?.id === s.id })),
+      start: beginStunt,
+      quit: quitStunt,
+    },
     lastSlot: LAST_SLOT,
     lastShut: () => !lastOpen(),
     onNote(id) {
@@ -870,7 +914,7 @@ ${STORY_MORE[target.id]}` : told };
   // TEMPORARY, for testing the opening: wipe the log, the album, the daily record and the
   // first-visit guide (the settings stay) and start again from the first page.
   $('testReset').addEventListener('click', () => {
-    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1']) {
+    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1']) {
       try { localStorage.removeItem(key); } catch { /* storage shut: nothing to wipe */ }
     }
     location.reload();
@@ -971,9 +1015,10 @@ ${STORY_MORE[target.id]}` : told };
   const journalHow = touch ? '수첩 버튼' : 'J 키나 수첩 버튼';
   const guideView = createGuideView({
     onSkip() {
-      // The same button ends a tour once the first-visit guide is over.
+      // The same button ends a stunt or a tour once the first-visit guide is over.
       if (guide.step === null) {
-        endTour();
+        if (stunt) quitStunt();
+        else endTour();
         return;
       }
       guide = skipGuide(guide);
@@ -987,7 +1032,7 @@ ${STORY_MORE[target.id]}` : told };
     },
   });
   // What the goal line points at: the guide's Moon, or a tour's next stop.
-  const goalNow = () => (guide.step !== null ? guideGoal(guide, touch) : tourGoal());
+  const goalNow = () => (guide.step !== null ? guideGoal(guide, touch) : stunt ? stuntGoal() : tourGoal());
   guideView.show(goalNow());
   if (guide.step === null) aimAtStop();
 
@@ -1112,6 +1157,13 @@ ${STORY_MORE[target.id]}` : told };
       sound.cue('discovered');
     }
     photoSubject = null;
+    // A stunt under way (core/stunts.js): its clock, and its end.
+    if (stunt) {
+      const stepped = stepStunt(stunt, { position: state.position, restingOn: state.restingOn, bodies, jumped: stuntJumped }, dt);
+      stunt = stepped.run;
+      if (stepped.done !== null) finishStunt(stepped.done);
+    }
+    stuntJumped = false;
     // A tour under way: at its next stop, Seora says her line and the tour moves on.
     const leg = guide.step === null ? currentStop(progress) : null;
     // Her line at a tour's stop is not talked over by the line for finding the body.

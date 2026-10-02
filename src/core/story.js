@@ -9,6 +9,22 @@
 // scene: a line of plain telling above the paper. text: grandmother's hand.
 // image: a drawing above the scene line (public/assets/notebook), on the first reading.
 // line: what Seora says once the note is put away (반말, 25 characters at most).
+// The opening is told over five pages (ui/noteCard.js turns them): she arrives, finds
+// the notebook, and reads grandmother's letter in three parts, with a word of her own
+// under each page. Grandmother is out; she speaks only through the letter. Read again
+// from the journal, the letter is one sheet (`text`, the three parts joined).
+const LETTER = [
+  '서라야, 왔구나. 반찬은 부엌에 두고 이 수첩 좀 보련.\n\n'
+    + '열다섯 살 때부터 하늘에서 본 것을 적어 온 수첩이란다. 본 것은 적고, 못 본 것은 빈칸으로 남겨 두었지.\n\n'
+    + '세어 보니 빈칸이 백여든 개가 넘더구나.',
+  '내 망원경으로는 거기까지였단다. 나머지는 가까이 가서 봐야 채울 수 있는 칸들이야.\n\n'
+    + '나는 이제 멀리 못 간단다. 무릎이 말을 안 들어.\n\n'
+    + '그런데 너는 날 수 있잖니. 지난달에 우리 집 지붕 위를 날아다닌 거, 엄마한테는 말 안 했다.',
+  '그러니 빈칸 좀 채워 주련. 가서 본 대로만 적으면 된단다. 서두를 것 없다. 한 칸씩이면 돼.\n\n'
+    + '첫 칸은 달이다. 1969년 7월 21일, 내가 이 수첩을 시작한 날의 달이란다.\n\n'
+    + '다녀와서 얘기해 주련.',
+];
+
 export const NOTES = [
   {
     id: 'opening',
@@ -17,7 +33,29 @@ export const NOTES = [
     image: 'porch.png',
     imageAlt: '햇빛이 드는 마루 위의 낡은 수첩과 접힌 쪽지, 돋보기안경과 연필',
     title: '서라에게',
-    text: '서라야, 수첩 빈칸 좀 채워 주련.\n나는 이제 멀리 못 간단다.\n\n첫 칸은 달이다.',
+    text: LETTER.join('\n\n'),
+    pages: [
+      {
+        image: 'opening-arrive.png',
+        imageAlt: '한낮의 골목. 돌담 사이 기와지붕 대문이 반쯤 열려 있고 섬돌 위에 보자기로 싼 반찬통이 놓여 있다',
+        scene: '토요일 한낮. 엄마 심부름으로 반찬통을 들고 옆집 할머니 댁에 왔다. 대문은 반쯤 열려 있는데, 불러도 대답이 없다.',
+        say: '할머니이! …마실 가셨나?',
+      },
+      {
+        image: 'porch.png',
+        imageAlt: '햇빛이 드는 마루 위의 낡은 수첩과 접힌 쪽지, 돋보기안경과 연필',
+        scene: '마루에 낡은 수첩이 놓여 있다. 표지 모서리가 닳아 둥글다. 그 위에 접힌 쪽지 한 장. 겉에 "서라에게"라고 적혀 있다.',
+        say: '어, 내 이름이네.',
+      },
+      {
+        image: 'opening-notebook.png',
+        imageAlt: '마루에 펼친 낡은 수첩. 왼쪽에 오려 붙인 달 사진, 오른쪽에 줄지은 네모 칸. 맨 위 몇 칸에만 작은 그림이 있고 나머지는 비어 있다',
+        text: LETTER[0],
+        say: '백여든 개도 넘는다고?',
+      },
+      { text: LETTER[1], say: '…들켰었구나.' },
+      { text: LETTER[2] },
+    ],
     button: '수첩을 편다',
     line: '빈칸 채우기? 그거 내 특기야.',
   },

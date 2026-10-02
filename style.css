@@ -2692,3 +2692,43 @@ html.shell body {
   background:#02040b url("/assets/scenes/backdrop.png") center / cover no-repeat;
   image-rendering:pixelated;
 }
+
+/* Seora's word under a page of the opening: her own hand, like her speech bubble. */
+#noteCardSay {
+  position:relative;
+  width:max-content;
+  max-width:100%;
+  margin:18px 0 0 auto;
+  padding:8px 15px;
+  border-radius:16px;
+  background:#fffdf4;
+  color:#1b2433;
+  font-family:var(--seora);
+  font-size:18px;
+  line-height:1.3;
+}
+
+#noteCardSay[hidden],
+#noteCardPaper[hidden] {
+  display:none;
+}
+
+/* TEMPORARY: the test button that wipes every record, in the strip above the top buttons. */
+#testReset {
+  position:fixed;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:7;
+  min-height:0;
+  height:15px;
+  padding:0 10px;
+  border:1px dashed #ff9d9d;
+  border-radius:10px;
+  background:#3a0f1acc;
+  backdrop-filter:none;
+  color:#ffd0d0;
+  font-size:10px;
+  line-height:13px;
+  pointer-events:auto;
+}

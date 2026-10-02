@@ -811,6 +811,15 @@ async function init() {
   // Opened before the first frame, the journal still has something to show.
   journal.update(progress, state.position, bodies);
 
+  // TEMPORARY, for testing the opening: wipe the log, the album, the daily record and the
+  // first-visit guide (the settings stay) and start again from the first page.
+  $('testReset').addEventListener('click', () => {
+    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1']) {
+      try { localStorage.removeItem(key); } catch { /* storage shut: nothing to wipe */ }
+    }
+    location.reload();
+  });
+
   function showSoundButton() {
     $('soundButton').textContent = sound.muted() ? '🔇' : '🔊';
     $('soundButton').classList.toggle('off', sound.muted());
@@ -1124,7 +1133,9 @@ async function init() {
     // gone in six seconds). Only the very first note, which opens the story, goes before it.
     const settled = dt > 0 && !noteCard.isOpen() && !cardDue && !storyCard.isOpen() && !warp.busy()
       && !(docked && !isDocked(docked)) && !(visit && !hasArrived(visit));
-    if (dailyDue && settled && (progress.notes ?? []).length > 0) {
+    // (After a note it waits out the gap between notes, so the first sitting does not
+    // open sheet upon sheet.)
+    if (dailyDue && settled && noteWait === 0 && (progress.notes ?? []).length > 0) {
       dailyDue = false;
       noteCard.show({
         scene: '수첩 사이에 오늘 날짜가 적힌 쪽지가 끼워져 있다.',

@@ -32,6 +32,32 @@ test("grandmother's notes come in the order of their years, each with a line fro
   assert.equal(noteById('nothing'), null);
 });
 
+test('the opening is told over five pages: she arrives, finds the notebook, reads the letter in three parts', () => {
+  const opening = noteById('opening');
+  assert.equal(opening.pages.length, 5);
+  for (const [i, page] of opening.pages.entries()) {
+    // Each page is a scene or a part of the letter, never both, never neither.
+    assert.ok(Boolean(page.scene) !== Boolean(page.text), `page ${i}`);
+    if (page.image) {
+      assert.ok(existsSync(`public/assets/notebook/${page.image}`), page.image);
+      assert.ok(page.imageAlt.length >= 10, page.image);
+    }
+    if (page.say) assert.ok(page.say.length <= 25 && (page.say.match(/!/g) ?? []).length <= 1, page.say);
+    assert.ok(!(page.text ?? page.scene).includes('~'), `page ${i}`);
+  }
+  // Two scenes first, then the letter; the first page has a picture; the last page leaves
+  // her word to the speech bubble after the notebook is opened.
+  assert.deepEqual(opening.pages.map((p) => (p.scene ? 'scene' : 'letter')), ['scene', 'scene', 'letter', 'letter', 'letter']);
+  assert.ok(opening.pages[0].image);
+  assert.equal(opening.pages[4].say, undefined);
+  // Read again from the journal it is one sheet: the three parts joined.
+  assert.equal(opening.text, opening.pages.filter((p) => p.text).map((p) => p.text).join('\n\n'));
+  // Grandmother is out and speaks only in the letter; the first slot is the Moon of 1969.
+  assert.ok(opening.text.includes('첫 칸은 달이다') && opening.text.includes('1969년 7월 21일'));
+  // The other notes are one sheet each.
+  for (const note of NOTES.filter((n) => n.id !== 'opening')) assert.equal(note.pages, undefined, note.id);
+});
+
 test('the opening note is due on a new log, before anything is done', () => {
   assert.equal(dueNote(createProgress(), 1).id, 'opening');
   assert.equal(dueNote(seen('opening'), 1), null);

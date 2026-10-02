@@ -104,6 +104,8 @@ test('a place she has answered before gets a second line, then a plain one', () 
   // The same holds for a picture that met a mission, and another place is untouched.
   const rise = { missions: ['earthrise'], rate: { stars: 3, subject: 'earth' } };
   assert.ok(replyFor(rise, 0, [replyFor(rise)]).startsWith('지구가 뜨는 걸 또 찍었구나.'));
+  // A reply kept from before the line was reworded still counts as said.
+  assert.ok(replyFor(rise, 0, ['달에서 지구가 뜨는 걸 보다니. 1968년 신문에서 본 그 사진 같구나. 별 셋. 이건 액자에 넣어야겠다.']).startsWith('지구가 뜨는 걸 또 찍었구나.'));
   assert.ok(replyFor({ missions: [], rate: { stars: 1, subject: 'mars' } }, 0, [first]).startsWith('2003년에'));
   for (const id of BODIES.filter((b) => b.kind !== 'moon' || b.id === 'moon').map((b) => b.id)) {
     const again = replyFor({ missions: [], rate: { stars: 2, subject: id } }, 0, [replyFor({ missions: [], rate: { stars: 2, subject: id } })]);

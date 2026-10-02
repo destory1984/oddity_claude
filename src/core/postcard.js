@@ -138,7 +138,10 @@ const STARS = [
 export function replyFor(entry, n = 0, earlier = []) {
   const mission = (entry.missions ?? []).find((id) => BY_MISSION[id]);
   const key = mission ?? entry.rate?.subject;
-  const said = (line) => earlier.some((text) => text.startsWith(line));
+  // Known by its first sentence, so a line reworded later (the earthrise one was) still
+  // counts as said.
+  const opening = (line) => line.slice(0, line.indexOf('.') + 1) || line;
+  const said = (line) => earlier.some((text) => text.startsWith(opening(line)));
   const own = [BY_MISSION[mission] ?? HEARTS[key], AGAIN[key]].find((line) => line && !said(line));
   const heart = own ?? PLAIN[n % PLAIN.length];
   return entry.rate ? `${heart} ${STARS[entry.rate.stars]}` : heart;

@@ -75,7 +75,8 @@ export function photoPlace(label, altitudeKm, craftName = null) {
   const km = Math.round(altitudeKm);
   if (km < 1e5) return `${label} ${km.toLocaleString('ko-KR')}km`;
   const from = label.replace(/ 상공$/, '에서');
-  return km >= 1e8 ? `${from} ${(km / 1e8).toFixed(1)}억km` : `${from} ${Math.round(km / 1e4).toLocaleString('ko-KR')}만km`;
+  const man = Math.round(km / 1e4);
+  return man >= 10000 ? `${from} ${(km / 1e8).toFixed(1)}억km` : `${from} ${man.toLocaleString('ko-KR')}만km`;
 }
 
 // The small copy's size for a view of the given size: THUMB_WIDTH wide, same shape.

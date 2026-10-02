@@ -89,5 +89,7 @@ test('where a photo was taken: the height, in 만 and 억 far out, or the craft 
   assert.equal(photoPlace('지구 상공', 99999), '지구 상공 99,999km');
   assert.equal(photoPlace('토성 상공', 123456), '토성에서 12만km');
   assert.equal(photoPlace('명왕성 상공', 212468948), '명왕성에서 2.1억km');
+  assert.equal(photoPlace('명왕성 상공', 99996000), '명왕성에서 1.0억km');
+  assert.equal(photoPlace('명왕성 상공', 99940000), '명왕성에서 9,994만km');
   assert.equal(photoPlace('명왕성 상공', 212468948, '보이저 1호'), '보이저 1호 곁');
 });

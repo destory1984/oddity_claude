@@ -1,9 +1,10 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, starText, postageFile,
+  ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, starText, postageFile, cardWords,
 } from '../src/core/postcard.js';
 import { existsSync } from 'node:fs';
+import { MISSIONS } from '../src/core/missions.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 import { lookAtDirection, rotateLocal } from '../src/core/orientation.js';
 
@@ -121,4 +122,11 @@ test('a postcard gets a stamp by what it shows, and every stamp is on file', () 
   assert.equal(postageFile({}), 'notebook/postage-telescope.png');
   for (const subject of ['moon', 'saturn', 'earth', 'halley', 'mars', null]) assert.ok(existsSync(`public/assets/${of(subject)}`), String(subject));
   for (const f of ['postmark', 'star-on', 'star-off', 'gate', 'porch', 'clipping']) assert.ok(existsSync(`public/assets/notebook/${f}.png`), f);
+});
+
+test('a postcard picture says where it was taken, the day and the missions it met', () => {
+  const entry = { at: '2026-10-03T12:00:00.000Z', where: '토성 상공 120,000km', missions: ['earthrise', 'gone'] };
+  const earthrise = MISSIONS.find((m) => m.id === 'earthrise');
+  assert.deepEqual(cardWords(entry, MISSIONS), { place: '토성 상공 120,000km', day: `2026.10.3 · ${earthrise.name}` });
+  assert.deepEqual(cardWords({ at: '2026-01-05T12:00:00.000Z', where: '달 상공 5km' }), { place: '달 상공 5km', day: '2026.1.5' });
 });

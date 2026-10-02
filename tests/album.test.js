@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  ALBUM_MAX, THUMB_WIDTH, addPhoto, removePhoto, sanitizeAlbum, photoCaption, thumbSize,
+  ALBUM_MAX, THUMB_WIDTH, addPhoto, removePhoto, sanitizeAlbum, photoCaption, thumbSize, photoPlace,
 } from '../src/core/album.js';
 import { MISSIONS } from '../src/core/missions.js';
 
@@ -82,4 +82,12 @@ test('stored postcards keep their stars, the day sent and the reply; junk is dro
   assert.deepEqual(a, { ...base, rate: { stars: 3, subject: 'moon' }, sent: '2026-10-02', reply: '별 셋.' });
   assert.deepEqual(b, base);
   assert.deepEqual(c, base);
+});
+
+test('where a photo was taken: the height, in 만 and 억 far out, or the craft beside her', () => {
+  assert.equal(photoPlace('달 상공', 1200.4), '달 상공 1,200km');
+  assert.equal(photoPlace('지구 상공', 99999), '지구 상공 99,999km');
+  assert.equal(photoPlace('토성 상공', 123456), '토성에서 12만km');
+  assert.equal(photoPlace('명왕성 상공', 212468948), '명왕성에서 2.1억km');
+  assert.equal(photoPlace('명왕성 상공', 212468948, '보이저 1호'), '보이저 1호 곁');
 });

@@ -144,6 +144,14 @@ export function replyFor(entry, n = 0, earlier = []) {
   return entry.rate ? `${heart} ${STARS[entry.rate.stars]}` : heart;
 }
 
+// The words on the paper band of a postcard picture (ui/postcardImage.js): where it was
+// taken, then the day (by the local calendar) and the photo missions it met.
+export function cardWords(entry, missions = []) {
+  const at = new Date(entry.at);
+  const names = (entry.missions ?? []).map((id) => missions.find((m) => m.id === id)?.name).filter(Boolean);
+  return { place: entry.where, day: [`${at.getFullYear()}.${at.getMonth() + 1}.${at.getDate()}`, ...names].join(' · ') };
+}
+
 export const starText = (stars) => '★'.repeat(stars) + '☆'.repeat(3 - stars);
 
 // The stamp on a postcard, by what the photo is of: public/assets/notebook/postage-*.png.

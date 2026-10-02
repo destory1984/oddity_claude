@@ -17,7 +17,7 @@ import { createMinimap } from './ui/minimap.js';
 import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
 import { createWarp } from './ui/warp.js';
-import { addPhoto, removePhoto } from './core/album.js';
+import { addPhoto, removePhoto, photoPlace } from './core/album.js';
 import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor } from './core/postcard.js';
 import { teleportSpot } from './core/teleport.js';
 import { behindBody } from './core/markers.js';
@@ -349,7 +349,8 @@ async function init() {
         });
         album = saveAlbum(addPhoto(album, {
           at: new Date().toISOString(),
-          where: `${local.label} ${Math.round(local.altitude).toLocaleString('ko-KR')}km`,
+          // Docked, or far from every body with a craft in reach: the craft is the place.
+          where: photoPlace(local.label, local.altitude, (docked ? here(docked.id) : local.altitude >= 1e5 ? dockable(state.position, craft) : null)?.name),
           missions: done,
           image: shot.thumb,
           rate: { stars, subject },

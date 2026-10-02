@@ -3,7 +3,8 @@ import { surfaceDistance } from '../core/bodies.js';
 import { objectParticle } from './messages.js';
 import { FACTS } from '../core/facts.js';
 import { photoCaption, ALBUM_MAX } from '../core/album.js';
-import { starText, postageFile } from '../core/postcard.js';
+import { starText, postageFile, cardWords } from '../core/postcard.js';
+import { postcardBlob, saveBlob } from './postcardImage.js';
 import { TOURS, stopName, stampFile, sceneFile } from '../core/tours.js';
 
 const $ = (id) => document.getElementById(id);
@@ -280,6 +281,24 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
           renderAlbum();
         });
       }
+      // The photo as a postcard picture with where and when on it: a file to keep or send on.
+      const card = document.createElement('button');
+      card.textContent = '엽서 그림 저장';
+      card.setAttribute('aria-label', `${caption.title} 사진을 엽서 그림으로 저장`);
+      card.addEventListener('click', async () => {
+        card.disabled = true;
+        try {
+          const blob = await postcardBlob(entry, cardWords(entry, missions), `${import.meta.env.BASE_URL}assets/${postageFile(entry)}`);
+          saveBlob(blob, `oddity-postcard-${caption.title.slice(0, 10)}.png`);
+          card.textContent = '저장했습니다';
+        } catch {
+          card.textContent = '저장하지 못했습니다';
+        }
+        setTimeout(() => {
+          card.textContent = '엽서 그림 저장';
+          card.disabled = false;
+        }, 2000);
+      });
       const remove = document.createElement('button');
       remove.textContent = '지우기';
       remove.setAttribute('aria-label', `${caption.title} 사진 지우기`);
@@ -292,7 +311,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       frame.className = 'photoFrame';
       frame.append(img);
       if (entry.sent) frame.append(picture('notebook/postmark.png', '', 'postmark'), picture(postageFile(entry), '우표', 'postage'));
-      figure.append(frame, text, ...(send ? [send] : []), remove);
+      figure.append(frame, text, ...(send ? [send] : []), card, remove);
       grid.append(figure);
     });
   }

@@ -115,3 +115,24 @@ test('a story place is seen from 400 km up and 400 km to one side', () => {
     assert.ok(gap(spot, body.position) > body.radiusKm + 399, site.id);
   }
 });
+
+test('a ringed body is seen from 30 degrees off its rings, on their sunlit side, still nine radii away', () => {
+  const saturn = bodyById('saturn', bodies);
+  const sun = bodyById('sun', bodies);
+  const toSun = sub(sun.position, saturn.position);
+  for (const normal of [[0, 1, 0], [0.45, 0.89, 0], [-0.3, -0.85, 0.43], [0.2, 0.9, -0.39]]) {
+    const length = Math.hypot(...normal);
+    const n = normal.map((x) => x / length);
+    const out = sub(bodyVista(saturn, bodies, normal), saturn.position);
+    const km = Math.hypot(...out);
+    near(km, 9 * saturn.radiusKm, 1);
+    const lift = dot(out, n) / km;
+    // 30 degrees off the plane of the rings, whichever way the normal was given.
+    near(Math.abs(lift), 0.5, 1e-6);
+    // On the side the Sun lights.
+    const lit = dot(toSun, n);
+    if (Math.abs(lit) / Math.hypot(...toSun) > 0.02) assert.ok(lift * lit > 0, `${normal}`);
+    // Still on the sunward half, so the globe is mostly lit.
+    assert.ok(dot(out, toSun) > 0, `${normal}`);
+  }
+});

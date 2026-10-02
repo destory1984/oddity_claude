@@ -437,7 +437,7 @@ async function init() {
     sound.cue('warp');
     warp.play(() => {
       const target = here(id);
-      const spot = teleportSpot(target, { position: state.position, progress, bodies, parent: target.parent ? here(target.parent) : null, anywhere, known });
+      const spot = teleportSpot(target, { position: state.position, progress, bodies, parent: target.parent ? here(target.parent) : null, anywhere, known, ringNormal: world.ringNormal(target.id) });
       if (!spot) return;
       if (docked) {
         docked = null;

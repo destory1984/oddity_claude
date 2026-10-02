@@ -190,6 +190,10 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
   return {
     engine,
     update,
+    // The direction square to a body's rings ([x, y, z]), or null when it has none.
+    ringNormal(id) {
+      return rendered.find((item) => item.body.id === id)?.rings?.normal ?? null;
+    },
     render() {
       scene.render();
       hero.scene.render();

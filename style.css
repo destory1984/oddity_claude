@@ -2645,6 +2645,7 @@ dialog:where(:not(#journal)) button:hover {
 #journalTours .scene {
   display:block;
   width:100%;
+  max-width:420px;
   height:auto;
   aspect-ratio:16 / 9;
   margin:2px 0 10px;

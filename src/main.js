@@ -22,7 +22,7 @@ import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor } from './core
 import { teleportSpot } from './core/teleport.js';
 import { behindBody } from './core/markers.js';
 import { FACTS } from './core/facts.js';
-import { eventMessage, limitText, dateText, withParticle } from './ui/messages.js';
+import { eventMessage, limitText, dateText, withParticle, objectParticle } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import {
   updateProgress, recordPhotos, recordStories, recordCraft, recordNote, recordQuiz, createProgress, summarize, score, isComplete,
@@ -638,7 +638,7 @@ async function init() {
     saveProgress(progress);
     aimAtStop();
     const now = currentStop(progress);
-    toast.show(`코스 "${now.tour.name}"을 시작합니다. 첫 곳은 ${stopName(now.stop)}입니다.\n화면 위의 "근처로"를 누르면 그 가까이로 순간 이동합니다.`, 'tour');
+    toast.show(`코스 "${now.tour.name}"${objectParticle(now.tour.name)} 시작합니다. 첫 곳은 ${stopName(now.stop)}입니다.\n화면 위의 "근처로"를 누르면 그 가까이로 순간 이동합니다.`, 'tour');
   }
   function endTour() {
     progress = quitTour(progress);
@@ -1063,7 +1063,7 @@ async function init() {
         const finish = () => {
           cheerUntil = performance.now() + 6000;
           sound.cue('complete');
-          toast.show(`코스 "${leg.tour.name}"을 다 돌았습니다. 수첩의 코스 갈래에 도장이 찍혔습니다.`, 'tour');
+          toast.show(`코스 "${leg.tour.name}"${objectParticle(leg.tour.name)} 다 돌았습니다. 수첩의 코스 갈래에 도장이 찍혔습니다.`, 'tour');
           // Not under the white of a jump: the stamp waits until the flash has cleared.
           const after = warp.busy() ? 3600 : 0;
           setTimeout(() => stampDown(stampFile(leg.tour)), after);

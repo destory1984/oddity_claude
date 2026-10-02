@@ -120,7 +120,9 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       name.textContent = `${moon ? '    ' : ''}${found ? body.name : `${body.name} (미발견)`}`;
       const marks = document.createElement('span');
       marks.className = 'marks';
-      marks.textContent = `${found ? '발견 ✓' : '발견 —'}  ${landed ? '착지 ✓' : '착지 —'}`;
+      // The question under its reading, answered right (core/readingQuiz.js).
+      const solved = found && (progress.quiz ?? []).includes(body.id);
+      marks.textContent = `${found ? '발견 ✓' : '발견 —'}  ${landed ? '착지 ✓' : '착지 —'}${solved ? '  문제 ✓' : ''}`;
       const distance = document.createElement('span');
       distance.className = 'distance';
       const now = lastBodies.find((b) => b.id === body.id) ?? body;
@@ -304,7 +306,8 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const li = document.createElement('li');
       li.className = met ? 'done' : '';
       const title = document.createElement('strong');
-      title.textContent = `${met ? '✓' : '○'} ${c.name} (${c.launched}년)`;
+      const solved = met && (lastProgress.quiz ?? []).includes(c.id);
+      title.textContent = `${met ? '✓' : '○'} ${c.name} (${c.launched}년)${solved ? ' · 문제 ✓' : ''}`;
       const line = document.createElement('span');
       line.textContent = met ? c.intro : '아직 만나지 못했습니다.';
       li.append(title, line);

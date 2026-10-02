@@ -100,3 +100,23 @@ test('a long message stays up 6 seconds so it can be read', () => {
   vi.advanceTimersByTime(200);
   assert.equal(el.classList.contains('on'), false);
 });
+
+test('with two or more waiting, each makes way sooner, and none is lost', () => {
+  const el = stubElement();
+  const toast = createToast(el);
+  for (const text of ['A', 'B', 'C', 'D']) toast.show(text);
+  assert.equal(el.textContent, 'A');
+  // The second of two waiting shortens nothing by itself: the deadline set when the first
+  // one joined stands (2.5 s), and from then on the pace follows what is still waiting.
+  vi.advanceTimersByTime(2600);
+  assert.equal(el.textContent, 'B');
+  // C and D wait behind B: 1.5 s.
+  vi.advanceTimersByTime(1600);
+  assert.equal(el.textContent, 'C');
+  // Only D waits: the usual 2.5 s.
+  vi.advanceTimersByTime(1600);
+  assert.equal(el.textContent, 'C');
+  vi.advanceTimersByTime(1000);
+  assert.equal(el.textContent, 'D');
+  assert.deepEqual(el.shown, ['A', 'B', 'C', 'D']);
+});

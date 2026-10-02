@@ -101,19 +101,24 @@ test('nearestSurface picks the closest surface and handles an empty list', () =>
   assert.deepEqual(nearestSurface(point, []), { body: null, distance: Infinity });
 });
 
-test('altitude label follows the nearest planet or the Sun, never a moon', () => {
+test('altitude label follows the nearest planet or the Sun, and a moon only from within one radius of its surface', () => {
   const start = nearestLocalBody(START_POSITION);
   assert.equal(start.body.id, 'earth');
   assert.equal(start.label, '지구 상공');
   near(start.altitude, 9129);
 
-  // Right above the Moon the label still counts from Earth.
+  // A little way off the Moon the label still counts from Earth.
   const moon = bodyById('moon');
   const earth = bodyById('earth');
-  const nearMoon = [moon.position[0], moon.position[1], moon.position[2] + 2000];
-  const result = nearestLocalBody(nearMoon);
+  const offMoon = [moon.position[0], moon.position[1], moon.position[2] + moon.radiusKm * 2 + 100];
+  const result = nearestLocalBody(offMoon);
   assert.equal(result.label, '지구 상공');
-  near(result.altitude, Math.hypot(...sub(nearMoon, earth.position)) - earth.radiusKm);
+  near(result.altitude, Math.hypot(...sub(offMoon, earth.position)) - earth.radiusKm);
+  // Coming down on it, the Moon takes over: 263 km up, then standing on it.
+  const nearMoon = nearestLocalBody([moon.position[0], moon.position[1], moon.position[2] + 2000]);
+  assert.equal(nearMoon.label, '달 상공');
+  near(nearMoon.altitude, 2000 - moon.radiusKm);
+  assert.equal(nearestLocalBody([moon.position[0], moon.position[1] + moon.radiusKm, moon.position[2]]).body.id, 'moon');
 
   const sun = bodyById('sun');
   const nearSun = [sun.position[0], sun.position[1] + sun.radiusKm + 10, sun.position[2]];

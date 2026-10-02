@@ -4,6 +4,10 @@ const QUEUED_MS = 2500;
 // Two-line messages (a discovery with its fact) stay up this much longer.
 const LONG_TEXT = 30;
 const LONG_EXTRA_MS = 2500;
+// With two or more waiting, the one showing makes way sooner: at a tour's stop five
+// notices come within seconds, and at the usual pace the last was 20 s behind what it told of.
+const HURRIED_MS = 1500;
+const HURRIED_LONG_EXTRA_MS = 1000;
 
 export function createToast(element) {
   let timer = null;
@@ -19,8 +23,10 @@ export function createToast(element) {
 
   function schedule() {
     clearTimeout(timer);
-    const extra = element.textContent.length > LONG_TEXT ? LONG_EXTRA_MS : 0;
-    timer = setTimeout(next, (queue.length ? QUEUED_MS : VISIBLE_MS) + extra);
+    const hurried = queue.length >= 2;
+    const long = element.textContent.length > LONG_TEXT;
+    const extra = long ? (hurried ? HURRIED_LONG_EXTRA_MS : LONG_EXTRA_MS) : 0;
+    timer = setTimeout(next, (hurried ? HURRIED_MS : queue.length ? QUEUED_MS : VISIBLE_MS) + extra);
   }
 
   function next() {

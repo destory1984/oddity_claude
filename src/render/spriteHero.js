@@ -101,6 +101,8 @@ export function createSpriteHero(engine) {
     const lit = light ? 0.45 + 0.55 * light.sun.strength : 1;
     material.emissiveColor = new Color3(lit, lit, lit);
     card.scaling.setAll(heroScaleFor(aspect) / 1.3);
+    // Sitting beside something on her left, the drawing (which looks right) is turned over.
+    if (state.sheet === 'sit' && move.mirror) card.scaling.x = -card.scaling.x;
     // A slow bob while hovering, as the paper model has.
     const afloat = state.mode === 'hover';
     card.position.y = CARD_AT[1] + (afloat ? Math.sin(elapsed * 1.5) * 0.04 : 0);

@@ -2113,9 +2113,46 @@ footer button:active,
     font-size:12px;
   }
 
-  /* The goal line sits under a two-line notice, not behind it. */
+  /* The goal line goes right under the top buttons, in the gap above the readouts:
+     lower down, Seora's speech bubble or a two-line notice would lie across it. */
   #guide {
-    top:372px;
+    top:max(76px, calc(env(safe-area-inset-top) + 50px));
+    left:12px;
+    right:12px;
+    width:auto;
+    max-width:none;
+    justify-content:space-between;
+    padding:3px 4px 3px 12px;
+    font-size:12px;
+    border-radius:12px;
+  }
+
+  #guide button {
+    min-height:28px;
+    padding:2px 10px;
+    font-size:12px;
+  }
+
+  /* The readouts move down to make room for it. */
+  .telemetry,
+  #targetPanel {
+    top:120px;
+  }
+
+  #minimap {
+    top:196px;
+  }
+
+  #toast {
+    top:324px;
+  }
+
+  #guideText {
+    flex:1;
+    min-width:0;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
   }
 }
 

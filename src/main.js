@@ -569,6 +569,8 @@ async function init() {
   let idleQuiet = 0;
   // A tour's line held back while a story card is in the way.
   let sayAfterCard = null;
+  // What else waits for the card to close (a finished tour's stamp and cheer).
+  let afterCard = null;
 
   // The tour under way (core/tours.js): its next stop is chosen as the target, so its
   // name shows from anywhere; the goal line names it and offers a jump near it.
@@ -622,8 +624,14 @@ async function init() {
     onClose() {
       setPaused(cardPriorPause);
       previous = null;
+      // One line only: a tour's, else a word to a probe left alone, else "here again".
       if (sayAfterCard) say.show(sayAfterCard);
       else if (!(greetAfterCard && greet(greetAfterCard)) && againAfterCard) sayFresh(AGAIN);
+      // Beside a probe left alone she sits down a while, whichever line it was.
+      if (GREETINGS[greetAfterCard] && visit && hasArrived(visit) && visit.id === greetAfterCard) sitUntil = performance.now() + SIT_MS;
+      // A tour finished here: its stamp and the cheer waited for the card to be put away.
+      if (afterCard) afterCard();
+      afterCard = null;
       sayAfterCard = null;
       greetAfterCard = null;
       againAfterCard = false;
@@ -1014,14 +1022,20 @@ async function init() {
       else say.show(leg.stop.line);
       saidAtStop = true;
       if (moved.finished) {
-        cheerUntil = performance.now() + 6000;
-        sound.cue('complete');
-        toast.show(`코스 "${leg.tour.name}"을 다 돌았습니다. 수첩의 코스 갈래에 도장이 찍혔습니다.`);
-        // Not under the white of a jump: the stamp waits until the flash has cleared.
-        const after = warp.busy() ? 3600 : 0;
-        setTimeout(() => stampDown(stampFile(leg.tour)), after);
-        if (allToursDone(progress)) setTimeout(() => stampDown(CRANE_FILE), after + 2600);
-        if (allToursDone(progress)) toast.show('아홉 길을 모두 돌았습니다. 수첩 사이에서 할머니가 접어 둔 종이학이 나왔습니다.');
+        const all = allToursDone(progress);
+        const finish = () => {
+          cheerUntil = performance.now() + 6000;
+          sound.cue('complete');
+          toast.show(`코스 "${leg.tour.name}"을 다 돌았습니다. 수첩의 코스 갈래에 도장이 찍혔습니다.`);
+          // Not under the white of a jump: the stamp waits until the flash has cleared.
+          const after = warp.busy() ? 3600 : 0;
+          setTimeout(() => stampDown(stampFile(leg.tour)), after);
+          if (all) setTimeout(() => stampDown(CRANE_FILE), after + 2600);
+          if (all) toast.show('아홉 길을 모두 돌았습니다. 수첩 사이에서 할머니가 접어 둔 종이학이 나왔습니다.');
+        };
+        // A story card is about to cover the view: celebrate once it is put away.
+        if (cardDue) afterCard = finish;
+        else finish();
       } else {
         aimAtStop();
         toast.show(`${leg.tour.name} ${leg.step + 1}/${leg.tour.stops.length}: ${stopName(leg.stop)}에 왔습니다. 다음은 ${stopName(currentStop(progress).stop)}입니다.`);
@@ -1155,6 +1169,8 @@ async function init() {
         read: performance.now() < readUntil,
         // Getting up as soon as she moves off.
         sit: performance.now() < sitUntil && Boolean(visit) && hasArrived(visit),
+        // The sitting drawing looks to her right: turned over when the probe is on her left.
+        mirror: Boolean(visit) && rotateVector(conjugate(state.orientation), here(visit.id).position.map((n, i) => n - state.position[i]))[0] < 0,
         // Close over the Sun's surface it is too bright to look; out to half an AU in
         // full sunlight it is hot; in a planet's shadow, or out past Uranus, it is cold.
         bright: surfaceDistance(state.position, here('sun')) < BRIGHT_KM,

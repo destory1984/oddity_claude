@@ -279,8 +279,14 @@ export function nearestSurface(position, bodies = BODIES) {
 }
 
 export function nearestLocalBody(position, bodies = BODIES) {
-  // Everything but moons (the Sun, planets, dwarf planets, the comet): with so many
-  // moons the label would keep flipping.
+  // A moon takes the readout only from close by: within one of its own radii above
+  // its surface (landing on the Moon then counts down to the Moon, not from Earth).
+  // Farther off it is the Sun, a planet, a dwarf planet or a comet: with so many moons
+  // the label would otherwise keep flipping.
+  const moon = nearestSurface(position, bodies.filter((body) => body.kind === 'moon'));
+  if (moon.body && moon.distance <= moon.body.radiusKm) {
+    return { body: moon.body, altitude: moon.distance, label: `${moon.body.name} 상공` };
+  }
   const local = bodies.filter((body) => body.kind !== 'moon');
   const { body, distance } = nearestSurface(position, local);
   return { body, altitude: distance, label: `${body.name} 상공` };

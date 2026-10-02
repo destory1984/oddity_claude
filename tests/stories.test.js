@@ -14,10 +14,10 @@ const done = (position, restingOn = null, t = 0) => {
   return completedStories({ position, restingOn, bodies, craft: craftAt(t, bodies), sites: storySitesAt(t, bodies) });
 };
 
-test('there are 91 story places, each with a name, a hint and a short story; events have a year', () => {
-  assert.equal(STORIES.length, 91);
-  assert.equal(new Set(STORIES.map((s) => s.id)).size, 91);
-  assert.equal(new Set(STORIES.map((s) => s.name)).size, 91);
+test('there are 94 story places, each with a name, a hint and a short story; events have a year', () => {
+  assert.equal(STORIES.length, 94);
+  assert.equal(new Set(STORIES.map((s) => s.id)).size, 94);
+  assert.equal(new Set(STORIES.map((s) => s.name)).size, 94);
   for (const s of STORIES) {
     assert.ok(s.name && s.nameEn && s.hint, s.id);
     assert.ok(s.year === undefined || s.year > 1900, s.id);
@@ -89,7 +89,7 @@ test("a place's label shows only from within four radii of its body's surface", 
 
 test('the places sit on the surface of their body and move as it spins', () => {
   const sites = storySitesAt(0, BODIES);
-  assert.equal(sites.length, 80);
+  assert.equal(sites.length, 83);
   assert.deepEqual(sites.slice(0, 4).map((s) => s.id), ['apollo11', 'viking1', 'huygens', 'dokdo']);
   for (const site of sites) {
     const body = bodyById(site.parent);
@@ -144,7 +144,7 @@ test('New Horizons, Giotto and Voyager 1: passing close by', () => {
   assert.deepEqual(done(add(voyager.position, [0, 9000, 0])), ['paleBlueDot']);
 });
 
-test('twenty famous places on the Moon and nine on Mars: craters, seas and mountains, with no machine standing there', () => {
+test('twenty famous places on the Moon and eleven on Mars: craters, seas and mountains, with no machine standing there', () => {
   const marks = STORIES.filter((s) => s.landmark && (s.body === 'moon' || s.body === 'mars'));
   assert.deepEqual(marks.filter((s) => s.body === 'moon').map((s) => s.name), [
     '티코 분화구', '코페르니쿠스 분화구', '고요의 바다', '비의 바다', '폭풍의 대양', '남극-에이트켄 분지',
@@ -154,9 +154,9 @@ test('twenty famous places on the Moon and nine on Mars: craters, seas and mount
   ]);
   assert.deepEqual(marks.filter((s) => s.body === 'mars').map((s) => s.name), [
     '올림푸스산', '마리너 계곡', '타르시스 세 화산', '헬라스 분지', '북극관', '남극관', '코롤료프 분화구', '시도니아의 얼굴',
-    '시르티스 메이저',
+    '시르티스 메이저', '아키달리아 평원', '스키아파렐리 분화구',
   ]);
-  assert.equal(marks.length, 29);
+  assert.equal(marks.length, 31);
   for (const s of marks) {
     assert.equal(s.type, 'surface');
     assert.equal(s.year, undefined);
@@ -167,7 +167,7 @@ test('twenty famous places on the Moon and nine on Mars: craters, seas and mount
   // The eight added to the Moon are all on the side that faces Earth.
   for (const s of marks.filter((m) => m.body === 'moon').slice(12)) assert.ok(Math.abs(s.lonDeg) < 90, s.id);
   const sites = storySitesAt(0, BODIES);
-  assert.equal(sites.filter((s) => s.landmark && (s.parent === 'moon' || s.parent === 'mars')).length, 29);
+  assert.equal(sites.filter((s) => s.landmark && (s.parent === 'moon' || s.parent === 'mars')).length, 31);
   // Landing on top of Olympus Mons logs the mountain and nothing else.
   assert.deepEqual(done(sites.find((s) => s.id === 'olympus').position, 'mars'), ['olympus']);
   assert.equal(sites.find((s) => s.id === 'apollo11').landmark, false);
@@ -188,7 +188,7 @@ test('the Pale Blue Dot: 60 million km from Earth, as far as Voyager 1 was on th
 });
 
 test('twenty places beyond the Moon and Mars: on eleven more bodies, at three craft and past two planets', () => {
-  const far = STORIES.slice(71);
+  const far = STORIES.slice(71, 91);
   assert.equal(far.length, 20);
   for (const s of far) assert.ok(s.year >= 1969 && s.year <= 2024, s.id);
   const ground = far.filter((s) => s.type === 'surface');

@@ -257,6 +257,19 @@ STORIES.push(
   },
 );
 
+// The road of the ninth tour (core/tours.js): real places a film about Mars was set in,
+// and Wadi Rum, a place on Earth that looks like Mars, where its outdoor scenes were shot.
+STORIES.push(...[
+  ['acidalia', '아키달리아 평원', 'Acidalia Planitia', 49.8, -20.7, 300, '화성 북반구의 넓고 어두운 평원입니다. 지구에서 망원경으로 보이는 어두운 무늬 가운데 하나입니다.'],
+  ['schiaparelli', '스키아파렐리 분화구', 'Schiaparelli', -2.71, 16.77, 300, '지름 약 460km의 큰 충돌 분화구입니다. 화성 지도를 그린 이탈리아 천문학자의 이름을 땄습니다.'],
+].map(landmark('mars', '화성')));
+STORIES.push({
+  id: 'wadiRum', name: '와디럼 사막', nameEn: 'Wadi Rum', type: 'surface', body: 'earth',
+  latDeg: 29.58, lonDeg: 35.42, withinKm: 150, landmark: true,
+  hint: '지구 요르단의 와디럼 사막(북위 29.6도, 동경 35.4도) 150km 안에 내려앉기',
+  text: '요르단 남쪽의 붉은 사막입니다. 화성과 닮아서 화성이 나오는 영화의 바깥 장면을 여러 편 이곳에서 찍었습니다.',
+});
+
 // A place's label shows only from within this many of its body's radii above the
 // surface (the Moon: 6,950 km; Mars: 13,560 km), like the craft that circle a planet
 // (core/craft.js hiddenCraft). From farther off the names pile up on the disc.

@@ -96,8 +96,9 @@ export function siteArrival(site, body) {
 // Where choosing `target` takes the traveler, or null when it does not (never been
 // there, or already near). parent: the body a story place is on. anywhere: the jump
 // was asked for outright (the journal's button), so being near does not cancel it.
-export function teleportSpot(target, { position, progress, bodies, parent = null, anywhere = false }) {
-  if (!visited(target, progress) || (!anywhere && !farFrom(target, position))) return null;
+// known: the next stop of a tour, which may be jumped near without having been there.
+export function teleportSpot(target, { position, progress, bodies, parent = null, anywhere = false, known = false }) {
+  if ((!known && !visited(target, progress)) || (!anywhere && !farFrom(target, position))) return null;
   if (target.kind === 'craft') return craftArrival(target, bodies);
   if (target.kind === 'site') return siteArrival(target, parent);
   return bodyVista(target, bodies);

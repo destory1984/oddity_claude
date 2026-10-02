@@ -29,7 +29,7 @@ test('the journal lists the Sun, then each world by distance with its moons unde
 });
 
 test('a new log knows Earth only', () => {
-  assert.deepEqual(createProgress(), { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], notes: [] });
+  assert.deepEqual(createProgress(), { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], notes: [], tours: [], tour: null });
 });
 
 test('entering 50,000 km of a surface discovers the body once', () => {
@@ -81,12 +81,12 @@ test('summary counts against every body and mission', () => {
   });
   const withStories = summarize({ ...progress, stories: ['giotto'] }, BODIES, MISSIONS, STORIES);
   assert.equal(withStories.stories, 1);
-  assert.equal(withStories.storyTotal, 91);
+  assert.equal(withStories.storyTotal, 94);
 });
 
 test('sanitizeProgress drops junk from storage and keeps known ids', () => {
   const junk = { discovered: ['mars', 'vulcan', 3], landed: 'moon', photos: ['eclipse', 'eclipse', 'fake'] };
-  assert.deepEqual(sanitizeProgress(junk, BODIES, MISSIONS), { discovered: ['earth', 'mars'], landed: [], photos: ['eclipse'], stories: [], craft: [], notes: [] });
+  assert.deepEqual(sanitizeProgress(junk, BODIES, MISSIONS), { discovered: ['earth', 'mars'], landed: [], photos: ['eclipse'], stories: [], craft: [], notes: [], tours: [], tour: null });
   const kept = sanitizeProgress({ stories: ['giotto', 'giotto', 'atlantis', 7] }, BODIES, MISSIONS, STORIES);
   assert.deepEqual(kept.stories, ['giotto']);
   assert.deepEqual(sanitizeProgress(null, BODIES, MISSIONS), createProgress());
@@ -115,8 +115,8 @@ test('a log saved when there were 75 slots still reads, as 75 of 89', () => {
   const summary = summarize(read, BODIES, MISSIONS);
   assert.deepEqual(score(summary), { done: 75, total: 89 });
   assert.equal(isComplete(summary), false);
-  // With the 91 story places and 35 bodies the same log is 75 of 180.
-  assert.deepEqual(score(summarize(sanitizeProgress(old, BODIES, MISSIONS, STORIES), BODIES, MISSIONS, STORIES)), { done: 75, total: 180 });
+  // With the 94 story places and 35 bodies the same log is 75 of 183.
+  assert.deepEqual(score(summarize(sanitizeProgress(old, BODIES, MISSIONS, STORIES), BODIES, MISSIONS, STORIES)), { done: 75, total: 183 });
 });
 
 test('recordStories keeps the first visit only', () => {

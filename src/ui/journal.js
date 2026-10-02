@@ -4,6 +4,7 @@ import { objectParticle } from './messages.js';
 import { FACTS } from '../core/facts.js';
 import { photoCaption, ALBUM_MAX } from '../core/album.js';
 import { starText } from '../core/postcard.js';
+import { TOURS, stopName } from '../core/tours.js';
 
 const $ = (id) => document.getElementById(id);
 // 로 after a vowel or ㄹ, 으로 after any other final consonant.
@@ -17,7 +18,7 @@ const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
 const CLIPPING = '1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.';
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onTourStart = null, onTourQuit = null }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -269,12 +270,48 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     }
   }
 
+  // The nine tours: gone round (a stamp), under way (how far), or yet to start.
+  function renderTours() {
+    const list = $('journalTours');
+    list.replaceChildren();
+    const done = lastProgress.tours ?? [];
+    const going = lastProgress.tour;
+    for (const tour of TOURS) {
+      const isGoing = going?.id === tour.id;
+      const isDone = done.includes(tour.id);
+      const li = document.createElement('li');
+      li.className = isGoing ? 'going' : isDone ? 'done' : '';
+      const title = document.createElement('strong');
+      title.textContent = `${isDone ? '✓' : '○'} ${tour.name}${isDone ? ' · 도장' : ''}${isGoing ? ` · 가는 중 ${going.step}/${tour.stops.length}` : ''}`;
+      const memo = document.createElement('span');
+      memo.className = 'memo';
+      memo.textContent = tour.memo;
+      const stops = document.createElement('span');
+      stops.className = 'stops';
+      stops.textContent = tour.stops.map((stop, i) => `${isGoing && i < going.step ? '✓ ' : ''}${stopName(stop)}`).join(' → ');
+      li.append(title, memo, stops);
+      if (onTourStart) {
+        const button = document.createElement('button');
+        button.textContent = isGoing ? '그만두기' : isDone ? '이 길로 다시 떠나기' : '이 길로 떠나기';
+        button.setAttribute('aria-label', `${tour.name} ${button.textContent}`);
+        button.addEventListener('click', () => {
+          dialog.close();
+          if (isGoing) onTourQuit();
+          else onTourStart(tour.id);
+        });
+        li.append(button);
+      }
+      list.append(li);
+    }
+  }
+
   function open() {
     if (dialog.open) return;
     onOpen();
     render();
     renderStories();
     renderCraft();
+    renderTours();
     renderAlbum();
     dialog.showModal();
     showTab(tab);

@@ -40,6 +40,9 @@ import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
 import {
+  TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, advanceTour, allToursDone,
+} from './core/tours.js';
+import {
   NOTES, MEMOS, GREETINGS, dueNote, noteById, LAST_SLOT, lastSlotOpen, photoSlots,
 } from './core/story.js';
 import { createSound } from './ui/sound.js';
@@ -119,7 +122,7 @@ let state = START_NEAR ? startNear(START_NEAR) : startAboveEarth();
 let paused = false;
 let selectedId = START_NEAR ? START_NEAR.id : 'earth';
 let dragTurn = [0, 0];
-let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT, NOTES);
+let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT, NOTES, TOURS);
 // Small copies of saved photos, shown in the journal (core/album.js).
 let album = loadAlbum(MISSIONS);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
@@ -380,12 +383,12 @@ async function init() {
 
   // A place already visited, chosen from far away: appear there behind a flash. A body
   // is seen from its best side, a craft is docked with, a story place is seen from above.
-  function teleport(id, anywhere = false) {
+  function teleport(id, anywhere = false, known = false) {
     if (warp.busy()) return;
     sound.cue('warp');
     warp.play(() => {
       const target = here(id);
-      const spot = teleportSpot(target, { position: state.position, progress, bodies, parent: target.parent ? here(target.parent) : null, anywhere });
+      const spot = teleportSpot(target, { position: state.position, progress, bodies, parent: target.parent ? here(target.parent) : null, anywhere, known });
       if (!spot) return;
       if (docked) {
         docked = null;
@@ -502,6 +505,44 @@ async function init() {
   }
   // The place whose card opened on reaching it: greeted once the card is put away.
   let greetAfterCard = null;
+  // A tour's line held back while a story card is in the way.
+  let sayAfterCard = null;
+
+  // The tour under way (core/tours.js): its next stop is chosen as the target, so its
+  // name shows from anywhere; the goal line names it and offers a jump near it.
+  function aimAtStop() {
+    const now = currentStop(progress);
+    if (!now) return;
+    selectedId = stopTarget(now.stop);
+    hud.showSelection(named(selectedId));
+  }
+  function tourGoal() {
+    const now = currentStop(progress);
+    if (!now) return null;
+    return {
+      count: `${now.step + 1}/${now.tour.stops.length}`,
+      text: `${now.tour.name}: ${stopName(now.stop)}`,
+      targetId: stopTarget(now.stop),
+      jump: true,
+    };
+  }
+  function beginTour(id) {
+    // A tour takes over from the first-visit guide.
+    if (guide.step !== null) {
+      guide = skipGuide(guide);
+      saveGuideDone();
+    }
+    progress = startTour(progress, id);
+    saveProgress(progress);
+    aimAtStop();
+    const now = currentStop(progress);
+    toast.show(`코스 "${now.tour.name}"을 시작합니다. 첫 곳은 ${stopName(now.stop)}입니다.\n화면 위의 "근처로"를 누르면 그 가까이로 순간 이동합니다.`);
+  }
+  function endTour() {
+    progress = quitTour(progress);
+    saveProgress(progress);
+    toast.show('코스를 그만두었습니다. 수첩의 코스 갈래에서 다시 떠날 수 있습니다.');
+  }
 
   // The card at a story place; the game waits while it is open.
   let cardPriorPause = false;
@@ -514,7 +555,9 @@ async function init() {
     onClose() {
       setPaused(cardPriorPause);
       previous = null;
-      if (greetAfterCard) greet(greetAfterCard);
+      if (sayAfterCard) say.show(sayAfterCard);
+      else if (greetAfterCard) greet(greetAfterCard);
+      sayAfterCard = null;
       greetAfterCard = null;
     },
   });
@@ -581,6 +624,8 @@ async function init() {
     },
     notes: NOTES,
     memos: MEMOS,
+    onTourStart: beginTour,
+    onTourQuit: endTour,
     lastSlot: LAST_SLOT,
     lastShut: () => !lastOpen(),
     onNote(id) {
@@ -713,13 +758,25 @@ async function init() {
   const journalHow = touch ? '수첩 버튼' : 'J 키나 수첩 버튼';
   const guideView = createGuideView({
     onSkip() {
+      // The same button ends a tour once the first-visit guide is over.
+      if (guide.step === null) {
+        endTour();
+        return;
+      }
       guide = skipGuide(guide);
       saveGuideDone();
       guideView.show(null);
       toast.show(`${journalHow}으로 탐험 목표를 확인하세요.`);
     },
+    onJump() {
+      const goal = tourGoal();
+      if (goal && !paused) teleport(goal.targetId, true, true);
+    },
   });
-  guideView.show(guideGoal(guide, touch));
+  // What the goal line points at: the guide's Moon, or a tour's next stop.
+  const goalNow = () => (guide.step !== null ? guideGoal(guide, touch) : tourGoal());
+  guideView.show(goalNow());
+  if (guide.step === null) aimAtStop();
 
   // The first frame uploads shaders and textures; count it as zero time so the
   // long-gap guard below does not pause the game before the player does anything.
@@ -814,9 +871,10 @@ async function init() {
     }
     // The Pale Blue Dot is not logged by going far: it is the last slot, filled by a
     // photograph (photoSlots above).
-    const told = recordStories(progress, completedStories({
+    const storiesNow = completedStories({
       position: state.position, restingOn: state.restingOn, bodies, craft, sites,
-    }).filter((id) => id !== LAST_SLOT));
+    });
+    const told = recordStories(progress, storiesNow.filter((id) => id !== LAST_SLOT));
     const storyEvents = told.newly.map((id) => {
       const story = STORIES.find((s) => s.id === id);
       return { type: 'story', name: story.name, text: story.text };
@@ -828,6 +886,27 @@ async function init() {
     }
     // A place reached for the first time opens its card, once she has settled.
     if (told.newly.length) cardDue = { id: told.newly[0], in: CARD_AFTER_S };
+    // A tour under way: at its next stop, Seora says her line and the tour moves on.
+    const leg = guide.step === null ? currentStop(progress) : null;
+    // Her line at a tour's stop is not talked over by the line for finding the body.
+    let saidAtStop = false;
+    if (leg && dt > 0 && stopReached(leg.stop, { storiesNow, position: state.position, bodies, craft })) {
+      const moved = advanceTour(progress);
+      progress = moved.progress;
+      saveProgress(progress);
+      if (cardDue) sayAfterCard = leg.stop.line;
+      else say.show(leg.stop.line);
+      saidAtStop = true;
+      if (moved.finished) {
+        cheerUntil = performance.now() + 6000;
+        sound.cue('complete');
+        toast.show(`코스 "${leg.tour.name}"을 다 돌았습니다. 수첩의 코스 갈래에 도장이 찍혔습니다.`);
+        if (allToursDone(progress)) toast.show('아홉 길을 모두 돌았습니다. 수첩 사이에서 할머니가 접어 둔 종이학이 나왔습니다.');
+      } else {
+        aimAtStop();
+        toast.show(`${leg.tour.name} ${leg.step + 1}/${leg.tour.stops.length}: ${stopName(leg.stop)}에 왔습니다. 다음은 ${stopName(currentStop(progress).stop)}입니다.`);
+      }
+    }
     if (cardDue && dt > 0) {
       cardDue.in -= dt;
       if (cardDue.in <= 0) {
@@ -842,7 +921,7 @@ async function init() {
       const cue = cueForEvent(event);
       if (cue) sound.cue(cue);
       // Somewhere new: Seora says her line (the same one the journal keeps).
-      if (event.type === 'discovered' && MEMOS[event.bodyId]) say.show(MEMOS[event.bodyId].line);
+      if (event.type === 'discovered' && MEMOS[event.bodyId] && !saidAtStop) say.show(MEMOS[event.bodyId].line);
     }
     if (finished) celebrate();
 
@@ -873,10 +952,10 @@ async function init() {
       });
       if (guide.finished) {
         saveGuideDone();
-        toast.show(`첫 탐험을 마쳤습니다. ${journalHow}으로 다음 목적지를 고르세요.`);
+        toast.show(`첫 탐험을 마쳤습니다. ${journalHow}을 열고 코스 갈래에서 "${tourById('firstSteps').name}"을 골라 보세요.`);
       }
-      guideView.show(guideGoal(guide, touch));
     }
+    guideView.show(goalNow());
 
     const turn = dt > 0
       // Sliding sideways leans the character like a gentle turn.
@@ -1008,7 +1087,7 @@ async function init() {
       flightLabel,
       throttle: input.throttle(),
       C,
-      goalId: guideGoal(guide)?.targetId ?? null,
+      goalId: goalNow()?.targetId ?? null,
       // A place on the far side of its body, or seen from far away, gets no label.
       knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...progress.stories]),
       hiddenIds: [
@@ -1017,7 +1096,7 @@ async function init() {
         // Whatever is behind a planet or a moon cannot be seen and gets no label (the
         // Sun says "가려짐" itself; the chosen target and the guide's goal stay).
         ...[...bodies, ...craft]
-          .filter((t) => t.kind !== 'star' && t.id !== selectedId && t.id !== guideGoal(guide)?.targetId && behindBody(t, state.position, bodies))
+          .filter((t) => t.kind !== 'star' && t.id !== selectedId && t.id !== goalNow()?.targetId && behindBody(t, state.position, bodies))
           .map((t) => t.id),
       ],
     });

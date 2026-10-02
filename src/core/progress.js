@@ -3,7 +3,8 @@ import { surfaceDistance, BODY_DATA } from './bodies.js';
 // The explorer's log: which bodies were discovered and landed on, which photo
 // missions were completed, which story places were visited, which craft were met (not
 // scored; it only allows jumping back to them, core/teleport.js), which of grandmother's
-// notes were read (not scored either, core/story.js). Plain arrays of ids
+// notes were read (not scored either, core/story.js), which tours were gone round and
+// the one under way (core/tours.js). Plain arrays of ids
 // so it stores as JSON.
 
 // A body counts as discovered once the traveler comes this close to its surface.
@@ -27,7 +28,7 @@ export function journalOrder(bodies) {
 }
 
 export function createProgress() {
-  return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], notes: [] };
+  return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], notes: [], tours: [], tour: null };
 }
 
 // A note from grandmother that has been read (core/story.js). Not scored.
@@ -89,7 +90,8 @@ export function summarize(progress, bodies, missions, stories = []) {
 }
 
 // Stored data may be old, edited or broken: keep only known, unique ids.
-export function sanitizeProgress(raw, bodies, missions, stories = [], craft = [], notes = []) {
+// tours: core/tours.js TOURS. The tour under way is kept only if its step exists.
+export function sanitizeProgress(raw, bodies, missions, stories = [], craft = [], notes = [], tours = []) {
   const fresh = createProgress();
   if (!raw || typeof raw !== 'object') return fresh;
   const bodyIds = new Set(bodies.map((b) => b.id));
@@ -104,7 +106,15 @@ export function sanitizeProgress(raw, bodies, missions, stories = [], craft = []
     stories: clean(raw.stories, storyIds),
     craft: clean(raw.craft, craftIds),
     notes: clean(raw.notes, new Set(notes.map((n) => n.id))),
+    tours: clean(raw.tours, new Set(tours.map((t) => t.id))),
+    tour: underWay(raw.tour, tours),
   };
+}
+
+function underWay(raw, tours) {
+  const tour = raw && typeof raw === 'object' ? tours.find((t) => t.id === raw.id) : null;
+  if (!tour || !Number.isInteger(raw.step) || raw.step < 0 || raw.step >= tour.stops.length) return null;
+  return { id: tour.id, step: raw.step };
 }
 
 export function score(summary) {

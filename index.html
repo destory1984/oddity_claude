@@ -98,6 +98,7 @@
   <div id="guide" hidden>
     <span id="guideCount"></span>
     <p id="guideText" role="status" aria-live="polite"></p>
+    <button id="guideJump" hidden>근처로</button>
     <button id="guideSkip">건너뛰기</button>
   </div>
 
@@ -118,6 +119,7 @@
       <button role="tab" data-tab="album">사진첩</button>
       <button role="tab" data-tab="stories">이야기 장소</button>
       <button role="tab" data-tab="craft">탐사선</button>
+      <button role="tab" data-tab="tours">코스</button>
     </div>
     <div id="journalScroll">
       <section data-tab="bodies">
@@ -141,6 +143,10 @@
       <section data-tab="craft" hidden>
         <p class="muted">1만km 안까지 다가간 탐사선과 망원경입니다. 점수에는 들지 않고, 언제든 그 곁으로 순간 이동할 수 있습니다.</p>
         <ul id="journalCraft"></ul>
+      </section>
+      <section data-tab="tours" hidden>
+        <p class="muted">할머니가 수첩 뒤에 적어 둔 "가 보고 싶은 길" 아홉입니다. 한 길을 고르면 다음에 갈 곳이 화면 위에 뜨고, 차례대로 다 돌면 도장이 찍힙니다. 점수에는 들지 않습니다.</p>
+        <ul id="journalTours"></ul>
       </section>
     </div>
   </dialog>

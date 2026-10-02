@@ -1600,3 +1600,61 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   font-family:"Gowun Batang","Nanum Myeongjo","AppleMyungjo","Batang",serif;
   word-break:keep-all;
 }
+
+/* A tour's goal line has a second button: jump near the next stop. */
+#guideJump {
+  width:auto;
+  margin:0;
+  min-height:32px;
+  padding:4px 12px;
+  border-radius:16px;
+  font-size:12px;
+  border-color:#ffdfa6;
+  color:#ffdfa6;
+}
+
+#guideJump[hidden] {
+  display:none;
+}
+
+/* The tours in the journal: the route's name, grandmother's memo, the stops in order. */
+#journalTours li {
+  padding:10px 0;
+  border-bottom:1px solid #ffffff12;
+  font-size:13px;
+  color:var(--muted);
+}
+
+#journalTours li strong {
+  display:block;
+  font-weight:400;
+  font-size:14px;
+  color:#b6cbe0;
+}
+
+#journalTours li.done strong {
+  color:#7fe3c5;
+}
+
+#journalTours li.going strong {
+  color:#ffdfa6;
+}
+
+#journalTours .memo {
+  display:block;
+  margin:2px 0 4px;
+  color:#e6d3a8;
+  font-family:"Gowun Batang","Nanum Myeongjo","AppleMyungjo","Batang",serif;
+  word-break:keep-all;
+}
+
+#journalTours .stops {
+  display:block;
+  line-height:1.7;
+  word-break:keep-all;
+}
+
+#journalTours li button {
+  display:block;
+  margin-top:6px;
+}

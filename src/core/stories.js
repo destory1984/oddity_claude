@@ -144,7 +144,7 @@ const MOON_LANDMARKS = [
   // (Not 'kepler': that is the space telescope's id, and labels are kept by id.)
   ['keplerCrater', '케플러 분화구', 'Kepler', 8.1, -38.0, 150, '폭풍의 대양과 섬들의 바다 사이에 있는 지름 30km쯤의 분화구입니다. 밝은 빛줄기가 300km 넘게 뻗어 있습니다.'],
   ['clavius', '클라비우스 분화구', 'Clavius', -58.4, -14.4, 150, '지름 231km로 달 앞면에서 손꼽히게 큰 분화구입니다. 2020년 이곳의 햇빛 드는 땅에서 물 분자가 확인됐습니다.'],
-  ['iridum', '무지개의 만', 'Sinus Iridum', 44.1, -31.5, 150, '비의 바다 북서쪽에 반달 모양으로 파인 지름 240km쯤의 만입니다. 쥐라 산맥이 둥글게 둘러싸고 있습니다.'],
+  ['iridum', '무지개의 만', 'Sinus Iridum', 44.1, -31.5, 150, '비의 바다 북서쪽에 반달 모양으로 파인 지름 250km쯤의 만입니다. 쥐라 산맥이 둥글게 둘러싸고 있습니다.'],
   ['reinerGamma', '라이너 감마', 'Reiner Gamma', 7.5, -59.0, 150, '폭풍의 대양에 그려진 길이 70km쯤의 밝은 소용돌이 무늬입니다. 높낮이가 없는 평지에 색만 다릅니다.'],
 ];
 // The sights of Mars: its volcanoes, canyon, basins and ice caps.
@@ -214,7 +214,7 @@ const FAR_PLACES = [
     '1969년 7월 16일 아폴로 11호가 이 발사대에서 떠났습니다. 나흘 뒤 달에 내렸습니다.'],
   ['kraken', '타이탄의 크라켄 해', 'Kraken Mare', 2007, 'titan', '타이탄', 68, 50, 50, 300, true,
     '2007년 카시니가 찾은 타이탄에서 가장 큰 바다입니다. 물이 아니라 메탄과 에탄으로 차 있습니다.'],
-  ['mordor', '카론의 붉은 북극, 모르도르', 'Mordor Macula', 2015, 'charon', '카론', 85, 0, 0, 200, true,
+  ['mordor', '카론의 붉은 북극, 모르도르', 'Neverland Regio', 2015, 'charon', '카론', 85, 0, 0, 200, true,
     '카론의 북극은 붉은 갈색입니다. 명왕성에서 빠져나온 기체가 얼어붙고 햇빛에 바뀐 것으로 봅니다.'],
   ['greatDarkSpot', '해왕성의 대흑점', 'Great Dark Spot', 1989, 'neptune', '해왕성', -18, null, 14, 10000, true,
     '1989년 보이저 2호가 지구만 한 검은 폭풍을 찍었습니다. 1994년 허블이 다시 보니 사라지고 없었습니다.'],

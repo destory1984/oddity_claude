@@ -71,3 +71,17 @@ test("grandmother's hand is shipped with the game too: Nanum Pen Script, woff2 o
   // Every place she writes uses the one variable.
   assert.ok(!/font-family:\s*"Gowun Batang"/.test(style));
 });
+
+test("Seora's hand is shipped with the game: Gaegu, woff2 only, with its licence", () => {
+  const css = fs.readFileSync('public/fonts/gaegu/400.css', 'utf8');
+  const files = [...new Set([...css.matchAll(/url\(\.\/(files\/[^)]+)\)/g)].map((m) => m[1]))];
+  assert.equal(files.length, 89);
+  for (const file of files) {
+    assert.ok(file.endsWith('.woff2'), file);
+    assert.ok(fs.existsSync(`public/fonts/gaegu/${file}`), file);
+  }
+  assert.match(css, /font-family: 'Gaegu'/);
+  assert.match(fs.readFileSync('public/fonts/gaegu/LICENSE.txt', 'utf8'), /SIL Open Font License, Version 1\.1/);
+  assert.match(fs.readFileSync('index.html', 'utf8'), /href="\/fonts\/gaegu\/400\.css"/);
+  assert.match(fs.readFileSync('style.css', 'utf8'), /--seora:"Gaegu",/);
+});

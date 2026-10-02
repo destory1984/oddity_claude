@@ -41,6 +41,7 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 |---|---|---|
 | `public/fonts/pretendard/` (CSS 1개, woff2 92개, `LICENSE.txt`) | Pretendard 1.3.9, 길형진. https://github.com/orioncactus/pretendard 의 npm 꾸러미 `pretendard` 안 `dist/web/variable/` 의 파일을 고치지 않고 그대로 넣었다(만든 이가 나눠 둔 웹용 조각). | SIL 오픈 폰트 라이선스 1.1. 라이선스 글을 같은 폴더에 두었다. 글꼴 이름 "Pretendard"는 고친 판에 쓸 수 없으므로 파일을 고치지 않는다 |
 | `public/fonts/nanum-pen-script/` (CSS 1개, woff2 93개, `LICENSE.txt`) | 나눔손글씨 펜(Nanum Pen Script), NHN(네이버), 디자인 산돌커뮤니케이션. npm 꾸러미 `@fontsource/nanum-pen-script` 5.3.0 안의 글꼴 파일(구글 폰트가 나눠 주는 조각)을 고치지 않고 넣었다. woff2만 넣고, CSS에서 woff 줄만 뺐다. | SIL 오픈 폰트 라이선스 1.1. 라이선스 글을 같은 폴더에 두었다 |
+| `public/fonts/gaegu/` (CSS 1개, woff2 89개, `LICENSE.txt`) | 개구(Gaegu), The Gaegu Project Authors. npm 꾸러미 `@fontsource/gaegu` 5.3.0 안의 글꼴 파일(구글 폰트가 나눠 주는 조각)을 고치지 않고 넣었다. woff2만 넣고, CSS에서 woff 줄만 뺐다. | SIL 오픈 폰트 라이선스 1.1. 라이선스 글을 같은 폴더에 두었다 |
 
 ## 이야기 장소의 사진
 

@@ -37,7 +37,7 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 
 ## 이야기 장소의 사진
 
-`public/assets/stories/` 의 사진 70장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
+`public/assets/stories/` 의 사진 90장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
 
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
@@ -111,6 +111,26 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | `korolev.jpg` | [Perspective view of Korolev crater.jpg](https://commons.wikimedia.org/wiki/File:Perspective_view_of_Korolev_crater.jpg) | ESA/DLR/FU Berlin | CC BY-SA 3.0 igo |
 | `cydonia.jpg` | [Face on Mars with Inset.jpg](https://commons.wikimedia.org/wiki/File:Face_on_Mars_with_Inset.jpg) | NASA / JPL / University of Arizona | Public domain |
 | `syrtis.jpg` | [Syrtis Major MC-13.jpg](https://commons.wikimedia.org/wiki/File:Syrtis_Major_MC-13.jpg) | NASA | Public domain |
+| `pele.jpg` | [Pele Voyagercolor mosaic.jpg](https://commons.wikimedia.org/wiki/File:Pele_Voyagercolor_mosaic.jpg) | NASA/JPL/USGS | Public domain |
+| `tigerStripes.jpg` | [Enceladus geysers June 2009.jpg](https://commons.wikimedia.org/wiki/File:Enceladus_geysers_June_2009.jpg) | NASA/JPL/SSI | Public domain |
+| `shoemakerLevy.jpg` | [Multiple Impacts From Comet P-Shoemaker-Levy 9 on Jupiter (2004-15-1529).jpg](https://commons.wikimedia.org/wiki/File:Multiple_Impacts_From_Comet_P-Shoemaker-Levy_9_on_Jupiter_(2004-15-1529).jpg) | Hubble Space Telescope Comet Team and | Public domain |
+| `voyager2Neptune.jpg` | [Neptune Full Disk View - GPN-2000-000443.jpg](https://commons.wikimedia.org/wiki/File:Neptune_Full_Disk_View_-_GPN-2000-000443.jpg) | NASA | Public domain |
+| `voyager2Uranus.jpg` | [Uranus from Voyager 2 (1986).jpg](https://commons.wikimedia.org/wiki/File:Uranus_from_Voyager_2_(1986).jpg) | NASA | Public domain |
+| `venera13.jpg` | [Surface of Venus taken by Venera 13 (panoramic).jpg](https://commons.wikimedia.org/wiki/File:Surface_of_Venus_taken_by_Venera_13_(panoramic).jpg) | Venera 13, Soviet space program | Public domain |
+| `tombaughRegio.jpg` | [Pluto in True Color - High-Res.jpg](https://commons.wikimedia.org/wiki/File:Pluto_in_True_Color_-_High-Res.jpg) | NASA/Johns Hopkins University Applied Physics Laboratory/Sou | Public domain |
+| `hexagon.jpg` | [Saturn north polar hexagon 2012-11-27.jpg](https://commons.wikimedia.org/wiki/File:Saturn_north_polar_hexagon_2012-11-27.jpg) | NASA / JPL-Caltech / Space Science Institute | Public domain |
+| `naro.jpg` | [P R KSLV-2 211021 0113.jpg](https://commons.wikimedia.org/wiki/File:P_R_KSLV-2_211021_0113.jpg) | Korea Aerospace Research Institute (KARI) | KOGL Type 1 |
+| `messenger.jpg` | [Details of MESSENGER's Impact Location.jpg](https://commons.wikimedia.org/wiki/File:Details_of_MESSENGER's_Impact_Location.jpg) | NASA/Johns Hopkins University Applied Physics Laboratory/Car | Public domain |
+| `conamara.jpg` | [Europa Ice Rafts.jpg](https://commons.wikimedia.org/wiki/File:Europa_Ice_Rafts.jpg) | NASA/JPL | Public domain |
+| `venera7.jpg` | [Venera-7.jpg](https://commons.wikimedia.org/wiki/File:Venera-7.jpg) | Stanislav Kozlovskiy | CC BY-SA 4.0 |
+| `occator.jpg` | [PIA20350 crop - Occator from LAMO.jpg](https://commons.wikimedia.org/wiki/File:PIA20350_crop_-_Occator_from_LAMO.jpg) | NASA / JPL-Caltech / UCLA / Max Planck Institute for Solar S | Public domain |
+| `lc39a.jpg` | [Apollo 11 Launch - GPN-2000-000630.jpg](https://commons.wikimedia.org/wiki/File:Apollo_11_Launch_-_GPN-2000-000630.jpg) | NASA | Public domain |
+| `yiSoyeon.jpg` | [Yi+Malenchenko+Whitson at ISS 08Apr17 (NASA-ISS016-E-036365).jpg](https://commons.wikimedia.org/wiki/File:Yi%2BMalenchenko%2BWhitson_at_ISS_08Apr17_(NASA-ISS016-E-036365).jpg) | ISS crew | Public domain |
+| `kraken.jpg` | [PIA17655 Kraken Mare crop no labels.jpg](https://commons.wikimedia.org/wiki/File:PIA17655_Kraken_Mare_crop_no_labels.jpg) | NASA / JPL-Caltech / Agenzia Spaziale Italiana / USGS | Public domain |
+| `mordor.jpg` | [Charon in True Color - High-Res.jpg](https://commons.wikimedia.org/wiki/File:Charon_in_True_Color_-_High-Res.jpg) | NASA/Johns Hopkins University Applied Physics Laboratory/Sou | Public domain |
+| `voyager2Out.jpg` | [Voyager 2 Heliopause.jpg](https://commons.wikimedia.org/wiki/File:Voyager_2_Heliopause.jpg) | NASA/Goddard Space Flight Center Conceptual Image Lab Animat | Public domain |
+| `parkerPerihelion.jpg` | [Parker Solar Probe.jpg](https://commons.wikimedia.org/wiki/File:Parker_Solar_Probe.jpg) | NASA/Johns Hopkins APL/Steve Gribben | Public domain |
+| `greatDarkSpot.jpg` | [Great Dark Spot (cropped).jpg](https://commons.wikimedia.org/wiki/File:Great_Dark_Spot_(cropped).jpg) | NASA | Public domain |
 
 CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수 있고, 고친 것은 같은 조건으로 내야 한다. 이 저장소의 MIT 라이선스는 이 사진들에 미치지 않는다.
 

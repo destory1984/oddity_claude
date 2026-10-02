@@ -394,7 +394,8 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       todo.className = 'stops';
       todo.textContent = `${stunt.todo}.`;
       const record = document.createElement('span');
-      record.className = 'memo';
+      // Not grandmother's hand: the record is the game's word.
+      record.className = 'record';
       record.textContent = stunt.record;
       const button = document.createElement('button');
       button.textContent = stunt.on ? '그만두기' : '해 보기';

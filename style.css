@@ -1673,6 +1673,13 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   margin-top:6px;
 }
 
+#journalStunts .record {
+  display:block;
+  margin-top:2px;
+  font-size:13px;
+  color:#7a5a36;
+}
+
 /* Today's request in the journal: grandmother's slip, a star once done. */
 #journalDaily {
   display:flex;

@@ -1135,7 +1135,10 @@ async function init() {
       && !(docked && !isDocked(docked)) && !(visit && !hasArrived(visit));
     // (After a note it waits out the gap between notes, so the first sitting does not
     // open sheet upon sheet.)
-    if (dailyDue && settled && noteWait === 0 && (progress.notes ?? []).length > 0) {
+    // Nor does it come while one of her notes is due (landing on the Moon for the first
+    // time, the request came up 20 s before the note of 1969), nor during the newcomer's
+    // steps to the Moon (once she stands there and its note is read, it may).
+    if (dailyDue && settled && noteWait === 0 && !note && (guide.step === null || guide.step === 'photo') && (progress.notes ?? []).length > 0) {
       dailyDue = false;
       noteCard.show({
         scene: '수첩 사이에 오늘 날짜가 적힌 쪽지가 끼워져 있다.',

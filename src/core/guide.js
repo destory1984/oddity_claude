@@ -52,7 +52,7 @@ const TEXT = {
   face: () => '달 이름표를 누르고 "달 바라보기"를 누르세요',
   fly: (touch) => (touch ? '전진 버튼을 누르고 있으면 달로 날아갑니다' : 'W 키를 누르고 있으면 달로 날아갑니다'),
   land: () => '그대로 달 표면까지 내려가 닿아 보세요',
-  photo: (touch) => `${touch ? '사진 모드 버튼' : 'P 키'}을 누르고 달과 지구를 함께 찍으세요`,
+  photo: (touch) => `${touch ? '사진 모드 버튼을' : 'P 키를'} 누르고 달과 지구를 함께 찍으세요`,
 };
 
 export function guideGoal(guide, touch = false) {

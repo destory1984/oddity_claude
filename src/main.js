@@ -40,6 +40,9 @@ import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
 import {
+  LANDED, IDLE, AGAIN, IDLE_AFTER_S, IDLE_GAP_S, freshLine, milestoneLine,
+} from './core/lines.js';
+import {
   TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, advanceTour, allToursDone,
 } from './core/tours.js';
 import {
@@ -171,6 +174,9 @@ function progressChanged(before) {
   const now = summarize(progress, BODIES, MISSIONS, STORIES);
   const { done, total } = score(now);
   $('journalButton').textContent = `수첩 ${done}/${total}`;
+  // Eighty, a hundred and twenty, a hundred and sixty slots: Seora counts aloud.
+  const counted = before ? milestoneLine(score(summarize(before, BODIES, MISSIONS, STORIES)).done, done) : null;
+  if (counted) say.show(counted);
   return Boolean(before) && !isComplete(summarize(before, BODIES, MISSIONS, STORIES)) && isComplete(now);
 }
 
@@ -499,12 +505,26 @@ async function init() {
   // A word to a probe left alone (core/story.js GREETINGS): once per visit to the game.
   const greeted = new Set();
   function greet(id) {
-    if (!GREETINGS[id] || greeted.has(id)) return;
+    if (!GREETINGS[id] || greeted.has(id)) return false;
     greeted.add(id);
     say.show(GREETINGS[id]);
+    return true;
   }
   // The place whose card opened on reaching it: greeted once the card is put away.
   let greetAfterCard = null;
+  // Lines said in this visit to the game (core/lines.js): she does not repeat herself.
+  const saidLines = new Set();
+  function sayFresh(list) {
+    const line = freshLine(list, saidLines);
+    if (!line) return;
+    saidLines.add(line);
+    say.show(line);
+  }
+  // The card that is open came up on standing again beside a place already logged.
+  let againAfterCard = false;
+  // How long she has been coasting with nothing to do, and how long until she may speak again.
+  let idleFor = 0;
+  let idleQuiet = 0;
   // A tour's line held back while a story card is in the way.
   let sayAfterCard = null;
 
@@ -556,9 +576,10 @@ async function init() {
       setPaused(cardPriorPause);
       previous = null;
       if (sayAfterCard) say.show(sayAfterCard);
-      else if (greetAfterCard) greet(greetAfterCard);
+      else if (!(greetAfterCard && greet(greetAfterCard)) && againAfterCard) sayFresh(AGAIN);
       sayAfterCard = null;
       greetAfterCard = null;
+      againAfterCard = false;
     },
   });
   const showStory = (id) => storyCard.show(STORIES.find((s) => s.id === id));
@@ -849,7 +870,7 @@ async function init() {
           toast.show(eventMessage({ type: 'visited', name: place.name }));
           sound.cue('landed');
           // Somewhere been before: the card again (a first visit opens it below).
-          if (progress.stories.includes(place.id)) cardDue = { id: place.id, in: CARD_AFTER_S };
+          if (progress.stories.includes(place.id)) cardDue = { id: place.id, in: CARD_AFTER_S, again: true };
         }
       }
     }
@@ -911,6 +932,7 @@ async function init() {
       cardDue.in -= dt;
       if (cardDue.in <= 0) {
         greetAfterCard = cardDue.id;
+        againAfterCard = Boolean(cardDue.again);
         showStory(cardDue.id);
         cardDue = null;
       }
@@ -922,6 +944,17 @@ async function init() {
       if (cue) sound.cue(cue);
       // Somewhere new: Seora says her line (the same one the journal keeps).
       if (event.type === 'discovered' && MEMOS[event.bodyId] && !saidAtStop) say.show(MEMOS[event.bodyId].line);
+      // A first landing: her line for standing there.
+      if (event.type === 'landed' && LANDED[event.bodyId] && !saidAtStop) say.show(LANDED[event.bodyId]);
+    }
+    // Coasting a long while with nothing to do, she talks to herself.
+    const coasting = dt > 0 && !input.driving() && !docked && !visit && !state.restingOn && totalSpeed(state) > 0.01;
+    idleFor = coasting ? idleFor + dt : (dt > 0 ? 0 : idleFor);
+    idleQuiet = Math.max(0, idleQuiet - dt);
+    if (idleFor >= IDLE_AFTER_S && idleQuiet === 0) {
+      sayFresh(IDLE);
+      idleFor = 0;
+      idleQuiet = IDLE_GAP_S;
     }
     if (finished) celebrate();
 

@@ -1,6 +1,6 @@
 // Background music, decided here and played by ui/sound.js. No sound files: a slow pad
 // of three notes per bar under a few bell notes, different every bar but always the
-// same for a given bar number. Six tunes take turns, each with its own four chords,
+// same for a given bar number. Eleven tunes take turns, each with its own four chords,
 // five-note scale, beat and bell.
 
 export const BAR_S = 8;
@@ -29,7 +29,10 @@ export const MELODY = scale('A4 C5 D5 E5 G5 A5 C6 D6');
 
 // slots: where a melody note may fall inside a bar, in seconds.
 // busy: the share of slots that sound near a world (deep space: about a third of it).
-// bell: how long a note rings, and its overtone (a multiple of the note, and how loud).
+// bell: how long a note rings, and its overtone (a multiple of the note, and how loud);
+//   wave: 'triangle' for a plucked sound (a sine, the music box, when left out).
+// motif: a figure, as places in the melody; the notes that sound walk along it in
+//   order instead of being picked by chance (which notes sound is still by chance).
 export const TUNES = [
   {
     id: 'box', name: '오르골',
@@ -77,6 +80,52 @@ export const TUNES = [
     slots: [0, 2, 4, 6], busy: 0.7,
     bell: { length: 2.6, overtone: 2, overtoneVolume: 0.2 },
   },
+  // The five below came later (2026-10-03: six were heard too often). Each also has a
+  // figure of its own, so they do not sound like the first six with other notes.
+  {
+    // G major in fives: a slow climb and back down.
+    id: 'drift', name: '유영',
+    chords: [chord('G2', 'G3', 'B3', 'D4'), chord('E2', 'G3', 'B3', 'E4'), chord('C3', 'G3', 'C4', 'E4'), chord('D2', 'A3', 'D4', 'F#4')],
+    melody: scale('G4 A4 B4 D5 E5 G5 A5 B5'),
+    slots: [0, 1.6, 3.2, 4.8, 6.4], busy: 0.62,
+    bell: { length: 2.0, overtone: 2, overtoneVolume: 0.18 },
+    motif: [0, 2, 3, 5, 7, 5, 3, 2],
+  },
+  {
+    // B minor, many short drops: rain on a window.
+    id: 'rain', name: '빗방울',
+    chords: [chord('B2', 'F#3', 'B3', 'D4'), chord('G2', 'G3', 'B3', 'D4'), chord('D2', 'A3', 'D4', 'F#4'), chord('A2', 'A3', 'C#4', 'E4')],
+    melody: scale('D5 E5 F#5 A5 B5 D6 E6 F#6'),
+    slots: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7], busy: 0.24,
+    bell: { length: 0.8, overtone: 4, overtoneVolume: 0.1, wave: 'triangle' },
+  },
+  {
+    // The five notes of a Korean tune on G, plucked: two close together, then a wait.
+    id: 'gayageum', name: '가야금',
+    chords: [chord('G2', 'G3', 'C4', 'D4'), chord('C3', 'G3', 'C4', 'E4'), chord('G2', 'G3', 'A3', 'D4'), chord('D2', 'A3', 'D4', 'E4')],
+    melody: scale('D4 E4 G4 A4 C5 D5 E5 G5'),
+    slots: [0, 0.4, 2, 2.4, 4, 5, 5.4, 7], busy: 0.5,
+    bell: { length: 1.3, overtone: 2, overtoneVolume: 0.3, wave: 'triangle' },
+    motif: [3, 5, 4, 3, 2, 3, 5, 7, 6, 5, 3, 2],
+  },
+  {
+    // D major, wide and bright, a falling line.
+    id: 'aurora', name: '오로라',
+    chords: [chord('D2', 'A3', 'D4', 'F#4'), chord('B2', 'F#3', 'B3', 'D4'), chord('G2', 'G3', 'B3', 'D4'), chord('A2', 'A3', 'C#4', 'E4')],
+    melody: scale('A4 B4 D5 E5 F#5 A5 B5 D6'),
+    slots: [0, 1, 2, 3, 4, 5, 6, 7], busy: 0.4,
+    bell: { length: 2.4, overtone: 3, overtoneVolume: 0.12 },
+    motif: [7, 6, 4, 5, 4, 2, 3, 1],
+  },
+  {
+    // B flat major in threes, up and down like a merry-go-round.
+    id: 'carousel', name: '회전목마',
+    chords: [chord('Bb2', 'Bb3', 'D4', 'F4'), chord('G2', 'G3', 'Bb3', 'D4'), chord('Eb2', 'G3', 'Bb3', 'Eb4'), chord('F2', 'A3', 'C4', 'F4')],
+    melody: scale('Bb4 C5 D5 F5 G5 Bb5 C6 D6'),
+    slots: [0, 1.33, 2.67, 4, 5.33, 6.67], busy: 0.62,
+    bell: { length: 1.1, overtone: 2, overtoneVolume: 0.22 },
+    motif: [0, 2, 4, 1, 3, 5, 2, 4, 6, 4, 2, 1],
+  },
 ];
 
 // How much of a tune's busyness is left in each mood.
@@ -116,7 +165,9 @@ export function barPlan(bar, mood) {
   tune.slots.forEach((slot, i) => {
     if (chance(bar, i) >= tune.busy * BUSY[mood]) return;
     notes.push({
-      freq: tune.melody[Math.floor(chance(bar, i + 100) * tune.melody.length)],
+      freq: tune.motif
+        ? tune.melody[tune.motif[(bar * tune.slots.length + i) % tune.motif.length]]
+        : tune.melody[Math.floor(chance(bar, i + 100) * tune.melody.length)],
       // A little off the beat, like a hand-wound music box.
       at: Math.min(BAR_S - 0.6, slot + chance(bar, i + 200) * 0.3),
       volume: 0.02 + chance(bar, i + 300) * 0.025,

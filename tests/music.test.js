@@ -16,15 +16,17 @@ test('a bar lasts eight seconds and the four chords come round in order', () => 
   assert.deepEqual(MELODY, [440, 523.25, 587.33, 659.26, 783.99, 880, 1046.5, 1174.66]);
 });
 
-test('six tunes take turns, sixteen bars each, and come round again', () => {
-  assert.equal(TUNES.length, 6);
+test('eleven tunes take turns, sixteen bars each, and come round again', () => {
+  assert.equal(TUNES.length, 11);
   assert.equal(BARS_PER_TUNE, 16);
-  assert.deepEqual(TUNES.map((t) => t.name), ['오르골', '새벽', '먼 바다', '자장가', '별무리', '깊은 밤']);
-  assert.equal(new Set(TUNES.map((t) => t.id)).size, 6);
+  assert.deepEqual(TUNES.map((t) => t.name), ['오르골', '새벽', '먼 바다', '자장가', '별무리', '깊은 밤', '유영', '빗방울', '가야금', '오로라', '회전목마']);
+  assert.equal(new Set(TUNES.map((t) => t.id)).size, 11);
   assert.equal(tuneFor(0).id, 'box');
   assert.equal(tuneFor(15).id, 'box');
   assert.equal(tuneFor(16).id, 'dawn');
-  assert.equal(tuneFor(BARS - 1).id, 'night');
+  assert.equal(tuneFor(6 * 16 - 1).id, 'night');
+  assert.equal(tuneFor(6 * 16).id, 'drift');
+  assert.equal(tuneFor(BARS - 1).id, 'carousel');
   assert.equal(tuneFor(BARS).id, 'box');
   // Skipping ahead lands on the first bar of the following tune.
   assert.equal(nextTuneBar(0), 16);
@@ -51,6 +53,21 @@ test('every tune has four chords, eight melody notes of its own and a bell', () 
   // No two tunes share both their chords and their scale.
   const marks = TUNES.map((t) => JSON.stringify([t.chords, t.melody]));
   assert.equal(new Set(marks).size, TUNES.length);
+});
+
+test('a tune with a figure walks along it; the notes of a bar are not all the same', () => {
+  const withFigure = TUNES.filter((t) => t.motif);
+  assert.deepEqual(withFigure.map((t) => t.id), ['drift', 'gayageum', 'aurora', 'carousel']);
+  for (const tune of withFigure) {
+    assert.ok(tune.motif.length >= 8 && tune.motif.every((n) => Number.isInteger(n) && n >= 0 && n < 8), tune.id);
+    // Neighbours in the figure are never the same note twice.
+    tune.motif.forEach((n, i) => assert.notEqual(n, tune.motif[(i + 1) % tune.motif.length], tune.id));
+    const first = TUNES.indexOf(tune) * BARS_PER_TUNE;
+    const heard = new Set();
+    for (let bar = first; bar < first + BARS_PER_TUNE; bar++) for (const note of barPlan(bar, 'near').notes) heard.add(note.freq);
+    assert.ok(heard.size >= 5, `${tune.id} ${heard.size}`);
+  }
+  assert.equal(TUNES.filter((t) => t.bell.wave).every((t) => t.bell.wave === 'triangle'), true);
 });
 
 test('the same bar always sounds the same', () => {

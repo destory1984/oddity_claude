@@ -160,8 +160,8 @@ export function createSound() {
     for (const freq of plan.pad) padNote(freq, start, PAD_VOLUME);
     tone({ freq: plan.bass, start, length: BAR_S, volume: BASS_VOLUME, out: musicBus });
     for (const note of plan.notes) {
-      const { length, overtone, overtoneVolume } = plan.bell;
-      tone({ freq: note.freq, start: start + note.at, length, volume: note.volume, out: musicBus });
+      const { length, overtone, overtoneVolume, wave = 'sine' } = plan.bell;
+      tone({ freq: note.freq, type: wave, start: start + note.at, length, volume: note.volume, out: musicBus });
       tone({ freq: note.freq * overtone, start: start + note.at, length: length * 0.3, volume: note.volume * overtoneVolume, out: musicBus });
     }
   }

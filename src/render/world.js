@@ -31,7 +31,13 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
   const engine = new Engine(canvas, true, {
     preserveDrawingBuffer: true, stencil: true, powerPreference: 'high-performance',
   });
-  engine.setHardwareScalingLevel(Math.max(1, window.devicePixelRatio / 1.6));
+  // Inside the phone-shaped frame of a wide window (src/shell.js) the page is scaled to
+  // the window's height: the picture is drawn that much finer so it stays sharp.
+  const sharpen = () => {
+    const zoom = Number(window.frameElement?.dataset.scale) || 1;
+    engine.setHardwareScalingLevel(Math.max(1, window.devicePixelRatio / 1.6) / Math.max(1, zoom));
+  };
+  sharpen();
 
   const scene = new Scene(engine);
   scene.clearColor = new Color4(0.002, 0.004, 0.012, 1);
@@ -189,6 +195,7 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       hero.scene.render();
     },
     resize() {
+      sharpen();
       engine.resize();
     },
     setFov(radians) {

@@ -211,6 +211,7 @@
       <dt>사진</dt><dd>P 키 / 사진 모드 버튼</dd>
       <dt>확대 관찰</dt><dd>고른 천체나 탐사선, 이야기 장소를 화면 가운데에 두고 가까이에서 봅니다. 드래그하면 그 둘레를 360도 돌아가며 봅니다. 이때 찍은 사진은 사진첩에는 들어가지만 사진 임무로는 치지 않습니다.</dd>
       <dt>앱으로 설치</dt><dd>안드로이드 크롬: 메뉴 ⋮ → 앱 설치. 아이폰 사파리: 공유 → 홈 화면에 추가. 설치하면 인터넷 없이도 열립니다. <button id="installButton" hidden>지금 설치</button></dd>
+      <dt id="screenTerm" hidden>화면 비율</dt><dd id="screenRow" hidden><span id="screenNow"></span> 바꾸면 게임이 처음 자리에서 다시 시작합니다(수첩은 그대로). <button id="screenButton"></button></dd>
       <dt>캐릭터</dt><dd><span id="heroNow"></span> 바꾸면 게임이 처음 자리에서 다시 시작합니다(수첩은 그대로). <button id="heroButton"></button></dd>
       <dt>행성 배치</dt><dd><span id="layoutNow"></span> 오늘의 하늘에서는 행성과 달이 오늘 날짜의 실제 방향에 놓이고, 거기서부터 게임 시계(720배)로 움직입니다. 바꾸면 게임이 처음 자리에서 다시 시작합니다(수첩은 그대로). <button id="layoutButton"></button></dd>
       <dt>소리</dt><dd>효과음은 M 키 / 🔊 버튼, 배경 음악은 B 키 / ♪ 버튼으로 따로 켜고 끕니다.</dd>
@@ -221,6 +222,6 @@
     <button id="closeHelp">비행 계속하기</button>
   </dialog>
 
-  <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/boot.js"></script>
 </body>
 </html>

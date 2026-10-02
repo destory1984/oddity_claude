@@ -30,7 +30,7 @@ import {
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
-  loadHeroKind, saveHeroKind, loadDaily, saveDaily,
+  loadHeroKind, saveHeroKind, loadDaily, saveDaily, loadScreen, saveScreen,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
@@ -816,6 +816,20 @@ async function init() {
   // Switching the layout moves every planet, so the game starts over (the log is kept).
   $('layoutNow').textContent = layout === 'today' ? '지금: 오늘의 하늘(오늘 날짜의 실제 위치).' : '지금: 여행 배치(행성을 태양 둘레에 고루 흩어 놓음).';
   $('layoutButton').textContent = layout === 'today' ? '여행 배치로 바꾸기' : '오늘의 하늘로 바꾸기';
+  // On a PC the game is in a phone-shaped frame (src/shell.js) unless the wide view was
+  // chosen; a phone has neither, and is not offered the switch.
+  const inFrame = window.self !== window.top;
+  const wideChosen = loadScreen() === 'wide';
+  if (inFrame || wideChosen) {
+    $('screenTerm').hidden = false;
+    $('screenRow').hidden = false;
+    $('screenNow').textContent = inFrame ? '지금: 휴대전화와 같은 세로 화면.' : '지금: 창을 가득 채운 넓은 화면.';
+    $('screenButton').textContent = inFrame ? '넓은 화면으로 바꾸기' : '세로 화면으로 바꾸기';
+    $('screenButton').addEventListener('click', () => {
+      saveScreen(inFrame ? 'wide' : 'phone');
+      window.top.location.reload();
+    });
+  }
   $('heroNow').textContent = heroKind === 'sprite' ? '지금: 도트 그림(시험 중).' : '지금: 종이 인형.';
   $('heroButton').textContent = heroKind === 'sprite' ? '종이 인형으로 바꾸기' : '도트 그림으로 바꾸기';
   $('heroButton').addEventListener('click', () => {

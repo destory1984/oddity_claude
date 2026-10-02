@@ -125,3 +125,23 @@ export function saveDaily(daily) {
     // The star lasts only for this page.
   }
 }
+
+const SCREEN_KEY = 'oddity.screen.v1';
+
+// On a wide window the game is shown in a phone-shaped frame (core/screen.js) unless
+// the player chose 'wide'.
+export function loadScreen() {
+  try {
+    return localStorage.getItem(SCREEN_KEY) === 'wide' ? 'wide' : 'phone';
+  } catch {
+    return 'phone';
+  }
+}
+
+export function saveScreen(choice) {
+  try {
+    localStorage.setItem(SCREEN_KEY, choice);
+  } catch {
+    // The choice simply does not stick.
+  }
+}

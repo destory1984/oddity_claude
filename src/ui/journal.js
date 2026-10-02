@@ -3,8 +3,8 @@ import { surfaceDistance } from '../core/bodies.js';
 import { objectParticle } from './messages.js';
 import { FACTS } from '../core/facts.js';
 import { photoCaption, ALBUM_MAX } from '../core/album.js';
-import { starText } from '../core/postcard.js';
-import { TOURS, stopName } from '../core/tours.js';
+import { starText, postageFile } from '../core/postcard.js';
+import { TOURS, stopName, stampFile } from '../core/tours.js';
 
 const $ = (id) => document.getElementById(id);
 // 로 after a vowel or ㄹ, 으로 after any other final consonant.
@@ -14,6 +14,14 @@ function hasFinalRieulOrNone(word) {
   return [0, 8].includes((code - 0xac00) % 28);
 }
 const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
+// A drawing from public/assets (the pictures drawn to order are in notebook/).
+function picture(file, alt, className = '') {
+  const img = document.createElement('img');
+  img.src = `${import.meta.env.BASE_URL}assets/${file}`;
+  img.alt = alt;
+  if (className) img.className = className;
+  return img;
+}
 // The last slot before it opens (core/story.js LAST_SLOT).
 const CLIPPING = '1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.';
 
@@ -153,7 +161,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       title.textContent = `${done ? '✓' : '○'} ${mission.name}`;
       const hint = document.createElement('span');
       hint.textContent = shut ? CLIPPING : mission.hint;
-      li.append(title, hint);
+      li.append(title, ...(shut ? [picture('notebook/clipping.png', '신문에서 오려 붙인 사진: 빛줄기 속의 푸른 점 하나')] : []), hint);
       missionList.append(li);
     }
   }
@@ -238,7 +246,16 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       if (entry.reply) {
         const reply = document.createElement('p');
         reply.className = 'reply';
-        reply.textContent = `${entry.rate ? `${starText(entry.rate.stars)} ` : ''}${entry.reply}`;
+        if (entry.rate) {
+          // Three stars in her pencil: filled for those given.
+          const stars = document.createElement('span');
+          stars.className = 'stars';
+          stars.setAttribute('role', 'img');
+          stars.setAttribute('aria-label', `별 ${entry.rate.stars}개 (${starText(entry.rate.stars)})`);
+          for (let i = 0; i < 3; i++) stars.append(picture(`notebook/star-${i < entry.rate.stars ? 'on' : 'off'}.png`, ''));
+          reply.append(stars);
+        }
+        reply.append(entry.reply);
         text.append(reply);
       } else if (entry.sent) {
         const sent = document.createElement('span');
@@ -261,7 +278,12 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
         album = onDeletePhoto(index);
         renderAlbum();
       });
-      figure.append(img, text, ...(send ? [send] : []), remove);
+      // A photo sent as a postcard carries a stamp and a postmark on its corner.
+      const frame = document.createElement('div');
+      frame.className = 'photoFrame';
+      frame.append(img);
+      if (entry.sent) frame.append(picture('notebook/postmark.png', '', 'postmark'), picture(postageFile(entry), '우표', 'postage'));
+      figure.append(frame, text, ...(send ? [send] : []), remove);
       grid.append(figure);
     });
   }
@@ -290,13 +312,15 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     list.replaceChildren();
     const done = lastProgress.tours ?? [];
     const going = lastProgress.tour;
+    $('journalCrane').hidden = !TOURS.every((t) => done.includes(t.id));
     for (const tour of TOURS) {
       const isGoing = going?.id === tour.id;
       const isDone = done.includes(tour.id);
       const li = document.createElement('li');
       li.className = isGoing ? 'going' : isDone ? 'done' : '';
       const title = document.createElement('strong');
-      title.textContent = `${isDone ? '✓' : '○'} ${tour.name}${isDone ? ' · 도장' : ''}${isGoing ? ` · 가는 중 ${going.step}/${tour.stops.length}` : ''}`;
+      title.textContent = `${isDone ? '✓' : '○'} ${tour.name}${isGoing ? ` · 가는 중 ${going.step}/${tour.stops.length}` : ''}`;
+      if (isDone) li.append(picture(stampFile(tour), `${tour.name} 도장`, 'stamp'));
       const memo = document.createElement('span');
       memo.className = 'memo';
       memo.textContent = tour.memo;

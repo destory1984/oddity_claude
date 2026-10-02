@@ -21,9 +21,9 @@ const STILL = { speed: 0 };
 // In flight, showing her back, past the turn away from the camera.
 const flying = () => run(createSpriteState(), FLY, 1.2).state;
 
-test('42 sheets of four frames in use, and every drawing is in the assets folder', () => {
-  assert.equal(SHEETS.length, 42);
-  assert.equal(new Set(SHEETS).size, 42);
+test('44 sheets of four frames in use, and every drawing is in the assets folder', () => {
+  assert.equal(SHEETS.length, 44);
+  assert.equal(new Set(SHEETS).size, 44);
   assert.equal(FRAMES, 4);
   for (const sheet of SHEETS) {
     for (let frame = 0; frame < FRAMES; frame++) {
@@ -275,4 +275,25 @@ test('photo mode holds the V pose, every time; a full journal sets her cheering'
   const cheer = run(createSpriteState(), { speed: 0, cheer: true }, 1);
   assert.deepEqual(sheetsOf(cheer.seen), ['cheer-big']);
   assert.deepEqual([...new Set(cheer.seen.map(spriteFrame))].sort(), [0, 1, 2, 3]);
+});
+
+test('reading a note runs once and holds; sitting loops; getting up she just stands', () => {
+  const ground = { speed: 0, resting: true };
+  const stood = run(createSpriteState(), ground, 2).state;
+  assert.equal(stood.sheet, 'stand');
+  const read = run(stood, { ...ground, read: true }, 2).seen;
+  assert.deepEqual(sheetsOf(read), ['read']);
+  assert.deepEqual([...new Set(read.map(spriteFrame))], [0, 1, 2, 3]);
+  assert.equal(spriteFrame(read[read.length - 1]), 3);
+  const sat = run(stood, { ...ground, sit: true }, 3).seen;
+  assert.deepEqual(sheetsOf(sat), ['sit']);
+  // Four drawings a second, round and round: frame 0 comes back.
+  assert.equal(spriteFrame(sat[Math.round(1.1 * 60)]), 0);
+  // No second touchdown on getting up.
+  const up = run(sat[sat.length - 1], ground, 1).seen;
+  assert.deepEqual(sheetsOf(up), ['stand']);
+  // Reading comes before sitting; a jump or photo mode before both.
+  assert.equal(modeFor({ read: true, sit: true }), 'read');
+  assert.equal(modeFor({ sit: true, photo: true }), 'photo');
+  assert.equal(modeFor({ sit: true, docking: true }), 'sit');
 });

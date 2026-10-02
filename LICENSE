@@ -14,6 +14,9 @@ This repository is licensed in three parts.
      draw it, src/render/hero.js and src/render/mageModel.js.
    - The pixel-art character "Seora": its design and every drawing of it in
      public/assets/seora-sprites/.
+   - The drawings made for the story in public/assets/notebook/ (the gate and
+     porch scenes, the tour stamps, the postage stamps and postmark, the
+     stars, the newspaper clipping).
    - The app icons in public/icons/.
    - The game's name and title as a brand: "우주 한량" and
      "Space Oddity — 우주 한량", including their use as the name of an app, game

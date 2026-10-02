@@ -1698,3 +1698,150 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   border-color:#b79a6a;
   background:#0000;
 }
+
+/* Pictures drawn to order for the story (public/assets/notebook): hard pixel edges. */
+.scenePicture {
+  display:block;
+  width:100%;
+  margin:0 0 14px;
+  border-radius:6px;
+  image-rendering:pixelated;
+}
+
+.scenePicture[hidden] {
+  display:none;
+}
+
+#gateScene {
+  width:min(520px,94vw);
+}
+
+/* A tour's stamp beside its name; the clipping in the last slot; stars on a reply. */
+#journalTours li {
+  position:relative;
+}
+
+#journalTours .stamp {
+  position:absolute;
+  top:8px;
+  right:0;
+  width:48px;
+  height:48px;
+  padding:4px;
+  border-radius:4px;
+  background:#f2e6c8;
+  image-rendering:pixelated;
+  transform:rotate(-8deg);
+}
+
+#journalTours li.done strong,
+#journalTours li.done .memo {
+  padding-right:64px;
+}
+
+#journalCrane {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:6px 0;
+  padding:8px 10px;
+  border-radius:3px;
+  background:#f2e6c8;
+  color:#3b2a1a;
+  font-size:13px;
+  font-family:"Gowun Batang","Nanum Myeongjo","AppleMyungjo","Batang",serif;
+}
+
+#journalCrane[hidden] {
+  display:none;
+}
+
+#journalCrane img {
+  width:48px;
+  height:48px;
+  image-rendering:pixelated;
+}
+
+#journal li.clipping img {
+  display:block;
+  width:160px;
+  height:120px;
+  margin:6px 0;
+  image-rendering:pixelated;
+}
+
+#journalAlbum .reply .stars {
+  display:block;
+  margin-bottom:2px;
+}
+
+#journalAlbum .reply .stars img {
+  display:inline;
+  width:16px;
+  height:16px;
+  border:0;
+  border-radius:0;
+  cursor:default;
+  image-rendering:pixelated;
+}
+
+/* A postcard in the album: a stamp and a postmark over the corner of the photo. */
+#journalAlbum .photoFrame {
+  position:relative;
+}
+
+#journalAlbum .photoFrame .postage,
+#journalAlbum .photoFrame .postmark {
+  position:absolute;
+  top:4px;
+  width:auto;
+  border:0;
+  border-radius:0;
+  cursor:default;
+  image-rendering:pixelated;
+  pointer-events:none;
+}
+
+#journalAlbum .photoFrame .postage {
+  right:4px;
+  height:36px;
+}
+
+#journalAlbum .photoFrame .postmark {
+  right:22px;
+  top:14px;
+  height:30px;
+  opacity:.85;
+}
+
+/* The stamp coming down in the middle of the view when a tour is gone round. */
+#stampFx {
+  position:fixed;
+  right:9vw;
+  top:34%;
+  width:min(192px,34vw);
+  height:min(192px,34vw);
+  padding:min(16px,3vw);
+  box-sizing:border-box;
+  border-radius:8px;
+  background:#f2e6c8;
+  image-rendering:pixelated;
+  opacity:0;
+  pointer-events:none;
+}
+
+#stampFx.on {
+  animation:stampDown 2.4s ease-out both;
+}
+
+@keyframes stampDown {
+  0% { opacity:0; transform:scale(2.2) rotate(-18deg); }
+  12% { opacity:1; transform:scale(.92) rotate(-8deg); }
+  18% { transform:scale(1) rotate(-8deg); }
+  80% { opacity:1; transform:scale(1) rotate(-8deg); }
+  100% { opacity:0; transform:scale(1) rotate(-8deg); }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  #stampFx.on { animation-duration:.01s; }
+}

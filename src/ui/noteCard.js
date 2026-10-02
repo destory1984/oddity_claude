@@ -30,6 +30,12 @@ export function createNoteCard({ onOpen, onClose }) {
       shown = { note, first };
       $('noteCardScene').textContent = first ? note.scene : '';
       $('noteCardScene').hidden = !first;
+      const picture = first && note.image ? note.image : null;
+      $('noteCardImage').hidden = !picture;
+      if (picture) {
+        $('noteCardImage').src = `${import.meta.env.BASE_URL}assets/notebook/${picture}`;
+        $('noteCardImage').alt = note.imageAlt ?? '';
+      }
       $('noteCardTitle').textContent = note.title;
       $('noteCardText').textContent = note.text;
       $('closeNoteCard').textContent = first ? note.button : '쪽지를 접는다';

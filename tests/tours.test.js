@@ -1,8 +1,9 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, advanceTour, allToursDone,
+  TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, advanceTour, allToursDone, stampFile, CRANE_FILE,
 } from '../src/core/tours.js';
+import { existsSync } from 'node:fs';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 import { STORIES } from '../src/core/stories.js';
 import { CRAFT, craftAt } from '../src/core/craft.js';
@@ -98,4 +99,10 @@ test("a tour's next stop can be jumped near without having been there", () => {
   const fresh = createProgress();
   assert.equal(teleportSpot(mars, { position: far, progress: fresh, bodies: BODIES, anywhere: true }), null);
   assert.ok(teleportSpot(mars, { position: far, progress: fresh, bodies: BODIES, anywhere: true, known: true }));
+});
+
+test('every tour has its own stamp on file, and there is a paper crane for all nine', () => {
+  const files = TOURS.map(stampFile);
+  assert.equal(new Set(files).size, 9);
+  for (const file of [...files, CRANE_FILE]) assert.ok(existsSync(`public/assets/${file}`), file);
 });

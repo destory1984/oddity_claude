@@ -10,10 +10,12 @@ import { DOCK_RANGE_KM } from './dock.js';
 // range) or a craft ({ craft }: come within docking range).
 //   memo: grandmother's hand, why she wanted this route.
 //   line: what Seora says at the stop (반말, 25 characters at most).
+//   stamp: the rubber stamp for going round it, public/assets/notebook/stamp-<stamp>.png.
 // The film behind the ninth tour is never named; only the real places on its road are used.
 export const TOURS = [
   {
     id: 'firstSteps',
+    stamp: 'first-steps',
     name: '첫 발자국',
     memo: '달에 처음 닿은 것들. 사람보다 기계가 먼저 갔다. 차례대로 가 보고 싶다.',
     stops: [
@@ -25,6 +27,7 @@ export const TOURS = [
   },
   {
     id: 'apollo',
+    stamp: 'apollo',
     name: '아폴로의 여섯 자리',
     memo: '1969년부터 1972년까지 여섯 번. 텔레비전과 신문으로만 따라갔다.',
     stops: [
@@ -38,6 +41,7 @@ export const TOURS = [
   },
   {
     id: 'grandTour',
+    stamp: 'grand-tour',
     name: '보이저의 그랜드 투어',
     memo: '1977년에 떠난 보이저 2호가 지나간 길. 네 행성을 다 본 건 그것 하나뿐.',
     stops: [
@@ -50,6 +54,7 @@ export const TOURS = [
   },
   {
     id: 'water',
+    stamp: 'water',
     name: '물을 찾아서',
     memo: '물이 있는 곳에 생명이 있을지도 모른다고 읽었다. 얼음과 바다를 찾아가는 길.',
     stops: [
@@ -62,6 +67,7 @@ export const TOURS = [
   },
   {
     id: 'rovers',
+    stamp: 'rovers',
     name: '붉은 행성의 차들',
     memo: '화성을 굴러다닌 차들. 신문에 날 때마다 오려 두었다. 안부를 전해 다오.',
     stops: [
@@ -75,6 +81,7 @@ export const TOURS = [
   },
   {
     id: 'marsSights',
+    stamp: 'mars-sights',
     name: '화성 관광',
     memo: '망원경으로는 붉은 점일 뿐이었다. 그 점 위에 산과 계곡이 있다니.',
     stops: [
@@ -87,6 +94,7 @@ export const TOURS = [
   },
   {
     id: 'korea',
+    stamp: 'korea',
     name: '한국의 우주',
     memo: '우리나라도 우주로 갔다. 2022년, 신문 1면을 오려 붙인 해.',
     stops: [
@@ -98,6 +106,7 @@ export const TOURS = [
   },
   {
     id: 'comets',
+    stamp: 'comets',
     name: '혜성 사냥꾼',
     memo: '1986년 핼리는 희미했고 1997년 헤일-밥은 평생 가장 밝았다. 가까이서 보고 싶었다.',
     stops: [
@@ -108,6 +117,7 @@ export const TOURS = [
   },
   {
     id: 'marsFilm',
+    stamp: 'desert',
     name: '와디럼에서 스키아파렐리까지',
     memo: '2015년 극장에서 본 화성 영화. 그 길의 땅은 다 진짜 있는 곳이라고 했다.',
     stops: [
@@ -118,6 +128,10 @@ export const TOURS = [
     ],
   },
 ];
+
+// The file of a tour's stamp, under the site's assets folder; the paper crane for all nine.
+export const stampFile = (tour) => `notebook/stamp-${tour.stamp}.png`;
+export const CRANE_FILE = 'notebook/stamp-crane.png';
 
 export function tourById(id) {
   return TOURS.find((t) => t.id === id) ?? null;

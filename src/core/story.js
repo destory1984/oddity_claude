@@ -7,12 +7,15 @@
 // gate: the last note only. The scene at grandmother's gate that follows it, where the
 // line is spoken instead of going into a speech bubble.
 // scene: a line of plain telling above the paper. text: grandmother's hand.
+// image: a drawing above the scene line (public/assets/notebook), on the first reading.
 // line: what Seora says once the note is put away (반말, 25 characters at most).
 export const NOTES = [
   {
     id: 'opening',
     when: 'start',
     scene: '심부름으로 온 할머니 댁. 할머니는 마실 나가셨고, 마루에 낡은 수첩과 쪽지가 놓여 있다.',
+    image: 'porch.png',
+    imageAlt: '햇빛이 드는 마루 위의 낡은 수첩과 접힌 쪽지, 돋보기안경과 연필',
     title: '서라에게',
     text: '서라야, 수첩 빈칸 좀 채워 주련.\n나는 이제 멀리 못 간단다.\n\n첫 칸은 달이다.',
     button: '수첩을 편다',

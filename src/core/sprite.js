@@ -1,5 +1,5 @@
 // Which drawing of the sprite character to show (render/spriteHero.js draws it).
-// 38 sheets of four frames each, in public/assets/seora-sprites. (Four more are in the
+// 40 sheets of four frames each, in public/assets/seora-sprites. (Four more are in the
 // folder but not used: 'backward', the first rear view, which leaned 45 degrees; 'up'
 // and 'down', which show her from the front; and 'dock-hold', a flying pose for riding
 // a craft, dropped because once docked she should look stopped.)
@@ -32,6 +32,9 @@ export const SHEETS = [
   'photo-v2', 'land-descend', 'land-touch',
   // Wiping her brow with a sleeve: takes turns with 'hot' (fanning herself).
   'hot-wipe',
+  // Drawn to order for the story (docs/art-order-story.md): sitting beside a probe left
+  // alone, and reading a note from grandmother.
+  'sit', 'read',
 ];
 
 // Frames per second.
@@ -40,7 +43,7 @@ export const SPRITE_FPS = {
   // The turn-round: the four 'brake' drawings, forwards as she stops and turns to face
   // the camera, backwards as she turns away again to fly off. 0.8 s.
   brake: 5,
-  rest: 4, sleep: 1.5, reach: 2, stand: 3, land: 8, descend: 6, sling: 12, cheer: 8, bright: 4, cold: 6, hot: 4,
+  rest: 4, sit: 4, read: 4, sleep: 1.5, reach: 2, stand: 3, land: 8, descend: 6, sling: 12, cheer: 8, bright: 4, cold: 6, hot: 4,
 };
 const TURN_ROUND_S = FRAMES / SPRITE_FPS.brake;
 // Slower than this (km/s) she is standing still.
@@ -121,6 +124,9 @@ export function modeFor(input) {
   if (input.warp) return 'warp';
   if (input.cheer) return 'cheer';
   if (input.photo) return 'photo';
+  // Reading a note she has just put away; sitting a while beside a probe left alone.
+  if (input.read) return 'read';
+  if (input.sit) return 'sit';
   if (input.docking) return 'reach';
   // Gliding down to a place on a surface, under the countdown (core/visit.js).
   if (input.landing) return 'descend';
@@ -136,7 +142,7 @@ export function modeFor(input) {
 const loop = (time, fps) => Math.floor(time * fps) % FRAMES;
 const once = (time, fps) => Math.min(FRAMES - 1, Math.floor(time * fps));
 // Facing the camera: these turn round by the 'brake' drawings on the way to and from flight.
-const FACING = ['hover', 'ground', 'photo', 'cheer'];
+const FACING = ['hover', 'ground', 'photo', 'cheer', 'read', 'sit'];
 
 function hover(state, input, dt, fresh) {
   // The turn-round, when she has just stopped flying.
@@ -203,6 +209,15 @@ export function stepSprite(state, input, dt) {
     // Only the last of the four drawings is ever seen.
     return { ...next, sheet: 'photo-v2', time: 0, frame: FRAMES - 1, reverse: false };
   }
+  if (mode === 'read') {
+    // Once through, then she holds the note to her chest.
+    const time = fresh ? 0 : state.time + dt;
+    return { ...next, sheet: 'read', time, frame: once(time, SPRITE_FPS.read), reverse: false };
+  }
+  if (mode === 'sit') {
+    const time = fresh ? 0 : state.time + dt;
+    return { ...next, sheet: 'sit', time, frame: loop(time, SPRITE_FPS.sit), reverse: false };
+  }
   if (mode === 'sling') {
     const time = fresh ? 0 : state.time + dt;
     return { ...next, sheet: 'sling', time, frame: loop(time, SPRITE_FPS.sling), reverse: false };
@@ -221,6 +236,8 @@ export function stepSprite(state, input, dt) {
   }
   if (mode === 'ground') {
     // Touching down, then standing.
+    // Getting up from sitting or looking up from a note, she is already on the ground.
+    if (fresh && (from === 'sit' || from === 'read')) return { ...next, sheet: 'stand', time: 0, frame: 0, reverse: false };
     if (fresh) return { ...next, sheet: 'land-touch', time: 0, frame: 0, reverse: false };
     const time = state.time + dt;
     if (state.sheet === 'land-touch' && time < FRAMES / SPRITE_FPS.land) return { ...next, time, frame: once(time, SPRITE_FPS.land) };

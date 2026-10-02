@@ -105,6 +105,7 @@
   <div id="warp" aria-hidden="true"></div>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="heroSay" role="status" aria-live="polite"></div>
+  <img id="stampFx" alt="" aria-hidden="true">
 
   <dialog id="journal" aria-labelledby="journalTitle">
     <div class="journalHead">
@@ -147,6 +148,7 @@
       </section>
       <section data-tab="tours" hidden>
         <p class="muted">할머니가 수첩 뒤에 적어 둔 "가 보고 싶은 길" 아홉입니다. 한 길을 고르면 다음에 갈 곳이 화면 위에 뜨고, 차례대로 다 돌면 도장이 찍힙니다. 점수에는 들지 않습니다.</p>
+        <p id="journalCrane" hidden><img src="/assets/notebook/stamp-crane.png" alt="종이학 도장">아홉 길을 모두 돌았다. 수첩 사이에 할머니가 접어 둔 종이학이 있었다.</p>
         <ul id="journalTours"></ul>
       </section>
     </div>
@@ -167,6 +169,7 @@
   </dialog>
 
   <dialog id="noteCard" aria-labelledby="noteCardTitle">
+    <img id="noteCardImage" class="scenePicture" alt="" hidden>
     <p id="noteCardScene"></p>
     <div class="notePaper">
       <span id="noteCardTitle"></span>
@@ -178,6 +181,7 @@
   </dialog>
 
   <dialog id="gateScene" aria-labelledby="gateLine">
+    <img class="scenePicture" src="/assets/notebook/gate.png" alt="해 진 저녁, 닫힌 대문 앞에 선 서라의 뒷모습. 한 손을 들어 문을 두드리려 한다">
     <p id="gateText"></p>
     <strong id="gateLine"></strong>
     <div class="journalActions">

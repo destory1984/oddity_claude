@@ -1,8 +1,9 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, starText,
+  ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, starText, postageFile,
 } from '../src/core/postcard.js';
+import { existsSync } from 'node:fs';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 import { lookAtDirection, rotateLocal } from '../src/core/orientation.js';
 
@@ -87,4 +88,17 @@ test("grandmother's reply speaks of the place, then gives her stars", () => {
     assert.ok(!text.startsWith('별이 참 많구나'), id);
   }
   assert.equal(starText(2), '★★☆');
+});
+
+test('a postcard gets a stamp by what it shows, and every stamp is on file', () => {
+  const of = (subject) => postageFile({ rate: { stars: 1, subject } });
+  assert.equal(of('moon'), 'notebook/postage-moon.png');
+  assert.equal(of('saturn'), 'notebook/postage-saturn.png');
+  assert.equal(of('earth'), 'notebook/postage-earth.png');
+  assert.equal(of('halley'), 'notebook/postage-comet.png');
+  assert.equal(of('mars'), 'notebook/postage-seora.png');
+  assert.equal(of(null), 'notebook/postage-telescope.png');
+  assert.equal(postageFile({}), 'notebook/postage-telescope.png');
+  for (const subject of ['moon', 'saturn', 'earth', 'halley', 'mars', null]) assert.ok(existsSync(`public/assets/${of(subject)}`), String(subject));
+  for (const f of ['postmark', 'star-on', 'star-off', 'gate', 'porch', 'clipping']) assert.ok(existsSync(`public/assets/notebook/${f}.png`), f);
 });

@@ -44,7 +44,7 @@ import {
   LANDED, IDLE, AGAIN, IDLE_AFTER_S, IDLE_GAP_S, freshLine, milestoneLine,
 } from './core/lines.js';
 import {
-  TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, advanceTour, allToursDone,
+  TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, advanceTour, allToursDone, stampFile, CRANE_FILE,
 } from './core/tours.js';
 import {
   NOTES, MEMOS, GREETINGS, dueNote, noteById, LAST_SLOT, lastSlotOpen, photoSlots,
@@ -198,6 +198,21 @@ const requestDone = () => daily.days.includes(today);
 
 // Until when (performance.now()) the sprite character cheers a completed journal.
 let cheerUntil = 0;
+// Until when she reads the note she has just put away, and sits beside a probe left alone.
+let readUntil = 0;
+let sitUntil = 0;
+const READ_MS = 2000;
+const SIT_MS = 4000;
+
+// The stamp that comes down in the middle of the view when a tour is gone round.
+function stampDown(file) {
+  const fx = $('stampFx');
+  fx.src = `${import.meta.env.BASE_URL}assets/${file}`;
+  fx.classList.remove('on');
+  // Reading the box restarts the animation when two stamps follow each other.
+  fx.getBoundingClientRect();
+  fx.classList.add('on');
+}
 // The Sun's visibility last frame, for the sprite character shivering in a shadow.
 let sunShown = 1;
 
@@ -525,6 +540,8 @@ async function init() {
     if (!GREETINGS[id] || greeted.has(id)) return false;
     greeted.add(id);
     say.show(GREETINGS[id]);
+    // Beside one that stands on the ground she sits down a while.
+    if (visit && hasArrived(visit) && visit.id === id) sitUntil = performance.now() + SIT_MS;
     return true;
   }
   // The place whose card opened on reaching it: greeted once the card is put away.
@@ -625,6 +642,8 @@ async function init() {
       noteWait = NOTE_GAP_S;
       // The last line was spoken at the gate.
       if (!note.gate) say.show(note.line);
+      // One of grandmother's notes (not a reply): she reads it over once more.
+      if (note.id && !note.gate) readUntil = performance.now() + READ_MS;
     },
   });
 
@@ -967,6 +986,10 @@ async function init() {
         cheerUntil = performance.now() + 6000;
         sound.cue('complete');
         toast.show(`코스 "${leg.tour.name}"을 다 돌았습니다. 수첩의 코스 갈래에 도장이 찍혔습니다.`);
+        // Not under the white of a jump: the stamp waits until the flash has cleared.
+        const after = warp.busy() ? 3600 : 0;
+        setTimeout(() => stampDown(stampFile(leg.tour)), after);
+        if (allToursDone(progress)) setTimeout(() => stampDown(CRANE_FILE), after + 2600);
         if (allToursDone(progress)) toast.show('아홉 길을 모두 돌았습니다. 수첩 사이에서 할머니가 접어 둔 종이학이 나왔습니다.');
       } else {
         aimAtStop();
@@ -1096,6 +1119,9 @@ async function init() {
         warp: warp.phase(),
         photo: photo.active() && photo.heroVisible(),
         cheer: performance.now() < cheerUntil,
+        read: performance.now() < readUntil,
+        // Getting up as soon as she moves off.
+        sit: performance.now() < sitUntil && Boolean(visit) && hasArrived(visit),
         // Close over the Sun's surface it is too bright to look; out to half an AU in
         // full sunlight it is hot; in a planet's shadow, or out past Uranus, it is cold.
         bright: surfaceDistance(state.position, here('sun')) < BRIGHT_KM,

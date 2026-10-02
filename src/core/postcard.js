@@ -119,3 +119,14 @@ export function replyFor(entry, n = 0) {
 }
 
 export const starText = (stars) => '★'.repeat(stars) + '☆'.repeat(3 - stars);
+
+// The stamp on a postcard, by what the photo is of: public/assets/notebook/postage-*.png.
+const COMETS = ['halley', 'haleBopp', 'churyumov'];
+export function postageFile(entry) {
+  const subject = entry.rate?.subject ?? null;
+  let stamp = 'seora';
+  if (!subject) stamp = 'telescope';
+  else if (['moon', 'saturn', 'earth'].includes(subject)) stamp = subject;
+  else if (COMETS.includes(subject)) stamp = 'comet';
+  return `notebook/postage-${stamp}.png`;
+}

@@ -103,6 +103,7 @@
 
   <div id="warp" aria-hidden="true"></div>
   <div id="toast" role="status" aria-live="polite"></div>
+  <div id="heroSay" role="status" aria-live="polite"></div>
 
   <dialog id="journal" aria-labelledby="journalTitle">
     <div class="journalHead">
@@ -110,6 +111,7 @@
       <button id="closeJournal" aria-label="수첩 닫고 비행 계속하기" title="닫기 (Esc, J)" autofocus>✕</button>
     </div>
     <p id="journalSummary"></p>
+    <div id="journalNotes" hidden></div>
     <div id="journalTabs" role="tablist" aria-label="수첩의 갈래">
       <button role="tab" data-tab="bodies">천체</button>
       <button role="tab" data-tab="missions">사진 임무</button>
@@ -154,6 +156,17 @@
     <p id="storyCardText"></p>
     <div class="journalActions">
       <button id="closeStoryCard" autofocus>비행 계속하기</button>
+    </div>
+  </dialog>
+
+  <dialog id="noteCard" aria-labelledby="noteCardTitle">
+    <p id="noteCardScene"></p>
+    <div class="notePaper">
+      <span id="noteCardTitle"></span>
+      <p id="noteCardText"></p>
+    </div>
+    <div class="journalActions">
+      <button id="closeNoteCard" autofocus>쪽지를 접는다</button>
     </div>
   </dialog>
 

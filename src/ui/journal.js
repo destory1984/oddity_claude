@@ -14,7 +14,7 @@ function hasFinalRieulOrNone(word) {
 const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -63,6 +63,22 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     const s = summarize(progress, bodies, missions, stories);
     $('journalSummary').textContent =
       `발견 ${s.discovered}/${s.bodies} · 착지 ${s.landed}/${s.bodies} · 사진 ${s.photos}/${s.missions} · 이야기 ${s.stories}/${s.storyTotal}`;
+
+    // Grandmother's notes read so far: press one to read it again.
+    const read = notes.filter((n) => (progress.notes ?? []).includes(n.id));
+    const noteRow = $('journalNotes');
+    noteRow.hidden = !read.length || !onNote;
+    noteRow.replaceChildren('할머니의 쪽지');
+    for (const note of read) {
+      const again = document.createElement('button');
+      again.textContent = note.title;
+      again.setAttribute('aria-label', `쪽지 ${note.title} 다시 읽기`);
+      again.addEventListener('click', () => {
+        dialog.close();
+        onNote(note.id);
+      });
+      noteRow.append(again);
+    }
 
     const list = $('journalBodies');
     list.replaceChildren();

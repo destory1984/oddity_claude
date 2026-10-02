@@ -2,7 +2,8 @@ import { surfaceDistance, BODY_DATA } from './bodies.js';
 
 // The explorer's log: which bodies were discovered and landed on, which photo
 // missions were completed, which story places were visited, which craft were met (not
-// scored; it only allows jumping back to them, core/teleport.js). Plain arrays of ids
+// scored; it only allows jumping back to them, core/teleport.js), which of grandmother's
+// notes were read (not scored either, core/story.js). Plain arrays of ids
 // so it stores as JSON.
 
 // A body counts as discovered once the traveler comes this close to its surface.
@@ -26,7 +27,14 @@ export function journalOrder(bodies) {
 }
 
 export function createProgress() {
-  return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [] };
+  return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], notes: [] };
+}
+
+// A note from grandmother that has been read (core/story.js). Not scored.
+export function recordNote(progress, id) {
+  const have = progress.notes ?? [];
+  if (have.includes(id)) return progress;
+  return { ...progress, notes: [...have, id] };
 }
 
 // Discovery happens within DISCOVERY_KM of a body's surface.
@@ -81,7 +89,7 @@ export function summarize(progress, bodies, missions, stories = []) {
 }
 
 // Stored data may be old, edited or broken: keep only known, unique ids.
-export function sanitizeProgress(raw, bodies, missions, stories = [], craft = []) {
+export function sanitizeProgress(raw, bodies, missions, stories = [], craft = [], notes = []) {
   const fresh = createProgress();
   if (!raw || typeof raw !== 'object') return fresh;
   const bodyIds = new Set(bodies.map((b) => b.id));
@@ -95,6 +103,7 @@ export function sanitizeProgress(raw, bodies, missions, stories = [], craft = []
     photos: clean(raw.photos, missionIds),
     stories: clean(raw.stories, storyIds),
     craft: clean(raw.craft, craftIds),
+    notes: clean(raw.notes, new Set(notes.map((n) => n.id))),
   };
 }
 

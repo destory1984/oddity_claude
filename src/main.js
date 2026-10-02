@@ -24,7 +24,7 @@ import { FACTS } from './core/facts.js';
 import { eventMessage, limitText, dateText, withParticle } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import {
-  updateProgress, recordPhotos, recordStories, recordCraft, createProgress, summarize, score, isComplete,
+  updateProgress, recordPhotos, recordStories, recordCraft, recordNote, createProgress, summarize, score, isComplete,
 } from './core/progress.js';
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
@@ -36,6 +36,9 @@ import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js'
 import { createGuideView } from './ui/guide.js';
 import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
+import { createNoteCard } from './ui/noteCard.js';
+import { createSay } from './ui/say.js';
+import { NOTES, dueNote, noteById } from './core/story.js';
 import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
@@ -58,6 +61,10 @@ const BRIGHT_KM = 200000;
 const HOT_AU = 0.5;
 // Looking round a target ("확대 관찰"): the view never comes closer to a surface than this.
 const INSPECT_CLEAR_KM = 3;
+// A note from grandmother comes out this many seconds of play after it falls due (the
+// landing is seen first), and the next one no sooner than NOTE_GAP_S after it is put away.
+const NOTE_AFTER_S = 2;
+const NOTE_GAP_S = 20;
 
 // How far off and how wide the view is when looking round a target: a body fills about
 // two thirds of the view's height (Saturn stands back for its rings); a craft is drawn
@@ -109,7 +116,7 @@ let state = START_NEAR ? startNear(START_NEAR) : startAboveEarth();
 let paused = false;
 let selectedId = START_NEAR ? START_NEAR.id : 'earth';
 let dragTurn = [0, 0];
-let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT);
+let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT, NOTES);
 // Small copies of saved photos, shown in the journal (core/album.js).
 let album = loadAlbum(MISSIONS);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
@@ -145,6 +152,7 @@ const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? s
 const named = (id) => bodyById(id) ?? craftById(id) ?? sites.find((s) => s.id === id);
 
 const toast = createToast($('toast'));
+const say = createSay($('heroSay'));
 const warp = createWarp($('warp'));
 const sound = createSound();
 const canvas = $('space');
@@ -215,11 +223,11 @@ async function init() {
     // A flight key pressed while paused flies on at once (not in photo mode, which is
     // paused on purpose, nor behind a story card).
     onMove() {
-      if (paused && !photo.active() && !$('storyCard').open) setPaused(false);
+      if (paused && !photo.active() && !$('storyCard').open && !$('noteCard').open) setPaused(false);
     },
     onEscape: () => (photo.active() ? photo.toggle() : setPaused(!paused)),
     onWheel: (deltaY) => photo.zoom(deltaY),
-    isBlocked: () => $('help').open || $('journal').open,
+    isBlocked: () => $('help').open || $('journal').open || $('noteCard').open,
   });
   photo = createPhoto({
     world,
@@ -469,9 +477,39 @@ async function init() {
   let cardDue = null;
   const CARD_AFTER_S = 1.2;
 
+  // Grandmother's notes (core/story.js): the game waits while one is open, and Seora
+  // answers the first reading with a line of her own.
+  let notePriorPause = false;
+  let noteWait = 0;
+  let noteDueId = null;
+  const noteCard = createNoteCard({
+    onOpen() {
+      notePriorPause = paused;
+      setPaused(true);
+      input.clear();
+    },
+    onClose(note, first) {
+      setPaused(notePriorPause);
+      previous = null;
+      if (!first) return;
+      noteWait = NOTE_GAP_S;
+      say.show(note.line);
+    },
+  });
+
   let journalPriorPause = false;
   const journal = createJournal({
-    onDetail: showStory,
+    // A card or a note opened from the journal: the journal's own closing comes after
+    // (a dialog's close event is late), so what to go back to is what the journal found.
+    onDetail(id) {
+      showStory(id);
+      cardPriorPause = journalPriorPause;
+    },
+    notes: NOTES,
+    onNote(id) {
+      noteCard.show(noteById(id), false);
+      notePriorPause = journalPriorPause;
+    },
     bodies: BODIES,
     missions: MISSIONS,
     stories: STORIES,
@@ -491,6 +529,8 @@ async function init() {
       setPaused(true);
     },
     onClose() {
+      // Closed to show a card or a note: that one ends the wait.
+      if (storyCard.isOpen() || noteCard.isOpen()) return;
       setPaused(journalPriorPause);
       // Time spent in the dialog (or a confirm box) is not a frame gap.
       previous = null;
@@ -719,6 +759,21 @@ async function init() {
     }
     if (finished) celebrate();
 
+    // A note that has fallen due comes out once she is at rest from whatever she was
+    // doing: not during a glide or a jump, nor on top of a story card.
+    const note = dueNote(progress, score(summarize(progress, BODIES, MISSIONS, STORIES)).done);
+    if (note?.id !== noteDueId) {
+      noteDueId = note?.id ?? null;
+      if (note) noteWait = Math.max(noteWait, NOTE_AFTER_S);
+    }
+    noteWait = Math.max(0, noteWait - dt);
+    if (note && dt > 0 && noteWait === 0 && !cardDue && !storyCard.isOpen() && !warp.busy()
+      && !(docked && !isDocked(docked)) && !(visit && !hasArrived(visit))) {
+      progress = recordNote(progress, note.id);
+      saveProgress(progress);
+      noteCard.show(note);
+    }
+
     if (guide.step !== null) {
       guide = updateGuide(guide, {
         heading: forward(state.orientation),
@@ -802,6 +857,7 @@ async function init() {
     });
     sunShown = view.sunVisibility;
     hud.maskHero(view.heroCard);
+    say.place(view.heroCard);
     if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`);
     if (view.meteorLit && !meteorSeen) {
       meteorSeen = true;

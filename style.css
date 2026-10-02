@@ -1434,3 +1434,112 @@ body.touch #reverseButton,body.touch #flyButton,body.touch #brake {
 body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   display:none;
 }
+
+/* A note from grandmother: a sheet of ruled paper in her hand (ui/noteCard.js). */
+#noteCard {
+  width:min(460px,92vw);
+  max-height:90vh;
+  overflow-y:auto;
+}
+
+#noteCardScene {
+  margin:0 0 16px;
+  font-size:13px;
+  line-height:1.7;
+  color:#b6cbe0;
+  word-break:keep-all;
+}
+
+#noteCardScene[hidden] {
+  display:none;
+}
+
+.notePaper {
+  padding:22px 22px 26px;
+  border-radius:3px;
+  color:#3b2a1a;
+  background:
+    repeating-linear-gradient(#0000 0 31px, #b79a6a55 31px 32px) 0 54px / 100% 100% no-repeat,
+    #f2e6c8;
+  box-shadow:0 10px 30px #0007, inset 0 0 40px #b9955a33;
+  transform:rotate(-.6deg);
+  font-family:"Gowun Batang","Nanum Myeongjo","AppleMyungjo","Batang",serif;
+}
+
+#noteCardTitle {
+  display:block;
+  height:32px;
+  font-size:13px;
+  letter-spacing:.06em;
+  color:#7a5a36;
+}
+
+#noteCard #noteCardText {
+  margin:0;
+  font-size:16px;
+  line-height:32px;
+  color:#3b2a1a;
+  white-space:pre-line;
+  word-break:keep-all;
+}
+
+/* Grandmother's notes read so far, in the journal under the score. */
+#journalNotes {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px;
+  margin:8px 22px 0;
+  font-size:12px;
+  color:#b6cbe0;
+}
+
+#journalNotes[hidden] {
+  display:none;
+}
+
+#journal #journalNotes button {
+  width:auto;
+  min-height:30px;
+  margin:0;
+  padding:3px 10px;
+  border-radius:3px;
+  border-color:#b79a6a;
+  background:#f2e6c8;
+  color:#3b2a1a;
+  font-size:12px;
+}
+
+/* Seora's speech bubble, above her head (ui/say.js). */
+#heroSay {
+  position:fixed;
+  left:50%;
+  top:40%;
+  transform:translate(-50%,calc(-100% - 12px));
+  max-width:80vw;
+  padding:9px 15px;
+  border-radius:16px;
+  background:#fffdf4;
+  color:#1b2433;
+  font-size:14px;
+  white-space:nowrap;
+  opacity:0;
+  transition:opacity .25s;
+  pointer-events:none;
+}
+
+#heroSay::after {
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-7px;
+  width:14px;
+  height:14px;
+  background:inherit;
+  transform:translateX(-50%) rotate(45deg);
+  border-radius:2px;
+}
+
+#heroSay.on {
+  opacity:1;
+}

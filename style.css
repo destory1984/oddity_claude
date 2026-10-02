@@ -1429,3 +1429,8 @@ body.touch #reverseButton,body.touch #flyButton,body.touch #brake {
     display: none;
   }
 }
+
+/* A touch screen has no keys to name on the buttons. */
+body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
+  display:none;
+}

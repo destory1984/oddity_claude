@@ -3,6 +3,7 @@ import { surfaceDistance } from '../core/bodies.js';
 import { objectParticle } from './messages.js';
 import { FACTS } from '../core/facts.js';
 import { photoCaption, ALBUM_MAX } from '../core/album.js';
+import { starText } from '../core/postcard.js';
 
 const $ = (id) => document.getElementById(id);
 // 로 after a vowel or ㄹ, 으로 after any other final consonant.
@@ -16,7 +17,7 @@ const fmt = (n) => n.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
 const CLIPPING = '1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.';
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -199,7 +200,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     const grid = $('journalAlbum');
     grid.replaceChildren();
     $('albumNote').textContent = album.length
-      ? `사진 모드에서 저장한 사진 ${album.length}장입니다(최근 ${ALBUM_MAX}장까지). 사진을 누르면 크게 보입니다.`
+      ? `사진 모드에서 저장한 사진 ${album.length}장입니다(최근 ${ALBUM_MAX}장까지). 사진을 누르면 크게 보입니다. 할머니께 엽서로 보내면 다음 날 답장과 별이 옵니다.`
       : '사진 모드에서 "사진 저장"을 누르면 여기에 모입니다.';
     album.forEach((entry, index) => {
       const caption = photoCaption(entry, missions);
@@ -217,6 +218,27 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
         line.textContent = `✓ ${m.name}: ${m.hint}`;
         text.append(line);
       }
+      let send = null;
+      // A postcard to grandmother: sent once; her reply (and her stars) come the next day.
+      if (entry.reply) {
+        const reply = document.createElement('p');
+        reply.className = 'reply';
+        reply.textContent = `${entry.rate ? `${starText(entry.rate.stars)} ` : ''}${entry.reply}`;
+        text.append(reply);
+      } else if (entry.sent) {
+        const sent = document.createElement('span');
+        sent.className = 'sent';
+        sent.textContent = '엽서로 보냈다. 답장은 다음 날 게임을 열면 와 있다.';
+        text.append(sent);
+      } else if (onSendPhoto) {
+        send = document.createElement('button');
+        send.textContent = '할머니께 엽서로';
+        send.setAttribute('aria-label', `${caption.title} 사진을 할머니께 엽서로 보내기`);
+        send.addEventListener('click', () => {
+          album = onSendPhoto(index);
+          renderAlbum();
+        });
+      }
       const remove = document.createElement('button');
       remove.textContent = '지우기';
       remove.setAttribute('aria-label', `${caption.title} 사진 지우기`);
@@ -224,7 +246,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
         album = onDeletePhoto(index);
         renderAlbum();
       });
-      figure.append(img, text, remove);
+      figure.append(img, text, ...(send ? [send] : []), remove);
       grid.append(figure);
     });
   }

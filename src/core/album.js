@@ -6,8 +6,19 @@ export const ALBUM_MAX = 24;
 export const THUMB_WIDTH = 480;
 
 // entry: { at: ISO time, where: '달 상공 1,200km', missions: [mission ids], image: data URL }
+// and, for postcards (core/postcard.js): rate { stars, subject }, sent 'YYYY-MM-DD',
+// reply (grandmother's words, once they have come).
+// When the album is full the oldest photo goes, but a postcard still waiting for its
+// reply is kept as long as anything else can go instead.
 export function addPhoto(album, entry, max = ALBUM_MAX) {
-  return [entry, ...album].slice(0, max);
+  const all = [entry, ...album];
+  while (all.length > max) {
+    const waiting = (e) => e.sent && !e.reply;
+    let drop = all.length - 1;
+    while (drop > 0 && waiting(all[drop])) drop -= 1;
+    all.splice(drop > 0 ? drop : all.length - 1, 1);
+  }
+  return all;
 }
 
 export function removePhoto(album, index) {
@@ -23,12 +34,21 @@ export function sanitizeAlbum(raw, missions = []) {
       && typeof e.image === 'string' && e.image.startsWith('data:image/jpeg;base64,')
       && typeof e.at === 'string' && !Number.isNaN(Date.parse(e.at))
       && typeof e.where === 'string')
-    .map((e) => ({
-      at: e.at,
-      where: e.where.slice(0, 60),
-      missions: Array.isArray(e.missions) ? [...new Set(e.missions.filter((id) => known.has(id)))] : [],
-      image: e.image,
-    }))
+    .map((e) => {
+      const entry = {
+        at: e.at,
+        where: e.where.slice(0, 60),
+        missions: Array.isArray(e.missions) ? [...new Set(e.missions.filter((id) => known.has(id)))] : [],
+        image: e.image,
+      };
+      const stars = e.rate?.stars;
+      if ([0, 1, 2, 3].includes(stars)) entry.rate = { stars, subject: typeof e.rate.subject === 'string' ? e.rate.subject.slice(0, 20) : null };
+      if (typeof e.sent === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.sent)) {
+        entry.sent = e.sent;
+        if (typeof e.reply === 'string' && e.reply) entry.reply = e.reply.slice(0, 200);
+      }
+      return entry;
+    })
     .slice(0, ALBUM_MAX);
 }
 

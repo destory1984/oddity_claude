@@ -58,3 +58,28 @@ test('the small copy is 480 wide and keeps the shape of the view', () => {
   assert.deepEqual(thumbSize(390, 844), { width: 390, height: 844 });
   assert.deepEqual(thumbSize(960, 1), { width: 480, height: 1 });
 });
+
+test('a postcard waiting for its reply is not pushed out of a full album', () => {
+  const photo = (n, more = {}) => ({ at: `2026-10-0${n}T00:00:00.000Z`, where: `p${n}`, missions: [], image: 'data:image/jpeg;base64,AA', ...more });
+  const full = [photo(3), photo(2, { sent: '2026-10-02' }), photo(1, { sent: '2026-10-01' })];
+  // The oldest that is not waiting goes instead.
+  assert.deepEqual(addPhoto(full, photo(4), 3).map((e) => e.where), ['p4', 'p2', 'p1']);
+  // Answered postcards go like any other photo.
+  const answered = [photo(3), photo(2), photo(1, { sent: '2026-10-01', reply: '고맙다.' })];
+  assert.deepEqual(addPhoto(answered, photo(4), 3).map((e) => e.where), ['p4', 'p3', 'p2']);
+  // Nothing else can go: the oldest goes after all.
+  const waiting = [photo(2, { sent: '2026-10-02' }), photo(1, { sent: '2026-10-01' })];
+  assert.deepEqual(addPhoto(waiting, photo(3), 2).map((e) => e.where), ['p3', 'p2']);
+});
+
+test('stored postcards keep their stars, the day sent and the reply; junk is dropped', () => {
+  const base = { at: '2026-10-02T00:00:00.000Z', where: '달', missions: [], image: 'data:image/jpeg;base64,AA' };
+  const [a, b, c] = sanitizeAlbum([
+    { ...base, rate: { stars: 3, subject: 'moon' }, sent: '2026-10-02', reply: '별 셋.' },
+    { ...base, rate: { stars: 9 }, sent: 'yesterday', reply: '가짜' },
+    { ...base },
+  ]);
+  assert.deepEqual(a, { ...base, rate: { stars: 3, subject: 'moon' }, sent: '2026-10-02', reply: '별 셋.' });
+  assert.deepEqual(b, base);
+  assert.deepEqual(c, base);
+});

@@ -18,6 +18,7 @@ import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
 import { createWarp } from './ui/warp.js';
 import { addPhoto, removePhoto } from './core/album.js';
+import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor } from './core/postcard.js';
 import { teleportSpot } from './core/teleport.js';
 import { behindBody } from './core/markers.js';
 import { FACTS } from './core/facts.js';
@@ -276,11 +277,21 @@ async function init() {
       const done = slots.missions;
       if (shot.thumb) {
         const local = nearestLocalBody(state.position, bodies);
+        // How it is framed: kept with the photo, for grandmother's stars if it is sent.
+        const { stars, subject } = ratePhoto({
+          position: state.position,
+          orientation: multiply(state.orientation, shot.orientation),
+          fovY: shot.fov,
+          aspect: shot.aspect,
+          heroVisible: shot.heroVisible,
+          bodies,
+        });
         album = saveAlbum(addPhoto(album, {
           at: new Date().toISOString(),
           where: `${local.label} ${Math.round(local.altitude).toLocaleString('ko-KR')}km`,
           missions: done,
           image: shot.thumb,
+          rate: { stars, subject },
         }));
         journal.setAlbum(album);
       }
@@ -522,8 +533,34 @@ async function init() {
     },
   });
 
+  // Postcards answered since the last visit (core/postcard.js): grandmother's replies
+  // are written into the album now and read out on one sheet, after any note.
+  let repliesDue = arrivedReplies(album, dayOf(openedAt));
+  function openReplies() {
+    const texts = repliesDue.map((index, n) => replyFor(album[index], n + album.filter((e) => e.reply).length));
+    album = saveAlbum(album.map((entry, i) => (repliesDue.includes(i) ? { ...entry, reply: texts[repliesDue.indexOf(i)] } : entry)));
+    journal.setAlbum(album);
+    const best = Math.max(...repliesDue.map((i) => album[i]?.rate?.stars ?? 0));
+    const count = repliesDue.length;
+    repliesDue = [];
+    noteCard.show({
+      scene: count > 1 ? `우편함에 할머니의 답장이 ${count}통 와 있다.` : '우편함에 할머니의 답장이 와 있다.',
+      title: '서라에게',
+      text: texts.join('\n\n'),
+      button: '답장을 넣어 둔다',
+      line: best === 3 ? '할머니가 별 세 개 주셨어!' : '답장 왔다! 또 보내야지.',
+    });
+  }
+  // What Seora says when the journal closes after a postcard was sent from it.
+  let sayAfterJournal = null;
+
   let journalPriorPause = false;
   const journal = createJournal({
+    onSendPhoto(index) {
+      album = saveAlbum(sendPostcard(album, index, dayOf(new Date())));
+      sayAfterJournal = '할머니, 이거 보면 깜짝 놀랄걸.';
+      return album;
+    },
     // A card or a note opened from the journal: the journal's own closing comes after
     // (a dialog's close event is late), so what to go back to is what the journal found.
     onDetail(id) {
@@ -560,6 +597,8 @@ async function init() {
       // Closed to show a card or a note: that one ends the wait.
       if (storyCard.isOpen() || noteCard.isOpen()) return;
       setPaused(journalPriorPause);
+      if (sayAfterJournal) say.show(sayAfterJournal);
+      sayAfterJournal = null;
       // Time spent in the dialog (or a confirm box) is not a frame gap.
       previous = null;
     },
@@ -800,11 +839,14 @@ async function init() {
       if (note) noteWait = Math.max(noteWait, NOTE_AFTER_S);
     }
     noteWait = Math.max(0, noteWait - dt);
-    if (note && dt > 0 && noteWait === 0 && !cardDue && !storyCard.isOpen() && !warp.busy()
-      && !(docked && !isDocked(docked)) && !(visit && !hasArrived(visit))) {
+    const calm = dt > 0 && noteWait === 0 && !cardDue && !storyCard.isOpen() && !warp.busy()
+      && !(docked && !isDocked(docked)) && !(visit && !hasArrived(visit));
+    if (note && calm) {
       progress = recordNote(progress, note.id);
       saveProgress(progress);
       noteCard.show(note);
+    } else if (!note && calm && repliesDue.length) {
+      openReplies();
     }
 
     if (guide.step !== null) {

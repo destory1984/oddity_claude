@@ -60,6 +60,7 @@ import {
 import { inspectLight } from './core/lamp.js';
 import { READINGS, bodyFacts } from './core/readings.js';
 import { STORY_DETAILS } from './core/storyDetails.js';
+import { STORY_MORE } from './core/storyMore.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts } from './core/visit.js';
 import { spinOf } from './core/surface.js';
@@ -510,7 +511,10 @@ async function init() {
       const story = STORIES.find((s) => s.id === target.id);
       const kicker = `${story.year ? `${story.year}년 · ` : ''}${here(target.parent).name}`;
       if (!progress.stories.includes(target.id)) return { ...head, kicker, text: `아직 수첩에 없는 곳입니다. ${story.hint}.` };
-      return { ...head, kicker, text: STORY_DETAILS[target.id]?.detail ?? story.text };
+      const told = STORY_DETAILS[target.id]?.detail ?? story.text;
+      return { ...head, kicker, text: STORY_MORE[target.id] ? `${told}
+
+${STORY_MORE[target.id]}` : told };
     }
     const parent = target.parent ? bodyById(target.parent) : null;
     const kicker = `${KIND[target.kind] ?? '천체'}${parent && target.kind === 'moon' ? ` · ${parent.name}의 위성` : ''}`;

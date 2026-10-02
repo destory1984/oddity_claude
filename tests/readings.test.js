@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import { READINGS, bodyFacts } from '../src/core/readings.js';
 import { BODY_DATA } from '../src/core/bodies.js';
 import { CRAFT } from '../src/core/craft.js';
+import { STORIES } from '../src/core/stories.js';
+import { STORY_DETAILS } from '../src/core/storyDetails.js';
+import { STORY_MORE } from '../src/core/storyMore.js';
 
 test('every body and every craft has something to read: two paragraphs, plain sentences', () => {
   const ids = [...BODY_DATA.map((b) => b.id), ...CRAFT.map((c) => c.id)];
@@ -40,5 +43,19 @@ test("a body's numbers come from the table the game flies by", () => {
   assert.equal(bodyFacts(by('halley'), '태양')[2][1], '75.3년');
   for (const body of BODY_DATA) {
     for (const [label, value] of bodyFacts(body, '태양')) assert.ok(label && value && !value.includes('NaN'), body.id);
+  }
+});
+
+test('every story place has a second paragraph to read, which does not repeat its card', () => {
+  assert.equal(STORIES.length, 94);
+  assert.deepEqual(Object.keys(STORY_MORE).sort(), STORIES.map((s) => s.id).sort());
+  for (const story of STORIES) {
+    const more = STORY_MORE[story.id];
+    assert.ok(more.length >= 70, `${story.id} ${more.length}`);
+    assert.ok(more.endsWith('다.'), `${story.id}: ${more.slice(-12)}`);
+    assert.ok(!more.includes('~') && !more.includes('  ') && !more.includes(String.fromCharCode(10)), story.id);
+    // Not a sentence of the card over again.
+    const card = STORY_DETAILS[story.id]?.detail ?? story.text;
+    for (const sentence of more.split('. ')) assert.ok(sentence.length < 12 || !card.includes(sentence), `${story.id}: ${sentence}`);
   }
 });

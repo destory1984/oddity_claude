@@ -53,3 +53,21 @@ test('the screen font is shipped with the game, with its licence, and is the fir
   assert.match(fs.readFileSync('index.html', 'utf8'), /href="\/fonts\/pretendard\/pretendardvariable-dynamic-subset\.css"/);
   assert.match(fs.readFileSync('style.css', 'utf8'), /font-family:"Pretendard Variable",Pretendard,/);
 });
+
+test("grandmother's hand is shipped with the game too: Nanum Pen Script, woff2 only, with its licence", () => {
+  const css = fs.readFileSync('public/fonts/nanum-pen-script/400.css', 'utf8');
+  const files = [...new Set([...css.matchAll(/url\(\.\/(files\/[^)]+)\)/g)].map((m) => m[1]))];
+  assert.equal(files.length, 93);
+  for (const file of files) {
+    assert.ok(file.endsWith('.woff2'), file);
+    assert.ok(fs.existsSync(`public/fonts/nanum-pen-script/${file}`), file);
+  }
+  assert.match(css, /font-family: 'Nanum Pen Script'/);
+  assert.match(css, /font-display: swap/);
+  assert.match(fs.readFileSync('public/fonts/nanum-pen-script/LICENSE.txt', 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/);
+  assert.match(fs.readFileSync('index.html', 'utf8'), /href="\/fonts\/nanum-pen-script\/400\.css"/);
+  const style = fs.readFileSync('style.css', 'utf8');
+  assert.match(style, /--hand:"Nanum Pen Script",/);
+  // Every place she writes uses the one variable.
+  assert.ok(!/font-family:\s*"Gowun Batang"/.test(style));
+});

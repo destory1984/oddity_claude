@@ -61,6 +61,7 @@ export function createSound() {
   // Bars played so far; the tunes go round in an order drawn afresh each sitting.
   let barNumber = 0;
   const order = tuneOrder();
+  let playing = null;
 
   // Browsers only allow audio after a user gesture, so this runs on the first key or tap.
   function ensure() {
@@ -301,11 +302,15 @@ export function createSound() {
       // After a pause or a hidden tab, pick up from now rather than catching up.
       if (nextBarAt < now) nextBarAt = now + 0.1;
       if (nextBarAt - now > 0.5) return;
-      playBar(barPlan(barInOrder(barNumber, order), mood), nextBarAt - now);
+      const bar = barInOrder(barNumber, order);
+      playBar(barPlan(bar, mood), nextBarAt - now);
+      playing = tuneFor(bar).name;
       barNumber += 1;
       nextBarAt += BAR_S;
     },
     musicOn: () => musicOn,
+    // The name of the tune being played (null before the first bar).
+    tuneName: () => playing,
     // Jump to the next tune at the coming bar; returns its name.
     nextTune() {
       barNumber = nextTuneBar(barNumber);

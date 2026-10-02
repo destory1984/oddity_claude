@@ -1,5 +1,5 @@
 // Going down to a place on a surface: choose its name from nearby and glide down to
-// stand beside it. The ground turns (Mars once every eight minutes of play, 44 km a
+// stand beside it. The ground turns (Mars once every 15 minutes of play, 24 km a
 // second at its equator), so the traveler is held to the spot and turns with it, as
 // when docked with a craft. Any thrust lets go.
 import { stopNow } from './game.js';

@@ -123,7 +123,9 @@ export function createSiteModels(scene, siteList) {
     if (SITE_CARDS[site.id]) cards.set(site.id, createSiteCard(scene, site.id, SITE_CARDS[site.id]));
   }
   for (const site of siteList) {
-    if (site.landmark) continue;
+    // A landmark (a crater, a sea, a mountain) has nothing standing on it, unless a
+    // model was made for it: MESSENGER's wreck where it hit Mercury.
+    if (site.landmark && !SITE_BUILD[site.id]) continue;
     // Elsewhere only what has a model of its own: Earth's two launch pads.
     if (!['moon', 'mars', 'titan'].includes(site.parent) && !SITE_BUILD[site.id]) continue;
     const [build, options] = SITE_BUILD[site.id] ?? DEFAULT_SITE;

@@ -84,7 +84,8 @@ const NOTE_GAP_S = 20;
 function inspectView(target) {
   if (target.kind === 'craft') return { distanceKm: 110, fovDeg: 30 };
   if (target.id === 'dokdo') return { distanceKm: 30, fovDeg: 40 };
-  if (target.kind === 'site') return target.landmark ? { distanceKm: 500, fovDeg: 50 } : { distanceKm: 28, fovDeg: 28 };
+  // (A landmark with something standing on it, MESSENGER's wreck, is looked at from close.)
+  if (target.kind === 'site') return target.landmark && !world?.hasSiteModel(target.id) ? { distanceKm: 500, fovDeg: 50 } : { distanceKm: 28, fovDeg: 28 };
   return { distanceKm: target.radiusKm * (target.id === 'saturn' ? 7 : 4), fovDeg: 44 };
 }
 
@@ -225,6 +226,8 @@ function stampDown(file) {
 }
 // The Sun's visibility last frame, for the sprite character shivering in a shadow.
 let sunShown = 1;
+// The tune last named in a notice (ui/sound.js tuneName()).
+let tuneTold = null;
 
 function celebrate() {
   cheerUntil = performance.now() + 6000;
@@ -1167,6 +1170,11 @@ async function init() {
       docked: Boolean(docked),
     }), elapsed || 1 / 60);
     sound.music(moodFor({ restingOn: state.restingOn, surfaceKm: nearestSurface(state.position, bodies).distance }));
+    // Say which tune it is as each begins: they go round in a chance order.
+    if (sound.tuneName() !== tuneTold) {
+      tuneTold = sound.tuneName();
+      if (tuneTold) toast.show(`♪ ${tuneTold}`, 'tune', SIGHT_S);
+    }
 
     // Craft that circle a planet or a moon are drawn and named only from near it.
     const awayCraft = hiddenCraft(state.position, bodies, selectedId, craft);

@@ -339,6 +339,27 @@ function impactor(scene, name, mats) {
   return fuse(scene, root);
 }
 
+// MESSENGER ran out of fuel and hit Mercury at 3.9 km/s. What lies here is what the
+// place is for: the gold-foiled body on its side in a small dark crater, the white
+// sunshade that kept it cool torn half off, the two solar panels thrown clear and the
+// long boom of its magnetometer bent over the rim.
+function messenger(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  drum(scene, `${name}Crater`, root, mats.dark, { height: 0.02, diameterTop: 1.0, diameterBottom: 1.1, tessellation: 20 }, [0, 0.01, 0]);
+  drum(scene, `${name}Rim`, root, mats.grey, { height: 0.03, diameterTop: 1.02, diameterBottom: 1.16, tessellation: 20 }, [0, 0.005, 0]);
+  box(scene, `${name}Body`, root, mats.goldFoil, [0.3, 0.26, 0.3], [0.02, 0.13, 0], [0.35, 0.5, 0.25]);
+  box(scene, `${name}Deck`, root, mats.plate, [0.2, 0.04, 0.2], [0.1, 0.27, -0.04], [0.35, 0.5, 0.25]);
+  nozzle(scene, `${name}Engine`, root, mats.dark, [0.16, 0.2, -0.14], [0.6, 0.5, -0.6], 0.12, 0.1);
+  box(scene, `${name}Shade`, root, mats.white, [0.5, 0.42, 0.015], [-0.16, 0.2, 0.2], [1.0, 0.3, 0.1]);
+  box(scene, `${name}ShadeTorn`, root, mats.white, [0.22, 0.2, 0.012], [-0.42, 0.04, 0.36], [1.45, -0.4, 0.2]);
+  box(scene, `${name}Panel0`, root, mats.cells, [0.42, 0.012, 0.2], [0.46, 0.04, -0.12], [0.08, 0.5, 0.12]);
+  box(scene, `${name}Panel1`, root, mats.cells, [0.42, 0.012, 0.2], [-0.3, 0.08, -0.38], [0.3, -0.7, -0.2]);
+  rod(scene, `${name}Boom0`, root, mats.grey, [0.05, 0.2, -0.1], [0.2, 0.42, -0.4], 0.014, 5);
+  rod(scene, `${name}Boom1`, root, mats.grey, [0.2, 0.42, -0.4], [0.28, 0.06, -0.62], 0.014, 5);
+  for (const [x, z, a] of round(7, 0.42, 0.9)) box(scene, `${name}Scrap${a}`, root, a % 2 > 1 ? mats.goldFoil : mats.silver, [0.05, 0.02, 0.035], [x * (1 + Math.sin(a * 5) * 0.25), 0.02, z * (1 + Math.cos(a * 3) * 0.25)], [0.3, a, 0.2]);
+  return fuse(scene, root);
+}
+
 // SLIM: a small box that touched down on target and then tipped onto its nose, its
 // engine bells pointing at the sky and its solar cells facing sideways.
 function slim(scene, name, mats) {
@@ -482,4 +503,5 @@ export const SITE_BUILD = {
   phoenix: [fanLander, {}], insight: [fanLander, { insight: true }],
   huygens: [huygens, {}],
   lc39a: [launchPad, { rocket: 'saturn' }], naro: [launchPad, { rocket: 'nuri' }],
+  messenger: [messenger, {}], venera7: [capsule, {}], venera13: [capsule, {}],
 };

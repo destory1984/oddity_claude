@@ -58,6 +58,9 @@ import {
   releaseDrift, dockingFacing,
 } from './core/dock.js';
 import { inspectLight } from './core/lamp.js';
+import { READINGS, bodyFacts } from './core/readings.js';
+import { STORY_DETAILS } from './core/storyDetails.js';
+import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts } from './core/visit.js';
 import { spinOf } from './core/surface.js';
 
@@ -492,6 +495,35 @@ async function init() {
       return { position, orientation: lookAtDirection(centre.map((n, i) => n - position[i])) };
     }
     return { position, orientation: orbit.orientation };
+  }
+
+  // What there is to read about the target being looked at closely: a body found, a
+  // craft met, a place been to. Before that, only how to open it.
+  const KIND = { star: '별', planet: '행성', moon: '위성', dwarf: '왜행성', comet: '혜성' };
+  function readingFor(target) {
+    const head = { name: target.name, nameEn: target.nameEn };
+    if (target.kind === 'craft') {
+      if (!(progress.craft ?? []).includes(target.id)) return { ...head, kicker: '탐사선', text: '아직 수첩에 없는 탐사선입니다. 3,000km 안까지 다가가면 읽을거리가 열립니다.' };
+      return { ...head, kicker: `${target.launched}년 발사`, text: READINGS[target.id] ?? target.intro };
+    }
+    if (target.kind === 'site') {
+      const story = STORIES.find((s) => s.id === target.id);
+      const kicker = `${story.year ? `${story.year}년 · ` : ''}${here(target.parent).name}`;
+      if (!progress.stories.includes(target.id)) return { ...head, kicker, text: `아직 수첩에 없는 곳입니다. ${story.hint}.` };
+      return { ...head, kicker, text: STORY_DETAILS[target.id]?.detail ?? story.text };
+    }
+    const parent = target.parent ? bodyById(target.parent) : null;
+    const kicker = `${KIND[target.kind] ?? '천체'}${parent && target.kind === 'moon' ? ` · ${parent.name}의 위성` : ''}`;
+    if (!progress.discovered.includes(target.id)) return { ...head, kicker, text: '아직 수첩에 없는 천체입니다. 표면에서 5만km 안까지 다가가면 읽을거리가 열립니다.' };
+    return { ...head, kicker, facts: bodyFacts(BODY_DATA.find((b) => b.id === target.id), parent?.name), text: READINGS[target.id] ?? FACTS[target.id] ?? '' };
+  }
+  const inspectInfo = createInspectInfo();
+  let inspectShown = null;
+  function showInspectInfo() {
+    const id = photo.orbit()?.id ?? null;
+    if (id === inspectShown) return;
+    inspectShown = id;
+    inspectInfo.show(id ? readingFor(here(id)) : null);
   }
 
   // A place being looked round while it is night there: its body is lit for the look.
@@ -1206,6 +1238,7 @@ async function init() {
       const length = Math.hypot(...local);
       heading = local.map((n) => n / length);
     }
+    showInspectInfo();
     const view = world.update({
       bodies,
       craft,

@@ -2732,3 +2732,110 @@ html.shell body {
   line-height:13px;
   pointer-events:auto;
 }
+
+/* Something to read while a target is looked at closely: a glass sheet over the top of
+   the view, which scrolls and folds away to its title. */
+#inspectInfo {
+  position:fixed;
+  top:max(12px,env(safe-area-inset-top));
+  left:50%;
+  transform:translateX(-50%);
+  z-index:6;
+  width:min(560px,calc(100vw - 24px));
+  border:1px solid var(--glass-line);
+  border-radius:16px;
+  background:#0d1a3ae6;
+  backdrop-filter:blur(8px);
+  box-shadow:0 8px 30px #0008;
+  color:#eef3ff;
+  pointer-events:auto;
+}
+
+#inspectInfo[hidden] {
+  display:none;
+}
+
+.inspectHead {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 10px 10px 16px;
+}
+
+#inspectKicker {
+  display:block;
+  font-size:11px;
+  letter-spacing:.06em;
+  color:var(--gold);
+}
+
+#inspectName {
+  font-size:18px;
+  font-weight:600;
+}
+
+#inspectNameEn {
+  margin-left:8px;
+  font-size:12px;
+  color:#9fb0d8;
+}
+
+#inspectFold {
+  flex:none;
+  min-height:34px;
+  padding:4px 14px;
+  border:1px solid var(--glass-line);
+  border-radius:10px;
+  background:#182a5c99;
+  backdrop-filter:none;
+  font-size:13px;
+}
+
+#inspectBody {
+  max-height:38vh;
+  overflow-y:auto;
+  padding:0 16px 14px;
+  scrollbar-width:thin;
+  scrollbar-color:#9fb4ff66 #0000;
+}
+
+#inspectInfo.folded #inspectBody {
+  display:none;
+}
+
+#inspectFacts {
+  display:grid;
+  grid-template-columns:max-content 1fr;
+  gap:3px 14px;
+  margin:0 0 10px;
+  padding:9px 12px;
+  border-radius:10px;
+  background:#182a5c80;
+  font-size:13px;
+}
+
+#inspectFacts[hidden] {
+  display:none;
+}
+
+#inspectFacts dt {
+  color:#9fb0d8;
+}
+
+#inspectFacts dd {
+  margin:0;
+  font-variant-numeric:tabular-nums;
+}
+
+#inspectText p {
+  margin:0 0 10px;
+  font-size:14px;
+  line-height:1.75;
+  color:#dbe4fb;
+  word-break:keep-all;
+}
+
+#inspectText p:last-child {
+  margin-bottom:0;
+}

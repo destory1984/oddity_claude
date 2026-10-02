@@ -52,8 +52,8 @@ test('a jump happens only from far away: nearby, choosing a name works as before
   assert.equal(farFrom(mars, at(10 * mars.radiusKm + 1)), true);
   assert.equal(farFrom(mars, at(10 * mars.radiusKm - 1)), false);
   const hubble = craft.find((c) => c.id === 'hubble');
-  assert.equal(farFrom(hubble, [hubble.position[0], hubble.position[1] + 10001, hubble.position[2]]), true);
-  assert.equal(farFrom(hubble, [hubble.position[0], hubble.position[1] + 9999, hubble.position[2]]), false);
+  assert.equal(farFrom(hubble, [hubble.position[0], hubble.position[1] + 3001, hubble.position[2]]), true);
+  assert.equal(farFrom(hubble, [hubble.position[0], hubble.position[1] + 2999, hubble.position[2]]), false);
   const apollo = sites.find((s) => s.id === 'apollo11');
   assert.equal(farFrom(apollo, [apollo.position[0], apollo.position[1] + 2001, apollo.position[2]]), true);
   assert.equal(farFrom(apollo, [apollo.position[0], apollo.position[1] + 1999, apollo.position[2]]), false);

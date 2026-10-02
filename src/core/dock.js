@@ -3,9 +3,11 @@ import { stopNow, CARRY_KM } from './game.js';
 import { nearestSurface } from './bodies.js';
 import { lookAtDirection, rotateLocal, blend } from './orientation.js';
 
-// How close the traveler must be to dock, and how far off they sit once docked (the
+// How close the traveler must be to dock (3,000 km; it was 10,000, and standing on a
+// launch pad on Earth offered a docking with the station passing far off), and how far
+// off they sit once docked (the
 // craft are drawn 30 km wide, so 60 km shows the whole craft at arm's length).
-export const DOCK_RANGE_KM = 10000;
+export const DOCK_RANGE_KM = 3000;
 export const DOCK_GAP_KM = 60;
 // The countdown: "Docking in progress", then 3 down to 0, one number a second. (It
 // counted from 5 at first; that was a long wait.)

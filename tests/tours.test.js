@@ -86,8 +86,8 @@ test('a stop is reached at its story place, within discovery range of a body, wi
   const moon = bodyById('moon');
   assert.equal(stopReached({ body: 'moon' }, at(moon.position.map((n, i) => n + (i === 1 ? moon.radiusKm + 60000 : 0)))), false);
   const danuri = craft.find((c) => c.id === 'danuri');
-  assert.equal(stopReached({ craft: 'danuri' }, at(danuri.position.map((n, i) => n + (i === 1 ? 9000 : 0)))), true);
-  assert.equal(stopReached({ craft: 'danuri' }, at(danuri.position.map((n, i) => n + (i === 1 ? 11000 : 0)))), false);
+  assert.equal(stopReached({ craft: 'danuri' }, at(danuri.position.map((n, i) => n + (i === 1 ? 2900 : 0)))), true);
+  assert.equal(stopReached({ craft: 'danuri' }, at(danuri.position.map((n, i) => n + (i === 1 ? 3100 : 0)))), false);
   assert.equal(stopReached({ story: 'luna9' }, at([0, 0, 0], ['luna2', 'luna9'])), true);
   assert.equal(stopReached({ story: 'luna9' }, at([0, 0, 0], ['luna2'])), false);
 });

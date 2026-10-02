@@ -100,6 +100,7 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
     }
 
     let ringCrossed = null;
+    let ringAt = null;
     for (const item of rendered) {
       const body = now.find((b) => b.id === item.body.id) ?? item.body;
       const rel = relative(body, position);
@@ -110,6 +111,7 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
         if (hit) {
           ice.burst(ringDensity(hit.t));
           ringCrossed = body.id;
+          ringAt = hit.t;
         }
         lastByRings.set(body.id, from);
       }
@@ -169,6 +171,8 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       distances,
       sunVisibility: visibility,
       ringCrossed,
+      // Where along the rings the crossing was: 0 at the inner edge, 1 at the outer.
+      ringAt,
       inBelt: inBelt(traveler, sunNow.position),
       meteorLit,
       // Lights and plumes to tell about: a flash (lightning, an impact on the Moon) in

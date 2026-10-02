@@ -14,12 +14,16 @@ export function ringCrossing(prev, now, normal, innerKm, outerKm) {
   return { t: (r - innerKm) / (outerKm - innerKm) };
 }
 
+// Where the Cassini division lies along Saturn's rings (t from, t to): the dark gap a
+// stunt flies through (core/stunts.js).
+export const CASSINI_GAP = [0.69, 0.765];
+
 // Rough share of Saturn's ring material at t (same bands as shaders/rings.glsl):
 // thin C ring, dense B ring, nearly empty Cassini division, medium A ring.
 export function ringDensity(t) {
   if (t < 0 || t > 1) return 0;
   if (t < 0.28) return 0.25;
-  if (t < 0.69) return 1;
-  if (t < 0.765) return 0.08;
+  if (t < CASSINI_GAP[0]) return 1;
+  if (t < CASSINI_GAP[1]) return 0.08;
   return 0.7;
 }

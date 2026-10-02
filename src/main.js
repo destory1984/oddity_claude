@@ -211,6 +211,8 @@ let daily = loadDaily();
 let stuntRecords = loadStunts();
 let stunt = null;
 let stuntJumped = false;
+// A ring plane crossed last frame ({ body, t }), for the stunt through the gap.
+let ringHit = null;
 const requestDone = () => daily.days.includes(today);
 
 // Until when (performance.now()) the sprite character cheers a completed journal.
@@ -1158,7 +1160,7 @@ ${STORY_MORE[target.id]}` : told };
     photoSubject = null;
     // A stunt under way (core/stunts.js): its clock, and its end.
     if (stunt) {
-      const stepped = stepStunt(stunt, { position: state.position, restingOn: state.restingOn, bodies, jumped: stuntJumped }, dt);
+      const stepped = stepStunt(stunt, { position: state.position, restingOn: state.restingOn, bodies, jumped: stuntJumped, ring: ringHit, speedKmS: shownSpeed() }, dt);
       stunt = stepped.run;
       if (stepped.done !== null) finishStunt(stepped.done);
     }
@@ -1359,6 +1361,7 @@ ${STORY_MORE[target.id]}` : told };
     sunShown = view.sunVisibility;
     hud.maskHero(view.heroCard);
     say.place(view.heroCard);
+    ringHit = view.ringCrossed ? { body: view.ringCrossed, t: view.ringAt } : null;
     if (view.ringCrossed) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`, null, SIGHT_S);
     if (view.meteorLit && !meteorSeen) {
       meteorSeen = true;

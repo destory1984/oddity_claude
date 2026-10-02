@@ -17,12 +17,12 @@ function hold(run, sample, n, dt = 1) {
   return { run, done };
 }
 
-test('three stunts, each with a name, what to do and a line of hers', () => {
-  assert.deepEqual(STUNTS.map((s) => s.id), ['moonRun', 'moonSkim', 'earthLap']);
+test('four stunts, each with a name, what to do and a line of hers', () => {
+  assert.deepEqual(STUNTS.map((s) => s.id), ['moonRun', 'moonSkim', 'earthLap', 'ringGap']);
   for (const s of STUNTS) {
     assert.ok(s.name && s.todo && !s.todo.includes('~'), s.id);
     assert.ok(s.line.length <= 25 && (s.line.match(/!/g) ?? []).length <= 1, s.id);
-    assert.ok(['less', 'more'].includes(s.better) && ['초', 'km'].includes(s.unit), s.id);
+    assert.ok(['less', 'more'].includes(s.better) && ['초', 'km', 'km/s'].includes(s.unit), s.id);
   }
   assert.equal(startStunt('nothing'), null);
   assert.equal(stuntById('moonRun').name, '달까지 달리기');
@@ -123,4 +123,24 @@ test('the best of each is kept: less time for a run, more for a skim', () => {
   assert.equal(recordText('earthLap', records), '아직 기록 없음');
   assert.deepEqual(sanitizeStunts({ moonRun: 15.26, moonSkim: -1, earthLap: 'x', other: 3 }), { moonRun: 15.26 });
   assert.deepEqual(sanitizeStunts(null), {});
+});
+
+test('through the gap in the rings of Saturn: only a crossing inside the Cassini division counts', () => {
+  const saturn = bodyById('saturn');
+  const cross = (t, body = 'saturn') => ({ ...at(above(saturn, 60000)), ring: { body, t }, speedKmS: 41234.4 });
+  let run = startStunt('ringGap');
+  assert.equal(stuntStatus(run), '고리 틈 지나기: 토성 고리의 검은 틈으로');
+  // No crossing: nothing. Through the bright B ring: said, and she may try again.
+  assert.equal(stepStunt(run, at(above(saturn, 60000)), 1).done, null);
+  const ice = stepStunt(run, cross(0.5), 1);
+  assert.equal(ice.done, null);
+  assert.match(stuntStatus(ice.run), /얼음을 지났습니다/);
+  assert.equal(stepStunt(ice.run, cross(0.9), 1).done, null);
+  assert.equal(stepStunt(run, cross(0.72, 'uranus'), 1).done, null);
+  // Inside the division, at either edge of it.
+  assert.equal(stepStunt(ice.run, cross(0.72), 1).done, 41234.4);
+  assert.equal(stepStunt(run, cross(0.69), 1).done, 41234.4);
+  assert.equal(stepStunt(run, cross(0.765), 1).done, null);
+  assert.equal(valueText('ringGap', 41234.4), '초속 41,234km');
+  assert.equal(recordStunt({ ringGap: 30000 }, 'ringGap', 41234.4).best, true);
 });

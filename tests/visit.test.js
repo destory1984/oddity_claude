@@ -26,7 +26,7 @@ test('an orientation is built from the way ahead and the way up', () => {
 });
 
 test('every surface place has a standing spot 25 km off, 1.5 km up, inside the range that logs its story', () => {
-  assert.equal(SURFACE.length, 65);
+  assert.equal(SURFACE.length, 80);
   for (const timeS of [0, 123456]) {
     const bodies = bodiesAt(timeS);
     const sites = storySitesAt(timeS, bodies);

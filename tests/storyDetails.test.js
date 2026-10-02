@@ -15,9 +15,10 @@ test('every story place has a longer telling of three sentences or more', () => 
   }
 });
 
-test('70 of the 71 have a photograph on file, with a caption and a credit; the Ocean of Storms has none', () => {
+test('70 of the 91 have a photograph on file, with a caption and a credit', () => {
+  // The Ocean of Storms has none, nor yet the twenty places added beyond the Moon and Mars.
   const without = STORIES.filter((s) => !STORY_DETAILS[s.id].photo).map((s) => s.id);
-  assert.deepEqual(without, ['procellarum']);
+  assert.deepEqual(without, ['procellarum', ...STORIES.slice(71).map((s) => s.id)]);
   assert.equal(storyPhotoFile('procellarum'), null);
   const credits = readFileSync('THIRD-PARTY.md', 'utf8');
   let bytes = 0;

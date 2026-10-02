@@ -120,7 +120,7 @@ const LOOKS = {
   },
   enceladus: {
     shader: 'textured', map: 'enceladus.jpg', saturation: 0.25, tint: [1.04, 1.04, 1.07], base: [0.9, 0.92, 0.95],
-    mapWeight: 1, haze: 0, detail: 0.06, dayS: 1.370218 * 86400,
+    mapWeight: 1, haze: 0, detail: 0.06, dayS: SPIN_DAY_S.enceladus,
   },
   tethys: {
     shader: 'textured', map: 'tethys.jpg', saturation: 0.3, tint: [1, 1, 1], base: [0.8, 0.8, 0.81],
@@ -149,11 +149,11 @@ const LOOKS = {
   },
   mercury: {
     shader: 'textured', map: 'mercury.jpg', saturation: 0.6, tint: [1, 0.99, 0.97], base: [0.55, 0.53, 0.5],
-    mapWeight: 1, haze: 0, detail: 0.12, dayS: 5067000,
+    mapWeight: 1, haze: 0, detail: 0.12, dayS: SPIN_DAY_S.mercury,
   },
   venus: {
     shader: 'textured', map: 'venus.jpg', saturation: 0.9, tint: [1.02, 0.98, 0.9], base: [0.92, 0.82, 0.6],
-    mapWeight: 1, haze: 1.1, detail: 0.03, dayS: -20997000,
+    mapWeight: 1, haze: 1.1, detail: 0.03, dayS: SPIN_DAY_S.venus,
     rim: [1, 0.9, 0.7], rimLight: 1.2,
   },
   mars: {
@@ -164,19 +164,19 @@ const LOOKS = {
   },
   jupiter: {
     shader: 'textured', map: 'jupiter.jpg', saturation: 1.1, tint: [1.03, 1, 0.96], base: [0.82, 0.7, 0.54],
-    mapWeight: 1, haze: 0.2, detail: 0.2, dayS: 35730,
+    mapWeight: 1, haze: 0.2, detail: 0.2, dayS: SPIN_DAY_S.jupiter,
   },
   saturn: {
     shader: 'textured', map: 'saturn.jpg', saturation: 1.15, tint: [1.03, 0.99, 0.9], base: [0.9, 0.8, 0.6],
-    mapWeight: 1, haze: 0.15, detail: 0.12, dayS: 38362, hexagon: 1, rings: { innerKm: 74500, outerKm: 136775, tilt: 0.47 },
+    mapWeight: 1, haze: 0.15, detail: 0.12, dayS: SPIN_DAY_S.saturn, hexagon: 1, rings: { innerKm: 74500, outerKm: 136775, tilt: 0.47 },
   },
   io: {
     shader: 'textured', map: 'io.jpg', saturation: 1.25, tint: [1.06, 1, 0.9], base: [0.82, 0.72, 0.38],
-    mapWeight: 1, haze: 0, detail: 0.12, dayS: 152854,
+    mapWeight: 1, haze: 0, detail: 0.12, dayS: SPIN_DAY_S.io,
   },
   europa: {
     shader: 'textured', map: 'europa.jpg', saturation: 1, tint: [1.03, 0.97, 0.88], base: [0.82, 0.76, 0.68],
-    mapWeight: 1, haze: 0, detail: 0.1, dayS: 306822,
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: SPIN_DAY_S.europa,
   },
   ganymede: {
     shader: 'textured', map: 'ganymede.jpg', saturation: 1, tint: [1, 1, 1], base: [0.55, 0.5, 0.45],
@@ -198,24 +198,24 @@ const LOOKS = {
   },
   neptune: {
     shader: 'textured', map: 'neptune.jpg', saturation: 1, tint: [0.9, 1, 1.1], base: [0.25, 0.42, 0.85],
-    mapWeight: 1, haze: 0.35, detail: 0.12, dayS: 57996,
+    mapWeight: 1, haze: 0.35, detail: 0.12, dayS: SPIN_DAY_S.neptune,
   },
   // Ceres, Pluto and Charon: grey USGS maps; the tint gives each its real cast.
   ceres: {
     shader: 'textured', map: 'ceres.jpg', saturation: 1, tint: [0.62, 0.6, 0.57], base: [0.3, 0.29, 0.28],
-    mapWeight: 1, haze: 0, detail: 0.12, dayS: 9.074 * 3600,
+    mapWeight: 1, haze: 0, detail: 0.12, dayS: SPIN_DAY_S.ceres,
   },
   // Pluto turns backwards once in 6.387 days, the same time Charon takes to circle it,
   // so each keeps one face toward the other.
   pluto: {
     shader: 'textured', map: 'pluto.jpg', saturation: 1, tint: [1.12, 0.96, 0.8], base: [0.62, 0.52, 0.42],
-    mapWeight: 1, haze: 0.15, detail: 0.08, dayS: -6.387 * 86400,
+    mapWeight: 1, haze: 0.15, detail: 0.08, dayS: SPIN_DAY_S.pluto,
     // The blue ring New Horizons saw looking back at Pluto with the Sun behind it.
     rim: [0.3, 0.52, 1], rimLight: 1.8,
   },
   charon: {
     shader: 'textured', map: 'charon.jpg', saturation: 1, tint: [0.92, 0.9, 0.88], base: [0.45, 0.44, 0.43],
-    mapWeight: 1, haze: 0, detail: 0.1, dayS: -6.387 * 86400,
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: SPIN_DAY_S.charon,
   },
   // The comet's nucleus reflects 4% of sunlight: nearly black.
   halley: { shader: 'rocky', colorA: [0.05, 0.05, 0.05], colorB: [0.16, 0.15, 0.14], cap: 0, haze: 0, contrast: 0.6, craters: 0.5, dayS: 2.2 * 86400 },

@@ -174,6 +174,89 @@ STORIES.push({
   text: '2014년 11월 12일 로제타의 착륙선 필레가 이 혜성에 내렸습니다. 혜성에 내린 첫 탐사선입니다.',
 });
 
+// Twenty places beyond the Moon and Mars (docs/이야기-장소-추가-20.md). lonDeg is the
+// longitude on the body's map as the game draws it: the maps of Pluto and Ceres are
+// centred on longitude 180, so 180 is taken off the real east longitude there (the hint
+// gives the real one). Jupiter, Saturn and Neptune have no ground: the place is a spot
+// on the cloud tops, which turns with the planet. Neptune's dark spot is where the map
+// shows it.
+const where = (latDeg, lonDeg) => `${degrees(latDeg, '북위', '남위')}, ${degrees(lonDeg, '동경', '서경')}`;
+// On a planet of gas there is nothing to land on and no fixed longitude: the hint says so.
+const CLOUD_HINTS = {
+  shoemakerLevy: '목성 남반구(남위 44도) 구름 꼭대기의 충돌 자리 20,000km 안에 닿기',
+  hexagon: '토성 북극(북위 78도) 구름 꼭대기의 육각형 15,000km 안에 닿기',
+  greatDarkSpot: '해왕성 남반구 구름 꼭대기의 검은 점 10,000km 안에 닿기',
+};
+const FAR_PLACES = [
+  ['pele', '이오의 펠레 화산', 'Pele', 1979, 'io', '이오', -18.7, 104.7, 104.7, 300, true,
+    '1979년 3월 보이저 1호가 이오에서 솟는 연기를 찍었습니다. 지구 밖에서 처음 찾은 활화산입니다.'],
+  ['tigerStripes', '엔셀라두스의 호랑이 줄무늬', 'Tiger Stripes', 2005, 'enceladus', '엔셀라두스', -84, 0, 0, 150, true,
+    '2005년 카시니가 남극의 네 줄 균열에서 물과 얼음이 뿜어 나오는 것을 찾았습니다.'],
+  ['shoemakerLevy', '슈메이커-레비 9 충돌', 'Shoemaker-Levy 9', 1994, 'jupiter', '목성', -44, 0, 0, 20000, true,
+    '1994년 7월, 스물한 조각으로 부서진 혜성이 목성 남반구에 차례로 부딪혔습니다.'],
+  ['venera13', '베네라 13호 착륙지', 'Venera 13', 1982, 'venus', '금성', -7.5, -57, -57, 150, false,
+    '1982년 3월 1일 금성에 내려 127분을 버텼습니다. 금성 표면의 첫 컬러 사진을 찍었습니다.'],
+  ['tombaughRegio', '명왕성의 하트, 톰보 지역', 'Tombaugh Regio', 2015, 'pluto', '명왕성', 18, 178, -2, 500, true,
+    '2015년 뉴허라이즌스가 찍은 하트 모양의 밝은 땅입니다. 명왕성을 찾은 톰보의 이름을 붙였습니다.'],
+  ['hexagon', '토성 북극의 육각형', "Saturn's Hexagon", 1981, 'saturn', '토성', 78, 0, 0, 15000, true,
+    '1981년 보이저 2호의 사진에 토성 북극의 여섯 변짜리 구름 띠가 찍혔습니다. 한 변이 지구 지름보다 깁니다.'],
+  ['naro', '나로우주센터', 'Naro Space Center', 2022, 'earth', '지구', 34.43, 127.53, 127.53, 40, false,
+    '2022년 6월 21일 이곳에서 누리호가 위성을 궤도에 올렸습니다. 한국이 만든 발사체로 처음 해낸 일입니다.'],
+  ['messenger', '메신저 충돌지', 'MESSENGER', 2015, 'mercury', '수성', 54.4, -149.9, -149.9, 150, true,
+    '수성을 처음으로 돌던 메신저가 연료가 다해 2015년 4월 30일 이곳에 떨어졌습니다.'],
+  ['conamara', '유로파의 코나마라 혼돈 지형', 'Conamara Chaos', 1997, 'europa', '유로파', 9.7, 86.7, 86.7, 150, true,
+    '얼음판이 부서져 떠다니다 다시 언 모양입니다. 얼음 아래에 바다가 있다는 단서로 꼽힙니다.'],
+  ['venera7', '베네라 7호 착륙지', 'Venera 7', 1970, 'venus', '금성', -5, -9, -9, 150, false,
+    '1970년 12월 15일 금성에 내려 23분 동안 신호를 보냈습니다. 다른 행성 표면에서 온 첫 신호입니다.'],
+  ['occator', '세레스의 오카토르 충돌구', 'Occator', 2015, 'ceres', '세레스', 19.8, -120.7, 59.3, 100, true,
+    '2015년 던이 이 충돌구 바닥의 밝은 점을 찍었습니다. 땅속 소금물이 올라와 남긴 탄산나트륨입니다.'],
+  ['lc39a', '케네디 우주센터 39A 발사대', 'Launch Complex 39A', 1969, 'earth', '지구', 28.61, -80.6, -80.6, 40, false,
+    '1969년 7월 16일 아폴로 11호가 이 발사대에서 떠났습니다. 나흘 뒤 달에 내렸습니다.'],
+  ['kraken', '타이탄의 크라켄 해', 'Kraken Mare', 2007, 'titan', '타이탄', 68, 50, 50, 300, true,
+    '2007년 카시니가 찾은 타이탄에서 가장 큰 바다입니다. 물이 아니라 메탄과 에탄으로 차 있습니다.'],
+  ['mordor', '카론의 붉은 북극, 모르도르', 'Mordor Macula', 2015, 'charon', '카론', 85, 0, 0, 200, true,
+    '카론의 북극은 붉은 갈색입니다. 명왕성에서 빠져나온 기체가 얼어붙고 햇빛에 바뀐 것으로 봅니다.'],
+  ['greatDarkSpot', '해왕성의 대흑점', 'Great Dark Spot', 1989, 'neptune', '해왕성', -18, null, 14, 10000, true,
+    '1989년 보이저 2호가 지구만 한 검은 폭풍을 찍었습니다. 1994년 허블이 다시 보니 사라지고 없었습니다.'],
+];
+STORIES.push(...FAR_PLACES.map(([id, name, nameEn, year, body, bodyName, latDeg, realLonDeg, lonDeg, withinKm, isLandmark, text]) => ({
+  id, name, nameEn, year, type: 'surface', body, latDeg, lonDeg, withinKm, landmark: isLandmark,
+  hint: CLOUD_HINTS[id] ?? `${bodyName}(${where(latDeg, realLonDeg)}) ${withinKm.toLocaleString('ko-KR')}km 안에 내려앉기`,
+  text,
+})));
+STORIES.push(
+  {
+    id: 'voyager2Neptune', name: '보이저 2호의 해왕성', nameEn: 'Voyager 2 at Neptune', year: 1989,
+    type: 'near', target: 'neptune', withinKm: 5000,
+    hint: '해왕성 구름 꼭대기 5,000km 안을 지나기',
+    text: '1989년 8월 25일 보이저 2호가 해왕성 구름 위 4,950km를 지났습니다. 해왕성에 가 본 탐사선은 이것 하나입니다.',
+  },
+  {
+    id: 'voyager2Uranus', name: '보이저 2호의 천왕성', nameEn: 'Voyager 2 at Uranus', year: 1986,
+    type: 'near', target: 'uranus', withinKm: 81500,
+    hint: '천왕성 구름 꼭대기 81,500km 안을 지나기',
+    text: '1986년 1월 24일 보이저 2호가 천왕성 구름 위 81,500km를 지났습니다. 천왕성에 가 본 탐사선은 이것 하나입니다.',
+  },
+  {
+    id: 'yiSoyeon', name: '국제우주정거장의 이소연', nameEn: 'Yi So-yeon on the ISS', year: 2008,
+    type: 'near', target: 'iss', withinKm: 3000,
+    hint: '국제우주정거장 3,000km 안까지 가기',
+    text: '2008년 4월 8일 이소연이 소유스를 타고 떠나 국제우주정거장에 머물렀습니다. 한국인의 첫 우주 비행입니다.',
+  },
+  {
+    id: 'voyager2Out', name: '보이저 2호, 별 사이 공간으로', nameEn: 'Voyager 2 Goes Interstellar', year: 2018,
+    type: 'near', target: 'voyager2', withinKm: 5000,
+    hint: '보이저 2호 5,000km 안까지 따라가기',
+    text: '2018년 11월 5일 보이저 2호가 태양풍이 닿는 범위를 벗어났습니다. 별 사이 공간에 들어선 둘째 탐사선입니다.',
+  },
+  {
+    id: 'parkerPerihelion', name: '파커 태양 탐사선의 최근접', nameEn: 'Parker Solar Probe', year: 2024,
+    type: 'near', target: 'parker', withinKm: 5000,
+    hint: '파커 태양 탐사선 5,000km 안까지 가기',
+    text: '2024년 12월 24일 파커 태양 탐사선이 태양 표면 610만km까지 다가갔습니다. 태양에 가장 가까이 간 탐사선입니다.',
+  },
+);
+
 // A place's label shows only from within this many of its body's radii above the
 // surface (the Moon: 6,950 km; Mars: 13,560 km), like the craft that circle a planet
 // (core/craft.js hiddenCraft). From farther off the names pile up on the disc.

@@ -4,11 +4,23 @@ const RAD = Math.PI / 180;
 
 // Real sidereal days (seconds) of the bodies that carry story places. render/planets.js
 // spins the same bodies with the same numbers, so a place stays on its spot of the map.
+// (A negative day turns backward: Venus, Pluto and Charon.)
 export const SPIN_DAY_S = {
   moon: 27.3217 * 86400,
   mars: 88643,
   titan: 1377648,
   earth: 86164,
+  mercury: 5067000,
+  venus: -20997000,
+  jupiter: 35730,
+  io: 152854,
+  europa: 306822,
+  saturn: 38362,
+  enceladus: 1.370218 * 86400,
+  neptune: 57996,
+  ceres: 9.074 * 3600,
+  pluto: -6.387 * 86400,
+  charon: -6.387 * 86400,
 };
 
 // Earth alone starts part-way through its turn, so the opening view shows it half lit

@@ -1,9 +1,10 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  NOTES, MEMOS, dueNote, noteById, LAST_SLOT, LAST_SLOT_KM, lastSlotOpen, photoSlots,
+  NOTES, MEMOS, GREETINGS, dueNote, noteById, LAST_SLOT, LAST_SLOT_KM, lastSlotOpen, photoSlots,
 } from '../src/core/story.js';
 import { STORIES } from '../src/core/stories.js';
+import { CRAFT } from '../src/core/craft.js';
 import { createProgress, recordNote, sanitizeProgress } from '../src/core/progress.js';
 import { BODIES } from '../src/core/bodies.js';
 import { MISSIONS } from '../src/core/missions.js';
@@ -121,4 +122,13 @@ test('a log that already had the last slot keeps it, and is told nothing more', 
   const half = { ...createProgress(), photos: [LAST_SLOT] };
   assert.deepEqual(photoSlots([LAST_SLOT], { open: false, earthKm: 7e7, progress: half }), { missions: [LAST_SLOT], stories: [], held: 'locked' });
   assert.deepEqual(photoSlots([LAST_SLOT], { open: true, earthKm: 7e7, progress: half }), { missions: [LAST_SLOT], stories: [LAST_SLOT], held: null });
+});
+
+test('Seora has a word for each probe left alone, and each is a real place or craft', () => {
+  const known = new Set([...STORIES.map((s) => s.id), ...CRAFT.map((c) => c.id)]);
+  assert.deepEqual(Object.keys(GREETINGS).sort(), ['danuri', 'lunokhod1', 'opportunity', 'phoenix', 'spirit', 'voyager1', 'voyager2']);
+  for (const [id, line] of Object.entries(GREETINGS)) {
+    assert.ok(known.has(id), id);
+    assert.ok(line.length <= 25 && (line.match(/!/g) ?? []).length <= 1, id);
+  }
 });

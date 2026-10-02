@@ -155,3 +155,16 @@ export const MEMOS = {
   haleBopp: { memo: '1997.3. 맨눈으로 꼬리까지. 평생 가장 밝은 혜성. 저녁마다 봤다.', line: '핼리보다 다섯 배 크대!' },
   churyumov: { memo: '1969년 발견. 내 수첩과 같은 해. 2014년 로제타 소식을 신문에서 읽었다.', line: '고무 오리다! 두 덩이야.' },
 };
+
+// The probes left alone out there: on reaching one, Seora says a word to it (story
+// places by their id in core/stories.js, craft by their id in core/craft.js). This is
+// the only place the story's feeling for them is spoken.
+export const GREETINGS = {
+  opportunity: '여기서 14년 넘게 일했대. 수고했어.',
+  spirit: '모래에 빠져도 일했대. 장하다.',
+  lunokhod1: '제일 먼저 온 달 자동차구나.',
+  phoenix: '겨울 얼음에 덮였대. 춥겠다.',
+  voyager1: '제일 멀리 온 친구야. 안녕!',
+  voyager2: '너는 아직도 가는 중이구나.',
+  danuri: '다누리다! 할머니, 우리 것도 왔어.',
+};

@@ -40,7 +40,7 @@ import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
 import {
-  NOTES, MEMOS, dueNote, noteById, LAST_SLOT, lastSlotOpen, photoSlots,
+  NOTES, MEMOS, GREETINGS, dueNote, noteById, LAST_SLOT, lastSlotOpen, photoSlots,
 } from './core/story.js';
 import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
@@ -493,6 +493,16 @@ async function init() {
   hud.showSelection(named(selectedId));
   const minimap = createMinimap($('minimap'), { onPick: selectBody });
 
+  // A word to a probe left alone (core/story.js GREETINGS): once per visit to the game.
+  const greeted = new Set();
+  function greet(id) {
+    if (!GREETINGS[id] || greeted.has(id)) return;
+    greeted.add(id);
+    say.show(GREETINGS[id]);
+  }
+  // The place whose card opened on reaching it: greeted once the card is put away.
+  let greetAfterCard = null;
+
   // The card at a story place; the game waits while it is open.
   let cardPriorPause = false;
   const storyCard = createStoryCard({
@@ -504,6 +514,8 @@ async function init() {
     onClose() {
       setPaused(cardPriorPause);
       previous = null;
+      if (greetAfterCard) greet(greetAfterCard);
+      greetAfterCard = null;
     },
   });
   const showStory = (id) => storyCard.show(STORIES.find((s) => s.id === id));
@@ -746,7 +758,10 @@ async function init() {
           sound.say(String(n));
           if (n > 0) sound.cue('count');
         }
-        if (isDocked(docked) && was < docked.elapsed && !isDocked({ elapsed: was })) announce({ type: 'docked', name: here(docked.id).name });
+        if (isDocked(docked) && was < docked.elapsed && !isDocked({ elapsed: was })) {
+          announce({ type: 'docked', name: here(docked.id).name });
+          greet(docked.id);
+        }
         state = dockedState(state, here(docked.id), dockingOffset(docked), bodies);
         // Turn aside on the way in, so the craft ends up beside her, not behind her.
         const facing = dt > 0 ? dockingFacing(docked, docked.facing, state.position, here(docked.id).position, innerWidth >= innerHeight) : null;
@@ -816,6 +831,7 @@ async function init() {
     if (cardDue && dt > 0) {
       cardDue.in -= dt;
       if (cardDue.in <= 0) {
+        greetAfterCard = cardDue.id;
         showStory(cardDue.id);
         cardDue = null;
       }

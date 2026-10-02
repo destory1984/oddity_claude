@@ -1,5 +1,5 @@
 import { objectParticle, distanceText, markedName } from './messages.js';
-import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped } from '../core/markers.js';
+import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, COMPACT_WIDTH } from '../core/markers.js';
 
 const $ = (id) => document.getElementById(id);
 const ARROWS = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
@@ -73,6 +73,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       $('throttleValue').textContent = `${Math.round(throttle * 100)}%`;
       $('speedLimit').textContent = `현재 제한 ${limitLabel}`;
       $('flightState').textContent = flightLabel;
+      const compact = innerWidth <= COMPACT_WIDTH;
       // Every body in view gets a label; off-screen arrows only for the selected, the
       // nearest and nearby bodies (core/markers.js), so fifteen arrows do not pile up.
       const placed = bodies.map((body) => {
@@ -94,6 +95,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
           nearest: body.id === local.body.id,
           surfaceKm: view.distances[body.id] - body.radiusKm,
           always: body.id === 'earth' || body.kind === 'star' || body.id === goalId,
+          compact,
         });
         return { body, el, spot, keep, selected: selectedHere };
       });
@@ -125,7 +127,8 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         const z = dot(direction, view.camera.forward);
         const px = (dot(direction, view.camera.right) / Math.max(0.001, z)) * focal;
         const py = (-dot(direction, view.camera.up) / Math.max(0.001, z)) * focal;
-        el.hidden = z <= 0.2 || Math.abs(px) > innerWidth / 2 || Math.abs(py) > innerHeight / 2;
+        // A phone has no room for the names of constellations.
+        el.hidden = compact || z <= 0.2 || Math.abs(px) > innerWidth / 2 || Math.abs(py) > innerHeight / 2;
         if (el.hidden) continue;
         el.style.left = `${innerWidth / 2 + px}px`;
         el.style.top = `${innerHeight / 2 + py}px`;

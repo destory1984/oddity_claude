@@ -98,7 +98,7 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | `crisium.jpg` | [Mare Crisium (LRO).png](https://commons.wikimedia.org/wiki/File:Mare_Crisium_(LRO).png) | NASA (image by Lunar Reconnaissance Orbiter) | Public domain |
 | `plato.jpg` | [Plato (LRO).png](https://commons.wikimedia.org/wiki/File:Plato_(LRO).png) | NASA (image by Lunar Reconnaissance Orbiter) | Public domain |
 | `aristarchus.jpg` | [Aristarchus and Herodotus craters Apollo 15.jpg](https://commons.wikimedia.org/wiki/File:Aristarchus_and_Herodotus_craters_Apollo_15.jpg) | NASA (Apollo 15) | Public domain |
-| `kepler.jpg` | [Kepler crater 3162 med.jpg](https://commons.wikimedia.org/wiki/File:Kepler_crater_3162_med.jpg) | NASA | Public domain |
+| `keplerCrater.jpg` | [Kepler crater 3162 med.jpg](https://commons.wikimedia.org/wiki/File:Kepler_crater_3162_med.jpg) | NASA | Public domain |
 | `clavius.jpg` | [Clavius LROC.jpg](https://commons.wikimedia.org/wiki/File:Clavius_LROC.jpg) | NASA | Public domain |
 | `iridum.jpg` | [Wac sinus iridum300m.png](https://commons.wikimedia.org/wiki/File:Wac_sinus_iridum300m.png) | NASA, LRO | Public domain |
 | `reinerGamma.jpg` | [Reiner-gamma-clem1.jpg](https://commons.wikimedia.org/wiki/File:Reiner-gamma-clem1.jpg) | U.S. Government | Public domain |

@@ -25,6 +25,13 @@ test('there are 71 story places, each with a name, a hint and a short story; eve
   }
 });
 
+test('no story place shares its id with a body or a craft: labels and targets are found by id', () => {
+  const taken = new Set([...BODIES.map((b) => b.id), ...craftAt(0, BODIES).map((c) => c.id)]);
+  // The stories told at a body or a craft itself (not at a place on a surface) may carry its name.
+  const clash = STORIES.filter((s) => s.type === 'surface' && taken.has(s.id)).map((s) => s.id);
+  assert.deepEqual(clash, []);
+});
+
 test('a place on the map: the equator at longitude 0 faces -x, east is toward -z, north is +y', () => {
   // This is how Babylon wraps a map round a sphere with this game's flipped u (see body.vert).
   const eq = surfaceDirection(0, 0, 0);

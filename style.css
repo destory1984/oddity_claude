@@ -1402,3 +1402,30 @@ body.touch #reverseButton,body.touch #flyButton,body.touch #brake {
   line-height:1.9;
   color:#dbe8f5;
 }
+
+/* A phone: less text on the flight screen. The notice sits in the clear band between
+   the map and the character (it lay across the altitude and the target panel), and
+   the title, the "c" readout, the note under the target's name and the labels round
+   the thrust slider are left out. */
+@media (max-width: 480px) {
+  #toast {
+    top: 300px;
+    width: max-content;
+    max-width: 88vw;
+    padding: 9px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  #guide {
+    top: 356px;
+  }
+
+  .brand,
+  #surfaceInfo,
+  #lightSpeed,
+  .throttle > div:first-child,
+  .throttle .rangeLabels {
+    display: none;
+  }
+}

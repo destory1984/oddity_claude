@@ -7,9 +7,15 @@ import { sweepSphere } from './flight.js';
 export const NEARBY_KM = 300000;
 
 // always: Earth and the Sun, the two bearings a traveler should never lose.
-export function keepMarker({ outside, selected, nearest, surfaceKm, always = false }) {
+// compact: a phone screen, where a dozen edge arrows covered the view. There only the
+// chosen target and the "always" ones keep an arrow when off screen.
+export function keepMarker({ outside, selected, nearest, surfaceKm, always = false, compact = false }) {
+  if (compact) return !outside || selected || always;
   return !outside || selected || nearest || always || surfaceKm <= NEARBY_KM;
 }
+
+// A screen this narrow (CSS pixels) is laid out as a phone: fewer labels, less text.
+export const COMPACT_WIDTH = 480;
 
 // Labels this close to the middle of the screen also show how far away the thing is:
 // within a quarter of the screen's shorter side.

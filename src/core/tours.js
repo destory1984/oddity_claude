@@ -133,6 +133,8 @@ export const TOURS = [
 // The file of a tour's stamp, under the site's assets folder; the paper crane for all nine.
 export const stampFile = (tour) => `notebook/stamp-${tour.stamp}.png`;
 export const CRANE_FILE = 'notebook/stamp-crane.png';
+// The picture pasted over a tour's page in the journal (384 x 216), named like its stamp.
+export const sceneFile = (tour) => `notebook/tour-${tour.stamp}.png`;
 
 export function tourById(id) {
   return TOURS.find((t) => t.id === id) ?? null;

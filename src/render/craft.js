@@ -60,17 +60,20 @@ const DOKDO_APPARENT = 0.1;
 // On the night side it is drawn this dim.
 const DOKDO_NIGHT = 0.25;
 
-function createDokdo(scene) {
+// Places shown as a drawing on a card, and the picture of each (public/assets/).
+const SITE_CARDS = { dokdo: 'dokdo.png', wadiRum: 'wadi-rum.png' };
+
+function createSiteCard(scene, id, file) {
   // The node sits at sea level; the card stands on it (two wide, one high, +y up).
-  const node = new TransformNode('site_dokdo', scene);
+  const node = new TransformNode(`site_${id}`, scene);
   node.rotationQuaternion = new Quaternion();
-  const card = CreatePlane('dokdoCard', { width: 2, height: 1 }, scene);
+  const card = CreatePlane(`${id}Card`, { width: 2, height: 1 }, scene);
   card.parent = node;
   card.position.y = 0.5;
   card.isPickable = false;
-  const texture = new Texture(`${import.meta.env.BASE_URL}assets/dokdo.png`, scene, true, true, Texture.NEAREST_SAMPLINGMODE);
+  const texture = new Texture(`${import.meta.env.BASE_URL}assets/${file}`, scene, true, true, Texture.NEAREST_SAMPLINGMODE);
   texture.hasAlpha = true;
-  const material = new StandardMaterial('dokdoCard', scene);
+  const material = new StandardMaterial(`${id}Card`, scene);
   material.disableLighting = true;
   material.diffuseTexture = texture;
   material.emissiveTexture = texture;
@@ -115,7 +118,10 @@ function createDokdo(scene) {
 export function createSiteModels(scene, siteList) {
   const mats = craftMaterials(scene);
   const nodes = new Map();
-  const dokdo = siteList.some((s) => s.id === 'dokdo') ? createDokdo(scene) : null;
+  const cards = new Map();
+  for (const site of siteList) {
+    if (SITE_CARDS[site.id]) cards.set(site.id, createSiteCard(scene, site.id, SITE_CARDS[site.id]));
+  }
   for (const site of siteList) {
     if (site.landmark) continue;
     // Elsewhere only what has a model of its own: Earth's two launch pads.
@@ -130,8 +136,9 @@ export function createSiteModels(scene, siteList) {
   // sites, bodies: this frame's positions (km); position: the traveler (km).
   function update(sites, bodies, position) {
     for (const site of sites) {
-      if (dokdo && site.id === 'dokdo') {
-        dokdo.update(site, bodies.find((b) => b.id === site.parent), bodies.find((b) => b.kind === 'star'), position);
+      const card = cards.get(site.id);
+      if (card) {
+        card.update(site, bodies.find((b) => b.id === site.parent), bodies.find((b) => b.kind === 'star'), position);
         continue;
       }
       const node = nodes.get(site.id);
@@ -149,7 +156,7 @@ export function createSiteModels(scene, siteList) {
     }
   }
 
-  return { update, has: (id) => nodes.has(id) };
+  return { update, has: (id) => nodes.has(id) || cards.has(id) };
 }
 
 export function createCraft(scene, craftList) {

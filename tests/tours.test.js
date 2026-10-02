@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, stopHint, advanceTour, allToursDone, stampFile, CRANE_FILE,
+  TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, stopHint, advanceTour, allToursDone, stampFile, sceneFile, CRANE_FILE,
 } from '../src/core/tours.js';
 import { existsSync } from 'node:fs';
 import { BODIES, bodyById } from '../src/core/bodies.js';
@@ -124,4 +124,10 @@ test('every tour has its own stamp on file, and there is a paper crane for all n
   const files = TOURS.map(stampFile);
   assert.equal(new Set(files).size, 9);
   for (const file of [...files, CRANE_FILE]) assert.ok(existsSync(`public/assets/${file}`), file);
+});
+
+test('every tour has a picture of its own for its page in the journal', () => {
+  const files = TOURS.map(sceneFile);
+  assert.equal(new Set(files).size, 9);
+  for (const file of files) assert.ok(existsSync(`public/assets/${file}`), file);
 });

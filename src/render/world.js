@@ -81,7 +81,7 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
   // now: where every body is this frame (they orbit); defaults to the starting layout.
   // seen: { position, orientation } when the view is from somewhere other than where
   // the traveler is (looking round a target, ui/photo.js); she herself stays put.
-  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn, move = {}, seen = null }) {
+  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn, move = {}, seen = null, lamp = null }) {
     elapsed += dt;
     // Draw from a point just above the ground when standing on it, and pull the near
     // plane in as the ground gets close; otherwise the planet under the feet is cut away
@@ -116,7 +116,9 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       for (const mesh of item.meshes) mesh.position.set(rel[0], rel[1], rel[2]);
       item.spin(elapsed);
       item.setClose?.(Math.max(0, (Math.hypot(...rel) * KM_PER_UNIT) / body.radiusKm - 1));
-      item.setSun(normalize(sunNow.position.map((n, i) => n - body.position[i])));
+      // lamp: { id, direction } lights one body from elsewhere than the Sun, while a
+      // place in its night is being looked at closely (core/lamp.js).
+      item.setSun(lamp?.id === body.id ? lamp.direction : normalize(sunNow.position.map((n, i) => n - body.position[i])));
     }
     const sunRel = relative(sunNow, position);
     sun.mesh.position.set(sunRel[0], sunRel[1], sunRel[2]);

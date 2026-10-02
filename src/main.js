@@ -57,6 +57,7 @@ import {
   dockable, DOCK_RANGE_KM, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
   releaseDrift, dockingFacing,
 } from './core/dock.js';
+import { inspectLight } from './core/lamp.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts } from './core/visit.js';
 import { spinOf } from './core/surface.js';
 
@@ -488,6 +489,28 @@ async function init() {
       return { position, orientation: lookAtDirection(centre.map((n, i) => n - position[i])) };
     }
     return { position, orientation: orbit.orientation };
+  }
+
+  // A place being looked round while it is night there: its body is lit for the look.
+  let lampTold = null;
+  function orbitLamp() {
+    const orbit = photo.orbit();
+    const target = orbit ? here(orbit.id) : null;
+    if (target?.kind !== 'site') {
+      lampTold = null;
+      return null;
+    }
+    const ground = here(target.parent);
+    const direction = inspectLight(
+      target.position.map((n, i) => n - ground.position[i]),
+      here('sun').position.map((n, i) => n - target.position[i]),
+    );
+    if (!direction) return null;
+    if (lampTold !== target.id) {
+      lampTold = target.id;
+      toast.show('이곳은 지금 밤입니다. 살펴보는 동안만 빛을 비춥니다.');
+    }
+    return { id: ground.id, direction };
   }
 
   // Choosing a craft from close by docks with it; choosing somewhere already visited
@@ -1161,6 +1184,7 @@ async function init() {
       speed: shownSpeed(),
       photoOrientation: photo.orientation(),
       seen: orbitEye(),
+      lamp: orbitLamp(),
       heroVisible: photo.heroVisible(),
       turn,
       // For the sprite character: which way she is thrusting. Docked, she rides ahead.

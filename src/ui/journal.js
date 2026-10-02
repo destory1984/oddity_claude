@@ -4,7 +4,7 @@ import { objectParticle } from './messages.js';
 import { FACTS } from '../core/facts.js';
 import { photoCaption, ALBUM_MAX } from '../core/album.js';
 import { starText, postageFile } from '../core/postcard.js';
-import { TOURS, stopName, stampFile } from '../core/tours.js';
+import { TOURS, stopName, stampFile, sceneFile } from '../core/tours.js';
 
 const $ = (id) => document.getElementById(id);
 // 로 after a vowel or ㄹ, 으로 after any other final consonant.
@@ -327,6 +327,12 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       li.className = isGoing ? 'going' : isDone ? 'done' : '';
       const title = document.createElement('strong');
       title.textContent = `${isDone ? '✓' : '○'} ${tour.name}${isGoing ? ` · 가는 중 ${going.step}/${tour.stops.length}` : ''}`;
+      // A picture of the road, pasted in like a photograph (it says nothing the words do not).
+      const scene = picture(sceneFile(tour), '', 'scene');
+      scene.loading = 'lazy';
+      scene.width = 384;
+      scene.height = 216;
+      li.append(scene);
       if (isDone) li.append(picture(stampFile(tour), `${tour.name} 도장`, 'stamp'));
       const memo = document.createElement('span');
       memo.className = 'memo';

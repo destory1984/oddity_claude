@@ -18,6 +18,8 @@ This repository is licensed in three parts.
      porch, note and mailbox scenes, the stamps, the postage stamps and
      postmark, the stars, the pencil marks, the newspaper clipping) and the
      companions in public/assets/pals/.
+   - The screen icons in public/assets/ui/icon-*.png. (The frames beside them,
+     frame-*.png and bubble-tail.png, are drawn by build/ui-frames.py and are MIT.)
    - The app icons in public/icons/.
    - The game's name and title as a brand: "우주 한량" and
      "Space Oddity — 우주 한량", including their use as the name of an app, game

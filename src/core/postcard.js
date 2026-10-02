@@ -103,6 +103,27 @@ const BY_MISSION = {
   earthrise: '달에서 지구가 뜨는 걸 보다니. 1968년 아폴로 8호가 찍은 그 사진 같구나.',
   paleBlueDot: '저 점 안에 내가 있단다. 손 흔든 거 봤느냐.',
 };
+// What she says when a place or a picture she has already answered comes again.
+const AGAIN = {
+  sun: '또 해구나. 눈 조심하렴. 나는 2009년 일식 때도 필터를 꼭 댔단다.',
+  mercury: '수성을 또 찍었구나. 해 뜨기 전에 나가도 번번이 놓치던 별인데.',
+  venus: '금성을 또 보냈구나. 2012년에 해 앞을 지나던 검은 점이 저것이란다.',
+  earth: '또 우리 집이구나. 이번에는 마당에 나가 손을 흔들었단다.',
+  moon: '달을 또 찍었구나. 볼 때마다 좋은 건 나도 그렇단다.',
+  mars: '화성을 또 보냈구나. 내 망원경으로는 흰 극관밖에 못 봤는데.',
+  jupiter: '목성을 또 찍었구나. 1994년에 혜성이 부딪혀 든 멍은 이제 없지?',
+  saturn: '토성을 또 보냈구나. 1995년에는 고리가 누워서 며칠 안 보였단다.',
+  uranus: '천왕성을 또 찍었구나. 정말 누워서 도느냐.',
+  neptune: '해왕성을 또 보냈구나. 1989년에 신문에서 본 그 푸른빛 그대로다.',
+  pluto: '명왕성을 또 찍었구나. 그 하트는 볼수록 정이 간다.',
+  ceres: '세레스를 또 찍었구나. 처음엔 행성이라 불렸던 곳이란다.',
+  halley: '핼리를 또 보냈구나. 2061년에 다시 온다니, 그때는 네가 보렴.',
+  haleBopp: '헤일-밥을 또 보냈구나. 저녁마다 마당에 나가던 생각이 난다.',
+  churyumov: '그 혜성을 또 찍었구나. 오리처럼 생긴 건 볼 때마다 우습다.',
+  eclipse: '개기일식을 또 봤구나. 부럽기도 하지.',
+  earthrise: '지구가 뜨는 걸 또 찍었구나. 몇 번을 봐도 곱다.',
+  paleBlueDot: '또 그 점이구나. 이번에도 손 흔들었단다.',
+};
 const STARS = [
   '다음엔 무엇을 찍는지 잘 보이게 담아 보렴.',
   '별 하나. 조금 더 크게, 조금 비켜서 찍어 보렴.',
@@ -112,9 +133,14 @@ const STARS = [
 
 // The reply to a postcard. entry: an album entry (rate may be missing on an old photo).
 // n: a count that picks among the plain lines, so two in a row differ.
-export function replyFor(entry, n = 0) {
+// earlier: the replies she has already written. A place answered before gets her second
+// line, and after that a plain one: she does not say the same thing twice.
+export function replyFor(entry, n = 0, earlier = []) {
   const mission = (entry.missions ?? []).find((id) => BY_MISSION[id]);
-  const heart = BY_MISSION[mission] ?? HEARTS[entry.rate?.subject] ?? PLAIN[n % PLAIN.length];
+  const key = mission ?? entry.rate?.subject;
+  const said = (line) => earlier.some((text) => text.startsWith(line));
+  const own = [BY_MISSION[mission] ?? HEARTS[key], AGAIN[key]].find((line) => line && !said(line));
+  const heart = own ?? PLAIN[n % PLAIN.length];
   return entry.rate ? `${heart} ${STARS[entry.rate.stars]}` : heart;
 }
 

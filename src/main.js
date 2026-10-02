@@ -745,7 +745,9 @@ ${STORY_MORE[target.id]}` : told };
   // are written into the album now and read out on one sheet, after any note.
   let repliesDue = arrivedReplies(album, dayOf(openedAt));
   function openReplies() {
-    const texts = repliesDue.map((index, n) => replyFor(album[index], n + album.filter((e) => e.reply).length));
+    const earlier = album.flatMap((e) => (e.reply ? [e.reply] : []));
+    const texts = [];
+    for (const index of repliesDue) texts.push(replyFor(album[index], earlier.length + texts.length, [...earlier, ...texts]));
     album = saveAlbum(album.map((entry, i) => (repliesDue.includes(i) ? { ...entry, reply: texts[repliesDue.indexOf(i)] } : entry)));
     journal.setAlbum(album);
     const best = Math.max(...repliesDue.map((i) => album[i]?.rate?.stars ?? 0));

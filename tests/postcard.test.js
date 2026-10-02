@@ -90,6 +90,26 @@ test("grandmother's reply speaks of the place, then gives her stars", () => {
   assert.equal(starText(2), '★★☆');
 });
 
+test('a place she has answered before gets a second line, then a plain one', () => {
+  const photo = { missions: [], rate: { stars: 2, subject: 'saturn' } };
+  const first = replyFor(photo, 0, []);
+  const second = replyFor(photo, 1, [first]);
+  const third = replyFor(photo, 2, [first, second]);
+  assert.ok(first.startsWith('처음 망원경으로 고리를 봤을 때'));
+  assert.ok(second.startsWith('토성을 또 보냈구나.'));
+  assert.ok(third.startsWith('사진을 벽에 붙여 놨단다.'));
+  // Every reply still ends with her stars.
+  for (const text of [first, second, third]) assert.ok(text.endsWith('별 둘. 솜씨가 늘었구나.'));
+  // The same holds for a picture that met a mission, and another place is untouched.
+  const rise = { missions: ['earthrise'], rate: { stars: 3, subject: 'earth' } };
+  assert.ok(replyFor(rise, 0, [replyFor(rise)]).startsWith('지구가 뜨는 걸 또 찍었구나.'));
+  assert.ok(replyFor({ missions: [], rate: { stars: 1, subject: 'mars' } }, 0, [first]).startsWith('2003년에'));
+  for (const id of BODIES.filter((b) => b.kind !== 'moon' || b.id === 'moon').map((b) => b.id)) {
+    const again = replyFor({ missions: [], rate: { stars: 2, subject: id } }, 0, [replyFor({ missions: [], rate: { stars: 2, subject: id } })]);
+    assert.ok(again.length <= 200 && !again.includes('~') && !again.startsWith('별이 참 많구나'), id);
+  }
+});
+
 test('a postcard gets a stamp by what it shows, and every stamp is on file', () => {
   const of = (subject) => postageFile({ rate: { stars: 1, subject } });
   assert.equal(of('moon'), 'notebook/postage-moon.png');

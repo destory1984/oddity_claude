@@ -1013,12 +1013,21 @@ ${STORY_MORE[target.id]}` : told };
     saveLayout(layout === 'today' ? 'tour' : 'today');
     location.reload();
   });
-  window.addEventListener('blur', () => {
-    input.clear();
-    if (!photo.active()) setPaused(true);
-  });
+  // Another window in front: the keys held are let go (their keyups never arrive), and
+  // the flight goes on.
+  window.addEventListener('blur', () => input.clear());
+  // The screen put away (another app, another tab): the game waits, and goes on by
+  // itself when the screen is back. (Until 2026-10-03 it stayed paused until the play
+  // button was pressed.) A pause the player made, or a dialog's, is left as it was.
+  let awayPaused = false;
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) setPaused(true);
+    if (document.hidden) {
+      awayPaused = !paused;
+      if (awayPaused) setPaused(true);
+    } else {
+      if (awayPaused && paused) setPaused(false);
+      awayPaused = false;
+    }
   });
   window.addEventListener('resize', () => world.resize());
   if (matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints > 0) document.body.classList.add('touch');
@@ -1061,8 +1070,8 @@ ${STORY_MORE[target.id]}` : told };
     const elapsed = previous === null ? 0 : (now - previous) / 1000;
     previous = now;
     // A suspended tab must never fast-forward the journey.
-    if (elapsed > MAX_FRAME_GAP_S) setPaused(true);
-    const dt = paused ? 0 : elapsed;
+    // (That one long frame counts as no time; the flight goes on from the next.)
+    const dt = paused || elapsed > MAX_FRAME_GAP_S ? 0 : elapsed;
 
     // Advance the orbits, carry the traveler with a nearby body, then fly.
     if (dt > 0) {

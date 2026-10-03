@@ -17,9 +17,13 @@ test('the time of the update is given on the Korean clock, to the minute', () =>
   assert.equal(updatedText(new Date('2026-10-03T21:34:00+09:00')), '2026-10-03 21:34');
 });
 
-test('the loading screen has a place for both, and the build fills it', () => {
+test('the note sheet has a place for both at its foot, and the build fills it', () => {
   const html = fs.readFileSync('index.html', 'utf8');
-  assert.ok(html.includes('{{version}}') && html.includes('{{updated}}'));
+  const note = html.slice(html.indexOf('<dialog id="noteCard"'));
+  const sheet = note.slice(0, note.indexOf('</dialog>'));
+  assert.match(sheet, /journalActions[\s\S]*<small id="noteCardVersion">\{\{version\}\} · \{\{updated\}\}<\/small>\s*$/);
+  // Nowhere else: the loading screen no longer carries it.
+  assert.equal(html.split('{{version}}').length, 2);
   const filled = fillVersion('<small>{{version}} · {{updated}}</small>', '0.1.2', new Date('2026-10-03T12:00:00Z'));
   assert.equal(filled, '<small>v0.1.2 · 2026-10-03 21:00</small>');
   // The version in package.json is one the label can show.

@@ -1,4 +1,4 @@
-// The version and the time of the last update, shown on the loading screen.
+// The version and the time of the last update, shown small at the foot of grandmother's note sheet.
 // The version is package.json's: raised a little with every commit (0.1.0 → 0.1.1; a
 // larger step for a larger change). The time is that of the last commit, in Korean time.
 import fs from 'node:fs';

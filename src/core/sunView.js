@@ -24,3 +24,18 @@ export function sunFrame(toSun, viewRight) {
   // Left-handed axes (x right, y up, z ahead): up = away × right.
   return { right, up: cross(away, right), away };
 }
+
+// The point of the Sun's ball (a unit vector from its centre) that is seen through the
+// place (x, y) on the card, in Sun radii from the card's middle along cardRight and
+// cardUp; null when the line of sight passes the ball by. eyeDist: from the eye to the
+// Sun's centre, in Sun radii. This is what shaders/sun.frag does for every pixel, kept
+// here to be tested: the disc used to be drawn as if seen from infinitely far, and from
+// close by a spot sat nearer the middle than it was and slid away from whoever flew at it.
+export function ballPoint({ away, eyeDist, cardRight, cardUp }, x, y) {
+  const sight = unit(away.map((n, i) => n * eyeDist + cardRight[i] * x + cardUp[i] * y));
+  const along = dot(sight, away);
+  const miss = eyeDist * Math.hypot(...sight.map((n, i) => n - away[i] * along));
+  if (miss >= 1) return null;
+  const reach = eyeDist * along - Math.sqrt(1 - miss * miss);
+  return sight.map((n, i) => n * reach - away[i] * eyeDist);
+}

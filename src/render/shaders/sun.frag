@@ -13,6 +13,13 @@ uniform vec3 bead;
 uniform vec3 axisR;
 uniform vec3 axisU;
 uniform vec3 axisF;
+// Where this point of the card is in space, from the eye (the eye is the scene's
+// origin), and how far the eye is from the Sun's centre, in Sun radii. With these each
+// pixel's line of sight is followed to the ball itself: from close by, a spot is drawn where it is, and flying at it it
+// stays ahead. (The disc was drawn as if seen from infinitely far: close in, spots sat
+// nearer the middle than they were and slid away from whoever flew at them.)
+varying vec3 wp;
+uniform float eyeDist;
 #include<noise>
 float hash3(vec3 p) {
   return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453);
@@ -37,7 +44,19 @@ float fbm3(vec3 p) {
   return v;
 }
 void main(){
-  vec2 p = (vUV - .5) * 2.;
+  // The line of sight through this pixel, and how near it passes the Sun's centre
+  // (miss, in Sun radii: under 1 it meets the ball). p is the pixel's place round the
+  // centre along the Sun-facing axes, with the disc's edge at .129 as before. On the
+  // disc it goes by the miss. Off it, by the angle from the centre, measured in disc
+  // radii as seen from here: the glow falls off across the sky as it did, and does not
+  // fill it. (By the miss alone, which is never more than the distance, the whole sky
+  // near Earth was a yellow haze.)
+  vec3 sight = normalize(wp);
+  float along = dot(sight, axisF);
+  vec3 aside = sight - axisF * along;
+  float miss = eyeDist * length(aside);
+  float off = length(aside) / max(along, 1e-4) * sqrt(eyeDist * eyeDist - 1.);
+  vec2 p = .129 * (miss < 1. ? miss : off) * vec2(dot(aside, axisR), dot(aside, axisU)) / max(length(aside), 1e-6);
   float r = length(p);
   float disc = 1. - smoothstep(.124, .129, r);
 
@@ -45,8 +64,8 @@ void main(){
   vec2 q = p / .129;
   float mu = sqrt(max(0., 1. - dot(q, q)));
   float limb = .45 + .55 * pow(mu, .6);
-  // The point of the ball under this pixel, in space.
-  vec3 n3 = axisR * q.x + axisU * q.y - axisF * mu;
+  // The point of the ball the line of sight meets, in space.
+  vec3 n3 = normalize(-axisF * eyeDist + sight * (eyeDist * along - mu));
   float granules = fbm3(n3 * 18. + vec3(time * .06, -time * .04, time * .03));
   float cells = fbm3(n3 * 55. - vec3(time * .1, time * .07, time * .05));
   // Sunspots ride the Sun's rotation: one turn in 25.4 days, 51 minutes on the game

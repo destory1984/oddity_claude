@@ -163,12 +163,14 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       const d = camera.getDirection(v);
       return [d.x, d.y, d.z];
     };
-    // The bead of the diamond ring, in the Sun billboard's own axes (the camera's).
     const [right, up] = [axis(Vector3.Right()), axis(Vector3.Up())];
-    const across = (a) => bead.direction.reduce((sum, n, i) => sum + n * a[i], 0);
-    sun.material.setVector3('bead', new Vector3(across(right), across(up), bead.strength));
-    // What is on the Sun's card is looked up in the Sun's own axes (core/sunView.js).
+    // What is on the Sun's card is looked up in the Sun's own axes (core/sunView.js),
+    // along each pixel's line of sight from the eye.
     const card = sunFrame(directions[sunNow.id], right);
+    // The bead of the diamond ring, in those axes.
+    const across = (a) => bead.direction.reduce((sum, n, i) => sum + n * a[i], 0);
+    sun.material.setVector3('bead', new Vector3(across(card.right), across(card.up), bead.strength));
+    sun.material.setFloat('eyeDist', Math.max(1.0005, distances[sunNow.id] / sunNow.radiusKm));
     sun.material.setVector3('axisR', new Vector3(...card.right));
     sun.material.setVector3('axisU', new Vector3(...card.up));
     sun.material.setVector3('axisF', new Vector3(...card.away));

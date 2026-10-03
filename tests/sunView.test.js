@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { sunFrame } from '../src/core/sunView.js';
+import { sunFrame, ballPoint } from '../src/core/sunView.js';
 
 const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
 const close = (a, b) => a.forEach((n, i) => assert.ok(Math.abs(n - b[i]) < 1e-9, `${a} != ${b}`));
@@ -30,4 +30,34 @@ test('from another side of the Sun the card looks at another part of it; turning
   // The Sun dead abeam still gives a frame.
   const abeam = sunFrame([1, 0, 0], [1, 0, 0]);
   assert.ok(Math.abs(dot(abeam.right, abeam.away)) < 1e-9 && Math.abs(Math.hypot(...abeam.up) - 1) < 1e-9);
+});
+
+test('a spot is drawn where it is: the line of sight through its place on the card meets the ball at the spot', () => {
+  const away = [0, 0, 1];
+  const card = { away, cardRight: [1, 0, 0], cardUp: [0, 1, 0] };
+  // A spot 40 degrees round from the point under the eye, toward the right.
+  const spot = [Math.sin(0.7), 0, -Math.cos(0.7)];
+  for (const eyeDist of [1.5, 2.4, 10, 1000]) {
+    // Where the line from the eye (at -away * eyeDist) to the spot crosses the card,
+    // which stands at the Sun's centre.
+    const x = spot[0] * eyeDist / (eyeDist + spot[2]);
+    close(ballPoint({ ...card, eyeDist }, x, 0), spot);
+    // Seen from infinitely far it would be at sin(0.7) of a radius; from close by it is
+    // farther out than that, and the nearer the eye the farther.
+    assert.ok(x > Math.sin(0.7));
+  }
+  assert.ok(Math.abs(1000 * Math.sin(0.7) / (1000 - Math.cos(0.7)) - Math.sin(0.7)) < 1e-3);
+  // The middle of the card is the point under the eye; far enough off it, the sight misses.
+  close(ballPoint({ ...card, eyeDist: 2.4 }, 0, 0), [0, 0, -1]);
+  assert.equal(ballPoint({ ...card, eyeDist: 2.4 }, 1.2, 0), null);
+  // From 2.4 radii the ball's edge is at 2.4 / sqrt(2.4^2 - 1) = 1.1 radii on the card, not 1.
+  assert.ok(ballPoint({ ...card, eyeDist: 2.4 }, 1.09, 0));
+  // A card that does not face the Sun squarely (the Sun off to one side of the view)
+  // still shows the spot where it is.
+  const tilted = { away, eyeDist: 2.4, cardRight: [Math.cos(0.5), 0, -Math.sin(0.5)], cardUp: [0, 1, 0] };
+  // The line from the eye to the spot: eye + t * (spot - eye) = s * cardRight.
+  const eye = [0, 0, -2.4];
+  const ray = spot.map((n, i) => n - eye[i]);
+  const s2 = (eye[2] * ray[0] - eye[0] * ray[2]) / (tilted.cardRight[2] * ray[0] - tilted.cardRight[0] * ray[2]);
+  close(ballPoint(tilted, s2, 0), spot);
 });

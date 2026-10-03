@@ -16,6 +16,7 @@ import { createComet } from './comet.js';
 import { createMeteors } from './meteors.js';
 import { createGlows } from './glows.js';
 import { glowsNear } from '../core/glows.js';
+import { SHADOW_CASTERS, castShadows, shadowsNear } from '../core/shadows.js';
 import { createBelt } from './belt.js';
 import { inBelt } from '../core/belt.js';
 import { createIce } from './ice.js';
@@ -122,6 +123,7 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       // lamp: { id, direction } lights one body from elsewhere than the Sun, while a
       // place in its night is being looked at closely (core/lamp.js).
       item.setSun(lamp?.id === body.id ? lamp.direction : normalize(sunNow.position.map((n, i) => n - body.position[i])));
+      if (SHADOW_CASTERS[body.id]) item.setShadows?.(castShadows(body.id, now));
     }
     const sunRel = relative(sunNow, position);
     sun.mesh.position.set(sunRel[0], sunRel[1], sunRel[2]);
@@ -186,7 +188,7 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       // A flash (lightning, a sprite, an impact on the Moon) in the frame it happens.
       glow: flashed,
       // Everything of that kind within reach, the nearest thing first (core/glows.js).
-      glowsNear: glowsNear(now, traveler),
+      glowsNear: [...glowsNear(now, traveler), ...shadowsNear(now, traveler)],
       // The sprite character's drawing; the paper model has none.
       heroSheet: hero.sheet ? hero.sheet() : null,
       // Where her drawing is on screen: { file, height, up, shape } (render/spriteHero.js).

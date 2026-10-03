@@ -1,4 +1,6 @@
 import { FACTS } from '../core/facts.js';
+import { BODY_DATA } from '../core/bodies.js';
+import { SHADOW_CASTERS, shadowEdge } from '../core/shadows.js';
 
 const HANGUL_START = 0xac00;
 const HANGUL_END = 0xd7a3;
@@ -82,6 +84,7 @@ export function eventMessage(event, bodies = []) {
       return `덥습니다. 태양에서 ${event.au.toFixed(1)}AU 떨어진 이곳의 햇빛은 지구의 ${(1 / (event.au * event.au)).toFixed(1)}배입니다.`;
     // Lights and plumes (core/glows.js), each told once.
     case 'glow':
+      if (event.id.startsWith('shadow:')) return shadowMessage(event.id.slice(7));
       return {
         'aurora:earth': '지구의 두 극 둘레에 오로라가 떠 있습니다. 밤 쪽에서 보입니다.\n태양에서 날아온 입자가 100km 위 공기를 때려 내는 빛입니다.',
         'aurora:jupiter': '목성의 두 극에 오로라가 떠 있습니다. 밤 쪽에서 보입니다.\n지구 오로라보다 수백 배 세고, 위성 이오가 뿜은 입자도 보탭니다.',
@@ -126,4 +129,17 @@ export function limitText(ratio) {
   if (ratio < 1) return `${ratio.toFixed(2)}c`;
   if (ratio < 10) return `${ratio.toFixed(1)}c`;
   return `${Math.round(ratio)}c`;
+}
+
+// A moon's shadow on its planet (core/shadows.js), or null for a moon that casts none.
+function shadowMessage(moonId) {
+  const moon = BODY_DATA.find((b) => b.id === moonId);
+  const planet = moon && BODY_DATA.find((b) => b.id === moon.parent);
+  if (!planet || !SHADOW_CASTERS[planet.id]?.includes(moonId)) return null;
+  if (shadowEdge(moonId).depth < 1) {
+    return `${planet.name} 땅 위로 흐릿한 얼룩이 지나갑니다. 위성 ${moon.name}의 그림자입니다.
+${moon.name}는 작아서 해를 다 가리지 못합니다. 화성의 탐사차들이 해 앞을 지나는 ${moon.name}를 여러 번 찍었습니다.`;
+  }
+  return `${planet.name} 구름 위로 검은 점이 지나갑니다. 위성 ${moon.name}의 그림자입니다.
+그 점 안에 서면 해가 ${moon.name}에 가려 보이지 않습니다. 일식입니다.`;
 }

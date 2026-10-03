@@ -15,6 +15,7 @@ import { KM_PER_UNIT, TIME_SCALE } from '../core/bodies.js';
 import { normalize } from './math.js';
 import { SPIN_DAY_S, EARTH_START_SPIN } from '../core/surface.js';
 import { SPOKES } from '../core/glows.js';
+import { SHADOW_SLOTS } from '../core/shadows.js';
 
 const SIDEREAL_DAY_S = SPIN_DAY_S.earth;
 // Real rotation is too slow to see (Earth turns 1.25 degrees in five minutes), so
@@ -285,7 +286,9 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
       ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy',
-        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time'], ['map']);
+        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge'], ['map']);
+    material.setArray4('shadeAt', new Array(SHADOW_SLOTS * 4).fill(0));
+    material.setArray3('shadeEdge', new Array(SHADOW_SLOTS * 3).fill(0));
     material.setVector3('storm', new Vector3(look.storm?.[0] ?? 0, look.storm?.[1] ?? 0, look.storm ? 1 : 0));
     material.setFloat('time', 0);
     material.setColor3('rimColor', color(look.rim ?? [0, 0, 0]));
@@ -350,6 +353,12 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     setSun(dir) {
       material.setVector3('sun', new Vector3(...dir));
       if (ring) ring.setSun(new Vector3(...dir));
+    },
+    // The shadows of its moons this frame (core/shadows.js castShadows).
+    setShadows({ at, edge }) {
+      if (look.shader !== 'textured') return;
+      material.setArray4('shadeAt', at);
+      material.setArray3('shadeEdge', edge);
     },
   };
 }

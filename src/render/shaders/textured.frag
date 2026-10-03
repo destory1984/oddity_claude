@@ -37,6 +37,11 @@ uniform float time;
 uniform vec3 ringNormal;
 uniform float ringInner;
 uniform float ringOuter;
+// The shadows of its moons (core/shadows.js), in planet radii: where each moon is from
+// the planet's centre, and its shadow's edge (x: fully dark out to here, y: no shadow
+// from here, z: how dark the middle is; y is zero for an unused slot).
+uniform vec4 shadeAt[6];
+uniform vec3 shadeEdge[6];
 #include<noise>
 #include<rings>
 
@@ -194,6 +199,18 @@ void main(){
       float rr = length(N + sun * reach);
       lit *= 1. - .8 * ringProfile((rr - ringInner) / (ringOuter - ringInner)).a;
     }
+  }
+  // The shadows of its moons: how far this spot is from the line that runs from the
+  // moon's centre straight away from the Sun.
+  vec3 spot = normalize(n);
+  for (int k = 0; k < 6; k++) {
+    vec3 edge = shadeEdge[k];
+    if (edge.y <= 0.) continue;
+    vec3 toMoon = shadeAt[k].xyz - spot;
+    float along = dot(toMoon, sun);
+    if (along <= 0.) continue;
+    float off = length(toMoon - sun * along);
+    lit *= 1. - .92 * edge.z * (1. - smoothstep(edge.x, edge.y, off));
   }
   float facing = max(dot(N, V), 0.);
   // Atmosphere: a soft glow on the lit limb.

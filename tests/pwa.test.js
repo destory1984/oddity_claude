@@ -43,6 +43,12 @@ test('the page links the manifest and the iPhone icon, and the worker template h
   assert.match(worker, /__PRECACHE__/);
 });
 
+test('the worker asks for the page past the browser cache, so a reload shows the newest build', () => {
+  const worker = fs.readFileSync('src/sw.js', 'utf8');
+  const navigate = worker.slice(worker.indexOf("request.mode === 'navigate'"));
+  assert.match(navigate.slice(0, navigate.indexOf('return;')), /fetch\(request\.url, \{ cache: 'no-store' \}\)/);
+});
+
 test('the screen font is shipped with the game, with its licence, and is the first choice', () => {
   const css = fs.readFileSync('public/fonts/pretendard/pretendardvariable-dynamic-subset.css', 'utf8');
   const files = [...css.matchAll(/url\(\.\/(woff2-dynamic-subset\/[^)]+\.woff2)\)/g)].map((m) => m[1]);

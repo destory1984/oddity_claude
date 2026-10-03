@@ -3071,3 +3071,12 @@ body.rear.touch #reticle span {
   #brake { right:68px; }
   #flyButton { right:0; }
 }
+
+/* The version and when it was last updated, small, under the loading line. */
+#loadingVersion {
+  margin-top:-8px;
+  font-size:11px;
+  font-variant-numeric:tabular-nums;
+  color:#aab6d8;
+  text-shadow:0 2px 12px #02040b, 0 0 3px #02040b;
+}

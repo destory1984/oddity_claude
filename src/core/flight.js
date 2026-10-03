@@ -3,20 +3,22 @@ export const C = 299792.458;
 export const MIN_SPEED = C * 0.01;
 export const MAX_SPEED = C * 100;
 // The limit grows with the distance to the nearest surface: flying straight at a body
-// at the limit, the surface is always at least one second away, so the traveler slows
-// down smoothly on approach and speeds up smoothly on departure.
-export const LIMIT_PER_SECOND = 1;
+// at the limit, the surface is always at least two seconds away, so the traveler slows
+// down smoothly on approach and speeds up smoothly on departure. (It was one second
+// until 2026-10-03: leaving a planet, the speed doubled every 0.7 s and ran away.)
+export const LIMIT_PER_SECOND = 0.5;
 
 export function speedLimit(surfaceKm) {
   return Math.min(MAX_SPEED, Math.max(MIN_SPEED, surfaceKm * LIMIT_PER_SECOND));
 }
 
-const ACCELERATION_SECONDS = 3;
+// Full thrust reaches the limit of the spot in this long (3 s until 2026-10-03).
+export const ACCELERATION_SECONDS = 6;
 
 export function accelerateSpeed(current, strength, dt, maxSpeed) {
   const clampedStrength = Math.max(0, Math.min(1, strength));
   const next = Math.max(0, current) + (maxSpeed / ACCELERATION_SECONDS) * clampedStrength * Math.max(0, dt);
-  // Snap rounding residue so a full-strength 3 s burn lands exactly on the limit.
+  // Snap rounding residue so a full-strength burn of that long lands exactly on the limit.
   if (next >= maxSpeed * (1 - 1e-12)) return maxSpeed;
   return next;
 }

@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { createState, step, stopNow, totalSpeed, carryAlong, START_ORIENTATION, startOrientation } from '../src/core/game.js';
-import { C, speedLimit, MAX_SPEED } from '../src/core/flight.js';
+import { C, speedLimit, MAX_SPEED, ACCELERATION_SECONDS } from '../src/core/flight.js';
 import { lookAtDirection } from '../src/core/orientation.js';
 import { BODIES, START_POSITION, bodyById, nearestSurface } from '../src/core/bodies.js';
 
@@ -32,11 +32,11 @@ test('zero or negative dt changes nothing', () => {
   assert.deepEqual(step(state, { drive: 1 }, -1).state, state);
 });
 
-test('full throttle reaches 100c in three seconds in empty space', () => {
+test('full throttle reaches 100c in six seconds in empty space', () => {
   const state = createState([0, 0, 0], [0, 0, 0, 1], []);
-  const after = run(state, { drive: 1 }, 180, []).state;
+  const after = run(state, { drive: 1 }, 360, []).state;
   assert.ok(Math.abs(after.speed - MAX_SPEED) < 1e-3);
-  assert.ok(run(state, { drive: 1 }, 170, []).state.speed < MAX_SPEED);
+  assert.ok(run(state, { drive: 1 }, 350, []).state.speed < MAX_SPEED);
 });
 
 test('releasing the keys keeps the speed: the traveler coasts', () => {
@@ -112,9 +112,9 @@ test('leaving a surface the speed grows a little every frame, never in a jump', 
     state = result.state;
     events.push(...result.events);
     const limit = speedLimit(Math.hypot(...before.position) - ball.radiusKm);
-    assert.ok(state.speed - before.speed <= limit / 3 * DT + 1e-6, `jumped at frame ${i}`);
+    assert.ok(state.speed - before.speed <= limit / ACCELERATION_SECONDS * DT + 1e-6, `jumped at frame ${i}`);
   }
-  assert.ok(Math.hypot(...state.position) > 1e6, 'got far away in 20 s');
+  assert.ok(Math.hypot(...state.position) > 5e5, 'got far away in 20 s');
   assert.deepEqual(events, []);
 });
 test('reverse near a body: S while diving brakes, never enters, then backs away', () => {
@@ -133,9 +133,9 @@ test('the real table: diving from the start at Earth lands on Earth', () => {
   assert.ok(events.some((e) => e.type === 'surfaceReached' && e.bodyId === 'earth'));
 });
 
-test('strafing right slides along the body right axis at the limit within three seconds', () => {
+test('strafing right slides along the body right axis at the limit within six seconds', () => {
   const state = createState([0, 0, 0], [0, 0, 0, 1], []);
-  const after = run(state, { strafe: 1 }, 180, []).state;
+  const after = run(state, { strafe: 1 }, 360, []).state;
   assert.ok(after.position[0] > 0, 'moved right');
   assert.ok(Math.abs(after.position[2]) < 1e-6, 'no forward motion');
   assert.ok(Math.abs(totalSpeed(after) - MAX_SPEED) < 1e-3);

@@ -7,31 +7,33 @@ import {
 
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
-test('the limit is the surface distance per second, between 0.01c and 100c', () => {
+test('the limit is half the surface distance per second, between 0.01c and 100c', () => {
   assert.equal(MIN_SPEED, C * 0.01);
   assert.equal(MAX_SPEED, C * 100);
   assert.equal(speedLimit(0), MIN_SPEED);
   assert.equal(speedLimit(1000), MIN_SPEED, 'close to a surface the floor applies');
-  near(speedLimit(30000), 30000);
-  near(speedLimit(3e6), 3e6);
-  assert.equal(speedLimit(4e7), MAX_SPEED);
+  assert.equal(speedLimit(5000), MIN_SPEED, 'the floor reaches out to 6,000 km');
+  near(speedLimit(30000), 15000);
+  near(speedLimit(3e6), 1.5e6);
+  assert.ok(speedLimit(4e7) < MAX_SPEED);
+  assert.equal(speedLimit(6e7), MAX_SPEED);
   assert.equal(speedLimit(Infinity), MAX_SPEED);
 });
 
 test('the limit never falls as the distance grows', () => {
   let previous = 0;
-  for (let d = 0; d < 5e7; d = d * 1.5 + 100) {
+  for (let d = 0; d < 1e8; d = d * 1.5 + 100) {
     const limit = speedLimit(d);
     assert.ok(limit >= previous, `limit fell at ${d} km`);
     previous = limit;
   }
 });
 
-test('full acceleration reaches a fixed limit in three seconds and never exceeds it', () => {
+test('full acceleration reaches a fixed limit in six seconds and never exceeds it', () => {
   for (const limit of [MIN_SPEED, C * 0.1, MAX_SPEED]) {
-    assert.equal(accelerateSpeed(0, 1, 3, limit), limit);
-    assert.ok(accelerateSpeed(0, 1, 2.9, limit) < limit);
-    assert.equal(accelerateSpeed(limit, 1, 3, limit), limit);
+    assert.equal(accelerateSpeed(0, 1, 6, limit), limit);
+    assert.ok(accelerateSpeed(0, 1, 5.9, limit) < limit);
+    assert.equal(accelerateSpeed(limit, 1, 6, limit), limit);
   }
 });
 

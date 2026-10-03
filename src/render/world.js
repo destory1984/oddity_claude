@@ -21,6 +21,7 @@ import { inBelt } from '../core/belt.js';
 import { createIce } from './ice.js';
 import { ringCrossing, ringDensity } from '../core/rings.js';
 import { eyeView } from '../core/eye.js';
+import { sunFrame } from '../core/sunView.js';
 import { CRAFT } from '../core/craft.js';
 import { normalize } from './math.js';
 
@@ -166,6 +167,11 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
     const [right, up] = [axis(Vector3.Right()), axis(Vector3.Up())];
     const across = (a) => bead.direction.reduce((sum, n, i) => sum + n * a[i], 0);
     sun.material.setVector3('bead', new Vector3(across(right), across(up), bead.strength));
+    // What is on the Sun's card is looked up in the Sun's own axes (core/sunView.js).
+    const card = sunFrame(directions[sunNow.id], right);
+    sun.material.setVector3('axisR', new Vector3(...card.right));
+    sun.material.setVector3('axisU', new Vector3(...card.up));
+    sun.material.setVector3('axisF', new Vector3(...card.away));
     return {
       directions,
       distances,

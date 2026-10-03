@@ -8,9 +8,10 @@ export const NEARBY_KM = 300000;
 
 // always: Earth and the Sun, the two bearings a traveler should never lose.
 // compact: a phone screen, where a dozen edge arrows covered the view. There only the
-// chosen target and the "always" ones keep an arrow when off screen.
+// chosen target, the nearest body and the "always" ones keep an arrow when off screen.
+// (The nearest had none until 2026-10-03, and what was closest was the hardest to find.)
 export function keepMarker({ outside, selected, nearest, surfaceKm, always = false, compact = false }) {
-  if (compact) return !outside || selected || always;
+  if (compact) return !outside || selected || nearest || always;
   return !outside || selected || nearest || always || surfaceKm <= NEARBY_KM;
 }
 

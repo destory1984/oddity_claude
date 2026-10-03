@@ -64,7 +64,9 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
     },
     // goalId: the body the first-visit guide points at; its label always shows and pulses.
     // knownIds: a Set of what is in the journal (bodies found, craft met, places logged).
-    update({ view, local, selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [], knownIds = null }) {
+    // nearestId: the body whose surface is closest (a moon counts); its label always says
+    // how far it is, and off screen it keeps an edge arrow, on a phone too.
+    update({ view, local, nearestId = local.body.id, selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [], knownIds = null }) {
       $('altitudeLabel').textContent = local.label;
       $('altitude').textContent = fmt(local.altitude);
       const backward = speed > 0.01 && motionSign < 0;
@@ -84,7 +86,9 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         el.classList.toggle('unknown', Boolean(knownIds) && !knownIds.has(body.id));
         const spot = placeMarker(el, view.directions[body.id], view.camera, hidden ? `${name} · 가려짐` : name);
         // What the traveler is looking toward also says how far its surface is.
-        if (!spot.outside && nearCentre(spot.x, spot.y, innerWidth, innerHeight)) {
+        const nearestHere = body.id === nearestId;
+        el.classList.toggle('nearest', nearestHere);
+        if (nearestHere || (!spot.outside && nearCentre(spot.x, spot.y, innerWidth, innerHeight))) {
           el.textContent += ` · ${distanceText(Math.max(0, view.distances[body.id] - body.radiusKm))}`;
         }
         const selectedHere = body.id === selected.id;
@@ -92,7 +96,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         const keep = (body.kind !== 'site' || !spot.outside || selectedHere) && keepMarker({
           outside: spot.outside,
           selected: selectedHere,
-          nearest: body.id === local.body.id,
+          nearest: nearestHere,
           surfaceKm: view.distances[body.id] - body.radiusKm,
           always: body.id === 'earth' || body.kind === 'star' || body.id === goalId,
           compact,

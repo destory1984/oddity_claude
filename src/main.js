@@ -1418,6 +1418,7 @@ ${STORY_MORE[target.id]}` : told };
     hud.update({
       view,
       local: nearestLocalBody(state.position, bodies),
+      nearestId: nearestSurface(state.position, bodies).body?.id,
       selected,
       speed: shownSpeed(),
       // Only forward/back motion can be 'backward'; a pure slide is not.

@@ -115,9 +115,10 @@ test('what stands behind a planet or a moon gets no label; what is in front of i
   assert.equal(behindBody(earth, [0, 0, 40000 + 1737], bodies), true);
 });
 
-test('on a phone only the chosen target, Earth, the Sun and the goal of the guide keep an off-screen arrow', () => {
-  const near = { outside: true, selected: false, nearest: true, surfaceKm: 1000, compact: true };
+test('on a phone only the chosen target, the nearest body, Earth, the Sun and the goal of the guide keep an off-screen arrow', () => {
+  const near = { outside: true, selected: false, nearest: false, surfaceKm: 1000, compact: true };
   assert.equal(keepMarker(near), false);
+  assert.equal(keepMarker({ ...near, nearest: true }), true);
   assert.equal(keepMarker({ ...near, compact: false }), true);
   assert.equal(keepMarker({ ...near, selected: true }), true);
   assert.equal(keepMarker({ ...near, always: true }), true);

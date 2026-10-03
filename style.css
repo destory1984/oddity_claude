@@ -2919,3 +2919,10 @@ button,
   margin-left:7px;
   font-size:10px;
 }
+
+/* The body whose surface is nearest: lined in mint, and its label always says how far.
+   Off screen it keeps its arrow at the edge, on a phone too. */
+.marker.nearest:not(.selected):not(.goal) {
+  border-color:#7fe0c3cc;
+  background:#0d1a3acc;
+}

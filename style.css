@@ -565,35 +565,6 @@ dialog button {
   margin-top:12px;
 }
 
-#stick {
-  display:none;
-  position:absolute;
-  left:24px;
-  bottom:95px;
-  width:108px;
-  height:108px;
-  border:1px solid #b9d6ed44;
-  background:#132b4433;
-  border-radius:50%;
-  pointer-events:auto;
-  touch-action:none;
-}
-
-#stickKnob {
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  background:#a4d6f24a;
-  border:1px solid #cbeaff77;
-  position:absolute;
-  left:31px;
-  top:31px;
-}
-
-body.touch #stick {
-  display:block;
-}
-
 body.touch #hint {
   display:none;
 }
@@ -670,15 +641,6 @@ body.touch #reticle span {
   kbd {
     display:none;
   }
-  #stick {
-    width:92px;
-    height:92px;
-    bottom:105px;
-  }
-  #stickKnob {
-    left:23px;
-    top:23px;
-  }
 }
 
 @media(max-height:500px) {
@@ -699,15 +661,6 @@ body.touch #reticle span {
   }
   .brand span {
     display:none;
-  }
-  #stick {
-    bottom:95px;
-    width:80px;
-    height:80px;
-  }
-  #stickKnob {
-    left:17px;
-    top:17px;
   }
   #toast {
     top:66px;
@@ -1264,10 +1217,6 @@ nav button {
     top:150px;
     width:100px;
     height:100px;
-  }
-  /* The touch stick sits at the left edge here; the map moves beside it. */
-  body.touch #minimap {
-    left:124px;
   }
 }
 

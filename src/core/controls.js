@@ -1,5 +1,5 @@
-export function controlIntent(keys, stickActive, flyingButton, reversingButton = false) {
-  const forward = keys.has('KeyW') || stickActive || flyingButton ? 1 : 0;
+export function controlIntent(keys, flyingButton, reversingButton = false) {
+  const forward = keys.has('KeyW') || flyingButton ? 1 : 0;
   const reverse = keys.has('KeyS') || reversingButton ? 1 : 0;
   return {
     turnX: (keys.has('ArrowRight') ? 1 : 0) - (keys.has('ArrowLeft') ? 1 : 0),

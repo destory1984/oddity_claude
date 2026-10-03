@@ -2871,3 +2871,51 @@ html.shell body {
   font-size:13px;
   color:#9fb0d8;
 }
+
+/* Nothing on the flight screen is text to be picked up: a long press on a phone marked
+   the word on a button instead of flying. Buttons everywhere, and the whole flight screen. */
+button,
+#hud,
+#guide,
+#photoTools,
+#toast,
+#heroSay,
+#journalTabs,
+.inspectHead {
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+}
+
+/* The three flight buttons are pictures (two chevrons back, a square, two chevrons
+   ahead); the words stay as the button's name for screen readers, the key beside it on a PC. */
+#reverseButton,
+#flyButton,
+#brake {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  font-size:0;
+}
+
+#reverseButton::before,
+#flyButton::before,
+#brake::before {
+  content:"";
+  flex:none;
+  width:24px;
+  height:24px;
+  background:center / contain no-repeat;
+}
+
+#reverseButton::before { background-image:url("/assets/ui/icon-reverse.svg"); }
+#flyButton::before { background-image:url("/assets/ui/icon-forward.svg"); }
+#brake::before { background-image:url("/assets/ui/icon-stop.svg"); }
+
+#reverseButton kbd,
+#flyButton kbd,
+#brake kbd {
+  margin-left:7px;
+  font-size:10px;
+}

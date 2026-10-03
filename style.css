@@ -3034,3 +3034,40 @@ body.rear.touch #reticle span {
 #journal #journalText button:disabled {
   opacity:.4;
 }
+
+/* The four buttons that steer her are squares: 56px, the key under the picture on a PC;
+   60px in one row on a phone. */
+#rearButton,
+#reverseButton,
+#brake,
+#flyButton {
+  flex:none;
+  flex-direction:column;
+  width:56px;
+  height:56px;
+  min-height:56px;
+  padding:0;
+}
+
+#rearButton kbd,
+#reverseButton kbd,
+#brake kbd,
+#flyButton kbd {
+  margin:2px 0 0;
+}
+
+@media (max-width: 480px) {
+  #rearButton,
+  #reverseButton,
+  #brake,
+  #flyButton {
+    width:60px;
+    height:60px;
+    min-height:60px;
+  }
+
+  #rearButton { right:204px; }
+  #reverseButton { right:136px; }
+  #brake { right:68px; }
+  #flyButton { right:0; }
+}

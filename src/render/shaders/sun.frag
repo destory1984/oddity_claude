@@ -96,12 +96,42 @@ void main(){
   // and show best when the disc is covered. Fourteen stand at fixed places on the Sun
   // and turn with it; one shows only while its place is near the edge as seen from
   // here, so which ones stand on the limb depends on where the Sun is looked at from.
+  // Turned toward the eye, the same place shows as a bright thread on the disc (below).
   float prom = 0.;
   for (int k = 0; k < 14; k++) {
     float fk = float(k);
     float py = (fract(sin(fk * 12.9898) * 43758.5) - .5) * 1.4;
     float pl = fk * 2.39996 - spin;
     vec3 place = vec3(sqrt(1. - py * py) * sin(pl), py, sqrt(1. - py * py) * cos(pl));
+    // The same gas over the face of the Sun, when its place is turned toward the eye:
+    // not an arch against the sky but a bright ragged thread across the disc, like a
+    // stroke of lightning, in a darker lane. It lies along a line through its place,
+    // each at its own slant, and flickers and creeps.
+    float facing = dot(place, n3);
+    if (miss < 1. && facing > .9) {
+      float slant = fk * 1.7;
+      vec3 east = normalize(cross(vec3(0., 1., 0.), place));
+      vec3 north = cross(place, east);
+      vec3 lineAlong = east * cos(slant) + north * sin(slant);
+      vec3 lineAcross = north * cos(slant) - east * sin(slant);
+      float reach = .1 + .12 * fract(sin(fk * 78.233) * 43758.5);
+      float bx = dot(n3, lineAlong) / reach;
+      float by = dot(n3, lineAcross);
+      if (abs(bx) < 1.) {
+        float bend = (fbm(vec2(bx * 2.2 + fk * 7., time * .05)) - .47) * reach * .9
+          + (noise(vec2(bx * 13. + fk * 3., time * .3)) - .5) * reach * .22;
+        float taper = 1. - bx * bx;
+        float swell = .7 + .3 * sin(time * .35 + fk * 2.1);
+        float thin = .003 + .0015 * noise(vec2(bx * 9. + fk, time * .6));
+        float thread = exp(-pow((by - bend) / thin, 2.)) * taper * swell;
+        float lane = exp(-pow((by - bend) / .016, 2.)) * taper;
+        // Fainter toward the edge of the disc, where the arch takes over.
+        float onFace = smoothstep(.25, .6, mu);
+        // The lane is the cooler, redder gas round the thread; the thread itself is white.
+        surface = mix(surface, surface * vec3(.95, .5, .22), .7 * lane * onFace);
+        surface += vec3(1.5, 1.4, 1.1) * thread * onFace * (.75 + .25 * noise(vec2(bx * 30. + fk, time * 2.)));
+      }
+    }
     vec2 on = vec2(dot(place, axisR), dot(place, axisU));
     float edge = smoothstep(.82, .98, length(on));
     if (edge <= 0.) continue;

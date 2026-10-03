@@ -13,6 +13,7 @@
 // the notebook, and reads grandmother's letter in three parts, with a word of her own
 // under each page. Grandmother is out; she speaks only through the letter. Read again
 // from the journal, the letter is one sheet (`text`, the three parts joined).
+// The notes of 1969, 1979 and 1986 are told over four pages each (`paged`).
 const LETTER = [
   '서라야, 왔구나. 반찬은 부엌에 두고 이 수첩 좀 보련.\n\n'
     + '열다섯 살 때부터 하늘에서 본 것을 적어 온 수첩이란다. 본 것은 적고, 못 본 것은 빈칸으로 남겨 두었지.\n\n'
@@ -24,6 +25,19 @@ const LETTER = [
     + '첫 칸은 달이다. 1969년 7월 21일, 내가 이 수첩을 시작한 날의 달이란다.\n\n'
     + '다녀와서 얘기해 주련.',
 ];
+
+// A one-sheet note told over pages: the drawing and the scene first, then her hand, a
+// paragraph a page. says: Seora's word under each page but the last, where her `line`
+// follows the note instead.
+function paged(note, says) {
+  return {
+    ...note,
+    pages: [
+      { image: note.image, imageAlt: note.imageAlt, scene: note.scene, say: says[0] },
+      ...note.text.split('\n\n').map((text, i) => ({ text, say: says[i + 1] })),
+    ],
+  };
+}
 
 export const NOTES = [
   {
@@ -59,7 +73,7 @@ export const NOTES = [
     button: '수첩을 편다',
     line: '빈칸 채우기? 그거 내 특기야.',
   },
-  {
+  paged({
     id: 'y1969',
     when: { landed: 'moon' },
     scene: '달에 내려서자 수첩 첫 장 사이에서 쪽지가 떨어졌다.',
@@ -71,8 +85,8 @@ export const NOTES = [
       + '그래도 사람이 달에 내려섰다는 건 알았지. 그날 밤 달을 한참 올려다보고 이 수첩 첫 장을 적었단다.',
     button: '쪽지를 접는다',
     line: '할머니가 본 달에 나 서 있어!',
-  },
-  {
+  }, ['어, 뭐가 떨어졌네?', '할머니가 열다섯 살이었대.', '온 동네가 한 마당에? 좋겠다.']),
+  paged({
     id: 'y1979',
     when: { slots: 40 },
     scene: '마흔 칸을 채우자 수첩 사이에서 쪽지가 또 나왔다.',
@@ -84,8 +98,8 @@ export const NOTES = [
       + '그 사진을 오려서 한참 들여다봤어.',
     button: '쪽지를 접는다',
     line: '마흔 칸이다. 쪽지가 또 나왔어!',
-  },
-  {
+  }, ['이번엔 1979년이네.', '신문 사진으로 보셨구나.', '점 넷이 달 넷이었어!']),
+  paged({
     id: 'y1986',
     when: { slots: 100 },
     scene: '백 칸을 채우자 수첩 사이에서 쪽지가 또 나왔다.',
@@ -97,7 +111,7 @@ export const NOTES = [
       + '다음에 오는 건 2061년이란다.',
     button: '쪽지를 접는다',
     line: '희미해도 봤잖아. 난 가까이서 볼게!',
-  },
+  }, ['백 칸째에도 쪽지가 있네.', '몇 달이나 기다리셨대.', '에이, 꼬리도 못 보셨네.']),
   {
     id: 'last',
     when: 'complete',

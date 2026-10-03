@@ -54,8 +54,28 @@ test('the opening is told over five pages: she arrives, finds the notebook, read
   assert.equal(opening.text, opening.pages.filter((p) => p.text).map((p) => p.text).join('\n\n'));
   // Grandmother is out and speaks only in the letter; the first slot is the Moon of 1969.
   assert.ok(opening.text.includes('첫 칸은 달이다') && opening.text.includes('1969년 7월 21일'));
-  // The other notes are one sheet each.
-  for (const note of NOTES.filter((n) => n.id !== 'opening')) assert.equal(note.pages, undefined, note.id);
+  // The last note is one sheet: the scene at the gate follows it.
+  assert.equal(noteById('last').pages, undefined);
+});
+
+test('the notes of 1969, 1979 and 1986 are told over four pages: the scene, then a paragraph a page', () => {
+  for (const id of ['y1969', 'y1979', 'y1986']) {
+    const note = noteById(id);
+    assert.equal(note.pages.length, 4, id);
+    const [scene, ...sheets] = note.pages;
+    // The first page is the drawing and the telling; no handwriting yet.
+    assert.deepEqual([scene.image, scene.imageAlt, scene.scene, scene.text], [note.image, note.imageAlt, note.scene, undefined], id);
+    // The rest are her hand only, and joined they are the one sheet read again from the journal.
+    for (const sheet of sheets) assert.ok(sheet.text && !sheet.scene && !sheet.image, id);
+    assert.equal(sheets.map((p) => p.text).join('\n\n'), note.text, id);
+    // Seora has a word under every page but the last, where her line follows the note.
+    for (const page of note.pages.slice(0, -1)) {
+      assert.ok(page.say.length <= 25 && (page.say.match(/!/g) ?? []).length <= 1, page.say);
+      assert.ok(!page.say.includes('~'), page.say);
+    }
+    assert.equal(note.pages.at(-1).say, undefined, id);
+    assert.equal(new Set(note.pages.map((p) => p.say)).size, 4, id);
+  }
 });
 
 test('the opening note is due on a new log, before anything is done', () => {

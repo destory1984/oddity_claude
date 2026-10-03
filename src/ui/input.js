@@ -6,7 +6,7 @@ const DRAG_RATE = 0.0035;
 // The keys that fly or turn her: pressing one while paused takes the game off pause (onMove).
 const MOVE_KEYS = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
-export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal, onMute, onMusic = () => {}, onMove = () => {}, onEscape, onWheel, isBlocked }) {
+export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal, onMute, onMusic = () => {}, onRear = () => {}, onMove = () => {}, onEscape, onWheel, isBlocked }) {
   const held = new Set();
   let flyingButton = false;
   let reversingButton = false;
@@ -45,6 +45,7 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
     else if (e.code === 'KeyJ' && !e.repeat && tracksKey(e)) onJournal();
     else if (e.code === 'KeyM' && !e.repeat && tracksKey(e)) onMute();
     else if (e.code === 'KeyB' && !e.repeat && tracksKey(e)) onMusic();
+    else if (e.code === 'KeyR' && !e.repeat && tracksKey(e)) onRear();
     else if (e.code === 'Escape' && !e.repeat) onEscape();
     if (tracksKey(e)) held.add(e.code);
   });

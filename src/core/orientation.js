@@ -99,3 +99,13 @@ export function blend(a, b, t) {
 export function turnAboutY(angle) {
   return axisRotation(angle, 1);
 }
+
+// Looking behind: the view turned half round about the traveler's own up axis. Their
+// orientation times this is the way the view looks; up stays up, right becomes left.
+export const REAR_VIEW = [0, 1, 0, 0];
+
+// A turn asked for while looking behind (a drag, the arrow keys): left and right stay
+// as they are on screen, up and down are the other way round for the body.
+export function rearTurn(yaw, pitch) {
+  return [yaw, -pitch];
+}

@@ -6,7 +6,7 @@ import {
   createState, step, stopNow, totalSpeed, carryAlong, boostLift, velocity, TURN_RATE, START_YAW,
 } from './core/game.js';
 import {
-  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom,
+  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft } from './core/craft.js';
 import { skyLabels } from './core/sky.js';
@@ -258,6 +258,17 @@ function setPaused(value) {
   $('pauseButton').classList.toggle('paused', paused);
 }
 
+// Looking behind (R, the bent arrow): only the view turns half round. She flies on the
+// way she was going, and is not drawn, being behind the view.
+let rear = false;
+function setRear(value) {
+  rear = value;
+  document.body.classList.toggle('rear', rear);
+  $('rearButton').setAttribute('aria-pressed', String(rear));
+  $('rearButton').title = rear ? '앞 보기 (R)' : '뒤 보기 (R)';
+  $('reticle').querySelector('span').textContent = rear ? '뒤 보기' : '비행 방향';
+}
+
 function brake() {
   input.clear();
   if (totalSpeed(state) > 0) sound.cue('brake');
@@ -283,7 +294,7 @@ async function init() {
     onDrag(dx, dy) {
       if (photo.active()) photo.rotate(dx, dy);
       else if (!paused) {
-        state = { ...state, orientation: rotateLocal(state.orientation, dx, dy) };
+        state = { ...state, orientation: rotateLocal(state.orientation, ...(rear ? rearTurn(dx, dy) : [dx, dy])) };
         dragTurn[0] += dx;
         dragTurn[1] += dy;
       }
@@ -293,6 +304,7 @@ async function init() {
     onJournal: () => journal.open(),
     onMute: () => toggleSound(),
     onMusic: () => toggleMusic(),
+    onRear: () => { if (!photo.active()) setRear(!rear); },
     // A flight key pressed while paused flies on at once (not in photo mode, which is
     // paused on purpose, nor behind a story card).
     onMove() {
@@ -963,6 +975,7 @@ ${STORY_MORE[target.id]}` : told };
   });
 
   $('brake').addEventListener('click', brake);
+  $('rearButton').addEventListener('click', () => setRear(!rear));
   $('pauseButton').addEventListener('click', () => setPaused(!paused));
   $('photoButton').addEventListener('click', () => photo.toggle());
   $('helpButton').addEventListener('click', () => {
@@ -1065,7 +1078,14 @@ ${STORY_MORE[target.id]}` : told };
       sites = storySitesAt(simTime, bodies);
       state = carryAlong(state, before, bodies);
     }
+    // Photo mode has a view of its own, which starts looking ahead.
+    if (rear && photo.active()) setRear(false);
     const intent = input.intent();
+    // Looking behind, up and down and the roll are the other way round for her body.
+    if (rear) {
+      intent.turnY = -intent.turnY;
+      intent.roll = -intent.roll;
+    }
     if (docked) {
       if (!paused && wantsToLeave(intent)) undock();
       else {
@@ -1329,7 +1349,7 @@ ${STORY_MORE[target.id]}` : told };
       orientation: state.orientation,
       dt,
       speed: shownSpeed(),
-      photoOrientation: photo.orientation(),
+      photoOrientation: photo.orientation() ?? (rear ? REAR_VIEW : null),
       seen: orbitEye(),
       lamp: orbitLamp(),
       heroVisible: photo.heroVisible(),

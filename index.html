@@ -81,6 +81,7 @@
         <input id="throttle" aria-label="가속 강도" type="range" min="0" max="1000" value="1000">
         <div class="rangeLabels"><span>0%</span><span>100%</span></div>
       </div>
+      <button id="rearButton" title="뒤 보기 (R)" aria-pressed="false">뒤 보기 <kbd>R</kbd></button>
       <button id="reverseButton" title="후진 (S)">후진 <kbd>S</kbd></button>
       <button id="flyButton" title="전진 (W)">전진 <kbd>W</kbd></button>
       <button id="brake" title="정지 (Space)">정지 <kbd>Space</kbd></button>
@@ -223,6 +224,7 @@
     <p>크기는 실제대로, 천체 사이의 빈 거리는 1/100(위성과 행성 사이는 1/10)로 압축된 우주를 날아보세요.</p>
     <dl>
       <dt>방향 전환</dt><dd>화면 드래그 / 방향키</dd>
+      <dt>뒤 보기</dt><dd>R 키 / 굽은 화살표 버튼. 시야만 뒤로 돌립니다. 나는 방향과 속도는 그대로이고, 다시 누르면 앞을 봅니다.</dd>
       <dt>옆걸음</dt><dd>A / D · 왼쪽, 오른쪽으로 미끄러지듯 이동합니다.</dd>
       <dt>몸 회전</dt><dd>Q / E · 좌우 롤 회전. 위아래 회전도 360도 가능합니다.</dd>
       <dt>전진·후진</dt><dd>W / 전진 버튼, S / 후진 버튼. 누르는 동안 현재 안전 속도까지 가속하고, 놓으면 그 속도 그대로 계속 납니다. 반대쪽을 누르면 약 1초 동안 멈춘 뒤 반대로 갑니다. 천체에 가까워지면 저절로 느려집니다.</dd>

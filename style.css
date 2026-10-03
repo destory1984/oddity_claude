@@ -2926,3 +2926,75 @@ button,
   border-color:#7fe0c3cc;
   background:#0d1a3acc;
 }
+
+/* Looking behind: a fourth picture button beside the three that fly her, lined in gold
+   while the view is turned; the mark in the middle of the screen then says so. */
+#rearButton {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  min-height:36px;
+  padding:6px 14px;
+  font-size:0;
+}
+
+#rearButton::before {
+  content:"";
+  flex:none;
+  width:24px;
+  height:24px;
+  background:url("/assets/ui/icon-rear.svg") center / contain no-repeat;
+}
+
+#rearButton kbd {
+  margin-left:7px;
+  font-size:10px;
+}
+
+#rearButton[aria-pressed="true"] {
+  border-color:var(--gold);
+  background:#1c2f6ae6;
+}
+
+body.touch #rearButton {
+  min-height:44px;
+}
+
+body.touch #rearButton kbd {
+  display:none;
+}
+
+body.rear #reticle {
+  opacity:.9;
+}
+
+body.rear #reticle i {
+  display:none;
+}
+
+body.rear #reticle span,
+body.rear.touch #reticle span {
+  display:block;
+  padding:3px 9px;
+  border:1px solid var(--gold);
+  border-radius:9px;
+  background:#0d1a3acc;
+  font-size:11px;
+  color:#ffdfa6;
+}
+
+@media (max-width: 480px) {
+  #rearButton {
+    position:absolute;
+    right:228px;
+    bottom:92px;
+    width:68px;
+    min-height:44px;
+    padding:0;
+  }
+
+  #rearButton kbd {
+    display:none;
+  }
+}

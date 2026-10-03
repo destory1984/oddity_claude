@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { rotateLocal, forward, lookAtDirection, multiply, conjugate, right, up } from '../src/core/orientation.js';
+import { rotateLocal, forward, lookAtDirection, multiply, conjugate, right, up, REAR_VIEW, rearTurn } from '../src/core/orientation.js';
 
 const near = (a, b) => a.forEach((n, i) => assert.ok(Math.abs(n - b[i]) < 1e-9));
 
@@ -50,4 +50,17 @@ test('camera basis stays orthonormal and right-handed in Babylon order after tur
   // Left-handed (Babylon): right = up × forward.
   const cross = [u[1] * f[2] - u[2] * f[1], u[2] * f[0] - u[0] * f[2], u[0] * f[1] - u[1] * f[0]];
   near(cross, r);
+});
+
+test('looking behind turns the view half round: ahead is behind, up stays up, and a drag still moves the picture the same way', () => {
+  const body = rotateLocal(rotateLocal([0, 0, 0, 1], 0.7, -0.3), 0.2, 0.4, 0.5);
+  const view = multiply(body, REAR_VIEW);
+  const close = (a, b) => a.forEach((n, i) => assert.ok(Math.abs(n - b[i]) < 1e-9, `${a} != ${b}`));
+  close(forward(view), forward(body).map((n) => -n));
+  close(up(view), up(body));
+  close(right(view), right(body).map((n) => -n));
+  // Dragging down by 0.1 looking behind must turn the view as a drag down does looking ahead.
+  const [yaw, pitch] = rearTurn(0.05, 0.1);
+  const turned = multiply(rotateLocal(body, yaw, pitch), REAR_VIEW);
+  close(turned, rotateLocal(view, 0.05, 0.1));
 });

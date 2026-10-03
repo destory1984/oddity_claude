@@ -2998,3 +2998,39 @@ body.rear.touch #reticle span {
     display:none;
   }
 }
+
+/* The size of the journal's writing: "가−" and "가+" at its head, beside the ✕. The part
+   that scrolls, under the tabs, grows with it and wraps again (ui/journal.js sets --text).
+   What stays put above the tabs keeps its size: grown too, it took half a phone's screen. */
+#journalScroll {
+  zoom:var(--text, 1);
+}
+
+.journalHead h1 {
+  flex:1;
+  min-width:0;
+}
+
+#journalText {
+  flex:none;
+  display:flex;
+  gap:6px;
+}
+
+#journal #journalText button {
+  width:44px;
+  height:40px;
+  min-height:40px;
+  margin:0;
+  padding:0;
+  font-size:15px;
+  font-weight:700;
+}
+
+#journal #journalText #textSmaller {
+  font-size:12px;
+}
+
+#journal #journalText button:disabled {
+  opacity:.4;
+}

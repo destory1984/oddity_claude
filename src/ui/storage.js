@@ -34,6 +34,25 @@ export function saveGuideDone() {
   }
 }
 
+const TEXT_KEY = 'oddity.text.v1';
+
+// How large the journal's writing is (core/textSize.js); the raw kept value, or null.
+export function loadTextSize() {
+  try {
+    return localStorage.getItem(TEXT_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function saveTextSize(size) {
+  try {
+    localStorage.setItem(TEXT_KEY, String(size));
+  } catch {
+    // The size simply is not kept.
+  }
+}
+
 const LAYOUT_KEY = 'oddity.layout.v1';
 
 // 'tour' (the hand-made layout) unless the player chose today's sky.

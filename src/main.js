@@ -148,6 +148,9 @@ let beltSeen = false;
 let meteorSeen = false;
 // Lights and plumes already told about (core/glows.js).
 const glowsTold = new Set();
+// Two sights in reach at once (Saturn's aurora and its ring spokes) are told this far apart.
+const SIGHT_GAP_S = 12;
+let glowTellWait = 0;
 let feelingTold = null;
 // The craft the traveler is docked with, and the glide toward it (core/dock.js startDocking).
 let docked = null;
@@ -1411,9 +1414,17 @@ ${STORY_MORE[target.id]}` : told };
       toast.show(eventMessage(feeling), null, SIGHT_S);
     }
     if (!docked && shownSpeed() > 1) feelingTold = null;
-    if (view.glow && !glowsTold.has(view.glow)) {
-      glowsTold.add(view.glow);
-      toast.show(eventMessage({ type: 'glow', id: view.glow }), null, SIGHT_S);
+    // Lights and plumes, each told once: a flash when it happens; of the standing
+    // sights in reach, the first not yet told, and the next only after this one has
+    // had its time on screen.
+    glowTellWait = Math.max(0, glowTellWait - elapsed);
+    const sight = view.glow && !glowsTold.has(view.glow)
+      ? view.glow
+      : (glowTellWait === 0 ? view.glowsNear.find((id) => !glowsTold.has(id)) : null);
+    if (sight) {
+      glowsTold.add(sight);
+      if (sight !== view.glow) glowTellWait = SIGHT_GAP_S;
+      toast.show(eventMessage({ type: 'glow', id: sight }), null, SIGHT_S);
     }
     if (view.inBelt && !beltSeen) {
       beltSeen = true;

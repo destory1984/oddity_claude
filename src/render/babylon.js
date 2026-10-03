@@ -4,7 +4,7 @@ export { Engine } from '@babylonjs/core/Engines/engine.js';
 export { Constants } from '@babylonjs/core/Engines/constants.js';
 export { Scene } from '@babylonjs/core/scene.js';
 export { FreeCamera } from '@babylonjs/core/Cameras/freeCamera.js';
-export { Vector3, Quaternion, Matrix } from '@babylonjs/core/Maths/math.vector.js';
+export { Vector2, Vector3, Quaternion, Matrix } from '@babylonjs/core/Maths/math.vector.js';
 export { Color3, Color4 } from '@babylonjs/core/Maths/math.color.js';
 export { CreateSphere } from '@babylonjs/core/Meshes/Builders/sphereBuilder.js';
 export { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder.js';

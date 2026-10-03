@@ -1,5 +1,5 @@
 import {
-  CreateSphere, CreatePlane, Mesh, ShaderMaterial, Effect, Texture, Vector3, Color3, Constants, Matrix,
+  CreateSphere, CreatePlane, Mesh, ShaderMaterial, Effect, Texture, Vector3, Vector2, Color3, Constants, Matrix,
 } from './babylon.js';
 import vertex from './shaders/body.vert?raw';
 import planetFrag from './shaders/planet.frag?raw';
@@ -14,6 +14,7 @@ import texturedFrag from './shaders/textured.frag?raw';
 import { KM_PER_UNIT, TIME_SCALE } from '../core/bodies.js';
 import { normalize } from './math.js';
 import { SPIN_DAY_S, EARTH_START_SPIN } from '../core/surface.js';
+import { SPOKES } from '../core/glows.js';
 
 const SIDEREAL_DAY_S = SPIN_DAY_S.earth;
 // Real rotation is too slow to see (Earth turns 1.25 degrees in five minutes), so
@@ -200,6 +201,9 @@ const LOOKS = {
   neptune: {
     shader: 'textured', map: 'neptune.jpg', saturation: 1, tint: [0.9, 1, 1.1], base: [0.25, 0.42, 0.85],
     mapWeight: 1, haze: 0.35, detail: 0.12, dayS: SPIN_DAY_S.neptune,
+    // The Great Dark Spot is in the map (Voyager 2, 1989); its bright companion clouds
+    // are drawn over it and shift. storm: [u, v] of the spot on the map.
+    storm: [0.545, 0.42],
   },
   // Ceres, Pluto and Charon: grey USGS maps; the tint gives each its real cast.
   ceres: {
@@ -232,7 +236,12 @@ function createRings(scene, body, rings, sunDir) {
   const plane = CreatePlane(`${body.id}Rings`, { size: 2 * outer, sideOrientation: Mesh.DOUBLESIDE }, scene);
   plane.rotation.x = Math.PI / 2 + rings.tilt;
   plane.rotation.y = Math.atan2(-sunDir.x, -sunDir.z);
-  const material = shader(scene, 'ring', ringFrag, ['sunLight', 'inner', 'outer', 'sunLocal', 'planetRadius']);
+  const material = shader(scene, 'ring', ringFrag, ['sunLight', 'inner', 'outer', 'sunLocal', 'planetRadius', 'time', 'spokeCount', 'spokeTurn', 'spokeRing', 'spokeDark']);
+  material.setFloat('time', 0);
+  material.setFloat('spokeCount', SPOKES.count);
+  material.setFloat('spokeTurn', 0);
+  material.setVector2('spokeRing', new Vector2(...SPOKES.ring));
+  material.setFloat('spokeDark', SPOKES.dark);
   material.setFloat('inner', rings.innerKm / rings.outerKm);
   material.setFloat('outer', 1);
   material.setFloat('planetRadius', body.radiusKm / rings.outerKm);
@@ -249,7 +258,12 @@ function createRings(scene, body, rings, sunDir) {
   const normal = Vector3.TransformNormal(new Vector3(0, 0, 1), turn);
   const setSun = (dir) => material.setVector3('sunLocal', Vector3.TransformNormal(dir, back));
   setSun(sunDir);
-  return { plane, normal, setSun };
+  // elapsed: seconds of play. The spokes go round with Saturn's magnetic field.
+  const setTime = (elapsed) => {
+    material.setFloat('time', elapsed);
+    material.setFloat('spokeTurn', ((elapsed * SPIN_SPEEDUP * 2 * Math.PI) / SPOKES.turnS) % (2 * Math.PI));
+  };
+  return { plane, normal, setSun, setTime };
 }
 
 // How cratered each mapped world is, for the close-up ground (textured.frag): 1 for the
@@ -271,7 +285,9 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
       ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy',
-        'rimColor', 'rimLight', 'hexagon', 'glint'], ['map']);
+        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time'], ['map']);
+    material.setVector3('storm', new Vector3(look.storm?.[0] ?? 0, look.storm?.[1] ?? 0, look.storm ? 1 : 0));
+    material.setFloat('time', 0);
     material.setColor3('rimColor', color(look.rim ?? [0, 0, 0]));
     material.setFloat('rimLight', look.rimLight ?? 0);
     material.setFloat('hexagon', look.hexagon ?? 0);
@@ -324,6 +340,8 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     rings: ring && { normal: [ring.normal.x, ring.normal.y, ring.normal.z], innerKm: look.rings.innerKm, outerKm: look.rings.outerKm },
     spin(elapsed) {
       sphere.rotation.y = -(elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
+      if (ring) ring.setTime(elapsed);
+      if (look.storm) material.setFloat('time', elapsed);
     },
     // heightRadii: the camera's height above the ground, in this body's radii.
     setClose(heightRadii) {

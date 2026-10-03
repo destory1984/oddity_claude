@@ -15,7 +15,7 @@ import { storySitesAt } from '../core/stories.js';
 import { createComet } from './comet.js';
 import { createMeteors } from './meteors.js';
 import { createGlows } from './glows.js';
-import { glowNear } from '../core/glows.js';
+import { glowsNear } from '../core/glows.js';
 import { createBelt } from './belt.js';
 import { inBelt } from '../core/belt.js';
 import { createIce } from './ice.js';
@@ -183,9 +183,10 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
       ringAt,
       inBelt: inBelt(traveler, sunNow.position),
       meteorLit,
-      // Lights and plumes to tell about: a flash (lightning, an impact on the Moon) in
-      // the frame it happens, else the one nearby.
-      glow: flashed ?? glowNear(now, traveler),
+      // A flash (lightning, a sprite, an impact on the Moon) in the frame it happens.
+      glow: flashed,
+      // Everything of that kind within reach, the nearest thing first (core/glows.js).
+      glowsNear: glowsNear(now, traveler),
       // The sprite character's drawing; the paper model has none.
       heroSheet: hero.sheet ? hero.sheet() : null,
       // Where her drawing is on screen: { file, height, up, shape } (render/spriteHero.js).

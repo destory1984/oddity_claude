@@ -11,6 +11,7 @@ import {
 import { CRAFT, craftAt, craftById, hiddenCraft } from './core/craft.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
+import { loadingWait } from './core/loading.js';
 import { createInput } from './ui/input.js';
 import { createHud } from './ui/hud.js';
 import { createMinimap } from './ui/minimap.js';
@@ -1035,6 +1036,9 @@ ${STORY_MORE[target.id]}` : told };
   window.addEventListener('resize', () => world.resize());
   if (matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints > 0) document.body.classList.add('touch');
 
+  // Ready sooner than three seconds: the loading screen waits out the rest, and the
+  // game (its first notice, its clock, grandmother's note) starts only when it lifts.
+  await new Promise((resolve) => setTimeout(resolve, loadingWait(performance.now())));
   $('loading').style.display = 'none';
   document.body.dataset.ready = 'true';
   toast.show(`${bodyById(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);

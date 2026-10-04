@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '다누리 곁에서 달의 한낮 땅이 하얗게 날아가 보이던 것을 고쳤습니다.' },
   { day: '2026-10-04', text: '탐사선을 확대 관찰로 열면 비스듬한 자리에서 보여, 접시 안테나 뒤의 몸통이 보입니다.' },
   { day: '2026-10-04', text: '화면 위 오른쪽 끝에 설정 단추가 생겼습니다. 이번 주에 바뀐 것을 여기서 봅니다.' },
   { day: '2026-10-04', text: '한국어 기기에서는 도킹과 착륙을 한국어로 셉니다. "도킹 준비 중. 삼, 이, 일, 영."' },

@@ -185,7 +185,9 @@ void main(){
     vec3 sx = dFdx(wp);
     vec3 sy = dFdy(wp);
     vec3 ground = closeGround(lp, strength, height, max(length(sx), length(sy)));
-    col *= 1. + ground.x;
+    // Under a high Sun there is no shade in the bowls to carry them, and the pale rims
+    // alone looked like bubbles: there they are painted fainter.
+    col *= 1. + ground.x * mix(1., .45, smoothstep(.5, 1., max(dot(N, sun), 0.)));
     // Tip the surface by the slope of that ground, so rims catch the Sun and bowls
     // hold shadow (the slope is read from how the height changes across the screen).
     vec3 r1 = cross(sy, N);
@@ -235,6 +237,16 @@ void main(){
     vec3 H = normalize(sun + V);
     float lakes = smoothstep(.55, .8, lp.y) * smoothstep(.42, .6, fbm(lp.xz * 9. + 3.));
     light += vec3(1., .86, .6) * pow(max(dot(N, H), 0.), 140.) * lakes * glint * 2.5;
+  }
+  // Close over a cratered world at its noon the whole view was white: the map shows
+  // 2.7 km a pixel at best, so from 160 km up it is one even glare (Danuri over the
+  // Moon). Near the ground under a high Sun everything is turned down together, as an
+  // eye takes in a bright ground, so the ground keeps its markings; a landing site in a
+  // low Sun is untouched.
+  if (craters > 0.) {
+    float nearness = 1. - smoothstep(.05, .5, close);
+    // (By how cratered the world is: the Moon in full, Mars a third, which is darker anyway.)
+    light /= 1. + craters * nearness * .75 * smoothstep(.6, 1., max(dot(normalize(n), sun), 0.));
   }
   gl_FragColor = vec4(pow(light, vec3(.92)), 1.);
 }

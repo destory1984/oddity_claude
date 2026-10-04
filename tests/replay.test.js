@@ -88,3 +88,10 @@ test('Huygens comes down like the lander: from 14 km, down at 17 seconds, its la
   assert.match(at(17).text, /가장 먼 곳/);
   assert.ok(at(24).done);
 });
+
+test('Curiosity has a scene of its own day, told in four lines', () => {
+  assert.equal(replayFor('curiosity').day, '2012년 8월 6일');
+  assert.equal(replayFor('curiosity').lines.length, 4);
+  assert.match(replayFrame('curiosity', 17).text, /게일 분화구/);
+  assert.equal(Object.keys(REPLAYS).length, 4);
+});

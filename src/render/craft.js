@@ -4,7 +4,7 @@ import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
 import { CRAFT_BUILD } from './craftModels.js';
 import { SITE_BUILD, SITE_REPLAY_BUILD } from './siteModels.js';
-import { drum, dish, rod, group } from './craftParts.js';
+import { drum, dish, rod, group, box } from './craftParts.js';
 
 // Spacecraft and landers. The models are in craftModels.js (in orbit) and
 // siteModels.js (on the ground), built from the parts in craftParts.js; this file
@@ -156,6 +156,18 @@ export function createSiteModels(scene, siteList) {
         const a = (k * Math.PI) / 4;
         rod(scene, `then_${id}_line${k}`, flame, mats.white, [Math.cos(a) * 0.64, 1.25, Math.sin(a) * 0.64], [Math.cos(a) * 0.2, 0.28, Math.sin(a) * 0.2], 0.008, 4);
       }
+    } else if (coming === 'crane') {
+      // The stage that hovers over it: a flat frame, a flame at each corner pointing
+      // out and down, and three cords down to the rover's deck.
+      flame = group(scene, `then_${id}_crane`, node);
+      box(scene, `then_${id}_stage`, flame, mats.plate, [0.62, 0.14, 0.5], [0, 1.55, 0]);
+      for (const sx of [-1, 1]) {
+        for (const sz of [-1, 1]) {
+          box(scene, `then_${id}_tank${sx}${sz}`, flame, mats.goldFoil, [0.14, 0.16, 0.14], [sx * 0.3, 1.6, sz * 0.24]);
+          drum(scene, `then_${id}_jet${sx}${sz}`, flame, flameMaterial, { height: 0.45, diameterTop: 0.04, diameterBottom: 0.16, tessellation: 10 }, [sx * 0.46, 1.28, sz * 0.36], [-sx * 0.35, 1, -sz * 0.35]);
+        }
+      }
+      for (const [x, z] of [[0.16, 0.1], [-0.16, 0.1], [0, -0.14]]) rod(scene, `then_${id}_cord${x}`, flame, mats.white, [x * 0.6, 1.48, z * 0.6], [x, 0.3, z], 0.008, 4);
     } else {
       // Under the engine bell (the model's feet are at y = 0), widening downward.
       flame = drum(scene, `then_${id}_flame`, node, flameMaterial, { height: 0.34, diameterTop: 0.05, diameterBottom: 0.2, tessellation: 12 }, [0, -0.06, 0]);

@@ -1,6 +1,6 @@
 // "그날로": at a story place, the day it is known for is played again in the close
 // view. The model that stands there comes down as it did, and a few lines tell what
-// happened, each at its moment: Apollo 11's landing, Huygens's on Titan, and (not at a
+// happened, each at its moment: Apollo 11's landing, Huygens's on Titan, Curiosity's on Mars, and (not at a
 // place but on a body) Cassini's plunge into Saturn.
 // seconds: how long the scene lasts. downAt: when it touches the ground.
 // fromKm: how high the model starts (it is drawn 6 km wide, so this is in drawn km).
@@ -30,6 +30,20 @@ export const REPLAYS = {
       { at: 6, text: '2시간 30분 동안 내려오며 강줄기와 바닷가처럼 보이는 땅을 찍어 보냈습니다.' },
       { at: 12, text: '바닥은 영하 179도. 물이 언 얼음 자갈이 널린, 젖은 모래 같은 땅이었습니다.' },
       { at: 17, text: '사람이 만든 것이 가장 먼 곳에 내려앉은 순간입니다. 그 뒤로도 한 시간 넘게 신호를 보냈습니다.' },
+    ],
+  },
+  // It was let down on cords from a stage that hovered on its rockets.
+  curiosity: {
+    name: '큐리오시티의 착륙',
+    day: '2012년 8월 6일',
+    seconds: 24,
+    downAt: 17,
+    fromKm: 14,
+    lines: [
+      { at: 0, text: '2012년 8월 6일. 무게 899kg의 큐리오시티는 에어백으로 받기에는 너무 무거웠습니다.' },
+      { at: 6, text: '그래서 로켓을 뿜는 하강단이 공중에 멈춰 서고, 줄로 차를 매달아 천천히 내립니다.' },
+      { at: 12, text: '대기권에 들어서 땅에 닿기까지 7분. 신호가 늦어 지구에서는 지켜볼 수밖에 없었습니다.' },
+      { at: 17, text: '바퀴가 닿자 줄을 끊고 하강단은 멀리 날아가 떨어졌습니다. 게일 분화구에 내린 순간입니다.' },
     ],
   },
   // Not a place but a body: resting anywhere on Saturn's cloud tops (the story 'cassini';

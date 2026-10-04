@@ -40,6 +40,7 @@ import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
 import { skyNews, newsLine } from './core/forecast.js';
+import { createSettings } from './ui/settings.js';
 import { shadowSpot } from './core/shadows.js';
 import { dailyRequest, requestTarget, requestMet, recordDay, streak, lastWeek } from './core/daily.js';
 import { palFor } from './core/pal.js';
@@ -315,7 +316,7 @@ async function init() {
     },
     onEscape: () => (photo.active() ? photo.toggle() : setPaused(!paused)),
     onWheel: (deltaY) => photo.zoom(deltaY),
-    isBlocked: () => $('help').open || $('journal').open || $('noteCard').open,
+    isBlocked: () => $('help').open || $('settings').open || $('journal').open || $('noteCard').open,
   });
   photo = createPhoto({
     world,
@@ -993,6 +994,16 @@ ${STORY_MORE[target.id]}` : told };
     $('help').addEventListener('close', () => setPaused(prior), { once: true });
   });
   $('closeHelp').addEventListener('click', () => $('help').close());
+  // The settings hold the game while they are open, as the help does.
+  let settingsPriorPause = false;
+  createSettings({
+    onOpen() {
+      settingsPriorPause = paused;
+      setPaused(true);
+    },
+    onClose: () => setPaused(settingsPriorPause),
+    today: () => dayOf(new Date()),
+  });
   // Switching the layout moves every planet, so the game starts over (the log is kept).
   $('layoutNow').textContent = layout === 'today' ? '지금: 오늘의 하늘(오늘 날짜의 실제 위치).' : '지금: 여행 배치(행성을 태양 둘레에 고루 흩어 놓음).';
   $('layoutButton').textContent = layout === 'today' ? '여행 배치로 바꾸기' : '오늘의 하늘로 바꾸기';

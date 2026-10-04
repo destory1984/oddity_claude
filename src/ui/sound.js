@@ -1,7 +1,7 @@
 // Synthesized game sounds (Web Audio). No sound files: every cue is built from
 // oscillators and a noise buffer, so nothing is downloaded and nothing is licensed.
 
-import { englishVoice } from '../core/voice.js';
+import { callFor } from '../core/voice.js';
 import { BAR_S, barPlan, tuneFor, nextTuneBar, tuneOrder, barInOrder } from '../core/music.js';
 
 const MUTE_KEY = 'oddity.muted';
@@ -321,22 +321,20 @@ export function createSound() {
       saveMusic(on);
       if (ctx) musicBus.gain.setTargetAtTime(on ? 1 : 0, ctx.currentTime, 0.3);
     },
-    // Spoken English, by the browser's own voice (no sound files). Silent when muted
-    // or when the browser has no speech.
+    // Spoken by the browser's own voice (no sound files): in Korean on a device set to
+    // Korean, in English on any other (core/voice.js). Silent when muted or when the
+    // browser has no speech.
     // Speech queues: a new line waits for the one being said, and a countdown would
     // drift late. So anything still being said is cut off first.
     say(text) {
       if (muted || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
       if (window.speechSynthesis.speaking || window.speechSynthesis.pending) window.speechSynthesis.cancel();
-      const words = new SpeechSynthesisUtterance(text);
-      words.lang = 'en-US';
-      // An English speaker by name: with the language alone, a device set to Korean
-      // used its Korean voice. (The list fills in a moment after the page opens.)
-      const voice = englishVoice(window.speechSynthesis.getVoices());
-      if (voice) {
-        words.voice = voice;
-        words.lang = voice.lang.replace('_', '-');
-      }
+      // The speaker is named outright: with the language alone the device chooses.
+      // (The list of voices fills in a moment after the page opens.)
+      const call = callFor(text, navigator.language, window.speechSynthesis.getVoices());
+      const words = new SpeechSynthesisUtterance(call.text);
+      words.lang = call.lang;
+      if (call.voice) words.voice = call.voice;
       words.rate = 1.2;
       // Half of what it was (0.9): the voice stood out over everything else.
       words.volume = 0.45;

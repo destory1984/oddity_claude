@@ -1,4 +1,6 @@
 :root {
+  /* The side of a square button on the flight screen. */
+  --tap:44px;
   color-scheme:dark;
   --ink:#edf7ff;
   --muted:#94afc7;
@@ -2052,8 +2054,8 @@ footer button:active,
   /* No gap: the button's words (font-size 0, for screen readers) still count as a second
      item, and a gap beside them pushed the icon 3.5px off the middle. */
   gap:0;
-  width:44px;
-  min-height:44px;
+  width:var(--tap);
+  min-height:var(--tap);
   padding:0;
   font-size:0;
 }
@@ -2075,6 +2077,7 @@ footer button:active,
 #hud nav #pauseButton.paused::before { background-image:url("/assets/ui/icon-play.svg"); }
 #hud nav #journalButton::before { background-image:url("/assets/ui/icon-journal.svg"); }
 #hud nav #photoButton::before { background-image:url("/assets/ui/icon-camera.svg"); }
+#hud nav #settingsButton::before { background-image:url("/assets/ui/icon-settings.svg"); }
 
 /* Switched off: the icon says so itself (a cross, a stroke); the button only dims a little. */
 #hud nav #soundButton.off,
@@ -2110,20 +2113,27 @@ footer button:active,
     display:none;
   }
 
+  /* Seven buttons in one row: the journal's takes what room is left. */
   #hud nav {
-    gap:8px;
+    width:100%;
+    gap:5px;
   }
 
   #hud nav button {
-    min-width:44px;
+    flex:none;
+    min-width:var(--tap);
     padding:0;
     font-size:0;
   }
 
   #hud nav #journalButton {
-    gap:6px;
-    padding:0 10px 0 8px;
+    flex:1 1 0;
+    width:auto;
+    min-width:0;
+    gap:4px;
+    padding:0 6px;
     font-size:12px;
+    white-space:nowrap;
   }
 
   /* The goal line goes right under the top buttons, in the gap above the readouts:
@@ -2553,6 +2563,7 @@ dialog:where(:not(#journal)) button:hover {
 
 /* The one button that closes the dialog: lined and lettered in gold. */
 #closeHelp,
+#closeSettings,
 #closeStoryCard,
 #closeNoteCard,
 #closeGate {
@@ -2563,12 +2574,14 @@ dialog:where(:not(#journal)) button:hover {
 
 /* Help: the buttons inside the list are small and sit under their text; the closing
    button stays in reach at the bottom while the list scrolls. */
-#help dt {
+#help dt,
+#settings dt {
   color:#eef3ff;
   font-weight:600;
 }
 
-#help dd button {
+#help dd button,
+#settings dd button {
   display:inline-block;
   width:auto;
   min-height:36px;
@@ -2577,11 +2590,13 @@ dialog:where(:not(#journal)) button:hover {
   font-size:13px;
 }
 
-#help dd button[hidden] {
+#help dd button[hidden],
+#settings dd button[hidden] {
   display:none;
 }
 
-#help #closeHelp {
+#help #closeHelp,
+#settings #closeSettings {
   position:sticky;
   bottom:0;
   background:#0d1a3a;
@@ -2594,17 +2609,20 @@ dialog:where(:not(#journal)) button:hover {
   }
 
   /* One column: the name above what it does, so the text has the whole width. */
-  #help dl {
+  #help dl,
+  #settings dl {
     grid-template-columns:1fr;
     gap:3px;
   }
 
-  #help dt {
+  #help dt,
+  #settings dt {
     margin-top:12px;
     color:var(--gold);
   }
 
-  #help dd {
+  #help dd,
+  #settings dd {
     line-height:1.6;
   }
 }
@@ -3092,7 +3110,8 @@ body.rear.touch #reticle span {
 }
 
 /* The four buttons that steer her are squares: 56px, the key under the picture on a PC;
-   44px in one row on a phone, the size of the buttons along the top (they were 60px). */
+   in one row on a phone, the size of the buttons along the top (--tap: 44px, and 40px
+   on a screen under 390px wide, where seven buttons must fit along the top). */
 #rearButton,
 #reverseButton,
 #brake,
@@ -3117,14 +3136,14 @@ body.rear.touch #reticle span {
   #reverseButton,
   #brake,
   #flyButton {
-    width:44px;
-    height:44px;
-    min-height:44px;
+    width:var(--tap);
+    height:var(--tap);
+    min-height:var(--tap);
   }
 
-  #rearButton { right:156px; }
-  #reverseButton { right:104px; }
-  #brake { right:52px; }
+  #rearButton { right:calc(3 * (var(--tap) + 8px)); }
+  #reverseButton { right:calc(2 * (var(--tap) + 8px)); }
+  #brake { right:calc(var(--tap) + 8px); }
   #flyButton { right:0; }
 }
 
@@ -3137,4 +3156,74 @@ body.rear.touch #reticle span {
   text-align:center;
   color:#aab6d8;
   opacity:.6;
+}
+
+@media (max-width: 389px) {
+  :root {
+    --tap:40px;
+  }
+}
+
+/* The settings (ui/settings.js): two pages under two tabs. The first tells what changed
+   this week, a line each, the day written once at its first line. */
+#settings {
+  width:min(560px,calc(100vw - 24px));
+  max-height:90vh;
+  overflow-y:auto;
+}
+
+#settingsTabs {
+  display:flex;
+  gap:8px;
+  margin:0 0 14px;
+}
+
+#settings #settingsTabs button {
+  flex:1 1 0;
+  width:auto;
+  min-height:38px;
+  margin:0;
+  padding:6px 10px;
+  font-size:13px;
+}
+
+#settings #settingsTabs button[aria-selected="true"] {
+  border-color:var(--gold);
+  color:var(--gold);
+  font-weight:600;
+}
+
+#newsList {
+  margin:0 0 18px;
+  padding:0;
+  list-style:none;
+}
+
+#newsList li {
+  display:grid;
+  grid-template-columns:38px 1fr;
+  gap:0 6px;
+  padding:7px 0;
+  border-bottom:1px solid #9fb4ff22;
+  font-size:14px;
+  line-height:1.55;
+  word-break:keep-all;
+}
+
+#newsList time {
+  color:var(--gold);
+  font-size:12px;
+  font-variant-numeric:tabular-nums;
+  line-height:1.8;
+}
+
+#settings section[hidden] {
+  display:none;
+}
+
+/* Narrower still, the journal's count has the room and its picture goes. */
+@media (max-width: 370px) {
+  #hud nav #journalButton::before {
+    display:none;
+  }
 }

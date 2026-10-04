@@ -75,16 +75,19 @@ function overRings(level, toLight, ringNormal) {
 // ringNormal: the direction square to the body's rings, when it has rings. The view is
 // then lifted off the rings' own plane, on their sunlit side: lifted off the planets'
 // plane alone, Saturn's rings (tilted 27 degrees) could come out edge on, a thin line.
-export function bodyVista(body, bodies, ringNormal = null) {
+// toward: a direction from the body's centre to something on it worth seeing (a moon's
+// shadow): of the two sides of the line to the Sun, the one nearer to it is tried first.
+export function bodyVista(body, bodies, ringNormal = null, toward = null) {
   const sun = bodies.find((b) => b.kind === 'star');
   const earth = bodies.find((b) => b.id === 'earth');
   const { radii, liftDeg } = { radii: VISTA_RADII, liftDeg: LIFT_DEG, ...RINGED[body.id] };
   // The Sun has no lit side: look from the side Earth is on.
   const toLight = unit(sub((body.kind === 'star' ? earth : sun).position, body.position));
   const side = sideOf(toLight);
+  const turns = toward && toward.reduce((s, n, i) => s + n * side[i], 0) < 0 ? [-1, 1] : [1, -1];
   const spots = [];
   for (const shrink of [1, 0.6, 0.4]) {
-    for (const turn of [1, -1]) {
+    for (const turn of turns) {
       const level = mix(toLight, side.map((n) => n * turn), SIDE_DEG);
       const out = ringNormal ? overRings(level, toLight, ringNormal) : mix(level, [0, 1, 0], liftDeg);
       spots.push(body.position.map((n, i) => n + out[i] * radii * shrink * body.radiusKm));
@@ -119,9 +122,9 @@ export function siteArrival(site, body) {
 // there, or already near). parent: the body a story place is on. anywhere: the jump
 // was asked for outright (the journal's button), so being near does not cancel it.
 // known: the next stop of a tour, which may be jumped near without having been there.
-export function teleportSpot(target, { position, progress, bodies, parent = null, anywhere = false, known = false, ringNormal = null }) {
+export function teleportSpot(target, { position, progress, bodies, parent = null, anywhere = false, known = false, ringNormal = null, toward = null }) {
   if ((!known && !visited(target, progress)) || (!anywhere && !farFrom(target, position))) return null;
   if (target.kind === 'craft') return craftArrival(target, bodies);
   if (target.kind === 'site') return siteArrival(target, parent);
-  return bodyVista(target, bodies, ringNormal);
+  return bodyVista(target, bodies, ringNormal, toward);
 }

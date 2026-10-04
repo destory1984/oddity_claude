@@ -77,13 +77,14 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   dialog.addEventListener('close', () => onClose());
 
   // A button that closes the journal and jumps to somewhere already visited.
-  function jumpButton(id, name) {
+  // toward: see onJump in main.js (sky news).
+  function jumpButton(id, name, toward = null) {
     const jump = document.createElement('button');
     jump.textContent = '순간 이동';
     jump.setAttribute('aria-label', `${name}${hasFinalRieulOrNone(name) ? '로' : '으로'} 순간 이동`);
     jump.addEventListener('click', () => {
       dialog.close();
-      onJump(id);
+      onJump(id, toward);
     });
     return jump;
   }
@@ -105,12 +106,12 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     $('dailyGo').hidden = today.done;
   }
 
-  // Sky news (core/forecast.js): sky() gives [{ text, planet: { id, name } }]. A planet
+  // Sky news (core/forecast.js): sky() gives [{ text, planet: { id, name }, toward }]. A planet
   // already found can be jumped to.
   function renderSky() {
     const news = sky ? sky() : [];
     $('journalSky').hidden = news.length === 0;
-    $('journalSky').replaceChildren(...news.map(({ text, planet }, i) => {
+    $('journalSky').replaceChildren(...news.map(({ text, planet, toward }, i) => {
       const line = document.createElement('p');
       const words = document.createElement('span');
       if (i === 0) {
@@ -120,7 +121,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       }
       words.append(text);
       line.append(words);
-      if (lastProgress.discovered.includes(planet.id)) line.append(jumpButton(planet.id, planet.name));
+      if (lastProgress.discovered.includes(planet.id)) line.append(jumpButton(planet.id, planet.name, toward));
       return line;
     }));
   }

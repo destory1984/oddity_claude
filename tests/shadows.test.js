@@ -5,6 +5,7 @@ import {
 } from '../src/core/shadows.js';
 import { BODIES, BODY_DATA, bodiesAt, bodyById } from '../src/core/bodies.js';
 import { eventMessage } from '../src/ui/messages.js';
+import { bodyVista } from '../src/core/teleport.js';
 
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 const sunOf = (bodies) => bodies.find((b) => b.kind === 'star');
@@ -96,4 +97,25 @@ test('each shadow has its notice, naming the moon and the planet', () => {
     }
   }
   assert.equal(eventMessage({ type: 'glow', id: 'shadow:moon' }), null);
+});
+
+test('a jump from the sky news arrives on the side of the planet the shadow is on', () => {
+  const periodS = BODY_DATA.find((b) => b.id === 'io').periodS;
+  const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
+  let checked = 0;
+  for (let k = 0; k < 40; k++) {
+    const bodies = bodiesAt((k * periodS) / 40);
+    const jupiter = bodies.find((b) => b.id === 'jupiter');
+    const spot = shadowSpot(jupiter, bodies.find((b) => b.id === 'io'), sunOf(bodies).position);
+    if (!spot) continue;
+    checked += 1;
+    const from = (vista) => vista.map((n, i) => n - jupiter.position[i]);
+    const unit = (v) => v.map((n) => n / Math.hypot(...v));
+    const plain = unit(from(bodyVista(jupiter, bodies)));
+    const aimed = unit(from(bodyVista(jupiter, bodies, null, spot)));
+    assert.ok(dot(aimed, spot) >= dot(plain, spot) - 1e-9);
+    // The shadow is then seen at a slant of 70 degrees or less, whenever it is on the planet.
+    assert.ok(dot(aimed, spot) > 0.34, `slot ${k}: ${dot(aimed, spot)}`);
+  }
+  assert.ok(checked >= 5);
 });

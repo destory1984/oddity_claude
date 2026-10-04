@@ -41,6 +41,7 @@ import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
 import { skyNews, newsLine } from './core/forecast.js';
+import { shadowSpot } from './core/shadows.js';
 import { dailyRequest, requestTarget, requestMet, recordDay, streak, lastWeek } from './core/daily.js';
 import { palFor } from './core/pal.js';
 import {
@@ -476,12 +477,13 @@ async function init() {
 
   // A place already visited, chosen from far away: appear there behind a flash. A body
   // is seen from its best side, a craft is docked with, a story place is seen from above.
-  function teleport(id, anywhere = false, known = false) {
+  // toward: something on the body to arrive on the side of (core/teleport.js bodyVista).
+  function teleport(id, anywhere = false, known = false, toward = null) {
     if (warp.busy()) return;
     sound.cue('warp');
     warp.play(() => {
       const target = here(id);
-      const spot = teleportSpot(target, { position: state.position, progress, bodies, parent: target.parent ? here(target.parent) : null, anywhere, known, ringNormal: world.ringNormal(target.id) });
+      const spot = teleportSpot(target, { position: state.position, progress, bodies, parent: target.parent ? here(target.parent) : null, anywhere, known, ringNormal: world.ringNormal(target.id), toward });
       if (!spot) return;
       if (docked) {
         docked = null;
@@ -858,7 +860,9 @@ ${STORY_MORE[target.id]}` : told };
     },
     notes: NOTES,
     memos: MEMOS,
-    sky: () => skyNews(bodiesAt, simTime).map((news) => ({ text: newsLine(news), planet: bodyById(news.planet, bodies) })),
+    sky: () => skyNews(bodiesAt, simTime).map((news) => ({ text: newsLine(news), planet: bodyById(news.planet, bodies),
+      toward: shadowSpot(bodyById(news.planet, bodies), bodyById(news.moon, bodies), bodyById('sun', bodies).position),
+    })),
     daily: () => ({
       text: request.text,
       done: requestDone(),
@@ -895,10 +899,11 @@ ${STORY_MORE[target.id]}` : told };
       return album;
     },
     // The journal's "순간 이동": jump there from anywhere.
-    onJump(id) {
+    // toward: for sky news, where the shadow is on the planet now, to arrive on its side.
+    onJump(id, toward = null) {
       selectedId = id;
       hud.showSelection(named(id));
-      teleport(id, true);
+      teleport(id, true, false, toward);
     },
     onOpen() {
       journalPriorPause = paused;

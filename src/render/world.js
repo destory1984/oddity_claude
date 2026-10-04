@@ -77,7 +77,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   // now: where every body is this frame (they orbit); defaults to the starting layout.
   // seen: { position, orientation } when the view is from somewhere other than where
   // the traveler is (looking round a target, ui/photo.js); she herself stays put.
-  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn, move = {}, seen = null, lamp = null, trail = null }) {
+  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn, move = {}, seen = null, lamp = null, trail = null, replay = null }) {
     elapsed += dt;
     // Draw from a point just above the ground when standing on it, and pull the near
     // plane in as the ground gets close; otherwise the planet under the feet is cut away
@@ -136,7 +136,7 @@ export async function createWorld(canvas, bodies = BODIES) {
       distances[c.id] = length * KM_PER_UNIT;
     }
     craftMeshes.update(craft, position, sunNow.position, jolt, hiddenCraft);
-    siteModels.update(sites, now, position);
+    siteModels.update(sites, now, position, replay);
     craftSun.direction = new Vector3(...normalize(sunRel)).scale(-1);
     for (const { id, glow } of comets) glow.update(now.find((b) => b.id === id), position, sunNow.position);
     const meteorLit = meteors.update(dt, now.find((b) => b.id === 'earth'), sunNow.position, position);

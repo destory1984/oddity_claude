@@ -73,6 +73,7 @@ import { readingQuizFor, readingKey } from './core/readingQuiz.js';
 import { STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, recordText, valueText, stuntById } from './core/stunts.js';
 import { STORY_DETAILS } from './core/storyDetails.js';
 import { STORY_MORE } from './core/storyMore.js';
+import { replayFor, replayFrame } from './core/replay.js';
 import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts } from './core/visit.js';
@@ -105,6 +106,10 @@ function inspectView(target) {
   if (target.kind === 'site') return target.landmark && !world?.hasSiteModel(target.id) ? { distanceKm: 500, fovDeg: 50 } : { distanceKm: 28, fovDeg: 28 };
   return { distanceKm: target.radiusKm * (target.id === 'saturn' ? 7 : 4), fovDeg: 44 };
 }
+
+// The close view while a day is played again (core/replay.js): the model is drawn 6 km
+// wide and starts 14 km up; from 48 km at 34 degrees the view is 29 km high.
+const REPLAY_VIEW = { distanceKm: 48, fovDeg: 34 };
 
 // For tuning a planet's look: set to e.g. { id: 'jupiter', fromCentreKm: 400000 } to
 // start beside it. null starts above Earth, where the first-visit guide begins.
@@ -314,6 +319,9 @@ function setPaused(value) {
 // Looking behind (R, the bent arrow): only the view turns half round. She flies on the
 // way she was going, and is not drawn, being behind the view.
 let rear = false;
+// "그날로" (core/replay.js): the place whose day is being played again in the close
+// view, since when (ms), and the line last shown. null when none is.
+let replay = null;
 // The feel of speed (core/speedFeel.js): on unless turned off in the settings; the
 // view's height now, in degrees.
 let feel = loadFeel();
@@ -632,9 +640,13 @@ ${STORY_MORE[target.id]}` : told };
   let inspectShown = null;
   function showInspectInfo() {
     const id = photo.orbit()?.id ?? null;
-    if (id === inspectShown) return;
-    inspectShown = id;
-    inspectInfo.show(id ? readingFor(here(id)) : null);
+    // A day played again: its lines take the sheet's place, each at its moment.
+    const scene = replay && id === replay.id ? replayFrame(replay.id, (performance.now() - replay.startedAt) / 1000) : null;
+    const key = scene ? `${id}:then:${scene.line}` : id;
+    if (key === inspectShown) return;
+    inspectShown = key;
+    if (scene) inspectInfo.show({ name: replayFor(id).name, nameEn: '', kicker: `그날로 · ${replayFor(id).day}`, text: scene.text });
+    else inspectInfo.show(id ? readingFor(here(id)) : null);
   }
 
   // A place being looked round while it is night there: its body is lit for the look.
@@ -684,6 +696,18 @@ ${STORY_MORE[target.id]}` : told };
     const target = onGround() ? null : dockable(state.position, craft);
     if (target) dock(target);
     return undefined;
+  });
+
+  // "그날로": standing at a place that has a scene, its day is played again in the close view.
+  $('replayButton').addEventListener('click', () => {
+    if (!visit || !hasArrived(visit) || !replayFor(visit.id) || photo.active()) return;
+    selectedId = visit.id;
+    hud.showSelection(named(visit.id));
+    $('inspectTarget').click();
+    if (photo.orbit()?.id !== visit.id) return;
+    // Seen from farther back than a plain close look, so the way down fits in the view.
+    photo.orbitAround({ id: visit.id, facing: photo.orbit().orientation, distanceKm: REPLAY_VIEW.distanceKm, fovDeg: REPLAY_VIEW.fovDeg });
+    replay = { id: visit.id, startedAt: performance.now(), down: false };
   });
 
   // The jump to TRAPPIST-1, offered while latched to Kepler, and the way home from there.
@@ -1512,6 +1536,18 @@ ${STORY_MORE[target.id]}` : told };
       const length = Math.hypot(...local);
       heading = local.map((n) => n / length);
     }
+    // A day being played again: over when its time is up or the close view is left.
+    let replayNow = null;
+    if (replay) {
+      replayNow = photo.orbit()?.id === replay.id ? replayFrame(replay.id, (performance.now() - replay.startedAt) / 1000) : null;
+      if (!replayNow || replayNow.done) {
+        replay = null;
+        replayNow = null;
+      } else if (replayNow.down && !replay.down) {
+        replay.down = true;
+        sound.cue('landed');
+      }
+    }
     showInspectInfo();
     // The feel of speed: the view widens near the limit of the spot, and the stars draw
     // out from 2c. Photo mode and the close view keep their own view; docked or gliding
@@ -1529,6 +1565,7 @@ ${STORY_MORE[target.id]}` : told };
       : null;
     const view = world.update({
       trail,
+      replay: replayNow && { id: replay.id, liftKm: replayNow.liftKm, flame: replayNow.flame },
       bodies,
       craft,
       hiddenCraft: awayCraft,
@@ -1645,6 +1682,10 @@ ${STORY_MORE[target.id]}` : told };
     // passing overhead put a docking button over a launch pad. (Its name tag still docks.)
     const offer = docked || onGround() ? null : dockable(state.position, craft);
     $('dockTarget').hidden = !docked && !offer;
+    // Standing at a place that has a scene of its day.
+    const thenHere = visit && hasArrived(visit) ? replayFor(visit.id) : null;
+    $('replayButton').hidden = !thenHere;
+    if (thenHere) $('replayButton').textContent = `그날로 · ${thenHere.day}`;
     // Latched to Kepler: the jump to the star it watched. There: the way home.
     $('exoJump').hidden = !away && !(docked?.id === 'kepler' && isDocked(docked));
     $('exoJump').textContent = away ? '태양계로 돌아가기' : '케플러가 본 별로';
@@ -1702,6 +1743,7 @@ ${STORY_MORE[target.id]}` : told };
     // bodies are now, and a way to stand at `position` (km) facing the point `toward`.
     bodies: () => bodies.map((b) => ({ id: b.id, position: [...b.position], radiusKm: b.radiusKm })),
     craft: () => craft.map((c) => ({ id: c.id, position: [...c.position] })),
+    sites: () => sites.map((x) => ({ id: x.id, parent: x.parent, position: [...x.position] })),
     place(position, toward) {
       state = createState(position, lookAtDirection(toward.map((n, i) => n - position[i])));
     },

@@ -40,7 +40,7 @@ function flag(scene, name, parent, mats, at) {
 // The Apollo Lunar Module: the eight-sided descent stage in gold foil on four legs
 // with the ladder down the front one, and the angular ascent stage with its two
 // triangular windows, hatch, thruster quads, radar dish and antennas. A flag beside it.
-function apollo(scene, name, mats) {
+function apollo(scene, name, mats, { withFlag = true } = {}) {
   const root = new TransformNode(name, scene);
   drum(scene, `${name}Descent`, root, mats.goldFoil, { height: 0.2, diameter: 0.5, tessellation: 8 }, [0, 0.3, 0], null).rotation.y = Math.PI / 8;
   drum(scene, `${name}DescentTop`, root, mats.blackFoil, { height: 0.012, diameter: 0.5, tessellation: 8 }, [0, 0.404, 0]).rotation.y = Math.PI / 8;
@@ -69,7 +69,7 @@ function apollo(scene, name, mats) {
   dish(scene, `${name}Sband`, cabin, mats, { at: [-0.1, 0.24, 0.1], toward: [-0.3, 1, 0.2], diameter: 0.09 });
   rod(scene, `${name}SbandMast`, cabin, mats.grey, [-0.08, 0.13, 0.08], [-0.1, 0.24, 0.1], 0.01, 4);
   rod(scene, `${name}Vhf`, cabin, mats.chrome, [-0.05, 0.15, -0.1], [-0.07, 0.34, -0.14], 0.006, 4);
-  flag(scene, `${name}Flag`, root, mats, [0.62, 0, 0.3]);
+  if (withFlag) flag(scene, `${name}Flag`, root, mats, [0.62, 0, 0.3]);
   return fuse(scene, root);
 }
 
@@ -504,4 +504,10 @@ export const SITE_BUILD = {
   huygens: [huygens, {}],
   lc39a: [launchPad, { rocket: 'saturn' }], naro: [launchPad, { rocket: 'nuri' }],
   messenger: [messenger, {}], venera7: [capsule, {}], venera13: [capsule, {}],
+};
+
+// For "그날로" (core/replay.js): what came down that day, as it was then. The Apollo
+// lander has no flag beside it yet.
+export const SITE_REPLAY_BUILD = {
+  apollo11: [apollo, { withFlag: false }],
 };

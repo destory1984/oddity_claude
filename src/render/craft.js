@@ -3,7 +3,8 @@ import { KM_PER_UNIT } from '../core/bodies.js';
 import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
 import { CRAFT_BUILD } from './craftModels.js';
-import { SITE_BUILD } from './siteModels.js';
+import { SITE_BUILD, SITE_REPLAY_BUILD } from './siteModels.js';
+import { drum } from './craftParts.js';
 
 // Spacecraft and landers. The models are in craftModels.js (in orbit) and
 // siteModels.js (on the ground), built from the parts in craftParts.js; this file
@@ -135,22 +136,52 @@ export function createSiteModels(scene, siteList) {
     nodes.set(site.id, node);
   }
 
+  // The same places as they were on their day, for a scene played again
+  // (core/replay.js): the model that comes down, and its engine's flame under it.
+  const then = new Map();
+  const flameMaterial = new StandardMaterial('replayFlame', scene);
+  flameMaterial.disableLighting = true;
+  flameMaterial.emissiveColor = new Color3(1, 0.82, 0.5);
+  flameMaterial.alpha = 0.38;
+  flameMaterial.backFaceCulling = false;
+  for (const [id, [build, options]] of Object.entries(SITE_REPLAY_BUILD)) {
+    const node = build(scene, `then_${id}`, mats, options);
+    node.rotationQuaternion = new Quaternion();
+    // Under the engine bell (the model's feet are at y = 0), widening downward.
+    const flame = drum(scene, `then_${id}_flame`, node, flameMaterial, { height: 0.34, diameterTop: 0.05, diameterBottom: 0.2, tessellation: 12 }, [0, -0.06, 0]);
+    node.setEnabled(false);
+    then.set(id, { node, flame });
+  }
+
   // sites, bodies: this frame's positions (km); position: the traveler (km).
-  function update(sites, bodies, position) {
+  // replay: { id, liftKm, flame } while that place's day is played again: its model as
+  // it was then stands liftKm above the ground in place of the one that is there now.
+  function update(sites, bodies, position, replay = null) {
+    for (const [id, old] of then) if (replay?.id !== id) old.node.setEnabled(false);
     for (const site of sites) {
       const card = cards.get(site.id);
       if (card) {
         card.update(site, bodies.find((b) => b.id === site.parent), bodies.find((b) => b.kind === 'star'), position);
         continue;
       }
-      const node = nodes.get(site.id);
-      if (!node) continue;
+      const now = nodes.get(site.id);
+      if (!now) continue;
+      const old = replay?.id === site.id ? then.get(site.id) : null;
+      if (old) now.setEnabled(false);
+      const node = old ? old.node : now;
       const rel = site.position.map((n, i) => (n - position[i]) / KM_PER_UNIT);
       const distanceKm = Math.hypot(...rel) * KM_PER_UNIT;
       node.setEnabled(distanceKm < SITE_VISIBLE_KM);
       if (!node.isEnabled()) continue;
       const body = bodies.find((b) => b.id === site.parent);
       const up = new Vector3(...site.position.map((n, i) => n - body.position[i])).normalize();
+      if (old) {
+        const lift = replay.liftKm / KM_PER_UNIT;
+        rel[0] += up.x * lift;
+        rel[1] += up.y * lift;
+        rel[2] += up.z * lift;
+        old.flame.setEnabled(replay.flame);
+      }
       // Stand it on the ground: turn the model's +y onto the local "up".
       Quaternion.FromUnitVectorsToRef(Vector3.Up(), up, node.rotationQuaternion);
       node.scaling.setAll(Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT)) / KM_PER_UNIT);

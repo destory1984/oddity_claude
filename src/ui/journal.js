@@ -1,4 +1,5 @@
 import { famousFor } from '../core/famous.js';
+import { lastSlotLast } from '../core/story.js';
 import { summarize, journalOrder } from '../core/progress.js';
 import { surfaceDistance } from '../core/bodies.js';
 import { objectParticle } from './messages.js';
@@ -182,7 +183,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
 
     const missionList = $('journalMissions');
     missionList.replaceChildren();
-    for (const mission of missions) {
+    for (const mission of lastSlotLast(missions, lastSlot)) {
       const done = progress.photos.includes(mission.id);
       // The last slot, still shut: only grandmother's clipping shows.
       const shut = !done && mission.id === lastSlot && lastShut(progress);
@@ -203,10 +204,12 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     const box = $('journalStories');
     box.replaceChildren();
     const told = lastProgress.stories ?? [];
+    // The last slot stands by itself at the end, under its own heading.
     const groups = [
-      ['지구와 먼 곳', (s) => s.body !== 'moon' && s.body !== 'mars'],
+      ['지구와 먼 곳', (s) => s.body !== 'moon' && s.body !== 'mars' && s.id !== lastSlot],
       ['달', (s) => s.body === 'moon'],
       ['화성', (s) => s.body === 'mars'],
+      ['마지막 칸', (s) => s.id === lastSlot],
     ];
     for (const [label, belongs] of groups) {
       const members = stories.filter(belongs);

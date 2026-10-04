@@ -1,8 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  NOTES, MEMOS, GREETINGS, dueNote, noteById, LAST_SLOT, LAST_SLOT_KM, lastSlotOpen, photoSlots,
-} from '../src/core/story.js';
+  NOTES, MEMOS, GREETINGS, dueNote, noteById, LAST_SLOT, LAST_SLOT_KM, lastSlotOpen, photoSlots, lastSlotLast } from '../src/core/story.js';
 import { STORIES } from '../src/core/stories.js';
 import { CRAFT } from '../src/core/craft.js';
 import { existsSync } from 'node:fs';
@@ -183,4 +182,11 @@ test('Seora has a word for each probe left alone, and each is a real place or cr
     assert.ok(known.has(id), id);
     assert.ok(line.length <= 25 && (line.match(/!/g) ?? []).length <= 1, id);
   }
+});
+
+test('the last slot is listed last, wherever it stands in the data', () => {
+  const list = [{ id: 'paleBlueDot' }, { id: 'earthrise' }, { id: 'eclipse' }];
+  assert.deepEqual(lastSlotLast(list).map((m) => m.id), ['earthrise', 'eclipse', 'paleBlueDot']);
+  assert.deepEqual(lastSlotLast(list, 'eclipse').map((m) => m.id), ['paleBlueDot', 'earthrise', 'eclipse']);
+  assert.deepEqual(lastSlotLast([{ id: 'a' }, { id: 'b' }]).map((m) => m.id), ['a', 'b']);
 });

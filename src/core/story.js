@@ -155,6 +155,13 @@ export function dueNote(progress, done, total = Infinity) {
 export const LAST_SLOT = 'paleBlueDot';
 export const LAST_SLOT_KM = 6e7;
 
+// The last slot is shown last in the journal's lists, wherever it stands in the data
+// (it is the first of the photo missions there; the user, 2026-10-05: "이건 마지막에
+// 보여야하는거 아님? 왜 제일 첫줄에 보여?").
+export function lastSlotLast(items, id = LAST_SLOT) {
+  return [...items.filter((item) => item.id !== id), ...items.filter((item) => item.id === id)];
+}
+
 export function lastSlotOpen(progress, done, total) {
   const have = Number(progress.photos.includes(LAST_SLOT)) + Number((progress.stories ?? []).includes(LAST_SLOT));
   return done - have >= total - 2;

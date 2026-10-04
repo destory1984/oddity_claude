@@ -33,8 +33,13 @@ void main(){
       * (.55 + .45 * sin(a * 5. + h * 7. + 1.7 * sin(a * 3. - time * .05)));
   }
   if (dark > .5) {
-    // Smoke: densest in the column, thinning into the cloud at the top.
-    float smoke = smoothstep(0., .08, h) * (1. - .55 * h) * strength;
+    // Smoke: densest in the column, thinning into the cloud and gone by the top. Above
+    // the column the wind carries it off to one side (Voyager 2 saw the clouds drawn
+    // out more than a hundred km downwind). (Even all the way up and all the way
+    // round, it stood past the limb as a flat grey triangle.)
+    float downwind = pow(.5 + .5 * cos(a - 1.), 2.);
+    float drift = mix(1., 1.3 * downwind, smoothstep(.1, .5, h));
+    float smoke = smoothstep(0., .08, h) * (1. - smoothstep(.45, 1., h)) * drift * (.85 + .15 * sin(a * 2. + h * 9.)) * strength;
     gl_FragColor = vec4(colorLow, smoke);
     return;
   }

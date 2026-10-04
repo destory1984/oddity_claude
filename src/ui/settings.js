@@ -1,8 +1,8 @@
 // The settings: the gear at the right end of the top buttons. Four pages, in the order
-// the user set on 2026-10-05: the help (how to fly: it had a "?" button and a sheet of
-// its own until then), the options (the screen's shape, the layout of the planets, the
-// sounds), what changed, a hundred lines at a time (core/changes.js), and "About" (the
-// title and why the game was made). They open on the help.
+// the user set on 2026-10-05: the options (the screen's shape, the layout of the
+// planets, the sounds), the help (how to fly: it had a "?" button and a sheet of its own
+// until then), what changed, a hundred lines at a time (core/changes.js), and "About"
+// (the title and why the game was made). They open on the options.
 import { changesUntil, firstLines, PAGE_LINES, dayLabel, startedLine } from '../core/changes.js';
 
 const $ = (id) => document.getElementById(id);
@@ -44,7 +44,7 @@ export function createSettings({ onOpen, onClose, today }) {
     onOpen();
     newsShown = PAGE_LINES;
     renderNews();
-    showTab('help');
+    showTab('options');
     dialog.showModal();
   });
   $('newsMore').addEventListener('click', () => {

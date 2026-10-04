@@ -1324,7 +1324,7 @@ ${STORY_MORE[target.id]}` : told };
   $('rearButton').addEventListener('click', () => setRear(!rear));
   $('pauseButton').addEventListener('click', () => setPaused(!paused));
   $('photoButton').addEventListener('click', () => photo.toggle());
-  // The settings hold the game while they are open. (The help is their first page: it
+  // The settings hold the game while they are open. (The help is their second page: it
   // was a sheet of its own behind a "?" button until 2026-10-05.)
   let settingsPriorPause = false;
   createSettings({

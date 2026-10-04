@@ -292,6 +292,11 @@ function progressChanged(before) {
   // Eighty, a hundred and twenty, a hundred and sixty slots: Seora counts aloud.
   const counted = before ? milestoneLine(score(summarize(before, BODIES, MISSIONS, STORIES)).done, done) : null;
   if (counted) say.show(counted);
+  // The last slot is not listed in the journal until every other slot is filled
+  // (ui/journal.js): the moment it comes into the lists, a notice says so.
+  if (before && !lastSlotOpen(before, score(summarize(before, BODIES, MISSIONS, STORIES)).done, total) && lastSlotOpen(progress, done, total) && done < total) {
+    toast.show('수첩에 마지막 칸이 나타났습니다. 임무 갈래의 맨 끝을 보세요.');
+  }
   return Boolean(before) && !isComplete(summarize(before, BODIES, MISSIONS, STORIES)) && isComplete(now);
 }
 

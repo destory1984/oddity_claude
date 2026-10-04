@@ -185,15 +185,18 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     missionList.replaceChildren();
     for (const mission of lastSlotLast(missions, lastSlot)) {
       const done = progress.photos.includes(mission.id);
-      // The last slot, still shut: only grandmother's clipping shows.
+      // The last slot is not listed at all until every other slot is filled (the user,
+      // 2026-10-05: "모든 임무를 다 끝내야 보여주는거 아니냐고"; grandmother's clipping
+      // stood in its place before). The count above still tells of twenty.
       const shut = !done && mission.id === lastSlot && lastShut(progress);
+      if (shut) continue;
       const li = document.createElement('li');
-      li.className = done ? 'done' : shut ? 'clipping' : '';
+      li.className = done ? 'done' : '';
       const title = document.createElement('strong');
       title.textContent = `${done ? '✓' : '○'} ${mission.name}`;
       const hint = document.createElement('span');
-      hint.textContent = shut ? CLIPPING : mission.hint;
-      li.append(title, ...(shut ? [picture('notebook/clipping.png', '신문에서 오려 붙인 사진: 빛줄기 속의 푸른 점 하나')] : []), hint);
+      hint.textContent = mission.hint;
+      li.append(title, hint);
       missionList.append(li);
     }
   }
@@ -204,12 +207,14 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     const box = $('journalStories');
     box.replaceChildren();
     const told = lastProgress.stories ?? [];
-    // The last slot stands by itself at the end, under its own heading.
+    // The last slot stands by itself at the end, under its own heading, and only once
+    // every other slot is filled: until then it is not listed.
+    const lastHidden = !told.includes(lastSlot) && lastShut(lastProgress);
     const groups = [
       ['지구와 먼 곳', (s) => s.body !== 'moon' && s.body !== 'mars' && s.id !== lastSlot],
       ['달', (s) => s.body === 'moon'],
       ['화성', (s) => s.body === 'mars'],
-      ['마지막 칸', (s) => s.id === lastSlot],
+      ['마지막 칸', (s) => s.id === lastSlot && !lastHidden],
     ];
     for (const [label, belongs] of groups) {
       const members = stories.filter(belongs);

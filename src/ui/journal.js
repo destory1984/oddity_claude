@@ -7,6 +7,7 @@ import { starText, postageFile, cardWords } from '../core/postcard.js';
 import { postcardBlob, saveBlob } from './postcardImage.js';
 import { readingKey } from '../core/readingQuiz.js';
 import { TOURS, stopName, stampFile, sceneFile } from '../core/tours.js';
+import { stuntStampFile } from '../core/stunts.js';
 
 const $ = (id) => document.getElementById(id);
 // 로 after a vowel or ㄹ, 으로 after any other final consonant.
@@ -403,7 +404,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   }
 
   // Stunt flights (core/stunts.js): what each asks, the best so far, and a button.
-  // stunts: { all(): [{ id, name, todo, record, on }], start(id), quit() }.
+  // stunts: { all(): [{ id, name, todo, record, on, done }], start(id), quit() }.
   function renderStunts() {
     const list = $('journalStunts');
     list.replaceChildren();
@@ -429,6 +430,8 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
         else stunts.start(stunt.id);
       });
       li.append(title, todo, record, button);
+      // Done once, it carries its stamp, as a tour gone round does.
+      if (stunt.done) li.append(picture(stuntStampFile(stunt.id), `${stunt.name} 도장`, 'stamp'));
       list.append(li);
     }
   }

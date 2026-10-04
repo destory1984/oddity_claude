@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, sanitizeStunts, recordText, valueText, stuntById,
+  STUNTS, stuntStampFile, startStunt, stepStunt, stuntStatus, recordStunt, sanitizeStunts, recordText, valueText, stuntById,
 } from '../src/core/stunts.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 
@@ -160,4 +160,9 @@ test('through the gap in the rings of Saturn: only a crossing inside the Cassini
   assert.equal(stepStunt(run, cross(0.765), 1).done, null);
   assert.equal(valueText('ringGap', 41234.4), '초속 41,234km');
   assert.equal(recordStunt({ ringGap: 30000 }, 'ringGap', 41234.4).best, true);
+});
+
+test('each stunt has a stamp drawing', async () => {
+  const { existsSync } = await import('node:fs');
+  for (const s of STUNTS) assert.ok(existsSync(`public/assets/${stuntStampFile(s.id)}`), s.id);
 });

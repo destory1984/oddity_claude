@@ -3,6 +3,8 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '불러오는 그림이 우주에서 본 지구의 새벽으로 바뀌었습니다.' },
+  { day: '2026-10-04', text: '묘기를 해내면 수첩에 도장이 찍힙니다. 작은 혜성과 작은 오로라가 따라다닐 수 있습니다.' },
   { day: '2026-10-04', text: '서라가 볼거리를 올려다보거나 가리키고, 말할 때 입을 움직입니다.' },
   { day: '2026-10-04', text: '서라가 쉴 때 하품을 하고, 수첩에 적고, 망원경을 보고, 주먹밥을 먹습니다.' },
   { day: '2026-10-04', text: '화성 남극에 흰 극관이 생겼습니다.' },

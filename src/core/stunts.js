@@ -22,6 +22,11 @@ export const STUNTS = [
   { id: 'ringGap', name: '고리 틈 지나기', todo: '토성 고리의 검은 틈(카시니 간극, 폭 4,700km)으로 고리를 건너기. 지나는 빠르기를 잰다', better: 'more', unit: 'km/s', line: '고리 사이로 쏙 지나왔어!' },
 ];
 
+// The rubber stamp a stunt leaves in the journal once it has a record (drawn to order,
+// 2026-10-04): public/assets/notebook/stamp-<name>.png.
+const STUNT_STAMPS = { moonRun: 'moon-run', moonSkim: 'moon-skim', earthLap: 'earth-lap', ringGap: 'ring-gap' };
+export const stuntStampFile = (id) => `notebook/stamp-${STUNT_STAMPS[id]}.png`;
+
 export function stuntById(id) {
   return STUNTS.find((s) => s.id === id) ?? null;
 }

@@ -3356,3 +3356,28 @@ dialog .sheetHead .textSize button:disabled {
   margin:0;
   line-height:1.4;
 }
+
+/* A stunt flight done once carries its stamp, as a tour does (ui/journal.js). */
+#journalStunts li {
+  position:relative;
+}
+
+#journalStunts .stamp {
+  position:absolute;
+  top:10px;
+  right:8px;
+  width:56px;
+  height:56px;
+  padding:4px;
+  border:1px solid #b79a6a66;
+  border-radius:4px;
+  background:#fffaf0;
+  image-rendering:pixelated;
+  transform:rotate(-8deg);
+}
+
+#journalStunts li:has(.stamp) strong,
+#journalStunts li:has(.stamp) .stops {
+  display:block;
+  padding-right:72px;
+}

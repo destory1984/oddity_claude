@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { PALS, PAL_FRAMES, palFor, palFile } from '../src/core/pal.js';
 
-test('five companions, four drawings each, all on file', () => {
-  assert.deepEqual(PALS.map((p) => p.id), ['star', 'saturn', 'voyager', 'earth', 'crane']);
+test('seven companions, four drawings each, all on file', () => {
+  assert.equal(PALS.length, 7);
   for (const pal of PALS) {
     for (let frame = 0; frame < PAL_FRAMES; frame++) assert.ok(existsSync(`public/assets/${palFile(pal.id, frame)}`), palFile(pal.id, frame));
   }
@@ -23,4 +23,10 @@ test('the companion is the last one earned: by slots, by a full journal, by all 
   // The crane comes with the tours, however full the journal is.
   assert.equal(at(1, true), 'crane');
   assert.equal(at(183, true), 'crane');
+  // The comet for all four stunts and the aurora for all the photo missions come after
+  // the first three and before a full journal.
+  assert.deepEqual(PALS.map((p) => p.id), ['star', 'saturn', 'voyager', 'comet', 'aurora', 'earth', 'crane']);
+  assert.equal(palFor({ done: 130, total: 183, allTours: false, allStunts: true }), 'comet');
+  assert.equal(palFor({ done: 10, total: 183, allTours: false, allStunts: true, allPhotos: true }), 'aurora');
+  assert.equal(palFor({ done: 183, total: 183, allTours: false, allStunts: true, allPhotos: true }), 'earth');
 });

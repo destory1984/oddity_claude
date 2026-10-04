@@ -925,7 +925,7 @@ ${STORY_MORE[target.id]}` : told };
     onTourStart: beginTour,
     onTourQuit: endTour,
     stunts: {
-      all: () => STUNTS.map((s) => ({ ...s, record: recordText(s.id, stuntRecords), on: stunt?.id === s.id })),
+      all: () => STUNTS.map((s) => ({ ...s, record: recordText(s.id, stuntRecords), on: stunt?.id === s.id, done: stuntRecords[s.id] !== undefined })),
       start: beginStunt,
       quit: quitStunt,
     },
@@ -1468,7 +1468,11 @@ ${STORY_MORE[target.id]}` : told };
         see: performance.now() < seeUntil ? seeKind : null,
         talk: say.showing(),
         // The companion earned last (core/pal.js); drawn beside the sprite character only.
-        pal: palFor({ ...tally(), allTours: allToursDone(progress) }),
+        pal: palFor({
+          ...tally(), allTours: allToursDone(progress),
+          allStunts: STUNTS.every((s) => stuntRecords[s.id] !== undefined),
+          allPhotos: progress.photos.length >= MISSIONS.length,
+        }),
         read: performance.now() < readUntil,
         // Getting up as soon as she moves off.
         sit: performance.now() < sitUntil && Boolean(visit) && hasArrived(visit),

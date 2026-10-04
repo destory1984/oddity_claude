@@ -1,4 +1,4 @@
-import { Vector3, Quaternion, Color3, CreatePlane, StandardMaterial, Texture, TransformNode } from './babylon.js';
+import { Vector3, Quaternion, Color3, CreatePlane, StandardMaterial, Texture, TransformNode, DynamicTexture } from './babylon.js';
 import { KM_PER_UNIT } from '../core/bodies.js';
 import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
@@ -157,18 +157,54 @@ export function createSiteModels(scene, siteList) {
   {
     const node = CRAFT_BUILD.cassini(scene, 'then_cassiniPlunge', mats);
     node.rotationQuaternion = new Quaternion();
+    // A soft teardrop of light drawn on a canvas: white-hot at the head, orange behind,
+    // fading to nothing along the tail and at the edges.
+    const glowTexture = new DynamicTexture('replayFireGlow', { width: 512, height: 128 }, scene, true);
+    {
+      const ctx = glowTexture.getContext();
+      const [w, h] = [512, 128];
+      const head = w * 0.86;
+      ctx.clearRect(0, 0, w, h);
+      const shade = ctx.createRadialGradient(0, 0, 0, 0, 0, h / 2);
+      shade.addColorStop(0, 'rgba(255, 250, 235, 1)');
+      shade.addColorStop(0.16, 'rgba(255, 214, 150, 0.95)');
+      shade.addColorStop(0.45, 'rgba(255, 150, 70, 0.55)');
+      shade.addColorStop(1, 'rgba(255, 110, 40, 0)');
+      ctx.fillStyle = shade;
+      // The tail: the same glow stretched back to the far end.
+      ctx.save();
+      ctx.translate(head, h / 2);
+      ctx.scale(head / (h / 2), 1);
+      ctx.fillRect(-h / 2, -h / 2, h / 2, h);
+      ctx.restore();
+      // The head: round.
+      ctx.save();
+      ctx.translate(head, h / 2);
+      ctx.fillRect(0, -h / 2, h / 2, h);
+      ctx.restore();
+      glowTexture.update();
+      glowTexture.hasAlpha = true;
+    }
     const fireMaterial = new StandardMaterial('replayFire', scene);
     fireMaterial.disableLighting = true;
-    fireMaterial.emissiveColor = new Color3(1, 0.62, 0.3);
+    fireMaterial.diffuseColor = new Color3(0, 0, 0);
+    fireMaterial.specularColor = new Color3(0, 0, 0);
+    fireMaterial.emissiveTexture = glowTexture;
+    fireMaterial.opacityTexture = glowTexture;
     fireMaterial.alpha = 0;
     fireMaterial.backFaceCulling = false;
-    const fire = drum(scene, 'then_cassiniPlunge_fire', node, fireMaterial, { height: 3.2, diameterTop: 0.02, diameterBottom: 1.1, tessellation: 16 }, [-1.3, 0, 0], [-1, 0, 0]);
-    // A hotter, narrower heart inside it.
-    const coreMaterial = fireMaterial.clone('replayFireCore');
-    coreMaterial.emissiveColor = new Color3(1, 0.9, 0.7);
-    drum(scene, 'then_cassiniPlunge_core', fire, coreMaterial, { height: 0.6, diameterTop: 0.02, diameterBottom: 0.5, tessellation: 12 }, [0, -1.3, 0]);
+    // Three sheets crossed along the way it flies, so it is a glow from any side.
+    const fire = new TransformNode('then_cassiniPlunge_fire', scene);
+    fire.parent = node;
+    for (let k = 0; k < 3; k++) {
+      const sheet = CreatePlane(`then_cassiniPlunge_fire${k}`, { width: 5, height: 1.7 }, scene);
+      sheet.parent = fire;
+      sheet.material = fireMaterial;
+      sheet.position.x = 0.15 - (0.86 - 0.5) * 5;
+      sheet.rotation.x = (k * Math.PI) / 3;
+    }
     node.setEnabled(false);
-    then.set('cassiniPlunge', { node, flame: null, fire, fireMaterial, coreMaterial });
+    then.set('cassiniPlunge', { node, flame: null, fire, fireMaterial });
   }
 
   // sites, bodies: this frame's positions (km); position: the traveler (km).
@@ -213,8 +249,7 @@ export function createSiteModels(scene, siteList) {
         const x = new Vector3(...replay.across).scale(-1).normalize().subtract(up.scale(replay.slope)).normalize();
         const z = Vector3.Cross(x, up).normalize();
         Quaternion.RotationQuaternionFromAxisToRef(x, Vector3.Cross(z, x), z, node.rotationQuaternion);
-        old.fireMaterial.alpha = 0.3 * replay.glow;
-        old.coreMaterial.alpha = 0.6 * replay.glow;
+        old.fireMaterial.alpha = replay.glow;
         old.fire.setEnabled(replay.glow > 0);
       }
       node.scaling.setAll(Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT)) / KM_PER_UNIT);

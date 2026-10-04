@@ -3248,7 +3248,44 @@ body.rear.touch #reticle span {
 /* Target lock: the chosen body is held in the middle of the view. Lined in gold while on. */
 #lockTarget {
   display:block;
+  margin:0;
+}
+
+/* It shares a row with the close-view button: on a phone a row of its own pushed the
+   buttons under it down onto the notice. */
+#targetRow {
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:9px;
+}
+
+#targetRow #inspectTarget {
+  margin:0;
+}
+
+/* The buttons that come and go under them keep the same 9px between rows. */
+#exoJump,
+#replayButton {
+  display:block;
   margin:9px 0 0 auto;
+}
+
+#exoJump[hidden],
+#replayButton[hidden] {
+  display:none;
+}
+
+/* On a phone five rows of them must end above the notice (288px from the top): 6px
+   between rows there. */
+@media (max-width: 480px) {
+  #targetRow,
+  #dockTarget,
+  #exoJump,
+  #replayButton,
+  #eclipseJump {
+    margin-top:6px;
+  }
 }
 
 #lockTarget[aria-pressed="true"] {

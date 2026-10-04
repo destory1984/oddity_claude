@@ -3251,14 +3251,25 @@ body.rear.touch #reticle span {
 @media (max-width: 480px) {
   #hud footer {
     --gap:12px;
-    --step:calc(var(--tap) + var(--gap));
+    --step:calc(var(--top-key) + var(--gap));
     left:var(--gap);
     right:var(--gap);
     bottom:max(var(--gap), env(safe-area-inset-bottom));
   }
 
+  /* The keys are as large as the buttons along the top (--top-key; the user,
+     2026-10-05: "화면 아래 아이콘도 윗쪽 버튼만큼 키워줘"; they were --tap, 44px). */
+  #rearButton,
+  #reverseButton,
+  #brake,
+  #flyButton {
+    width:var(--top-key);
+    height:var(--top-key);
+    min-height:var(--top-key);
+  }
+
   #slidePad {
-    --key:var(--tap);
+    --key:var(--top-key);
     gap:var(--gap);
     position:absolute;
     right:0;
@@ -3292,7 +3303,7 @@ body.rear.touch #reticle span {
   }
 
   #hud footer .throttle input[type=range] {
-    height:calc(3 * var(--tap) + var(--gap) - 111px);
+    height:calc(3 * var(--top-key) + var(--gap) - 111px);
   }
 }
 

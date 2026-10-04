@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '앞으로 날 때 서라의 다리가 튀듯이 움직이던 것을 고쳤습니다.' },
   { day: '2026-10-04', text: '바라보기를 누르고 전진하면 그 목표로 곧게 날아갑니다. 전에는 목표 아래로 빗나갔습니다.' },
   { day: '2026-10-04', text: '바라보기와 목표 고정 때 목표가 서라의 머리 위에 옵니다. 전에는 머리 뒤에 가려졌습니다.' },
   { day: '2026-10-04', text: '태양 바로 위에서 옆을 보면 태양이 양쪽에 보이던 것을 고쳤습니다. 이제 한쪽에만 보입니다.' },

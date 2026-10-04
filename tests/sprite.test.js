@@ -3,8 +3,7 @@ import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import {
   SHEETS, FRAMES, SPRITE_FPS, SHEET_HOLD_S, REST_ACTIONS, FIRST_REST_S, REST_GAP_S, SLEEP_AFTER_S,
-  createSpriteState, flightSheet, modeFor, stepSprite, spriteFrame, spriteFile, seeFor, SEE_S,
-} from '../src/core/sprite.js';
+  createSpriteState, flightSheet, modeFor, stepSprite, spriteFrame, spriteFile, seeFor, SEE_S, flightFrame } from '../src/core/sprite.js';
 
 // Run the sprite for `seconds` with the same input, returning every state on the way.
 function run(state, input, seconds, dt = 1 / 60) {
@@ -90,7 +89,11 @@ test('setting off she turns away from the camera over 0.8 s, then flies at ten f
   assert.ok(Math.abs(turn.length / 60 - 0.8) < 0.05, `${turn.length / 60}`);
   assert.deepEqual(sheetsOf(seen), ['brake', 'away']);
   const flight = run(flying(), FLY, 0.4, 0.01).seen;
-  assert.deepEqual([...new Set(flight.map(spriteFrame))].sort(), [0, 1, 2, 3]);
+  // Straight away the third drawing (a kick) is left out: the first comes round again.
+  assert.deepEqual([...new Set(flight.map(spriteFrame))].sort(), [0, 1, 3]);
+  assert.deepEqual([0, 1, 2, 3].map((n) => flightFrame('away', n)), [0, 1, 0, 3]);
+  assert.deepEqual([0, 1, 2, 3].map((n) => flightFrame('away-left', n)), [0, 1, 0, 3]);
+  assert.deepEqual([0, 1, 2, 3].map((n) => flightFrame('back-up', n)), [0, 1, 2, 3]);
 });
 
 test('stopping she turns back to face the camera over 0.8 s, then hovers', () => {

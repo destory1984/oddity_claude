@@ -164,6 +164,15 @@ export function modeFor(input) {
 }
 
 const loop = (time, fps) => Math.floor(time * fps) % FRAMES;
+// Flying straight away and leaning, the third drawing kicks one leg up (and, straight
+// on, puts the hidden boot on the other side of the leg in front): played in turn with
+// the others the legs jerked about ("다리 움직임이 매우 이상한데?"). It is left out: the
+// first drawing comes round again in its place.
+const CALM_ORDER = [0, 1, 0, 3];
+const CALM_SHEETS = ['away', 'away-left', 'away-right'];
+export function flightFrame(sheet, n) {
+  return CALM_SHEETS.includes(sheet) ? CALM_ORDER[n] : n;
+}
 const once = (time, fps) => Math.min(FRAMES - 1, Math.floor(time * fps));
 // Facing the camera: these turn round by the 'brake' drawings on the way to and from flight.
 const FACING = ['hover', 'ground', 'photo', 'cheer', 'read', 'sit'];
@@ -297,7 +306,7 @@ export function stepSprite(state, input, dt) {
     const time = state.time + dt;
     const wanted = flightSheet({ ...input, turn }, state.sheet);
     const sheet = wanted === state.sheet || since < SHEET_HOLD_S ? state.sheet : wanted;
-    return { ...next, sheet, time, frame: loop(time, SPRITE_FPS.flight), since: sheet === state.sheet ? since : 0, turn };
+    return { ...next, sheet, time, frame: flightFrame(sheet, loop(time, SPRITE_FPS.flight)), since: sheet === state.sheet ? since : 0, turn };
   }
   // Hovering. Coming out of flight she turns round to face the camera first.
   if (fresh && ['fly', 'sling', 'reach', 'descend'].includes(from)) {

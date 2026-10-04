@@ -5,6 +5,7 @@ import veilVert from './shaders/veil.vert?raw';
 import veilFrag from './shaders/veil.frag?raw';
 import glowVert from './shaders/glow.vert?raw';
 import sodiumFrag from './shaders/sodium.frag?raw';
+import eringFrag from './shaders/ering.frag?raw';
 import { KM_PER_UNIT, TIME_SCALE, AU_KM } from '../core/bodies.js';
 import { cometActivity } from '../core/comet.js';
 import { meteorSpot } from '../core/meteors.js';
@@ -12,7 +13,7 @@ import {
   AURORAS, auroraBand, STORMS, LIGHTNING_LIFE_S, lightningGap, lightningGlow,
   PLUMES, PLUME_DAY_S, PLUME_RANGE_RADII, plumeUp,
   IMPACT_RANGE_KM, IMPACT_LIFE_S, IMPACT_SIZE_KM, impactGap, impactGlow,
-  NIGHT_CLOUDS, sheetBand, FOOTPRINT, footprintUp, SODIUM_TAIL, JETS, jetDirections, SPRITE, spriteGlow,
+  NIGHT_CLOUDS, sheetBand, FOOTPRINT, footprintUp, SODIUM_TAIL, JETS, jetDirections, SPRITE, spriteGlow, E_RING,
 } from '../core/glows.js';
 
 const FLASHES = 8;
@@ -259,6 +260,23 @@ export function createGlows(scene, bodies) {
   const sodiumLength = SODIUM_TAIL.lengthKm / KM_PER_UNIT;
   sodium.scaling.set(sodiumLength * SODIUM_TAIL.spread, sodiumLength, sodiumLength * SODIUM_TAIL.spread);
 
+  // Saturn's E ring: one flat card in the plane Enceladus goes round in.
+  Effect.ShadersStore.eringVertexShader = glowVert;
+  Effect.ShadersStore.eringFragmentShader = eringFrag;
+  const eringMaterial = new ShaderMaterial('ering', scene, { vertex: 'ering', fragment: 'ering' }, {
+    attributes: ['position', 'uv'], uniforms: ['worldViewProjection', 'strength', 'at'],
+  });
+  eringMaterial.alphaMode = Constants.ALPHA_ADD;
+  eringMaterial.needAlphaBlending = () => true;
+  eringMaterial.disableDepthWrite = true;
+  eringMaterial.backFaceCulling = false;
+  eringMaterial.setFloat('at', 1 / E_RING.spread);
+  const ering = CreatePlane('ering', { size: 1, sideOrientation: Mesh.DOUBLESIDE }, scene);
+  ering.rotation.x = Math.PI / 2;
+  ering.material = eringMaterial;
+  ering.isPickable = false;
+  ering.setEnabled(false);
+
   // The jets of Halley's nucleus: narrow cones of lit dust on its day side.
   const jets = JETS.lean.map((_, i) => {
     const material = veilMaterial(scene, `jet${i}`, { low: [1, 0.97, 0.9], high: [0.75, 0.85, 1], ripple: 0, nightOnly: false, soft: true });
@@ -392,6 +410,24 @@ export function createGlows(scene, bodies) {
         const size = Math.max(FOOTPRINT.sizeKm, Math.hypot(...at) * KM_PER_UNIT * 0.012);
         mesh.scaling.setAll(size / KM_PER_UNIT);
         material.alpha = 0.99 * night * (0.8 + 0.2 * Math.sin(elapsed * 5.3));
+      }
+    }
+
+    {
+      const body = find(E_RING.body);
+      const moon = find(E_RING.moon);
+      const on = height(body, position) <= E_RING.rangeRadii * body.radiusKm;
+      ering.setEnabled(on);
+      if (on) {
+        const out = moon.position.map((n, i) => n - body.position[i]);
+        // In the plane the moon goes round in (level, at the moon's own height).
+        const centre = rel([body.position[0], moon.position[1], body.position[2]], position);
+        ering.position.set(centre[0], centre[1], centre[2]);
+        ering.scaling.setAll((2 * Math.hypot(out[0], out[2]) * E_RING.spread) / KM_PER_UNIT);
+        // Against the light the fine ice scatters the Sun forward and the ring stands out.
+        const eye = new Vector3(...position.map((n, i) => n - body.position[i])).normalize();
+        const against = Math.max(0, -Vector3.Dot(eye, sunFrom(body)));
+        eringMaterial.setFloat('strength', E_RING.light * (1 + 3 * against * against));
       }
     }
 

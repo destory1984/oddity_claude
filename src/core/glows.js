@@ -199,12 +199,17 @@ export function plumeUp(plume, spinRad) {
 // flashes are told when one lights.) Several may be in reach at once (near Jupiter: its
 // aurora and Io's footprint); the game tells them one at a time.
 // (Saturn is looked at from nine radii off, to take in its rings: the spokes are told from there.)
-export const TELL_RADII = { aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, backlit: 12, haze: 8, shine: 4, rings: 6, geyser: 3, ashen: 4, horizon: 4 };
+export const TELL_RADII = { aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, backlit: 12, haze: 8, shine: 4, rings: 6, geyser: 3, ashen: 4, horizon: 4, ering: 40, flare: 3, flow: 5, tracks: 0.2 };
 // A comet's tail is told from within this far of its nucleus, while it is within this
 // many AU of the Sun (farther out it has no tail to speak of).
 export const TELL_TAIL_KM = 300000;
 export const TELL_TAIL_AU = 3;
 const AU = 149597870.7;
+// Saturn's E ring: the ice of Enceladus's jets spread round Saturn along the moon's
+// path. spread: the card's half-width in units of the moon's distance; light: how
+// bright it is from the Sun's side (against the light it is four times brighter, as
+// Cassini saw it from Saturn's shadow). Shown from within rangeRadii of Saturn.
+export const E_RING = { body: 'saturn', moon: 'enceladus', spread: 1.9, light: 0.035, rangeRadii: 40 };
 // "Behind" a world: this far round from the Sun's side (the cosine of the angle), or more.
 export const BEHIND = 0.6;
 // A planet crossing the Sun is a transit while it looks smaller than this share of the Sun.
@@ -252,6 +257,12 @@ export function glowsNear(bodies, position) {
   // Earthshine on the Moon: from over its night side, on the side turned to Earth.
   const earth = bodies.find((b) => b.id === 'earth');
   if (earth && sun && near('moon', TELL_RADII.shine) && side('moon', sun.position) < 0 && side('moon', earth.position) > 0.3) found.push('shine:moon');
+  // The E ring, from near Enceladus, which feeds it; the Sun's flares from near the Sun;
+  // Jupiter's sliding belts; the tracks on Mars from low over its day side.
+  if (near('enceladus', TELL_RADII.ering)) found.push('ering:saturn');
+  if (near('sun', TELL_RADII.flare)) found.push('flare:sun');
+  if (near('jupiter', TELL_RADII.flow)) found.push('flow:jupiter');
+  if (near('mars', TELL_RADII.tracks) && sun && side('mars', sun.position) > 0.2) found.push('tracks:mars');
   // Uranus: its thin dark rings (its aurora is told with the others above).
   if (near('uranus', TELL_RADII.rings)) found.push('rings:uranus');
   // The dark jets of Mars's south polar cap, from over the south.

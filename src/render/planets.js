@@ -54,7 +54,8 @@ function createEarth(scene, body, sunDir) {
   const diameter = (2 * body.radiusKm) / KM_PER_UNIT;
 
   const earth = CreateSphere('earth', { diameter, segments: 112 }, scene);
-  const surface = shader(scene, 'planet', planetFrag, ['sun', 'eye'], ['day', 'night']);
+  const surface = shader(scene, 'planet', planetFrag, ['sun', 'eye', 'cloudShift'], ['day', 'night', 'cloudMap']);
+  surface.setFloat('cloudShift', 0);
   surface.setTexture('day', texture(scene, 'earth-day.jpg'));
   surface.setTexture('night', texture(scene, 'earth-night.jpg'));
   surface.setVector3('sun', sunDir);
@@ -63,7 +64,10 @@ function createEarth(scene, body, sunDir) {
 
   const clouds = CreateSphere('clouds', { diameter: diameter * CLOUD_SCALE, segments: 96 }, scene);
   const cloudMaterial = shader(scene, 'cloudLayer', cloudsFrag, ['sun'], ['cloudMap']);
-  cloudMaterial.setTexture('cloudMap', texture(scene, 'earth-clouds.jpg'));
+  const cloudMap = texture(scene, 'earth-clouds.jpg');
+  cloudMaterial.setTexture('cloudMap', cloudMap);
+  // The ground shader reads the same map, to lay the clouds' shadows on the ground.
+  surface.setTexture('cloudMap', cloudMap);
   cloudMaterial.setVector3('sun', sunDir);
   cloudMaterial.alphaMode = Constants.ALPHA_COMBINE;
   cloudMaterial.needAlphaBlending = () => true;
@@ -87,6 +91,9 @@ function createEarth(scene, body, sunDir) {
       // Negative rotation turns counterclockwise seen from the north: the ground moves east.
       earth.rotation.y = EARTH_START_SPIN - turn;
       clouds.rotation.y = EARTH_START_SPIN + 0.008 - turn * CLOUD_DRIFT;
+      // How far the cloud map stands east of the ground map, in turns (a larger
+      // rotation.y carries a map eastward past a fixed place).
+      surface.setFloat('cloudShift', (clouds.rotation.y - earth.rotation.y) / (2 * Math.PI));
     },
     setSun(dir) {
       const v = new Vector3(...dir);
@@ -169,10 +176,15 @@ const LOOKS = {
     mapWeight: 1, haze: 0.4, detail: 0.14, dayS: SPIN_DAY_S.mars,
     // Seen from behind, the dust in its air glows blue (the blue sunsets the rovers photograph).
     rim: [0.4, 0.58, 1], rimLight: 0.9,
+    // The tracks dust devils leave on its ground.
+    tracks: 1,
   },
   jupiter: {
     shader: 'textured', map: 'jupiter.jpg', saturation: 1.1, tint: [1.03, 1, 0.96], base: [0.82, 0.7, 0.54],
     mapWeight: 1, haze: 0.2, detail: 0.2, dayS: SPIN_DAY_S.jupiter,
+    // Its belts slide past each other: the fastest gains a turn on the slowest in about
+    // ten minutes (the real winds differ by some hundred m/s: speeded up to be seen).
+    flow: 0.0016,
   },
   saturn: {
     shader: 'textured', map: 'saturn.jpg', saturation: 1.15, tint: [1.03, 0.99, 0.9], base: [0.9, 0.8, 0.6],
@@ -303,7 +315,9 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
       ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy',
-        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'nightGlow'], ['map']);
+        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'nightGlow', 'flow', 'tracks'], ['map']);
+    material.setFloat('flow', look.flow ?? 0);
+    material.setFloat('tracks', look.tracks ?? 0);
     material.setColor3('nightGlow', color(look.nightGlow ?? [0, 0, 0]));
     material.setVector4('shine', new Vector4(0, 1, 0, 0));
     material.setColor3('shineColor', new Color3(1, 1, 1));
@@ -364,7 +378,7 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     spin(elapsed) {
       sphere.rotation.y = -(elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
       if (ring) ring.setTime(elapsed);
-      if (look.storm || look.nightGlow) material.setFloat('time', elapsed);
+      if (look.storm || look.nightGlow || look.flow) material.setFloat('time', elapsed);
     },
     // heightRadii: the camera's height above the ground, in this body's radii.
     setClose(heightRadii) {

@@ -82,7 +82,8 @@ test('each light is told about from nearby, in words', () => {
     return [b.position[0], b.position[1] + b.radiusKm * (1 + radii), b.position[2]];
   };
   assert.equal(glowNear(BODIES, above('earth', TELL_RADII.aurora - 0.1)), 'aurora:earth');
-  assert.equal(glowNear(BODIES, above('earth', TELL_RADII.aurora + 0.1)), null);
+  // (Past the aurora's reach only the Sun's flares are left to tell of: Earth is within three Sun radii of it.)
+  assert.equal(glowNear(BODIES, above('earth', TELL_RADII.aurora + 0.1)), 'flare:sun');
   assert.equal(glowNear(BODIES, above('jupiter', 1)), 'aurora:jupiter');
   assert.equal(glowNear(BODIES, above('io', 5)), 'plume:io');
   assert.equal(glowNear(BODIES, above('enceladus', 5)), 'plume:enceladus');
@@ -100,22 +101,23 @@ test('where several sights are in reach they are all listed, the nearest thing f
     const b = bodyById(id);
     return [b.position[0], b.position[1] + b.radiusKm * (1 + radii), b.position[2]];
   };
-  assert.deepEqual(glowsNear(BODIES, above('earth', 1)), ['aurora:earth', 'clouds:earth']);
-  assert.deepEqual(glowsNear(BODIES, above('earth', 2.5)), ['aurora:earth']);
-  assert.deepEqual(glowsNear(BODIES, above('jupiter', 1)), ['aurora:jupiter', 'footprint:io']);
+  assert.deepEqual(glowsNear(BODIES, above('earth', 1)), ['aurora:earth', 'clouds:earth', 'flare:sun']);
+  assert.deepEqual(glowsNear(BODIES, above('earth', 2.5)), ['aurora:earth', 'flare:sun']);
+  assert.deepEqual(glowsNear(BODIES, above('jupiter', 1)), ['aurora:jupiter', 'footprint:io', 'flow:jupiter']);
   assert.deepEqual(glowsNear(BODIES, above('saturn', 1)), ['aurora:saturn', 'spokes:saturn', 'hexagon:saturn']);
   assert.deepEqual(glowsNear(BODIES, above('neptune', 1)), ['spot:neptune']);
   // Triton is within three radii of Neptune.
   assert.deepEqual(glowsNear(BODIES, above('triton', 5)), ['plume:triton', 'spot:neptune']);
   // From where Saturn is looked at with its rings, nine radii off: the spokes, not yet the aurora.
   assert.deepEqual(glowsNear(BODIES, above('saturn', 8)), ['spokes:saturn']);
-  assert.deepEqual(glowsNear(BODIES, above('mercury', 20)), ['tail:mercury']);
+  assert.deepEqual(glowsNear(BODIES, above('mercury', 20)), ['tail:mercury', 'flare:sun']);
+  assert.ok(glowsNear(BODIES, above('enceladus', 5)).includes('ering:saturn'));
   const halley = bodyById('halley');
   const off = (km) => [halley.position[0], halley.position[1] + halley.radiusKm + km, halley.position[2]];
-  assert.deepEqual(glowsNear(BODIES, off(TELL_JETS_KM - 1)), ['jets:halley', 'tailcut']);
+  assert.deepEqual(glowsNear(BODIES, off(TELL_JETS_KM - 1)), ['jets:halley', 'flare:sun', 'tailcut']);
   // Past the jets' reach the tail is still told of, out to 300,000 km.
-  assert.deepEqual(glowsNear(BODIES, off(TELL_JETS_KM + 1)), ['tailcut']);
-  assert.deepEqual(glowsNear(BODIES, off(300001)), []);
+  assert.deepEqual(glowsNear(BODIES, off(TELL_JETS_KM + 1)), ['flare:sun', 'tailcut']);
+  assert.deepEqual(glowsNear(BODIES, off(300001)), ['flare:sun']);
   assert.equal(glowNear(BODIES, above('jupiter', 1)), 'aurora:jupiter');
 });
 

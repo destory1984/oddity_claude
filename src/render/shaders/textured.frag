@@ -43,6 +43,11 @@ uniform float ringOuter;
 // Light thrown back by the planet a moon goes round (earthshine on the Moon): xyz the
 // way to the planet, w how strong; and its colour (core/shine.js).
 // A faint glow of its own on the night side (Venus's ashen light).
+// Jupiter: its belts and zones go round at different rates, so the stripes slide past
+// each other (flow: how fast, in turns a second at most). Mars: the dark tracks dust
+// devils leave, seen from close by.
+uniform float flow;
+uniform float tracks;
 uniform vec3 nightGlow;
 uniform vec4 shine;
 uniform vec3 shineColor;
@@ -111,8 +116,23 @@ vec3 closeGround(vec3 p, float strength, float height, float pixel) {
   return sum;
 }
 
+// One steady number in -0.5..0.5 for each belt.
+float beltSpeed(float belt) {
+  return fract(sin(belt * 91.7 + 3.1) * 43758.5453) - .5;
+}
+
 void main(){
   vec3 col = texture2D(map, vUV).rgb;
+  if (flow > 0.) {
+    // Fourteen belts from pole to pole, each carried round at its own rate; across the
+    // edge between two the map is cross-faded, so no line is cut through the clouds.
+    float at = vUV.y * 14. - .5;
+    float belt = floor(at);
+    float mixTo = smoothstep(.3, .7, fract(at));
+    vec3 a = texture2D(map, vec2(fract(vUV.x + time * flow * beltSpeed(belt)), vUV.y)).rgb;
+    vec3 b = texture2D(map, vec2(fract(vUV.x + time * flow * beltSpeed(belt + 1.)), vUV.y)).rgb;
+    col = mix(a, b, mixTo);
+  }
   // Hide the seam where the map's left and right edges meet: over the last third of a
   // degree each side, fade to the average of the two edges. (A band of three degrees
   // each side showed from close by as 170 km of smeared streaks across the Moon.)
@@ -148,6 +168,14 @@ void main(){
     grain = mix(grain, even, min(1., craters * 3.));
   }
   col *= 1. + (grain - .5) * detail;
+  if (tracks > 0. && close < .3) {
+    // Thin dark wandering lines in patches: where a dust devil has swept the pale dust
+    // off the darker ground. They come into view within a third of a radius.
+    float wander = fbm(lp.zy * 40. + 2.) * 9. + fbm(lp.xy * 40. + 5.) * 9.;
+    float line = smoothstep(.06, 0., abs(sin(lp.x * 700. + lp.z * 500. + wander)));
+    float swept = smoothstep(.5, .68, fbm(lp.xz * 11. + lp.y * 7.));
+    col *= 1. - .28 * line * swept * tracks * (1. - smoothstep(.1, .3, close));
+  }
 
   if (storm.z > 0.) {
     // Across the spot: x along the latitude (wrapped), y across it; the spot is an oval

@@ -166,9 +166,22 @@ void main(){
   // The planet in front already hides the covered part of the disc; what is left keeps
   // its full surface brightness. Only the glare around it fades with the covered area.
   // (Additive blending multiplies the colour by alpha, so visibility goes in once.)
+  // A flare and the cloud it throws off (a coronal mass ejection): once in 90 s a point
+  // near the limb flashes white for a few seconds and a shell of gas swells away from
+  // it, out to three radii, thinning as it goes. (Always off the limb as seen from here:
+  // one that came straight at the eye would be a halo all round the disc.)
+  float lap = time / 90.;
+  float u = fract(lap);
+  float where = 6.2832 * fract(sin(floor(lap) * 78.233) * 43758.5453);
+  vec2 from = vec2(cos(where), sin(where));
+  float da = acos(clamp(dot(p / max(r, 1e-6), from), -1., 1.));
+  float kernel = exp(-dot(p - from * .118, p - from * .118) / .00016) * smoothstep(0., .012, u) * exp(-u * 14.) * 2.5;
+  float shell = exp(-pow((r - .129 * (1.05 + 2.2 * u)) / (.012 + .05 * u), 2.)) * exp(-pow(da / (.3 + .35 * u), 2.))
+    * pow(1. - u, 2.) * smoothstep(0., .03, u) * .5;
   vec3 col = (surface * disc * 1.35 + glow * visibility + vec3(1., .3, .27) * prom * .9
+    + vec3(1., .96, .88) * kernel * disc + vec3(1., .8, .6) * shell * (1. - disc)
     + vec3(.86, .9, 1.) * pearl + vec3(1., .97, .9) * diamond) * .68;
-  float a = clamp(disc + corona * .38 + rayH + rayV + ring + prom + pearl + diamond, 0., 1.);
+  float a = clamp(disc + corona * .38 + rayH + rayV + ring + prom + pearl + diamond + shell, 0., 1.);
   // The glow is light added to the sky, but the disc itself hides what is behind it: the
   // colour goes out already multiplied by its strength, and the alpha says how much of
   // the background is taken away (all of it on the disc, none of it in the glow). Added

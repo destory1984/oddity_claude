@@ -279,6 +279,7 @@ npm test
 - **권리 보유 (MIT에서 제외)**: 도트 그림 캐릭터 서라와 그 그림 파일 229장(`public/assets/seora-sprites/`), 이야기 그림 46장(`public/assets/notebook/`: 대문과 마루와 쪽지 장면, 여는 장면 둘, 우편함, 코스 도장, 코스 장면 아홉, 우표와 소인, 별, 신문 스크랩, 색연필 표시), 불러오는 화면과 바깥 배경 그림 2장(`public/assets/scenes/`), 와디럼 그림(`public/assets/wadi-rum.png`), 따라다니는 것 28장(`public/assets/pals/`), 전에 쓰던 종이 인형 캐릭터의 디자인(얼굴 없는 종이 인형 마법사, 은색 쌍갈래 머리, 금 테두리 흰 케이프와 흰 로브. 그리는 코드는 v0.1.23에서 뺐다), 독도 그림(`public/assets/dokdo.png`), 앱 아이콘(`public/icons/`), 게임 이름 "할머니의 수첩"과 "Space Oddity — 할머니의 수첩", 전에 쓰던 "우주 한량"과 "Space Oddity — 우주 한량". 허락 없이 복사하거나 자기 작품에 쓸 수 없다. 이 코드를 가져다 쓰는 사람은 캐릭터, 아이콘, 이름을 자기 것으로 바꿔야 한다.
 - **외부 자료 (MIT에서 제외)**: 각자의 조건을 따른다. [THIRD-PARTY.md](THIRD-PARTY.md) 에 파일마다 출처와 라이선스를 적었다.
   - 화면의 아이콘 14장(`public/assets/ui/icon-*.svg`): 이 게임에서 그린 선 그림이고 코드와 같은 MIT다.
+  - 제목 글씨(`public/assets/ui/title.png`): 게임 이름과 함께 권리를 보유한다.
   - 글꼴: 화면의 글자는 Pretendard(길형진), 할머니의 손글씨는 나눔손글씨 펜(네이버, 산돌), 서라의 말풍선과 덧글은 개구(The Gaegu Project Authors)다. 셋 다 SIL 오픈 폰트 라이선스 1.1이고, 글꼴 파일을 고치지 않고 `public/fonts/` 에 넣었다(3.1MB, 1.7MB, 0.9MB).
   - 천체 지도: NASA·USGS 지도는 저작권이 없고, Solar System Scope 지도는 CC BY 4.0이다.
   - 이야기 장소의 사진 95장(`public/assets/stories/`): 86장은 NASA 등 저작권이 없는 사진이다. 나머지 아홉은 출처를 밝혀야 쓸 수 있다. 마우나케아 천문대(Generic1139)와 알마 전파망원경(ESO/B. Tafreshi) 사진은 CC BY 4.0이다. 누리호 사진은 한국항공우주연구원의 공공누리 제1유형, 베네라 7호 모형 사진은 CC BY-SA 4.0이다. 찬드라얀 3호는 ISRO의 GODL-India, 핼리 혜성과 67P 혜성과 코롤료프 분화구는 ESA의 CC BY-SA 3.0 IGO, 독도는 CC BY-SA 3.0이다. CC BY-SA 사진을 고쳐 쓰면 같은 조건으로 내야 한다.

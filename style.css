@@ -3245,6 +3245,24 @@ body.rear.touch #reticle span {
   display:none;
 }
 
+/* The title is a picture: "Space Oddity" in pixel lettering, cream with a gold edge and a
+   navy line round it, a small crown over the O (the user's pick of five, 2026-10-04).
+   Its height goes by the size of the type it stands in for, so the rules that shrank
+   the words on narrow screens shrink it too. */
+.titleArt {
+  display:block;
+  width:auto;
+  height:1.7em;
+  max-width:100%;
+  object-fit:contain;
+  object-position:left center;
+  image-rendering:pixelated;
+}
+
+#loading .titleArt {
+  object-position:center;
+}
+
 /* Target lock: the chosen body is held in the middle of the view. Lined in gold while on. */
 #lockTarget {
   display:block;

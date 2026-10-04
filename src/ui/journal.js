@@ -7,8 +7,6 @@ import { starText, postageFile, cardWords } from '../core/postcard.js';
 import { postcardBlob, saveBlob } from './postcardImage.js';
 import { readingKey } from '../core/readingQuiz.js';
 import { TOURS, stopName, stampFile, sceneFile } from '../core/tours.js';
-import { textSizeFrom, nextTextSize, canResize } from '../core/textSize.js';
-import { loadTextSize, saveTextSize } from './storage.js';
 
 const $ = (id) => document.getElementById(id);
 // 로 after a vowel or ㄹ, 으로 after any other final consonant.
@@ -42,24 +40,6 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   dialog.addEventListener('click', (e) => {
     if (e.target === dialog) dialog.close();
   });
-
-  // The size of the writing: two buttons at the head, five sizes, kept between visits.
-  // The part that scrolls grows with it (CSS zoom, so the lines wrap again); the title,
-  // the summary, the tabs and the buttons themselves stay as they are.
-  let textSize = textSizeFrom(loadTextSize());
-  function showTextSize() {
-    dialog.style.setProperty('--text', String(textSize));
-    $('textSmaller').disabled = !canResize(textSize, -1);
-    $('textLarger').disabled = !canResize(textSize, 1);
-  }
-  for (const [id, way] of [['textSmaller', -1], ['textLarger', 1]]) {
-    $(id).addEventListener('click', () => {
-      textSize = nextTextSize(textSize, way);
-      saveTextSize(textSize);
-      showTextSize();
-    });
-  }
-  showTextSize();
 
   // One part of the journal shows at a time (the whole of it was fourteen screens long
   // on a phone). The part last looked at is the one it opens on.

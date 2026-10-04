@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '설정과 도움말에도 글자 크기 단추(가−, 가+)가 생겼습니다. 수첩과 함께 바뀝니다.' },
   { day: '2026-10-04', text: '토성을 해 반대쪽에서 보면 고리가 뒤에서 빛을 받아 엷은 고리가 밝게 보입니다.' },
   { day: '2026-10-04', text: '달과 위성의 밤 쪽이 행성이 되비춘 빛으로 어슴푸레 보입니다(지구조).' },
   { day: '2026-10-04', text: '대기광, 토성 육각형, 타이탄·명왕성·화성의 안개 고리에 알림이 붙었습니다.' },

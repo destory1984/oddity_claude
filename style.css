@@ -3276,3 +3276,49 @@ body.rear.touch #reticle span {
 #lookBackButton {
   margin:0 0 12px;
 }
+
+/* The size of the writing in the settings and the help too (ui/textSize.js): the same
+   two buttons as the journal's, at the right of the title; what is read grows, the
+   title, the tabs and the closing button stay. */
+.sheetHead {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.sheetHead h1 {
+  flex:1;
+  min-width:0;
+  margin:0;
+}
+
+.sheetHead .textSize {
+  flex:none;
+  display:flex;
+  gap:6px;
+}
+
+dialog .sheetHead .textSize button {
+  width:44px;
+  height:40px;
+  min-height:40px;
+  margin:0;
+  padding:0;
+  font-size:15px;
+  font-weight:700;
+}
+
+dialog .sheetHead .textSize button[data-way="-1"] {
+  font-size:12px;
+}
+
+dialog .sheetHead .textSize button:disabled {
+  opacity:.4;
+}
+
+#settings section,
+#help > p,
+#help > dl {
+  zoom:var(--text, 1);
+}

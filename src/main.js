@@ -42,6 +42,7 @@ import { createSay } from './ui/say.js';
 import { skyNews, newsLine } from './core/forecast.js';
 import { createSettings } from './ui/settings.js';
 import { createLookBack } from './ui/lookBack.js';
+import { bindTextSize } from './ui/textSize.js';
 import { shadowSpot } from './core/shadows.js';
 import { dailyRequest, requestTarget, requestMet, recordDay, streak, lastWeek } from './core/daily.js';
 import { palFor } from './core/pal.js';
@@ -947,6 +948,7 @@ ${STORY_MORE[target.id]}` : told };
     },
   });
   journal.setAlbum(album);
+  bindTextSize();
   const lookBack = createLookBack({ missions: MISSIONS });
   $('lookBackButton').addEventListener('click', () => lookBack.play(album));
   // Opened before the first frame, the journal still has something to show.

@@ -6,6 +6,7 @@
 // buttons about, evening out spaces, renaming a tab or rewording a sentence does not
 // (the user had six such lines taken out on 2026-10-05: "이런건 바뀐 것에서 빼줘").
 export const CHANGES = [
+  { day: '2026-10-05', text: '오로라가 매끈한 띠가 아니라 빛줄기가 늘어선 커튼으로 보입니다. 토성의 것은 낮아졌습니다.' },
   { day: '2026-10-05', text: '설정의 "바뀐 것들"이 만들기 시작한 날부터의 기록을 모두 보여 줍니다.' },
   { day: '2026-10-05', text: '아이폰에서 단추를 빠르게 두 번 누르면 화면이 커지던 것을 고쳤습니다.' },
   { day: '2026-10-05', text: '보현산천문대에 천문대 그림이 섰고, 사진이 없던 이야기 장소 세 곳에 그림이 붙었습니다.' },

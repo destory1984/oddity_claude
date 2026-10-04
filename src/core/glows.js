@@ -11,12 +11,14 @@ const RAD = Math.PI / 180;
 // A curtain round each pole at this latitude, from baseKm up to baseKm + heightKm.
 // Real aurora is 100 to 400 km up on Earth and far fainter: the height and brightness
 // are raised so it shows from orbit. Shown from within rangeRadii of the surface.
+// It is drawn as a curtain of rays with dark gaps (render/shaders/veil.frag).
 export const AURORAS = [
   { body: 'earth', latDeg: 67, baseKm: 100, heightKm: 700, low: [0.2, 1, 0.45], high: [0.75, 0.25, 0.9], rangeRadii: 6 },
   { body: 'jupiter', latDeg: 76, baseKm: 300, heightKm: 4000, low: [0.45, 0.55, 1], high: [0.8, 0.4, 1], rangeRadii: 6 },
   // Saturn's, as Cassini photographed it in visible light: red at the foot, purple at
   // the top (hydrogen's light), standing over a thousand km above the cloud tops.
-  { body: 'saturn', latDeg: 75, baseKm: 800, heightKm: 4500, low: [1, 0.3, 0.38], high: [0.62, 0.35, 1], rangeRadii: 12 },
+  // (It was drawn 4,500 km tall until 2026-10-05: from close by, a thick pink tube.)
+  { body: 'saturn', latDeg: 75, baseKm: 500, heightKm: 1800, low: [1, 0.3, 0.38], high: [0.62, 0.35, 1], rangeRadii: 12 },
   // Uranus's, first photographed by Hubble in 2011. Its magnetic axis leans 59 degrees
   // from its spin axis, so the ovals stand far from the poles of its spin: here they
   // are drawn about the globe's own axis, which lies nowhere near its rings' axis.

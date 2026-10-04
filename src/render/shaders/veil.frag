@@ -15,12 +15,23 @@ uniform float dark;
 // crossed the close view as a flat wedge with a hard edge.
 uniform float soft;
 varying float vFace;
+// A number between 0 and 1 for each whole step along x, joined smoothly; it comes round
+// to where it began after `period` steps, so a ring of it closes.
+float hash1(float n){ return fract(sin(n * 127.1) * 43758.5453); }
+float ringNoise(float x, float period){
+  float i = floor(x);
+  float f = fract(x);
+  f = f * f * (3. - 2. * f);
+  return mix(hash1(mod(i, period)), hash1(mod(i + 1., period)), f);
+}
 // A thin glowing sheet wrapped round an axis: an aurora curtain or a plume. The mesh is
 // a cone band one unit tall, so vPos.y + .5 runs 0 at the foot to 1 at the top.
 void main(){
   float h = vPos.y + .5;
   float a = atan(vPos.z, vPos.x);
   float fade = smoothstep(0., .05, h) * pow(1. - h, 1.5);
+  // How far up its own height this bit is: the colour runs from the foot's to the top's.
+  float tint = h;
   // Folds drifting round the ring (ripple is a whole number, so the ring closes).
   float folds = .5 + .5 * sin(a * ripple + time * .7 + 2.5 * sin(a * 5. - time * .4));
   float wave = mix(1., (.3 + .7 * folds) * (.7 + .3 * sin(a * 3. + time * .23)), step(.5, ripple));
@@ -37,6 +48,23 @@ void main(){
     wave = (.5 + .5 * (.5 + .5 * sin(a * ripple * 9. + h * 70. + time * .2 + 3. * sin(a * 13. + h * 11.))))
       * (.55 + .45 * sin(a * 5. + h * 7. + 1.7 * sin(a * 3. - time * .05)));
   }
+  // An aurora is a curtain of rays, not an even band (the user, 2026-10-05, asked
+  // whether Saturn's smooth pink tube was right: it was not). Rays stand side by side
+  // round the ring, each as tall as it happens to be and brighter or fainter than the
+  // next; whole stretches of the ring are bright and others nearly dark; the foot is
+  // sharp and the top fades. They drift slowly round.
+  if (nightOnly > .5 && nightOnly < 1.5) {
+    float u = a / 6.2831853 + .5;
+    float fine = ringNoise(u * 520. + time * .22, 520.);
+    float mid = ringNoise(u * 130. - time * .09, 130.);
+    float stretch = ringNoise(u * 22. + time * .02, 22.);
+    float top = .3 + .7 * mid * (.55 + .45 * fine);
+    fade = smoothstep(0., .03, h) * pow(max(0., 1. - h / top), 1.1);
+    // Each ray turns to the top's colour by its own top, short or tall.
+    tint = clamp(h / top * 1.3, 0., 1.);
+    float rays = .25 + .75 * fine * fine * (.5 + .5 * mid);
+    wave = rays * mix(.1, 1.7, smoothstep(.25, .7, stretch)) * (.75 + .25 * folds);
+  }
   if (dark > .5) {
     // Smoke: densest in the column, thinning into the cloud and gone by the top. Above
     // the column the wind carries it off to one side (Voyager 2 saw the clouds drawn
@@ -49,5 +77,5 @@ void main(){
     return;
   }
   float stream = mix(1., smoothstep(0., .75, vFace), soft);
-  gl_FragColor = vec4(mix(colorLow, colorHigh, h) * fade * wave * night * strength * stream, 1.);
+  gl_FragColor = vec4(mix(colorLow, colorHigh, tint) * fade * wave * night * strength * stream, 1.);
 }

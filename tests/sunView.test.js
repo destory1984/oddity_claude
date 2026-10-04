@@ -61,3 +61,10 @@ test('a spot is drawn where it is: the line of sight through its place on the ca
   const s2 = (eye[2] * ray[0] - eye[0] * ray[2]) / (tilted.cardRight[2] * ray[0] - tilted.cardRight[0] * ray[2]);
   close(ballPoint(tilted, s2, 0), spot);
 });
+
+test('a line of sight that points away from the Sun does not see it, though the line passes through the ball behind the eye', () => {
+  const card = { away: [0, 0, 1], cardRight: [1, 0, 0], cardUp: [0, 1, 0] };
+  // 43,147 km over the Sun: 1.062 radii from its middle.
+  assert.ok(ballPoint({ ...card, eyeDist: 1.062 }, 0.2, 0));
+  assert.equal(ballPoint({ ...card, away: [0, 0, -1], eyeDist: -1.062 }, 0.2, 0), null);
+});

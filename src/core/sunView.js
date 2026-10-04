@@ -35,7 +35,8 @@ export function ballPoint({ away, eyeDist, cardRight, cardUp }, x, y) {
   const sight = unit(away.map((n, i) => n * eyeDist + cardRight[i] * x + cardUp[i] * y));
   const along = dot(sight, away);
   const miss = eyeDist * Math.hypot(...sight.map((n, i) => n - away[i] * along));
-  if (miss >= 1) return null;
+  // (Behind the eye the line passes the ball too: that is no sight of it.)
+  if (miss >= 1 || along <= 0) return null;
   const reach = eyeDist * along - Math.sqrt(1 - miss * miss);
   return sight.map((n, i) => n * reach - away[i] * eyeDist);
 }

@@ -130,6 +130,8 @@ export async function createWorld(canvas, bodies = BODIES) {
     }
     const sunRel = relative(sunNow, position);
     sun.mesh.position.set(sunRel[0], sunRel[1], sunRel[2]);
+    // Its card faces the eye, which is the scene's origin (render/sun.js).
+    sun.mesh.lookAt(Vector3.Zero());
 
     for (const c of [...craft, ...sites]) {
       const rel = relative(c, position);

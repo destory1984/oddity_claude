@@ -1,4 +1,4 @@
-import { CreatePlane, Mesh, Constants, Vector3 } from './babylon.js';
+import { CreatePlane, Constants, Vector3 } from './babylon.js';
 import sunFrag from './shaders/sun.frag?raw';
 import { shader } from './planets.js';
 import { KM_PER_UNIT } from '../core/bodies.js';
@@ -8,12 +8,16 @@ const DISC_FRACTION = 0.129; // disc edge in the billboard's UV radius (see sun.
 export function createSun(scene, sunBody) {
   const size = (2 * sunBody.radiusKm) / KM_PER_UNIT / DISC_FRACTION;
   const plane = CreatePlane('sun', { size }, scene);
-  plane.billboardMode = Mesh.BILLBOARDMODE_ALL;
+  // The card faces the eye (render/world.js turns it each frame), not the screen: a card
+  // square to the view passes through the eye when the Sun is 90 degrees to one side, and
+  // from close by, where the Sun spreads 70 degrees and more from its middle, the part of
+  // it that should have shown at the edge of the view was not drawn at all.
   const material = shader(scene, 'sunGlow', sunFrag, ['visibility', 'time', 'eclipse', 'bead', 'axisR', 'axisU', 'axisF', 'eyeDist']);
   // sun.frag gives colour already multiplied, and alpha 1 on the disc only.
   material.alphaMode = Constants.ALPHA_PREMULTIPLIED;
   material.needAlphaBlending = () => true;
   material.disableDepthWrite = true;
+  material.backFaceCulling = false;
   material.setFloat('visibility', 1);
   material.setFloat('eclipse', 0);
   material.setVector3('bead', Vector3.Zero());

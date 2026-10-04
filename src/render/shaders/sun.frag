@@ -54,7 +54,10 @@ void main(){
   vec3 sight = normalize(wp);
   float along = dot(sight, axisF);
   vec3 aside = sight - axisF * along;
-  float miss = eyeDist * length(aside);
+  // (Only ahead: a line of sight that points away from the Sun also passes within a
+  // radius of its middle, behind the eye. Close in, 43,000 km up, the card is all round
+  // the eye and the Sun was drawn a second time on the far side of the view.)
+  float miss = along > 0. ? eyeDist * length(aside) : 2.;
   float off = length(aside) / max(along, 1e-4) * sqrt(eyeDist * eyeDist - 1.);
   vec2 p = .129 * (miss < 1. ? miss : off) * vec2(dot(aside, axisR), dot(aside, axisU)) / max(length(aside), 1e-6);
   float r = length(p);

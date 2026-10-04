@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '설정에 "About" 갈래가 생겼습니다. 게임 제목과 만든 이유가 적혀 있습니다.' },
   { day: '2026-10-04', text: '일식과 월식을 보는 동안 글 아래에 "이 장면은 연출입니다"라고 까닭과 함께 적어 둡니다.' },
   { day: '2026-10-04', text: '고도, 속도, 목적지 글자 뒤에 어두운 받침을 깔았습니다. 밝은 태양 앞에서도 읽힙니다.' },
   { day: '2026-10-04', text: 'PC의 방향키가 위, 아래, 왼쪽, 오른쪽 이동이 됐습니다. 시야는 화면을 끌어서 돌립니다.' },

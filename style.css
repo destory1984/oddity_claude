@@ -3406,8 +3406,8 @@ body.rear.touch #reticle span {
   }
 }
 
-/* The settings (ui/settings.js): two pages under two tabs. The first tells what changed
-   this week, a line each, the day written once at its first line. */
+/* The settings (ui/settings.js): three pages under three tabs. The first tells what
+   changed this week, a line each, the day written once at its first line. */
 #settings {
   width:min(560px,calc(100vw - 24px));
   max-height:90vh;
@@ -3475,6 +3475,26 @@ body.rear.touch #reticle span {
 
 #settings section[hidden] {
   display:none;
+}
+
+/* The third page, "About": the title as it is drawn, the subtitle under it, and why
+   the game was made. */
+#aboutTitle {
+  display:grid;
+  justify-items:center;
+  gap:6px;
+  margin:10px 0 18px;
+  font-size:26px;
+}
+
+#aboutTitle .titleArt {
+  object-position:center;
+}
+
+#aboutTitle span {
+  color:var(--gold);
+  font-size:15px;
+  letter-spacing:.08em;
 }
 
 /* Narrower still, the journal's count has the room and its picture goes. */

@@ -1,7 +1,7 @@
 // The settings: the gear at the right end of the top buttons. Its first page tells what
 // changed this week (core/changes.js); the second holds what can be set (the screen's
-// shape, the character, the layout of the planets, the sounds), which used to be in the
-// help.
+// shape, the layout of the planets, the sounds), which used to be in the help; the third,
+// "About", shows the title and why the game was made.
 import { weekChanges, dayLabel, startedLine } from '../core/changes.js';
 
 const $ = (id) => document.getElementById(id);

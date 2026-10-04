@@ -2,16 +2,13 @@
 // 것"). One line each, in plain words, the newest day first. Only what shows on screen or
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
+// Not every change belongs: a new thing to do or see, or a fault mended, does; moving
+// buttons about, evening out spaces, renaming a tab or rewording a sentence does not
+// (the user had six such lines taken out on 2026-10-05: "이런건 바뀐 것에서 빼줘").
 export const CHANGES = [
   { day: '2026-10-05', text: '위쪽의 일시 정지 단추를 뺐습니다. 수첩이나 설정을 열면 전처럼 저절로 멈춥니다.' },
-  { day: '2026-10-05', text: '설정 창이 갈래를 바꿔도 같은 크기로 있고, 갈래 단추 셋의 크기가 같아졌습니다.' },
-  { day: '2026-10-05', text: '설정 창의 둘째 갈래 이름이 "설정"에서 "옵션"으로 바뀌었습니다.' },
-  { day: '2026-10-05', text: '휴대전화 화면의 위쪽과 아래쪽 단추, 받침의 간격을 모두 한 값으로 맞췄습니다.' },
-  { day: '2026-10-05', text: '휴대전화에서 단추 여덟이 오른쪽 맨 아래 구석에 세 줄로 모였습니다. 가운데가 정지입니다.' },
-  { day: '2026-10-05', text: '화면 아래의 가속 강도 막대를 아주 작게 줄였습니다.' },
   { day: '2026-10-05', text: '행성 가까이 가면 그 행성의 위성들도 화면 가장자리에 화살표와 거리로 보입니다.' },
   { day: '2026-10-05', text: '목성 구름에 세로로 난 밝은 틈과 띠 경계의 점선을 없앴습니다.' },
-  { day: '2026-10-04', text: '할머니의 첫 쪽지에서 부탁하는 말을 부드럽게 고쳤습니다.' },
   { day: '2026-10-04', text: '설정에 "About" 갈래가 생겼습니다. 게임 제목과 만든 이유가 적혀 있습니다.' },
   { day: '2026-10-04', text: '일식과 월식을 보는 동안 글 아래에 "이 장면은 연출입니다"라고 까닭과 함께 적어 둡니다.' },
   { day: '2026-10-04', text: '고도, 속도, 목적지 글자 뒤에 어두운 받침을 깔았습니다. 밝은 태양 앞에서도 읽힙니다.' },

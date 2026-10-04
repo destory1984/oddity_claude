@@ -438,7 +438,7 @@ async function init() {
       if (paused) toast.show('멈췄습니다. Esc나 비행 키를 누르면 이어집니다.', 'pause', 4);
     },
     onWheel: (deltaY) => photo.zoom(deltaY),
-    isBlocked: () => $('help').open || $('settings').open || $('journal').open || $('noteCard').open || $('bigMap').open,
+    isBlocked: () => $('settings').open || $('journal').open || $('noteCard').open || $('bigMap').open,
   });
   photo = createPhoto({
     world,
@@ -1316,14 +1316,8 @@ ${STORY_MORE[target.id]}` : told };
   $('rearButton').addEventListener('click', () => setRear(!rear));
   $('pauseButton').addEventListener('click', () => setPaused(!paused));
   $('photoButton').addEventListener('click', () => photo.toggle());
-  $('helpButton').addEventListener('click', () => {
-    const prior = paused;
-    setPaused(true);
-    $('help').showModal();
-    $('help').addEventListener('close', () => setPaused(prior), { once: true });
-  });
-  $('closeHelp').addEventListener('click', () => $('help').close());
-  // The settings hold the game while they are open, as the help does.
+  // The settings hold the game while they are open. (The help is their third page: it
+  // was a sheet of its own behind a "?" button until 2026-10-05.)
   let settingsPriorPause = false;
   createSettings({
     onOpen() {

@@ -118,11 +118,6 @@ nav {
   gap:9px;
 }
 
-#helpButton {
-  font:19px Georgia,serif;
-  width:42px;
-  padding:6px;
-}
 
 .telemetry {
   position:absolute;
@@ -1186,8 +1181,7 @@ nav button {
   }
 
   #soundButton,
-  #bgmButton,
-  #helpButton {
+  #bgmButton {
     min-width: 32px;
   }
 
@@ -2088,7 +2082,6 @@ footer button:active,
 #hud nav #soundButton.off::before { background-image:url("/assets/ui/icon-sound-off.svg"); }
 #hud nav #bgmButton::before { background-image:url("/assets/ui/icon-music-on.svg"); }
 #hud nav #bgmButton.off::before { background-image:url("/assets/ui/icon-music-off.svg"); }
-#hud nav #helpButton::before { background-image:url("/assets/ui/icon-help.svg"); }
 #hud nav #pauseButton::before { background-image:url("/assets/ui/icon-pause.svg"); }
 #hud nav #pauseButton.paused::before { background-image:url("/assets/ui/icon-play.svg"); }
 #hud nav #journalButton::before { background-image:url("/assets/ui/icon-journal.svg"); }
@@ -2124,8 +2117,8 @@ footer button:active,
      from the screen's edges, between the six buttons, from the buttons down to the
      minimap and the target's name, and on down to the notice. It is 8px (12px until the
      user's "버튼 크기를 80%로 줄이고, 버튼 간격을 줄이자", 2026-10-05).
-     --top-key: the side of one of the six squares: 80% of a sixth of the row, which
-     they filled until then; the six now stand at the right, over the keys below.
+     --top-key: the side of one of the squares: 80% of a sixth of the row, which
+     six filled until then; the five now stand at the right, over the keys below.
      --row2: where the plates' upper edge stands, under the buttons (and under the goal
      line while the first-visit guide shows it: --guide, its height and one more gap). */
   body {
@@ -2188,7 +2181,7 @@ footer button:active,
      lower down, Seora's speech bubble or a two-line notice would lie across it. */
   #guide {
     top:calc(var(--edge-top) + var(--top-key) + var(--gap));
-    left:var(--gap);
+    left:calc(124px + 2 * var(--gap));
     right:var(--gap);
     box-sizing:border-box;
     height:44px;
@@ -2206,16 +2199,19 @@ footer button:active,
     font-size:12px;
   }
 
-  /* The minimap under the buttons (124px), the notice under the minimap. With no goal
-     line showing they stand that much higher (--guide). The height plate that stood
+  /* The notice stands under the target's keys. With no goal line showing it stands
+     that much higher (--guide). The height plate that stood
      over the minimap is gone from a phone (the user, 2026-10-05: "이거 없애자"): the
      nearest body's label already says how far its surface is. */
   .telemetry {
     display:none;
   }
 
+  /* The minimap stands at the very top, left of the five buttons (the user,
+     2026-10-05: with the help in the settings and the buttons at the right there is
+     room: 5 keys and 4 gaps leave 142px at a width of 402). */
   #minimap {
-    top:var(--row2);
+    top:var(--edge-top);
     left:var(--gap);
     width:124px;
     height:124px;
@@ -2226,11 +2222,13 @@ footer button:active,
   }
 
   #guideText {
+    /* Beside the minimap the line is short: the words take two lines there. */
     flex:1;
     min-width:0;
+    max-height:2.5em;
     overflow:hidden;
-    white-space:nowrap;
-    text-overflow:ellipsis;
+    line-height:1.25;
+    word-break:keep-all;
   }
 }
 
@@ -2603,7 +2601,6 @@ dialog:where(:not(#journal)) button:hover {
 }
 
 /* The one button that closes the dialog: lined and lettered in gold. */
-#closeHelp,
 #closeSettings,
 #closeStoryCard,
 #closePair,
@@ -2614,15 +2611,13 @@ dialog:where(:not(#journal)) button:hover {
   font-weight:600;
 }
 
-/* Help: the buttons inside the list are small and sit under their text; the closing
+/* The settings (the help is one of their pages): the buttons inside the list are small and sit under their text; the closing
    button stays in reach at the bottom while the list scrolls. */
-#help dt,
 #settings dt {
   color:#eef3ff;
   font-weight:600;
 }
 
-#help dd button,
 #settings dd button {
   display:inline-block;
   width:auto;
@@ -2632,12 +2627,10 @@ dialog:where(:not(#journal)) button:hover {
   font-size:13px;
 }
 
-#help dd button[hidden],
 #settings dd button[hidden] {
   display:none;
 }
 
-#help #closeHelp,
 #settings #closeSettings {
   position:sticky;
   bottom:0;
@@ -2651,19 +2644,16 @@ dialog:where(:not(#journal)) button:hover {
   }
 
   /* One column: the name above what it does, so the text has the whole width. */
-  #help dl,
   #settings dl {
     grid-template-columns:1fr;
     gap:3px;
   }
 
-  #help dt,
   #settings dt {
     margin-top:12px;
     color:var(--gold);
   }
 
-  #help dd,
   #settings dd {
     line-height:1.6;
   }
@@ -3693,9 +3683,9 @@ footer .throttle .rangeLabels {
   font-size:13px;
 }
 
-/* The three tabs are one size (the user, 2026-10-05: "3개의 버튼 크기를 같게"). The first
-   one's name is the longer ("최근 1주일 동안 바뀐 것"): on a phone it takes two lines,
-   broken between words, and the other two are as tall as it. */
+/* The four tabs are one size (the user, 2026-10-05: "3개의 버튼 크기를 같게", of the three
+   there were then). The first one's name is the longer ("최근 1주일 동안 바뀐 것"): on a
+   phone it takes two lines or three, broken between words, and the others are as tall. */
 #settings #settingsTabs {
   align-items:stretch;
 }
@@ -3703,6 +3693,17 @@ footer .throttle .rangeLabels {
 #settings #settingsTabs button {
   line-height:1.25;
   word-break:keep-all;
+}
+
+@media (max-width: 480px) {
+  #settingsTabs {
+    gap:6px;
+  }
+
+  #settings #settingsTabs button {
+    padding:6px 2px;
+    font-size:12px;
+  }
 }
 
 /* The day the making began: small, and if it must wrap, only between words. */
@@ -3855,9 +3856,7 @@ dialog .sheetHead .textSize button:disabled {
   opacity:.4;
 }
 
-#settings section,
-#help > p,
-#help > dl {
+#settings section {
   zoom:var(--text, 1);
 }
 

@@ -30,7 +30,7 @@ import {
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
-  loadHeroKind, saveHeroKind, loadDaily, saveDaily, loadScreen, saveScreen, loadStunts, saveStunts,
+  loadDaily, saveDaily, loadScreen, saveScreen, loadStunts, saveStunts,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
@@ -105,8 +105,6 @@ const START_NEAR = null;
 // Two layouts: 'tour' is the hand-made one (planets spread round the Sun); 'today' puts
 // the planets where they really are on the day the game is opened.
 const layout = loadLayout();
-// The character: the folded-paper model, or the pixel-art drawings on trial.
-const heroKind = loadHeroKind();
 const openedAt = new Date();
 const bodyData = layout === 'today' ? todayData(openedAt) : BODY_DATA;
 const bodiesAt = (timeS) => placeBodies(bodyData, timeS);
@@ -288,7 +286,7 @@ let world;
 
 async function init() {
   try {
-    world = await createWorld(canvas, bodies, { heroKind });
+    world = await createWorld(canvas, bodies);
   } catch (e) {
     console.error(e);
     $('loadError').textContent = `${e.message} 최신 Chrome이나 Edge에서 하드웨어 가속을 켜고 다시 열어 주세요.`;
@@ -1027,13 +1025,6 @@ ${STORY_MORE[target.id]}` : told };
       window.top.location.reload();
     });
   }
-  $('heroNow').textContent = heroKind === 'sprite' ? '지금: 도트 그림(시험 중).' : '지금: 종이 인형.';
-  $('heroButton').textContent = heroKind === 'sprite' ? '종이 인형으로 바꾸기' : '도트 그림으로 바꾸기';
-  $('heroButton').addEventListener('click', () => {
-    saveHeroKind(heroKind === 'sprite' ? 'model' : 'sprite');
-    // Drop any ?hero= from the address, which would override the saved choice.
-    location.href = location.pathname;
-  });
   $('layoutButton').addEventListener('click', () => {
     saveLayout(layout === 'today' ? 'tour' : 'today');
     location.reload();

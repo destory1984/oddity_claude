@@ -1,7 +1,7 @@
 // The light that falls on the character, worked out from where she really is: sunlight
 // from the Sun's true direction, cut off in a planet's shadow, and the glow thrown back
-// by the nearest world (blue under Earth, rust beside Mars). render/hero.js turns it
-// into lights and cast shadows.
+// by the nearest world (blue under Earth, rust beside Mars). render/spriteHero.js takes
+// the sunlight's strength from it to dim her drawing in a shadow.
 import { conjugate, rotateVector } from './orientation.js';
 
 // The colour each world throws back; grey for the rest.

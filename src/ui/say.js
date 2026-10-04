@@ -40,8 +40,8 @@ export function createSay(el) {
       if (queue.length > WAITING) queue.shift();
       if (!nextTimer) nextTimer = setTimeout(next, Math.max(0, MIN_S - since) * 1000);
     },
-    // card: world.update's heroCard (the sprite on screen), or null for the paper model,
-    // which stands a little under the middle of the view.
+    // card: world.update's heroCard (the sprite on screen); without one the bubble
+    // stands a little above the middle of the view.
     place(card) {
       const top = card
         ? innerHeight / 2 - card.up * innerHeight - (card.height * innerHeight) / 2

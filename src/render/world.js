@@ -8,7 +8,6 @@ import { heroLighting } from '../core/heroLight.js';
 import { createBodyMeshes } from './planets.js';
 import { createSun } from './sun.js';
 import { createStars } from './stars.js';
-import { createHero } from './hero.js';
 import { createSpriteHero } from './spriteHero.js';
 import { createCraft, createSiteModels } from './craft.js';
 import { storySitesAt } from '../core/stories.js';
@@ -28,8 +27,7 @@ import { normalize } from './math.js';
 
 // Floating origin: the player stays at the scene origin and every body is placed
 // relative to it, one scene unit per 1,000 km.
-// heroKind: 'model' (the folded-paper figure) or 'sprite' (the pixel-art drawings on trial).
-export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' } = {}) {
+export async function createWorld(canvas, bodies = BODIES) {
   const engine = new Engine(canvas, true, {
     preserveDrawingBuffer: true, stencil: true, powerPreference: 'high-performance',
   });
@@ -66,13 +64,8 @@ export async function createWorld(canvas, bodies = BODIES, { heroKind = 'model' 
   const meteors = createMeteors(scene);
   const glows = createGlows(scene, bodies);
 
-  // The character is drawn in the camera's own space, and her light is fixed: from the
-  // right and a little above, where the Sun is in the opening view. It is taken from
-  // the tour layout, whose opening view looks along +z, so it holds in today's sky too.
-  const tourEarth = BODIES.find((b) => b.id === 'earth');
-  const tourSun = BODIES.find((b) => b.kind === 'star');
-  const heroSun = new Vector3(...normalize(tourSun.position.map((n, i) => n - tourEarth.position[i])));
-  const hero = heroKind === 'sprite' ? createSpriteHero(engine) : createHero(engine, heroSun);
+  // The character (the pixel-art drawings) is drawn in the camera's own space.
+  const hero = createSpriteHero(engine);
   const ice = createIce(hero.scene);
   // The traveler's place relative to each ringed planet last frame, to catch a crossing.
   const lastByRings = new Map();

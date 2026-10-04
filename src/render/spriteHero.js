@@ -5,13 +5,11 @@ import { FLIGHT_SHEETS, FRAMES, createSpriteState, stepSprite, spriteFrame, spri
 import { heroScaleFor } from '../core/pose.js';
 import { PAL_FPS, PAL_FRAMES, palFile } from '../core/pal.js';
 
-// A trial of the character as pixel-art drawings instead of the folded-paper model:
-// one flat card that always faces the camera, showing one of 152 drawings chosen by
-// what the traveler is doing (core/sprite.js). Same interface as render/hero.js, so
-// the world can use either.
+// The character, drawn as pixel art: one flat card that always faces the camera,
+// showing one of 152 drawings chosen by what the traveler is doing (core/sprite.js).
 
 // The card: 192 x 256 drawings. Its height in the hero scene's units, where the
-// paper model stands about 2.9 tall. (At 3.4 she covered too much of the view.)
+// folded-paper model this replaced stood about 2.9 tall. (At 3.4 she covered too much of the view.)
 const CARD_HEIGHT = 2.4;
 const CARD_AT = [0, -0.75, 6];
 // The companion beside her (core/pal.js): 64 x 64 drawings on a card of its own, up by
@@ -103,7 +101,7 @@ export function createSpriteHero(engine) {
     card.scaling.setAll(heroScaleFor(aspect) / 1.3);
     // Sitting beside something on her left, the drawing (which looks right) is turned over.
     if (state.sheet === 'sit' && move.mirror) card.scaling.x = -card.scaling.x;
-    // A slow bob while hovering, as the paper model has.
+    // A slow bob while hovering.
     const afloat = state.mode === 'hover';
     card.position.y = CARD_AT[1] + (afloat ? Math.sin(elapsed * 1.5) * 0.04 : 0);
     card.setEnabled(visible);

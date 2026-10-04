@@ -105,28 +105,6 @@ export function saveAlbum(album) {
   }
 }
 
-const HERO_KEY = 'oddity.hero.v1';
-
-// Which character is drawn: 'sprite' (the pixel-art drawings, on trial as the default)
-// unless the player chose 'model' (the folded-paper figure). `?hero=sprite` or `?hero=model` in the address wins.
-export function loadHeroKind() {
-  const asked = new URLSearchParams(location.search).get('hero');
-  if (asked === 'sprite' || asked === 'model') return asked;
-  try {
-    return localStorage.getItem(HERO_KEY) === 'model' ? 'model' : 'sprite';
-  } catch {
-    return 'sprite';
-  }
-}
-
-export function saveHeroKind(kind) {
-  try {
-    localStorage.setItem(HERO_KEY, kind);
-  } catch {
-    // The choice lasts only for this page.
-  }
-}
-
 const DAILY_KEY = 'oddity.daily.v1';
 
 // The days today's request was done (core/daily.js).

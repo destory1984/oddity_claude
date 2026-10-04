@@ -10,8 +10,9 @@ This repository is licensed in three parts.
 2. Reserved: all rights reserved, NOT licensed under the MIT License
    - The player character: its design (a faceless papercraft mage with silver twin
      tails, a white capelet with gold trim over a striped shirt, a long white robe
-     with a gold hem, folded brown boots) and the code and data that define and
-     draw it, src/render/hero.js and src/render/mageModel.js.
+     with a gold hem, folded brown boots). The code and data that drew it,
+     src/render/hero.js and src/render/mageModel.js, were taken out of the game
+     in v0.1.23 and stay reserved in the repository's history.
    - The pixel-art character "Seora": its design and every drawing of it in
      public/assets/seora-sprites/.
    - The drawings made for the story in public/assets/notebook/ (the gate,

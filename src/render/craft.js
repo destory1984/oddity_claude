@@ -4,7 +4,7 @@ import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
 import { CRAFT_BUILD } from './craftModels.js';
 import { SITE_BUILD, SITE_REPLAY_BUILD } from './siteModels.js';
-import { drum } from './craftParts.js';
+import { drum, dish, rod, group } from './craftParts.js';
 
 // Spacecraft and landers. The models are in craftModels.js (in orbit) and
 // siteModels.js (on the ground), built from the parts in craftParts.js; this file
@@ -144,11 +144,22 @@ export function createSiteModels(scene, siteList) {
   flameMaterial.emissiveColor = new Color3(1, 0.82, 0.5);
   flameMaterial.alpha = 0.38;
   flameMaterial.backFaceCulling = false;
-  for (const [id, [build, options]] of Object.entries(SITE_REPLAY_BUILD)) {
+  for (const [id, [build, options, coming = 'flame']] of Object.entries(SITE_REPLAY_BUILD)) {
     const node = build(scene, `then_${id}`, mats, options);
     node.rotationQuaternion = new Quaternion();
-    // Under the engine bell (the model's feet are at y = 0), widening downward.
-    const flame = drum(scene, `then_${id}_flame`, node, flameMaterial, { height: 0.34, diameterTop: 0.05, diameterBottom: 0.2, tessellation: 12 }, [0, -0.06, 0]);
+    let flame;
+    if (coming === 'chute') {
+      // A white canopy over it, open downward, and eight lines down to its top.
+      flame = group(scene, `then_${id}_chute`, node);
+      dish(scene, `then_${id}_canopy`, flame, mats, { at: [0, 1.7, 0], toward: [0, -1, 0], diameter: 1.3, depth: 0.45, feed: false });
+      for (let k = 0; k < 8; k++) {
+        const a = (k * Math.PI) / 4;
+        rod(scene, `then_${id}_line${k}`, flame, mats.white, [Math.cos(a) * 0.64, 1.25, Math.sin(a) * 0.64], [Math.cos(a) * 0.2, 0.28, Math.sin(a) * 0.2], 0.008, 4);
+      }
+    } else {
+      // Under the engine bell (the model's feet are at y = 0), widening downward.
+      flame = drum(scene, `then_${id}_flame`, node, flameMaterial, { height: 0.34, diameterTop: 0.05, diameterBottom: 0.2, tessellation: 12 }, [0, -0.06, 0]);
+    }
     node.setEnabled(false);
     then.set(id, { node, flame });
   }

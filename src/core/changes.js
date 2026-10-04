@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '타이탄의 하위헌스 착륙지에 내려서면 "그날로" 단추가 뜹니다. 누르면 2005년 낙하산을 타고 내려오는 모습을 보여 줍니다.' },
   { day: '2026-10-04', text: '토성의 구름 꼭대기에 내려서면 "그날로" 단추가 뜹니다. 누르면 2017년 카시니의 마지막 돌입을 보여 줍니다.' },
   { day: '2026-10-04', text: '트라피스트-1에 가 있는 동안 미니맵이 그 별과 행성 일곱(b부터 h)을 보여 줍니다.' },
   { day: '2026-10-04', text: '"그날로" 장면이 도는 동안에는 다른 알림과 서라의 말풍선이 뜨지 않습니다.' },

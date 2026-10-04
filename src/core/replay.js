@@ -1,6 +1,7 @@
 // "그날로": at a story place, the day it is known for is played again in the close
 // view. The model that stands there comes down as it did, and a few lines tell what
-// happened, each at its moment. One scene so far: Apollo 11's landing.
+// happened, each at its moment: Apollo 11's landing, Huygens's on Titan, and (not at a
+// place but on a body) Cassini's plunge into Saturn.
 // seconds: how long the scene lasts. downAt: when it touches the ground.
 // fromKm: how high the model starts (it is drawn 6 km wide, so this is in drawn km).
 export const REPLAYS = {
@@ -15,6 +16,20 @@ export const REPLAYS = {
       { at: 5, text: '컴퓨터가 고른 자리는 바위가 널린 분화구였습니다. 암스트롱이 손으로 몰아 그 너머로 넘어갑니다.' },
       { at: 11, text: '"60초." 연료가 얼마 남지 않았다고 지상에서 알립니다. 엔진 바람에 먼지가 사방으로 날립니다.' },
       { at: 17, text: '"휴스턴, 여기는 고요의 기지. 이글은 착륙했다." 한국 시간으로 7월 21일 새벽 5시 17분이었습니다.' },
+    ],
+  },
+  // It came down under a parachute, with no engine (render/siteModels.js shows which).
+  huygens: {
+    name: '하위헌스의 착륙',
+    day: '2005년 1월 14일',
+    seconds: 24,
+    downAt: 17,
+    fromKm: 14,
+    lines: [
+      { at: 0, text: '2005년 1월 14일. 카시니에서 떨어져 나온 하위헌스가 낙하산을 펴고 타이탄의 주황빛 안개 속으로 내려옵니다.' },
+      { at: 6, text: '2시간 30분 동안 내려오며 강줄기와 바닷가처럼 보이는 땅을 찍어 보냈습니다.' },
+      { at: 12, text: '바닥은 영하 179도. 물이 언 얼음 자갈이 널린, 젖은 모래 같은 땅이었습니다.' },
+      { at: 17, text: '사람이 만든 것이 가장 먼 곳에 내려앉은 순간입니다. 그 뒤로도 한 시간 넘게 신호를 보냈습니다.' },
     ],
   },
   // Not a place but a body: resting anywhere on Saturn's cloud tops (the story 'cassini';

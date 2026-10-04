@@ -508,6 +508,9 @@ export const SITE_BUILD = {
 
 // For "그날로" (core/replay.js): what came down that day, as it was then. The Apollo
 // lander has no flag beside it yet.
+// The third item says what shows while it comes down: an engine's flame (the default)
+// or a parachute.
 export const SITE_REPLAY_BUILD = {
   apollo11: [apollo, { withFlag: false }],
+  huygens: [huygens, {}, 'chute'],
 };

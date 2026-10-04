@@ -77,3 +77,14 @@ test('Cassini comes in from the side, glows from a third of the way and is gone 
   // The landing never goes sideways, glows or vanishes.
   assert.deepEqual([replayFrame('apollo11', 8).acrossKm, replayFrame('apollo11', 8).glow, replayFrame('apollo11', 20).gone], [0, 0, false]);
 });
+
+test('Huygens comes down like the lander: from 14 km, down at 17 seconds, its last line then', () => {
+  const at = (t) => replayFrame('huygens', t);
+  assert.equal(replayFor('huygens').day, '2005년 1월 14일');
+  assert.equal(at(0).liftKm, 14);
+  assert.ok(at(16.9).flame && !at(17).flame);
+  assert.equal(at(17).liftKm, 0);
+  assert.equal(at(11.9).line, 1);
+  assert.match(at(17).text, /가장 먼 곳/);
+  assert.ok(at(24).done);
+});

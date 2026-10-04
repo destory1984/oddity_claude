@@ -3485,6 +3485,39 @@ footer .throttle .rangeLabels {
   background:center / contain no-repeat;
 }
 
+/* A word under each picture says what it does (the pictures alone did not: "저 3 버튼의
+   의미 전달이 어려워"). The picture is a little smaller for it, as the journal's is
+   over its count. */
+#targetRow #faceTarget,
+#targetRow #lockTarget,
+#targetRow #inspectTarget {
+  flex-direction:column;
+  gap:2px;
+}
+
+#targetRow #faceTarget::before,
+#targetRow #lockTarget::before,
+#targetRow #inspectTarget::before {
+  width:19px;
+  height:19px;
+}
+
+#targetRow #faceTarget::after,
+#targetRow #lockTarget::after,
+#targetRow #inspectTarget::after {
+  content:attr(data-label);
+  font-size:9px;
+  font-weight:600;
+  line-height:1;
+  letter-spacing:-.02em;
+  white-space:nowrap;
+  text-shadow:none;
+}
+
+#targetRow #lockTarget[aria-pressed="true"]::after {
+  color:var(--gold);
+}
+
 #targetRow #faceTarget::before { background-image:url("/assets/ui/icon-face.svg"); }
 #targetRow #lockTarget::before { background-image:url("/assets/ui/icon-lock.svg"); }
 #targetRow #inspectTarget::before { background-image:url("/assets/ui/icon-inspect.svg"); }

@@ -246,8 +246,6 @@ function stampDown(file) {
 }
 // The Sun's visibility last frame, for the sprite character shivering in a shadow.
 let sunShown = 1;
-// The tune last named in a notice (ui/sound.js tuneName()).
-let tuneTold = null;
 
 function celebrate() {
   cheerUntil = performance.now() + 6000;
@@ -1335,11 +1333,6 @@ ${STORY_MORE[target.id]}` : told };
       docked: Boolean(docked),
     }), elapsed || 1 / 60);
     sound.music(moodFor({ restingOn: state.restingOn, surfaceKm: nearestSurface(state.position, bodies).distance }));
-    // Say which tune it is as each begins: they go round in a chance order.
-    if (sound.tuneName() !== tuneTold) {
-      tuneTold = sound.tuneName();
-      if (tuneTold) toast.show(`♪ ${tuneTold}`, 'tune', SIGHT_S);
-    }
 
     // Craft that circle a planet or a moon are drawn and named only from near it.
     const awayCraft = hiddenCraft(state.position, bodies, selectedId, craft);

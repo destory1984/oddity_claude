@@ -3175,7 +3175,7 @@ body.rear.touch #reticle span {
   grid-template-columns:repeat(3, var(--key));
   grid-template-rows:repeat(2, var(--key));
   grid-template-areas:". up ." "left down right";
-  gap:6px;
+  gap:8px;
 }
 
 #slidePad button {
@@ -3214,13 +3214,23 @@ body.rear.touch #reticle span {
   }
 }
 
-/* On a wide screen it stands to the left of the four, out of their row's flow so they
-   stay together. */
+/* On a wide screen the pad and the four are one cluster: keys of one size (56px), 8px
+   apart, on one bottom line, with 24px between the two groups. (The pad's keys were
+   44px and 6px apart, the four 32px apart, and the pad stood 16px lower: "중구난방".)
+   The pad is out of the row's flow so the four stay together at the right end. */
 @media (min-width: 481px) {
+  #reverseButton,
+  #brake,
+  #flyButton {
+    margin-left:-24px;
+  }
+
   #slidePad {
+    --key:56px;
+    gap:8px;
     position:absolute;
-    right:calc(4 * 56px + 3 * 32px + 40px);
-    bottom:0;
+    right:calc(4 * 56px + 3 * 8px + 24px);
+    bottom:16px;
   }
 }
 

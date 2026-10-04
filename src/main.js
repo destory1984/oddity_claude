@@ -151,6 +151,8 @@ let beltSeen = false;
 let meteorSeen = false;
 // Lights and plumes already told about (core/glows.js).
 const glowsTold = new Set();
+// How far the close view of a craft is turned from straight on: to the side and up, in radians.
+const CRAFT_VIEW_TURN = [(35 * Math.PI) / 180, (18 * Math.PI) / 180];
 // Two sights in reach at once (Saturn's aurora and its ring spokes) are told this far apart.
 const SIGHT_GAP_S = 12;
 let glowTellWait = 0;
@@ -654,6 +656,10 @@ ${STORY_MORE[target.id]}` : told };
         const tilt = (15 * Math.PI) / 180;
         facing = orientationFrom(level.map((n, i) => (n / length) * Math.cos(tilt) - up[i] * Math.sin(tilt)), up);
       }
+      // A craft is first seen from a little to one side and above. Docked, she is on its
+      // sunlit side, which is where its dish or its heat shield points: straight on, half
+      // the craft were a white disc with nothing of the craft behind it.
+      if (body.kind === 'craft') facing = rotateLocal(facing, CRAFT_VIEW_TURN[0], CRAFT_VIEW_TURN[1]);
       photo.orbitAround({ id: body.id, facing, ...inspectView(body) });
     },
   });

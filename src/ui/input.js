@@ -18,6 +18,7 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
     flyingButton = false;
     reversingButton = false;
     drag = null;
+    for (const id of Object.keys(slide)) slide[id] = false;
   }
 
   $('throttle').addEventListener('input', (e) => { throttle = Number(e.target.value) / 1000; });
@@ -31,6 +32,20 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
     });
     for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) button.addEventListener(ev, () => set(false));
   }
+
+  // The slide pad: four buttons like arrow keys, held to slide across the view.
+  const slide = { slideUp: false, slideDown: false, slideLeft: false, slideRight: false };
+  for (const id of Object.keys(slide)) {
+    const button = $(id);
+    button.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      if (!Object.values(slide).some(Boolean)) onMove();
+      slide[id] = true;
+      button.setPointerCapture(e.pointerId);
+    });
+    for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) button.addEventListener(ev, () => { slide[id] = false; });
+  }
+  const sliding = () => Object.values(slide).some(Boolean);
 
   document.addEventListener('keydown', (e) => {
     if (isBlocked()) return;
@@ -86,12 +101,13 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
         turnY: c.turnY,
         roll: (held.has('KeyE') ? 1 : 0) - (held.has('KeyQ') ? 1 : 0),
         drive: c.drive,
-        strafe: c.strafe,
+        strafe: Math.max(-1, Math.min(1, c.strafe + (slide.slideRight ? 1 : 0) - (slide.slideLeft ? 1 : 0))),
+        rise: (slide.slideUp ? 1 : 0) - (slide.slideDown ? 1 : 0),
         throttle,
       };
     },
     driving() {
-      return held.has('KeyW') || held.has('KeyS') || held.has('KeyA') || held.has('KeyD') || flyingButton || reversingButton;
+      return held.has('KeyW') || held.has('KeyS') || held.has('KeyA') || held.has('KeyD') || flyingButton || reversingButton || sliding();
     },
   };
 }

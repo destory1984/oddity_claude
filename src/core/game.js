@@ -1,4 +1,4 @@
-import { rotateLocal, forward, right } from './orientation.js';
+import { rotateLocal, forward, right, up } from './orientation.js';
 import { BODIES, nearestSurface } from './bodies.js';
 import { speedLimit, accelerateSpeed, brakeSpeed, firstSphereHit, MAX_SPEED } from './flight.js';
 
@@ -28,6 +28,10 @@ export function createState(position, orientation = [0, 0, 0, 1]) {
     sideSpeed: 0,
     sideSign: 1,
     sideBrakeRate: 0,
+    // Up and down across the view (the slide buttons), the same rules along the body's up axis.
+    riseSpeed: 0,
+    riseSign: 1,
+    riseBrakeRate: 0,
     restingOn: null,
     // Speed kept from something the traveler rode with (km/s, in world axes): it does
     // not turn with the traveler and lasts until they stop or land.
@@ -39,7 +43,7 @@ export function createState(position, orientation = [0, 0, 0, 1]) {
 }
 
 export function stopNow(state) {
-  return { ...state, speed: 0, brakeRate: 0, sideSpeed: 0, sideBrakeRate: 0, drift: [0, 0, 0], boost: null };
+  return { ...state, speed: 0, brakeRate: 0, sideSpeed: 0, sideBrakeRate: 0, riseSpeed: 0, riseBrakeRate: 0, drift: [0, 0, 0], boost: null };
 }
 
 // Bodies move along their orbits between frames. Near a body (within CARRY_KM of its
@@ -69,8 +73,10 @@ function pushOut(position, bodies) {
 function velocityOf(state, orientation = state.orientation) {
   const f = forward(orientation);
   const r = right(orientation);
+  const u = up(orientation);
   const drift = state.drift ?? [0, 0, 0];
-  return f.map((n, i) => n * state.speed * state.motionSign + r[i] * (state.sideSpeed ?? 0) * (state.sideSign ?? 1) + drift[i]);
+  return f.map((n, i) => n * state.speed * state.motionSign + r[i] * (state.sideSpeed ?? 0) * (state.sideSign ?? 1)
+    + u[i] * (state.riseSpeed ?? 0) * (state.riseSign ?? 1) + drift[i]);
 }
 
 export function totalSpeed(state) {
@@ -111,12 +117,12 @@ function thrust(speed, sign, brakeRate, command, throttle, dt, maxSpeed) {
   return { speed, sign, brakeRate };
 }
 
-// Scale both axes down together so the combined speed stays within the limit.
-function capTotal(main, side, maxSpeed) {
-  const total = Math.hypot(main, side);
-  if (total <= maxSpeed) return [main, side];
+// Scale the three axes down together so the combined speed stays within the limit.
+function capTotal(main, side, rise, maxSpeed) {
+  const total = Math.hypot(main, side, rise);
+  if (total <= maxSpeed) return [main, side, rise];
   const k = maxSpeed / total;
-  return [main * k, side * k];
+  return [main * k, side * k, rise * k];
 }
 
 // The speed allowed at a spot: set by the nearest surface, and also by the nearest
@@ -139,7 +145,7 @@ export function step(state, input, dt, bodies = BODIES, slowPoints = []) {
     };
   }
 
-  const { turnX = 0, turnY = 0, roll = 0, drive = 0, strafe = 0, throttle = 1 } = input;
+  const { turnX = 0, turnY = 0, roll = 0, drive = 0, strafe = 0, rise = 0, throttle = 1 } = input;
   const orientation = rotateLocal(
     state.orientation, turnX * TURN_RATE * dt, turnY * TURN_RATE * dt, roll * ROLL_RATE * dt,
   );
@@ -149,16 +155,21 @@ export function step(state, input, dt, bodies = BODIES, slowPoints = []) {
   const limit = lifted(state.position);
   let boost = state.boost ?? null;
   if (boost) boost = boost.seconds > dt ? { ...boost, seconds: boost.seconds - dt } : null;
-  let [speed, sideSpeed] = capTotal(state.speed, state.sideSpeed ?? 0, limit);
+  let [speed, sideSpeed, riseSpeed] = capTotal(state.speed, state.sideSpeed ?? 0, state.riseSpeed ?? 0, limit);
   let { motionSign, brakeRate } = state;
   let sideSign = state.sideSign ?? 1;
   let sideBrakeRate = state.sideBrakeRate ?? 0;
+  let riseSign = state.riseSign ?? 1;
+  let riseBrakeRate = state.riseBrakeRate ?? 0;
 
   ({ speed, sign: motionSign, brakeRate } = thrust(speed, motionSign, brakeRate, drive, throttle, dt, limit));
   ({ speed: sideSpeed, sign: sideSign, brakeRate: sideBrakeRate } = thrust(
     sideSpeed, sideSign, sideBrakeRate, strafe, throttle, dt, limit,
   ));
-  [speed, sideSpeed] = capTotal(speed, sideSpeed, limit);
+  ({ speed: riseSpeed, sign: riseSign, brakeRate: riseBrakeRate } = thrust(
+    riseSpeed, riseSign, riseBrakeRate, rise, throttle, dt, limit,
+  ));
+  [speed, sideSpeed, riseSpeed] = capTotal(speed, sideSpeed, riseSpeed, limit);
 
   // A drift is held to the limit too, on its own and together with the thrust.
   let drift = state.drift ?? [0, 0, 0];
@@ -166,7 +177,7 @@ export function step(state, input, dt, bodies = BODIES, slowPoints = []) {
   // A fling keeps the traveler at the lifted limit of wherever they are, so they speed
   // up as the planet falls behind; otherwise a drift is only ever cut down.
   if (drifting > 0 && (state.boost || drifting > limit)) drift = drift.map((n) => (n * limit) / drifting);
-  let velocity = velocityOf({ speed, motionSign, sideSpeed, sideSign, drift }, orientation);
+  let velocity = velocityOf({ speed, motionSign, sideSpeed, sideSign, riseSpeed, riseSign, drift }, orientation);
   let combined = Math.hypot(...velocity);
   if (combined > limit) {
     velocity = velocity.map((n) => (n * limit) / combined);
@@ -185,6 +196,8 @@ export function step(state, input, dt, bodies = BODIES, slowPoints = []) {
       brakeRate = 0;
       sideSpeed = 0;
       sideBrakeRate = 0;
+      riseSpeed = 0;
+      riseBrakeRate = 0;
       drift = [0, 0, 0];
       boost = null;
       if (restingOn !== hit.body.id) events.push({ type: 'surfaceReached', bodyId: hit.body.id });
@@ -193,13 +206,13 @@ export function step(state, input, dt, bodies = BODIES, slowPoints = []) {
       position = state.position.map((n, i) => n + direction[i] * length);
       restingOn = null;
       // Having moved closer, never carry more speed than the new spot allows.
-      [speed, sideSpeed] = capTotal(speed, sideSpeed, lifted(position));
+      [speed, sideSpeed, riseSpeed] = capTotal(speed, sideSpeed, riseSpeed, lifted(position));
     }
   }
 
   return {
     state: {
-      position, orientation, speed, motionSign, brakeRate, sideSpeed, sideSign, sideBrakeRate, restingOn, drift, boost,
+      position, orientation, speed, motionSign, brakeRate, sideSpeed, sideSign, sideBrakeRate, riseSpeed, riseSign, riseBrakeRate, restingOn, drift, boost,
     },
     events,
   };

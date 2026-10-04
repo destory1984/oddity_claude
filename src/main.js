@@ -1560,7 +1560,7 @@ ${STORY_MORE[target.id]}` : told };
     const carried = docked && !isDocked(docked)
       ? here(docked.id).position.map((n, i) => n - state.position[i])
       : gliding ? standBeside(visit.id).position.map((n, i) => n - state.position[i])
-      : (!docked && state.speed < 0.01 && (state.sideSpeed ?? 0) < 0.01 ? velocity(state) : null);
+      : (!docked && state.speed < 0.01 && (state.sideSpeed ?? 0) < 0.01 && (state.riseSpeed ?? 0) < 0.01 ? velocity(state) : null);
     if (carried && Math.hypot(...carried) > 1) {
       const local = rotateVector(conjugate(state.orientation), carried);
       const length = Math.hypot(...local);
@@ -1725,7 +1725,7 @@ ${STORY_MORE[target.id]}` : told };
     else if (state.restingOn) flightLabel = `${bodyById(state.restingOn).name} 표면`;
     else if (shownSpeed() < 0.01) flightLabel = '정지 비행';
     else if (!driving) flightLabel = '관성 비행';
-    else if (state.sideSpeed > state.speed) flightLabel = '옆으로 비행';
+    else if (Math.max(state.sideSpeed, state.riseSpeed ?? 0) > state.speed) flightLabel = (state.riseSpeed ?? 0) > state.sideSpeed ? (state.riseSign > 0 ? '위로 비행' : '아래로 비행') : '옆으로 비행';
     else if (state.motionSign < 0) flightLabel = '후진 비행';
     journal.update(progress, state.position, bodies);
     // Not while she stands on the ground or is going down to a place: the station

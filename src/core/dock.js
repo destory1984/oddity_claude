@@ -173,6 +173,6 @@ export function releaseDrift(craftId, craftBefore, craftAfter, bodiesBefore, bod
 }
 
 // Any thrust lets go of the craft.
-export function wantsToLeave({ drive = 0, strafe = 0 }) {
-  return drive !== 0 || strafe !== 0;
+export function wantsToLeave({ drive = 0, strafe = 0, rise = 0 }) {
+  return drive !== 0 || strafe !== 0 || rise !== 0;
 }

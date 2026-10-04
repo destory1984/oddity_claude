@@ -3166,6 +3166,64 @@ body.rear.touch #reticle span {
   }
 }
 
+/* Four buttons laid out like a keyboard's arrow keys: they slide her up, down, left and
+   right across the view without turning it. */
+#slidePad {
+  --key:44px;
+  flex:none;
+  display:grid;
+  grid-template-columns:repeat(3, var(--key));
+  grid-template-rows:repeat(2, var(--key));
+  grid-template-areas:". up ." "left down right";
+  gap:6px;
+}
+
+#slidePad button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:var(--key);
+  height:var(--key);
+  min-height:var(--key);
+  padding:0;
+  font-size:0;
+}
+
+#slidePad button::before {
+  content:"";
+  width:14px;
+  height:14px;
+  background:currentColor;
+  clip-path:polygon(50% 12%, 96% 88%, 4% 88%);
+}
+
+#slideUp { grid-area:up; }
+#slideLeft { grid-area:left; }
+#slideDown { grid-area:down; }
+#slideRight { grid-area:right; }
+#slideLeft::before { transform:rotate(-90deg); }
+#slideDown::before { transform:rotate(180deg); }
+#slideRight::before { transform:rotate(90deg); }
+
+@media (max-width: 480px) {
+  #slidePad {
+    --key:var(--tap);
+    position:absolute;
+    left:0;
+    bottom:92px;
+  }
+}
+
+/* On a wide screen it stands to the left of the four, out of their row's flow so they
+   stay together. */
+@media (min-width: 481px) {
+  #slidePad {
+    position:absolute;
+    right:calc(4 * 56px + 3 * 32px + 40px);
+    bottom:0;
+  }
+}
+
 /* The version and when it was last updated, small, under the loading line. */
 #appVersion {
   display:block;

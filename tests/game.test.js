@@ -266,3 +266,22 @@ test('a drift faster than the speed limit is cut down to it', () => {
   const after = step(state, {}, DT, [ball]).state;
   assert.ok(Math.abs(totalSpeed(after) - C * 0.01) < 1e-6);
 });
+
+test('rise slides her along her own up axis without turning her, and keeps to the limit with the other axes', () => {
+  const state = createState([0, 0, 0], [0, 0, 0, 1], []);
+  const up = run(state, { rise: 1 }, 60, []).state;
+  assert.ok(up.position[1] > 0 && Math.abs(up.position[0]) < 1e-6 && Math.abs(up.position[2]) < 1e-6);
+  assert.deepEqual(up.orientation, [0, 0, 0, 1]);
+  assert.equal(up.speed, 0);
+  assert.ok(up.riseSpeed > 0 && up.riseSign === 1);
+  const down = run(state, { rise: -1 }, 60, []).state;
+  assert.ok(down.position[1] < 0 && down.riseSign === -1);
+  // Letting go coasts; pressing the other way brakes within a second and goes back.
+  const coast = run(up, {}, 30, []).state;
+  assert.equal(coast.riseSpeed, up.riseSpeed);
+  assert.equal(run(up, { rise: -1 }, 90, []).state.riseSign, -1);
+  // All three together never pass the limit, and stopping clears the slide too.
+  const all = run(state, { drive: 1, strafe: 1, rise: 1 }, 400, []).state;
+  assert.ok(totalSpeed(all) <= MAX_SPEED + 1e-6);
+  assert.equal(stopNow(all).riseSpeed, 0);
+});

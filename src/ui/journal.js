@@ -1,3 +1,4 @@
+import { famousFor } from '../core/famous.js';
 import { summarize, journalOrder } from '../core/progress.js';
 import { surfaceDistance } from '../core/bodies.js';
 import { objectParticle } from './messages.js';
@@ -29,7 +30,7 @@ function picture(file, alt, className = '') {
 const CLIPPING = '1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.';
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, sky = null }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, sky = null }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -324,6 +325,15 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
           card.disabled = false;
         }, 2000);
       });
+      // A mission after a famous photograph: the real one beside this one (ui/pair.js).
+      const famous = onPair && famousFor(entry.missions);
+      let pair = null;
+      if (famous) {
+        pair = document.createElement('button');
+        pair.textContent = '실제 사진과 나란히';
+        pair.setAttribute('aria-label', `${caption.title} 사진을 ${famous.name}의 실제 사진과 나란히 보기`);
+        pair.addEventListener('click', () => onPair(entry, famous));
+      }
       const remove = document.createElement('button');
       remove.textContent = '지우기';
       remove.setAttribute('aria-label', `${caption.title} 사진 지우기`);
@@ -336,7 +346,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       frame.className = 'photoFrame';
       frame.append(img);
       if (entry.sent) frame.append(picture('notebook/postmark.png', '', 'postmark'), picture(postageFile(entry), '우표', 'postage'));
-      figure.append(frame, text, ...(send ? [send] : []), card, remove);
+      figure.append(frame, text, ...(pair ? [pair] : []), ...(send ? [send] : []), card, remove);
       grid.append(figure);
     });
   }

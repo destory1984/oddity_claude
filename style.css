@@ -2565,6 +2565,7 @@ dialog:where(:not(#journal)) button:hover {
 #closeHelp,
 #closeSettings,
 #closeStoryCard,
+#closePair,
 #closeNoteCard,
 #closeGate {
   border-color:var(--gold);
@@ -3380,4 +3381,52 @@ dialog .sheetHead .textSize button:disabled {
 #journalStunts li:has(.stamp) .stops {
   display:block;
   padding-right:72px;
+}
+
+/* Side by side (ui/pair.js): the traveler's photo over the real one, each with a line
+   under it. Both keep their own shape and are no taller than 27% of the screen, so the closing
+   button shows without scrolling. */
+#pair {
+  width:min(560px,92vw);
+  padding:18px;
+  text-align:center;
+}
+
+#pair h1 {
+  margin-bottom:10px;
+  font-size:22px;
+}
+
+#pair figure {
+  margin:0 0 12px;
+}
+
+#pair img {
+  display:block;
+  max-width:100%;
+  max-height:27vh;
+  margin:0 auto;
+  border-radius:8px;
+  background:#02070d;
+}
+
+#pair figcaption {
+  margin-top:6px;
+  font-size:12px;
+  line-height:1.5;
+  word-break:keep-all;
+}
+
+#pairNote {
+  margin:0;
+  font-size:14px;
+  line-height:1.7;
+  word-break:keep-all;
+}
+
+#pairCredit {
+  display:block;
+  margin-top:4px;
+  color:#7f97ad;
+  font-size:11px;
 }

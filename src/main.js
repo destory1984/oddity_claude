@@ -17,7 +17,7 @@ import { createMinimap } from './ui/minimap.js';
 import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
 import { createWarp } from './ui/warp.js';
-import { addPhoto, removePhoto, photoPlace } from './core/album.js';
+import { addPhoto, removePhoto, photoPlace, photoCaption } from './core/album.js';
 import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } from './core/postcard.js';
 import { teleportSpot } from './core/teleport.js';
 import { behindBody , nearestBodies } from './core/markers.js';
@@ -42,6 +42,8 @@ import { createSay } from './ui/say.js';
 import { skyNews, newsLine } from './core/forecast.js';
 import { createSettings } from './ui/settings.js';
 import { createLookBack } from './ui/lookBack.js';
+import { createPair } from './ui/pair.js';
+import { famousFor } from './core/famous.js';
 import { bindTextSize } from './ui/textSize.js';
 import { shadowSpot } from './core/shadows.js';
 import { dailyRequest, requestTarget, requestMet, recordDay, streak, lastWeek } from './core/daily.js';
@@ -322,6 +324,7 @@ function brake() {
 
 let input;
 let photo;
+let pair;
 let world;
 
 async function init() {
@@ -430,6 +433,7 @@ async function init() {
         }));
         journal.setAlbum(album);
       }
+      const mine = album[0];
       const before = progress;
       const result = recordPhotos(progress, done);
       const told = recordStories(result.progress, slots.stories);
@@ -449,6 +453,10 @@ async function init() {
         say.show('저 점이 지구야? 진짜 작다.');
       }
       if (finished) celebrate();
+      // A mission after a famous photograph, met for the first time: the real one is
+      // shown beside hers. Not over the last slot's own telling.
+      const famous = famousFor(result.newly);
+      if (famous && shot.thumb && !told.newly.length && !finished) pair.show(shot.thumb, photoCaption(mine, MISSIONS).title, famous);
     },
   });
 
@@ -939,6 +947,7 @@ ${STORY_MORE[target.id]}` : told };
     missions: MISSIONS,
     stories: STORIES,
     craft: CRAFT,
+    onPair: (entry, famous) => pair.show(entry.image, photoCaption(entry, MISSIONS).title, famous),
     onDeletePhoto(index) {
       album = saveAlbum(removePhoto(album, index));
       return album;
@@ -981,6 +990,7 @@ ${STORY_MORE[target.id]}` : told };
   journal.setAlbum(album);
   bindTextSize();
   const lookBack = createLookBack({ missions: MISSIONS });
+  pair = createPair();
   $('lookBackButton').addEventListener('click', () => lookBack.play(album));
   // Opened before the first frame, the journal still has something to show.
   journal.update(progress, state.position, bodies);

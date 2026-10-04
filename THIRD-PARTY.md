@@ -142,6 +142,19 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 
 CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수 있고, 고친 것은 같은 조건으로 내야 한다. 이 저장소의 MIT 라이선스는 이 사진들에 미치지 않는다.
 
+## 사진 임무가 따라 찍는 실제 사진
+
+`public/assets/famous/` 의 사진 6장도 위키미디어 공용에서 받아 560×420 안에 들도록 줄였다(태양계 가족사진만 1120×336). 모두 저작권이 없다. 창백한 푸른 점과 핼리 혜성은 위 표의 `paleBlueDot.jpg`, `giotto.jpg` 를 같이 쓴다.
+
+| 파일 | 원본 | 만든 이 | 라이선스 |
+|---|---|---|---|
+| `earthrise.jpg` | [NASA-Apollo8-Dec24-Earthrise.jpg](https://commons.wikimedia.org/wiki/File:NASA-Apollo8-Dec24-Earthrise.jpg) | NASA / Bill Anders | Public domain |
+| `blueMarble.jpg` | [The Earth seen from Apollo 17.jpg](https://commons.wikimedia.org/wiki/File:The_Earth_seen_from_Apollo_17.jpg) | NASA / Apollo 17 crew | Public domain |
+| `familyPortrait.jpg` | [Family portrait (Voyager 1).png](https://commons.wikimedia.org/wiki/File:Family_portrait_(Voyager_1).png) | NASA, Voyager 1 | Public domain |
+| `saturnShadow.jpg` | [Saturn eclipse.jpg](https://commons.wikimedia.org/wiki/File:Saturn_eclipse.jpg) | NASA/JPL/Space Science Institute | Public domain |
+| `earthAndMoon.jpg` | [First Picture of the Earth and Moon in a Single Frame - GPN-2002-000202.jpg](https://commons.wikimedia.org/wiki/File:First_Picture_of_the_Earth_and_Moon_in_a_Single_Frame_-_GPN-2002-000202.jpg) | NASA | Public domain |
+| `plutoCharon.jpg` | [Pluto-Charon-v2-10-1-15.jpg](https://commons.wikimedia.org/wiki/File:Pluto-Charon-v2-10-1-15.jpg) | NASA / Johns Hopkins University Applied Physics Laboratory / Southwest Research Institute | Public domain |
+
 ## d3-celestial 라이선스 (BSD 3-Clause)
 
 Copyright (c) 2015, Olaf Frohn. All rights reserved.

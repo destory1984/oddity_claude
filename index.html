@@ -256,6 +256,21 @@
     <button id="lookClose">그만 보기</button>
   </dialog>
 
+  <dialog id="pair" aria-labelledby="pairTitle">
+    <h1 id="pairTitle"></h1>
+    <figure>
+      <img id="pairMine" alt="내가 찍은 사진">
+      <figcaption id="pairMineCaption"></figcaption>
+    </figure>
+    <figure>
+      <img id="pairReal" alt="">
+      <figcaption id="pairRealCaption"></figcaption>
+    </figure>
+    <p id="pairNote"></p>
+    <small id="pairCredit"></small>
+    <button id="closePair">닫기</button>
+  </dialog>
+
   <dialog id="settings" aria-labelledby="settingsTitle">
     <div class="sheetHead"><h1 id="settingsTitle">설정</h1><small id="appVersion">{{version}} · {{updated}}</small><div class="textSize" role="group" aria-label="글자 크기"><button data-way="-1" aria-label="글자 작게" title="글자 작게">가<span aria-hidden="true">−</span></button><button data-way="1" aria-label="글자 크게" title="글자 크게">가<span aria-hidden="true">+</span></button></div></div>
     <div id="settingsTabs" role="tablist" aria-label="설정의 갈래">

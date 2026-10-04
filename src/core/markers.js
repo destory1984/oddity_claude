@@ -7,7 +7,8 @@ import { surfaceDistance } from './bodies.js';
 
 export const NEARBY_KM = 300000;
 
-// always: Earth and the Sun, the two bearings a traveler should never lose.
+// always: the Sun, the one bearing a traveler should never lose. (Earth was one too
+// until the user's word of 2026-10-05: "태양으로 한정".)
 // compact: a phone screen, where a dozen edge arrows covered the view. There only the
 // chosen target, the nearest body (and a neighbour next nearest: nearestBodies) and the
 // "always" ones keep an arrow when off screen.

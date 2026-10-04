@@ -49,7 +49,7 @@ test('off-screen arrows are left to spreadArrows', () => {
   assert.deepEqual([...crowdedMoons([saturn, { ...titan, outside: true }])], []);
 });
 
-test('Earth and the Sun keep their arrow from anywhere', () => {
+test('the Sun keeps its arrow from anywhere', () => {
   const far = { outside: true, selected: false, nearest: false, surfaceKm: 5e8 };
   assert.equal(keepMarker(far), false);
   assert.equal(keepMarker({ ...far, always: true }), true);

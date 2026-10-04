@@ -109,7 +109,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
           selected: selectedHere,
           nearest: nearestHere || moonHere,
           surfaceKm: view.distances[body.id] - body.radiusKm,
-          always: body.id === 'earth' || body.kind === 'star' || body.id === goalId,
+          always: body.kind === 'star' || body.id === goalId,
           compact,
         });
         return { body, el, spot, keep, selected: selectedHere };

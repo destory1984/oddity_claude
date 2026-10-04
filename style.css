@@ -3453,6 +3453,56 @@ footer .throttle .rangeLabels {
   background:#1c2f6ae6;
 }
 
+/* The three things to do with the chosen target are picture buttons in one row: an eye
+   (face it), a padlock (hold it in view), a magnifying glass (look at it closely). They
+   were three buttons of words in two rows, and the panel filled the corner of a phone's
+   screen (the user, 2026-10-05, picked this of three ways to make it smaller). The
+   words stay as each button's name and tip. On a phone they are as large as the other
+   buttons and stand as far apart. */
+#targetRow #faceTarget,
+#targetRow #lockTarget,
+#targetRow #inspectTarget {
+  display:inline-flex;
+  flex:none;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  width:var(--target-key, 44px);
+  height:var(--target-key, 44px);
+  min-height:0;
+  margin:0;
+  padding:0;
+  font-size:0;
+}
+
+#targetRow #faceTarget::before,
+#targetRow #lockTarget::before,
+#targetRow #inspectTarget::before {
+  content:"";
+  flex:none;
+  width:24px;
+  height:24px;
+  background:center / contain no-repeat;
+}
+
+#targetRow #faceTarget::before { background-image:url("/assets/ui/icon-face.svg"); }
+#targetRow #lockTarget::before { background-image:url("/assets/ui/icon-lock.svg"); }
+#targetRow #inspectTarget::before { background-image:url("/assets/ui/icon-inspect.svg"); }
+
+#targetRow #inspectTarget[hidden] {
+  display:none;
+}
+
+@media (max-width: 480px) {
+  #targetPanel {
+    --target-key:var(--top-key);
+  }
+
+  #targetPanel #targetRow {
+    gap:var(--gap);
+  }
+}
+
 /* The big map (a tap on the small one opens it): the map, every place by name under
    it, and what to do with the one picked. */
 #bigMap {

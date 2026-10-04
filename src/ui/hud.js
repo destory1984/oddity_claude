@@ -66,6 +66,8 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
     showSelection(body) {
       $('targetName').innerHTML = `${body.name} <small>${body.nameEn}</small>`;
       $('faceTarget').textContent = `${body.name} 바라보기`;
+      // The button shows a picture only: its words are its name and its tip.
+      $('faceTarget').title = `${body.name} 바라보기`;
     },
     // goalId: the body the first-visit guide points at; its label always shows and pulses.
     // knownIds: a Set of what is in the journal (bodies found, craft met, places logged).

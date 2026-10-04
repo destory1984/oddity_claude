@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '이동 단추로 위나 아래로 갈 때 서라가 고개를 들거나 숙인 모습으로 납니다.' },
   { day: '2026-10-04', text: '제목 "Space Oddity"가 도트 글씨 그림으로 바뀌었습니다. O 위에 작은 왕관이 있습니다.' },
   { day: '2026-10-04', text: '앞으로 날 때의 뒷모습을 다시 그렸습니다. 이제 두 다리가 나란히 보입니다.' },
   { day: '2026-10-04', text: '지구의 새 장소 다섯 곳(바이코누르, 칙술루브, 배린저, 마우나케아, 알마)의 카드에 사진이 붙었습니다.' },

@@ -1728,8 +1728,10 @@ ${STORY_MORE[target.id]}` : told };
     guideView.show(goalNow());
 
     const turn = dt > 0
-      // Sliding sideways leans the character like a gentle turn.
-      ? [dragTurn[0] / dt + intent.turnX * TURN_RATE + intent.strafe * 0.6, dragTurn[1] / dt + intent.turnY * TURN_RATE]
+      // Sliding sideways leans the character like a gentle turn; sliding up or down (the
+      // slide pad) shows her nose up or down, for as long as she keeps going that way.
+      ? [dragTurn[0] / dt + intent.turnX * TURN_RATE + intent.strafe * 0.6,
+        dragTurn[1] / dt + intent.turnY * TURN_RATE - (!docked && (state.riseSpeed ?? 0) > 0.01 ? state.riseSign : 0) * 0.6]
       : [0, 0];
     dragTurn = [0, 0];
 

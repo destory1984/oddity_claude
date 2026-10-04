@@ -95,3 +95,9 @@ test('Curiosity has a scene of its own day, told in four lines', () => {
   assert.match(replayFrame('curiosity', 17).text, /게일 분화구/);
   assert.equal(Object.keys(REPLAYS).length, 4);
 });
+
+test('the seconds since it came down are counted from the moment it is down', () => {
+  assert.equal(replayFrame('curiosity', 10).after, 0);
+  assert.equal(replayFrame('curiosity', 17).after, 0);
+  assert.equal(replayFrame('curiosity', 19.5).after, 2.5);
+});

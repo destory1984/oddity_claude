@@ -1608,7 +1608,7 @@ ${STORY_MORE[target.id]}` : told };
     const view = world.update({
       trail,
       replay: replayNow && {
-        id: replay.id, liftKm: replayNow.liftKm, flame: replayNow.flame, glow: replayNow.glow, gone: replayNow.gone, slope: replayNow.slope,
+        id: replay.id, liftKm: replayNow.liftKm, flame: replayNow.flame, after: replayNow.after, glow: replayNow.glow, gone: replayNow.gone, slope: replayNow.slope,
         // To the left of the view: across the ground, square to the way the view looks.
         across: scenePlace ? [
           scenePlace.up[1] * scenePlace.level[2] - scenePlace.up[2] * scenePlace.level[1],

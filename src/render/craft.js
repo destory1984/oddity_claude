@@ -1,10 +1,10 @@
-import { Vector3, Quaternion, Color3, CreatePlane, StandardMaterial, Texture, TransformNode, DynamicTexture } from './babylon.js';
+import { Vector3, Quaternion, Color3, CreatePlane, CreateSphere, StandardMaterial, Texture, TransformNode, DynamicTexture } from './babylon.js';
 import { KM_PER_UNIT } from '../core/bodies.js';
 import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
 import { CRAFT_BUILD } from './craftModels.js';
 import { SITE_BUILD, SITE_REPLAY_BUILD } from './siteModels.js';
-import { drum, dish, rod, group, box } from './craftParts.js';
+import { drum, rod, group, box } from './craftParts.js';
 
 // Spacecraft and landers. The models are in craftModels.js (in orbit) and
 // siteModels.js (on the ground), built from the parts in craftParts.js; this file
@@ -148,10 +148,21 @@ export function createSiteModels(scene, siteList) {
     const node = build(scene, `then_${id}`, mats, options);
     node.rotationQuaternion = new Quaternion();
     let flame;
+    let cords = null;
     if (coming === 'chute') {
-      // A white canopy over it, open downward, and eight lines down to its top.
+      // A white canopy over it, open downward, and eight lines down to its top. The
+      // cloth is lit from within a little: under Titan's haze a plain white went grey.
       flame = group(scene, `then_${id}_chute`, node);
-      dish(scene, `then_${id}_canopy`, flame, mats, { at: [0, 1.7, 0], toward: [0, -1, 0], diameter: 1.3, depth: 0.45, feed: false });
+      const cloth = new StandardMaterial(`then_${id}_cloth`, scene);
+      cloth.diffuseColor = new Color3(1, 0.97, 0.9);
+      cloth.emissiveColor = new Color3(0.62, 0.58, 0.5);
+      cloth.specularColor = new Color3(0, 0, 0);
+      cloth.backFaceCulling = false;
+      const canopy = CreateSphere(`then_${id}_canopy`, { diameter: 1.3, slice: 0.5, segments: 20 }, scene);
+      canopy.parent = flame;
+      canopy.material = cloth;
+      canopy.position.y = 1.25;
+      canopy.scaling.y = 0.75;
       for (let k = 0; k < 8; k++) {
         const a = (k * Math.PI) / 4;
         rod(scene, `then_${id}_line${k}`, flame, mats.white, [Math.cos(a) * 0.64, 1.25, Math.sin(a) * 0.64], [Math.cos(a) * 0.2, 0.28, Math.sin(a) * 0.2], 0.008, 4);
@@ -167,13 +178,14 @@ export function createSiteModels(scene, siteList) {
           drum(scene, `then_${id}_jet${sx}${sz}`, flame, flameMaterial, { height: 0.45, diameterTop: 0.04, diameterBottom: 0.16, tessellation: 10 }, [sx * 0.46, 1.28, sz * 0.36], [-sx * 0.35, 1, -sz * 0.35]);
         }
       }
-      for (const [x, z] of [[0.16, 0.1], [-0.16, 0.1], [0, -0.14]]) rod(scene, `then_${id}_cord${x}`, flame, mats.white, [x * 0.6, 1.48, z * 0.6], [x, 0.3, z], 0.008, 4);
+      cords = group(scene, `then_${id}_cords`, flame);
+      for (const [x, z] of [[0.16, 0.1], [-0.16, 0.1], [0, -0.14]]) rod(scene, `then_${id}_cord${x}`, cords, mats.white, [x * 0.6, 1.48, z * 0.6], [x, 0.3, z], 0.008, 4);
     } else {
       // Under the engine bell (the model's feet are at y = 0), widening downward.
       flame = drum(scene, `then_${id}_flame`, node, flameMaterial, { height: 0.34, diameterTop: 0.05, diameterBottom: 0.2, tessellation: 12 }, [0, -0.06, 0]);
     }
     node.setEnabled(false);
-    then.set(id, { node, flame });
+    then.set(id, { node, flame, cords });
   }
   // Cassini's plunge into Saturn: the craft itself, and round it the glow of the air it
   // heats, drawn out behind it (the model's -x is the way it has come).
@@ -259,7 +271,12 @@ export function createSiteModels(scene, siteList) {
         rel[0] += up.x * lift;
         rel[1] += up.y * lift;
         rel[2] += up.z * lift;
-        old.flame?.setEnabled(replay.flame);
+        old.flame?.setEnabled(replay.flame || Boolean(old.cords));
+        if (old.cords) {
+          // The stage that let it down cuts its cords and flies off, up and to one side.
+          old.cords.setEnabled(replay.flame);
+          old.flame.position.set(0.6 * replay.after ** 2, 0.5 * replay.after, 0);
+        }
       }
       // Stand it on the ground: turn the model's +y onto the local "up".
       Quaternion.FromUnitVectorsToRef(Vector3.Up(), up, node.rotationQuaternion);

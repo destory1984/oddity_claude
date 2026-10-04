@@ -100,6 +100,8 @@ export function replayFrame(id, t) {
     gone: Boolean(scene.streak) && t >= scene.downAt,
     flame: !scene.streak && t < scene.downAt,
     down: t >= scene.downAt,
+    // Seconds since it came down (what let it down may then leave).
+    after: Math.max(0, t - scene.downAt),
     line,
     text: scene.lines[line].text,
     done: t >= scene.seconds,

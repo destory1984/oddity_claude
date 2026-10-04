@@ -3239,3 +3239,40 @@ body.rear.touch #reticle span {
     display:none;
   }
 }
+
+/* Looking back (ui/lookBack.js): the album's photos one after another over the journal. */
+#lookBack {
+  width:min(560px,92vw);
+  padding:18px;
+  text-align:center;
+}
+
+#lookImage {
+  display:block;
+  width:100%;
+  max-height:62vh;
+  object-fit:contain;
+  border-radius:10px;
+  transition:opacity .35s;
+}
+
+#lookImage.out {
+  opacity:0;
+}
+
+#lookCaption {
+  margin:12px 0 0;
+  font-family:var(--seora);
+  font-size:18px;
+  line-height:1.4;
+}
+
+#lookCount {
+  margin:2px 0 10px;
+  font-size:12px;
+  font-variant-numeric:tabular-nums;
+}
+
+#lookBackButton {
+  margin:0 0 12px;
+}

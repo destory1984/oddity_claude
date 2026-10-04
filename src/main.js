@@ -41,6 +41,7 @@ import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
 import { skyNews, newsLine } from './core/forecast.js';
 import { createSettings } from './ui/settings.js';
+import { createLookBack } from './ui/lookBack.js';
 import { shadowSpot } from './core/shadows.js';
 import { dailyRequest, requestTarget, requestMet, recordDay, streak, lastWeek } from './core/daily.js';
 import { palFor } from './core/pal.js';
@@ -251,7 +252,7 @@ let sunShown = 1;
 function celebrate() {
   cheerUntil = performance.now() + 6000;
   sound.cue('complete');
-  toast.show('태양계 탐험을 모두 마쳤습니다. 수첩이 가득 찼습니다!');
+  toast.show(`태양계 탐험을 모두 마쳤습니다. 수첩이 가득 찼습니다!${album.length >= 2 ? '\n수첩의 사진첩에서 "지나온 길 돌아보기"를 눌러 보세요.' : ''}`);
 }
 
 function setPaused(value) {
@@ -936,6 +937,8 @@ ${STORY_MORE[target.id]}` : told };
     },
   });
   journal.setAlbum(album);
+  const lookBack = createLookBack({ missions: MISSIONS });
+  $('lookBackButton').addEventListener('click', () => lookBack.play(album));
   // Opened before the first frame, the journal still has something to show.
   journal.update(progress, state.position, bodies);
 

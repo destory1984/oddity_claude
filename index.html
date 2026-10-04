@@ -163,6 +163,7 @@
       </section>
       <section data-tab="album" hidden>
         <p class="muted" id="albumNote"></p>
+        <button id="lookBackButton" hidden>지나온 길 돌아보기</button>
         <div id="journalAlbum"></div>
       </section>
       <section data-tab="stories" hidden>
@@ -247,6 +248,13 @@
     </dl>
     <p class="muted">태양, 여덟 행성, 위성 21개, 왜행성 둘, 핼리 혜성의 실제 표면 바로 앞까지 접근할 수 있습니다. 천체 내부로는 들어갈 수 없습니다. 천체 표면 사이의 빈 거리만 1/100(위성은 1/10)로 줄였습니다. 기본인 여행 배치는 오늘의 실제 천문 위치가 아닙니다. 다른 앱이나 탭으로 갔다 오면 그동안 멈춰 있다가 돌아오는 대로 이어집니다.</p>
     <button id="closeHelp" autofocus>비행 계속하기</button>
+  </dialog>
+
+  <dialog id="lookBack" aria-label="지나온 길 돌아보기">
+    <img id="lookImage" class="out" alt="">
+    <p id="lookCaption"></p>
+    <p id="lookCount" class="muted"></p>
+    <button id="lookClose">그만 보기</button>
   </dialog>
 
   <dialog id="settings" aria-labelledby="settingsTitle">

@@ -274,6 +274,8 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   function renderAlbum() {
     const grid = $('journalAlbum');
     grid.replaceChildren();
+    // Looking back turns through the photos (ui/lookBack.js): it needs two at least.
+    $('lookBackButton').hidden = album.length < 2;
     $('albumNote').textContent = album.length
       ? `사진 모드에서 저장한 사진 ${album.length}장입니다(최근 ${ALBUM_MAX}장까지). 사진을 누르면 크게 보입니다. 할머니께 엽서로 보내면 다음 날 답장과 별이 옵니다.`
       : '사진 모드에서 "사진 저장"을 누르면 여기에 모입니다.';

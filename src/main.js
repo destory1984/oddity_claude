@@ -198,6 +198,10 @@ let dragTurn = [0, 0];
 // then take her round it, and forward and back bring her nearer and farther. Dragging
 // the view or turning with the arrow keys lets go.
 let locked = false;
+// Turned to face a target without locking on (바라보기, the journal's 목적지로): the id of
+// it while the view has not been turned since. Forward then goes straight at it, though
+// the view is tipped to keep it over her head (along the view she flew 15 degrees under it).
+let aimedId = null;
 // How fast the view swings onto the target: most of the way in a third of a second.
 const LOCK_RATE = 6;
 let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT, NOTES, TOURS);
@@ -399,6 +403,7 @@ async function init() {
       if (photo.active()) photo.rotate(dx, dy);
       else if (!paused) {
         if (locked) unlock();
+        aimedId = null;
         state = { ...state, orientation: rotateLocal(state.orientation, ...(rear ? rearTurn(dx, dy) : [dx, dy])) };
         dragTurn[0] += dx;
         dragTurn[1] += dy;
@@ -850,6 +855,7 @@ ${STORY_MORE[target.id]}` : told };
       const body = here(selectedId);
       const direction = body.position.map((n, i) => n - state.position[i]);
       state = { ...state, orientation: faceToward(direction) };
+      aimedId = selectedId;
       // Somewhere already known: say again what it is.
       const about = aboutKnown(body);
       toast.show(about ? `${hud.faceToast(body)}\n${about}` : hud.faceToast(body));
@@ -1171,6 +1177,7 @@ ${STORY_MORE[target.id]}` : told };
         hud.showSelection(named(selectedId));
         const target = here(selectedId);
         state = { ...state, orientation: faceToward(target.position.map((n, i) => n - state.position[i])) };
+        aimedId = selectedId;
         toast.show(hud.faceToast(target));
       },
     }),
@@ -1221,6 +1228,7 @@ ${STORY_MORE[target.id]}` : told };
       hud.showSelection(bodyById(id));
       const body = here(id);
       state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
+      aimedId = id;
       toast.show(hud.faceToast(body));
     },
     onReset() {
@@ -1479,23 +1487,29 @@ ${STORY_MORE[target.id]}` : told };
     }
     const slowPoints = craft.map((c) => c.position);
     // (How far the locked target is before this step: sliding round it keeps that.)
-    const lockRange = locked ? Math.hypot(...here(selectedId).position.map((n, i) => n - state.position[i])) : 0;
-    const lockFrom = locked ? state.position : null;
+    if (aimedId !== selectedId) aimedId = null;
+    const guided = locked || aimedId !== null;
+    const lockRange = guided ? Math.hypot(...here(selectedId).position.map((n, i) => n - state.position[i])) : 0;
+    const lockFrom = guided ? state.position : null;
     const result = step(state, intent, dt, bodies, slowPoints);
     state = result.state;
     // Target lock: the view swings onto the target and stays on it as she moves. Turning
     // with the keys lets go; docked, going down to a place, looking behind or resting on
     // the target itself it waits.
-    if (locked && dt > 0 && !docked && !visit && !rear && !photo.active()) {
-      if (intent.turnX !== 0 || intent.turnY !== 0) unlock();
-      else {
+    // (Only faced, not locked: the view is left alone and sliding is a plain slide, but
+    // forward and back still go straight to the target and away.)
+    if (guided && dt > 0 && !docked && !visit && !rear && !photo.active()) {
+      if (intent.turnX !== 0 || intent.turnY !== 0 || intent.roll !== 0) {
+        if (locked) unlock();
+        aimedId = null;
+      } else {
         const aim = here(selectedId);
         const toward = aim.position.map((n, i) => n - state.position[i]);
         if (Math.hypot(...toward) > 1 && state.restingOn !== aim.id) {
           // Only sliding (not going forward or back): she goes round it at the distance
           // she was at. A straight slide drew away: 1,900 km in 2.5 s beside Earth.
           const sliding = state.speed < 0.01 && Math.max(state.sideSpeed ?? 0, state.riseSpeed ?? 0) > 0.01;
-          let position = sliding && !state.restingOn && lockRange > 1 ? keepRange(state.position, aim.position, lockRange) : state.position;
+          let position = locked && sliding && !state.restingOn && lockRange > 1 ? keepRange(state.position, aim.position, lockRange) : state.position;
           // Only going forward or back: straight at the target or straight away from it,
           // though the view is tipped to keep it over her head (along the view she would
           // curl in round it).
@@ -1504,7 +1518,8 @@ ${STORY_MORE[target.id]}` : told };
             const along = Math.min(went, state.motionSign > 0 ? lockRange : Infinity) * state.motionSign;
             position = lockFrom.map((n, i) => n + ((aim.position[i] - n) / lockRange) * along);
           }
-          state = { ...state, position, orientation: blend(state.orientation, faceToward(aim.position.map((n, i) => n - position[i])), 1 - Math.exp(-dt * LOCK_RATE)) };
+          const orientation = locked ? blend(state.orientation, faceToward(aim.position.map((n, i) => n - position[i])), 1 - Math.exp(-dt * LOCK_RATE)) : state.orientation;
+          state = { ...state, position, orientation };
         }
       }
     }

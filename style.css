@@ -3392,6 +3392,20 @@ body.rear.touch #reticle span {
   font-size:13px;
 }
 
+/* The first tab's name is the longer one ("최근 1주일 동안 바뀐 것"): it takes the room it
+   needs on one line, and the other the rest. */
+#settings #settingsTabs button[data-tab="news"] {
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+
+/* The day the making began: small, and if it must wrap, only between words. */
+#newsStarted {
+  margin:0 0 10px;
+  font-size:12px;
+  word-break:keep-all;
+}
+
 #settings #settingsTabs button[aria-selected="true"] {
   border-color:var(--gold);
   color:var(--gold);

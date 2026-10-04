@@ -2060,6 +2060,11 @@ footer button:active,
   font-size:0;
 }
 
+/* The pause button is no longer shown (it stays in the page to hold the state). */
+#hud nav button[hidden] {
+  display:none;
+}
+
 #hud nav button::before {
   content:"";
   flex:none;
@@ -2105,15 +2110,15 @@ footer button:active,
 @media (max-width: 480px) {
   /* The top of a phone's screen is laid out by the same one measure as its foot
      (--gap, 12px: "윗쪽 아이콘들도 아래와 같이 일관성 있게 재배치해줘", 2026-10-05):
-     from the screen's edges, between the seven buttons, from the buttons down to the
+     from the screen's edges, between the six buttons, from the buttons down to the
      two plates, from the height plate down to the minimap, and on down to the notice.
-     --top-key: the side of one of the seven squares, which share the row evenly.
+     --top-key: the side of one of the six squares, which share the row evenly.
      --row2: where the plates' upper edge stands, under the buttons (and under the goal
      line while the first-visit guide shows it: --guide, its height and one more gap). */
   body {
     --gap:12px;
     --edge-top:max(var(--gap), env(safe-area-inset-top));
-    --top-key:calc((100vw - 8 * var(--gap)) / 7);
+    --top-key:calc((100vw - 7 * var(--gap)) / 6);
     --guide:calc(44px + var(--gap));
     --row2:calc(var(--edge-top) + var(--top-key) + var(--gap) + var(--guide));
   }
@@ -2133,8 +2138,8 @@ footer button:active,
     display:none;
   }
 
-  /* Seven equal squares in one row. (The journal's was wider, with its count beside the
-     picture, and the others stood 5px apart.) */
+  /* Six equal squares in one row (seven until the pause button went). (The journal's
+     was wider, with its count beside the picture, and the others stood 5px apart.) */
   #hud nav {
     width:100%;
     gap:var(--gap);

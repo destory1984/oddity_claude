@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-05', text: '위쪽의 일시 정지 단추를 뺐습니다. 수첩이나 설정을 열면 전처럼 저절로 멈춥니다.' },
   { day: '2026-10-05', text: '설정 창이 갈래를 바꿔도 같은 크기로 있고, 갈래 단추 셋의 크기가 같아졌습니다.' },
   { day: '2026-10-05', text: '설정 창의 둘째 갈래 이름이 "설정"에서 "옵션"으로 바뀌었습니다.' },
   { day: '2026-10-05', text: '휴대전화 화면의 위쪽과 아래쪽 단추, 받침의 간격을 모두 한 값으로 맞췄습니다.' },

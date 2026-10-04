@@ -420,7 +420,15 @@ async function init() {
     onMove() {
       if (paused && !photo.active() && !$('storyCard').open && !$('noteCard').open) setPaused(false);
     },
-    onEscape: () => (photo.active() ? photo.toggle() : setPaused(!paused)),
+    // Esc holds the game and lets it go again. There is no button for it on screen (the
+    // user, 2026-10-05: "일시 정지 버튼이 굳이 필요할까?"; #pauseButton stays in the page,
+    // hidden, and only keeps the state), so a notice says what happened and how to go on.
+    onEscape() {
+      if (photo.active()) return photo.toggle();
+      setPaused(!paused);
+      // (Behind another notice it waits four seconds at most: later it may no longer be true.)
+      if (paused) toast.show('멈췄습니다. Esc나 비행 키를 누르면 이어집니다.', 'pause', 4);
+    },
     onWheel: (deltaY) => photo.zoom(deltaY),
     isBlocked: () => $('help').open || $('settings').open || $('journal').open || $('noteCard').open || $('bigMap').open,
   });

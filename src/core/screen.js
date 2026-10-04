@@ -2,12 +2,14 @@
 // upright, so the one layout made for phones is what everyone sees. (src/shell.js puts
 // the game in that frame; a real phone, already that shape, gets no frame.)
 
-// Width over height of the frame: 9 to 19.5, as on most phones.
-export const PHONE_RATIO = 9 / 19.5;
-// The frame's own width in CSS pixels: no narrower than a small phone (the six top
-// buttons need it), no wider than the phone layout's breakpoint in style.css.
-export const PHONE_MIN_WIDTH = 375;
-export const PHONE_MAX_WIDTH = 480;
+// The frame's own size in CSS pixels: what the page gets on the user's iPhone in Safari
+// with its address bar and tool bar showing (402 wide, 657 tall; measured on a
+// screenshot of 2026-10-05), so that a PC shows exactly what that phone shows. (It was
+// the whole screen's shape, 9 to 19.5, and 375 to 480 wide by the window's height: a
+// PC then showed a taller and wider picture than the phone did.)
+export const PHONE_WIDTH = 402;
+export const PHONE_HEIGHT = 657;
+export const PHONE_RATIO = PHONE_WIDTH / PHONE_HEIGHT;
 // A window wider than this for its height is not phone-shaped and gets the frame.
 export const WIDE_RATIO = 0.62;
 // A window lower than this is a phone held sideways: it keeps its own wide layout.
@@ -18,7 +20,5 @@ export const MIN_HEIGHT = 560;
 // width x height and then scaled so that it is exactly as tall as the window.
 export function phoneFrame({ width, height }) {
   if (!(width > 0 && height >= MIN_HEIGHT) || width / height <= WIDE_RATIO) return null;
-  const w = Math.min(PHONE_MAX_WIDTH, Math.max(PHONE_MIN_WIDTH, Math.round(height * PHONE_RATIO)));
-  const h = Math.round(w / PHONE_RATIO);
-  return { width: w, height: h, scale: height / h };
+  return { width: PHONE_WIDTH, height: PHONE_HEIGHT, scale: height / PHONE_HEIGHT };
 }

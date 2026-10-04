@@ -102,12 +102,12 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
         roll: (held.has('KeyE') ? 1 : 0) - (held.has('KeyQ') ? 1 : 0),
         drive: c.drive,
         strafe: Math.max(-1, Math.min(1, c.strafe + (slide.slideRight ? 1 : 0) - (slide.slideLeft ? 1 : 0))),
-        rise: (slide.slideUp ? 1 : 0) - (slide.slideDown ? 1 : 0),
+        rise: Math.max(-1, Math.min(1, c.rise + (slide.slideUp ? 1 : 0) - (slide.slideDown ? 1 : 0))),
         throttle,
       };
     },
     driving() {
-      return held.has('KeyW') || held.has('KeyS') || held.has('KeyA') || held.has('KeyD') || flyingButton || reversingButton || sliding();
+      return held.has('KeyW') || held.has('KeyS') || held.has('KeyA') || held.has('KeyD') || ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].some((k) => held.has(k)) || flyingButton || reversingButton || sliding();
     },
   };
 }

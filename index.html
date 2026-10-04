@@ -93,10 +93,10 @@
       <button id="flyButton" title="전진 (W)">전진 <kbd>W</kbd></button>
       <button id="brake" title="정지 (Space)">정지 <kbd>Space</kbd></button>
       <div id="slidePad" role="group" aria-label="보는 방향 그대로 위아래와 옆으로 움직이기">
-        <button id="slideUp" title="위로 움직이기" aria-label="위로 움직이기"></button>
-        <button id="slideLeft" title="왼쪽으로 움직이기 (A)" aria-label="왼쪽으로 움직이기"></button>
-        <button id="slideDown" title="아래로 움직이기" aria-label="아래로 움직이기"></button>
-        <button id="slideRight" title="오른쪽으로 움직이기 (D)" aria-label="오른쪽으로 움직이기"></button>
+        <button id="slideUp" title="위로 움직이기 (↑)" aria-label="위로 움직이기"></button>
+        <button id="slideLeft" title="왼쪽으로 움직이기 (←, A)" aria-label="왼쪽으로 움직이기"></button>
+        <button id="slideDown" title="아래로 움직이기 (↓)" aria-label="아래로 움직이기"></button>
+        <button id="slideRight" title="오른쪽으로 움직이기 (→, D)" aria-label="오른쪽으로 움직이기"></button>
       </div>
     </footer>
 
@@ -242,11 +242,11 @@
     <div class="sheetHead"><h1>태양계 탐험</h1><div class="textSize" role="group" aria-label="글자 크기"><button data-way="-1" aria-label="글자 작게" title="글자 작게">가<span aria-hidden="true">−</span></button><button data-way="1" aria-label="글자 크게" title="글자 크게">가<span aria-hidden="true">+</span></button></div></div>
     <p>크기는 실제대로, 천체 사이의 빈 거리는 1/100(위성과 행성 사이는 1/10)로 압축된 우주를 날아보세요.</p>
     <dl>
-      <dt>방향 전환</dt><dd>화면 드래그 / 방향키</dd>
-      <dt>목표 고정</dt><dd>"목표 고정" 단추. 고른 곳을 화면 가운데에 붙잡아 둡니다. 옆걸음 단추로 그 둘레를 돌고, 전진과 후진으로 다가가고 물러납니다. 화면을 끌거나 방향키를 누르면 풀립니다.</dd>
+      <dt>방향 전환</dt><dd>화면 드래그</dd>
+      <dt>목표 고정</dt><dd>"목표 고정" 단추. 고른 곳을 화면 가운데에 붙잡아 둡니다. 옆걸음 단추로 그 둘레를 돌고, 전진과 후진으로 다가가고 물러납니다. 화면을 끌면 풀립니다.</dd>
       <dt>큰 지도</dt><dd>왼쪽의 작은 지도를 누르면 열립니다. 지도나 이름에서 갈 곳을 고릅니다. "순간 이동"을 누르면 6초 뒤 그곳에 나타납니다(가 보지 않은 곳도 됩니다). "이 방향으로"는 그쪽을 바라보고 고정만 합니다.</dd>
       <dt>뒤 보기</dt><dd>R 키 / 굽은 화살표 버튼. 시야만 뒤로 돌립니다. 나는 방향과 속도는 그대로이고, 다시 누르면 앞을 봅니다.</dd>
-      <dt>옆걸음</dt><dd>방향키 모양의 단추 넷 / A · D 키. 보는 방향은 그대로 둔 채 위, 아래, 왼쪽, 오른쪽으로 미끄러지듯 이동합니다(위아래는 단추로만). 놓으면 그 속도로 계속 가고, 정지를 누르면 멈춥니다.</dd>
+      <dt>옆걸음</dt><dd>방향키(↑ ↓ ← →) / 방향키 모양의 단추 넷 / A · D 키(왼쪽, 오른쪽). 보는 방향은 그대로 둔 채 위, 아래, 왼쪽, 오른쪽으로 미끄러지듯 이동합니다. 놓으면 그 속도로 계속 가고, 정지를 누르면 멈춥니다.</dd>
       <dt>몸 회전</dt><dd>Q / E · 좌우 롤 회전. 위아래 회전도 360도 가능합니다.</dd>
       <dt>전진·후진</dt><dd>W / 전진 버튼, S / 후진 버튼. 누르는 동안 현재 안전 속도까지 가속하고, 놓으면 그 속도 그대로 계속 납니다. 반대쪽을 누르면 약 1초 동안 멈춘 뒤 반대로 갑니다. 천체에 가까워지면 저절로 느려집니다.</dd>
       <dt>자동 속도</dt><dd>가까울수록 느리게, 멀수록 빠르게 (0.01c → 100c)</dd>

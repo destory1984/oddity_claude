@@ -1680,7 +1680,30 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 #journalSky b {
+  flex:none;
   color:#7a5a36;
+}
+
+/* Folded: one line, the first piece of news cut short, and a press unfolds them all. */
+#journal #journalSky #skyFold {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:100%;
+  min-height:30px;
+  margin:0;
+  padding:3px 10px;
+  font-size:12px;
+  text-align:left;
+}
+
+#journalSky #skyFold span {
+  flex:1 1 0;
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-size:13px;
 }
 
 #journal #journalSky button {

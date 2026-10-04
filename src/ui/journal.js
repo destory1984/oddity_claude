@@ -91,17 +91,29 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
 
   // Sky news (core/forecast.js): sky() gives [{ text, planet: { id, name }, toward }]. A planet
   // already found can be jumped to.
+  // The sky news is folded to one line (the user, 2026-10-05: its three or four lines
+  // left too little of the page for the lists under it): "하늘 소식 3" and the first
+  // line, cut short; a press unfolds them all. Opening the journal folds it again.
+  let skyOpen = false;
   function renderSky() {
     const news = sky ? sky() : [];
     $('journalSky').hidden = news.length === 0;
-    $('journalSky').replaceChildren(...news.map(({ text, planet, toward }, i) => {
+    const fold = document.createElement('button');
+    fold.id = 'skyFold';
+    fold.setAttribute('aria-expanded', String(skyOpen));
+    const head = document.createElement('b');
+    head.textContent = `하늘 소식 ${news.length}`;
+    const first = document.createElement('span');
+    first.textContent = skyOpen ? '' : news[0]?.text ?? '';
+    fold.append(head, first, skyOpen ? '접기' : '펼치기');
+    fold.addEventListener('click', () => {
+      skyOpen = !skyOpen;
+      renderSky();
+      $('skyFold').focus();
+    });
+    $('journalSky').replaceChildren(fold, ...(skyOpen ? news : []).map(({ text, planet, toward }) => {
       const line = document.createElement('p');
       const words = document.createElement('span');
-      if (i === 0) {
-        const head = document.createElement('b');
-        head.textContent = '하늘 소식 ';
-        words.append(head);
-      }
       words.append(text);
       line.append(words);
       // (A line with no planet, the next real eclipse, is only told.)
@@ -460,6 +472,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     onOpen();
     render();
     renderDaily();
+    skyOpen = false;
     renderSky();
     renderStories();
     renderCraft();

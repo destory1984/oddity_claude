@@ -21,6 +21,10 @@ export const REST_ACTIONS = [
   { sheet: 'rest-nod', times: 2 }, { sheet: 'rest-sway', times: 2 }, { sheet: 'rest-cheer', times: 1 },
   { sheet: 'rest-wave2', times: 2 }, { sheet: 'rest-sit', times: 3 }, { sheet: 'rest-star', times: 1 },
   { sheet: 'rest-ribbon', times: 1 },
+  // Drawn to order on 2026-10-04 (the user: "모두 다 하자"): a yawn, writing in the
+  // notebook, a look through a small telescope, a rice ball.
+  { sheet: 'rest-yawn', times: 1 }, { sheet: 'rest-note', times: 2 }, { sheet: 'rest-scope', times: 2 },
+  { sheet: 'rest-snack', times: 2 },
 ];
 export const SHEETS = [
   ...FLIGHT_SHEETS, 'brake', 'idle', ...REST_ACTIONS.map((a) => a.sheet), 'rest-sleep',
@@ -35,7 +39,24 @@ export const SHEETS = [
   // Drawn to order for the story (docs/art-order-story.md): sitting beside a probe left
   // alone, and reading a note from grandmother.
   'sit', 'read',
+  // Drawn to order on 2026-10-04: what she does when a sight is pointed out (pointing
+  // at it, wide-eyed at it, looking up at it), and speaking, while her bubble is up.
+  'see-point', 'see-wow', 'see-up', 'talk',
 ];
+
+// Which of the three she does for a sight (the ids of core/glows.js, with 'meteor' and
+// 'belt'): she looks up at what is in the sky, is startled by what flashes or happens
+// of a sudden, and points at the rest.
+const SEE_UP = ['aurora', 'counterglow', 'meteor', 'clouds', 'airglow', 'flare', 'shine'];
+const SEE_WOW = ['lightning', 'sprite', 'impact', 'transit', 'tailcut', 'plume', 'jets', 'geyser'];
+export function seeFor(sight) {
+  const kind = String(sight).split(':')[0];
+  if (SEE_UP.includes(kind)) return 'up';
+  if (SEE_WOW.includes(kind)) return 'wow';
+  return 'point';
+}
+// How long she keeps at it.
+export const SEE_S = 3;
 
 // Frames per second.
 export const SPRITE_FPS = {
@@ -44,6 +65,7 @@ export const SPRITE_FPS = {
   // the camera, backwards as she turns away again to fly off. 0.8 s.
   brake: 5,
   rest: 4, sit: 4, read: 4, sleep: 1.5, reach: 2, stand: 3, land: 8, descend: 6, sling: 12, cheer: 8, bright: 4, cold: 6, hot: 4,
+  see: 4, talk: 6,
 };
 const TURN_ROUND_S = FRAMES / SPRITE_FPS.brake;
 // Slower than this (km/s) she is standing still.
@@ -118,7 +140,9 @@ export function flightSheet({ drive = 0, strafe = 0, turn = [0, 0], heading = nu
 
 // What she is doing, from most pressing to least.
 // input: { speed, drive, strafe, turn, heading, held, docking, landing, resting, boost,
-//          warp, photo, cheer, bright, hot, cold }
+//          warp, photo, cheer, bright, hot, cold, see, talk }
+//   see: null or 'point' | 'wow' | 'up' while a sight has just been pointed out;
+//   talk: true while her speech bubble is up. Both show only while she hovers.
 //   warp: null, or { phase: 'out' | 'in', t } with t seconds into that half of a jump.
 export function modeFor(input) {
   if (input.warp) return 'warp';
@@ -153,6 +177,14 @@ function hover(state, input, dt, fresh) {
   }
   const still = fresh ? 0 : state.still + dt;
   let { rests, nextRest } = fresh ? { rests: state.rests, nextRest: FIRST_REST_S } : state;
+  // A sight has just been pointed out, or she is speaking: that takes the place of
+  // whatever she was at, and she is awake for it.
+  const showing = input.see ? `see-${input.see}` : input.talk ? 'talk' : null;
+  if (showing) {
+    const time = state.sheet === showing ? state.time + dt : 0;
+    const awake = Math.min(still, SLEEP_AFTER_S - 5);
+    return { ...state, sheet: showing, time, frame: loop(time, input.see ? SPRITE_FPS.see : SPRITE_FPS.talk), still: awake, rests, nextRest: Math.max(nextRest, awake + 2) };
+  }
   if (still >= SLEEP_AFTER_S) return { ...state, sheet: 'rest-sleep', time: still, frame: loop(still - SLEEP_AFTER_S, SPRITE_FPS.sleep), still, rests, nextRest };
   // A rest action under way.
   const action = REST_ACTIONS.find((a) => a.sheet === state.sheet);

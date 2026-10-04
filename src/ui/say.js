@@ -40,6 +40,8 @@ export function createSay(el) {
       if (queue.length > WAITING) queue.shift();
       if (!nextTimer) nextTimer = setTimeout(next, Math.max(0, MIN_S - since) * 1000);
     },
+    // Whether a line is up now (she is drawn speaking while it is).
+    showing: () => el.classList.contains('on'),
     // card: world.update's heroCard (the sprite on screen); without one the bubble
     // stands a little above the middle of the view.
     place(card) {

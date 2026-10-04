@@ -178,6 +178,8 @@ const LOOKS = {
     rim: [0.4, 0.58, 1], rimLight: 0.9,
     // The tracks dust devils leave on its ground.
     tracks: 1,
+    // The white cap over its south pole, which the dark jets stand out against.
+    polarCap: 1,
   },
   jupiter: {
     shader: 'textured', map: 'jupiter.jpg', saturation: 1.1, tint: [1.03, 1, 0.96], base: [0.82, 0.7, 0.54],
@@ -315,9 +317,10 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
       ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy',
-        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'nightGlow', 'flow', 'tracks'], ['map']);
+        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'nightGlow', 'flow', 'tracks', 'polarCap'], ['map']);
     material.setFloat('flow', look.flow ?? 0);
     material.setFloat('tracks', look.tracks ?? 0);
+    material.setFloat('polarCap', look.polarCap ?? 0);
     material.setColor3('nightGlow', color(look.nightGlow ?? [0, 0, 0]));
     material.setVector4('shine', new Vector4(0, 1, 0, 0));
     material.setColor3('shineColor', new Color3(1, 1, 1));

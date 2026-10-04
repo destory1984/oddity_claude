@@ -48,6 +48,8 @@ uniform float ringOuter;
 // devils leave, seen from close by.
 uniform float flow;
 uniform float tracks;
+// Mars: the white cap of ice over its south pole (how far it reaches, 0 for none).
+uniform float polarCap;
 uniform vec3 nightGlow;
 uniform vec4 shine;
 uniform vec3 shineColor;
@@ -170,6 +172,13 @@ void main(){
     grain = mix(grain, even, min(1., craters * 3.));
   }
   col *= 1. + (grain - .5) * detail;
+  if (polarCap > 0.) {
+    // Carbon dioxide ice from the pole out to about latitude 80, with a ragged edge:
+    // the ground the dark spring jets burst out of.
+    float edge = -.985 + .012 * (fbm(lp.xz * 18.) - .5) * 2.;
+    float ice = smoothstep(edge + .006, edge - .006, lp.y) * polarCap;
+    col = mix(col, vec3(.94, .92, .9) * (.9 + .2 * fbm(lp.xz * 60.)), ice);
+  }
   if (tracks > 0. && close < .3) {
     // Thin dark wandering lines in patches: where a dust devil has swept the pale dust
     // off the darker ground. They come into view within a third of a radius.

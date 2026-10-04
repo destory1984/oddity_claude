@@ -6,7 +6,7 @@ import { heroScaleFor } from '../core/pose.js';
 import { PAL_FPS, PAL_FRAMES, palFile } from '../core/pal.js';
 
 // The character, drawn as pixel art: one flat card that always faces the camera,
-// showing one of 152 drawings chosen by what the traveler is doing (core/sprite.js).
+// showing one of some two hundred drawings chosen by what the traveler is doing (core/sprite.js).
 
 // The card: 192 x 256 drawings. Its height in the hero scene's units, where the
 // folded-paper model this replaced stood about 2.9 tall. (At 3.4 she covered too much of the view.)

@@ -46,6 +46,7 @@ import { bindTextSize } from './ui/textSize.js';
 import { shadowSpot } from './core/shadows.js';
 import { dailyRequest, requestTarget, requestMet, recordDay, streak, lastWeek } from './core/daily.js';
 import { palFor } from './core/pal.js';
+import { seeFor, SEE_S } from './core/sprite.js';
 import {
   LANDED, IDLE, AGAIN, IDLE_AFTER_S, IDLE_GAP_S, freshLine, milestoneLine,
   NEAR, NEAR_RADII, DEEP, DEEP_FROM_KM, REAR, PHOTO, JUMP, DOCK, SIGHTS, fastLine,
@@ -190,6 +191,9 @@ const CRAFT_VIEW_TURN = [(35 * Math.PI) / 180, (18 * Math.PI) / 180];
 const SIGHT_GAP_S = 30;
 const SIGHT_START_S = 20;
 let glowTellWait = SIGHT_START_S;
+// What she does at a sight just told of (core/sprite.js seeFor), and until when.
+let seeKind = null;
+let seeUntil = 0;
 let feelingTold = null;
 // The craft the traveler is docked with, and the glide toward it (core/dock.js startDocking).
 let docked = null;
@@ -1460,6 +1464,9 @@ ${STORY_MORE[target.id]}` : told };
         warp: warp.phase(),
         photo: photo.active() && photo.heroVisible(),
         cheer: performance.now() < cheerUntil,
+        // Pointing at a sight just told of, and speaking while her bubble is up.
+        see: performance.now() < seeUntil ? seeKind : null,
+        talk: say.showing(),
         // The companion earned last (core/pal.js); drawn beside the sprite character only.
         pal: palFor({ ...tally(), allTours: allToursDone(progress) }),
         read: performance.now() < readUntil,
@@ -1485,6 +1492,8 @@ ${STORY_MORE[target.id]}` : told };
       markTold('meteor');
       glowTellWait = SIGHT_GAP_S;
       say.show(SIGHTS.meteor);
+      seeKind = seeFor('meteor');
+      seeUntil = performance.now() + SEE_S * 1000;
       toast.show(eventMessage({ type: 'meteor' }), null, SIGHT_S);
     }
     // Say why she shivers or shields her eyes: once each time she comes into the cold
@@ -1506,8 +1515,10 @@ ${STORY_MORE[target.id]}` : told };
     if (sight) {
       markTold(sight);
       glowTellWait = SIGHT_GAP_S;
-      // Her own word under the notice that explains it.
+      // Her own word under the notice that explains it, and a gesture toward it.
       if (SIGHTS[sight]) say.show(SIGHTS[sight]);
+      seeKind = seeFor(sight);
+      seeUntil = performance.now() + SEE_S * 1000;
       toast.show(eventMessage({ type: 'glow', id: sight }), null, SIGHT_S);
     }
     if (view.inBelt && !beltSeen) {

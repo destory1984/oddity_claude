@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import {
   SHEETS, FRAMES, SPRITE_FPS, SHEET_HOLD_S, REST_ACTIONS, FIRST_REST_S, REST_GAP_S, SLEEP_AFTER_S,
-  createSpriteState, flightSheet, modeFor, stepSprite, spriteFrame, spriteFile,
+  createSpriteState, flightSheet, modeFor, stepSprite, spriteFrame, spriteFile, seeFor, SEE_S,
 } from '../src/core/sprite.js';
 
 // Run the sprite for `seconds` with the same input, returning every state on the way.
@@ -22,8 +22,8 @@ const STILL = { speed: 0 };
 const flying = () => run(createSpriteState(), FLY, 1.2).state;
 
 test('44 sheets of four frames in use, and every drawing is in the assets folder', () => {
-  assert.equal(SHEETS.length, 44);
-  assert.equal(new Set(SHEETS).size, 44);
+  assert.equal(SHEETS.length, 52);
+  assert.equal(new Set(SHEETS).size, 52);
   assert.equal(FRAMES, 4);
   for (const sheet of SHEETS) {
     for (let frame = 0; frame < FRAMES; frame++) {
@@ -134,7 +134,7 @@ test('a mouse drag arrives in bursts, and the drawing does not flicker with it',
 test('hovering is mostly stillness with a blink, and a rest action now and then', () => {
   assert.equal(FIRST_REST_S, 3);
   assert.deepEqual(REST_GAP_S, [8, 15]);
-  assert.equal(REST_ACTIONS.length, 13);
+  assert.equal(REST_ACTIONS.length, 17);
   const { seen } = run(createSpriteState(), STILL, 55, 1 / 30);
   const idle = seen.filter((s) => s.sheet === 'idle');
   assert.ok(idle.length / seen.length > 0.75, `${idle.length / seen.length}`);
@@ -296,4 +296,25 @@ test('reading a note runs once and holds; sitting loops; getting up she just sta
   assert.equal(modeFor({ read: true, sit: true }), 'read');
   assert.equal(modeFor({ sit: true, photo: true }), 'photo');
   assert.equal(modeFor({ sit: true, docking: true }), 'sit');
+});
+
+test('hovering, she points at a sight just told of and is drawn speaking while her bubble is up', () => {
+  const still = { speed: 0 };
+  let { state } = run(createSpriteState(), still, 1);
+  assert.equal(state.sheet, 'idle');
+  const seeing = run(state, { ...still, see: 'point' }, 1).seen;
+  assert.ok(seeing.every((s) => s.sheet === 'see-point'));
+  assert.deepEqual([...new Set(seeing.map((s) => s.frame))], [0, 1, 2, 3]);
+  state = run(seeing[seeing.length - 1], still, 0.1).state;
+  assert.equal(state.sheet, 'idle');
+  // Speaking gives way to a sight.
+  assert.equal(run(state, { ...still, talk: true }, 0.5).state.sheet, 'talk');
+  assert.equal(run(state, { ...still, talk: true, see: 'up' }, 0.5).state.sheet, 'see-up');
+  // In flight she keeps flying: the gesture is for when she faces the camera.
+  assert.ok(!run(createSpriteState(), { speed: 500, drive: 1, see: 'wow' }, 2).state.sheet.startsWith('see-'));
+  // What she does for which sight.
+  assert.equal(seeFor('aurora:earth'), 'up');
+  assert.equal(seeFor('lightning:venus'), 'wow');
+  assert.equal(seeFor('hexagon:saturn'), 'point');
+  assert.ok(SEE_S >= 2);
 });

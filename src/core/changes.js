@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '바라보기와 목표 고정 때 목표가 서라의 머리 위에 옵니다. 전에는 머리 뒤에 가려졌습니다.' },
   { day: '2026-10-04', text: '태양 바로 위에서 옆을 보면 태양이 양쪽에 보이던 것을 고쳤습니다. 이제 한쪽에만 보입니다.' },
   { day: '2026-10-04', text: '큰 지도에서 고른 곳으로 바로 순간 이동할 수 있습니다. 가 보지 않은 곳도 됩니다.' },
   { day: '2026-10-04', text: '지구에 갈 곳 여섯이 생겼습니다(바이코누르, 칙술루브 충돌구, 마우나케아 등). 수첩은 190칸입니다.' },

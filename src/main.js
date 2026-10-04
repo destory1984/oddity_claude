@@ -86,6 +86,11 @@ const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
 // After a jump to a body the view is turned this far (radians) off it.
 const VISTA_YAW = 0.3;
+// Turned to face a target (바라보기, 목표 고정, the big map), the view is tipped down by
+// this much, 15 degrees, so the target stands over her head: square on, it sat in the
+// very middle of the view, behind her ("서라의 머리가 그걸 막게 되어서 움직이기 불편해").
+const AIM_OVER = 0.26;
+const faceToward = (toward) => rotateLocal(lookAtDirection(toward), 0, AIM_OVER);
 const HUD_EVERY_N_FRAMES = 6;
 // The sprite character shields her eyes within this far of the Sun's surface, and fans
 // herself out to this many AU (distances between bodies are a hundredth of the real
@@ -844,7 +849,7 @@ ${STORY_MORE[target.id]}` : told };
     onFace() {
       const body = here(selectedId);
       const direction = body.position.map((n, i) => n - state.position[i]);
-      state = { ...state, orientation: lookAtDirection(direction) };
+      state = { ...state, orientation: faceToward(direction) };
       // Somewhere already known: say again what it is.
       const about = aboutKnown(body);
       toast.show(about ? `${hud.faceToast(body)}\n${about}` : hud.faceToast(body));
@@ -883,7 +888,7 @@ ${STORY_MORE[target.id]}` : told };
     if (locked) return unlock();
     locked = true;
     const body = here(selectedId);
-    state = { ...state, orientation: lookAtDirection(body.position.map((n, i) => n - state.position[i])) };
+    state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
     toast.show(`${body.name}에 화면을 고정했습니다. 방향키 단추로 그 둘레를 돌고, 전진과 후진으로 다가가고 물러납니다.\n화면을 끌면 풀립니다.`);
     return undefined;
   });
@@ -929,7 +934,7 @@ ${STORY_MORE[target.id]}` : told };
     const body = here(mapPick);
     selectedId = mapPick;
     hud.showSelection(named(mapPick));
-    state = { ...state, orientation: lookAtDirection(body.position.map((n, i) => n - state.position[i])) };
+    state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
     locked = true;
     $('bigMap').close();
     toast.show(`${body.name} 쪽을 바라보고 화면을 고정했습니다. 전진을 누르면 다가갑니다.`);
@@ -1165,7 +1170,7 @@ ${STORY_MORE[target.id]}` : told };
         selectedId = requestTarget(request);
         hud.showSelection(named(selectedId));
         const target = here(selectedId);
-        state = { ...state, orientation: lookAtDirection(target.position.map((n, i) => n - state.position[i])) };
+        state = { ...state, orientation: faceToward(target.position.map((n, i) => n - state.position[i])) };
         toast.show(hud.faceToast(target));
       },
     }),
@@ -1215,7 +1220,7 @@ ${STORY_MORE[target.id]}` : told };
       selectedId = id;
       hud.showSelection(bodyById(id));
       const body = here(id);
-      state = { ...state, orientation: lookAtDirection(body.position.map((n, i) => n - state.position[i])) };
+      state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
       toast.show(hud.faceToast(body));
     },
     onReset() {
@@ -1490,7 +1495,7 @@ ${STORY_MORE[target.id]}` : told };
           // she was at. A straight slide drew away: 1,900 km in 2.5 s beside Earth.
           const sliding = state.speed < 0.01 && Math.max(state.sideSpeed ?? 0, state.riseSpeed ?? 0) > 0.01;
           const position = sliding && !state.restingOn && lockRange > 1 ? keepRange(state.position, aim.position, lockRange) : state.position;
-          state = { ...state, position, orientation: blend(state.orientation, lookAtDirection(aim.position.map((n, i) => n - position[i])), 1 - Math.exp(-dt * LOCK_RATE)) };
+          state = { ...state, position, orientation: blend(state.orientation, faceToward(aim.position.map((n, i) => n - position[i])), 1 - Math.exp(-dt * LOCK_RATE)) };
         }
       }
     }

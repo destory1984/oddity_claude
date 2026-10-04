@@ -3245,6 +3245,25 @@ body.rear.touch #reticle span {
   display:none;
 }
 
+/* The readouts stand on a dark glass plate. They were bare pale type: over the Sun or
+   Saturn's clouds the speed and the height could not be read at all ("밝은 바탕 위에서는
+   속도가 하나도 안 보여"). The plate is the box's own ground and a ring of the same
+   colour 8px out, so nothing moves from where it was. */
+.telemetry,
+.speedBox,
+.throttle,
+#hint,
+#targetPanel {
+  background:#0b1630c8;
+  border-radius:10px;
+  box-shadow:0 0 0 8px #0b1630c8;
+}
+
+/* The subtitle under the title has no plate: a dark edge round its letters instead. */
+.brand span {
+  text-shadow:0 0 3px #02040b, 0 0 8px #02040b, 0 1px 2px #02040b;
+}
+
 /* The title is a picture: "Space Oddity" in pixel lettering, cream with a gold edge and a
    navy line round it, a small crown over the O (the user's pick of five, 2026-10-04).
    Its height goes by the size of the type it stands in for, so the rules that shrank

@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '고도, 속도, 목적지 글자 뒤에 어두운 받침을 깔았습니다. 밝은 태양 앞에서도 읽힙니다.' },
   { day: '2026-10-04', text: 'PC의 방향키가 위, 아래, 왼쪽, 오른쪽 이동이 됐습니다. 시야는 화면을 끌어서 돌립니다.' },
   { day: '2026-10-04', text: '이동 단추로 위나 아래로 갈 때 서라가 고개를 들거나 숙인 모습으로 납니다.' },
   { day: '2026-10-04', text: '제목 "Space Oddity"가 도트 글씨 그림으로 바뀌었습니다. O 위에 작은 왕관이 있습니다.' },

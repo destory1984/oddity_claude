@@ -1480,6 +1480,7 @@ ${STORY_MORE[target.id]}` : told };
     const slowPoints = craft.map((c) => c.position);
     // (How far the locked target is before this step: sliding round it keeps that.)
     const lockRange = locked ? Math.hypot(...here(selectedId).position.map((n, i) => n - state.position[i])) : 0;
+    const lockFrom = locked ? state.position : null;
     const result = step(state, intent, dt, bodies, slowPoints);
     state = result.state;
     // Target lock: the view swings onto the target and stays on it as she moves. Turning
@@ -1494,7 +1495,15 @@ ${STORY_MORE[target.id]}` : told };
           // Only sliding (not going forward or back): she goes round it at the distance
           // she was at. A straight slide drew away: 1,900 km in 2.5 s beside Earth.
           const sliding = state.speed < 0.01 && Math.max(state.sideSpeed ?? 0, state.riseSpeed ?? 0) > 0.01;
-          const position = sliding && !state.restingOn && lockRange > 1 ? keepRange(state.position, aim.position, lockRange) : state.position;
+          let position = sliding && !state.restingOn && lockRange > 1 ? keepRange(state.position, aim.position, lockRange) : state.position;
+          // Only going forward or back: straight at the target or straight away from it,
+          // though the view is tipped to keep it over her head (along the view she would
+          // curl in round it).
+          const went = Math.hypot(...state.position.map((n, i) => n - lockFrom[i]));
+          if (!sliding && state.speed > 0.01 && went > 0 && !state.restingOn && lockRange > 1) {
+            const along = Math.min(went, state.motionSign > 0 ? lockRange : Infinity) * state.motionSign;
+            position = lockFrom.map((n, i) => n + ((aim.position[i] - n) / lockRange) * along);
+          }
           state = { ...state, position, orientation: blend(state.orientation, faceToward(aim.position.map((n, i) => n - position[i])), 1 - Math.exp(-dt * LOCK_RATE)) };
         }
       }

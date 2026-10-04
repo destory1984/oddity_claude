@@ -1,4 +1,5 @@
 import { sanitizeExo } from '../core/exo.js';
+import { sanitizeEclipses } from '../core/eclipses.js';
 import { createProgress, sanitizeProgress } from '../core/progress.js';
 import { sanitizeAlbum } from '../core/album.js';
 import { createDaily, sanitizeDaily } from '../core/daily.js';
@@ -207,6 +208,7 @@ export function saveFeel(on) {
 }
 
 const EXO_KEY = 'oddity.exo.v1';
+const ECLIPSE_KEY = 'oddity.eclipse.v1';
 
 // The trip to another star (core/exo.js): whether she has been, and the planets seen.
 export function loadExo() {
@@ -214,6 +216,23 @@ export function loadExo() {
     return sanitizeExo(JSON.parse(localStorage.getItem(EXO_KEY)));
   } catch {
     return sanitizeExo(null);
+  }
+}
+
+// The real eclipses watched (core/eclipses.js).
+export function loadEclipses() {
+  try {
+    return sanitizeEclipses(JSON.parse(localStorage.getItem(ECLIPSE_KEY)));
+  } catch {
+    return sanitizeEclipses(null);
+  }
+}
+
+export function saveEclipses(record) {
+  try {
+    localStorage.setItem(ECLIPSE_KEY, JSON.stringify(record));
+  } catch {
+    // The record lasts only until the page is closed.
   }
 }
 

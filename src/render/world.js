@@ -77,7 +77,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   // now: where every body is this frame (they orbit); defaults to the starting layout.
   // seen: { position, orientation } when the view is from somewhere other than where
   // the traveler is (looking round a target, ui/photo.js); she herself stays put.
-  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn, move = {}, seen = null, lamp = null, trail = null, replay = null }) {
+  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn, move = {}, seen = null, lamp = null, trail = null, replay = null, eclipsed = null }) {
     elapsed += dt;
     // Draw from a point just above the ground when standing on it, and pull the near
     // plane in as the ground gets close; otherwise the planet under the feet is cut away
@@ -120,6 +120,8 @@ export async function createWorld(canvas, bodies = BODIES) {
       const lightFrom = body.star ? now.find((b) => b.id === body.star) : sunNow;
       item.setSun(lamp?.id === body.id ? lamp.direction : normalize(lightFrom.position.map((n, i) => n - body.position[i])));
       if (SHADOW_CASTERS[body.id]) item.setShadows?.(castShadows(body.id, now));
+      // eclipsed: { id, direction, amount } while a lunar eclipse is played (core/eclipses.js).
+      if (body.id === 'moon') item.setEclipsed?.(eclipsed?.direction ?? [0, 1, 0], eclipsed?.id === body.id ? eclipsed.amount : 0);
       // A moon is lit a little by the planet it goes round (core/shine.js).
       if (body.kind === 'moon' && item.setShine) {
         const planet = now.find((b) => b.id === body.parent);

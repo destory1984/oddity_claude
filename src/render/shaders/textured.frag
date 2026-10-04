@@ -52,6 +52,9 @@ uniform float tracks;
 uniform float polarCap;
 uniform vec3 nightGlow;
 uniform vec4 shine;
+// Earth's shadow coming over the Moon in a lunar eclipse (core/eclipses.js): xyz the
+// side it comes from, w how far it has come (0 none, 1 all of the disc).
+uniform vec4 eclipsed;
 uniform vec3 shineColor;
 uniform vec4 shadeAt[6];
 uniform vec3 shadeEdge[6];
@@ -297,6 +300,13 @@ void main(){
     float nearness = 1. - smoothstep(.05, .5, close);
     // (By how cratered the world is: the Moon in full, Mars a third, which is darker anyway.)
     light /= 1. + craters * nearness * .75 * smoothstep(.6, 1., max(dot(normalize(n), sun), 0.));
+  }
+  if (eclipsed.w > 0.) {
+    // The shadow's edge crosses the globe; under it the ground is lit only by the red
+    // light bent round Earth: dim, and copper.
+    float edge = 1.2 - 2.4 * eclipsed.w;
+    float under = smoothstep(edge - .22, edge + .22, dot(normalize(n), eclipsed.xyz));
+    light = mix(light, col * vec3(.34, .09, .04), under);
   }
   gl_FragColor = vec4(pow(light, vec3(.92)), 1.);
 }

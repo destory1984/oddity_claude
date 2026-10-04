@@ -3234,6 +3234,17 @@ body.rear.touch #reticle span {
   }
 }
 
+/* The week of a real eclipse: the way to the place it is seen from. */
+#eclipseJump {
+  display:block;
+  margin:9px 0 0 auto;
+  border-color:var(--gold);
+}
+
+#eclipseJump[hidden] {
+  display:none;
+}
+
 /* Target lock: the chosen body is held in the middle of the view. Lined in gold while on. */
 #lockTarget {
   display:block;

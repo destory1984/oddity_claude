@@ -336,12 +336,13 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
       ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy',
-        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'nightGlow', 'flow', 'tracks', 'polarCap'], ['map']);
+        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'eclipsed', 'nightGlow', 'flow', 'tracks', 'polarCap'], ['map']);
     material.setFloat('flow', look.flow ?? 0);
     material.setFloat('tracks', look.tracks ?? 0);
     material.setFloat('polarCap', look.polarCap ?? 0);
     material.setColor3('nightGlow', color(look.nightGlow ?? [0, 0, 0]));
     material.setVector4('shine', new Vector4(0, 1, 0, 0));
+    material.setVector4('eclipsed', new Vector4(0, 1, 0, 0));
     material.setColor3('shineColor', new Color3(1, 1, 1));
     material.setArray4('shadeAt', new Array(SHADOW_SLOTS * 4).fill(0));
     material.setArray3('shadeEdge', new Array(SHADOW_SLOTS * 3).fill(0));
@@ -418,6 +419,11 @@ function createProceduralPlanet(scene, body, look, sunDir) {
       if (look.shader !== 'textured') return;
       material.setVector4('shine', new Vector4(...light.direction, light.strength));
       material.setColor3('shineColor', new Color3(...light.color));
+    },
+    // Earth's shadow over the Moon in a lunar eclipse: from which side, and how far over.
+    setEclipsed(direction, amount) {
+      if (look.shader !== 'textured') return;
+      material.setVector4('eclipsed', new Vector4(...direction, amount));
     },
     // The shadows of its moons this frame (core/shadows.js castShadows).
     setShadows({ at, edge }) {

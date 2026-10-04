@@ -103,7 +103,8 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       }
       words.append(text);
       line.append(words);
-      if (lastProgress.discovered.includes(planet.id)) line.append(jumpButton(planet.id, planet.name, toward));
+      // (A line with no planet, the next real eclipse, is only told.)
+      if (planet && lastProgress.discovered.includes(planet.id)) line.append(jumpButton(planet.id, planet.name, toward));
       return line;
     }));
   }

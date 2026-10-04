@@ -6,7 +6,7 @@ import {
   createState, step, stopNow, totalSpeed, carryAlong, boostLift, velocity, TURN_RATE, START_YAW,
 } from './core/game.js';
 import {
-  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, blend,
+  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, blend, right,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft } from './core/craft.js';
 import { skyLabels } from './core/sky.js';
@@ -30,7 +30,7 @@ import {
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
-  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, loadStunts, saveStunts, loadFeel, saveFeel, loadExo, saveExo,
+  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, loadStunts, saveStunts, loadFeel, saveFeel, loadExo, saveExo, loadEclipses, saveEclipses,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
@@ -77,7 +77,10 @@ import { replayFor, replayFrame, replayOn } from './core/replay.js';
 import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts } from './core/visit.js';
-import { spinOf } from './core/surface.js';
+import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
+import {
+  eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon,
+} from './core/eclipses.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
@@ -118,7 +121,16 @@ const START_NEAR = null;
 // Two layouts: 'tour' is the hand-made one (planets spread round the Sun); 'today' puts
 // the planets where they really are on the day the game is opened.
 const layout = loadLayout();
-const openedAt = new Date();
+// (A test may set the day: sessionStorage 'oddity.day', as 2027-08-02.)
+const openedAt = (() => {
+  try {
+    const day = sessionStorage.getItem('oddity.day');
+    if (day) return new Date(`${day}T12:00:00`);
+  } catch {
+    // No session storage: today.
+  }
+  return new Date();
+})();
 const bodyData = layout === 'today' ? todayData(openedAt) : BODY_DATA;
 const bodiesAt = (timeS) => placeBodies(bodyData, timeS);
 // Everything that is flown among and drawn: the Solar System, and far off TRAPPIST-1
@@ -233,12 +245,23 @@ const shownSpeed = () => (docked ? rideKmS : visit ? visitKmS : totalSpeed(state
 let craft = craftAt(0, bodies);
 // Story places on a surface: named and selected like craft, turning with their body.
 let sites = storySitesAt(0, bodies);
+// The week of a real eclipse (core/eclipses.js): which one, the place on Earth it is
+// seen from (a place for the labels and the jump only, not a story place), the record
+// of those watched, and the show while it is watched: { startedAt, id } and this frame of it.
+const eclipse = eclipseNow(openedAt);
+let eclipsesSeen = loadEclipses();
+const eclipseSpotAt = (timeS, at) => eclipseSpot(eclipse, bodyById('earth', at), bodyById('sun', at), spinAngle(SPIN_DAY_S.earth, timeS, EARTH_START_SPIN));
+const eventPlace = eclipse
+  ? { id: 'eclipseSpot', name: `${eclipseTitle(eclipse)} 자리`, nameEn: '', kind: 'site', parent: 'earth', radiusKm: 0, landmark: true, ...eclipseSpotAt(0, bodies) }
+  : null;
+let show = null;
+let showNow = null;
 // The spot a scene with no story place of its own is played at (core/replay.js: Cassini's
 // plunge, where she rests on Saturn): a place for the close view only, with `up` its
 // direction from the body's middle and `level` the way the view looks along the ground.
 let scenePlace = null;
-const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null);
-const named = (id) => bodyById(id) ?? craftById(id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null);
+const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null) ?? (eventPlace?.id === id ? eventPlace : null);
+const named = (id) => bodyById(id) ?? craftById(id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null) ?? (eventPlace?.id === id ? eventPlace : null);
 
 const toast = createToast($('toast'));
 const say = createSay($('heroSay'));
@@ -529,7 +552,8 @@ async function init() {
 
   // Where to stand beside a place on a surface right now.
   const standBeside = (id) => {
-    const story = STORIES.find((s) => s.id === id);
+    // (The place of a solar eclipse is no story, but it has a latitude and a longitude.)
+    const story = STORIES.find((s) => s.id === id) ?? (eventPlace?.id === id ? { body: 'earth', latDeg: eclipse.latDeg, lonDeg: eclipse.lonDeg } : null);
     return standSpot(story, here(story.body), simTime, innerWidth / innerHeight < 0.75);
   };
 
@@ -653,9 +677,14 @@ ${STORY_MORE[target.id]}` : told };
     const id = photo.orbit()?.id ?? null;
     // A day played again: its lines take the sheet's place, each at its moment.
     const scene = replay && id === replay.id ? replayFrame(replay.id, (performance.now() - replay.startedAt) / 1000) : null;
-    const key = scene ? `${id}:then:${scene.line}` : id;
+    const key = show && showNow ? `eclipse:${showNow.line}` : scene ? `${id}:then:${scene.line}` : id;
     if (key === inspectShown) return;
     inspectShown = key;
+    // An eclipse being watched: its lines, each at its moment.
+    if (show && showNow) {
+      inspectInfo.show({ name: eclipseTitle(eclipse), nameEn: '', kicker: `${eclipseDayText(eclipse)} · ${eclipse.where}`, text: showNow.text });
+      return;
+    }
     if (scene) inspectInfo.show({ name: replayFor(id).name, nameEn: '', kicker: `그날로 · ${replayFor(id).day}`, text: scene.text });
     else inspectInfo.show(id ? readingFor(here(id)) : null);
   }
@@ -695,7 +724,7 @@ ${STORY_MORE[target.id]}` : told };
     }
     const target = craft.find((c) => c.id === id);
     if (target && !docked && dockable(state.position, [target])) dock(target);
-    const place = sites.find((s) => s.id === id);
+    const place = sites.find((s) => s.id === id) ?? (eventPlace?.id === id && eclipse.kind === 'solar' ? eventPlace : null);
     if (place && !docked && visit?.id !== id
       && !siteHidden(place, here(place.parent), state.position) && !siteFar(here(place.parent), state.position)) goDownTo(place);
   }
@@ -710,8 +739,41 @@ ${STORY_MORE[target.id]}` : told };
   });
 
   // "그날로": standing at a place that has a scene, its day is played again in the close view.
+  // The Moon where the eclipse being watched needs it (core/eclipses.js stagedMoon),
+  // seen from where she is.
+  function stageMoon(frame) {
+    const earth = here('earth');
+    const out = state.position.map((n, i) => n - earth.position[i]);
+    const far = Math.hypot(...out);
+    const at = stagedMoon(eclipse, frame, state.position, out.map((n) => n / far), here('sun'), bodyById('moon', allAt(simTime)), earth);
+    bodies = bodies.map((b) => (b.id === 'moon' ? Object.freeze({ ...b, position: Object.freeze(at) }) : b));
+  }
+  function startShow() {
+    show = { startedAt: performance.now(), id: eclipse.kind === 'solar' ? 'sun' : 'moon' };
+    showNow = showFrame(eclipse, 0);
+    stageMoon(showNow);
+    const target = here(show.id);
+    const toward = target.position.map((n, i) => n - state.position[i]);
+    // From where she stands, looking up at it: the whole Sun with its corona, or the Moon large.
+    photo.orbitAround({ id: show.id, facing: lookAtDirection(toward), distanceKm: Math.hypot(...toward), fovDeg: eclipse.kind === 'solar' ? (innerWidth < innerHeight ? 95 : 70) : 14 });
+  }
+  // The jump to the eclipse's place, and then down to stand there: the ground turns
+  // under anyone who only hovers (46 km a second at this clock), and standing she is
+  // carried with it, through the night too if the Sun is not up yet.
+  let landAtEclipse = false;
+  $('eclipseJump').addEventListener('click', () => {
+    if (!eclipse || photo.active() || warp.busy()) return;
+    teleport(eventPlace.id, true, true);
+    landAtEclipse = true;
+  });
+
   $('replayButton').addEventListener('click', () => {
     if (photo.active()) return;
+    if (eclipse && (!visit || visit.id === eventPlace.id)) {
+      const watch = canWatch(eclipse, eventPlace, here('sun'), state.position);
+      if (watch === 'yes') return startShow();
+      if (watch === 'night') return toast.show('이곳은 지금 밤입니다. 해가 뜨면 볼 수 있습니다. 게임의 하루는 14분 24초입니다.');
+    }
     const onBody = !visit && state.restingOn ? replayOn(state.restingOn) : null;
     if (onBody) {
       // Where she rests, seen along the ground from 15 degrees above it; what comes in
@@ -775,7 +837,7 @@ ${STORY_MORE[target.id]}` : told };
   // What is left unnamed while she is at the other star: everything at home but the Sun.
   const homeIds = [...BODIES.filter((b) => b.kind !== 'star').map((b) => b.id), ...craft.map((c) => c.id), ...sites.map((s) => s.id)];
 
-  const hud = createHud([...BODIES, ...exoBodiesAt(0), ...craft, ...sites], {
+  const hud = createHud([...BODIES, ...exoBodiesAt(0), ...craft, ...sites, ...(eventPlace ? [eventPlace] : [])], {
     skyLabels: skyLabels(),
     onSelect: selectBody,
     onFace() {
@@ -1079,9 +1141,13 @@ ${STORY_MORE[target.id]}` : told };
     },
     notes: NOTES,
     memos: MEMOS,
-    sky: () => skyNews(bodiesAt, simTime).map((news) => ({ text: newsLine(news), planet: bodyById(news.planet, bodies),
-      toward: shadowSpot(bodyById(news.planet, bodies), bodyById(news.moon, bodies), bodyById('sun', bodies).position),
-    })),
+    // The next real eclipse first (core/eclipses.js), then the shadows of moons.
+    sky: () => [
+      ...(eclipseNews(openedAt) ? [{ text: eclipseNews(openedAt), planet: null, toward: null }] : []),
+      ...skyNews(bodiesAt, simTime).map((news) => ({ text: newsLine(news), planet: bodyById(news.planet, bodies),
+        toward: shadowSpot(bodyById(news.planet, bodies), bodyById(news.moon, bodies), bodyById('sun', bodies).position),
+      })),
+    ],
     daily: () => ({
       text: request.text,
       done: requestDone(),
@@ -1164,7 +1230,7 @@ ${STORY_MORE[target.id]}` : told };
   // TEMPORARY, for testing the opening: wipe the log, the album, the daily record and the
   // first-visit guide (the settings stay) and start again from the first page.
   $('testReset').addEventListener('click', () => {
-    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1', 'oddity.told.v1', 'oddity.exo.v1']) {
+    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1', 'oddity.told.v1', 'oddity.exo.v1', 'oddity.eclipse.v1']) {
       try { localStorage.removeItem(key); } catch { /* storage shut: nothing to wipe */ }
     }
     location.reload();
@@ -1288,6 +1354,8 @@ ${STORY_MORE[target.id]}` : told };
     markTold('start');
     toast.show(`${bodyById(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);
   }
+  // The week of a real eclipse: say so each time the game is opened.
+  if (eclipse) toast.show(`${eclipseNews(openedAt)}\n"${eclipseTitle(eclipse)} 자리로" 단추를 누르면 그곳으로 갑니다.`);
   progressChanged(null);
   const touch = document.body.classList.contains('touch');
   const journalHow = touch ? '수첩 버튼' : 'J 키나 수첩 버튼';
@@ -1338,6 +1406,7 @@ ${STORY_MORE[target.id]}` : told };
         rideDrift = releaseDrift(docked.id, craftBefore, craft, before, bodies, state.position, dt);
       }
       sites = storySitesAt(simTime, bodies);
+      if (eventPlace) Object.assign(eventPlace, eclipseSpotAt(simTime, bodies));
       state = carryAlong(state, before, bodies);
     }
     // Photo mode has a view of its own, which starts looking ahead.
@@ -1672,8 +1741,29 @@ ${STORY_MORE[target.id]}` : told };
     }
     // While a day is played again nothing else is told: the notice and her bubble are
     // hidden (style.css), and the sights wait, so none is spent unseen.
-    document.body.classList.toggle('replaying', Boolean(replay));
-    if (replay) glowTellWait = Math.max(glowTellWait, 1);
+    // An eclipse being watched: the Moon is put where this moment of it needs it. Over
+    // when its time is up or the close view is left; the Moon then goes back to its orbit.
+    if (show) {
+      showNow = photo.orbit()?.id === show.id ? showFrame(eclipse, (performance.now() - show.startedAt) / 1000) : null;
+      if (!showNow || showNow.done) {
+        const watched = Boolean(showNow?.done);
+        if (photo.orbit()?.id === show.id) $('exitPhoto').click();
+        show = null;
+        showNow = null;
+        bodies = allAt(simTime);
+        if (watched) {
+          const first = !eclipsesSeen.seen.includes(eclipse.id);
+          if (first) {
+            eclipsesSeen = { seen: [...eclipsesSeen.seen, eclipse.id] };
+            saveEclipses(eclipsesSeen);
+          }
+          toast.show(`${eclipseDayText(eclipse)}의 ${eclipseTitle(eclipse)}${first ? '을 보았습니다' : '을 다시 보았습니다'}. 이번 주 동안 몇 번이든 볼 수 있습니다.`);
+          say.show(eclipse.kind === 'lunar' ? '달이 빨개졌어. 할머니한테 말해야지.' : eclipse.type === 'total' ? '해가 사라졌어. 저 하얀 게 코로나구나.' : '불반지다! 가운데가 까매.');
+        }
+      } else stageMoon(showNow);
+    }
+    document.body.classList.toggle('replaying', Boolean(replay || show));
+    if (replay || show) glowTellWait = Math.max(glowTellWait, 1);
     showInspectInfo();
     // The feel of speed: the view widens near the limit of the spot, and the stars draw
     // out from 2c. Photo mode and the close view keep their own view; docked or gliding
@@ -1703,7 +1793,11 @@ ${STORY_MORE[target.id]}` : told };
       bodies,
       craft,
       hiddenCraft: awayCraft,
-      sites: scenePlace ? [...sites, scenePlace] : sites,
+      sites: scenePlace || eventPlace ? [...sites, ...(scenePlace ? [scenePlace] : []), ...(eventPlace ? [eventPlace] : [])] : sites,
+      // A lunar eclipse being watched: Earth's shadow comes over the Moon from one side.
+      eclipsed: show && showNow && eclipse.kind === 'lunar'
+        ? { id: 'moon', direction: right(photo.orbit()?.orientation ?? state.orientation), amount: showNow.shade }
+        : null,
       jolt: docked ? { id: docked.id, ...latchJolt(docked) } : null,
       position: state.position,
       orientation: state.orientation,
@@ -1818,8 +1912,21 @@ ${STORY_MORE[target.id]}` : told };
     $('dockTarget').hidden = !docked && !offer;
     // Standing at a place that has a scene of its day.
     const thenHere = visit ? (hasArrived(visit) ? replayFor(visit.id) : null) : (state.restingOn ? replayFor(replayOn(state.restingOn)) : null);
-    $('replayButton').hidden = !thenHere;
-    if (thenHere) $('replayButton').textContent = `그날로 · ${thenHere.day}`;
+    // The week of a real eclipse: near its place the same button plays it, and from
+    // elsewhere another jumps there.
+    if (landAtEclipse && !warp.busy()) {
+      landAtEclipse = false;
+      // (A lunar eclipse is watched from the middle of the night side, which does not
+      // turn with the ground: hovering there is enough.)
+      if (eclipse.kind === 'solar' && !visit && !docked && canWatch(eclipse, eventPlace, here('sun'), state.position) !== 'far') goDownTo(eventPlace);
+    }
+    const watch = eclipse && (!visit || visit.id === eventPlace.id) && !photo.active() ? canWatch(eclipse, eventPlace, here('sun'), state.position) : null;
+    const watchable = watch === 'yes' || watch === 'night';
+    $('replayButton').hidden = !thenHere && !watchable;
+    if (watchable) $('replayButton').textContent = watch === 'yes' ? `${eclipseTitle(eclipse)} 보기` : '해가 뜨면 일식을 볼 수 있습니다';
+    else if (thenHere) $('replayButton').textContent = `그날로 · ${thenHere.day}`;
+    $('eclipseJump').hidden = watch !== 'far' || away;
+    if (eclipse) $('eclipseJump').textContent = `${eclipseTitle(eclipse)} 자리로`;
     // Latched to Kepler: the jump to the star it watched. There: the way home.
     $('exoJump').hidden = !away && !(docked?.id === 'kepler' && isDocked(docked));
     $('exoJump').textContent = away ? '태양계로 돌아가기' : '케플러가 본 별로';
@@ -1841,7 +1948,7 @@ ${STORY_MORE[target.id]}` : told };
       C,
       goalId: goalNow()?.targetId ?? null,
       // A place on the far side of its body, or seen from far away, gets no label.
-      knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...progress.stories, ...exo.seen, ...(exo.been ? [EXO_STAR.id] : [])]),
+      knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...progress.stories, ...exo.seen, ...(exo.been ? [EXO_STAR.id] : []), ...(eventPlace ? [eventPlace.id] : [])]),
       hiddenIds: [
         // The other star is named only from there, and home is one name from there: the Sun.
         ...(away ? homeIds : EXO_IDS),

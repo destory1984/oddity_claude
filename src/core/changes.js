@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '실제 일식과 월식이 있는 주에는 게임이 알려 주고, 그 자리로 가서 볼 수 있습니다. 다음은 2027년 2월 6일입니다.' },
   { day: '2026-10-04', text: '사진 임무 "다이아몬드 반지"가 생겼습니다. 행성 가장자리로 태양이 막 나올 때 찍습니다. 수첩은 184칸이 됐습니다.' },
   { day: '2026-10-04', text: '미니맵을 누르면 큰 지도가 열립니다. 갈 곳을 고르고 "이 방향으로"를 누르면 그쪽을 바라봅니다.' },
   { day: '2026-10-04', text: '"목표 고정" 단추가 생겼습니다. 고른 곳을 화면 가운데에 붙잡아 두고 그 둘레를 돌 수 있습니다.' },

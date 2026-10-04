@@ -29,6 +29,17 @@ html,body {
   font-family:"Pretendard Variable",Pretendard,"Segoe UI","Malgun Gothic",sans-serif;
 }
 
+/* Two quick taps do not enlarge the page (on an iPhone a double tap on a button zoomed
+   the whole screen in: the user, 2026-10-05). Sheets still scroll and a pinch still
+   works; the view and the flight keys keep their own touch-action:none. */
+html,
+body,
+button,
+dialog,
+#hud {
+  touch-action:manipulation;
+}
+
 button,input {
   font:inherit;
 }

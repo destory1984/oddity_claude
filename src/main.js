@@ -73,7 +73,7 @@ import { readingQuizFor, readingKey } from './core/readingQuiz.js';
 import { STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, recordText, valueText, stuntById } from './core/stunts.js';
 import { STORY_DETAILS } from './core/storyDetails.js';
 import { STORY_MORE } from './core/storyMore.js';
-import { replayFor, replayFrame } from './core/replay.js';
+import { replayFor, replayFrame, replayOn } from './core/replay.js';
 import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts } from './core/visit.js';
@@ -227,8 +227,12 @@ const shownSpeed = () => (docked ? rideKmS : visit ? visitKmS : totalSpeed(state
 let craft = craftAt(0, bodies);
 // Story places on a surface: named and selected like craft, turning with their body.
 let sites = storySitesAt(0, bodies);
-const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? sites.find((s) => s.id === id);
-const named = (id) => bodyById(id) ?? craftById(id) ?? sites.find((s) => s.id === id);
+// The spot a scene with no story place of its own is played at (core/replay.js: Cassini's
+// plunge, where she rests on Saturn): a place for the close view only, with `up` its
+// direction from the body's middle and `level` the way the view looks along the ground.
+let scenePlace = null;
+const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null);
+const named = (id) => bodyById(id) ?? craftById(id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null);
 
 const toast = createToast($('toast'));
 const say = createSay($('heroSay'));
@@ -700,7 +704,33 @@ ${STORY_MORE[target.id]}` : told };
 
   // "그날로": standing at a place that has a scene, its day is played again in the close view.
   $('replayButton').addEventListener('click', () => {
-    if (!visit || !hasArrived(visit) || !replayFor(visit.id) || photo.active()) return;
+    if (photo.active()) return;
+    const onBody = !visit && state.restingOn ? replayOn(state.restingOn) : null;
+    if (onBody) {
+      // Where she rests, seen along the ground from 15 degrees above it; what comes in
+      // crosses the view from one side.
+      const ground = here(state.restingOn);
+      const out = state.position.map((n, i) => n - ground.position[i]);
+      const far = Math.hypot(...out);
+      const up = out.map((n) => n / far);
+      const ahead = forward(state.orientation);
+      const rise = ahead.reduce((sum, n, i) => sum + n * up[i], 0);
+      let level = ahead.map((n, i) => n - up[i] * rise);
+      if (Math.hypot(...level) < 1e-6) level = [up[1], -up[0], 0];
+      const length = Math.hypot(...level);
+      level = level.map((n) => n / length);
+      const scene = replayFor(onBody);
+      scenePlace = {
+        id: onBody, name: scene.name, nameEn: '', kind: 'site', parent: ground.id, radiusKm: 0, landmark: false, up, level,
+        position: ground.position.map((n, i) => n + up[i] * ground.radiusKm),
+      };
+      const tilt = (15 * Math.PI) / 180;
+      const facing = orientationFrom(level.map((n, i) => n * Math.cos(tilt) - up[i] * Math.sin(tilt)), up);
+      photo.orbitAround({ id: onBody, facing, distanceKm: scene.viewKm, fovDeg: REPLAY_VIEW.fovDeg });
+      replay = { id: onBody, startedAt: performance.now(), down: false };
+      return;
+    }
+    if (!visit || !hasArrived(visit) || !replayFor(visit.id)) return;
     selectedId = visit.id;
     hud.showSelection(named(visit.id));
     $('inspectTarget').click();
@@ -1545,8 +1575,16 @@ ${STORY_MORE[target.id]}` : told };
         replayNow = null;
       } else if (replayNow.down && !replay.down) {
         replay.down = true;
-        sound.cue('landed');
+        if (!replayNow.gone) sound.cue('landed');
       }
+    }
+    if (scenePlace) {
+      // It turns with its body. When its scene is over the close view closes too (there
+      // is nothing left there to look at), and it is forgotten once the view has left it.
+      const ground = here(scenePlace.parent);
+      scenePlace.position = ground.position.map((n, i) => n + scenePlace.up[i] * ground.radiusKm);
+      if (!replay && photo.orbit()?.id === scenePlace.id) $('exitPhoto').click();
+      if (photo.orbit()?.id !== scenePlace.id) scenePlace = null;
     }
     // While a day is played again nothing else is told: the notice and her bubble are
     // hidden (style.css), and the sights wait, so none is spent unseen.
@@ -1569,11 +1607,19 @@ ${STORY_MORE[target.id]}` : told };
       : null;
     const view = world.update({
       trail,
-      replay: replayNow && { id: replay.id, liftKm: replayNow.liftKm, flame: replayNow.flame },
+      replay: replayNow && {
+        id: replay.id, liftKm: replayNow.liftKm, flame: replayNow.flame, glow: replayNow.glow, gone: replayNow.gone, slope: replayNow.slope,
+        // To the left of the view: across the ground, square to the way the view looks.
+        across: scenePlace ? [
+          scenePlace.up[1] * scenePlace.level[2] - scenePlace.up[2] * scenePlace.level[1],
+          scenePlace.up[2] * scenePlace.level[0] - scenePlace.up[0] * scenePlace.level[2],
+          scenePlace.up[0] * scenePlace.level[1] - scenePlace.up[1] * scenePlace.level[0],
+        ].map((n) => n * replayNow.acrossKm) : [0, 0, 0],
+      },
       bodies,
       craft,
       hiddenCraft: awayCraft,
-      sites,
+      sites: scenePlace ? [...sites, scenePlace] : sites,
       jolt: docked ? { id: docked.id, ...latchJolt(docked) } : null,
       position: state.position,
       orientation: state.orientation,
@@ -1687,7 +1733,7 @@ ${STORY_MORE[target.id]}` : told };
     const offer = docked || onGround() ? null : dockable(state.position, craft);
     $('dockTarget').hidden = !docked && !offer;
     // Standing at a place that has a scene of its day.
-    const thenHere = visit && hasArrived(visit) ? replayFor(visit.id) : null;
+    const thenHere = visit ? (hasArrived(visit) ? replayFor(visit.id) : null) : (state.restingOn ? replayFor(replayOn(state.restingOn)) : null);
     $('replayButton').hidden = !thenHere;
     if (thenHere) $('replayButton').textContent = `그날로 · ${thenHere.day}`;
     // Latched to Kepler: the jump to the star it watched. There: the way home.

@@ -1,11 +1,12 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { REPLAYS, replayFor, replayFrame } from '../src/core/replay.js';
+import { REPLAYS, replayFor, replayFrame, replayOn } from '../src/core/replay.js';
 import { STORIES } from '../src/core/stories.js';
 
 test('every scene belongs to a story place on a surface and tells its lines in order', () => {
   for (const [id, scene] of Object.entries(REPLAYS)) {
-    assert.equal(STORIES.find((s) => s.id === id)?.type, 'surface', id);
+    if (scene.on) assert.ok(STORIES.some((s) => s.type === 'land' && s.body === scene.on), id);
+    else assert.equal(STORIES.find((s) => s.id === id)?.type, 'surface', id);
     assert.equal(scene.lines[0].at, 0);
     for (let i = 1; i < scene.lines.length; i++) assert.ok(scene.lines[i].at > scene.lines[i - 1].at);
     assert.ok(scene.downAt < scene.seconds);
@@ -50,4 +51,29 @@ test('the line told is the last one whose moment has come, and the scene ends at
   assert.match(at(17).text, /이글은 착륙했다/);
   assert.ok(!at(23.9).done);
   assert.ok(at(24).done);
+});
+
+test('resting on Saturn offers the plunge of Cassini, and no other body offers a scene', () => {
+  assert.equal(replayOn('saturn'), 'cassiniPlunge');
+  assert.equal(replayOn('moon'), null);
+  assert.equal(replayOn('jupiter'), null);
+});
+
+test('Cassini comes in from the side, glows from a third of the way and is gone at 15 seconds', () => {
+  const at = (t) => replayFrame('cassiniPlunge', t);
+  assert.equal(at(0).acrossKm, 130);
+  assert.equal(at(0).liftKm, 70);
+  assert.equal(at(0).glow, 0);
+  assert.ok(!at(0).flame);
+  assert.ok(at(7.5).acrossKm < 130 && at(7.5).acrossKm > 0);
+  assert.ok(at(7.5).glow > 0 && at(7.5).glow < 1);
+  assert.equal(at(12).glow, 1);
+  assert.ok(!at(14.9).gone);
+  assert.ok(at(15).gone);
+  assert.equal(at(15).acrossKm, 0);
+  assert.equal(at(15).liftKm, 20);
+  assert.match(at(15).text, /신호가 끊겼습니다/);
+  assert.ok(at(22).done);
+  // The landing never goes sideways, glows or vanishes.
+  assert.deepEqual([replayFrame('apollo11', 8).acrossKm, replayFrame('apollo11', 8).glow, replayFrame('apollo11', 20).gone], [0, 0, false]);
 });

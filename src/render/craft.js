@@ -152,10 +152,30 @@ export function createSiteModels(scene, siteList) {
     node.setEnabled(false);
     then.set(id, { node, flame });
   }
+  // Cassini's plunge into Saturn: the craft itself, and round it the glow of the air it
+  // heats, drawn out behind it (the model's -x is the way it has come).
+  {
+    const node = CRAFT_BUILD.cassini(scene, 'then_cassiniPlunge', mats);
+    node.rotationQuaternion = new Quaternion();
+    const fireMaterial = new StandardMaterial('replayFire', scene);
+    fireMaterial.disableLighting = true;
+    fireMaterial.emissiveColor = new Color3(1, 0.62, 0.3);
+    fireMaterial.alpha = 0;
+    fireMaterial.backFaceCulling = false;
+    const fire = drum(scene, 'then_cassiniPlunge_fire', node, fireMaterial, { height: 3.2, diameterTop: 0.02, diameterBottom: 1.1, tessellation: 16 }, [-1.3, 0, 0], [-1, 0, 0]);
+    // A hotter, narrower heart inside it.
+    const coreMaterial = fireMaterial.clone('replayFireCore');
+    coreMaterial.emissiveColor = new Color3(1, 0.9, 0.7);
+    drum(scene, 'then_cassiniPlunge_core', fire, coreMaterial, { height: 0.6, diameterTop: 0.02, diameterBottom: 0.5, tessellation: 12 }, [0, -1.3, 0]);
+    node.setEnabled(false);
+    then.set('cassiniPlunge', { node, flame: null, fire, fireMaterial, coreMaterial });
+  }
 
   // sites, bodies: this frame's positions (km); position: the traveler (km).
   // replay: { id, liftKm, flame } while that place's day is played again: its model as
   // it was then stands liftKm above the ground in place of the one that is there now.
+  // A streak (Cassini) also has across: [x, y, z] km to the side of the place, glow 0 → 1
+  // and gone; it has no model of now, and flies nose first along the way it goes.
   function update(sites, bodies, position, replay = null) {
     for (const [id, old] of then) if (replay?.id !== id) old.node.setEnabled(false);
     for (const site of sites) {
@@ -165,13 +185,13 @@ export function createSiteModels(scene, siteList) {
         continue;
       }
       const now = nodes.get(site.id);
-      if (!now) continue;
       const old = replay?.id === site.id ? then.get(site.id) : null;
-      if (old) now.setEnabled(false);
+      if (!now && !old) continue;
+      if (old && now) now.setEnabled(false);
       const node = old ? old.node : now;
       const rel = site.position.map((n, i) => (n - position[i]) / KM_PER_UNIT);
       const distanceKm = Math.hypot(...rel) * KM_PER_UNIT;
-      node.setEnabled(distanceKm < SITE_VISIBLE_KM);
+      node.setEnabled(distanceKm < SITE_VISIBLE_KM && !(old && replay.gone));
       if (!node.isEnabled()) continue;
       const body = bodies.find((b) => b.id === site.parent);
       const up = new Vector3(...site.position.map((n, i) => n - body.position[i])).normalize();
@@ -180,10 +200,23 @@ export function createSiteModels(scene, siteList) {
         rel[0] += up.x * lift;
         rel[1] += up.y * lift;
         rel[2] += up.z * lift;
-        old.flame.setEnabled(replay.flame);
+        old.flame?.setEnabled(replay.flame);
       }
       // Stand it on the ground: turn the model's +y onto the local "up".
       Quaternion.FromUnitVectorsToRef(Vector3.Up(), up, node.rotationQuaternion);
+      if (old?.fire) {
+        rel[0] += replay.across[0] / KM_PER_UNIT;
+        rel[1] += replay.across[1] / KM_PER_UNIT;
+        rel[2] += replay.across[2] / KM_PER_UNIT;
+        // Its +x toward the place it is going to, its dish (+y) up.
+        // (and down the slope it comes in on).
+        const x = new Vector3(...replay.across).scale(-1).normalize().subtract(up.scale(replay.slope)).normalize();
+        const z = Vector3.Cross(x, up).normalize();
+        Quaternion.RotationQuaternionFromAxisToRef(x, Vector3.Cross(z, x), z, node.rotationQuaternion);
+        old.fireMaterial.alpha = 0.3 * replay.glow;
+        old.coreMaterial.alpha = 0.6 * replay.glow;
+        old.fire.setEnabled(replay.glow > 0);
+      }
       node.scaling.setAll(Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT)) / KM_PER_UNIT);
       node.position.set(rel[0], rel[1], rel[2]);
     }

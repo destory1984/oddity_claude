@@ -27,6 +27,8 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
     if (active) {
       priorPause = isPaused();
       setPaused(true);
+      // The view may be wider for speed (core/speedFeel.js): a photo starts from the plain one.
+      setFovDeg(DEFAULT_FOV_DEG);
       orientation = [0, 0, 0, 1];
       orbit = null;
       $('photoHint').textContent = HINTS.look;

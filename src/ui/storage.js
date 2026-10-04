@@ -185,3 +185,22 @@ export function saveScreen(choice) {
     // The choice simply does not stick.
   }
 }
+
+const FEEL_KEY = 'oddity.feel.v1';
+
+// The feel of speed (core/speedFeel.js) is on unless the player turned it off.
+export function loadFeel() {
+  try {
+    return localStorage.getItem(FEEL_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+}
+
+export function saveFeel(on) {
+  try {
+    localStorage.setItem(FEEL_KEY, on ? 'on' : 'off');
+  } catch {
+    // The choice simply does not stick.
+  }
+}

@@ -77,7 +77,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   // now: where every body is this frame (they orbit); defaults to the starting layout.
   // seen: { position, orientation } when the view is from somewhere other than where
   // the traveler is (looking round a target, ui/photo.js); she herself stays put.
-  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn, move = {}, seen = null, lamp = null }) {
+  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn, move = {}, seen = null, lamp = null, trail = null }) {
     elapsed += dt;
     // Draw from a point just above the ground when standing on it, and pull the near
     // plane in as the ground gets close; otherwise the planet under the feet is cut away
@@ -146,6 +146,8 @@ export async function createWorld(canvas, bodies = BODIES) {
     }));
     const visibility = sunVisibility(directions[sunNow.id], distances[sunNow.id], sunNow.radiusKm, occluders);
     stars.setSun(directions[sunNow.id]);
+    // The stars drawn out by speed: { heading, amount } (core/speedFeel.js).
+    stars.setStreak(trail?.heading ?? null, trail?.amount ?? 0);
     sun.material.setFloat('visibility', visibility);
     sun.material.setFloat('time', elapsed);
     sun.material.setFloat('eclipse', eclipseDepth(visibility));

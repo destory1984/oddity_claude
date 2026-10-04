@@ -1,8 +1,10 @@
 import {
-  PointsCloudSystem, Vector3, Color3, Color4, CreateSphere, CreateLineSystem, Constants,
+  PointsCloudSystem, Vector3, Color3, Color4, CreateSphere, CreateLineSystem, Constants, Mesh, VertexData, ShaderMaterial, Effect,
 } from './babylon.js';
 import { fromEquatorial, GALAXIES, NEBULAE, CONSTELLATIONS, BRIGHT_STARS } from '../core/sky.js';
 import skyFrag from './shaders/sky.frag?raw';
+import streakVert from './shaders/streak.vert?raw';
+import streakFrag from './shaders/streak.frag?raw';
 import { shader } from './planets.js';
 
 // The galaxy's plane is tilted 60 degrees to the planets' plane. In the game's axes
@@ -29,6 +31,10 @@ export async function createStars(scene) {
     return seed / 4294967296;
   };
   const cloud = new PointsCloudSystem('stars', 1.5, scene);
+  // The same stars again as lines, for the feel of speed (below).
+  const linePositions = [];
+  const lineColors = [];
+  const lineEnds = [];
   cloud.addPoints(1400, (p) => {
     const z = rand() * 2 - 1;
     const t = rand() * Math.PI * 2;
@@ -36,6 +42,11 @@ export async function createStars(scene) {
     p.position = new Vector3(r * Math.cos(t), z, r * Math.sin(t)).scale(80000);
     const v = 0.35 + rand() * 0.55;
     p.color = new Color4(v * 0.87, v * 0.93, v, 1);
+    for (const end of [0, 1]) {
+      linePositions.push(p.position.x, p.position.y, p.position.z);
+      lineColors.push(v * 0.87, v * 0.93, v, 1);
+      lineEnds.push(end, 0);
+    }
   });
   // Fainter stars crowding the Milky Way's band, thickest toward the galactic centre.
   const side = Vector3.Cross(GALACTIC_POLE, GALACTIC_CENTRE);
@@ -124,6 +135,45 @@ export async function createStars(scene) {
   // lines came after the Sun and lay across its disc (the user's photo, 2026-10-04:
   // "별자리가 태양 앞으로 그려졌어").
   lines.alphaIndex = 0;
-  // setSun: the way to the Sun from the traveler (a unit vector), for the zodiacal light.
-  return { mesh: cloud.mesh, setSun: (direction) => material.setVector3('sunDir', new Vector3(...direction)) };
+
+  // The feel of speed (core/speedFeel.js): from 2c each of the 1,400 stars draws out
+  // into a short line away from the point flown toward (streak.vert). Hidden otherwise.
+  const streaks = new Mesh('starStreaks', scene);
+  const data = new VertexData();
+  data.positions = linePositions;
+  data.colors = lineColors;
+  data.uvs = lineEnds;
+  data.indices = Array.from({ length: linePositions.length / 3 }, (_, i) => i);
+  data.applyToMesh(streaks);
+  Effect.ShadersStore.streakVertexShader = streakVert;
+  Effect.ShadersStore.streakFragmentShader = streakFrag;
+  const streakMaterial = new ShaderMaterial('streak', scene, { vertex: 'streak', fragment: 'streak' }, {
+    attributes: ['position', 'uv', 'color'],
+    uniforms: ['worldViewProjection', 'heading', 'streak'],
+  });
+  streakMaterial.fillMode = Constants.MATERIAL_LineListDrawMode;
+  streakMaterial.alphaMode = Constants.ALPHA_ADD;
+  streakMaterial.needAlphaBlending = () => true;
+  streakMaterial.disableDepthWrite = true;
+  streakMaterial.backFaceCulling = false;
+  streakMaterial.setVector3('heading', new Vector3(0, 0, 1));
+  streakMaterial.setFloat('streak', 0);
+  streaks.material = streakMaterial;
+  streaks.isPickable = false;
+  streaks.alwaysSelectAsActiveMesh = true;
+  streaks.alphaIndex = 0;
+  streaks.setEnabled(false);
+
+  return {
+    mesh: cloud.mesh,
+    // setSun: the way to the Sun from the traveler (a unit vector), for the zodiacal light.
+    setSun: (direction) => material.setVector3('sunDir', new Vector3(...direction)),
+    // heading: the way she flies (a unit vector). amount: 0 (none) to 1.
+    setStreak(heading, amount) {
+      streaks.setEnabled(amount > 0 && Boolean(heading));
+      if (!streaks.isEnabled()) return;
+      streakMaterial.setVector3('heading', new Vector3(...heading));
+      streakMaterial.setFloat('streak', amount);
+    },
+  };
 }

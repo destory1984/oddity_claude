@@ -30,7 +30,7 @@ import {
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
-  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, loadStunts, saveStunts,
+  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, loadStunts, saveStunts, loadFeel, saveFeel,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
@@ -43,6 +43,7 @@ import { skyNews, newsLine } from './core/forecast.js';
 import { createSettings } from './ui/settings.js';
 import { createLookBack } from './ui/lookBack.js';
 import { createPair } from './ui/pair.js';
+import { feelFovDeg, easeFovDeg, streakAmount, BASE_FOV_DEG } from './core/speedFeel.js';
 import { famousFor } from './core/famous.js';
 import { bindTextSize } from './ui/textSize.js';
 import { shadowSpot } from './core/shadows.js';
@@ -307,6 +308,10 @@ function setPaused(value) {
 // Looking behind (R, the bent arrow): only the view turns half round. She flies on the
 // way she was going, and is not drawn, being behind the view.
 let rear = false;
+// The feel of speed (core/speedFeel.js): on unless turned off in the settings; the
+// view's height now, in degrees.
+let feel = loadFeel();
+let feelFov = BASE_FOV_DEG;
 function setRear(value) {
   rear = value;
   document.body.classList.toggle('rear', rear);
@@ -1086,6 +1091,17 @@ ${STORY_MORE[target.id]}` : told };
     saveLayout(layout === 'today' ? 'tour' : 'today');
     location.reload();
   });
+  // The feel of speed: switched at once, no restart.
+  const showFeel = () => {
+    $('feelNow').textContent = feel ? '지금: 켜짐.' : '지금: 꺼짐.';
+    $('feelButton').textContent = feel ? '끄기' : '켜기';
+  };
+  showFeel();
+  $('feelButton').addEventListener('click', () => {
+    feel = !feel;
+    saveFeel(feel);
+    showFeel();
+  });
   // Another window in front: the keys held are let go (their keyups never arrive), and
   // the flight goes on.
   window.addEventListener('blur', () => input.clear());
@@ -1446,7 +1462,22 @@ ${STORY_MORE[target.id]}` : told };
       heading = local.map((n) => n / length);
     }
     showInspectInfo();
+    // The feel of speed: the view widens near the limit of the spot, and the stars draw
+    // out from 2c. Photo mode and the close view keep their own view; docked or gliding
+    // to a place she is carried, not flying.
+    const flying = !docked && !visit;
+    if (photo.active()) feelFov = BASE_FOV_DEG;
+    else {
+      feelFov = easeFovDeg(feelFov, feel && flying ? feelFovDeg(totalSpeed(state) / limit, canvas.height > canvas.width) : BASE_FOV_DEG, dt);
+      world.setFov((feelFov * Math.PI) / 180);
+    }
+    const going = velocity(state);
+    const goingKmS = Math.hypot(...going);
+    const trail = feel && flying && !paused && goingKmS > 0
+      ? { heading: going.map((n) => n / goingKmS), amount: streakAmount(goingKmS / C) }
+      : null;
     const view = world.update({
+      trail,
       bodies,
       craft,
       hiddenCraft: awayCraft,

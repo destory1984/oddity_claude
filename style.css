@@ -3206,11 +3206,13 @@ body.rear.touch #reticle span {
 #slideRight::before { transform:rotate(90deg); }
 
 @media (max-width: 480px) {
+  /* On a phone the pad stands at the right, over the row of four and centred on it
+     (the user's drawing of 2026-10-05; it stood at the left, over the speed). */
   #slidePad {
     --key:var(--tap);
     position:absolute;
-    left:0;
-    bottom:92px;
+    right:calc((var(--tap) + 8px) / 2);
+    bottom:calc(92px + var(--tap) + 8px);
   }
 }
 

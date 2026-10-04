@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { fromEquatorial, GALAXIES, NEBULAE, CONSTELLATIONS, BRIGHT_STARS, skyLabels } from '../src/core/sky.js';
+import { fromEquatorial, GALAXIES, NEBULAE, CONSTELLATIONS, BRIGHT_STARS, skyLabels, lookedAt } from '../src/core/sky.js';
 
 const deg = (r) => (r * 180) / Math.PI;
 const angle = (a, b) => deg(Math.acos(Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]))));
@@ -57,7 +57,9 @@ test('Polaris marks the north celestial pole; Sirius is the brightest star liste
 test('one label per constellation and galaxy, each a unit direction inside its figure', () => {
   const labels = skyLabels();
   assert.equal(labels.length, CONSTELLATIONS.length + GALAXIES.length + NEBULAE.length);
-  assert.deepEqual(NEBULAE.map((n) => n.id), ['m42', 'carina', 'm8', 'm45', 'omegaCen']);
+  assert.deepEqual(NEBULAE.map((n) => n.id), ['m42', 'carina', 'm8', 'm45', 'omegaCen', 'hyades', 'm44', 'doubleCluster', 'tuc47', 'm7', 'coalsack']);
+  // Every name has a line to tell, short enough for one row on a phone.
+  for (const l of labels) assert.ok(l.note && l.note.length <= 30, l.id);
   // The Orion Nebula sits in Orion's sword, just south of the celestial equator.
   const m42 = fromEquatorial(5.588, -5.39);
   const belt = fromEquatorial(5.6, -1.2);
@@ -66,4 +68,22 @@ test('one label per constellation and galaxy, each a unit direction inside its f
   const orion = CONSTELLATIONS.find((c) => c.id === 'ori');
   const label = labels.find((l) => l.id === 'ori');
   for (const [raH, decDeg] of orion.lines.flat()) assert.ok(angle(label.direction, fromEquatorial(raH, decDeg)) < 25);
+});
+
+test('the sky name being looked at is the nearest to the middle of the view, within reach', () => {
+  const spots = [{ id: 'ori', x: 40, y: -30 }, { id: 'tau', x: -90, y: 10 }, { id: 'm42', x: 20, y: 15 }];
+  assert.equal(lookedAt(spots, 120), 'm42');
+  assert.equal(lookedAt(spots, 20), null);
+  assert.equal(lookedAt([], 120), null);
+});
+
+test('the Hyades lie behind the eye of the Bull, the Coalsack beside the Cross, 47 Tucanae beside the Small Magellanic Cloud', () => {
+  const at = (id) => { const n = [...NEBULAE, ...GALAXIES].find((x) => x.id === id); return fromEquatorial(n.raH, n.decDeg); };
+  // Aldebaran, the Bull's eye, stands in front of the Hyades.
+  const eye = BRIGHT_STARS.find((x) => x.name === 'Aldebaran');
+  const tau = fromEquatorial(eye.raH, eye.decDeg);
+  const cru = skyLabels().find((l) => l.id === 'cru').direction;
+  assert.ok(angle(at('hyades'), tau) < 3);
+  assert.ok(angle(at('coalsack'), cru) < 8);
+  assert.ok(angle(at('tuc47'), at('smc')) < 4);
 });

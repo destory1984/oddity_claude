@@ -1,4 +1,5 @@
 import { objectParticle, distanceText, markedName } from './messages.js';
+import { lookedAt } from '../core/sky.js';
 import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, clearOfPanels, COMPACT_WIDTH } from '../core/markers.js';
 
 const $ = (id) => document.getElementById(id);
@@ -22,9 +23,13 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
     const el = document.createElement('span');
     el.className = 'skyLabel';
     el.textContent = label.name;
+    // A line about it, shown only while it is the one looked at.
+    const note = document.createElement('small');
+    note.textContent = label.note ?? '';
+    el.append(note);
     el.hidden = true;
     $('markers').append(el);
-    return { el, direction: label.direction };
+    return { id: label.id, el, direction: label.direction };
   });
   let lastMask = null;
   $('faceTarget').addEventListener('click', onFace);
@@ -142,16 +147,22 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         arrows[i].el.style.top = `${spot.y}px`;
       });
       const focal = innerHeight / (2 * Math.tan(view.camera.fov / 2));
-      for (const { el, direction } of skyNames) {
+      // The names of what is in the sky, on a phone too (they were left out there; the
+      // user, 2026-10-04: "시야에 보일 때에는 설명 태그도 보여줘", "별자리도 설명 태그 보여줘").
+      const shown = [];
+      for (const { id, el, direction } of skyNames) {
         const z = dot(direction, view.camera.forward);
         const px = (dot(direction, view.camera.right) / Math.max(0.001, z)) * focal;
         const py = (-dot(direction, view.camera.up) / Math.max(0.001, z)) * focal;
-        // A phone has no room for the names of constellations.
-        el.hidden = compact || z <= 0.2 || Math.abs(px) > innerWidth / 2 || Math.abs(py) > innerHeight / 2;
+        el.hidden = z <= 0.2 || Math.abs(px) > innerWidth / 2 || Math.abs(py) > innerHeight / 2;
         if (el.hidden) continue;
         el.style.left = `${innerWidth / 2 + px}px`;
         el.style.top = `${innerHeight / 2 + py}px`;
+        shown.push({ id, x: px, y: py });
       }
+      // The one being looked at tells a line about itself.
+      const told = lookedAt(shown, Math.min(innerWidth, innerHeight) * 0.3);
+      for (const { id, el } of skyNames) el.classList.toggle('told', id === told);
     },
     // Labels pass behind the character: her outline is cut out of the label layer, using
     // the very drawing that is on screen. card: world.update's heroCard, or null.

@@ -3322,3 +3322,24 @@ dialog .sheetHead .textSize button:disabled {
 #help > dl {
   zoom:var(--text, 1);
 }
+
+/* A name in the sky that is being looked at tells a line about itself (ui/hud.js). */
+.skyLabel {
+  text-align:center;
+}
+
+.skyLabel small {
+  display:none;
+  margin-top:2px;
+  font-size:10px;
+  letter-spacing:0;
+  color:#d8e4f6cc;
+}
+
+.skyLabel.told {
+  color:#dfeaffd9;
+}
+
+.skyLabel.told small {
+  display:block;
+}

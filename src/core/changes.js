@@ -3,6 +3,9 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '별자리와 은하, 성단의 이름이 휴대전화에서도 뜨고, 화면 가운데로 바라보면 한 줄 설명이 붙습니다.' },
+  { day: '2026-10-04', text: '하늘에 히아데스, 벌집성단, 이중성단, 큰부리새자리 47, 프톨레마이오스 성단, 석탄자루가 생겼습니다.' },
+  { day: '2026-10-04', text: '게임이 지구 밤 쪽의 해돋이 자리에서 시작합니다.' },
   { day: '2026-10-04', text: '설정과 도움말에도 글자 크기 단추(가−, 가+)가 생겼습니다. 수첩과 함께 바뀝니다.' },
   { day: '2026-10-04', text: '토성을 해 반대쪽에서 보면 고리가 뒤에서 빛을 받아 엷은 고리가 밝게 보입니다.' },
   { day: '2026-10-04', text: '달과 위성의 밤 쪽이 행성이 되비춘 빛으로 어슴푸레 보입니다(지구조).' },

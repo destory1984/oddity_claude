@@ -134,7 +134,30 @@ function startAboveEarth() {
   return createState(position, innerWidth / innerHeight < 1 ? facing : rotateLocal(facing, START_YAW, 0));
 }
 
-let state = START_NEAR ? startNear(START_NEAR) : startAboveEarth();
+// For the time being the game opens at dawn over Earth's night side (the user sent a
+// picture of the place on 2026-10-04: "당분간 시작 위치를 여기로 변경"): 6,794 km up, the dark
+// Earth with its city lights filling the left of the view and the Sun coming up over
+// its edge at the upper right. The angles are read off that picture: from the middle
+// of the view the Sun stands 16.5 degrees to the right and 18.8 up, Earth's centre 23
+// to the left and 4.6 up. To go back to the old start, set START_AT_DAWN to false.
+const START_AT_DAWN = true;
+const DAWN_HEIGHT_KM = 6794;
+function startAtDawn() {
+  const earth = bodyById('earth', bodies);
+  const sun = bodyById('sun', bodies);
+  const toSun = sun.position.map((n, i) => n - earth.position[i]);
+  const far = Math.hypot(...toSun);
+  const deg = Math.PI / 180;
+  const way = (turn, lift) => [Math.cos(lift) * Math.sin(turn), Math.sin(lift), Math.cos(lift) * Math.cos(turn)];
+  // The view's own heading and tilt, from where the Sun must stand in it.
+  const turn = Math.atan2(toSun[0], toSun[2]) - 16.5 * deg;
+  const lift = Math.asin(toSun[1] / far) - 18.8 * deg;
+  const toEarth = way(turn - 23 * deg, lift + 4.6 * deg);
+  const position = earth.position.map((n, i) => n - toEarth[i] * (earth.radiusKm + DAWN_HEIGHT_KM));
+  return createState(position, lookAtDirection(way(turn, lift)));
+}
+
+let state = START_NEAR ? startNear(START_NEAR) : START_AT_DAWN ? startAtDawn() : startAboveEarth();
 let paused = false;
 let selectedId = START_NEAR ? START_NEAR.id : 'earth';
 let dragTurn = [0, 0];

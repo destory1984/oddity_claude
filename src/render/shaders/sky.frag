@@ -10,13 +10,13 @@ uniform vec3 galDir[4];
 uniform vec3 galAxis[4];
 uniform vec4 galShape[4];
 // Nebulae and star clusters: direction, and (half-width in radians, kind, brightness, 0).
-uniform vec3 nebDir[5];
-uniform vec4 nebShape[5];
+uniform vec3 nebDir[11];
+uniform vec4 nebShape[11];
 // The way to the Sun from the traveler, for the zodiacal light.
 uniform vec3 sunDir;
 #include<noise>
-// A glowing gas cloud (kind 0), an open cluster of young blue stars (1) or a ball of
-// old stars (2).
+// A glowing gas cloud (kind 0), an open cluster of young blue stars (1), a ball of
+// old stars (2) or a dark cloud (3: it takes light away, so its answer is below zero).
 vec3 nebula(vec3 d, vec3 dir, vec4 shape) {
   float c = dot(d, dir);
   if (c < .97) return vec3(0.);
@@ -35,6 +35,11 @@ vec3 nebula(vec3 d, vec3 dir, vec4 shape) {
     float dark = smoothstep(.45, .7, fbm(p * 3.5 + here + 9.));
     vec3 tint = mix(vec3(1., .36, .55), vec3(.75, .84, 1.), exp(-r * r * 6.));
     return tint * body * (1. - .6 * dark) * edge * shape.z;
+  }
+  if (shape.y > 2.5) {
+    // Ragged at the edge, darkest in the middle.
+    float cloud = fbm(p * 1.8 + here);
+    return -vec3(1., .95, .9) * exp(-r * r * 1.1) * (.55 + .7 * cloud) * edge * shape.z * .12;
   }
   if (shape.y < 1.5) {
     // A blue haze with a handful of sharp stars in it.
@@ -102,7 +107,8 @@ void main(){
   vec3 cool = vec3(.72, .8, 1.);
   vec3 col = mix(cool, warm, bulge * .8 + .1) * light * .3;
   for (int i = 0; i < 4; i++) col += galaxy(d, galDir[i], galAxis[i], galShape[i]);
-  for (int i = 0; i < 5; i++) col += nebula(d, nebDir[i], nebShape[i]);
+  for (int i = 0; i < 11; i++) col += nebula(d, nebDir[i], nebShape[i]);
+  col = max(col, vec3(0.));
   // Zodiacal light: sunlight scattered by the dust between the planets, a faint wedge
   // lying along their plane (y = 0) and brightest toward the Sun.
   float elong = acos(clamp(dot(d, sunDir), -1., 1.));

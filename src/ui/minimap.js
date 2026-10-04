@@ -24,7 +24,11 @@ const EDGE_PX = 8;
 // asteroid belt, the comet, and the
 // traveler with an arrow for the flight heading. Tapping a planet selects it. Each
 // planet has the first letter of its English name beside it (core/minimap.js mapLetter).
-export function createMinimap(canvas, { onPick }) {
+// onTap: any tap on the map calls this and picks nothing (the small map opens the big
+// one). big: larger dots and letters, the Sun can be picked too, and a tap picks the
+// nearest dot from farther off.
+export function createMinimap(canvas, { onPick = () => {}, onTap = null, big = false }) {
+  const grow = big ? 1.7 : 1;
   const ctx = canvas.getContext('2d');
   let dots = [];
   // Every circle that can be named on hover: the Sun, the planets and the traveler.
@@ -36,8 +40,10 @@ export function createMinimap(canvas, { onPick }) {
     return [e.clientX - rect.left - rect.width / 2, e.clientY - rect.top - rect.height / 2];
   };
   canvas.addEventListener('pointerdown', (e) => {
-    const id = pickNearest(pointAt(e), dots);
+    if (onTap) return onTap();
+    const id = pickNearest(pointAt(e), dots, big ? 28 : 12);
     if (id) onPick(id);
+    return undefined;
   });
   canvas.addEventListener('pointermove', (e) => {
     hover = pickNearest(pointAt(e), named, 10);
@@ -52,7 +58,8 @@ export function createMinimap(canvas, { onPick }) {
     const size = canvas.clientWidth;
     if (!size) return;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    if (canvas.width !== Math.round(size * dpr)) {
+    // (Both: a canvas starts 300 by 150, and a 300px map would keep that height.)
+    if (canvas.width !== Math.round(size * dpr) || canvas.height !== Math.round(size * dpr)) {
       canvas.width = Math.round(size * dpr);
       canvas.height = Math.round(size * dpr);
     }
@@ -99,25 +106,25 @@ export function createMinimap(canvas, { onPick }) {
       const [x, y] = at(body.position);
       ctx.fillStyle = COLORS[body.id] ?? '#cfe3f3';
       ctx.beginPath();
-      ctx.arc(x, y, body === sun ? 4 : body.kind === 'planet' || body.kind === 'exoplanet' ? 2.6 : 2, 0, Math.PI * 2);
+      ctx.arc(x, y, (body === sun ? 4 : body.kind === 'planet' || body.kind === 'exoplanet' ? 2.6 : 2) * grow, 0, Math.PI * 2);
       ctx.fill();
       if (body.id === ringed) {
         ctx.strokeStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.arc(x, y, 6 * grow, 0, Math.PI * 2);
         ctx.stroke();
       }
       const letter = mapLetter(body);
       if (letter) {
-        const [lx, ly] = letterPoint([x, y], 7, size / 2 - 6);
-        ctx.font = '600 8px sans-serif';
+        const [lx, ly] = letterPoint([x, y], big ? 11 : 7, size / 2 - 6);
+        ctx.font = big ? '600 11px sans-serif' : '600 8px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = COLORS[body.id] ?? '#cfe3f3';
         ctx.fillText(letter, lx, ly);
         ctx.textAlign = 'start';
       }
-      if (body !== sun) dots.push({ id: body.id, x, y });
+      if (big || body !== sun) dots.push({ id: body.id, x, y });
       named.push({ id: body.id, x, y, name: body.name });
     }
 

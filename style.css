@@ -3234,6 +3234,70 @@ body.rear.touch #reticle span {
   }
 }
 
+/* Target lock: the chosen body is held in the middle of the view. Lined in gold while on. */
+#lockTarget {
+  display:block;
+  margin:9px 0 0 auto;
+}
+
+#lockTarget[aria-pressed="true"] {
+  border-color:var(--gold);
+  background:#1c2f6ae6;
+}
+
+/* The big map (a tap on the small one opens it): the map, every place by name under
+   it, and what to do with the one picked. */
+#bigMap {
+  width:min(380px, 94vw);
+  padding:18px;
+  text-align:center;
+}
+
+#bigMapCanvas {
+  display:block;
+  width:min(300px, 78vw);
+  height:min(300px, 78vw);
+  margin:10px auto;
+  touch-action:none;
+}
+
+#bigMapList {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:6px;
+}
+
+#bigMapList button {
+  width:auto;
+  min-height:34px;
+  margin:0;
+  padding:0 10px;
+  font-size:13px;
+}
+
+#bigMapList button[aria-pressed="true"] {
+  border-color:var(--gold);
+  background:#1c2f6ae6;
+}
+
+#bigMapActions {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+}
+
+#bigMapActions button {
+  width:auto;
+  margin:0;
+  padding:0 16px;
+}
+
+#bigMapGo:disabled {
+  opacity:.45;
+}
+
 /* The version and when it was last updated, small, under the loading line. */
 #appVersion {
   display:block;

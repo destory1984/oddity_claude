@@ -6,7 +6,7 @@ import {
   createState, step, stopNow, totalSpeed, carryAlong, boostLift, velocity, TURN_RATE, START_YAW,
 } from './core/game.js';
 import {
-  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn,
+  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, blend,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft } from './core/craft.js';
 import { skyLabels } from './core/sky.js';
@@ -22,7 +22,7 @@ import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } f
 import { teleportSpot } from './core/teleport.js';
 import { behindBody , nearestBodies } from './core/markers.js';
 import { FACTS } from './core/facts.js';
-import { eventMessage, limitText, dateText, withParticle, objectParticle } from './ui/messages.js';
+import { eventMessage, limitText, dateText, withParticle, objectParticle, distanceText } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import {
   updateProgress, recordPhotos, recordStories, recordCraft, recordNote, recordQuiz, createProgress, summarize, score, isComplete,
@@ -177,6 +177,12 @@ let state = START_NEAR ? startNear(START_NEAR) : START_AT_DAWN ? startAtDawn() :
 let paused = false;
 let selectedId = START_NEAR ? START_NEAR.id : 'earth';
 let dragTurn = [0, 0];
+// Target lock: the chosen target is held in the middle of the view; the slide buttons
+// then take her round it, and forward and back bring her nearer and farther. Dragging
+// the view or turning with the arrow keys lets go.
+let locked = false;
+// How fast the view swings onto the target: most of the way in a third of a second.
+const LOCK_RATE = 6;
 let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT, NOTES, TOURS);
 // Small copies of saved photos, shown in the journal (core/album.js).
 let album = loadAlbum(MISSIONS);
@@ -364,6 +370,7 @@ async function init() {
     onDrag(dx, dy) {
       if (photo.active()) photo.rotate(dx, dy);
       else if (!paused) {
+        if (locked) unlock();
         state = { ...state, orientation: rotateLocal(state.orientation, ...(rear ? rearTurn(dx, dy) : [dx, dy])) };
         dragTurn[0] += dx;
         dragTurn[1] += dy;
@@ -382,7 +389,7 @@ async function init() {
     },
     onEscape: () => (photo.active() ? photo.toggle() : setPaused(!paused)),
     onWheel: (deltaY) => photo.zoom(deltaY),
-    isBlocked: () => $('help').open || $('settings').open || $('journal').open || $('noteCard').open,
+    isBlocked: () => $('help').open || $('settings').open || $('journal').open || $('noteCard').open || $('bigMap').open,
   });
   photo = createPhoto({
     world,
@@ -805,7 +812,71 @@ ${STORY_MORE[target.id]}` : told };
     },
   });
   hud.showSelection(named(selectedId));
-  const minimap = createMinimap($('minimap'), { onPick: selectBody });
+  function unlock() {
+    locked = false;
+    toast.show('목표 고정을 풀었습니다.');
+  }
+  $('lockTarget').addEventListener('click', () => {
+    if (locked) return unlock();
+    locked = true;
+    const body = here(selectedId);
+    state = { ...state, orientation: lookAtDirection(body.position.map((n, i) => n - state.position[i])) };
+    toast.show(`${body.name}에 화면을 고정했습니다. 방향키 단추로 그 둘레를 돌고, 전진과 후진으로 다가가고 물러납니다.\n화면을 끌면 풀립니다.`);
+    return undefined;
+  });
+
+  // The big map: a tap on the small one opens it. A place is picked on the map or by
+  // its name, then "이 방향으로" turns her to it and locks the view on it.
+  let mapPick = null;
+  const mapBodies = () => {
+    const away = inExo(state.position);
+    return bodies.filter((b) => (away ? b.exo : !b.exo && ['star', 'planet', 'dwarf', 'comet'].includes(b.kind)));
+  };
+  function pickOnMap(id) {
+    mapPick = id;
+    const body = here(id);
+    $('bigMapInfo').textContent = `${body.name} · ${distanceText(surfaceDistance(state.position, body))}`;
+    $('bigMapGo').disabled = false;
+    $('bigMapJump').hidden = !teleportSpot(body, { position: state.position, progress, bodies, parent: body.parent ? here(body.parent) : null });
+    for (const chip of $('bigMapList').children) chip.setAttribute('aria-pressed', String(chip.dataset.id === id));
+  }
+  const bigMap = createMinimap($('bigMapCanvas'), { big: true, onPick: pickOnMap });
+  function openBigMap() {
+    if (photo.active() || $('bigMap').open) return;
+    const prior = paused;
+    setPaused(true);
+    mapPick = null;
+    $('bigMapInfo').textContent = '갈 곳을 지도나 이름에서 고르세요.';
+    $('bigMapGo').disabled = true;
+    $('bigMapJump').hidden = true;
+    $('bigMapList').replaceChildren(...mapBodies().map((b) => {
+      const chip = document.createElement('button');
+      chip.textContent = b.name;
+      chip.dataset.id = b.id;
+      chip.setAttribute('aria-pressed', 'false');
+      chip.addEventListener('click', () => pickOnMap(b.id));
+      return chip;
+    }));
+    $('bigMap').showModal();
+    $('bigMap').addEventListener('close', () => setPaused(prior), { once: true });
+  }
+  $('bigMapClose').addEventListener('click', () => $('bigMap').close());
+  $('bigMapGo').addEventListener('click', () => {
+    if (!mapPick) return;
+    const body = here(mapPick);
+    selectedId = mapPick;
+    hud.showSelection(named(mapPick));
+    state = { ...state, orientation: lookAtDirection(body.position.map((n, i) => n - state.position[i])) };
+    locked = true;
+    $('bigMap').close();
+    toast.show(`${body.name} 쪽을 바라보고 화면을 고정했습니다. 전진을 누르면 다가갑니다.`);
+  });
+  $('bigMapJump').addEventListener('click', () => {
+    const id = mapPick;
+    $('bigMap').close();
+    if (id) selectBody(id);
+  });
+  const minimap = createMinimap($('minimap'), { onTap: openBigMap });
 
   // A word to a probe left alone (core/story.js GREETINGS): once per visit to the game.
   const greeted = new Set();
@@ -1328,6 +1399,19 @@ ${STORY_MORE[target.id]}` : told };
     const slowPoints = craft.map((c) => c.position);
     const result = step(state, intent, dt, bodies, slowPoints);
     state = result.state;
+    // Target lock: the view swings onto the target and stays on it as she moves. Turning
+    // with the keys lets go; docked, going down to a place, looking behind or resting on
+    // the target itself it waits.
+    if (locked && dt > 0 && !docked && !visit && !rear && !photo.active()) {
+      if (intent.turnX !== 0 || intent.turnY !== 0) unlock();
+      else {
+        const aim = here(selectedId);
+        const toward = aim.position.map((n, i) => n - state.position[i]);
+        if (Math.hypot(...toward) > 1 && state.restingOn !== aim.id) {
+          state = { ...state, orientation: blend(state.orientation, lookAtDirection(toward), 1 - Math.exp(-dt * LOCK_RATE)) };
+        }
+      }
+    }
     // The journal is of the Solar System: another star's planets are kept apart (below).
     const logged = updateProgress(progress, EXO_IDS.includes(state.restingOn) ? { ...state, restingOn: null } : state, bodies.filter((b) => !b.exo));
     const away = inExo(state.position);
@@ -1771,12 +1855,16 @@ ${STORY_MORE[target.id]}` : told };
       ],
     });
     minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId, away });
+    if ($('bigMap').open) bigMap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId: mapPick ?? selectedId, away });
+    $('lockTarget').setAttribute('aria-pressed', String(locked));
+    $('lockTarget').textContent = locked ? '고정 풀기' : '목표 고정';
   });
 
   // Read-only diagnostics for verification. No travel shortcuts.
   window.oddity = {
     getState: () => ({
       position: [...state.position],
+      orientation: [...state.orientation],
       speed: totalSpeed(state),
       motionSign: state.motionSign,
       limitC: speedLimit(nearestSurface(state.position, bodies).distance) / C,

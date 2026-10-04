@@ -51,7 +51,7 @@
       <div><strong id="altitude">—</strong><small>km</small></div>
       <p>고도 <span class="dot">●</span> <span id="flightState">정지 비행</span></p>
     </section>
-    <canvas id="minimap" aria-label="태양계 지도. 행성을 누르면 선택합니다."></canvas>
+    <canvas id="minimap" aria-label="태양계 지도. 누르면 큰 지도가 열립니다." role="button" tabindex="-1"></canvas>
 
     <div id="reticle"><i></i><span>비행 방향</span></div>
     <div id="markers"></div>
@@ -61,6 +61,7 @@
       <strong id="targetName">지구 <small>Earth</small></strong>
       <p id="surfaceInfo">실제 표면까지 접근 가능</p>
       <button id="faceTarget">지구 바라보기</button>
+      <button id="lockTarget" aria-pressed="false" title="고른 곳을 화면 가운데에 붙잡아 둡니다">목표 고정</button>
       <button id="inspectTarget">확대 관찰</button>
       <button id="dockTarget" hidden>도킹</button>
       <button id="exoJump" hidden>케플러가 본 별로</button>
@@ -239,6 +240,8 @@
     <p>크기는 실제대로, 천체 사이의 빈 거리는 1/100(위성과 행성 사이는 1/10)로 압축된 우주를 날아보세요.</p>
     <dl>
       <dt>방향 전환</dt><dd>화면 드래그 / 방향키</dd>
+      <dt>목표 고정</dt><dd>"목표 고정" 단추. 고른 곳을 화면 가운데에 붙잡아 둡니다. 옆걸음 단추로 그 둘레를 돌고, 전진과 후진으로 다가가고 물러납니다. 화면을 끌거나 방향키를 누르면 풀립니다.</dd>
+      <dt>큰 지도</dt><dd>왼쪽의 작은 지도를 누르면 열립니다. 지도나 이름에서 갈 곳을 고르고 "이 방향으로"를 누르면 그쪽을 바라보고 고정합니다. 가 본 곳은 "순간 이동"도 뜹니다.</dd>
       <dt>뒤 보기</dt><dd>R 키 / 굽은 화살표 버튼. 시야만 뒤로 돌립니다. 나는 방향과 속도는 그대로이고, 다시 누르면 앞을 봅니다.</dd>
       <dt>옆걸음</dt><dd>방향키 모양의 단추 넷 / A · D 키. 보는 방향은 그대로 둔 채 위, 아래, 왼쪽, 오른쪽으로 미끄러지듯 이동합니다(위아래는 단추로만). 놓으면 그 속도로 계속 가고, 정지를 누르면 멈춥니다.</dd>
       <dt>몸 회전</dt><dd>Q / E · 좌우 롤 회전. 위아래 회전도 360도 가능합니다.</dd>
@@ -255,6 +258,18 @@
     </dl>
     <p class="muted">태양, 여덟 행성, 위성 21개, 왜행성 둘, 핼리 혜성의 실제 표면 바로 앞까지 접근할 수 있습니다. 천체 내부로는 들어갈 수 없습니다. 천체 표면 사이의 빈 거리만 1/100(위성은 1/10)로 줄였습니다. 기본인 여행 배치는 오늘의 실제 천문 위치가 아닙니다. 다른 앱이나 탭으로 갔다 오면 그동안 멈춰 있다가 돌아오는 대로 이어집니다.</p>
     <button id="closeHelp" autofocus>비행 계속하기</button>
+  </dialog>
+
+  <dialog id="bigMap" aria-labelledby="bigMapTitle">
+    <h1 id="bigMapTitle">지도에서 고르기</h1>
+    <canvas id="bigMapCanvas" aria-label="태양계 지도. 갈 곳을 누릅니다."></canvas>
+    <div id="bigMapList" role="group" aria-label="갈 곳"></div>
+    <p id="bigMapInfo" class="muted">갈 곳을 지도나 이름에서 고르세요.</p>
+    <div id="bigMapActions">
+      <button id="bigMapGo" disabled>이 방향으로</button>
+      <button id="bigMapJump" hidden>순간 이동</button>
+      <button id="bigMapClose">닫기</button>
+    </div>
   </dialog>
 
   <dialog id="lookBack" aria-label="지나온 길 돌아보기">

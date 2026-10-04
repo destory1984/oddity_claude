@@ -3,6 +3,8 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '미니맵을 누르면 큰 지도가 열립니다. 갈 곳을 고르고 "이 방향으로"를 누르면 그쪽을 바라봅니다.' },
+  { day: '2026-10-04', text: '"목표 고정" 단추가 생겼습니다. 고른 곳을 화면 가운데에 붙잡아 두고 그 둘레를 돌 수 있습니다.' },
   { day: '2026-10-04', text: '부제가 "우주 한량"에서 "할머니의 수첩"으로 바뀌었습니다.' },
   { day: '2026-10-04', text: '방향키 모양 단추 넷이 생겼습니다. 화면을 돌리지 않고 위, 아래, 왼쪽, 오른쪽으로 움직입니다.' },
   { day: '2026-10-04', text: '화성의 바이킹 1호 착륙지에 내려서면 "그날로" 단추가 뜹니다. 누르면 1976년의 착륙을 다시 보여 줍니다.' },

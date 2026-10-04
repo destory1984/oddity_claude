@@ -3216,6 +3216,19 @@ body.rear.touch #reticle span {
     right:0;
     bottom:calc(92px + var(--tap) + 8px);
   }
+
+  /* The stop button and the pad's down key change places (the user, 2026-10-05: "멈춤
+     버튼과 아래 버튼을 서로 맞바꿈"): stop is the middle of the cross, down is under it,
+     between reverse and forward. The stop button lies over the pad's empty cell. */
+  #brake {
+    bottom:calc(92px + var(--tap) + 8px);
+    z-index:1;
+  }
+
+  #slideDown {
+    position:relative;
+    top:calc(var(--tap) + 8px);
+  }
 }
 
 /* On a wide screen the pad and the four are one cluster: keys of one size (56px), 8px

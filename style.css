@@ -3494,12 +3494,44 @@ footer .throttle .rangeLabels {
 }
 
 @media (max-width: 480px) {
-  #targetPanel {
+  /* On a phone the panel's keys stand in the columns of the buttons along the top
+     ("버튼 일렬로": with the panel's plate round them they stood 8px to the left of
+     those columns). The panel has no plate of its own there; the name has one, and the
+     keys stand bare like the keys at the foot of the screen, their right edge on the
+     screen's --gap. */
+  #hud #targetPanel {
     --target-key:var(--top-key);
+    top:var(--row2);
+    right:var(--gap);
+    background:none;
+    box-shadow:none;
   }
 
-  #targetPanel #targetRow {
+  #hud #targetPanel strong {
+    display:inline-block;
+    margin:0;
+    padding:5px 10px;
+    border-radius:10px;
+    background:#0b1630c8;
+  }
+
+  #hud #targetPanel #targetRow {
     gap:var(--gap);
+    margin-top:var(--gap);
+  }
+
+  #hud #targetPanel #dockTarget,
+  #hud #targetPanel #exoJump,
+  #hud #targetPanel #replayButton,
+  #hud #targetPanel #eclipseJump {
+    margin-top:var(--gap);
+  }
+
+  #hud #targetPanel #craftCard {
+    margin-top:var(--gap);
+    padding:8px 10px;
+    border-radius:10px;
+    background:#0b1630c8;
   }
 }
 

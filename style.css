@@ -2103,9 +2103,29 @@ footer button:active,
 /* A phone: the six buttons take the whole top row, each big enough for a finger; the
    title gives way to them. */
 @media (max-width: 480px) {
+  /* The top of a phone's screen is laid out by the same one measure as its foot
+     (--gap, 12px: "윗쪽 아이콘들도 아래와 같이 일관성 있게 재배치해줘", 2026-10-05):
+     from the screen's edges, between the seven buttons, from the buttons down to the
+     two plates, from the height plate down to the minimap, and on down to the notice.
+     --top-key: the side of one of the seven squares, which share the row evenly.
+     --row2: where the plates' upper edge stands, under the buttons (and under the goal
+     line while the first-visit guide shows it: --guide, its height and one more gap). */
+  body {
+    --gap:12px;
+    --edge-top:max(var(--gap), env(safe-area-inset-top));
+    --top-key:calc((100vw - 8 * var(--gap)) / 7);
+    --guide:calc(44px + var(--gap));
+    --row2:calc(var(--edge-top) + var(--top-key) + var(--gap) + var(--guide));
+  }
+
+  body:has(#guide[hidden]) {
+    --guide:0px;
+  }
+
   header {
-    left:12px;
-    right:12px;
+    left:var(--gap);
+    right:var(--gap);
+    top:var(--edge-top);
     justify-content:center;
   }
 
@@ -2113,35 +2133,46 @@ footer button:active,
     display:none;
   }
 
-  /* Seven buttons in one row: the journal's takes what room is left. */
+  /* Seven equal squares in one row. (The journal's was wider, with its count beside the
+     picture, and the others stood 5px apart.) */
   #hud nav {
     width:100%;
-    gap:5px;
+    gap:var(--gap);
   }
 
   #hud nav button {
-    flex:none;
-    min-width:var(--tap);
+    flex:1 1 0;
+    width:auto;
+    min-width:0;
+    height:var(--top-key);
+    min-height:0;
     padding:0;
     font-size:0;
   }
 
+  /* The journal's count stands under its picture, which is a little smaller for it. */
   #hud nav #journalButton {
-    flex:1 1 0;
-    width:auto;
-    min-width:0;
-    gap:4px;
-    padding:0 6px;
-    font-size:12px;
+    flex-direction:column;
+    gap:1px;
+    padding:0;
+    font-size:9px;
+    line-height:1;
     white-space:nowrap;
+  }
+
+  #hud nav #journalButton::before {
+    width:19px;
+    height:19px;
   }
 
   /* The goal line goes right under the top buttons, in the gap above the readouts:
      lower down, Seora's speech bubble or a two-line notice would lie across it. */
   #guide {
-    top:max(76px, calc(env(safe-area-inset-top) + 50px));
-    left:12px;
-    right:12px;
+    top:calc(var(--edge-top) + var(--top-key) + var(--gap));
+    left:var(--gap);
+    right:var(--gap);
+    box-sizing:border-box;
+    height:44px;
     width:auto;
     max-width:none;
     justify-content:space-between;
@@ -2156,32 +2187,30 @@ footer button:active,
     font-size:12px;
   }
 
-  /* The readouts move down to make room for it. */
+  /* The two plates under the buttons (a plate reaches 8px past its box), the minimap
+     under the height plate (102px tall) and as wide as it, the notice under the minimap
+     (120px). With no goal line showing they all stand that much higher (--guide). */
   .telemetry,
   #targetPanel {
-    top:120px;
+    top:calc(var(--row2) + 8px);
+  }
+
+  /* The height plate is 124px wide at least and 102px tall, the minimap 124px. */
+  .telemetry {
+    box-sizing:border-box;
+    min-width:108px;
+    min-height:86px;
   }
 
   #minimap {
-    top:196px;
+    top:calc(var(--row2) + 102px + var(--gap));
+    left:var(--gap);
+    width:124px;
+    height:124px;
   }
 
   #toast {
-    top:324px;
-  }
-
-  /* With no goal line showing, that room stood empty: the readouts go up 36px. */
-  body:has(#guide[hidden]) .telemetry,
-  body:has(#guide[hidden]) #targetPanel {
-    top:84px;
-  }
-
-  body:has(#guide[hidden]) #minimap {
-    top:160px;
-  }
-
-  body:has(#guide[hidden]) #toast {
-    top:288px;
+    top:calc(var(--row2) + 226px + 2 * var(--gap));
   }
 
   #guideText {

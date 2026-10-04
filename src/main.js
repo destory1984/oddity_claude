@@ -3,10 +3,10 @@ import {
 } from './core/bodies.js';
 import { C, speedLimit } from './core/flight.js';
 import {
-  createState, step, stopNow, totalSpeed, carryAlong, boostLift, velocity, TURN_RATE, START_YAW, keepRange,
+  createState, step, stopNow, totalSpeed, carryAlong, boostLift, velocity, TURN_RATE, START_YAW, keepRange, slideCap,
 } from './core/game.js';
 import {
-  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, blend, right,
+  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, right, swingToward,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft } from './core/craft.js';
 import { skyLabels } from './core/sky.js';
@@ -91,6 +91,8 @@ const VISTA_YAW = 0.3;
 // very middle of the view, behind her ("서라의 머리가 그걸 막게 되어서 움직이기 불편해").
 const AIM_OVER = 0.26;
 const faceToward = (toward) => rotateLocal(lookAtDirection(toward), 0, AIM_OVER);
+// The line of the view, in its own axes, that a faced target lies on (over her head).
+const AIM_LINE = rotateVector(conjugate(faceToward([0, 0, 1])), [0, 0, 1]);
 const HUD_EVERY_N_FRAMES = 6;
 // The sprite character shields her eyes within this far of the Sun's surface, and fans
 // herself out to this many AU (distances between bodies are a hundredth of the real
@@ -1522,6 +1524,13 @@ ${STORY_MORE[target.id]}` : told };
           // Only sliding (not going forward or back): she goes round it at the distance
           // she was at. A straight slide drew away: 1,900 km in 2.5 s beside Earth.
           const sliding = state.speed < 0.01 && Math.max(state.sideSpeed ?? 0, state.riseSpeed ?? 0) > 0.01;
+          // Near the target the slide is held to half a radian a second round it
+          // (core/game.js slideCap): at the speed the limit allowed she whirled.
+          if (locked && sliding && lockRange > 1) {
+            const slide = Math.hypot(state.sideSpeed ?? 0, state.riseSpeed ?? 0);
+            const cap = slideCap(lockRange);
+            if (slide > cap) state = { ...state, sideSpeed: ((state.sideSpeed ?? 0) * cap) / slide, riseSpeed: ((state.riseSpeed ?? 0) * cap) / slide };
+          }
           let position = locked && sliding && !state.restingOn && lockRange > 1 ? keepRange(state.position, aim.position, lockRange) : state.position;
           // Only going forward or back: straight at the target or straight away from it,
           // though the view is tipped to keep it over her head (along the view she would
@@ -1531,7 +1540,10 @@ ${STORY_MORE[target.id]}` : told };
             const along = Math.min(went, state.motionSign > 0 ? lockRange : Infinity) * state.motionSign;
             position = lockFrom.map((n, i) => n + ((aim.position[i] - n) / lockRange) * along);
           }
-          const orientation = locked ? blend(state.orientation, faceToward(aim.position.map((n, i) => n - position[i])), 1 - Math.exp(-dt * LOCK_RATE)) : state.orientation;
+          // The view is swung onto the target from where it is, by the shortest turn
+          // (core/orientation.js swingToward): built anew from world-up each frame it
+          // span half round whenever she passed over or under the target.
+          const orientation = locked ? swingToward(state.orientation, AIM_LINE, aim.position.map((n, i) => n - position[i]), 1 - Math.exp(-dt * LOCK_RATE)) : state.orientation;
           state = { ...state, position, orientation };
         }
       }

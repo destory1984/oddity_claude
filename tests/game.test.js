@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { createState, step, stopNow, totalSpeed, carryAlong, START_ORIENTATION, startOrientation, keepRange } from '../src/core/game.js';
+import { createState, step, stopNow, totalSpeed, carryAlong, START_ORIENTATION, startOrientation, keepRange, slideCap, LOCK_TURN_RATE } from '../src/core/game.js';
 import { C, speedLimit, MAX_SPEED, ACCELERATION_SECONDS } from '../src/core/flight.js';
 import { lookAtDirection } from '../src/core/orientation.js';
 import { BODIES, START_POSITION, bodyById, nearestSurface } from '../src/core/bodies.js';
@@ -292,4 +292,11 @@ test('keepRange puts her back at the same distance from the centre, the same way
   const off = keepRange([10, 0, 5], [10, 0, 0], 2);
   assert.deepEqual(off, [10, 0, 2]);
   assert.deepEqual(keepRange([1, 2, 3], [1, 2, 3], 50), [1, 2, 3]);
+});
+
+test('round a locked target she slides no faster than half a radian a second', () => {
+  assert.equal(LOCK_TURN_RATE, 0.5);
+  // 300 km from Tiangong: 150 km/s, a turn in 12.6 s (at the 3,000 km/s the limit allows there it was a turn in 0.6 s).
+  assert.equal(slideCap(300), 150);
+  assert.equal(slideCap(40000), 20000);
 });

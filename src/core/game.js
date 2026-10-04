@@ -92,6 +92,14 @@ export function keepRange(position, centre, km) {
   return centre.map((n, i) => n + (out[i] / far) * km);
 }
 
+// Round a locked target she turns no faster than this (radians a second), however near
+// it is: the slide's speed is held to the range times this. (300 km from a space station
+// the limit near Earth, 3,000 km/s, was a turn in 0.6 s: "혼자서 휙휙 돌아버리는데?")
+export const LOCK_TURN_RATE = 0.5;
+export function slideCap(rangeKm) {
+  return rangeKm * LOCK_TURN_RATE;
+}
+
 // The traveler's velocity in world axes, km/s.
 export function velocity(state) {
   return velocityOf(state);

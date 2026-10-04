@@ -94,6 +94,34 @@ export function blend(a, b, t) {
   return out.map((n) => n / length);
 }
 
+// Turns orientation q so that its own line `local` (a unit vector in the view's axes)
+// points along the world direction `way`, by the shortest turn; t (0..1) is how much of
+// that turn is made. Nothing here knows which way is up, so the view does not flip when
+// the direction passes straight overhead or underfoot, as one built by lookAtDirection
+// does (target lock used that: sliding round a target, over its top, the view span half
+// round at the top, the slide keys then pushed the other way, and she whirled).
+export function swingToward(q, local, way, t = 1) {
+  const length = Math.hypot(...way) || 1;
+  const to = way.map((n) => n / length);
+  const from = rotateVector(q, local);
+  let axis = [from[1] * to[2] - from[2] * to[1], from[2] * to[0] - from[0] * to[2], from[0] * to[1] - from[1] * to[0]];
+  let sine = Math.hypot(...axis);
+  const cosine = from[0] * to[0] + from[1] * to[1] + from[2] * to[2];
+  if (sine < 1e-12) {
+    if (cosine > 0) return q;
+    // Straight behind: any axis square to the line will do; her own up, or her right.
+    const other = Math.abs(local[1]) < 0.9 ? up(q) : right(q);
+    axis = [from[1] * other[2] - from[2] * other[1], from[2] * other[0] - from[0] * other[2], from[0] * other[1] - from[1] * other[0]];
+    sine = 0;
+  }
+  const size = Math.hypot(...axis) || 1;
+  const half = (Math.atan2(sine, cosine) * t) / 2;
+  const turn = [...axis.map((n) => (n / size) * Math.sin(half)), Math.cos(half)];
+  const out = multiply(turn, q);
+  const norm = Math.hypot(...out);
+  return out.map((n) => n / norm);
+}
+
 // A turn of `angle` radians about the world Y axis, to apply in front of an
 // orientation: multiply(turnAboutY(angle), q).
 export function turnAboutY(angle) {

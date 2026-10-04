@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { rotateLocal, forward, lookAtDirection, multiply, conjugate, right, up, REAR_VIEW, rearTurn } from '../src/core/orientation.js';
+import { rotateLocal, forward, lookAtDirection, multiply, conjugate, right, up, REAR_VIEW, rearTurn, swingToward, rotateVector } from '../src/core/orientation.js';
 
 const near = (a, b) => a.forEach((n, i) => assert.ok(Math.abs(n - b[i]) < 1e-9));
 
@@ -63,4 +63,39 @@ test('looking behind turns the view half round: ahead is behind, up stays up, an
   const [yaw, pitch] = rearTurn(0.05, 0.1);
   const turned = multiply(rotateLocal(body, yaw, pitch), REAR_VIEW);
   close(turned, rotateLocal(view, 0.05, 0.1));
+});
+
+test('swingToward brings a chosen line of the view onto a direction by the shortest turn', () => {
+  const near = (a, b, eps = 1e-9) => a.forEach((n, i) => assert.ok(Math.abs(n - b[i]) < eps, `${a} vs ${b}`));
+  const aim = [0, Math.sin(0.26), Math.cos(0.26)];
+  const start = rotateLocal([0, 0, 0, 1], 0.7, -0.2, 0.1);
+  const way = [0.3, -0.5, 0.81].map((n) => n / Math.hypot(0.3, -0.5, 0.81));
+  near(rotateVector(swingToward(start, aim, way, 1), aim), way, 1e-9);
+  // Part of the way: nearer than before, not yet there.
+  const half = rotateVector(swingToward(start, aim, way, 0.5), aim);
+  const before = rotateVector(start, aim);
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  assert.ok(dot(half, way) > dot(before, way) && dot(half, way) < 1 - 1e-6);
+  // Already there, and straight behind: no fault, still a unit quaternion.
+  near(swingToward(start, aim, before, 1), start, 1e-9);
+  const round = swingToward(start, aim, before.map((n) => -n), 1);
+  assert.ok(Math.abs(Math.hypot(...round) - 1) < 1e-9);
+  near(rotateVector(round, aim), before.map((n) => -n), 1e-6);
+});
+
+test('going over the top of a target the view does not flip, as a view built from world-up does', () => {
+  // The way to the target sweeps through straight up: from 60 degrees up, over the top, to 60 up on the far side.
+  const ways = [];
+  for (let deg = 60; deg <= 120; deg += 2) ways.push([0, Math.sin((deg * Math.PI) / 180), Math.cos((deg * Math.PI) / 180)]);
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  let q = lookAtDirection(ways[0]);
+  let least = 1;
+  for (const way of ways.slice(1)) {
+    const next = swingToward(q, [0, 0, 1], way, 1);
+    least = Math.min(least, dot(right(q), right(next)));
+    q = next;
+  }
+  assert.ok(least > 0.99, `her right hand stays her right hand (${least})`);
+  // Built anew from world-up at each step, right becomes left as the top is passed.
+  assert.ok(dot(right(lookAtDirection(ways[0])), right(lookAtDirection(ways[ways.length - 1]))) < -0.99);
 });

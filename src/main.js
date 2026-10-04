@@ -1117,6 +1117,9 @@ ${STORY_MORE[target.id]}` : told };
   let noteWait = 0;
   let dailyDue = !requestDone();
   let noteDueId = null;
+  // A note read again from the journal: folding it brings the journal back (the user,
+  // 2026-10-05; it went back to the flight).
+  let noteFromJournal = false;
   const noteCard = createNoteCard({
     onOpen() {
       notePriorPause = paused;
@@ -1126,6 +1129,10 @@ ${STORY_MORE[target.id]}` : told };
     onClose(note, first) {
       setPaused(notePriorPause);
       previous = null;
+      if (noteFromJournal) {
+        noteFromJournal = false;
+        journal.open();
+      }
       if (!first) return;
       noteWait = NOTE_GAP_S;
       // The last line was spoken at the gate.
@@ -1209,6 +1216,7 @@ ${STORY_MORE[target.id]}` : told };
     onNote(id) {
       noteCard.show(noteById(id), false);
       notePriorPause = journalPriorPause;
+      noteFromJournal = noteCard.isOpen();
     },
     bodies: BODIES,
     missions: MISSIONS,

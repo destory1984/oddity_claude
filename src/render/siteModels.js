@@ -512,6 +512,9 @@ export const SITE_BUILD = {
 // a parachute, or a rocket stage it hangs from (the sky crane).
 export const SITE_REPLAY_BUILD = {
   apollo11: [apollo, { withFlag: false }],
+  // (The fourth item: how high the flame's middle is; Viking's engines are under its
+  // body, between the legs.)
+  viking1: [viking, {}, 'flame', 0.1],
   huygens: [huygens, {}, 'chute'],
   curiosity: [rover, { power: 'rtg' }, 'crane'],
 };

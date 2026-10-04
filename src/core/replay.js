@@ -1,6 +1,6 @@
 // "그날로": at a story place, the day it is known for is played again in the close
 // view. The model that stands there comes down as it did, and a few lines tell what
-// happened, each at its moment: Apollo 11's landing, Huygens's on Titan, Curiosity's on Mars, and (not at a
+// happened, each at its moment: Apollo 11's landing, Huygens's on Titan, Viking 1's and Curiosity's on Mars, and (not at a
 // place but on a body) Cassini's plunge into Saturn.
 // seconds: how long the scene lasts. downAt: when it touches the ground.
 // fromKm: how high the model starts (it is drawn 6 km wide, so this is in drawn km).
@@ -30,6 +30,19 @@ export const REPLAYS = {
       { at: 6, text: '2시간 30분 동안 내려오며 강줄기와 바닷가처럼 보이는 땅을 찍어 보냈습니다.' },
       { at: 12, text: '바닥은 영하 179도. 물이 언 얼음 자갈이 널린, 젖은 모래 같은 땅이었습니다.' },
       { at: 17, text: '사람이 만든 것이 가장 먼 곳에 내려앉은 순간입니다. 그 뒤로도 한 시간 넘게 신호를 보냈습니다.' },
+    ],
+  },
+  viking1: {
+    name: '바이킹 1호의 착륙',
+    day: '1976년 7월 20일',
+    seconds: 24,
+    downAt: 17,
+    fromKm: 14,
+    lines: [
+      { at: 0, text: '1976년 7월 20일. 바이킹 1호 착륙선이 궤도선에서 떨어져 나와 크리세 평원으로 내려옵니다.' },
+      { at: 6, text: '낙하산을 버린 뒤 엔진 셋으로 속도를 줄입니다. 땅을 덜 건드리려고 불꽃을 넓게 퍼뜨린 엔진입니다.' },
+      { at: 12, text: '마침 아폴로 11호가 달에 내린 지 꼭 7년이 되는 날이었습니다.' },
+      { at: 17, text: '내린 지 25초 뒤 첫 사진을 찍기 시작했습니다. 제 발판과 화성의 자갈이 찍혔습니다.' },
     ],
   },
   // It was let down on cords from a stage that hovered on its rockets.

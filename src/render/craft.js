@@ -144,7 +144,7 @@ export function createSiteModels(scene, siteList) {
   flameMaterial.emissiveColor = new Color3(1, 0.82, 0.5);
   flameMaterial.alpha = 0.38;
   flameMaterial.backFaceCulling = false;
-  for (const [id, [build, options, coming = 'flame']] of Object.entries(SITE_REPLAY_BUILD)) {
+  for (const [id, [build, options, coming = 'flame', flameY = -0.06]] of Object.entries(SITE_REPLAY_BUILD)) {
     const node = build(scene, `then_${id}`, mats, options);
     node.rotationQuaternion = new Quaternion();
     let flame;
@@ -182,7 +182,7 @@ export function createSiteModels(scene, siteList) {
       for (const [x, z] of [[0.16, 0.1], [-0.16, 0.1], [0, -0.14]]) rod(scene, `then_${id}_cord${x}`, cords, mats.white, [x * 0.6, 1.48, z * 0.6], [x, 0.3, z], 0.008, 4);
     } else {
       // Under the engine bell (the model's feet are at y = 0), widening downward.
-      flame = drum(scene, `then_${id}_flame`, node, flameMaterial, { height: 0.34, diameterTop: 0.05, diameterBottom: 0.2, tessellation: 12 }, [0, -0.06, 0]);
+      flame = drum(scene, `then_${id}_flame`, node, flameMaterial, { height: 0.34, diameterTop: 0.05, diameterBottom: 0.2, tessellation: 12 }, [0, flameY, 0]);
     }
     node.setEnabled(false);
     then.set(id, { node, flame, cords });

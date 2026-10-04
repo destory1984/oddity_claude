@@ -3234,10 +3234,24 @@ body.rear.touch #reticle span {
      "이제 버튼들을 화면 제일 오른쪽 아래로"; they stood 92px up, over the thrust bar's
      row). Left of them there is room for the speed only, so the small thrust bar goes
      up over the speed. */
-  footer .throttle {
+  #hud footer .throttle {
     position:absolute;
-    left:0;
-    bottom:calc(100% + 18px);
+    left:8px;
+    bottom:calc(100% + 24px);
+    width:110px;
+  }
+
+  /* One line all round ("버튼 간격이 삐뚤빼뚤"): the two plates at the left and the keys at
+     the right stand the same way off the screen's edges and are the same height. A
+     plate reaches 8px past its box, so the boxes stand 8px in; the two plates are one
+     width with 8px between them, as between the keys; and the thrust bar is tall enough
+     that the two together are as tall as three keys (3 keys + 2 gaps = 148px at 44px). */
+  footer .speedBox {
+    margin:0 0 8px 8px;
+  }
+
+  #hud footer .throttle input[type=range] {
+    height:calc(3 * var(--tap) + 16px - 119px);
   }
 
   /* Forward and reverse stand in the top corners, the rear-view button in the bottom

@@ -16,7 +16,8 @@ import { DOCK_RANGE_KM } from './dock.js';
 const ANNIVERSARIES = [
   [1, 3, 2019, 'change4'], [1, 4, 2004, 'spirit'], [1, 14, 2005, 'huygens'], [1, 24, 1986, 'voyager2Uranus'],
   [1, 25, 2004, 'opportunity'], [2, 3, 1966, 'luna9'], [2, 5, 1971, 'apollo14'], [2, 18, 2021, 'perseverance'],
-  [3, 1, 1982, 'venera13'], [3, 14, 1986, 'giotto'], [4, 8, 2008, 'yiSoyeon'], [4, 21, 1972, 'apollo16'],
+  [3, 1, 1982, 'venera13'], [3, 13, 2013, 'alma'], [3, 14, 1986, 'giotto'], [4, 8, 2008, 'yiSoyeon'], [4, 12, 1961, 'baikonur'],
+  [4, 21, 1972, 'apollo16'],
   [4, 30, 2015, 'messenger'], [5, 25, 2008, 'phoenix'], [6, 21, 2022, 'naro'], [7, 4, 1997, 'pathfinder'],
   [7, 14, 2015, 'newHorizons'], [7, 21, 1969, 'apollo11'], [7, 30, 1971, 'apollo15'], [8, 6, 2012, 'curiosity'],
   [8, 23, 2023, 'chandrayaan3'], [8, 25, 1989, 'voyager2Neptune'], [9, 3, 1976, 'viking2'], [9, 14, 1959, 'luna2'],

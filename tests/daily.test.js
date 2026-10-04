@@ -16,7 +16,10 @@ test('on the day of a real event the errand is its place, with the year', () => 
   assert.deepEqual({ kind: apollo.kind, id: apollo.id, year: apollo.year }, { kind: 'day', id: 'apollo11', year: 1969 });
   assert.equal(apollo.text, '1969년 오늘이 그날이란다. 아폴로 11호 착륙지에 다녀와 다오.');
   assert.equal(dailyRequest('2031-10-04', far).id, 'sputnik');
-  assert.equal(ANNIVERSARY_COUNT, 33);
+  assert.equal(ANNIVERSARY_COUNT, 35);
+  // Gagarin's day sends her to where he left from, and ALMA's opening to ALMA.
+  assert.deepEqual([dailyRequest('2027-04-12', fresh).id, dailyRequest('2027-04-12', fresh).year], ['baikonur', 1961]);
+  assert.equal(dailyRequest('2027-03-13', fresh).id, 'alma');
 });
 
 test('every day of a year has an errand whose place exists, in grandmother\'s words', () => {

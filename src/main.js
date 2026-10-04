@@ -79,7 +79,7 @@ import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts } from './core/visit.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import {
-  eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon,
+  eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
 } from './core/eclipses.js';
 
 const $ = (id) => document.getElementById(id);
@@ -691,9 +691,9 @@ ${STORY_MORE[target.id]}` : told };
     const key = show && showNow ? `eclipse:${showNow.line}` : scene ? `${id}:then:${scene.line}` : id;
     if (key === inspectShown) return;
     inspectShown = key;
-    // An eclipse being watched: its lines, each at its moment.
+    // An eclipse being watched: its lines, each at its moment, and under each that it is staged.
     if (show && showNow) {
-      inspectInfo.show({ name: eclipseTitle(eclipse), nameEn: '', kicker: `${eclipseDayText(eclipse)} · ${eclipse.where}`, text: showNow.text });
+      inspectInfo.show({ name: eclipseTitle(eclipse), nameEn: '', kicker: `${eclipseDayText(eclipse)} · ${eclipse.where}`, text: `${showNow.text}\n\n${stagedNote(eclipse)}` });
       return;
     }
     if (scene) inspectInfo.show({ name: replayFor(id).name, nameEn: '', kicker: `그날로 · ${replayFor(id).day}`, text: scene.text });

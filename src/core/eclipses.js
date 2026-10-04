@@ -123,6 +123,13 @@ function linesFor(event) {
   ];
 }
 
+// Said under every line of the show: what is seen is put on, and why.
+export function stagedNote(event) {
+  return event.kind === 'lunar'
+    ? '이 장면은 연출입니다. 게임은 거리를 줄여 놓아 지구 그림자가 달에 닿지 않습니다. 보는 동안에만 달을 붉게 물들입니다.'
+    : '이 장면은 연출입니다. 게임은 거리를 줄여 놓아 달이 해를 가리지 못합니다. 보는 동안에만 달을 해 앞으로 옮겨 놓습니다.';
+}
+
 export function showSeconds(event) {
   const p = event.kind === 'solar' ? SOLAR : LUNAR;
   return p.inS + p.holdS + p.outS + p.afterS;

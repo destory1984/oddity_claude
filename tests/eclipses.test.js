@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   ECLIPSES, ECLIPSE_DAYS, eclipseNow, nextEclipse, eclipseNews, eclipseTitle, eclipseDayText, daysUntil,
-  eclipseSpot, sunHeight, canWatch, showFrame, showSeconds, stagedMoon, sanitizeEclipses, SUN_UP,
+  eclipseSpot, sunHeight, canWatch, showFrame, showSeconds, stagedMoon, stagedNote, sanitizeEclipses, SUN_UP,
 } from '../src/core/eclipses.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 
@@ -93,6 +93,12 @@ test('a solar show: the Moon comes in from one side, sits on the Sun, and leaves
   assert.match(at(9).text, /코로나.*6분 23초/);
   assert.match(showFrame(ECLIPSES[0], 9).text, /빛의 고리.*7분 51초/);
   assert.match(at(15).text, /다이아몬드 반지/);
+});
+
+test('every show says that it is staged, and why', () => {
+  for (const e of ECLIPSES) assert.match(stagedNote(e), /^이 장면은 연출입니다\. 게임은 거리를 줄여 놓아/);
+  assert.match(stagedNote(ECLIPSES[1]), /달이 해를 가리지 못합니다/);
+  assert.match(stagedNote(ECLIPSES[4]), /지구 그림자가 달에 닿지 않습니다/);
 });
 
 test('a lunar show: the shadow comes over the Moon, stays, and goes', () => {

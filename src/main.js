@@ -30,7 +30,7 @@ import {
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
-  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, loadStunts, saveStunts, loadFeel, saveFeel,
+  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, loadStunts, saveStunts, loadFeel, saveFeel, loadExo, saveExo,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
@@ -73,6 +73,7 @@ import { readingQuizFor, readingKey } from './core/readingQuiz.js';
 import { STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, recordText, valueText, stuntById } from './core/stunts.js';
 import { STORY_DETAILS } from './core/storyDetails.js';
 import { STORY_MORE } from './core/storyMore.js';
+import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts } from './core/visit.js';
 import { spinOf } from './core/surface.js';
@@ -115,7 +116,12 @@ const layout = loadLayout();
 const openedAt = new Date();
 const bodyData = layout === 'today' ? todayData(openedAt) : BODY_DATA;
 const bodiesAt = (timeS) => placeBodies(bodyData, timeS);
-let bodies = bodiesAt(0);
+// Everything that is flown among and drawn: the Solar System, and far off TRAPPIST-1
+// with its seven planets (core/exo.js), which are not in the journal.
+const allAt = (timeS) => [...bodiesAt(timeS), ...exoBodiesAt(timeS)];
+let bodies = allAt(0);
+// The trip there: whether she has been, and which planets she has seen from close by.
+let exo = loadExo();
 
 function startNear({ id, fromCentreKm }) {
   const body = bodyById(id, bodies);
@@ -606,6 +612,8 @@ async function init() {
 
 ${STORY_MORE[target.id]}` : told };
     }
+    // Another star and its planets (core/exo.js): a word each, no journal slot.
+    if (target.exo) return { ...head, kicker: target.kind === 'exostar' ? '붉은 왜성 · 지구에서 약 40광년' : '외계 행성 · 겉모습은 상상해서 그림', text: exoNote(target.id) };
     const parent = target.parent ? bodyById(target.parent) : null;
     const kicker = `${KIND[target.kind] ?? '천체'}${parent && target.kind === 'moon' ? ` · ${parent.name}의 위성` : ''}`;
     if (!progress.discovered.includes(target.id)) return { ...head, kicker, text: '아직 수첩에 없는 천체입니다. 표면에서 5만km 안까지 다가가면 읽을거리가 열립니다.' };
@@ -678,7 +686,35 @@ ${STORY_MORE[target.id]}` : told };
     return undefined;
   });
 
-  const hud = createHud([...BODIES, ...craft, ...sites], {
+  // The jump to TRAPPIST-1, offered while latched to Kepler, and the way home from there.
+  $('exoJump').addEventListener('click', () => {
+    if (warp.busy()) return undefined;
+    if (inExo(state.position)) return teleport('kepler', true);
+    sound.cue('warp');
+    warp.play(() => {
+      docked = null;
+      showCraftCard(null);
+      sound.hush();
+      visit = null;
+      stuntJumped = true;
+      input.clear();
+      const spot = exoArrival();
+      state = createState(spot.position, spot.orientation);
+      selectedId = EXO_STAR.id;
+      hud.showSelection(here(EXO_STAR.id));
+      if (!exo.been) {
+        exo = { ...exo, been: true };
+        saveExo(exo);
+      }
+      toast.show('트라피스트-1에 왔습니다. 지구에서 약 40광년 떨어진 붉은 왜성과 행성 일곱입니다.\n크기와 궤도는 잰 값이고, 겉모습은 아무도 몰라 상상해서 그렸습니다.');
+      say.show('해가 빨개! 행성이 일곱이나 돼.');
+    });
+    return undefined;
+  });
+  // What is left unnamed while she is at the other star: everything at home but the Sun.
+  const homeIds = [...BODIES.filter((b) => b.kind !== 'star').map((b) => b.id), ...craft.map((c) => c.id), ...sites.map((s) => s.id)];
+
+  const hud = createHud([...BODIES, ...exoBodiesAt(0), ...craft, ...sites], {
     skyLabels: skyLabels(),
     onSelect: selectBody,
     onFace() {
@@ -1003,7 +1039,7 @@ ${STORY_MORE[target.id]}` : told };
   // TEMPORARY, for testing the opening: wipe the log, the album, the daily record and the
   // first-visit guide (the settings stay) and start again from the first page.
   $('testReset').addEventListener('click', () => {
-    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1', 'oddity.told.v1']) {
+    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1', 'oddity.told.v1', 'oddity.exo.v1']) {
       try { localStorage.removeItem(key); } catch { /* storage shut: nothing to wipe */ }
     }
     location.reload();
@@ -1170,7 +1206,7 @@ ${STORY_MORE[target.id]}` : told };
       const before = bodies;
       const craftBefore = craft;
       simTime += dt * TIME_SCALE;
-      bodies = bodiesAt(simTime);
+      bodies = allAt(simTime);
       craft = craftAt(simTime, bodies);
       if (docked) {
         rideKmS = rideSpeed(docked.id, craftBefore, craft, before, bodies, dt);
@@ -1238,7 +1274,22 @@ ${STORY_MORE[target.id]}` : told };
     const slowPoints = craft.map((c) => c.position);
     const result = step(state, intent, dt, bodies, slowPoints);
     state = result.state;
-    const logged = updateProgress(progress, state, bodies);
+    // The journal is of the Solar System: another star's planets are kept apart (below).
+    const logged = updateProgress(progress, EXO_IDS.includes(state.restingOn) ? { ...state, restingOn: null } : state, bodies.filter((b) => !b.exo));
+    const away = inExo(state.position);
+    if (away && dt > 0) {
+      const seenNow = recordExo(exo, state.position, bodies);
+      if (seenNow.newly.length) {
+        exo = seenNow.record;
+        saveExo(exo);
+        for (const id of seenNow.newly) toast.show(`${here(id).name}\n${exoNote(id)}\n가까이에서 본 외계 행성 ${exo.seen.length}/${EXO_PLANETS.length}`, null, SIGHT_S);
+        sound.cue('discovered');
+        if (exo.seen.length === EXO_PLANETS.length) {
+          toast.show('트라피스트-1의 행성 일곱을 모두 가까이에서 보았습니다.');
+          say.show('일곱 개 다 봤다! 할머니가 믿으실까?');
+        }
+      }
+    }
     let finished = false;
     if (logged.events.length) {
       const before = progress;
@@ -1523,7 +1574,8 @@ ${STORY_MORE[target.id]}` : told };
         // full sunlight it is hot; in a planet's shadow, or out past Uranus, it is cold.
         bright: surfaceDistance(state.position, here('sun')) < BRIGHT_KM,
         hot: sunShown > 0.5 && surfaceDistance(state.position, here('sun')) < HOT_AU * AU_KM / 100,
-        cold: sunShown < 0.05 || surfaceDistance(state.position, here('sun')) > 19 * AU_KM / 100,
+        // (Not at another star: its seven planets are all close in to it.)
+        cold: !away && (sunShown < 0.05 || surfaceDistance(state.position, here('sun')) > 19 * AU_KM / 100),
       },
     });
     sunShown = view.sunVisibility;
@@ -1593,6 +1645,9 @@ ${STORY_MORE[target.id]}` : told };
     // passing overhead put a docking button over a launch pad. (Its name tag still docks.)
     const offer = docked || onGround() ? null : dockable(state.position, craft);
     $('dockTarget').hidden = !docked && !offer;
+    // Latched to Kepler: the jump to the star it watched. There: the way home.
+    $('exoJump').hidden = !away && !(docked?.id === 'kepler' && isDocked(docked));
+    $('exoJump').textContent = away ? '태양계로 돌아가기' : '케플러가 본 별로';
     if (docked) $('dockTarget').textContent = '도킹 풀기';
     else if (offer) $('dockTarget').textContent = `${offer.name}에 도킹`;
     // In today's sky the game clock's date rides along with the flight state.
@@ -1611,8 +1666,10 @@ ${STORY_MORE[target.id]}` : told };
       C,
       goalId: goalNow()?.targetId ?? null,
       // A place on the far side of its body, or seen from far away, gets no label.
-      knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...progress.stories]),
+      knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...progress.stories, ...exo.seen, ...(exo.been ? [EXO_STAR.id] : [])]),
       hiddenIds: [
+        // The other star is named only from there, and home is one name from there: the Sun.
+        ...(away ? homeIds : EXO_IDS),
         ...sites.filter((s) => siteHidden(s, here(s.parent), state.position) || (s.id !== selectedId && siteFar(here(s.parent), state.position))).map((s) => s.id),
         ...awayCraft,
         // Whatever is behind a planet or a moon cannot be seen and gets no label (the
@@ -1644,6 +1701,7 @@ ${STORY_MORE[target.id]}` : told };
     // For test scripts that must look at something from a chosen place: where the
     // bodies are now, and a way to stand at `position` (km) facing the point `toward`.
     bodies: () => bodies.map((b) => ({ id: b.id, position: [...b.position], radiusKm: b.radiusKm })),
+    craft: () => craft.map((c) => ({ id: c.id, position: [...c.position] })),
     place(position, toward) {
       state = createState(position, lookAtDirection(toward.map((n, i) => n - position[i])));
     },

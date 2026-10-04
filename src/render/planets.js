@@ -7,6 +7,8 @@ import cloudsFrag from './shaders/clouds.frag?raw';
 import airFrag from './shaders/air.frag?raw';
 import gasFrag from './shaders/gas.frag?raw';
 import rockyFrag from './shaders/rocky.frag?raw';
+import emberFrag from './shaders/ember.frag?raw';
+import { EXO_STAR, EXO_PLANETS } from '../core/exo.js';
 import ringFrag from './shaders/ring.frag?raw';
 import noiseGlsl from './shaders/noise.glsl?raw';
 import ringsGlsl from './shaders/rings.glsl?raw';
@@ -298,6 +300,23 @@ function createRings(scene, body, rings, sunDir) {
   return { plane, normal, setSun, setTime };
 }
 
+// TRAPPIST-1 and its seven planets (core/exo.js). Nobody knows what the planets look
+// like: these are guesses from how much light each gets (bare hot rock near the star, a
+// sea in the middle, ice far out), drawn as plain balls. Each keeps one face to its
+// star, so it turns once an orbit.
+const EXO_LOOKS = {
+  b: { colorA: [0.32, 0.2, 0.16], colorB: [0.58, 0.36, 0.24], cap: 0, haze: 0, contrast: 0.9, craters: 0.5 },
+  c: { colorA: [0.36, 0.33, 0.3], colorB: [0.62, 0.56, 0.48], cap: 0, haze: 0, contrast: 0.8, craters: 0.6 },
+  d: { colorA: [0.5, 0.38, 0.24], colorB: [0.78, 0.66, 0.46], cap: 0, haze: 0.35, contrast: 0.6, craters: 0.1 },
+  e: { colorA: [0.1, 0.26, 0.42], colorB: [0.5, 0.62, 0.52], cap: 0.14, haze: 0.5, contrast: 0.7 },
+  f: { colorA: [0.3, 0.42, 0.55], colorB: [0.8, 0.86, 0.9], cap: 0.3, haze: 0.4, contrast: 0.6 },
+  g: { colorA: [0.55, 0.62, 0.7], colorB: [0.9, 0.93, 0.96], cap: 0.45, haze: 0.3, contrast: 0.5 },
+  h: { colorA: [0.7, 0.74, 0.8], colorB: [0.95, 0.96, 0.98], cap: 0.6, haze: 0.15, contrast: 0.4, craters: 0.2 },
+};
+for (const p of EXO_PLANETS) LOOKS[p.id] = { shader: 'rocky', ...EXO_LOOKS[p.id.slice(-1)], dayS: p.periodS };
+// The star turns once in 3.3 days.
+LOOKS[EXO_STAR.id] = { shader: 'ember', dayS: 3.3 * 86400 };
+
 // How cratered each mapped world is, for the close-up ground (textured.frag): 1 for the
 // Moon, little for young or icy surfaces, none (left out) under clouds.
 const CRATERS = {
@@ -352,6 +371,9 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     material.setFloat('bands', look.bands);
     material.setFloat('turbulence', look.turbulence);
     material.setFloat('spot', look.spot);
+  } else if (look.shader === 'ember') {
+    material = shader(scene, 'ember', emberFrag, ['time']);
+    material.setFloat('time', 0);
   } else {
     material = shader(scene, 'rocky', rockyFrag, ['sun', 'colorA', 'colorB', 'cap', 'haze', 'contrast', 'craters']);
     material.setFloat('cap', look.cap);
@@ -381,7 +403,7 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     spin(elapsed) {
       sphere.rotation.y = -(elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
       if (ring) ring.setTime(elapsed);
-      if (look.storm || look.nightGlow || look.flow) material.setFloat('time', elapsed);
+      if (look.storm || look.nightGlow || look.flow || look.shader === 'ember') material.setFloat('time', elapsed);
     },
     // heightRadii: the camera's height above the ground, in this body's radii.
     setClose(heightRadii) {

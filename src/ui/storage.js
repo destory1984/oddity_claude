@@ -1,3 +1,4 @@
+import { sanitizeExo } from '../core/exo.js';
 import { createProgress, sanitizeProgress } from '../core/progress.js';
 import { sanitizeAlbum } from '../core/album.js';
 import { createDaily, sanitizeDaily } from '../core/daily.js';
@@ -202,5 +203,24 @@ export function saveFeel(on) {
     localStorage.setItem(FEEL_KEY, on ? 'on' : 'off');
   } catch {
     // The choice simply does not stick.
+  }
+}
+
+const EXO_KEY = 'oddity.exo.v1';
+
+// The trip to another star (core/exo.js): whether she has been, and the planets seen.
+export function loadExo() {
+  try {
+    return sanitizeExo(JSON.parse(localStorage.getItem(EXO_KEY)));
+  } catch {
+    return sanitizeExo(null);
+  }
+}
+
+export function saveExo(record) {
+  try {
+    localStorage.setItem(EXO_KEY, JSON.stringify(record));
+  } catch {
+    // The record lasts only until the page is closed.
   }
 }

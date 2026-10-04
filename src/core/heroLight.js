@@ -29,11 +29,13 @@ const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
 //           times how much of the side facing the traveler is lit.
 export function heroLighting({ position, orientation, bodies, sunVisibility = 1 }) {
   const toLocal = (worldDirection) => rotateVector(conjugate(orientation), worldDirection);
-  const star = bodies.find((b) => b.kind === 'star');
+  // The nearest star: the Sun, or another star when she is at it (core/exo.js).
+  const far = (b) => Math.hypot(...sub(b.position, position));
+  const star = bodies.filter((b) => b.kind === 'star' || b.kind === 'exostar').reduce((best, b) => (far(b) < far(best) ? b : best));
   const sunDirection = unit(sub(star.position, position));
   let bounce = { direction: [0, -1, 0], color: GREY, strength: 0 };
   for (const body of bodies) {
-    if (body.kind === 'star') continue;
+    if (body.kind === 'star' || body.kind === 'exostar') continue;
     const out = sub(position, body.position);
     const distance = Math.max(Math.hypot(...out), body.radiusKm);
     const sky = (body.radiusKm / distance) ** 2;

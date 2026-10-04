@@ -12,7 +12,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
   const markers = new Map();
   for (const body of bodies) {
     const el = document.createElement('button');
-    el.className = { star: 'marker sun', site: 'marker site' }[body.kind] ?? 'marker';
+    el.className = { star: 'marker sun', exostar: 'marker sun', site: 'marker site' }[body.kind] ?? 'marker';
     el.textContent = body.name;
     el.addEventListener('click', () => onSelect(body.id));
     $('markers').append(el);

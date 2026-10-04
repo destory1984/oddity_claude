@@ -137,12 +137,14 @@ export function dateText(date) {
 }
 
 // How far away something is, short enough for a label: km up to 10,000, then 만 (ten
-// thousands), then 억 (hundred millions).
+// thousands), then 억 (hundred millions), then 조
+// (millions of millions: the way home from another star).
 export function distanceText(km) {
   if (km < 1e4) return `${Math.round(km).toLocaleString('ko-KR')}km`;
   if (km < 999950) return `${(km / 1e4).toFixed(1)}만km`;
   if (km < 1e8) return `${Math.round(km / 1e4).toLocaleString('ko-KR')}만km`;
-  return `${(km / 1e8).toFixed(1)}억km`;
+  if (km < 1e12) return `${(km / 1e8).toFixed(1)}억km`;
+  return `${(km / 1e12).toFixed(1)}조km`;
 }
 
 // The live speed limit as a multiple of light speed.

@@ -116,7 +116,9 @@ export async function createWorld(canvas, bodies = BODIES) {
       item.setClose?.(Math.max(0, (Math.hypot(...rel) * KM_PER_UNIT) / body.radiusKm - 1));
       // lamp: { id, direction } lights one body from elsewhere than the Sun, while a
       // place in its night is being looked at closely (core/lamp.js).
-      item.setSun(lamp?.id === body.id ? lamp.direction : normalize(sunNow.position.map((n, i) => n - body.position[i])));
+      // A planet of another star is lit by that star (core/exo.js).
+      const lightFrom = body.star ? now.find((b) => b.id === body.star) : sunNow;
+      item.setSun(lamp?.id === body.id ? lamp.direction : normalize(lightFrom.position.map((n, i) => n - body.position[i])));
       if (SHADOW_CASTERS[body.id]) item.setShadows?.(castShadows(body.id, now));
       // A moon is lit a little by the planet it goes round (core/shine.js).
       if (body.kind === 'moon' && item.setShine) {
@@ -141,7 +143,8 @@ export async function createWorld(canvas, bodies = BODIES) {
     const flashed = glows.update(dt, elapsed, now, sunNow.position, position);
     belt.update(position, sunNow.position, directions[sunNow.id]);
 
-    const occluders = now.filter((b) => b.kind !== 'star').map((b) => ({
+    // (Nothing of another star's hides the Sun: from there it is one point among the stars.)
+    const occluders = now.filter((b) => b.kind !== 'star' && !b.exo).map((b) => ({
       direction: directions[b.id], distance: distances[b.id], radius: b.radiusKm,
     }));
     const visibility = sunVisibility(directions[sunNow.id], distances[sunNow.id], sunNow.radiusKm, occluders);

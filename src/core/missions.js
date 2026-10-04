@@ -157,7 +157,8 @@ export function completedMissions({ position, orientation, fovY, aspect, heroVis
       sun.direction,
       sun.distance,
       sun.body.radiusKm,
-      frames.filter((f) => f !== sun).map((f) => ({ direction: f.direction, distance: f.distance, radius: f.body.radiusKm })),
+      // (Bodies of another star, core/exo.js, do not count as hiding the Sun.)
+      frames.filter((f) => f !== sun && !f.body.exo).map((f) => ({ direction: f.direction, distance: f.distance, radius: f.body.radiusKm })),
     ),
   };
   return MISSIONS.filter((m) => m.check(shot)).map((m) => m.id);

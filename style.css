@@ -3259,6 +3259,35 @@ body.rear.touch #reticle span {
   box-shadow:0 0 0 8px #0b1630c8;
 }
 
+/* The thrust bar is very small, on every screen (the user, 2026-10-05: "이거 줄이자. 아주
+   작게"; it was 180 → 280px wide and on a phone filled the foot of the screen): 84px, its
+   name and value on one 9px line, a low bar under it. */
+footer .throttle {
+  width:84px;
+  flex:0 0 auto;
+}
+
+footer .throttle > div:first-child {
+  margin-bottom:0;
+  font-size:9px;
+  line-height:1.2;
+  white-space:nowrap;
+}
+
+footer .throttle output {
+  font-size:9px;
+}
+
+footer .throttle input[type=range] {
+  display:block;
+  height:14px;
+  margin:2px 0 0;
+}
+
+footer .throttle .rangeLabels {
+  display:none;
+}
+
 /* The subtitle under the title has no plate: a dark edge round its letters instead. */
 .brand span {
   text-shadow:0 0 3px #02040b, 0 0 8px #02040b, 0 1px 2px #02040b;

@@ -169,5 +169,9 @@ void main(){
   vec3 col = (surface * disc * 1.35 + glow * visibility + vec3(1., .3, .27) * prom * .9
     + vec3(.86, .9, 1.) * pearl + vec3(1., .97, .9) * diamond) * .68;
   float a = clamp(disc + corona * .38 + rayH + rayV + ring + prom + pearl + diamond, 0., 1.);
-  gl_FragColor = vec4(col, a);
+  // The glow is light added to the sky, but the disc itself hides what is behind it: the
+  // colour goes out already multiplied by its strength, and the alpha says how much of
+  // the background is taken away (all of it on the disc, none of it in the glow). Added
+  // over everything, the disc let the constellation lines show across it.
+  gl_FragColor = vec4(col * a, disc);
 }

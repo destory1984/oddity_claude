@@ -119,6 +119,11 @@ export async function createStars(scene) {
   lines.alpha = 0.16;
   lines.isPickable = false;
   lines.alwaysSelectAsActiveMesh = true;
+  // Drawn with the sky, before the Sun, whose disc then covers them (sun.frag). Left to
+  // the usual order (by the distance of the mesh's middle, which is at the eye) the
+  // lines came after the Sun and lay across its disc (the user's photo, 2026-10-04:
+  // "별자리가 태양 앞으로 그려졌어").
+  lines.alphaIndex = 0;
   // setSun: the way to the Sun from the traveler (a unit vector), for the zodiacal light.
   return { mesh: cloud.mesh, setSun: (direction) => material.setVector3('sunDir', new Vector3(...direction)) };
 }

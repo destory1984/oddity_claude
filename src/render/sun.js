@@ -10,7 +10,8 @@ export function createSun(scene, sunBody) {
   const plane = CreatePlane('sun', { size }, scene);
   plane.billboardMode = Mesh.BILLBOARDMODE_ALL;
   const material = shader(scene, 'sunGlow', sunFrag, ['visibility', 'time', 'eclipse', 'bead', 'axisR', 'axisU', 'axisF', 'eyeDist']);
-  material.alphaMode = Constants.ALPHA_ADD;
+  // sun.frag gives colour already multiplied, and alpha 1 on the disc only.
+  material.alphaMode = Constants.ALPHA_PREMULTIPLIED;
   material.needAlphaBlending = () => true;
   material.disableDepthWrite = true;
   material.setFloat('visibility', 1);

@@ -1,11 +1,12 @@
-// What changed, as a player sees it: the first page of the settings ("이번 주에 바뀐
-// 것"). One line each, in plain words, the newest day first. Only what shows on screen or
+// What changed, as a player sees it: the first page of the settings ("바뀐 것들").
+// One line each, in plain words, the newest day first. Only what shows on screen or
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 // Not every change belongs: a new thing to do or see, or a fault mended, does; moving
 // buttons about, evening out spaces, renaming a tab or rewording a sentence does not
 // (the user had six such lines taken out on 2026-10-05: "이런건 바뀐 것에서 빼줘").
 export const CHANGES = [
+  { day: '2026-10-05', text: '설정의 첫 쪽이 "바뀐 것들"이 되어, 만들기 시작한 날부터의 기록을 모두 보여 줍니다.' },
   { day: '2026-10-05', text: '아이폰에서 단추를 빠르게 두 번 누르면 화면이 커지던 것을 고쳤습니다.' },
   { day: '2026-10-05', text: '보현산천문대에 천문대 그림이 섰고, 사진이 없던 이야기 장소 세 곳에 그림이 붙었습니다.' },
   { day: '2026-10-05', text: '앞으로 날 때와 아래로 날 때의 뒷모습을 새로 그렸습니다. 띠와 머리카락 끝만 나부낍니다.' },
@@ -121,15 +122,18 @@ export const CHANGES = [
 const DAY_MS = 86400000;
 const stamp = (day) => Date.parse(`${day}T00:00:00Z`);
 
-// The changes of the last `days` days up to `today` ('YYYY-MM-DD'), the newest first,
-// in the order written. When the week has none, the last day that had any is shown, so
-// the page is never empty.
-export function weekChanges(today, changes = CHANGES, days = 7) {
-  const from = stamp(today) - (days - 1) * DAY_MS;
-  const week = changes.filter((c) => stamp(c.day) >= from && stamp(c.day) <= stamp(today));
-  if (week.length > 0 || changes.length === 0) return week;
-  const last = changes.reduce((best, c) => (stamp(c.day) > stamp(best) ? c.day : best), changes[0].day);
-  return changes.filter((c) => c.day === last);
+// The changes up to `today` ('YYYY-MM-DD'), the newest first, in the order written: all
+// of them, back to the first day. (Until 2026-10-05 the page showed the last seven days
+// only.) A change dated after today (the device's clock is behind) is not shown yet.
+export function changesUntil(today, changes = CHANGES) {
+  return changes.filter((c) => stamp(c.day) <= stamp(today));
+}
+
+// The page shows them a hundred lines at a time; a "더 읽기" button brings the next
+// hundred. Returns the lines to show and whether more are left.
+export const PAGE_LINES = 100;
+export function firstLines(list, count = PAGE_LINES) {
+  return { lines: list.slice(0, count), more: list.length > count };
 }
 
 // The day the making of the game began (the first entry in its history), told at the

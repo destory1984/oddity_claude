@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { CHANGES, weekChanges, dayLabel, startedLine, STARTED } from '../src/core/changes.js';
+import { CHANGES, changesUntil, firstLines, PAGE_LINES, dayLabel, startedLine, STARTED } from '../src/core/changes.js';
 
 test('every change has a day and one short plain sentence, the newest day first', () => {
   assert.ok(CHANGES.length > 0);
@@ -13,23 +13,27 @@ test('every change has a day and one short plain sentence, the newest day first'
   assert.equal(new Set(CHANGES.map((c) => c.text)).size, CHANGES.length);
 });
 
-test('the page shows the last seven days, today included', () => {
+test('the page shows every change up to today, the newest first', () => {
   const list = [
     { day: '2026-10-04', text: 'a' },
     { day: '2026-10-03', text: 'b' },
     { day: '2026-09-28', text: 'c' },
     { day: '2026-09-27', text: 'd' },
   ];
-  assert.deepEqual(weekChanges('2026-10-04', list).map((c) => c.text), ['a', 'b', 'c']);
-  assert.deepEqual(weekChanges('2026-10-05', list).map((c) => c.text), ['a', 'b']);
+  assert.deepEqual(changesUntil('2026-11-20', list).map((c) => c.text), ['a', 'b', 'c', 'd']);
   // A change dated after today (the clock of the device is behind) is not shown yet.
-  assert.deepEqual(weekChanges('2026-10-03', list).map((c) => c.text), ['b', 'c', 'd']);
+  assert.deepEqual(changesUntil('2026-10-03', list).map((c) => c.text), ['b', 'c', 'd']);
+  assert.deepEqual(changesUntil('2026-11-20', []), []);
 });
 
-test('a week with nothing new shows the last day that had something', () => {
-  const list = [{ day: '2026-10-04', text: 'a' }, { day: '2026-10-04', text: 'b' }, { day: '2026-10-01', text: 'c' }];
-  assert.deepEqual(weekChanges('2026-11-20', list).map((c) => c.text), ['a', 'b']);
-  assert.deepEqual(weekChanges('2026-11-20', []), []);
+test('a hundred lines are shown at a time, and the button for more stays while any are left', () => {
+  assert.equal(PAGE_LINES, 100);
+  const list = Array.from({ length: 230 }, (_, i) => i);
+  assert.deepEqual(firstLines(list), { lines: list.slice(0, 100), more: true });
+  assert.equal(firstLines(list, 200).lines.length, 200);
+  assert.equal(firstLines(list, 200).more, true);
+  assert.deepEqual(firstLines(list, 300), { lines: list, more: false });
+  assert.deepEqual(firstLines(list.slice(0, 100)), { lines: list.slice(0, 100), more: false });
 });
 
 test('a day is written short', () => {

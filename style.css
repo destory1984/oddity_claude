@@ -3684,8 +3684,7 @@ footer .throttle .rangeLabels {
 }
 
 /* The four tabs are one size (the user, 2026-10-05: "3개의 버튼 크기를 같게", of the three
-   there were then). The first one's name is the longer ("최근 1주일 동안 바뀐 것"): on a
-   phone it takes two lines or three, broken between words, and the others are as tall. */
+   there were then). */
 #settings #settingsTabs {
   align-items:stretch;
 }
@@ -3717,6 +3716,20 @@ footer .throttle .rangeLabels {
   border-color:var(--gold);
   color:var(--gold);
   font-weight:600;
+}
+
+/* More of the changes: under the hundred lines shown. */
+#settings #newsMore {
+  display:block;
+  width:auto;
+  min-height:36px;
+  margin:0 auto 18px;
+  padding:6px 18px;
+  font-size:13px;
+}
+
+#settings #newsMore[hidden] {
+  display:none;
 }
 
 #newsList {

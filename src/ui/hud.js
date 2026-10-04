@@ -1,5 +1,5 @@
 import { objectParticle, distanceText, markedName } from './messages.js';
-import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, COMPACT_WIDTH } from '../core/markers.js';
+import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, clearOfPanels, COMPACT_WIDTH } from '../core/markers.js';
 
 const $ = (id) => document.getElementById(id);
 const ARROWS = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
@@ -107,18 +107,26 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       const crowded = crowdedMoons(placed.map(({ body, spot, selected: sel }) => ({
         id: body.id, parent: ['moon', 'craft', 'site'].includes(body.kind) ? body.parent : null, x: spot.x, y: spot.y, outside: spot.outside, selected: sel || body.id === goalId,
       })));
-      // On a phone the readouts, the minimap and the target panel fill the top of the
-      // screen: an off-screen arrow that would stand on them is brought down under them
-      // (the label of Mars 3's site once lay over the target's name).
-      const arrowTop = compact
-        ? Math.max($('minimap').getBoundingClientRect().bottom, $('targetPanel').getBoundingClientRect().bottom) + 18
-        : 0;
+      // An off-screen arrow that would stand on the readouts, the minimap or the target
+      // panel is brought down under them (core/markers.js clearOfPanels). On a phone
+      // those fill the top of the screen from side to side (the label of Mars 3's site
+      // once lay over the target's name); on a wide screen they stand at its two sides
+      // (the Sun's arrow lay over the dock button and over the minimap).
+      const map = $('minimap').getBoundingClientRect();
+      const readout = $('altitudeLabel').getBoundingClientRect();
+      const target = $('targetPanel').getBoundingClientRect();
+      const panels = compact
+        ? [{ left: 0, top: 0, right: innerWidth, bottom: Math.max(map.bottom, target.bottom) }]
+        : [
+          { left: Math.min(map.left, readout.left), top: readout.top, right: Math.max(map.right, readout.right), bottom: map.bottom },
+          { left: target.left, top: target.top, right: target.right, bottom: target.bottom },
+        ];
       const arrows = [];
       for (const { body, el, spot, keep, selected: sel } of placed) {
         el.hidden = !keep || crowded.has(body.id) || hiddenIds.includes(body.id);
         el.classList.toggle('selected', sel);
         el.classList.toggle('goal', body.id === goalId);
-        if (!el.hidden && spot.outside) arrows.push({ el, ...spot, y: Math.max(spot.y, arrowTop) });
+        if (!el.hidden && spot.outside) arrows.push({ el, ...spot, y: clearOfPanels(spot, panels) });
       }
       // Labels in view that would cover each other: the nearer thing keeps its label.
       const inView = placed.filter(({ el, spot }) => !el.hidden && !spot.outside);

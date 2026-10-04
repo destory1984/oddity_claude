@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody, nearestBodies, NEARBY_KM } from '../src/core/markers.js';
+import { clearOfPanels, keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody, nearestBodies, NEARBY_KM } from '../src/core/markers.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 
 test('on-screen bodies always keep their label', () => {
@@ -136,4 +136,20 @@ test('between a planet and its moon both count as the nearest; out between the p
   // Halfway from Earth to Mars nothing else is within 300,000 km.
   assert.equal(nearestBodies(between('earth', 'mars', 0.5), BODIES).length, 1);
   assert.equal(NEARBY_KM, 300000);
+});
+
+test('an off-screen arrow is brought down under a panel it would stand on', () => {
+  const panels = [{ left: 36, top: 95, right: 200, bottom: 345 }, { left: 1240, top: 95, right: 1404, bottom: 345 }];
+  // On the right edge, beside the target panel: under it.
+  assert.equal(clearOfPanels({ x: 1370, y: 310 }, panels), 363);
+  // On the left edge, over the minimap: under it.
+  assert.equal(clearOfPanels({ x: 70, y: 180 }, panels), 363);
+  // Along the top, in the open middle of a wide screen: left alone.
+  assert.equal(clearOfPanels({ x: 720, y: 100 }, panels), 100);
+  // Already below a panel: left alone.
+  assert.equal(clearOfPanels({ x: 1370, y: 500 }, panels), 500);
+  // A phone: one panel from side to side.
+  assert.equal(clearOfPanels({ x: 200, y: 100 }, [{ left: 0, top: 0, right: 400, bottom: 330 }]), 348);
+  // Under one panel it must not land on another.
+  assert.equal(clearOfPanels({ x: 100, y: 50 }, [{ left: 0, top: 0, right: 200, bottom: 100 }, { left: 0, top: 110, right: 200, bottom: 200 }]), 218);
 });

@@ -38,6 +38,21 @@ export function nearCentre(x, y, width, height) {
   return Math.hypot(x - width / 2, y - height / 2) <= Math.min(width, height) / 4;
 }
 
+// An off-screen arrow must not stand on the readouts, the minimap or the target panel.
+// panels: [{ left, top, right, bottom }] in screen pixels. An arrow within `reach` to the
+// side of a panel (its label is that wide) and within `gap` above or below it is brought
+// down to `gap` under the panel. Returns the y to draw it at.
+export function clearOfPanels({ x, y }, panels, gap = 18, reach = 90) {
+  let at = y;
+  // Twice: under one panel it may have come onto another.
+  for (let pass = 0; pass < 2; pass++) {
+    for (const { left, top, right, bottom } of panels) {
+      if (x > left - reach && x < right + reach && at > top - gap && at < bottom + gap) at = bottom + gap;
+    }
+  }
+  return at;
+}
+
 // Arrows closer than `gap` pixels (in both x and y) are pushed apart vertically,
 // staying within the screen height.
 export function spreadArrows(arrows, gap, height) {

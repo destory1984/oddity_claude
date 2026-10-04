@@ -3147,6 +3147,18 @@ body.rear.touch #reticle span {
   #flyButton { right:0; }
 }
 
+/* On a wide screen the four stand together at the right end. (The rear-view button stood
+   alone beside the thrust bar, the other three far to the right.) */
+@media (min-width: 481px) {
+  #rearButton {
+    margin-left:auto;
+  }
+
+  #reverseButton {
+    margin-left:0;
+  }
+}
+
 /* The version and when it was last updated, small, under the loading line. */
 #noteCardVersion {
   display:block;

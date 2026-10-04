@@ -984,7 +984,8 @@ ${STORY_MORE[target.id]}` : told };
   $('bgmButton').addEventListener('click', toggleMusic);
   $('tuneButton').addEventListener('click', () => {
     sound.unlock();
-    toast.show(`다음 곡: ${sound.nextTune()}. ${sound.musicOn() ? '다음 마디부터 나옵니다.' : '배경 음악이 꺼져 있습니다.'}`, 'tune');
+    // Told beside the button: a notice would be hidden behind the settings.
+    $('tuneNow').textContent = `♪ ${sound.nextTune()}${sound.musicOn() ? '' : ' (배경 음악이 꺼져 있습니다)'}`;
   });
 
   $('brake').addEventListener('click', brake);

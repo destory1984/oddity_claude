@@ -62,6 +62,9 @@ export function createSound() {
   let barNumber = 0;
   const order = tuneOrder();
   let playing = null;
+  // The bars still sounding, each through its own gain ({ out, until }), so that a jump
+  // to the next tune can fade them out at once.
+  let barBuses = [];
 
   // Browsers only allow audio after a user gesture, so this runs on the first key or tap.
   function ensure() {
@@ -135,7 +138,7 @@ export function createSound() {
 
   // One held note of the pad: two slightly detuned triangles behind a low-pass filter,
   // swelling in over 2.5 s and fading out over 3 s so bars melt into each other.
-  function padNote(freq, start, volume) {
+  function padNote(freq, start, volume, out = musicBus) {
     const t = ctx.currentTime + start;
     const end = t + BAR_S + 3;
     const filter = ctx.createBiquadFilter();
@@ -146,7 +149,7 @@ export function createSound() {
     env.gain.linearRampToValueAtTime(volume, t + 2.5);
     env.gain.setValueAtTime(volume, end - 3);
     env.gain.linearRampToValueAtTime(0.0001, end);
-    filter.connect(env).connect(musicBus);
+    filter.connect(env).connect(out);
     for (const cents of [-6, 6]) {
       const osc = ctx.createOscillator();
       osc.type = 'triangle';
@@ -160,12 +163,16 @@ export function createSound() {
 
   // plan from core/music.js barPlan(); start is seconds from now.
   function playBar(plan, start) {
-    for (const freq of plan.pad) padNote(freq, start, PAD_VOLUME);
-    tone({ freq: plan.bass, start, length: BAR_S, volume: BASS_VOLUME, out: musicBus });
+    const out = ctx.createGain();
+    out.connect(musicBus);
+    barBuses = barBuses.filter((bar) => bar.until > ctx.currentTime);
+    barBuses.push({ out, until: ctx.currentTime + start + BAR_S + 3.1 });
+    for (const freq of plan.pad) padNote(freq, start, PAD_VOLUME, out);
+    tone({ freq: plan.bass, start, length: BAR_S, volume: BASS_VOLUME, out });
     for (const note of plan.notes) {
       const { length, overtone, overtoneVolume, wave = 'sine' } = plan.bell;
-      tone({ freq: note.freq, type: wave, start: start + note.at, length, volume: note.volume, out: musicBus });
-      tone({ freq: note.freq * overtone, start: start + note.at, length: length * 0.3, volume: note.volume * overtoneVolume, out: musicBus });
+      tone({ freq: note.freq, type: wave, start: start + note.at, length, volume: note.volume, out });
+      tone({ freq: note.freq * overtone, start: start + note.at, length: length * 0.3, volume: note.volume * overtoneVolume, out });
     }
   }
 
@@ -311,9 +318,16 @@ export function createSound() {
     musicOn: () => musicOn,
     // The name of the tune being played (null before the first bar).
     tuneName: () => playing,
-    // Jump to the next tune at the coming bar; returns its name.
+    // Jump to the next tune now; returns its name. The bars that are sounding fade out
+    // and the new tune's first bar starts a third of a second on. (It used to wait for
+    // the coming bar, up to 8 s: the user, 2026-10-04: "다음곡으로 안 넘어가는데?")
     nextTune() {
       barNumber = nextTuneBar(barNumber);
+      if (ctx) {
+        for (const bar of barBuses) bar.out.gain.setTargetAtTime(0, ctx.currentTime, 0.12);
+        barBuses = [];
+        nextBarAt = ctx.currentTime + 0.35;
+      }
       return tuneFor(barInOrder(barNumber, order)).name;
     },
     setMusic(on) {

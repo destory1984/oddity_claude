@@ -31,9 +31,9 @@ function near(bodyId, distanceKm, fromId = 'sun') {
   return add(body.position, scale(toward, distanceKm));
 }
 
-test('there are nineteen missions with names and hints', () => {
-  assert.equal(MISSIONS.length, 19);
-  assert.equal(new Set(MISSIONS.map((m) => m.id)).size, 19);
+test('there are twenty missions with names and hints', () => {
+  assert.equal(MISSIONS.length, 20);
+  assert.equal(new Set(MISSIONS.map((m) => m.id)).size, 20);
   for (const m of MISSIONS) assert.ok(m.name && m.hint);
 });
 
@@ -54,6 +54,24 @@ test('earthrise: Earth over the lunar horizon from low orbit', () => {
   const low = add(moon.position, scale(upDir, moon.radiusKm + 100));
   assert.ok(shoot(low, 'earth', { fovDeg: 70 }).includes('earthrise'));
   assert.ok(!shoot(near('moon', 20000, 'earth'), 'earth').includes('earthrise'));
+});
+
+test('diamond ring: the Sun part-way out from behind the Moon, neither hidden nor clear', () => {
+  const moon = bodyById('moon');
+  const shadow = near('moon', 1737.4 + 2000, 'sun').map((n, i) => 2 * moon.position[i] - n);
+  // Step sideways out of the shadow: somewhere on the way the Sun is 10 to 40% out.
+  const out = unit([shadow[2] - moon.position[2], 0, moon.position[0] - shadow[0]]);
+  const hits = [];
+  for (let km = 0; km <= 6000; km += 50) {
+    const done = shoot(add(shadow, scale(out, km)), 'sun');
+    if (done.includes('diamondRing')) hits.push(km);
+    // Never both at once: the eclipse wants under 10%, this over 10%.
+    assert.ok(!(done.includes('diamondRing') && done.includes('eclipse')), `${km}`);
+  }
+  assert.ok(hits.length > 0);
+  assert.ok(hits[0] > 0);
+  assert.ok(!shoot(shadow, 'sun').includes('diamondRing'));
+  assert.ok(!shoot(START_POSITION, 'sun').includes('diamondRing'));
 });
 
 test('eclipse: the Sun in frame behind the Moon', () => {

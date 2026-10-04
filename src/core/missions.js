@@ -139,6 +139,15 @@ export const MISSIONS = [
     hint: '핼리 혜성 5,000km 안에서 혜성과 태양을 한 화면에 (지오토, 1986년)',
     check: (s) => s.distanceToSurface('halley') <= 5000 && s.seen('halley') && s.frame('sun').visible,
   },
+  // The Sun just coming out from behind a body's edge, its light spreading and drawn
+  // out into rays (bloom, glare, diffraction spikes): what an eclipse shows at its
+  // start and end. Added at the end of the list, by the user's order of 2026-10-04.
+  {
+    id: 'diamondRing',
+    name: '다이아몬드 반지',
+    hint: '행성이나 위성의 가장자리로 태양이 막 나올 때 찍기 (태양이 10% 넘고 40%보다 적게 보여야 한다)',
+    check: (s) => s.frame('sun').visible && s.sunShown > 0.1 && s.sunShown < 0.4,
+  },
 ];
 
 export function completedMissions({ position, orientation, fovY, aspect, heroVisible, bodies = BODIES, craft = [] }) {

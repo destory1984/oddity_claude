@@ -168,17 +168,13 @@ const loop = (time, fps) => Math.floor(time * fps) % FRAMES;
 // the others the legs jerked about ("다리 움직임이 매우 이상한데?"). It is left out: the
 // first drawing comes round again in its place.
 const CALM_ORDER = [0, 1, 0, 3];
-// (Nosing down, the third drawing throws her hair and ribbons up: left out too.)
-const CALM_SHEETS = ['away-left', 'away-right', 'back-down'];
-// The straight set, 'away' (drawn again on 2026-10-04 with both legs side by side),
-// plays its first and third drawings only. In the second the head stands 6px to one
-// side; the fourth was drawn mirrored and flipped back, so its head is another head
-// and the whole figure stands 12px aside: in turn with the others her head shook
-// ("머리가 너무 많이 떨려"). The first and third differ by 2px in the head, and in
-// the cape's points, which is the movement wanted.
-const STEADY_ORDER = [0, 2, 0, 2];
+const CALM_SHEETS = ['away-left', 'away-right'];
+// The straight set, 'away', and the dive, 'back-down', were drawn again on 2026-10-05
+// with the head and body in one place in all four drawings (measured: no shift between
+// them), only the sashes and the ends of the hair moving: they play all four. (Before
+// that 'away' played two of its four, because the other two stood 6 and 12px aside and
+// her head shook, and 'back-down' left out a drawing that threw her hair up.)
 export function flightFrame(sheet, n) {
-  if (sheet === 'away') return STEADY_ORDER[n];
   return CALM_SHEETS.includes(sheet) ? CALM_ORDER[n] : n;
 }
 const once = (time, fps) => Math.min(FRAMES - 1, Math.floor(time * fps));

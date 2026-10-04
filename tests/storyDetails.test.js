@@ -15,10 +15,12 @@ test('every story place has a longer telling of three sentences or more', () => 
   }
 });
 
-test('95 of the 100 have a photograph on file, with a caption and a credit; the Ocean of Storms, the three places of the ninth tour and the six places added on Earth have none', () => {
+test('98 of the 100 have a picture on file, with a caption and a credit (95 photographs and three drawings made for the game); Wadi Rum and Bohyunsan have none', () => {
   const without = STORIES.filter((s) => !STORY_DETAILS[s.id].photo).map((s) => s.id);
-  assert.deepEqual(without, ['procellarum', 'acidalia', 'schiaparelli', 'wadiRum', 'bohyunsan']);
-  assert.equal(storyPhotoFile('procellarum'), null);
+  assert.deepEqual(without, ['wadiRum', 'bohyunsan']);
+  assert.equal(storyPhotoFile('wadiRum'), null);
+  // A drawing says that it is one.
+  for (const id of ['procellarum', 'acidalia', 'schiaparelli']) assert.match(STORY_DETAILS[id].photo.caption, /^그림으로 그린 .*사진이 아닙니다\.$/);
   const credits = readFileSync('THIRD-PARTY.md', 'utf8');
   let bytes = 0;
   for (const story of STORIES) {
@@ -32,6 +34,6 @@ test('95 of the 100 have a photograph on file, with a caption and a credit; the 
     // Where it came from and its licence are written down.
     assert.ok(credits.includes(`| \`${story.id}.jpg\` |`), `${story.id} is not in THIRD-PARTY.md`);
   }
-  assert.equal(readdirSync('public/assets/stories').length, 95);
-  assert.ok(bytes < 3.6e6, `${bytes} bytes of photographs`);
+  assert.equal(readdirSync('public/assets/stories').length, 98);
+  assert.ok(bytes < 3.8e6, `${bytes} bytes of pictures`);
 });

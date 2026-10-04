@@ -2769,6 +2769,18 @@ dialog:where(:not(#journal)) button:hover {
   color:#dfe6ff;
 }
 
+/* The subtitle under the title, in the title's gold (it was missing here: the loading
+   screen showed the title alone). It stands close under the lettering. */
+#loadingSub {
+  margin-top:-12px;
+  color:var(--gold);
+  font-size:18px;
+  font-style:normal;
+  font-weight:600;
+  letter-spacing:.14em;
+  text-shadow:0 2px 12px #02040b, 0 0 3px #02040b;
+}
+
 /* The outer page on a wide window: a dark night sky behind the phone-shaped frame. */
 html.shell body {
   background:#02040b url("/assets/scenes/backdrop.png") center / cover no-repeat;

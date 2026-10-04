@@ -62,7 +62,7 @@ const DOKDO_APPARENT = 0.1;
 const DOKDO_NIGHT = 0.25;
 
 // Places shown as a drawing on a card, and the picture of each (public/assets/).
-const SITE_CARDS = { dokdo: 'dokdo.png', wadiRum: 'wadi-rum.png' };
+const SITE_CARDS = { dokdo: 'dokdo.png', wadiRum: 'wadi-rum.png', bohyunsan: 'bohyunsan.png' };
 
 function createSiteCard(scene, id, file) {
   // The node sits at sea level; the card stands on it (two wide, one high, +y up).

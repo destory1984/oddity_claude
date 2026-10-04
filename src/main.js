@@ -111,7 +111,8 @@ const NOTE_GAP_S = 20;
 // 30 km wide and a lander 6 km; a crater or a sea is seen from 500 km.
 function inspectView(target) {
   if (target.kind === 'craft') return { distanceKm: 110, fovDeg: 30 };
-  if (target.id === 'dokdo') return { distanceKm: 30, fovDeg: 40 };
+  // (The drawn cards of a small place: the islets, the observatory on its mountain.)
+  if (target.id === 'dokdo' || target.id === 'bohyunsan') return { distanceKm: 30, fovDeg: 40 };
   // (A landmark with something standing on it, MESSENGER's wreck, is looked at from close.)
   if (target.kind === 'site') return target.landmark && !world?.hasSiteModel(target.id) ? { distanceKm: 500, fovDeg: 50 } : { distanceKm: 28, fovDeg: 28 };
   return { distanceKm: target.radiusKm * (target.id === 'saturn' ? 7 : 4), fovDeg: 44 };

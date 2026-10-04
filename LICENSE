@@ -19,7 +19,10 @@ This repository is licensed in three parts.
      porch, note and mailbox scenes, the stamps, the postage stamps and
      postmark, the stars, the pencil marks, the newspaper clipping, the nine
      pictures of the tours), the two scenes in public/assets/scenes/, the
-     drawing of Wadi Rum in public/assets/wadi-rum.png and the companions in
+     drawings of Wadi Rum and of the Bohyunsan observatory in
+     public/assets/wadi-rum.png and public/assets/bohyunsan.png, the three
+     drawings among the story pictures (acidalia.jpg, procellarum.jpg and
+     schiaparelli.jpg in public/assets/stories/) and the companions in
      public/assets/pals/.
    - The app icons in public/icons/.
    - The title lettering in public/assets/ui/title.png.

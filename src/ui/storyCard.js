@@ -1,4 +1,4 @@
-import { STORY_DETAILS, storyPhotoFile } from '../core/storyDetails.js';
+import { STORY_DETAILS, storyPhotoFile, DRAWN } from '../core/storyDetails.js';
 import { quizFor } from '../core/storyQuiz.js';
 
 const $ = (id) => document.getElementById(id);
@@ -28,7 +28,8 @@ export function createStoryCard({ onOpen, onClose, onSolve = () => {}, isSolved 
         $('storyCardPhoto').src = `${import.meta.env.BASE_URL}assets/${file}`;
         $('storyCardPhoto').alt = more.photo.caption;
         $('storyCardCaption').textContent = more.photo.caption;
-        $('storyCardCredit').textContent = `사진: ${more.photo.credit}`;
+        // (A picture drawn for the game is not called a photograph.)
+        $('storyCardCredit').textContent = more.photo.credit === DRAWN ? more.photo.credit : `사진: ${more.photo.credit}`;
       } else {
         $('storyCardPhoto').removeAttribute('src');
       }

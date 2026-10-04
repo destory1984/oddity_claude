@@ -47,8 +47,11 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 
 `public/assets/stories/` 의 사진 95장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
 
+같은 폴더의 그림 석 장(`acidalia.jpg`, `procellarum.jpg`, `schiaparelli.jpg`, 420×420)은 쓸 수 있는 사진이 없어 이 게임을 위해 그린 것이다. 외부 자료가 아니고 권리를 보유한다(LICENSE).
+
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
+| `acidalia.jpg` | 이 게임을 위해 그린 그림 (2026-10-05) | 이 저장소 | 권리 보유 (LICENSE) |
 | `aitken.jpg` | [South Pole–Aitken basin on the Moon's farside.png](https://commons.wikimedia.org/wiki/File:South_Pole%E2%80%93Aitken_basin_on_the_Moon%27s_farside.png) | NASA (the outline of South Pole–Aitken basin is own work) | Public domain |
 | `alpineValley.jpg` | [Vallis Alpes - LROC - WAC.JPG](https://commons.wikimedia.org/wiki/File:Vallis_Alpes_-_LROC_-_WAC.JPG) | NASA / LRO_LROC_TEAM | Public domain |
 | `apennines.jpg` | [Montes Apenninus (LRO).png](https://commons.wikimedia.org/wiki/File:Montes_Apenninus_(LRO).png) | NASA (image by Lunar Reconnaissance Orbiter) | Public domain |
@@ -159,6 +162,8 @@ CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수
 | `saturnShadow.jpg` | [Saturn eclipse.jpg](https://commons.wikimedia.org/wiki/File:Saturn_eclipse.jpg) | NASA/JPL/Space Science Institute | Public domain |
 | `earthAndMoon.jpg` | [First Picture of the Earth and Moon in a Single Frame - GPN-2002-000202.jpg](https://commons.wikimedia.org/wiki/File:First_Picture_of_the_Earth_and_Moon_in_a_Single_Frame_-_GPN-2002-000202.jpg) | NASA | Public domain |
 | `plutoCharon.jpg` | [Pluto-Charon-v2-10-1-15.jpg](https://commons.wikimedia.org/wiki/File:Pluto-Charon-v2-10-1-15.jpg) | NASA / Johns Hopkins University Applied Physics Laboratory / Southwest Research Institute | Public domain |
+| `procellarum.jpg` | 이 게임을 위해 그린 그림 (2026-10-05) | 이 저장소 | 권리 보유 (LICENSE) |
+| `schiaparelli.jpg` | 이 게임을 위해 그린 그림 (2026-10-05) | 이 저장소 | 권리 보유 (LICENSE) |
 
 ## d3-celestial 라이선스 (BSD 3-Clause)
 

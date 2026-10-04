@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { CHANGES, weekChanges, dayLabel } from '../src/core/changes.js';
+import { CHANGES, weekChanges, dayLabel, startedLine, STARTED } from '../src/core/changes.js';
 
 test('every change has a day and one short plain sentence, the newest day first', () => {
   assert.ok(CHANGES.length > 0);
@@ -35,4 +35,13 @@ test('a week with nothing new shows the last day that had something', () => {
 test('a day is written short', () => {
   assert.equal(dayLabel('2026-10-04'), '10.4');
   assert.equal(dayLabel('2026-12-25'), '12.25');
+});
+
+test('the page tells the day the making began and how many days it has been, the first day being day 1', () => {
+  assert.equal(STARTED, '2026-09-30');
+  assert.equal(startedLine('2026-09-30'), '만들기 시작한 날: 2026년 9월 30일 · 오늘로 1일째');
+  assert.equal(startedLine('2026-10-04'), '만들기 시작한 날: 2026년 9월 30일 · 오늘로 5일째');
+  assert.equal(startedLine('2029-06-26'), '만들기 시작한 날: 2026년 9월 30일 · 오늘로 1,001일째');
+  // A clock set before the start tells only the day.
+  assert.equal(startedLine('2026-09-01'), '만들기 시작한 날: 2026년 9월 30일');
 });

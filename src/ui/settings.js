@@ -2,7 +2,7 @@
 // changed this week (core/changes.js); the second holds what can be set (the screen's
 // shape, the character, the layout of the planets, the sounds), which used to be in the
 // help.
-import { weekChanges, dayLabel } from '../core/changes.js';
+import { weekChanges, dayLabel, startedLine } from '../core/changes.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -20,6 +20,7 @@ export function createSettings({ onOpen, onClose, today }) {
 
   function renderNews() {
     let lastDay = null;
+    $('newsStarted').textContent = startedLine(today());
     $('newsList').replaceChildren(...weekChanges(today()).map(({ day, text }) => {
       const item = document.createElement('li');
       // The day is written once, at the first line of that day.

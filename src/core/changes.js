@@ -84,6 +84,15 @@ export function weekChanges(today, changes = CHANGES, days = 7) {
   return changes.filter((c) => c.day === last);
 }
 
+// The day the making of the game began (the first entry in its history), told at the
+// head of the page with how many days it has been: the day itself is day 1.
+export const STARTED = '2026-09-30';
+export function startedLine(today, started = STARTED) {
+  const [y, m, d] = started.split('-').map(Number);
+  const days = Math.round((stamp(today) - stamp(started)) / DAY_MS) + 1;
+  return `만들기 시작한 날: ${y}년 ${m}월 ${d}일${days >= 1 ? ` · 오늘로 ${days.toLocaleString('ko-KR')}일째` : ''}`;
+}
+
 // '2026-10-04' → '10.4'
 export function dayLabel(day) {
   const [, month, date] = day.split('-').map(Number);

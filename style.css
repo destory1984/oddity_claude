@@ -3148,7 +3148,9 @@ body.rear.touch #reticle span {
     min-height:var(--tap);
   }
 
-  #rearButton { right:calc(3 * (var(--tap) + 8px)); }
+  /* The rear-view button stands in the pad's empty corner, left of its up key (the
+     user's drawing of 2026-10-05): the three under the pad then line up with its keys. */
+  #rearButton { right:calc(2 * (var(--tap) + 8px)); bottom:calc(92px + 2 * (var(--tap) + 8px)); }
   #reverseButton { right:calc(2 * (var(--tap) + 8px)); }
   #brake { right:calc(var(--tap) + 8px); }
   #flyButton { right:0; }
@@ -3206,12 +3208,12 @@ body.rear.touch #reticle span {
 #slideRight::before { transform:rotate(90deg); }
 
 @media (max-width: 480px) {
-  /* On a phone the pad stands at the right, over the row of four and centred on it
-     (the user's drawing of 2026-10-05; it stood at the left, over the speed). */
+  /* On a phone the pad stands at the right edge, over the row of three (the user's
+     drawings of 2026-10-05; it stood at the left, over the speed). */
   #slidePad {
     --key:var(--tap);
     position:absolute;
-    right:calc((var(--tap) + 8px) / 2);
+    right:0;
     bottom:calc(92px + var(--tap) + 8px);
   }
 }

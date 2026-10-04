@@ -3148,12 +3148,7 @@ body.rear.touch #reticle span {
     min-height:var(--tap);
   }
 
-  /* The rear-view button stands in the pad's empty corner, left of its up key (the
-     user's drawing of 2026-10-05): the three under the pad then line up with its keys. */
-  #rearButton { right:calc(2 * (var(--tap) + 8px)); bottom:calc(2 * (var(--tap) + 8px)); }
-  #reverseButton { right:calc(2 * (var(--tap) + 8px)); }
-  #brake { right:calc(var(--tap) + 8px); }
-  #flyButton { right:0; }
+  /* Where each stands is told below, with the pad ("One block of keys"). */
 }
 
 /* On a wide screen the four stand together at the right end. (The rear-view button stood
@@ -3207,62 +3202,63 @@ body.rear.touch #reticle span {
 #slideDown::before { transform:rotate(180deg); }
 #slideRight::before { transform:rotate(90deg); }
 
+/* One block of keys on a phone, in the bottom right corner, three columns by three rows:
+     [reverse] [up]   [forward]
+     [left]    [stop] [right]
+     [rear]    [down]
+   and at the left the speed with the thrust bar over it, as tall as the keys together.
+   (All by the user's drawings and words of 2026-10-05: the pad to the right, lined up to
+   the right edge, stop and down changed places, forward and reverse to the top corners,
+   everything down to the foot of the screen.)
+   ONE measure, --gap, is used for every space: from the screen's left, right and bottom
+   edges, between two keys, and between the two plates ("저 간격들이 모두 같아야 해").
+   A plate (speed, thrust) reaches 8px past its box as a ring of the same colour, so its
+   box stands 8px further in than a key does. */
 @media (max-width: 480px) {
-  /* On a phone the pad stands at the right edge, over the row of three (the user's
-     drawings of 2026-10-05; it stood at the left, over the speed). */
+  #hud footer {
+    --gap:12px;
+    --step:calc(var(--tap) + var(--gap));
+    left:var(--gap);
+    right:var(--gap);
+    bottom:max(var(--gap), env(safe-area-inset-bottom));
+  }
+
   #slidePad {
     --key:var(--tap);
+    gap:var(--gap);
     position:absolute;
     right:0;
-    bottom:calc(var(--tap) + 8px);
+    bottom:var(--step);
   }
 
-  /* The stop button and the pad's down key change places (the user, 2026-10-05: "멈춤
-     버튼과 아래 버튼을 서로 맞바꿈"): stop is the middle of the cross, down is under it,
-     between reverse and forward. The stop button lies over the pad's empty cell. */
-  #brake {
-    bottom:calc(var(--tap) + 8px);
-    z-index:1;
-  }
-
+  /* The pad's down key stands one row lower, and the stop button lies in the cell it left. */
   #slideDown {
     position:relative;
-    top:calc(var(--tap) + 8px);
+    top:var(--step);
   }
 
-  /* The keys stand in the very corner, at the foot of the screen (the user, 2026-10-05:
-     "이제 버튼들을 화면 제일 오른쪽 아래로"; they stood 92px up, over the thrust bar's
-     row). Left of them there is room for the speed only, so the small thrust bar goes
-     up over the speed. */
-  #hud footer .throttle {
-    position:absolute;
-    left:8px;
-    bottom:calc(100% + 24px);
-    width:110px;
-  }
+  #reverseButton { right:calc(2 * var(--step)); bottom:calc(2 * var(--step)); }
+  #flyButton { right:0; bottom:calc(2 * var(--step)); }
+  #brake { right:var(--step); bottom:var(--step); z-index:1; }
+  #rearButton { right:calc(2 * var(--step)); bottom:0; }
 
-  /* One line all round ("버튼 간격이 삐뚤빼뚤"): the two plates at the left and the keys at
-     the right stand the same way off the screen's edges and are the same height. A
-     plate reaches 8px past its box, so the boxes stand 8px in; the two plates are one
-     width with 8px between them, as between the keys; and the thrust bar is tall enough
-     that the two together are as tall as three keys (3 keys + 2 gaps = 148px at 44px). */
+  /* The speed: its plate's edge on the footer's left and bottom edges. */
   footer .speedBox {
     margin:0 0 8px 8px;
   }
 
+  /* The thrust bar over it: as wide, --gap between the two plates, and tall enough that
+     the two plates together are as tall as the three rows of keys. (The speed's plate
+     is 82px tall; the thrust plate is its bar and 29px more.) */
+  #hud footer .throttle {
+    position:absolute;
+    left:8px;
+    bottom:calc(100% + 16px + var(--gap));
+    width:110px;
+  }
+
   #hud footer .throttle input[type=range] {
-    height:calc(3 * var(--tap) + 16px - 119px);
-  }
-
-  /* Forward and reverse stand in the top corners, the rear-view button in the bottom
-     left one (the user, 2026-10-05: "전진/후진과 뒤 보기 버튼의 위치를 맞바꾸자"). */
-  #reverseButton,
-  #flyButton {
-    bottom:calc(2 * (var(--tap) + 8px));
-  }
-
-  #rearButton {
-    bottom:0;
+    height:calc(3 * var(--tap) + var(--gap) - 111px);
   }
 }
 

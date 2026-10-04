@@ -64,9 +64,10 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
     },
     // goalId: the body the first-visit guide points at; its label always shows and pulses.
     // knownIds: a Set of what is in the journal (bodies found, craft met, places logged).
-    // nearestId: the body whose surface is closest (a moon counts); its label always says
-    // how far it is, and off screen it keeps an edge arrow, on a phone too.
-    update({ view, local, nearestId = local.body.id, selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [], knownIds = null }) {
+    // nearestIds: the body whose surface is closest (a moon counts) and a neighbour next
+    // nearest (core/markers.js nearestBodies); their labels always say how far they
+    // are, and off screen they keep an edge arrow, on a phone too.
+    update({ view, local, nearestIds = [local.body.id], selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [], knownIds = null }) {
       $('altitudeLabel').textContent = local.label;
       $('altitude').textContent = fmt(local.altitude);
       const backward = speed > 0.01 && motionSign < 0;
@@ -86,7 +87,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         el.classList.toggle('unknown', Boolean(knownIds) && !knownIds.has(body.id));
         const spot = placeMarker(el, view.directions[body.id], view.camera, hidden ? `${name} · 가려짐` : name);
         // What the traveler is looking toward also says how far its surface is.
-        const nearestHere = body.id === nearestId;
+        const nearestHere = nearestIds.includes(body.id);
         el.classList.toggle('nearest', nearestHere);
         if (nearestHere || (!spot.outside && nearCentre(spot.x, spot.y, innerWidth, innerHeight))) {
           el.textContent += ` · ${distanceText(Math.max(0, view.distances[body.id] - body.radiusKm))}`;

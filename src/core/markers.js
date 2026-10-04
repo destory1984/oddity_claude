@@ -3,13 +3,27 @@
 // Bodies this close get an edge arrow even when off screen, so a neighbor such as
 // the Moon never vanishes while you fly around Earth.
 import { sweepSphere } from './flight.js';
+import { surfaceDistance } from './bodies.js';
 
 export const NEARBY_KM = 300000;
 
 // always: Earth and the Sun, the two bearings a traveler should never lose.
 // compact: a phone screen, where a dozen edge arrows covered the view. There only the
-// chosen target, the nearest body and the "always" ones keep an arrow when off screen.
+// chosen target, the nearest body (and a neighbour next nearest: nearestBodies) and the
+// "always" ones keep an arrow when off screen.
 // (The nearest had none until 2026-10-03, and what was closest was the hardest to find.)
+// The bodies that count as "the nearest" for the labels: the one whose surface is
+// closest, and the next one too when it is a neighbour (within NEARBY_KM). Between
+// Earth and the Moon the nearest was Earth, which has its arrow anyway, and on a phone
+// the Moon had none; the same between Jupiter and Io. Out between the planets the
+// second is far away and gets nothing.
+export function nearestBodies(position, bodies, nearbyKm = NEARBY_KM) {
+  const byDistance = bodies
+    .map((body) => ({ id: body.id, km: surfaceDistance(position, body) }))
+    .sort((a, b) => a.km - b.km);
+  return byDistance.filter(({ km }, i) => i === 0 || (i === 1 && km <= nearbyKm)).map(({ id }) => id);
+}
+
 export function keepMarker({ outside, selected, nearest, surfaceKm, always = false, compact = false }) {
   if (compact) return !outside || selected || nearest || always;
   return !outside || selected || nearest || always || surfaceKm <= NEARBY_KM;

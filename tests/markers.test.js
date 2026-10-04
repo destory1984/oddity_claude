@@ -1,6 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody } from '../src/core/markers.js';
+import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody, nearestBodies, NEARBY_KM } from '../src/core/markers.js';
+import { BODIES, bodyById } from '../src/core/bodies.js';
 
 test('on-screen bodies always keep their label', () => {
   assert.equal(keepMarker({ outside: false, selected: false, nearest: false, surfaceKm: 1e9 }), true);
@@ -124,4 +125,15 @@ test('on a phone only the chosen target, the nearest body, Earth, the Sun and th
   assert.equal(keepMarker({ ...near, always: true }), true);
   // In view, a label always shows.
   assert.equal(keepMarker({ ...near, outside: false }), true);
+});
+
+test('between a planet and its moon both count as the nearest; out between the planets only one does', () => {
+  const between = (a, b, t) => bodyById(a).position.map((n, i) => n + (bodyById(b).position[i] - n) * t);
+  // A quarter of the way from Earth to the Moon: Earth is nearer, and the Moon is a neighbour.
+  assert.deepEqual(nearestBodies(between('earth', 'moon', 0.25), BODIES), ['earth', 'moon']);
+  assert.deepEqual(nearestBodies(between('earth', 'moon', 0.9), BODIES), ['moon', 'earth']);
+  assert.deepEqual(nearestBodies(between('jupiter', 'io', 0.5), BODIES).sort(), ['io', 'jupiter']);
+  // Halfway from Earth to Mars nothing else is within 300,000 km.
+  assert.equal(nearestBodies(between('earth', 'mars', 0.5), BODIES).length, 1);
+  assert.equal(NEARBY_KM, 300000);
 });

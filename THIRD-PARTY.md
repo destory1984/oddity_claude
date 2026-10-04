@@ -45,7 +45,7 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 
 ## 이야기 장소의 사진
 
-`public/assets/stories/` 의 사진 90장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
+`public/assets/stories/` 의 사진 95장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
 
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
@@ -139,6 +139,11 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | `voyager2Out.jpg` | [Voyager 2 Heliopause.jpg](https://commons.wikimedia.org/wiki/File:Voyager_2_Heliopause.jpg) | NASA/Goddard Space Flight Center Conceptual Image Lab Animat | Public domain |
 | `parkerPerihelion.jpg` | [Parker Solar Probe.jpg](https://commons.wikimedia.org/wiki/File:Parker_Solar_Probe.jpg) | NASA/Johns Hopkins APL/Steve Gribben | Public domain |
 | `greatDarkSpot.jpg` | [Great Dark Spot (cropped).jpg](https://commons.wikimedia.org/wiki/File:Great_Dark_Spot_(cropped).jpg) | NASA | Public domain |
+| `baikonur.jpg` | [Baikonur Cosmodrome Soyuz launch pad.jpg](https://commons.wikimedia.org/wiki/File:Baikonur_Cosmodrome_Soyuz_launch_pad.jpg) | NASA/Bill Ingalls | Public domain |
+| `chicxulub.jpg` | [Chicxulub radar topography.jpg](https://commons.wikimedia.org/wiki/File:Chicxulub_radar_topography.jpg) | NASA/JPL-Caltech | Public domain |
+| `barringer.jpg` | [Barringer Crater aerial photo by USGS.jpg](https://commons.wikimedia.org/wiki/File:Barringer_Crater_aerial_photo_by_USGS.jpg) | USGS/D. Roddy | Public domain |
+| `maunaKea.jpg` | [Mauna Kea Eastern Telescopes.jpg](https://commons.wikimedia.org/wiki/File:Mauna_Kea_Eastern_Telescopes.jpg) | Generic1139 | CC BY 4.0 |
+| `alma.jpg` | [ALMA antennas on Chajnantor.jpg](https://commons.wikimedia.org/wiki/File:ALMA_antennas_on_Chajnantor.jpg) | ESO/B. Tafreshi (twanight.org) | CC BY 4.0 |
 
 CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수 있고, 고친 것은 같은 조건으로 내야 한다. 이 저장소의 MIT 라이선스는 이 사진들에 미치지 않는다.
 

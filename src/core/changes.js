@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '지구의 새 장소 다섯 곳(바이코누르, 칙술루브, 배린저, 마우나케아, 알마)의 카드에 사진이 붙었습니다.' },
   { day: '2026-10-04', text: '앞으로 날 때 서라의 다리가 튀듯이 움직이던 것을 고쳤습니다.' },
   { day: '2026-10-04', text: '바라보기를 누르고 전진하면 그 목표로 곧게 날아갑니다. 전에는 목표 아래로 빗나갔습니다.' },
   { day: '2026-10-04', text: '바라보기와 목표 고정 때 목표가 서라의 머리 위에 옵니다. 전에는 머리 뒤에 가려졌습니다.' },

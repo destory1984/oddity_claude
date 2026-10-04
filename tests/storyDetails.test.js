@@ -15,9 +15,9 @@ test('every story place has a longer telling of three sentences or more', () => 
   }
 });
 
-test('90 of the 100 have a photograph on file, with a caption and a credit; the Ocean of Storms, the three places of the ninth tour and the six places added on Earth have none', () => {
+test('95 of the 100 have a photograph on file, with a caption and a credit; the Ocean of Storms, the three places of the ninth tour and the six places added on Earth have none', () => {
   const without = STORIES.filter((s) => !STORY_DETAILS[s.id].photo).map((s) => s.id);
-  assert.deepEqual(without, ['procellarum', 'acidalia', 'schiaparelli', 'wadiRum', 'baikonur', 'chicxulub', 'barringer', 'maunaKea', 'alma', 'bohyunsan']);
+  assert.deepEqual(without, ['procellarum', 'acidalia', 'schiaparelli', 'wadiRum', 'bohyunsan']);
   assert.equal(storyPhotoFile('procellarum'), null);
   const credits = readFileSync('THIRD-PARTY.md', 'utf8');
   let bytes = 0;
@@ -32,6 +32,6 @@ test('90 of the 100 have a photograph on file, with a caption and a credit; the 
     // Where it came from and its licence are written down.
     assert.ok(credits.includes(`| \`${story.id}.jpg\` |`), `${story.id} is not in THIRD-PARTY.md`);
   }
-  assert.equal(readdirSync('public/assets/stories').length, 90);
+  assert.equal(readdirSync('public/assets/stories').length, 95);
   assert.ok(bytes < 3.6e6, `${bytes} bytes of photographs`);
 });

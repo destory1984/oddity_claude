@@ -255,7 +255,7 @@ npm test
 |---|---|
 | `src/core/` | 천체 표, 비행 규칙, 한 프레임 진행. 화면과 무관한 계산이라 전부 시험한다. |
 | `src/render/` | Babylon.js로 천체, 태양, 별, 탐사선, 캐릭터를 그린다. 캐릭터는 `spriteHero.js` 가 그린다. |
-| `public/assets/` | 천체 지도, 캐릭터 도트 그림(`seora-sprites/`), 이야기 장소의 실제 사진(`stories/`, 90장 3.4MB), 사진 임무가 따라 찍는 실제 사진(`famous/`, 6장 0.1MB), 이야기 그림(`notebook/`, 42장 2.3MB), 불러오는 화면과 PC 바깥 배경(`scenes/`, 2장 0.9MB), 서라 곁을 따라다니는 것(`pals/`, 20장). |
+| `public/assets/` | 천체 지도, 캐릭터 도트 그림(`seora-sprites/`), 이야기 장소의 실제 사진(`stories/`, 95장 3.6MB), 사진 임무가 따라 찍는 실제 사진(`famous/`, 6장 0.1MB), 이야기 그림(`notebook/`, 42장 2.3MB), 불러오는 화면과 PC 바깥 배경(`scenes/`, 2장 0.9MB), 서라 곁을 따라다니는 것(`pals/`, 20장). |
 | `src/ui/` | 입력, 화면 표시, 미니맵, 사진 모드, 알림. |
 
 ## 출처
@@ -272,5 +272,5 @@ npm test
   - 화면의 아이콘 14장(`public/assets/ui/icon-*.svg`): 이 게임에서 그린 선 그림이고 코드와 같은 MIT다.
   - 글꼴: 화면의 글자는 Pretendard(길형진), 할머니의 손글씨는 나눔손글씨 펜(네이버, 산돌), 서라의 말풍선과 덧글은 개구(The Gaegu Project Authors)다. 셋 다 SIL 오픈 폰트 라이선스 1.1이고, 글꼴 파일을 고치지 않고 `public/fonts/` 에 넣었다(3.1MB, 1.7MB, 0.9MB).
   - 천체 지도: NASA·USGS 지도는 저작권이 없고, Solar System Scope 지도는 CC BY 4.0이다.
-  - 이야기 장소의 사진 90장(`public/assets/stories/`): 83장은 NASA 등 저작권이 없는 사진이다. 나머지 일곱은 출처를 밝혀야 쓸 수 있다. 누리호 사진은 한국항공우주연구원의 공공누리 제1유형, 베네라 7호 모형 사진은 CC BY-SA 4.0이다. 찬드라얀 3호는 ISRO의 GODL-India, 핼리 혜성과 67P 혜성과 코롤료프 분화구는 ESA의 CC BY-SA 3.0 IGO, 독도는 CC BY-SA 3.0이다. CC BY-SA 사진을 고쳐 쓰면 같은 조건으로 내야 한다.
+  - 이야기 장소의 사진 95장(`public/assets/stories/`): 86장은 NASA 등 저작권이 없는 사진이다. 나머지 아홉은 출처를 밝혀야 쓸 수 있다. 마우나케아 천문대(Generic1139)와 알마 전파망원경(ESO/B. Tafreshi) 사진은 CC BY 4.0이다. 누리호 사진은 한국항공우주연구원의 공공누리 제1유형, 베네라 7호 모형 사진은 CC BY-SA 4.0이다. 찬드라얀 3호는 ISRO의 GODL-India, 핼리 혜성과 67P 혜성과 코롤료프 분화구는 ESA의 CC BY-SA 3.0 IGO, 독도는 CC BY-SA 3.0이다. CC BY-SA 사진을 고쳐 쓰면 같은 조건으로 내야 한다.
   - 별자리 선: d3-celestial(BSD 3-Clause). 엔진: Babylon.js(Apache 2.0).

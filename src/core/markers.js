@@ -24,6 +24,23 @@ export function nearestBodies(position, bodies, nearbyKm = NEARBY_KM) {
   return byDistance.filter(({ km }, i) => i === 0 || (i === 1 && km <= nearbyKm)).map(({ id }) => id);
 }
 
+// Near a planet its moons keep an edge arrow too, on a phone as well (the user,
+// 2026-10-05: "행성 근처에 가면, 그 근처에 있는 위성도 화살표 표시를 해줘"). Near: the
+// surface of the planet within NEARBY_KM; beside a moon, its planet is the one meant.
+// Returns the ids of that planet's moons, or none.
+export function nearbyMoons(position, bodies, nearbyKm = NEARBY_KM) {
+  let nearest = null;
+  let least = Infinity;
+  for (const body of bodies) {
+    const km = surfaceDistance(position, body);
+    if (km < least) [nearest, least] = [body, km];
+  }
+  if (!nearest) return [];
+  const planet = nearest.kind === 'moon' ? bodies.find((b) => b.id === nearest.parent) : nearest;
+  if (!planet || surfaceDistance(position, planet) > nearbyKm) return [];
+  return bodies.filter((b) => b.kind === 'moon' && b.parent === planet.id).map((b) => b.id);
+}
+
 export function keepMarker({ outside, selected, nearest, surfaceKm, always = false, compact = false }) {
   if (compact) return !outside || selected || nearest || always;
   return !outside || selected || nearest || always || surfaceKm <= NEARBY_KM;

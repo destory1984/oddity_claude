@@ -20,7 +20,7 @@ import { createWarp } from './ui/warp.js';
 import { addPhoto, removePhoto, photoPlace, photoCaption } from './core/album.js';
 import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } from './core/postcard.js';
 import { teleportSpot } from './core/teleport.js';
-import { behindBody , nearestBodies } from './core/markers.js';
+import { behindBody , nearestBodies, nearbyMoons } from './core/markers.js';
 import { FACTS } from './core/facts.js';
 import { eventMessage, limitText, dateText, withParticle, objectParticle, distanceText } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
@@ -1982,6 +1982,7 @@ ${STORY_MORE[target.id]}` : told };
       view,
       local: nearestLocalBody(state.position, bodies),
       nearestIds: nearestBodies(state.position, bodies),
+      moonIds: nearbyMoons(state.position, bodies),
       selected,
       speed: shownSpeed(),
       // Only forward/back motion can be 'backward'; a pure slide is not.

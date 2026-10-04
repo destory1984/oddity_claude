@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { clearOfPanels, keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody, nearestBodies, NEARBY_KM } from '../src/core/markers.js';
+import { clearOfPanels, keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody, nearestBodies, nearbyMoons, NEARBY_KM } from '../src/core/markers.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 
 test('on-screen bodies always keep their label', () => {
@@ -136,6 +136,22 @@ test('between a planet and its moon both count as the nearest; out between the p
   // Halfway from Earth to Mars nothing else is within 300,000 km.
   assert.equal(nearestBodies(between('earth', 'mars', 0.5), BODIES).length, 1);
   assert.equal(NEARBY_KM, 300000);
+});
+
+test('near a planet all its moons keep an arrow; far from any, none', () => {
+  const between = (a, b, t) => bodyById(a).position.map((n, i) => n + (bodyById(b).position[i] - n) * t);
+  const over = (id, km) => { const b = bodyById(id); return [b.position[0], b.position[1] + b.radiusKm + km, b.position[2]]; };
+  assert.deepEqual(nearbyMoons(over('jupiter', 20000), BODIES).sort(), ['callisto', 'europa', 'ganymede', 'io']);
+  assert.equal(nearbyMoons(over('saturn', 50000), BODIES).length, 7);
+  assert.deepEqual(nearbyMoons(over('earth', 9000), BODIES), ['moon']);
+  // Beside a moon, its planet's moons: Io's neighbours are Jupiter's four.
+  assert.equal(nearbyMoons(over('io', 500), BODIES).length, 4);
+  // A planet with no moon, the Sun, and the empty road between planets: none.
+  assert.deepEqual(nearbyMoons(over('venus', 1000), BODIES), []);
+  assert.deepEqual(nearbyMoons(over('sun', 100000), BODIES), []);
+  assert.deepEqual(nearbyMoons(between('earth', 'mars', 0.5), BODIES), []);
+  // Past 300,000 km from the planet's surface: none.
+  assert.deepEqual(nearbyMoons(over('jupiter', NEARBY_KM + 1), BODIES), []);
 });
 
 test('an off-screen arrow is brought down under a panel it would stand on', () => {

@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-05', text: '행성 가까이 가면 그 행성의 위성들도 화면 가장자리에 화살표와 거리로 보입니다.' },
   { day: '2026-10-05', text: '목성 구름에 세로로 난 밝은 틈과 띠 경계의 점선을 없앴습니다.' },
   { day: '2026-10-04', text: '할머니의 첫 쪽지에서 부탁하는 말을 부드럽게 고쳤습니다.' },
   { day: '2026-10-04', text: '설정에 "About" 갈래가 생겼습니다. 게임 제목과 만든 이유가 적혀 있습니다.' },

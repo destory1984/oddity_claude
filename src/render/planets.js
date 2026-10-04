@@ -203,8 +203,11 @@ const LOOKS = {
     shader: 'textured', map: 'neptune.jpg', saturation: 1, tint: [0.9, 1, 1.1], base: [0.25, 0.42, 0.85],
     mapWeight: 1, haze: 0.35, detail: 0.12, dayS: SPIN_DAY_S.neptune,
     // The Great Dark Spot is in the map (Voyager 2, 1989); its bright companion clouds
-    // are drawn over it and shift. storm: [u, v] of the spot on the map.
-    storm: [0.545, 0.42],
+    // are drawn over it and shift. storm: [u, v] of the spot on the map, v counted from
+    // the top (north) as the shader's is: the spot is at 16 degrees south. (It was first
+    // set at 0.42, counted from the bottom, and the clouds were drawn 31 degrees north
+    // of the spot, a second dark oval of their own.)
+    storm: [0.557, 0.587],
   },
   // Ceres, Pluto and Charon: grey USGS maps; the tint gives each its real cast.
   ceres: {

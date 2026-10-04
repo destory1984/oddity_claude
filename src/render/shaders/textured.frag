@@ -150,14 +150,14 @@ void main(){
     vec2 oval = fromSpot / vec2(.085, .05);
     float inSpot = 1. - smoothstep(.55, 1., length(oval));
     col = mix(col, col * vec3(.5, .58, .78), inSpot * .55);
-    // Thin white streaks along its rim, mostly on the side toward the pole, that creep
-    // and change (Voyager watched them change within hours).
+    // Thin white streaks along its rim, mostly on the side toward the south pole (v
+    // grows southward), that creep and change (Voyager watched them change within hours).
     float rim = exp(-pow((length(oval) - 1.05) / .22, 2.));
-    float side = smoothstep(.1, -.6, oval.y);
+    float side = smoothstep(-.1, .6, oval.y);
     float wisps = smoothstep(.5, .78, fbm(vec2(fromSpot.x * 60. + time * .02, fromSpot.y * 260. - time * .015)));
     col = mix(col, vec3(.95, .97, 1.), rim * side * wisps * .85);
     // The small bright cloud farther south that went round faster (the "Scooter").
-    vec2 fromScooter = vec2((fract(vUV.x - storm.x - .08 + time * .0006 + .5) - .5) * 2., vUV.y - storm.y + .11);
+    vec2 fromScooter = vec2((fract(vUV.x - storm.x - .08 + time * .0006 + .5) - .5) * 2., vUV.y - storm.y - .11);
     col = mix(col, vec3(.92, .95, 1.), (1. - smoothstep(.2, 1., length(fromScooter / vec2(.02, .008)))) * .7);
   }
   if (hexagon > 0. && lp.y > .9) {

@@ -109,6 +109,9 @@ const LOOKS = {
   moon: {
     shader: 'textured', map: 'moon.jpg', saturation: 0.9, tint: [1, 1, 1], base: [0.6, 0.6, 0.6],
     mapWeight: 1, haze: 0, detail: 0.1, dayS: SPIN_DAY_S.moon,
+    // The horizon glow: seen from behind, a thin line of light along its edge (dust
+    // lifted off the ground, as the Surveyors and Apollo 17 saw at sunrise).
+    rim: [0.9, 0.9, 1], rimLight: 0.3,
   },
   // Small moons: plain cratered rock or ice in each one's own shade. All keep one face
   // to their planet, so a day lasts one orbit.
@@ -158,6 +161,8 @@ const LOOKS = {
     shader: 'textured', map: 'venus.jpg', saturation: 0.9, tint: [1.02, 0.98, 0.9], base: [0.92, 0.82, 0.6],
     mapWeight: 1, haze: 1.1, detail: 0.03, dayS: SPIN_DAY_S.venus,
     rim: [1, 0.9, 0.7], rimLight: 1.2,
+    // The ashen light: its night side glows faintly, seen since 1643 and never explained.
+    nightGlow: [0.035, 0.022, 0.016],
   },
   mars: {
     shader: 'textured', map: 'mars.jpg', saturation: 0.85, tint: [1, 0.98, 0.95], base: [0.72, 0.42, 0.26],
@@ -198,6 +203,9 @@ const LOOKS = {
   uranus: {
     shader: 'gas', colorA: [0.62, 0.85, 0.88], colorB: [0.57, 0.81, 0.86], colorC: [0.74, 0.92, 0.94],
     bands: 5, turbulence: 0.12, spot: 0, dayS: -62064,
+    // Nine narrow dark rings, found in 1977. Uranus lies on its side, so they stand
+    // nearly upright to its orbit: here they face the Sun, as Voyager 2 found them in 1986.
+    rings: { innerKm: 41000, outerKm: 52000, tilt: 1.43, style: 1 },
   },
   neptune: {
     shader: 'textured', map: 'neptune.jpg', saturation: 1, tint: [0.9, 1, 1.1], base: [0.25, 0.42, 0.85],
@@ -240,9 +248,11 @@ function createRings(scene, body, rings, sunDir) {
   const plane = CreatePlane(`${body.id}Rings`, { size: 2 * outer, sideOrientation: Mesh.DOUBLESIDE }, scene);
   plane.rotation.x = Math.PI / 2 + rings.tilt;
   plane.rotation.y = Math.atan2(-sunDir.x, -sunDir.z);
-  const material = shader(scene, 'ring', ringFrag, ['sunLight', 'inner', 'outer', 'sunLocal', 'sunWorld', 'normalWorld', 'planetRadius', 'time', 'spokeCount', 'spokeTurn', 'spokeRing', 'spokeDark']);
+  const material = shader(scene, 'ring', ringFrag, ['sunLight', 'inner', 'outer', 'sunLocal', 'sunWorld', 'normalWorld', 'planetRadius', 'style', 'time', 'spokeCount', 'spokeTurn', 'spokeRing', 'spokeDark']);
   material.setFloat('time', 0);
-  material.setFloat('spokeCount', SPOKES.count);
+  material.setFloat('style', rings.style ?? 0);
+  // Only Saturn's rings have spokes.
+  material.setFloat('spokeCount', rings.style ? 0 : SPOKES.count);
   material.setFloat('spokeTurn', 0);
   material.setVector2('spokeRing', new Vector2(...SPOKES.ring));
   material.setFloat('spokeDark', SPOKES.dark);
@@ -293,7 +303,8 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
       ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy',
-        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor'], ['map']);
+        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'nightGlow'], ['map']);
+    material.setColor3('nightGlow', color(look.nightGlow ?? [0, 0, 0]));
     material.setVector4('shine', new Vector4(0, 1, 0, 0));
     material.setColor3('shineColor', new Color3(1, 1, 1));
     material.setArray4('shadeAt', new Array(SHADOW_SLOTS * 4).fill(0));
@@ -353,7 +364,7 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     spin(elapsed) {
       sphere.rotation.y = -(elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
       if (ring) ring.setTime(elapsed);
-      if (look.storm) material.setFloat('time', elapsed);
+      if (look.storm || look.nightGlow) material.setFloat('time', elapsed);
     },
     // heightRadii: the camera's height above the ground, in this body's radii.
     setClose(heightRadii) {

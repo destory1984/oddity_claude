@@ -24,7 +24,7 @@ function glowMaterial(scene, name, fragment) {
   Effect.ShadersStore[`${name}VertexShader`] = glowVert;
   Effect.ShadersStore[`${name}FragmentShader`] = fragment;
   const material = new ShaderMaterial(name, scene, { vertex: name, fragment: name }, {
-    attributes: ['position', 'uv'], uniforms: ['worldViewProjection', 'strength'],
+    attributes: ['position', 'uv'], uniforms: ['worldViewProjection', 'strength', 'time'],
   });
   material.alphaMode = Constants.ALPHA_ADD;
   material.needAlphaBlending = () => true;
@@ -98,6 +98,7 @@ export function createComet(scene) {
     // The gas tail is blown straight away from the Sun by the solar wind.
     aim(tail, away);
     tailMaterial.setFloat('strength', (0.35 + 0.45 * activity) * near);
+    tailMaterial.setFloat('time', performance.now() / 1000);
 
     // The dust is heavier: it falls behind along the orbit, so its tail leans back the
     // way the comet came. Until the comet has been seen to move, lean it in the

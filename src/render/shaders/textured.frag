@@ -42,6 +42,8 @@ uniform float ringOuter;
 // from here, z: how dark the middle is; y is zero for an unused slot).
 // Light thrown back by the planet a moon goes round (earthshine on the Moon): xyz the
 // way to the planet, w how strong; and its colour (core/shine.js).
+// A faint glow of its own on the night side (Venus's ashen light).
+uniform vec3 nightGlow;
 uniform vec4 shine;
 uniform vec3 shineColor;
 uniform vec4 shadeAt[6];
@@ -237,6 +239,9 @@ void main(){
   // (By the smooth globe, not the cratered ground: its slopes would sparkle.)
   float limbEdge = 1. - max(dot(normalize(n), V), 0.);
   vec3 light = col * lit + baseColor * rim + rimColor * pow(limbEdge, 4.) * beyond * beyond * rimLight;
+  if (nightGlow.r + nightGlow.g + nightGlow.b > 0.) {
+    light += nightGlow * (1. - smoothstep(-.15, .1, l)) * (.5 + fbm(lp.xz * 3. + lp.y * 2. + time * .01));
+  }
   // The planet's light on the side turned to it: it shows where the Sun does not reach.
   light += col * shineColor * max(dot(N, shine.xyz), 0.) * shine.w;
   if (glint > 0.) {

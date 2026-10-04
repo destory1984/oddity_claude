@@ -17,6 +17,10 @@ export const AURORAS = [
   // Saturn's, as Cassini photographed it in visible light: red at the foot, purple at
   // the top (hydrogen's light), standing over a thousand km above the cloud tops.
   { body: 'saturn', latDeg: 75, baseKm: 800, heightKm: 4500, low: [1, 0.3, 0.38], high: [0.62, 0.35, 1], rangeRadii: 12 },
+  // Uranus's, first photographed by Hubble in 2011. Its magnetic axis leans 59 degrees
+  // from its spin axis, so the ovals stand far from the poles of its spin: here they
+  // are drawn about the globe's own axis, which lies nowhere near its rings' axis.
+  { body: 'uranus', latDeg: 62, baseKm: 400, heightKm: 2600, low: [0.55, 0.78, 1], high: [0.8, 0.62, 1], rangeRadii: 6 },
 ];
 
 // Night-shining (noctilucent) clouds: the highest clouds there are, ice at about 83 km,
@@ -104,6 +108,9 @@ export function auroraBand(aurora, radiusKm, north = true) {
 export const STORMS = [
   { id: 'lightning', body: 'jupiter', rangeKm: 500000, gapS: [0.3, 1.6], sizeKm: [4000, 9000], liftKm: 150, spread: 0.04 },
   { id: 'lightning:earth', body: 'earth', rangeKm: 60000, gapS: [0.5, 2.2], sizeKm: [350, 800], liftKm: 40, spread: 0.05 },
+  // Venus: still argued over. Probes have heard the radio crackle of it for decades and
+  // Akatsuki caught one flash of light in 2020. Drawn seldom.
+  { id: 'lightning:venus', body: 'venus', rangeKm: 80000, gapS: [3, 7], sizeKm: [500, 1100], liftKm: 70, spread: 0.05 },
 ];
 export const LIGHTNING_RANGE_KM = STORMS[0].rangeKm;
 export const LIGHTNING_GAP_S = STORMS[0].gapS;
@@ -159,6 +166,13 @@ export const PLUMES = [
   ...[[30, -155], [-14, -175], [22, 60], [-28, -45], [8, 110], [-40, 20]].map(([latDeg, lonDeg], i) => ({
     id: `devil${i + 1}`, body: 'mars', name: '먼지 회오리', latDeg, lonDeg, heightKm: 45, widthKm: 9,
   })),
+  // The jets of Mars's south polar cap: in spring the Sun warms the ground under the
+  // clear dry ice, the gas bursts out and carries dark dust with it, which the wind lays
+  // down in fans ("spiders" are the channels it cuts). Real jets are some hundred metres
+  // tall; drawn 40 km tall like the dust devils, dark against the ice.
+  ...[[-84, 20], [-86, 140], [-83, 250], [-87, 320]].map(([latDeg, lonDeg], i) => ({
+    id: `geyser${i + 1}`, body: 'mars', name: '극관 분출', latDeg, lonDeg, heightKm: 40, widthKm: 60, dark: true,
+  })),
   ...[0, 72, 144, 216, 288].map((turnDeg, i) => ({
     id: `tiger${i + 1}`, body: 'enceladus', name: '호랑이 줄무늬', latDeg: -84, lonDeg: turnDeg, heightKm: 450, widthKm: 130,
   })),
@@ -185,9 +199,18 @@ export function plumeUp(plume, spinRad) {
 // flashes are told when one lights.) Several may be in reach at once (near Jupiter: its
 // aurora and Io's footprint); the game tells them one at a time.
 // (Saturn is looked at from nine radii off, to take in its rings: the spokes are told from there.)
-export const TELL_RADII = { aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, backlit: 12, haze: 8, shine: 4 };
+export const TELL_RADII = { aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, backlit: 12, haze: 8, shine: 4, rings: 6, geyser: 3, ashen: 4, horizon: 4 };
+// A comet's tail is told from within this far of its nucleus, while it is within this
+// many AU of the Sun (farther out it has no tail to speak of).
+export const TELL_TAIL_KM = 300000;
+export const TELL_TAIL_AU = 3;
+const AU = 149597870.7;
 // "Behind" a world: this far round from the Sun's side (the cosine of the angle), or more.
 export const BEHIND = 0.6;
+// A planet crossing the Sun is a transit while it looks smaller than this share of the Sun.
+export const TRANSIT_SMALL = 0.25;
+// ...and while it is large enough to be seen at all (from Earth, Mercury is 1/160 of the Sun).
+export const TRANSIT_SEEN = 0.005;
 // The counterglow is told this far from every world's ground, or farther.
 export const COUNTERGLOW_FROM_KM = 2e6;
 export const TELL_JETS_KM = 3000;
@@ -229,6 +252,36 @@ export function glowsNear(bodies, position) {
   // Earthshine on the Moon: from over its night side, on the side turned to Earth.
   const earth = bodies.find((b) => b.id === 'earth');
   if (earth && sun && near('moon', TELL_RADII.shine) && side('moon', sun.position) < 0 && side('moon', earth.position) > 0.3) found.push('shine:moon');
+  // Uranus: its thin dark rings (its aurora is told with the others above).
+  if (near('uranus', TELL_RADII.rings)) found.push('rings:uranus');
+  // The dark jets of Mars's south polar cap, from over the south.
+  const mars = bodies.find((b) => b.id === 'mars');
+  if (mars && near('mars', TELL_RADII.geyser) && side('mars', mars.position.map((n, i) => n - (i === 1 ? 1 : 0))) > 0.4) found.push('geyser:mars');
+  // Venus's night side: the ashen light.
+  if (near('venus', TELL_RADII.ashen) && sun && side('venus', sun.position) < -0.3) found.push('ashen:venus');
+  // The Moon from behind: the glow along its horizon.
+  if (behind('moon', TELL_RADII.horizon)) found.push('horizon:moon');
+  // A comet's gas tail, which now and then breaks off.
+  for (const comet of bodies.filter((b) => b.kind === 'comet')) {
+    const sunKm = sun ? Math.hypot(...comet.position.map((n, i) => n - sun.position[i])) : Infinity;
+    if (surfaceKm(comet.id) <= TELL_TAIL_KM && sunKm <= (TELL_TAIL_AU * AU) / 100) { found.push('tailcut'); break; }
+  }
+  // Venus or Mercury crossing the Sun's face as seen from here: a transit.
+  if (sun) {
+    const toSun = sun.position.map((n, i) => n - position[i]);
+    const sunFar = Math.hypot(...toSun);
+    const sunWide = Math.asin(Math.min(1, sun.radiusKm / sunFar));
+    for (const id of ['venus', 'mercury']) {
+      const planet = bodies.find((b) => b.id === id);
+      if (!planet) continue;
+      const to = planet.position.map((n, i) => n - position[i]);
+      const far = Math.hypot(...to);
+      const wide = Math.asin(Math.min(1, planet.radiusKm / far));
+      const apart = Math.acos(Math.max(-1, Math.min(1, to.reduce((sum, n, i) => sum + n * toSun[i], 0) / (far * sunFar))));
+      // In front of the Sun, wholly on its disc, and small against it (a dot, not a wall).
+      if (far < sunFar && apart + wide < sunWide && wide < sunWide * TRANSIT_SMALL && wide > sunWide * TRANSIT_SEEN) found.push(`transit:${id}`);
+    }
+  }
   // The counterglow, far from every world, where nothing else lights the sky.
   if (sun && bodies.every((b) => b.kind === 'star' || surfaceKm(b.id) > COUNTERGLOW_FROM_KM)) found.push('counterglow');
   return found;

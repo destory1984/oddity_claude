@@ -8,6 +8,8 @@ uniform float outer;
 // and the planet's radius as a share of the outer ring radius.
 uniform vec3 sunLocal;
 uniform float planetRadius;
+// 0: Saturn's broad bright rings; 1: the nine narrow dark rings of Uranus.
+uniform float style;
 // The way to the Sun and the ring plane's normal, both in the world's axes: for the
 // rings seen against the light (the eye is at the world's origin).
 uniform vec3 sunWorld;
@@ -28,6 +30,23 @@ void main(){
   float r = length(p);
   if (r < inner || r > 1.) discard;
   vec4 ring = ringProfile((r - inner) / (1. - inner));
+  if (style > .5) {
+    // 6, 5, 4, alpha, beta, eta, gamma, delta, epsilon, by distance between 41,000 and
+    // 52,000 km. Each is a few km to a hundred km wide: drawn some hundreds wide so
+    // they show at all, the outermost (epsilon) the widest and brightest.
+    float at = (r - inner) / (1. - inner);
+    float lines = 0.;
+    lines += exp(-pow((at - .076) / .006, 2.)) * .35;
+    lines += exp(-pow((at - .112) / .006, 2.)) * .35;
+    lines += exp(-pow((at - .143) / .006, 2.)) * .35;
+    lines += exp(-pow((at - .338) / .008, 2.)) * .5;
+    lines += exp(-pow((at - .424) / .008, 2.)) * .5;
+    lines += exp(-pow((at - .561) / .006, 2.)) * .35;
+    lines += exp(-pow((at - .602) / .007, 2.)) * .45;
+    lines += exp(-pow((at - .664) / .007, 2.)) * .45;
+    lines += exp(-pow((at - .923) / .016, 2.)) * .85;
+    ring = vec4(vec3(.42, .43, .46), clamp(lines, 0., 1.) * .75);
+  }
 
   // Saturn's shadow: ring particles behind the planet, as seen from the Sun, are dark.
   float along = dot(p, sunLocal);

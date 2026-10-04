@@ -12,7 +12,7 @@ import { eventMessage } from '../src/ui/messages.js';
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 
 test('aurora curtains ring both poles of Earth, Jupiter and Saturn, standing straight up from the air', () => {
-  assert.deepEqual(AURORAS.map((a) => a.body), ['earth', 'jupiter', 'saturn']);
+  assert.deepEqual(AURORAS.map((a) => a.body), ['earth', 'jupiter', 'saturn', 'uranus']);
   // Saturn's is red at the foot and purple at the top, as Cassini saw it.
   const saturn = AURORAS[2];
   assert.ok(saturn.low[0] > saturn.low[2] && saturn.high[2] > saturn.high[0]);
@@ -32,7 +32,7 @@ test('aurora curtains ring both poles of Earth, Jupiter and Saturn, standing str
 
 test('lightning comes every 0.3 to 1.6 seconds as two strokes and an afterglow', () => {
   assert.equal(lightningGap(() => 0), LIGHTNING_GAP_S[0]);
-  assert.deepEqual(STORMS.map((s) => s.body), ['jupiter', 'earth']);
+  assert.deepEqual(STORMS.map((s) => s.body), ['jupiter', 'earth', 'venus']);
   assert.equal(lightningGap(() => 0, STORMS[1]), 0.5);
   assert.ok(STORMS[1].sizeKm[1] < STORMS[0].sizeKm[0], 'storms on Earth are far smaller');
   near(lightningGap(() => 1), LIGHTNING_GAP_S[1]);
@@ -55,7 +55,9 @@ test('a meteoroid hitting the Moon flashes every 2 to 6 seconds, bright at once 
 
 test('three plumes on Io and five jets round the south pole of Enceladus, turning with the ground', () => {
   assert.equal(PLUMES.filter((p) => p.body === 'io').length, 3);
-  assert.equal(PLUMES.filter((p) => p.body === 'mars').length, 6);
+  assert.equal(PLUMES.filter((p) => p.body === 'mars' && !p.dark).length, 6);
+  // Four dark jets on Mars's south polar cap.
+  assert.deepEqual(PLUMES.filter((p) => p.body === 'mars' && p.dark).map((p) => p.latDeg < -80), [true, true, true, true]);
   const jets = PLUMES.filter((p) => p.body === 'enceladus');
   assert.equal(jets.length, 5);
   for (const jet of jets) assert.ok(plumeUp(jet, 0)[1] < -0.99);
@@ -84,7 +86,8 @@ test('each light is told about from nearby, in words', () => {
   assert.equal(glowNear(BODIES, above('jupiter', 1)), 'aurora:jupiter');
   assert.equal(glowNear(BODIES, above('io', 5)), 'plume:io');
   assert.equal(glowNear(BODIES, above('enceladus', 5)), 'plume:enceladus');
-  assert.equal(glowNear(BODIES, above('uranus', 1)), null);
+  assert.equal(glowNear(BODIES, above('uranus', 1)), 'aurora:uranus');
+  assert.equal(glowNear(BODIES, above('ceres', 1)), null);
   for (const id of ['aurora:earth', 'aurora:jupiter', 'aurora:saturn', 'plume:io', 'plume:enceladus', 'plume:triton', 'lightning', 'lightning:earth',
     'sprite', 'clouds:earth', 'footprint:io', 'spokes:saturn', 'spot:neptune', 'tail:mercury', 'jets:halley']) {
     assert.ok(eventMessage({ type: 'glow', id }).length > 20, id);
@@ -109,8 +112,10 @@ test('where several sights are in reach they are all listed, the nearest thing f
   assert.deepEqual(glowsNear(BODIES, above('mercury', 20)), ['tail:mercury']);
   const halley = bodyById('halley');
   const off = (km) => [halley.position[0], halley.position[1] + halley.radiusKm + km, halley.position[2]];
-  assert.deepEqual(glowsNear(BODIES, off(TELL_JETS_KM - 1)), ['jets:halley']);
-  assert.deepEqual(glowsNear(BODIES, off(TELL_JETS_KM + 1)), []);
+  assert.deepEqual(glowsNear(BODIES, off(TELL_JETS_KM - 1)), ['jets:halley', 'tailcut']);
+  // Past the jets' reach the tail is still told of, out to 300,000 km.
+  assert.deepEqual(glowsNear(BODIES, off(TELL_JETS_KM + 1)), ['tailcut']);
+  assert.deepEqual(glowsNear(BODIES, off(300001)), []);
   assert.equal(glowNear(BODIES, above('jupiter', 1)), 'aurora:jupiter');
 });
 
@@ -123,7 +128,7 @@ test('two dark plumes stand in the south of Triton and turn with its ground, the
   }
   // Triton goes round backwards: its day is counted the other way.
   assert.ok(PLUME_DAY_S.triton < 0);
-  assert.equal(PLUMES.filter((p) => p.dark).length, 2);
+  assert.equal(PLUMES.filter((p) => p.dark && p.body === 'triton').length, 2);
 });
 
 test("the night-shining clouds lie over Earth's north polar cap at one height", () => {
@@ -198,4 +203,32 @@ test('sights that show from one side: behind a world with the Sun beyond, over t
   // Far above the planets' plane, away from everything.
   const far = [sun.position[0], sun.position[1] + 3 * COUNTERGLOW_FROM_KM + sun.radiusKm, sun.position[2]];
   assert.deepEqual(glowsNear(BODIES, far), ['counterglow']);
+});
+
+test('a transit is told when Venus or Mercury stands as a small dot on the Sun as seen from here', () => {
+  const sun = bodyById('sun');
+  const venus = bodyById('venus');
+  const out = venus.position.map((n, i) => n - sun.position[i]);
+  const far = Math.hypot(...out);
+  // On the line from the Sun through Venus, well beyond Venus: it stands on the Sun's face.
+  const beyond = sun.position.map((n, i) => n + (out[i] / far) * (far + 600000));
+  assert.ok(glowsNear(BODIES, beyond).includes('transit:venus'));
+  // Close behind Venus it is a wall across the Sun, not a dot.
+  const close = sun.position.map((n, i) => n + (out[i] / far) * (far + 9000));
+  assert.ok(!glowsNear(BODIES, close).includes('transit:venus'));
+  // Off the line: no transit.
+  const off = beyond.map((n, i) => n + (i === 1 ? 800000 : 0));
+  assert.ok(!glowsNear(BODIES, off).includes('transit:venus'));
+});
+
+test('Uranus has an aurora and rings to tell of; Mars its polar jets from over the south; Venus its ashen light at night', () => {
+  const above = (id, radii, way = 1) => { const b = bodyById(id); return [b.position[0], b.position[1] + way * b.radiusKm * (1 + radii), b.position[2]]; };
+  const uranus = glowsNear(BODIES, above('uranus', 1));
+  assert.ok(uranus.includes('aurora:uranus') && uranus.includes('rings:uranus'));
+  assert.ok(glowsNear(BODIES, above('mars', 1, -1)).includes('geyser:mars'));
+  assert.ok(!glowsNear(BODIES, above('mars', 1, 1)).includes('geyser:mars'));
+  const sun = bodyById('sun'); const venus = bodyById('venus');
+  const away = venus.position.map((n, i) => n - sun.position[i]); const d = Math.hypot(...away);
+  const night = venus.position.map((n, i) => n + (away[i] / d) * venus.radiusKm * 2);
+  assert.ok(glowsNear(BODIES, night).includes('ashen:venus'));
 });

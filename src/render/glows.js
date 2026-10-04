@@ -428,7 +428,9 @@ export function createGlows(scene, bodies) {
       if (!on) continue;
       const up = plumeUp(plume, -(elapsed * TIME_SCALE * 2 * Math.PI) / PLUME_DAY_S[plume.body]);
       // A dust devil is raised by the Sun warming the ground: none at night.
-      if (plume.body === 'mars' && Vector3.Dot(new Vector3(...up), sunFrom(body)) < 0.15) {
+      // (The polar jets burst out at the first low sunlight of spring: for them the Sun
+      // need only be at the horizon.)
+      if (plume.body === 'mars' && Vector3.Dot(new Vector3(...up), sunFrom(body)) < (plume.dark ? -0.02 : 0.15)) {
         mesh.setEnabled(false);
         continue;
       }

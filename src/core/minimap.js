@@ -30,3 +30,21 @@ export function pickNearest([px, py], dots, within = 12) {
   }
   return best;
 }
+
+// The one letter beside a planet's dot on the map: the first of its English name
+// (Saturn: S). The Sun in the middle and the comets get none.
+export function mapLetter(body) {
+  return body.kind === 'planet' || body.kind === 'dwarf' ? body.nameEn[0].toUpperCase() : null;
+}
+
+// Where that letter goes: `gap` pixels from the dot, on the side away from the Sun
+// (the middle of the map), so the letters of the inner planets spread outward and not
+// over one another. Straight up when the dot is on the middle. A dot so far out that
+// the letter would pass `edge` pixels from the middle (Pluto, on the rim of the map)
+// has its letter on the inner side.
+export function letterPoint([x, y], gap, edge = Infinity) {
+  const r = Math.hypot(x, y);
+  if (r < 1e-6) return [x, y - gap];
+  const out = r + gap > edge ? -gap : gap;
+  return [x + (x / r) * out, y + (y / r) * out];
+}

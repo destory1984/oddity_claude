@@ -1,4 +1,4 @@
-import { mapPoint, mapHeading, pickNearest } from '../core/minimap.js';
+import { mapPoint, mapHeading, pickNearest, mapLetter, letterPoint } from '../core/minimap.js';
 import { BELT } from '../core/belt.js';
 
 const COLORS = {
@@ -21,7 +21,8 @@ const EDGE_PX = 8;
 
 // Round map in the HUD: the Sun, the planets and dwarf planets with their orbits, the
 // asteroid belt, the comet, and the
-// traveler with an arrow for the flight heading. Tapping a planet selects it.
+// traveler with an arrow for the flight heading. Tapping a planet selects it. Each
+// planet has the first letter of its English name beside it (core/minimap.js mapLetter).
 export function createMinimap(canvas, { onPick }) {
   const ctx = canvas.getContext('2d');
   let dots = [];
@@ -100,6 +101,16 @@ export function createMinimap(canvas, { onPick }) {
         ctx.beginPath();
         ctx.arc(x, y, 6, 0, Math.PI * 2);
         ctx.stroke();
+      }
+      const letter = mapLetter(body);
+      if (letter) {
+        const [lx, ly] = letterPoint([x, y], 7, size / 2 - 6);
+        ctx.font = '600 8px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = COLORS[body.id] ?? '#cfe3f3';
+        ctx.fillText(letter, lx, ly);
+        ctx.textAlign = 'start';
       }
       if (body.kind !== 'star') dots.push({ id: body.id, x, y });
       named.push({ id: body.id, x, y, name: body.name });

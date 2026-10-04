@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { mapPoint, mapHeading, pickNearest } from '../src/core/minimap.js';
+import { mapPoint, mapHeading, pickNearest, mapLetter, letterPoint } from '../src/core/minimap.js';
 
 const near = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
@@ -49,4 +49,29 @@ test('a tap picks the nearest dot within reach', () => {
   assert.equal(pickNearest([24, 1], dots), 'earth');
   assert.equal(pickNearest([29, -2], dots), 'mars');
   assert.equal(pickNearest([80, 80], dots), null);
+});
+
+test('each planet and dwarf planet has the first letter of its English name; the Sun, moons and comets have none', async () => {
+  const { BODIES: all } = await import('../src/core/bodies.js');
+  const letter = (id) => mapLetter(all.find((b) => b.id === id));
+  assert.equal(letter('saturn'), 'S');
+  assert.equal(letter('earth'), 'E');
+  assert.equal(letter('jupiter'), 'J');
+  assert.equal(letter('pluto'), 'P');
+  assert.equal(letter('ceres'), 'C');
+  assert.equal(letter('sun'), null);
+  assert.equal(letter('moon'), null);
+  assert.equal(letter('halley'), null);
+  assert.equal(all.filter((b) => mapLetter(b)).length, 10);
+});
+
+test('the letter stands outward of its dot, away from the middle of the map', () => {
+  assert.deepEqual(letterPoint([10, 0], 7), [17, 0]);
+  assert.deepEqual(letterPoint([0, -20], 7), [0, -27]);
+  const [x, y] = letterPoint([3, 4], 5);
+  assert.ok(Math.abs(x - 6) < 1e-9 && Math.abs(y - 8) < 1e-9);
+  assert.deepEqual(letterPoint([0, 0], 7), [0, -7]);
+  // On the rim of a map 60 px in radius, the letter goes inside.
+  assert.deepEqual(letterPoint([52, 0], 7, 54), [45, 0]);
+  assert.deepEqual(letterPoint([40, 0], 7, 54), [47, 0]);
 });

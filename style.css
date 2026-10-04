@@ -2154,6 +2154,20 @@ footer button:active,
     top:324px;
   }
 
+  /* With no goal line showing, that room stood empty: the readouts go up 36px. */
+  body:has(#guide[hidden]) .telemetry,
+  body:has(#guide[hidden]) #targetPanel {
+    top:84px;
+  }
+
+  body:has(#guide[hidden]) #minimap {
+    top:160px;
+  }
+
+  body:has(#guide[hidden]) #toast {
+    top:288px;
+  }
+
   #guideText {
     flex:1;
     min-width:0;
@@ -3072,7 +3086,7 @@ body.rear.touch #reticle span {
 }
 
 /* The four buttons that steer her are squares: 56px, the key under the picture on a PC;
-   60px in one row on a phone. */
+   44px in one row on a phone, the size of the buttons along the top (they were 60px). */
 #rearButton,
 #reverseButton,
 #brake,
@@ -3097,14 +3111,14 @@ body.rear.touch #reticle span {
   #reverseButton,
   #brake,
   #flyButton {
-    width:60px;
-    height:60px;
-    min-height:60px;
+    width:44px;
+    height:44px;
+    min-height:44px;
   }
 
-  #rearButton { right:204px; }
-  #reverseButton { right:136px; }
-  #brake { right:68px; }
+  #rearButton { right:156px; }
+  #reverseButton { right:104px; }
+  #brake { right:52px; }
   #flyButton { right:0; }
 }
 

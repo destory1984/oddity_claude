@@ -1,4 +1,4 @@
-// What changed, as a player sees it: the first page of the settings ("바뀐 것들").
+// What changed, as a player sees it: a page of the settings ("바뀐 것들").
 // One line each, in plain words, the newest day first. Only what shows on screen or
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
@@ -6,7 +6,7 @@
 // buttons about, evening out spaces, renaming a tab or rewording a sentence does not
 // (the user had six such lines taken out on 2026-10-05: "이런건 바뀐 것에서 빼줘").
 export const CHANGES = [
-  { day: '2026-10-05', text: '설정의 첫 쪽이 "바뀐 것들"이 되어, 만들기 시작한 날부터의 기록을 모두 보여 줍니다.' },
+  { day: '2026-10-05', text: '설정의 "바뀐 것들"이 만들기 시작한 날부터의 기록을 모두 보여 줍니다.' },
   { day: '2026-10-05', text: '아이폰에서 단추를 빠르게 두 번 누르면 화면이 커지던 것을 고쳤습니다.' },
   { day: '2026-10-05', text: '보현산천문대에 천문대 그림이 섰고, 사진이 없던 이야기 장소 세 곳에 그림이 붙었습니다.' },
   { day: '2026-10-05', text: '앞으로 날 때와 아래로 날 때의 뒷모습을 새로 그렸습니다. 띠와 머리카락 끝만 나부낍니다.' },

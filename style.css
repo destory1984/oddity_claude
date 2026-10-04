@@ -3598,12 +3598,34 @@ footer .throttle .rangeLabels {
   text-align:center;
 }
 
+/* The sheet is never taller than the screen: on a low one (657px, a phone in its
+   browser) the map is smaller and the names scroll, so the three buttons at the foot
+   are always in sight (they were cut off: the user, 2026-10-05). */
+#bigMap[open] {
+  display:flex;
+  flex-direction:column;
+  max-height:calc(100vh - 24px);
+  max-height:calc(100dvh - 24px);
+  box-sizing:border-box;
+}
+
+#bigMap[open] > * {
+  flex:none;
+}
+
 #bigMapCanvas {
+  --side:min(300px, 78vw, 100vh - 390px);
   display:block;
-  width:min(300px, 78vw);
-  height:min(300px, 78vw);
+  width:var(--side);
+  height:var(--side);
   margin:10px auto;
   touch-action:none;
+}
+
+#bigMap[open] > #bigMapList {
+  flex:0 1 auto;
+  min-height:74px;
+  overflow-y:auto;
 }
 
 #bigMapList {
@@ -3783,7 +3805,7 @@ footer .throttle .rangeLabels {
   display:none;
 }
 
-/* The third page, "About": the title as it is drawn, the subtitle under it, and why
+/* The last page, "About": the title as it is drawn, the subtitle under it, and why
    the game was made. */
 #aboutTitle {
   display:grid;

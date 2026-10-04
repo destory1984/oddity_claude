@@ -275,12 +275,12 @@
   <dialog id="settings" aria-labelledby="settingsTitle">
     <div class="sheetHead"><h1 id="settingsTitle">설정</h1><small id="appVersion">{{version}} · {{updated}}</small><div class="textSize" role="group" aria-label="글자 크기"><button data-way="-1" aria-label="글자 작게" title="글자 작게">가<span aria-hidden="true">−</span></button><button data-way="1" aria-label="글자 크게" title="글자 크게">가<span aria-hidden="true">+</span></button></div></div>
     <div id="settingsTabs" role="tablist" aria-label="설정의 갈래">
-      <button role="tab" data-tab="news" aria-selected="true">바뀐 것들</button>
+      <button role="tab" data-tab="help" aria-selected="true">도움말</button>
       <button role="tab" data-tab="options" aria-selected="false">옵션</button>
-      <button role="tab" data-tab="help" aria-selected="false">도움말</button>
+      <button role="tab" data-tab="news" aria-selected="false">바뀐 것들</button>
       <button role="tab" data-tab="about" aria-selected="false">About</button>
     </div>
-    <section data-tab="news">
+    <section data-tab="news" hidden>
       <p id="newsStarted" class="muted"></p>
       <ul id="newsList"></ul>
       <button id="newsMore" hidden>더 읽기</button>
@@ -295,7 +295,7 @@
       <dt>배경 음악</dt><dd>열한 곡(오르골, 새벽, 먼 바다, 자장가, 별무리, 깊은 밤, 유영, 빗방울, 가야금, 오로라, 회전목마)이 2분쯤씩 흐릅니다. 순서는 열 때마다 바뀝니다. 천체 가까이에서는 음이 잦고, 먼 우주에서는 낮고 드물며, 표면에 서면 화음만 남습니다.<br><button id="musicButton"></button> <button id="tuneButton">다음 곡</button> <span id="tuneNow" aria-live="polite"></span></dd>
       </dl>
     </section>
-    <section data-tab="help" hidden>
+    <section data-tab="help">
       <p>크기는 실제대로, 천체 사이의 빈 거리는 1/100(위성과 행성 사이는 1/10)로 압축된 우주를 날아보세요.</p>
       <dl>
         <dt>방향 전환</dt><dd>화면 드래그</dd>
@@ -312,7 +312,7 @@
         <dt>순간 이동</dt><dd>한 번 가 본 곳은 멀리서 그 이름표를 누르거나 수첩에서 "순간 이동"을 누르면 6초 뒤 그곳에 나타납니다. 천체는 가장 잘 보이는 자리에, 탐사선은 곁에 나타나 도킹하고, 이야기 장소는 그 위에 나타납니다.</dd>
         <dt>사진</dt><dd>P 키 / 사진 모드 버튼</dd>
         <dt>확대 관찰</dt><dd>고른 천체나 탐사선, 이야기 장소를 화면 가운데에 두고 가까이에서 봅니다. 드래그하면 그 둘레를 360도 돌아가며 봅니다. 화면 위쪽에 읽을거리가 뜨고, 수첩에 있는 천체와 탐사선이면 글 아래에 문제 하나가 붙습니다. 이때 찍은 사진은 사진첩에는 들어가지만 사진 임무로는 치지 않습니다.</dd>
-        <dt>설정</dt><dd>위쪽 맨 오른쪽의 톱니 버튼. 첫 쪽에서 바뀐 것들을 보고, 둘째 쪽에서 화면 비율, 행성 배치, 소리를 바꿉니다. 셋째 쪽이 이 도움말입니다. 앱으로 설치하는 방법도 거기에 있습니다.</dd>
+        <dt>설정</dt><dd>위쪽 맨 오른쪽의 톱니 버튼. 첫 쪽이 이 도움말입니다. 둘째 쪽 "옵션"에서 화면 비율, 행성 배치, 소리를 바꾸고, 셋째 쪽에서 바뀐 것들을 봅니다. 앱으로 설치하는 방법도 거기에 있습니다.</dd>
         <dt>탐험 수첩</dt><dd>J 키 / 수첩 버튼. 위쪽의 "가−", "가+"로 글자 크기를 다섯 단계(85% → 150%)로 바꿉니다(수첩, 설정, 이 도움말이 함께 바뀝니다). 새 천체를 발견하고, 표면에 내려앉고, 사진 임무를 달성하면 기록됩니다. 위쪽 갈래(천체, 임무, 사진첩, 이야기, 탐사선, 코스)를 눌러 넘겨 보고(사진첩에서는 사진을 엽서 그림으로 저장할 수 있고, 코스 갈래 아래에는 하고 싶을 때만 하는 묘기 비행이 있습니다), 오른쪽 위 ✕나 Esc, J 키, 수첩 바깥을 누르면 닫힙니다.</dd>
       </dl>
       <p class="muted">태양, 여덟 행성, 위성 21개, 왜행성 둘, 핼리 혜성의 실제 표면 바로 앞까지 접근할 수 있습니다. 천체 내부로는 들어갈 수 없습니다. 천체 표면 사이의 빈 거리만 1/100(위성은 1/10)로 줄였습니다. 기본인 여행 배치는 오늘의 실제 천문 위치가 아닙니다. 다른 앱이나 탭으로 갔다 오면 그동안 멈춰 있다가 돌아오는 대로 이어집니다.</p>

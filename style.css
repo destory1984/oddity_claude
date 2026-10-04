@@ -3521,6 +3521,23 @@ footer .throttle .rangeLabels {
   overflow-y:auto;
 }
 
+/* The sheet keeps one size whichever tab is open (the user, 2026-10-05: "about을 눌러도,
+   설정 팝업 메뉴 크기 바꾸지 마"; it was as tall as its page, and About's is short). The
+   closing button stays at the foot. */
+#settings[open] {
+  display:flex;
+  flex-direction:column;
+  height:min(640px, 90vh);
+}
+
+#settings[open] > * {
+  flex:none;
+}
+
+#settings[open] > #closeSettings {
+  margin-top:auto;
+}
+
 #settingsTabs {
   display:flex;
   gap:8px;
@@ -3536,11 +3553,16 @@ footer .throttle .rangeLabels {
   font-size:13px;
 }
 
-/* The first tab's name is the longer one ("최근 1주일 동안 바뀐 것"): it takes the room it
-   needs on one line, and the other the rest. */
-#settings #settingsTabs button[data-tab="news"] {
-  flex:0 0 auto;
-  white-space:nowrap;
+/* The three tabs are one size (the user, 2026-10-05: "3개의 버튼 크기를 같게"). The first
+   one's name is the longer ("최근 1주일 동안 바뀐 것"): on a phone it takes two lines,
+   broken between words, and the other two are as tall as it. */
+#settings #settingsTabs {
+  align-items:stretch;
+}
+
+#settings #settingsTabs button {
+  line-height:1.25;
+  word-break:keep-all;
 }
 
 /* The day the making began: small, and if it must wrap, only between words. */

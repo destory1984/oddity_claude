@@ -1,5 +1,5 @@
 import {
-  CreateSphere, CreatePlane, Mesh, ShaderMaterial, Effect, Texture, Vector3, Vector2, Color3, Constants, Matrix,
+  CreateSphere, CreatePlane, Mesh, ShaderMaterial, Effect, Texture, Vector3, Vector2, Vector4, Color3, Constants, Matrix,
 } from './babylon.js';
 import vertex from './shaders/body.vert?raw';
 import planetFrag from './shaders/planet.frag?raw';
@@ -240,7 +240,7 @@ function createRings(scene, body, rings, sunDir) {
   const plane = CreatePlane(`${body.id}Rings`, { size: 2 * outer, sideOrientation: Mesh.DOUBLESIDE }, scene);
   plane.rotation.x = Math.PI / 2 + rings.tilt;
   plane.rotation.y = Math.atan2(-sunDir.x, -sunDir.z);
-  const material = shader(scene, 'ring', ringFrag, ['sunLight', 'inner', 'outer', 'sunLocal', 'planetRadius', 'time', 'spokeCount', 'spokeTurn', 'spokeRing', 'spokeDark']);
+  const material = shader(scene, 'ring', ringFrag, ['sunLight', 'inner', 'outer', 'sunLocal', 'sunWorld', 'normalWorld', 'planetRadius', 'time', 'spokeCount', 'spokeTurn', 'spokeRing', 'spokeDark']);
   material.setFloat('time', 0);
   material.setFloat('spokeCount', SPOKES.count);
   material.setFloat('spokeTurn', 0);
@@ -260,7 +260,11 @@ function createRings(scene, body, rings, sunDir) {
   const turn = Matrix.RotationYawPitchRoll(plane.rotation.y, plane.rotation.x, 0);
   const back = turn.clone().invert();
   const normal = Vector3.TransformNormal(new Vector3(0, 0, 1), turn);
-  const setSun = (dir) => material.setVector3('sunLocal', Vector3.TransformNormal(dir, back));
+  material.setVector3('normalWorld', normal);
+  const setSun = (dir) => {
+    material.setVector3('sunLocal', Vector3.TransformNormal(dir, back));
+    material.setVector3('sunWorld', dir);
+  };
   setSun(sunDir);
   // elapsed: seconds of play. The spokes go round with Saturn's magnetic field.
   const setTime = (elapsed) => {
@@ -289,7 +293,9 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
       ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy',
-        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge'], ['map']);
+        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor'], ['map']);
+    material.setVector4('shine', new Vector4(0, 1, 0, 0));
+    material.setColor3('shineColor', new Color3(1, 1, 1));
     material.setArray4('shadeAt', new Array(SHADOW_SLOTS * 4).fill(0));
     material.setArray3('shadeEdge', new Array(SHADOW_SLOTS * 3).fill(0));
     material.setVector3('storm', new Vector3(look.storm?.[0] ?? 0, look.storm?.[1] ?? 0, look.storm ? 1 : 0));
@@ -356,6 +362,12 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     setSun(dir) {
       material.setVector3('sun', new Vector3(...dir));
       if (ring) ring.setSun(new Vector3(...dir));
+    },
+    // The light of the planet it goes round (core/shine.js planetshine), or none.
+    setShine(light) {
+      if (look.shader !== 'textured') return;
+      material.setVector4('shine', new Vector4(...light.direction, light.strength));
+      material.setColor3('shineColor', new Color3(...light.color));
     },
     // The shadows of its moons this frame (core/shadows.js castShadows).
     setShadows({ at, edge }) {

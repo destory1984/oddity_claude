@@ -146,12 +146,14 @@ let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
 let simTime = 0;
 // The note on entering the asteroid belt shows once per visit to the game.
 // Lights and plumes already told about (core/glows.js), with 'belt', 'meteor' and
-// 'start' (how to look round). Kept on the device: each is told once, not at every
-// opening (the user, 2026-10-04: "처음 지구 근처에서 시작할 때에 메시지가 되게 반복적으로 많이 뜨네").
-const glowsTold = new Set(loadTold());
+// 'start' (how to look round). Kept on the device for the day: each is told once a day,
+// not at every opening (the user, 2026-10-04: "처음 지구 근처에서 시작할 때에 메시지가 되게
+// 반복적으로 많이 뜨네", then "하루에 한 번").
+const toldDay = dayOf(new Date());
+const glowsTold = new Set(loadTold(toldDay));
 const markTold = (id) => {
   glowsTold.add(id);
-  saveTold([...glowsTold]);
+  saveTold([...glowsTold], toldDay);
 };
 let beltSeen = glowsTold.has('belt');
 // So does the note on the first shooting star over Earth.
@@ -1523,6 +1525,12 @@ ${STORY_MORE[target.id]}` : told };
       throttle: input.throttle(),
       fps: world.engine.getFps(),
     }),
+    // For test scripts that must look at something from a chosen place: where the
+    // bodies are now, and a way to stand at `position` (km) facing the point `toward`.
+    bodies: () => bodies.map((b) => ({ id: b.id, position: [...b.position], radiusKm: b.radiusKm })),
+    place(position, toward) {
+      state = createState(position, lookAtDirection(toward.map((n, i) => n - position[i])));
+    },
   };
 }
 

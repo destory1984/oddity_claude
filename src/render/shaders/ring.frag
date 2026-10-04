@@ -1,5 +1,6 @@
 precision highp float;
 varying vec2 vUV;
+varying vec3 wp;
 uniform vec3 sunLight;
 uniform float inner;
 uniform float outer;
@@ -7,6 +8,10 @@ uniform float outer;
 // and the planet's radius as a share of the outer ring radius.
 uniform vec3 sunLocal;
 uniform float planetRadius;
+// The way to the Sun and the ring plane's normal, both in the world's axes: for the
+// rings seen against the light (the eye is at the world's origin).
+uniform vec3 sunWorld;
+uniform vec3 normalWorld;
 // Seconds of play, and the spokes (core/glows.js SPOKES): how many places one may
 // stand, the turn of Saturn's magnetic field in radians, where across the rings they
 // lie, how much darker they are.
@@ -47,5 +52,17 @@ void main(){
     float alive = smoothstep(.15, .6, sin(time * (.035 + .02 * fract(sin(fk * 39.3) * 9871.3)) + fk * 2.4));
     spokes = max(spokes, shape * alive * (.75 + .25 * noise(vec2(t * 40. + fk * 5., fk))));
   }
-  gl_FragColor = vec4(ring.rgb * sunLight * (1. - .94 * shadow) * (1. - spokeDark * spokes), ring.a);
+  // Against the light (Cassini looking back from Saturn's shadow, 2006 and 2013): from
+  // the side the Sun does not light, the dense B ring lets little through and is dark,
+  // while the thin C ring, the Cassini division and the A ring pass the light on and
+  // glow; and looking toward the Sun every thin part scatters its light forward.
+  vec3 V = normalize(-wp);
+  float through = step(dot(V, normalWorld) * sunLocal.z, 0.);
+  float passed = .07 + 22. * ring.a * exp(-6. * ring.a);
+  float toward = pow(max(dot(-V, sunWorld), 0.), 4.);
+  float thin = ring.a * exp(-2.5 * ring.a) * 2.7;
+  vec3 lit = ring.rgb * sunLight * mix(1., passed, through) + vec3(1., .93, .8) * toward * thin * mix(.35, 1.1, through);
+  // The thin parts are nearly clear glass from the lit side; against the light they show.
+  float cover = mix(ring.a, clamp(ring.a + thin * .55, 0., 1.), through);
+  gl_FragColor = vec4(lit * (1. - .94 * shadow) * (1. - spokeDark * spokes), cover);
 }

@@ -185,7 +185,11 @@ export function plumeUp(plume, spinRad) {
 // flashes are told when one lights.) Several may be in reach at once (near Jupiter: its
 // aurora and Io's footprint); the game tells them one at a time.
 // (Saturn is looked at from nine radii off, to take in its rings: the spokes are told from there.)
-export const TELL_RADII = { aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9 };
+export const TELL_RADII = { aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, backlit: 12, haze: 8, shine: 4 };
+// "Behind" a world: this far round from the Sun's side (the cosine of the angle), or more.
+export const BEHIND = 0.6;
+// The counterglow is told this far from every world's ground, or farther.
+export const COUNTERGLOW_FROM_KM = 2e6;
 export const TELL_JETS_KM = 3000;
 export function glowsNear(bodies, position) {
   const surfaceKm = (id) => {
@@ -202,6 +206,31 @@ export function glowsNear(bodies, position) {
   if (near('neptune', TELL_RADII.spot)) found.push('spot:neptune');
   if (near(SODIUM_TAIL.body, TELL_RADII.tail)) found.push(`tail:${SODIUM_TAIL.body}`);
   if (surfaceKm(JETS.body) <= TELL_JETS_KM) found.push(`jets:${JETS.body}`);
+  // Sights that show from one side only. side(id, toward): how far round the traveler
+  // stands from `toward` as seen from the body, 1 on that side, -1 opposite.
+  const sun = bodies.find((b) => b.kind === 'star');
+  const side = (id, toward) => {
+    const body = bodies.find((b) => b.id === id);
+    if (!body || !sun) return 0;
+    const out = position.map((n, i) => n - body.position[i]);
+    const way = toward.map((n, i) => n - body.position[i]);
+    return out.reduce((sum, n, i) => sum + n * way[i], 0) / (Math.hypot(...out) * Math.hypot(...way) || 1);
+  };
+  const behind = (id, radii) => Boolean(sun) && near(id, radii) && side(id, sun.position) < -BEHIND;
+  // The green line of airglow along Earth's night limb.
+  if (near('earth', TELL_RADII.airglow) && sun && side('earth', sun.position) < -0.2) found.push('airglow:earth');
+  // Saturn's hexagon, from over its north pole (the globe's pole is +y).
+  const saturn = bodies.find((b) => b.id === 'saturn');
+  if (saturn && near('saturn', TELL_RADII.hexagon) && side('saturn', saturn.position.map((n, i) => n + (i === 1 ? 1 : 0))) > 0.5) found.push('hexagon:saturn');
+  // Seen from behind, with the Sun beyond: the rings against the light, and the haze of
+  // Titan, of Pluto and the blue dusk of Mars.
+  if (behind('saturn', TELL_RADII.backlit)) found.push('backlit:saturn');
+  for (const id of ['titan', 'pluto', 'mars']) if (behind(id, TELL_RADII.haze)) found.push(`haze:${id}`);
+  // Earthshine on the Moon: from over its night side, on the side turned to Earth.
+  const earth = bodies.find((b) => b.id === 'earth');
+  if (earth && sun && near('moon', TELL_RADII.shine) && side('moon', sun.position) < 0 && side('moon', earth.position) > 0.3) found.push('shine:moon');
+  // The counterglow, far from every world, where nothing else lights the sky.
+  if (sun && bodies.every((b) => b.kind === 'star' || surfaceKm(b.id) > COUNTERGLOW_FROM_KM)) found.push('counterglow');
   return found;
 }
 

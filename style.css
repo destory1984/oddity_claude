@@ -3160,7 +3160,7 @@ body.rear.touch #reticle span {
 }
 
 /* The version and when it was last updated, small, under the loading line. */
-#noteCardVersion {
+#appVersion {
   display:block;
   margin-top:14px;
   font-size:10px;

@@ -40,6 +40,10 @@ uniform float ringOuter;
 // The shadows of its moons (core/shadows.js), in planet radii: where each moon is from
 // the planet's centre, and its shadow's edge (x: fully dark out to here, y: no shadow
 // from here, z: how dark the middle is; y is zero for an unused slot).
+// Light thrown back by the planet a moon goes round (earthshine on the Moon): xyz the
+// way to the planet, w how strong; and its colour (core/shine.js).
+uniform vec4 shine;
+uniform vec3 shineColor;
 uniform vec4 shadeAt[6];
 uniform vec3 shadeEdge[6];
 #include<noise>
@@ -233,6 +237,8 @@ void main(){
   // (By the smooth globe, not the cratered ground: its slopes would sparkle.)
   float limbEdge = 1. - max(dot(normalize(n), V), 0.);
   vec3 light = col * lit + baseColor * rim + rimColor * pow(limbEdge, 4.) * beyond * beyond * rimLight;
+  // The planet's light on the side turned to it: it shows where the Sun does not reach.
+  light += col * shineColor * max(dot(N, shine.xyz), 0.) * shine.w;
   if (glint > 0.) {
     vec3 H = normalize(sun + V);
     float lakes = smoothstep(.55, .8, lp.y) * smoothstep(.42, .6, fbm(lp.xz * 9. + 3.));

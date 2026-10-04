@@ -5,6 +5,7 @@ import { BODIES, KM_PER_UNIT } from '../core/bodies.js';
 import { multiply } from '../core/orientation.js';
 import { sunVisibility, eclipseDepth, sunBead } from '../core/occlusion.js';
 import { heroLighting } from '../core/heroLight.js';
+import { planetshine } from '../core/shine.js';
 import { createBodyMeshes } from './planets.js';
 import { createSun } from './sun.js';
 import { createStars } from './stars.js';
@@ -117,6 +118,11 @@ export async function createWorld(canvas, bodies = BODIES) {
       // place in its night is being looked at closely (core/lamp.js).
       item.setSun(lamp?.id === body.id ? lamp.direction : normalize(sunNow.position.map((n, i) => n - body.position[i])));
       if (SHADOW_CASTERS[body.id]) item.setShadows?.(castShadows(body.id, now));
+      // A moon is lit a little by the planet it goes round (core/shine.js).
+      if (body.kind === 'moon' && item.setShine) {
+        const planet = now.find((b) => b.id === body.parent);
+        if (planet) item.setShine(planetshine(body, planet, sunNow));
+      }
     }
     const sunRel = relative(sunNow, position);
     sun.mesh.position.set(sunRel[0], sunRel[1], sunRel[2]);

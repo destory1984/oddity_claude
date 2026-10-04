@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   AURORAS, auroraBand, STORMS, LIGHTNING_GAP_S, LIGHTNING_LIFE_S, lightningGap, lightningGlow,
-  PLUMES, PLUME_DAY_S, plumeUp, glowNear, glowsNear, TELL_RADII, TELL_JETS_KM,
+  PLUMES, PLUME_DAY_S, plumeUp, glowNear, glowsNear, TELL_RADII, TELL_JETS_KM, COUNTERGLOW_FROM_KM,
   IMPACT_GAP_S, IMPACT_LIFE_S, impactGap, impactGlow,
   NIGHT_CLOUDS, sheetBand, FOOTPRINT, footprintUp, SODIUM_TAIL, JETS, jetDirections, SPRITE, spriteGlow, SPOKES,
 } from '../src/core/glows.js';
@@ -100,7 +100,7 @@ test('where several sights are in reach they are all listed, the nearest thing f
   assert.deepEqual(glowsNear(BODIES, above('earth', 1)), ['aurora:earth', 'clouds:earth']);
   assert.deepEqual(glowsNear(BODIES, above('earth', 2.5)), ['aurora:earth']);
   assert.deepEqual(glowsNear(BODIES, above('jupiter', 1)), ['aurora:jupiter', 'footprint:io']);
-  assert.deepEqual(glowsNear(BODIES, above('saturn', 1)), ['aurora:saturn', 'spokes:saturn']);
+  assert.deepEqual(glowsNear(BODIES, above('saturn', 1)), ['aurora:saturn', 'spokes:saturn', 'hexagon:saturn']);
   assert.deepEqual(glowsNear(BODIES, above('neptune', 1)), ['spot:neptune']);
   // Triton is within three radii of Neptune.
   assert.deepEqual(glowsNear(BODIES, above('triton', 5)), ['plume:triton', 'spot:neptune']);
@@ -176,4 +176,26 @@ test("Mercury's tail and the ring spokes have their sizes", () => {
   assert.equal(Math.round(SODIUM_TAIL.lengthKm / bodyById('mercury').radiusKm), 100);
   assert.ok(SPOKES.ring[0] > 0.29 && SPOKES.ring[1] < 0.685, 'within the B ring');
   assert.ok(SPOKES.count > 0 && SPOKES.dark > 0 && SPOKES.dark < 0.5);
+});
+
+test('sights that show from one side: behind a world with the Sun beyond, over the night side, far from everything', () => {
+  const sun = bodyById('sun');
+  // A place `radii` above the ground of a body, on the side away from the Sun (-1) or toward it (1).
+  const beside = (id, radii, sunward) => {
+    const b = bodyById(id);
+    const way = sun.position.map((n, i) => n - b.position[i]);
+    const length = Math.hypot(...way);
+    return b.position.map((n, i) => n + sunward * (way[i] / length) * b.radiusKm * (1 + radii));
+  };
+  assert.ok(glowsNear(BODIES, beside('saturn', 5, -1)).includes('backlit:saturn'));
+  assert.ok(!glowsNear(BODIES, beside('saturn', 5, 1)).includes('backlit:saturn'));
+  for (const id of ['titan', 'pluto', 'mars']) {
+    assert.ok(glowsNear(BODIES, beside(id, 3, -1)).includes(`haze:${id}`), id);
+    assert.ok(!glowsNear(BODIES, beside(id, 3, 1)).includes(`haze:${id}`), id);
+  }
+  assert.ok(glowsNear(BODIES, beside('earth', 1, -1)).includes('airglow:earth'));
+  assert.ok(!glowsNear(BODIES, beside('earth', 1, 1)).includes('airglow:earth'));
+  // Far above the planets' plane, away from everything.
+  const far = [sun.position[0], sun.position[1] + 3 * COUNTERGLOW_FROM_KM + sun.radiusKm, sun.position[2]];
+  assert.deepEqual(glowsNear(BODIES, far), ['counterglow']);
 });

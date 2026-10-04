@@ -109,5 +109,9 @@ void main(){
   float fromPlane = asin(clamp(d.y, -1., 1.));
   float zodiacal = exp(-elong * 1.9) * exp(-pow(fromPlane / (.09 + .2 * elong), 2.)) * .2;
   col += vec3(1., .93, .8) * zodiacal;
+  // The counterglow (gegenschein): the same dust seen straight away from the Sun, where
+  // every grain shows its full lit face: a faint oval some ten degrees across.
+  float anti = acos(clamp(dot(d, -sunDir), -1., 1.));
+  col += vec3(1., .95, .85) * exp(-pow(anti / .13, 2.)) * exp(-pow(fromPlane / .1, 2.)) * .1;
   gl_FragColor = vec4(col, 1.);
 }

@@ -244,7 +244,7 @@
     <dl>
       <dt>방향 전환</dt><dd>화면 드래그 / 방향키</dd>
       <dt>목표 고정</dt><dd>"목표 고정" 단추. 고른 곳을 화면 가운데에 붙잡아 둡니다. 옆걸음 단추로 그 둘레를 돌고, 전진과 후진으로 다가가고 물러납니다. 화면을 끌거나 방향키를 누르면 풀립니다.</dd>
-      <dt>큰 지도</dt><dd>왼쪽의 작은 지도를 누르면 열립니다. 지도나 이름에서 갈 곳을 고르고 "이 방향으로"를 누르면 그쪽을 바라보고 고정합니다. 가 본 곳은 "순간 이동"도 뜹니다.</dd>
+      <dt>큰 지도</dt><dd>왼쪽의 작은 지도를 누르면 열립니다. 지도나 이름에서 갈 곳을 고릅니다. "순간 이동"을 누르면 6초 뒤 그곳에 나타납니다(가 보지 않은 곳도 됩니다). "이 방향으로"는 그쪽을 바라보고 고정만 합니다.</dd>
       <dt>뒤 보기</dt><dd>R 키 / 굽은 화살표 버튼. 시야만 뒤로 돌립니다. 나는 방향과 속도는 그대로이고, 다시 누르면 앞을 봅니다.</dd>
       <dt>옆걸음</dt><dd>방향키 모양의 단추 넷 / A · D 키. 보는 방향은 그대로 둔 채 위, 아래, 왼쪽, 오른쪽으로 미끄러지듯 이동합니다(위아래는 단추로만). 놓으면 그 속도로 계속 가고, 정지를 누르면 멈춥니다.</dd>
       <dt>몸 회전</dt><dd>Q / E · 좌우 롤 회전. 위아래 회전도 360도 가능합니다.</dd>
@@ -269,8 +269,8 @@
     <div id="bigMapList" role="group" aria-label="갈 곳"></div>
     <p id="bigMapInfo" class="muted">갈 곳을 지도나 이름에서 고르세요.</p>
     <div id="bigMapActions">
+      <button id="bigMapJump" disabled>순간 이동</button>
       <button id="bigMapGo" disabled>이 방향으로</button>
-      <button id="bigMapJump" hidden>순간 이동</button>
       <button id="bigMapClose">닫기</button>
     </div>
   </dialog>

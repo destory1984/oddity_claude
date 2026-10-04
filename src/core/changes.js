@@ -3,6 +3,8 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '큰 지도에서 고른 곳으로 바로 순간 이동할 수 있습니다. 가 보지 않은 곳도 됩니다.' },
+  { day: '2026-10-04', text: '지구에 갈 곳 여섯이 생겼습니다(바이코누르, 칙술루브 충돌구, 마우나케아 등). 수첩은 190칸입니다.' },
   { day: '2026-10-04', text: '실제 일식과 월식이 있는 주에는 게임이 알려 주고, 그 자리로 가서 볼 수 있습니다. 다음은 2027년 2월 6일입니다.' },
   { day: '2026-10-04', text: '사진 임무 "다이아몬드 반지"가 생겼습니다. 행성 가장자리로 태양이 막 나올 때 찍습니다. 수첩은 184칸이 됐습니다.' },
   { day: '2026-10-04', text: '미니맵을 누르면 큰 지도가 열립니다. 갈 곳을 고르고 "이 방향으로"를 누르면 그쪽을 바라봅니다.' },

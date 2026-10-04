@@ -98,6 +98,12 @@ const ROWS = [
   ['acidalia', '옛 지도에는 뭐라고 적혔나?', '아키달리아의 바다', '아키달리아의 숲', '아키달리아의 산'],
   ['schiaparelli', '운하로 잘못 옮겨진 말은?', '카날리', '마레', '테라'],
   ['wadiRum', '어느 나라에 있나?', '요르단', '이집트', '칠레'],
+  ['baikonur', '1961년 여기서 떠난 첫 우주인은?', '유리 가가린', '닐 암스트롱', '존 글렌'],
+  ['chicxulub', '충돌구의 지름은?', '약 180km', '약 18km', '약 1,800km'],
+  ['barringer', '구덩이의 지름은?', '약 1.2km', '약 12km', '약 120km'],
+  ['maunaKea', '산의 높이는?', '4,207m', '2,407m', '8,848m'],
+  ['alma', '안테나는 모두 몇 대인가?', '66대', '16대', '106대'],
+  ['bohyunsan', '망원경 거울의 지름은?', '1.8m', '18m', '8.1m'],
 ];
 
 export const QUIZ = Object.fromEntries(ROWS.map(([id, question, answer, ...wrong]) => [id, { question, answer, wrong }]));

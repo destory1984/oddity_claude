@@ -15,9 +15,9 @@ test('every story place has a longer telling of three sentences or more', () => 
   }
 });
 
-test('90 of the 94 have a photograph on file, with a caption and a credit; the Ocean of Storms and the three places of the ninth tour have none', () => {
+test('90 of the 100 have a photograph on file, with a caption and a credit; the Ocean of Storms, the three places of the ninth tour and the six places added on Earth have none', () => {
   const without = STORIES.filter((s) => !STORY_DETAILS[s.id].photo).map((s) => s.id);
-  assert.deepEqual(without, ['procellarum', 'acidalia', 'schiaparelli', 'wadiRum']);
+  assert.deepEqual(without, ['procellarum', 'acidalia', 'schiaparelli', 'wadiRum', 'baikonur', 'chicxulub', 'barringer', 'maunaKea', 'alma', 'bohyunsan']);
   assert.equal(storyPhotoFile('procellarum'), null);
   const credits = readFileSync('THIRD-PARTY.md', 'utf8');
   let bytes = 0;

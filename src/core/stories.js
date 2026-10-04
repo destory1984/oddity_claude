@@ -269,6 +269,46 @@ STORIES.push({
   hint: '지구 요르단의 와디럼 사막(북위 29.6도, 동경 35.4도) 150km 안에 내려앉기',
   text: '요르단 남쪽의 붉은 사막입니다. 화성과 닮아서 화성이 나오는 영화의 바깥 장면을 여러 편 이곳에서 찍었습니다.',
 });
+// Six more places on Earth (2026-10-04, by the user's pick from nine): where rockets
+// left from, where the sky fell, and where the sky is watched. None has a photograph yet.
+STORIES.push(
+  {
+    id: 'baikonur', name: '바이코누르 우주기지', nameEn: 'Baikonur Cosmodrome', year: 1957, type: 'surface', body: 'earth',
+    latDeg: 45.92, lonDeg: 63.34, withinKm: 60, landmark: false,
+    hint: '지구 카자흐스탄의 바이코누르 우주기지(북위 45.9도, 동경 63.3도) 60km 안에 내려앉기',
+    text: '1957년 10월 4일 스푸트니크가, 1961년 4월 12일 가가린이 이곳에서 떠났습니다. 카자흐스탄의 초원에 있습니다.',
+  },
+  {
+    id: 'chicxulub', name: '칙술루브 충돌구', nameEn: 'Chicxulub Crater', type: 'surface', body: 'earth',
+    latDeg: 21.4, lonDeg: -89.5, withinKm: 150, landmark: true,
+    hint: '지구 멕시코 유카탄반도의 칙술루브 충돌구(북위 21.4도, 서경 89.5도) 150km 안에 내려앉기',
+    text: '6,600만 년 전 지름 10km쯤의 소행성이 떨어진 자리입니다. 공룡을 비롯해 생물 종의 4분의 3이 사라졌습니다.',
+  },
+  {
+    id: 'barringer', name: '배린저 운석공', nameEn: 'Meteor Crater', type: 'surface', body: 'earth',
+    latDeg: 35.03, lonDeg: -111.02, withinKm: 60, landmark: true,
+    hint: '지구 미국 애리조나의 배린저 운석공(북위 35.0도, 서경 111.0도) 60km 안에 내려앉기',
+    text: '5만 년 전 지름 50m쯤의 쇳덩이 운석이 판 구덩이입니다. 아폴로 우주인들이 이곳에서 달 걷기를 익혔습니다.',
+  },
+  {
+    id: 'maunaKea', name: '마우나케아 천문대', nameEn: 'Mauna Kea Observatories', year: 1970, type: 'surface', body: 'earth',
+    latDeg: 19.82, lonDeg: -155.47, withinKm: 60, landmark: false,
+    hint: '지구 하와이의 마우나케아 천문대(북위 19.8도, 서경 155.5도) 60km 안에 내려앉기',
+    text: '하와이섬의 해발 4,207m 산꼭대기에 망원경 열세 대가 모여 있습니다. 구름 위라 공기가 마르고 맑습니다.',
+  },
+  {
+    id: 'alma', name: '아타카마의 알마 전파망원경', nameEn: 'ALMA', year: 2013, type: 'surface', body: 'earth',
+    latDeg: -23.02, lonDeg: -67.75, withinKm: 60, landmark: false,
+    hint: '지구 칠레 아타카마 사막의 알마 전파망원경(남위 23.0도, 서경 67.8도) 60km 안에 내려앉기',
+    text: '칠레 아타카마 사막의 해발 5,000m 고원에 전파 안테나 66대가 서 있습니다. 별과 행성이 태어나는 곳을 봅니다.',
+  },
+  {
+    id: 'bohyunsan', name: '보현산천문대', nameEn: 'Bohyunsan Observatory', year: 1996, type: 'surface', body: 'earth',
+    latDeg: 36.16, lonDeg: 128.98, withinKm: 40, landmark: false,
+    hint: '지구 경북 영천의 보현산천문대(북위 36.2도, 동경 129.0도) 40km 안에 내려앉기',
+    text: '경북 영천 보현산 꼭대기에 한국에서 가장 큰 지름 1.8m 광학 망원경이 있습니다. 1996년에 문을 열었습니다.',
+  },
+);
 
 // A place's label shows only from within this many of its body's radii above the
 // surface (the Moon: 6,950 km; Mars: 13,560 km), like the craft that circle a planet

@@ -578,12 +578,13 @@ async function init() {
   // A place already visited, chosen from far away: appear there behind a flash. A body
   // is seen from its best side, a craft is docked with, a story place is seen from above.
   // toward: something on the body to arrive on the side of (core/teleport.js bodyVista).
-  function teleport(id, anywhere = false, known = false, toward = null) {
+  // free: somewhere not been to may be jumped to as well (the big map, an eclipse's place).
+  function teleport(id, anywhere = false, known = false, toward = null, free = false) {
     if (warp.busy()) return;
     sound.cue('warp');
     warp.play(() => {
       const target = here(id);
-      const spot = teleportSpot(target, { position: state.position, progress, bodies, parent: target.parent ? here(target.parent) : null, anywhere, known, ringNormal: world.ringNormal(target.id), toward });
+      const spot = teleportSpot(target, { position: state.position, progress, bodies, parent: target.parent ? here(target.parent) : null, anywhere, known: known || free, ringNormal: world.ringNormal(target.id), toward });
       if (!spot) return;
       if (docked) {
         docked = null;
@@ -763,7 +764,7 @@ ${STORY_MORE[target.id]}` : told };
   let landAtEclipse = false;
   $('eclipseJump').addEventListener('click', () => {
     if (!eclipse || photo.active() || warp.busy()) return;
-    teleport(eventPlace.id, true, true);
+    teleport(eventPlace.id, true, false, null, true);
     landAtEclipse = true;
   });
 
@@ -899,7 +900,7 @@ ${STORY_MORE[target.id]}` : told };
     const body = here(id);
     $('bigMapInfo').textContent = `${body.name} · ${distanceText(surfaceDistance(state.position, body))}`;
     $('bigMapGo').disabled = false;
-    $('bigMapJump').hidden = !teleportSpot(body, { position: state.position, progress, bodies, parent: body.parent ? here(body.parent) : null });
+    $('bigMapJump').disabled = false;
     for (const chip of $('bigMapList').children) chip.setAttribute('aria-pressed', String(chip.dataset.id === id));
   }
   const bigMap = createMinimap($('bigMapCanvas'), { big: true, onPick: pickOnMap });
@@ -910,7 +911,7 @@ ${STORY_MORE[target.id]}` : told };
     mapPick = null;
     $('bigMapInfo').textContent = '갈 곳을 지도나 이름에서 고르세요.';
     $('bigMapGo').disabled = true;
-    $('bigMapJump').hidden = true;
+    $('bigMapJump').disabled = true;
     $('bigMapList').replaceChildren(...mapBodies().map((b) => {
       const chip = document.createElement('button');
       chip.textContent = b.name;
@@ -936,7 +937,13 @@ ${STORY_MORE[target.id]}` : told };
   $('bigMapJump').addEventListener('click', () => {
     const id = mapPick;
     $('bigMap').close();
-    if (id) selectBody(id);
+    if (!id) return;
+    // Anywhere on the map, been there or not (as a tour's jump goes): on a phone,
+    // finding the way by hand was the hard part ("미니맵을 터치하면, 크게 확대되고, 거기에서
+    // 별을 선택해서 텔레포트하는 식으로 바꾸자").
+    selectedId = id;
+    hud.showSelection(named(id));
+    teleport(id, true, false, null, true);
   });
   const minimap = createMinimap($('minimap'), { onTap: openBigMap });
 

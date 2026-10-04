@@ -3342,7 +3342,13 @@ body.rear.touch #reticle span {
   padding:0 16px;
 }
 
-#bigMapGo:disabled {
+/* The jump is the main thing to do with the place picked. */
+#bigMapJump:not(:disabled) {
+  border-color:var(--gold);
+}
+
+#bigMapGo:disabled,
+#bigMapJump:disabled {
   opacity:.45;
 }
 

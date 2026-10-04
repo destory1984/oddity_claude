@@ -126,26 +126,39 @@ float beltSpeed(float belt) {
   return fract(sin(belt * 91.7 + 3.1) * 43758.5453) - .5;
 }
 
+// The map at u (which may run past 1: the map repeats round the globe by itself, and
+// wrapping the number here would leave a line where it jumps from 1 to 0). The seam
+// where the map's left and right edges meet is hidden: over the last third of a degree
+// each side it fades to the average of the two edges (`across`). (A band of three
+// degrees each side showed from close by as 170 km of smeared streaks across the Moon.)
+// The seam is found on the map itself, so it is hidden too where the map is slid round.
+vec3 mapAt(float u, vec3 across) {
+  float along = fract(u);
+  float edge = min(along, 1. - along);
+  return mix(across, texture2D(map, vec2(u, vUV.y)).rgb, smoothstep(.0002, .001, edge));
+}
+
 void main(){
-  vec3 col = texture2D(map, vUV).rgb;
+  vec3 across = .5 * (texture2D(map, vec2(.001, vUV.y)).rgb + texture2D(map, vec2(.999, vUV.y)).rgb);
+  vec3 col;
   if (flow > 0.) {
     // Fourteen belts from pole to pole, each carried round at its own rate; across the
     // edge between two the map is cross-faded, so no line is cut through the clouds.
+    // Two layers take turns: one holds the even belts, the other the odd ones, and a
+    // layer steps to its next belt only where it is not seen. (Where a layer's place on
+    // the map jumps, the card reads the most blurred copy of the map for a row of
+    // pixels: seen, that was a pale dashed line along every belt's edge.)
     float at = vUV.y * 14. - .5;
-    float belt = floor(at);
-    float mixTo = smoothstep(.3, .7, fract(at));
-    // (The map repeats round the globe by itself: wrapping the number here would leave a
-    // seam where it jumps from 1 to 0.)
-    vec3 a = texture2D(map, vec2(vUV.x + time * flow * beltSpeed(belt), vUV.y)).rgb;
-    vec3 b = texture2D(map, vec2(vUV.x + time * flow * beltSpeed(belt + 1.), vUV.y)).rgb;
-    col = mix(a, b, mixTo);
+    float pair = fract(at * .5) * 2.;
+    float odd = smoothstep(.3, .7, pair) - smoothstep(1.3, 1.7, pair);
+    float evenBelt = 2. * floor(at * .5 + .5);
+    float oddBelt = 2. * floor(at * .5) + 1.;
+    vec3 a = mapAt(vUV.x + time * flow * beltSpeed(evenBelt), across);
+    vec3 b = mapAt(vUV.x + time * flow * beltSpeed(oddBelt), across);
+    col = mix(a, b, odd);
+  } else {
+    col = mapAt(vUV.x, across);
   }
-  // Hide the seam where the map's left and right edges meet: over the last third of a
-  // degree each side, fade to the average of the two edges. (A band of three degrees
-  // each side showed from close by as 170 km of smeared streaks across the Moon.)
-  float edge = min(vUV.x, 1. - vUV.x);
-  vec3 across = .5 * (texture2D(map, vec2(.001, vUV.y)).rgb + texture2D(map, vec2(.999, vUV.y)).rgb);
-  col = mix(across, col, smoothstep(.0002, .001, edge));
   // How blurred the map is here, 0 (sharp) to 1: how little two softened copies of it
   // differ, taken over a small neighbourhood so the answer itself is smooth.
   float blurred = 0.;

@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '부제가 "우주 한량"에서 "할머니의 수첩"으로 바뀌었습니다.' },
   { day: '2026-10-04', text: '방향키 모양 단추 넷이 생겼습니다. 화면을 돌리지 않고 위, 아래, 왼쪽, 오른쪽으로 움직입니다.' },
   { day: '2026-10-04', text: '화성의 바이킹 1호 착륙지에 내려서면 "그날로" 단추가 뜹니다. 누르면 1976년의 착륙을 다시 보여 줍니다.' },
   { day: '2026-10-04', text: '화성의 큐리오시티 착륙지에 내려서면 "그날로" 단추가 뜹니다. 누르면 2012년 줄에 매달려 내려오던 모습을 보여 줍니다.' },

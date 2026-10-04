@@ -51,7 +51,7 @@ test('a tap picks the nearest dot within reach', () => {
   assert.equal(pickNearest([80, 80], dots), null);
 });
 
-test('each planet and dwarf planet has the first letter of its English name; the Sun, moons and comets have none', async () => {
+test('Earth and the planets and dwarf planets beyond it have the first letter of their English name; Mercury, Venus, the Sun, moons and comets have none', async () => {
   const { BODIES: all } = await import('../src/core/bodies.js');
   const letter = (id) => mapLetter(all.find((b) => b.id === id));
   assert.equal(letter('saturn'), 'S');
@@ -59,10 +59,13 @@ test('each planet and dwarf planet has the first letter of its English name; the
   assert.equal(letter('jupiter'), 'J');
   assert.equal(letter('pluto'), 'P');
   assert.equal(letter('ceres'), 'C');
+  assert.equal(letter('mars'), 'M');
+  assert.equal(letter('mercury'), null);
+  assert.equal(letter('venus'), null);
   assert.equal(letter('sun'), null);
   assert.equal(letter('moon'), null);
   assert.equal(letter('halley'), null);
-  assert.equal(all.filter((b) => mapLetter(b)).length, 10);
+  assert.equal(all.filter((b) => mapLetter(b)).length, 8);
 });
 
 test('the letter stands outward of its dot, away from the middle of the map', () => {

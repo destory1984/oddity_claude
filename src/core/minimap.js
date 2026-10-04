@@ -32,8 +32,12 @@ export function pickNearest([px, py], dots, within = 12) {
 }
 
 // The one letter beside a planet's dot on the map: the first of its English name
-// (Saturn: S). The Sun in the middle and the comets get none.
+// (Saturn: S). The Sun in the middle and the comets get none; nor do the planets inside
+// Earth's orbit, Mercury and Venus: on a map this small there is no room for letters
+// that close to the middle (the user, 2026-10-04: "자리가 모자란다").
+const NO_LETTER = ['mercury', 'venus'];
 export function mapLetter(body) {
+  if (NO_LETTER.includes(body.id)) return null;
   return body.kind === 'planet' || body.kind === 'dwarf' ? body.nameEn[0].toUpperCase() : null;
 }
 

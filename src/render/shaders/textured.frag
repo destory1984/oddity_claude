@@ -78,18 +78,26 @@ vec2 craterField(vec3 p) {
 // The map shows 2.7 km a pixel at best, so from close by the ground would be a blur.
 // Finer and finer craters come in as the camera nears the ground: 60 km ones from
 // three radii up, down to 700 m ones from a twenty-fifth of a radius.
-// Returns the height in scene units (x) and a shade for the colour (y).
-vec2 closeGround(vec3 p, float strength, float height) {
-  vec2 sum = vec2(0.);
+// A layer whose cells are only a few pixels wide is left out: craters smaller than a
+// pixel tip the ground at random from one pixel to the next, and it showed as black
+// specks all over Triton, where the blurred side is drawn this way from any distance.
+// pixel: how much ground one pixel covers, in scene units.
+// Returns a shade for the colour (x) and how the ground's height (in scene units)
+// changes across the screen (yz: per pixel to the right, per pixel up). That change is
+// taken from the craters' own shape, layer by layer, and only then weighed: strength
+// and height differ from pixel to pixel where the map is half blurred, and the change
+// of the weighed height made the ground there tip at random (black dashes on Triton).
+vec3 closeGround(vec3 p, float strength, float height, float pixel) {
+  vec3 sum = vec3(0.);
   float freq = 30.;
   float from = 3.;
   for (int k = 0; k < 5; k++) {
-    float w = strength * (1. - smoothstep(from * .45, from, height));
+    float w = strength * (1. - smoothstep(from * .45, from, height)) * smoothstep(3., 9., radius / (freq * pixel));
     if (w > .002) {
       vec2 f = craterField(p * freq + float(k) * 17.3);
       // The map already shows the largest craters: the widest layer only hints.
       float keep = k == 0 ? .4 : 1.;
-      sum += w * keep * vec2(f.x * radius / freq, f.y);
+      sum += w * keep * vec3(f.y, vec2(dFdx(f.x), dFdy(f.x)) * radius / freq);
     }
     freq *= 3.;
     from *= .34;
@@ -174,17 +182,20 @@ void main(){
     col *= 1. + blurred * ((mottle - .5) * .6 + (fine - .5) * .45);
   }
   if (strength > 0. && height < 3.) {
-    vec2 ground = closeGround(lp, strength, height);
-    col *= 1. + ground.y;
-    // Tip the surface by the slope of that ground, so rims catch the Sun and bowls
-    // hold shadow (the slope is read from how the height changes across the screen).
     vec3 sx = dFdx(wp);
     vec3 sy = dFdy(wp);
+    vec3 ground = closeGround(lp, strength, height, max(length(sx), length(sy)));
+    col *= 1. + ground.x;
+    // Tip the surface by the slope of that ground, so rims catch the Sun and bowls
+    // hold shadow (the slope is read from how the height changes across the screen).
     vec3 r1 = cross(sy, N);
     vec3 r2 = cross(N, sx);
     float det = dot(sx, r1);
-    vec3 grad = sign(det) * (dFdx(ground.x) * r1 + dFdy(ground.x) * r2);
-    N = normalize(abs(det) * N - 1.6 * grad);
+    vec3 grad = 1.6 * sign(det) * (ground.y * r1 + ground.z * r2);
+    // No slope steeper than 56 degrees: a crater's wall is not, and a stray value
+    // must not turn the ground away from the Sun.
+    grad *= min(1., 1.5 * abs(det) / max(length(grad), 1e-12));
+    N = normalize(abs(det) * N - grad);
   }
   vec3 V = normalize(-wp);
   float l = dot(N, sun);

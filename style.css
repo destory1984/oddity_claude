@@ -3491,13 +3491,9 @@ body.rear.touch #reticle span {
   object-position:center;
 }
 
-/* The day beside "만든 이유": small and quiet. */
-#settings dt time {
-  margin-left:6px;
-  color:#9fb4ffaa;
-  font-size:12px;
-  font-weight:400;
-  font-variant-numeric:tabular-nums;
+/* The reason wraps between words only. */
+#settings section[data-tab="about"] dd {
+  word-break:keep-all;
 }
 
 #aboutTitle span {

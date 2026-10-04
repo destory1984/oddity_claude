@@ -89,9 +89,9 @@ test('setting off she turns away from the camera over 0.8 s, then flies at ten f
   assert.ok(Math.abs(turn.length / 60 - 0.8) < 0.05, `${turn.length / 60}`);
   assert.deepEqual(sheetsOf(seen), ['brake', 'away']);
   const flight = run(flying(), FLY, 0.4, 0.01).seen;
-  // Straight away the third drawing (a kick) is left out: the first comes round again.
-  assert.deepEqual([...new Set(flight.map(spriteFrame))].sort(), [0, 1, 3]);
-  assert.deepEqual([0, 1, 2, 3].map((n) => flightFrame('away', n)), [0, 1, 0, 3]);
+  assert.deepEqual([...new Set(flight.map(spriteFrame))].sort(), [0, 1, 2, 3]);
+  // Leaning, the third drawing (a kick) is left out: the first comes round again.
+  assert.deepEqual([0, 1, 2, 3].map((n) => flightFrame('away', n)), [0, 1, 2, 3]);
   assert.deepEqual([0, 1, 2, 3].map((n) => flightFrame('away-left', n)), [0, 1, 0, 3]);
   assert.deepEqual([0, 1, 2, 3].map((n) => flightFrame('back-down', n)), [0, 1, 0, 3]);
   assert.deepEqual([0, 1, 2, 3].map((n) => flightFrame('back-up', n)), [0, 1, 2, 3]);

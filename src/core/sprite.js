@@ -164,13 +164,14 @@ export function modeFor(input) {
 }
 
 const loop = (time, fps) => Math.floor(time * fps) % FRAMES;
-// Flying straight away and leaning, the third drawing kicks one leg up (and, straight
-// on, puts the hidden boot on the other side of the leg in front): played in turn with
+// Leaning as she flies away, the third drawing kicks one leg up: played in turn with
 // the others the legs jerked about ("다리 움직임이 매우 이상한데?"). It is left out: the
-// first drawing comes round again in its place.
+// first drawing comes round again in its place. (The straight set, 'away', did the same
+// and read as one-legged besides; it was drawn again on 2026-10-04 with both legs side
+// by side and still, and plays all four.)
 const CALM_ORDER = [0, 1, 0, 3];
 // (Nosing down, the third drawing throws her hair and ribbons up: left out too.)
-const CALM_SHEETS = ['away', 'away-left', 'away-right', 'back-down'];
+const CALM_SHEETS = ['away-left', 'away-right', 'back-down'];
 export function flightFrame(sheet, n) {
   return CALM_SHEETS.includes(sheet) ? CALM_ORDER[n] : n;
 }

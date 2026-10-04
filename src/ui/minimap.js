@@ -16,6 +16,7 @@ const COLORS = {
   halley: '#bfe6ff',
   haleBopp: '#bfe6ff',
   churyumov: '#bfe6ff',
+  trappist1: '#ff8a5c',
 };
 const EDGE_PX = 8;
 
@@ -45,7 +46,9 @@ export function createMinimap(canvas, { onPick }) {
     hover = null;
   });
 
-  function draw({ bodies, position, heading, selectedId }) {
+  // away: she is at the other star (core/exo.js); the map is then of that star and its
+  // seven planets, with no belt and no comets.
+  function draw({ bodies, position, heading, selectedId, away = false }) {
     const size = canvas.clientWidth;
     if (!size) return;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -57,9 +60,9 @@ export function createMinimap(canvas, { onPick }) {
     ctx.clearRect(-size / 2, -size / 2, size, size);
 
     const radius = size / 2 - EDGE_PX;
-    const sun = bodies.find((b) => b.kind === 'star');
-    const planets = bodies.filter((b) => b.kind === 'planet' || b.kind === 'dwarf');
-    const comets = bodies.filter((b) => b.kind === 'comet');
+    const sun = bodies.find((b) => b.kind === (away ? 'exostar' : 'star'));
+    const planets = bodies.filter((b) => (away ? b.kind === 'exoplanet' : b.kind === 'planet' || b.kind === 'dwarf'));
+    const comets = away ? [] : bodies.filter((b) => b.kind === 'comet');
     const dist = (b) => Math.hypot(b.position[0] - sun.position[0], b.position[2] - sun.position[2]);
     const outerKm = Math.max(...planets.map(dist));
     const at = (p) => mapPoint(p, sun.position, outerKm, radius);
@@ -80,11 +83,13 @@ export function createMinimap(canvas, { onPick }) {
     }
 
     // The asteroid belt: one dotted ring down its middle.
-    ctx.setLineDash([2, 3]);
-    ctx.beginPath();
-    ctx.arc(0, 0, radius * Math.sqrt((BELT.innerKm + BELT.outerKm) / 2 / outerKm), 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    if (!away) {
+      ctx.setLineDash([2, 3]);
+      ctx.beginPath();
+      ctx.arc(0, 0, radius * Math.sqrt((BELT.innerKm + BELT.outerKm) / 2 / outerKm), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
 
     const selected = bodies.find((b) => b.id === selectedId);
     const ringed = selected?.kind === 'moon' ? selected.parent : selectedId;
@@ -94,7 +99,7 @@ export function createMinimap(canvas, { onPick }) {
       const [x, y] = at(body.position);
       ctx.fillStyle = COLORS[body.id] ?? '#cfe3f3';
       ctx.beginPath();
-      ctx.arc(x, y, body.kind === 'star' ? 4 : body.kind === 'planet' ? 2.6 : 2, 0, Math.PI * 2);
+      ctx.arc(x, y, body === sun ? 4 : body.kind === 'planet' || body.kind === 'exoplanet' ? 2.6 : 2, 0, Math.PI * 2);
       ctx.fill();
       if (body.id === ringed) {
         ctx.strokeStyle = '#ffffff';
@@ -112,7 +117,7 @@ export function createMinimap(canvas, { onPick }) {
         ctx.fillText(letter, lx, ly);
         ctx.textAlign = 'start';
       }
-      if (body.kind !== 'star') dots.push({ id: body.id, x, y });
+      if (body !== sun) dots.push({ id: body.id, x, y });
       named.push({ id: body.id, x, y, name: body.name });
     }
 

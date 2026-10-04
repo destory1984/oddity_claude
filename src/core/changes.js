@@ -3,6 +3,8 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '트라피스트-1에 가 있는 동안 미니맵이 그 별과 행성 일곱(b부터 h)을 보여 줍니다.' },
+  { day: '2026-10-04', text: '"그날로" 장면이 도는 동안에는 다른 알림과 서라의 말풍선이 뜨지 않습니다.' },
   { day: '2026-10-04', text: '아폴로 11호 착륙지에 내려서면 "그날로" 단추가 뜹니다. 누르면 1969년의 착륙을 다시 보여 줍니다.' },
   { day: '2026-10-04', text: '케플러 우주망원경에 도킹하면 40광년 밖의 별 트라피스트-1로 건너가 행성 일곱을 구경할 수 있습니다.' },
   { day: '2026-10-04', text: '빨리 날면 시야가 넓어지고 별이 짧은 줄로 늘어납니다. 설정의 "속도의 느낌"에서 끌 수 있습니다.' },

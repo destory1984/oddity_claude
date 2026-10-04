@@ -68,6 +68,12 @@ test('Earth and the planets and dwarf planets beyond it have the first letter of
   assert.equal(all.filter((b) => mapLetter(b)).length, 8);
 });
 
+test('a planet of the other star has its own letter, b to h, and the star has none', async () => {
+  const { exoBodiesAt } = await import('../src/core/exo.js');
+  const there = exoBodiesAt(0);
+  assert.deepEqual(there.map(mapLetter), [null, 'b', 'c', 'd', 'e', 'f', 'g', 'h']);
+});
+
 test('the letter stands outward of its dot, away from the middle of the map', () => {
   assert.deepEqual(letterPoint([10, 0], 7), [17, 0]);
   assert.deepEqual(letterPoint([0, -20], 7), [0, -27]);

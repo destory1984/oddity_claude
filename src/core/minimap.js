@@ -36,8 +36,10 @@ export function pickNearest([px, py], dots, within = 12) {
 // Earth's orbit, Mercury and Venus: on a map this small there is no room for letters
 // that close to the middle (the user, 2026-10-04: "자리가 모자란다").
 const NO_LETTER = ['mercury', 'venus'];
+// A planet of another star (core/exo.js) has its own letter: TRAPPIST-1 e is "e".
 export function mapLetter(body) {
   if (NO_LETTER.includes(body.id)) return null;
+  if (body.kind === 'exoplanet') return body.nameEn.slice(-1);
   return body.kind === 'planet' || body.kind === 'dwarf' ? body.nameEn[0].toUpperCase() : null;
 }
 

@@ -1548,6 +1548,10 @@ ${STORY_MORE[target.id]}` : told };
         sound.cue('landed');
       }
     }
+    // While a day is played again nothing else is told: the notice and her bubble are
+    // hidden (style.css), and the sights wait, so none is spent unseen.
+    document.body.classList.toggle('replaying', Boolean(replay));
+    if (replay) glowTellWait = Math.max(glowTellWait, 1);
     showInspectInfo();
     // The feel of speed: the view widens near the limit of the spot, and the stars draw
     // out from 2c. Photo mode and the close view keep their own view; docked or gliding
@@ -1637,7 +1641,7 @@ ${STORY_MORE[target.id]}` : told };
     if (view.heroSheet === 'hurt-bright') feeling = { type: 'tooBright' };
     else if (view.heroSheet === 'hot' || view.heroSheet === 'hot-wipe') feeling = { type: 'hot', au: sunKm * 100 / AU_KM };
     else if (view.heroSheet === 'cold') feeling = sunKm > 19 * AU_KM / 100 ? { type: 'coldFar', au: sunKm * 100 / AU_KM } : { type: 'coldShadow' };
-    if (feeling && feelingTold !== feeling.type) {
+    if (feeling && feelingTold !== feeling.type && !replay) {
       feelingTold = feeling.type;
       toast.show(eventMessage(feeling), null, SIGHT_S);
     }
@@ -1655,7 +1659,7 @@ ${STORY_MORE[target.id]}` : told };
       seeUntil = performance.now() + SEE_S * 1000;
       toast.show(eventMessage({ type: 'glow', id: sight }), null, SIGHT_S);
     }
-    if (view.inBelt && !beltSeen) {
+    if (view.inBelt && !beltSeen && !replay) {
       beltSeen = true;
       markTold('belt');
       say.show(SIGHTS.belt);
@@ -1720,7 +1724,7 @@ ${STORY_MORE[target.id]}` : told };
           .map((t) => t.id),
       ],
     });
-    minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId });
+    minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId, away });
   });
 
   // Read-only diagnostics for verification. No travel shortcuts.

@@ -2947,6 +2947,12 @@ html.shell body {
   color:#9fb0d8;
 }
 
+/* While a day is played again ("그날로") only its own lines are told. */
+body.replaying #toast,
+body.replaying #heroSay {
+  visibility:hidden;
+}
+
 /* Nothing on the flight screen is text to be picked up: a long press on a phone marked
    the word on a button instead of flying. Buttons everywhere, and the whole flight screen. */
 button,

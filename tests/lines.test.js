@@ -2,6 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   LANDED, IDLE, AGAIN, MILESTONES, freshLine, milestoneLine,
+  NEAR, DEEP, REAR, PHOTO, JUMP, DOCK, FAST, SIGHTS, fastLine,
 } from '../src/core/lines.js';
 import { MEMOS } from '../src/core/story.js';
 import { BODIES } from '../src/core/bodies.js';
@@ -20,8 +21,8 @@ test('Seora has a line for landing on every body, different from the one for fin
   assert.equal(new Set(Object.values(LANDED)).size, BODIES.length);
 });
 
-test('twelve idle lines, eight for coming back, three milestones: all short and all different', () => {
-  assert.equal(IDLE.length, 12);
+test('thirty idle lines, eight for coming back, three milestones: all short and all different', () => {
+  assert.equal(IDLE.length, 30);
   assert.equal(AGAIN.length, 8);
   const all = [...IDLE, ...AGAIN, ...Object.values(MILESTONES)];
   all.forEach((line, i) => short(line, i));
@@ -46,4 +47,24 @@ test('a milestone line comes when the count crosses 80, 120 or 160', () => {
   assert.equal(milestoneLine(119, 120), MILESTONES[120]);
   assert.equal(milestoneLine(159, 161), MILESTONES[160]);
   assert.equal(milestoneLine(39, 40), null);
+});
+
+test('her lines about the world she is near, what she does and what she sees: all short, none said twice', () => {
+  const all = [
+    ...IDLE, ...AGAIN, ...Object.values(MILESTONES), ...Object.values(LANDED), ...Object.values(NEAR).flat(),
+    ...DEEP, ...REAR, ...PHOTO, ...JUMP, ...DOCK, ...Object.values(FAST), ...Object.values(SIGHTS),
+  ];
+  all.forEach((line, i) => short(line, `${i} ${line}`));
+  assert.equal(new Set(all).size, all.length);
+  // Only worlds that exist have lines.
+  for (const id of Object.keys(NEAR)) assert.ok(BODIES.some((b) => b.id === id), id);
+  assert.ok(Object.keys(SIGHTS).length >= 26);
+});
+
+test('a speed line comes when she first passes one, ten and fifty times the speed of light', () => {
+  assert.equal(fastLine(0.9, 1.1), FAST[1]);
+  assert.equal(fastLine(1.1, 1.2), null);
+  assert.equal(fastLine(9, 12), FAST[10]);
+  assert.equal(fastLine(40, 60), FAST[50]);
+  assert.equal(fastLine(60, 40), null);
 });

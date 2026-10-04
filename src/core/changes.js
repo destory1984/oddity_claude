@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '서라가 말이 많아졌습니다. 가까운 천체 이야기, 뒤를 볼 때, 사진을 찍을 때, 볼거리를 볼 때 한마디씩 합니다.' },
   { day: '2026-10-04', text: '별자리와 은하, 성단의 이름이 휴대전화에서도 뜨고, 화면 가운데로 바라보면 한 줄 설명이 붙습니다.' },
   { day: '2026-10-04', text: '하늘에 히아데스, 벌집성단, 이중성단, 큰부리새자리 47, 프톨레마이오스 성단, 석탄자루가 생겼습니다.' },
   { day: '2026-10-04', text: '게임이 지구 밤 쪽의 해돋이 자리에서 시작합니다.' },

@@ -48,6 +48,7 @@ import { dailyRequest, requestTarget, requestMet, recordDay, streak, lastWeek } 
 import { palFor } from './core/pal.js';
 import {
   LANDED, IDLE, AGAIN, IDLE_AFTER_S, IDLE_GAP_S, freshLine, milestoneLine,
+  NEAR, NEAR_RADII, DEEP, DEEP_FROM_KM, REAR, PHOTO, JUMP, DOCK, SIGHTS, fastLine,
 } from './core/lines.js';
 import {
   TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, stopHint, advanceTour, allToursDone, stampFile, CRANE_FILE,
@@ -717,10 +718,13 @@ ${STORY_MORE[target.id]}` : told };
   const saidLines = new Set();
   function sayFresh(list) {
     const line = freshLine(list, saidLines);
-    if (!line) return;
+    if (!line) return false;
     saidLines.add(line);
     say.show(line);
+    return true;
   }
+  // What she was doing last frame, to notice what she has just done (core/lines.js).
+  let lastDoing = null;
   // The card that is open came up on standing again beside a place already logged.
   let againAfterCard = false;
   // How long she has been coasting with nothing to do, and how long until she may speak again.
@@ -1305,14 +1309,41 @@ ${STORY_MORE[target.id]}` : told };
       // A first landing: her line for standing there.
       if (event.type === 'landed' && LANDED[event.bodyId] && !saidAtStop) say.show(LANDED[event.bodyId]);
     }
-    // Coasting a long while with nothing to do, she talks to herself.
-    const coasting = dt > 0 && !input.driving() && !docked && !visit && !state.restingOn && totalSpeed(state) > 0.01;
-    idleFor = coasting ? idleFor + dt : (dt > 0 ? 0 : idleFor);
+    // With nothing to do a while (coasting, hovering, standing or riding a craft) she
+    // talks to herself: about the world she is near, or the emptiness far from all of
+    // them, and when those are said, whatever comes to mind.
+    const atEase = dt > 0 && !input.driving() && !visit;
+    idleFor = atEase ? idleFor + dt : (dt > 0 ? 0 : idleFor);
     idleQuiet = Math.max(0, idleQuiet - dt);
     if (idleFor >= IDLE_AFTER_S && idleQuiet === 0) {
-      sayFresh(IDLE);
+      const nearby = nearestSurface(state.position, bodies);
+      const topic = nearby.distance <= NEAR_RADII * nearby.body.radiusKm ? NEAR[nearby.body.id]
+        : (nearby.distance >= DEEP_FROM_KM ? DEEP : null);
+      if (!(topic && sayFresh(topic))) sayFresh(IDLE);
       idleFor = 0;
       idleQuiet = IDLE_GAP_S;
+    }
+    // A word on what she has just done: looked behind, saved a photo, come by a jump,
+    // docked, passed the speed of light.
+    {
+      const speedC = totalSpeed(state) / C;
+      const doing = { rear, photos: album.length, docked: Boolean(docked), speedC, position: state.position };
+      if (lastDoing && dt > 0) {
+        const leap = Math.hypot(...doing.position.map((n, i) => n - lastDoing.position[i]));
+        if (doing.rear && !lastDoing.rear) sayFresh(REAR);
+        else if (doing.photos > lastDoing.photos) sayFresh(PHOTO);
+        else if (doing.docked && !lastDoing.docked) sayFresh(DOCK);
+        // Farther in one frame than flying could take her: a jump.
+        else if (leap > 1e4 && leap > totalSpeed(state) * dt * 20) sayFresh(JUMP);
+        else {
+          const fast = fastLine(lastDoing.speedC, speedC);
+          if (fast && !saidLines.has(fast)) {
+            saidLines.add(fast);
+            say.show(fast);
+          }
+        }
+      }
+      lastDoing = doing;
     }
     if (finished) celebrate();
 
@@ -1453,6 +1484,7 @@ ${STORY_MORE[target.id]}` : told };
       meteorSeen = true;
       markTold('meteor');
       glowTellWait = SIGHT_GAP_S;
+      say.show(SIGHTS.meteor);
       toast.show(eventMessage({ type: 'meteor' }), null, SIGHT_S);
     }
     // Say why she shivers or shields her eyes: once each time she comes into the cold
@@ -1474,11 +1506,14 @@ ${STORY_MORE[target.id]}` : told };
     if (sight) {
       markTold(sight);
       glowTellWait = SIGHT_GAP_S;
+      // Her own word under the notice that explains it.
+      if (SIGHTS[sight]) say.show(SIGHTS[sight]);
       toast.show(eventMessage({ type: 'glow', id: sight }), null, SIGHT_S);
     }
     if (view.inBelt && !beltSeen) {
       beltSeen = true;
       markTold('belt');
+      say.show(SIGHTS.belt);
       toast.show(eventMessage({ type: 'beltEntered' }), null, SIGHT_S);
     }
     world.render();

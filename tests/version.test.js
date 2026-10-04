@@ -17,11 +17,11 @@ test('the time of the update is given on the Korean clock, to the minute', () =>
   assert.equal(updatedText(new Date('2026-10-03T21:34:00+09:00')), '2026-10-03 21:34');
 });
 
-test('the settings have a place for both at their foot, and the build fills it', () => {
+test('the settings have a place for both at their head, and the build fills it', () => {
   const html = fs.readFileSync('index.html', 'utf8');
   const settings = html.slice(html.indexOf('<dialog id="settings"'));
-  const sheet = settings.slice(0, settings.indexOf('</dialog>'));
-  assert.match(sheet, /closeSettings[\s\S]*<small id="appVersion">\{\{version\}\} · \{\{updated\}\}<\/small>\s*$/);
+  const head = settings.slice(0, settings.indexOf('settingsTabs'));
+  assert.ok(head.includes('<h1 id="settingsTitle">설정</h1><small id="appVersion">{{version}} · {{updated}}</small>'));
   // Nowhere else: neither the loading screen nor the note sheet carries it now.
   assert.equal(html.split('{{version}}').length, 2);
   const filled = fillVersion('<small>{{version}} · {{updated}}</small>', '0.1.2', new Date('2026-10-03T12:00:00Z'));

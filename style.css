@@ -3343,3 +3343,16 @@ dialog .sheetHead .textSize button:disabled {
 .skyLabel.told small {
   display:block;
 }
+
+/* The version stands at the head of the settings, between the title and the text size
+   buttons (the user, 2026-10-04: "버전 표시를 설정 화면의 제일 위로 옮겨줘"). */
+#settings .sheetHead h1 {
+  flex:none;
+}
+
+#settings .sheetHead #appVersion {
+  flex:1;
+  min-width:0;
+  margin:0;
+  line-height:1.4;
+}

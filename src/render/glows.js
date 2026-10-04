@@ -153,16 +153,17 @@ function lightCard(scene, name, texture) {
   return { mesh, material };
 }
 
-function veilMaterial(scene, name, { low, high, ripple, nightOnly, dark = false }) {
+function veilMaterial(scene, name, { low, high, ripple, nightOnly, dark = false, soft = false }) {
   Effect.ShadersStore.veilVertexShader = veilVert;
   Effect.ShadersStore.veilFragmentShader = veilFrag;
   const material = new ShaderMaterial(name, scene, { vertex: 'veil', fragment: 'veil' }, {
     attributes: ['position'],
-    uniforms: ['worldViewProjection', 'world', 'centre', 'colorLow', 'colorHigh', 'strength', 'time', 'ripple', 'nightOnly', 'sunDir', 'dark'],
+    uniforms: ['worldViewProjection', 'world', 'centre', 'colorLow', 'colorHigh', 'strength', 'time', 'ripple', 'nightOnly', 'sunDir', 'dark', 'soft'],
   });
   // Smoke covers what is behind it; light is added to it.
   material.alphaMode = dark ? Constants.ALPHA_COMBINE : Constants.ALPHA_ADD;
   material.setFloat('dark', dark ? 1 : 0);
+  material.setFloat('soft', soft ? 1 : 0);
   material.needAlphaBlending = () => true;
   material.disableDepthWrite = true;
   material.backFaceCulling = false;
@@ -260,7 +261,7 @@ export function createGlows(scene, bodies) {
 
   // The jets of Halley's nucleus: narrow cones of lit dust on its day side.
   const jets = JETS.lean.map((_, i) => {
-    const material = veilMaterial(scene, `jet${i}`, { low: [1, 0.97, 0.9], high: [0.75, 0.85, 1], ripple: 0, nightOnly: false });
+    const material = veilMaterial(scene, `jet${i}`, { low: [1, 0.97, 0.9], high: [0.75, 0.85, 1], ripple: 0, nightOnly: false, soft: true });
     const mesh = band(scene, `jet${i}`, (JETS.widthKm * 0.04) / KM_PER_UNIT, (JETS.widthKm / 2) / KM_PER_UNIT, 20);
     mesh.material = material;
     mesh.scaling.y = JETS.heightKm / KM_PER_UNIT;

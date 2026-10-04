@@ -10,6 +10,11 @@ uniform float nightOnly;
 uniform vec3 sunDir;
 // 1 for a dark plume (Triton's): drawn over the ground as smoke, not added as light.
 uniform float dark;
+// 1 for a jet seen from close by (Halley's): the cone's wall fades out where it is seen
+// edge on, so the jet is a soft stream bright down its middle. With an even wall it
+// crossed the close view as a flat wedge with a hard edge.
+uniform float soft;
+varying float vFace;
 // A thin glowing sheet wrapped round an axis: an aurora curtain or a plume. The mesh is
 // a cone band one unit tall, so vPos.y + .5 runs 0 at the foot to 1 at the top.
 void main(){
@@ -43,5 +48,6 @@ void main(){
     gl_FragColor = vec4(colorLow, smoke);
     return;
   }
-  gl_FragColor = vec4(mix(colorLow, colorHigh, h) * fade * wave * night * strength, 1.);
+  float stream = mix(1., smoothstep(0., .75, vFace), soft);
+  gl_FragColor = vec4(mix(colorLow, colorHigh, h) * fade * wave * night * strength * stream, 1.);
 }

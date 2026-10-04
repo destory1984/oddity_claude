@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '해 정반대편의 희미한 빛(대일조)과 플레어 뒤에 부푸는 가스 구름이 이제 제대로 보입니다.' },
   { day: '2026-10-04', text: '토성 둘레에 엔셀라두스의 분수가 만든 푸른 E 고리가 생겼습니다.' },
   { day: '2026-10-04', text: '해 가장자리에서 가끔 플레어가 번쩍하고, 목성의 띠가 서로 다른 빠르기로 흐릅니다.' },
   { day: '2026-10-04', text: '화성 땅 가까이에서 먼지 회오리가 지나간 검은 줄이 보입니다.' },

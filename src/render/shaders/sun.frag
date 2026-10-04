@@ -179,7 +179,7 @@ void main(){
   float shell = exp(-pow((r - .129 * (1.05 + 2.2 * u)) / (.012 + .05 * u), 2.)) * exp(-pow(da / (.3 + .35 * u), 2.))
     * pow(1. - u, 2.) * smoothstep(0., .03, u) * .5;
   vec3 col = (surface * disc * 1.35 + glow * visibility + vec3(1., .3, .27) * prom * .9
-    + vec3(1., .96, .88) * kernel * disc + vec3(1., .8, .6) * shell * (1. - disc)
+    + vec3(1., .96, .88) * kernel * disc + vec3(1., .8, .6) * shell * 3. * (1. - disc)
     + vec3(.86, .9, 1.) * pearl + vec3(1., .97, .9) * diamond) * .68;
   float a = clamp(disc + corona * .38 + rayH + rayV + ring + prom + pearl + diamond + shell, 0., 1.);
   // The glow is light added to the sky, but the disc itself hides what is behind it: the

@@ -129,8 +129,10 @@ void main(){
     float at = vUV.y * 14. - .5;
     float belt = floor(at);
     float mixTo = smoothstep(.3, .7, fract(at));
-    vec3 a = texture2D(map, vec2(fract(vUV.x + time * flow * beltSpeed(belt)), vUV.y)).rgb;
-    vec3 b = texture2D(map, vec2(fract(vUV.x + time * flow * beltSpeed(belt + 1.)), vUV.y)).rgb;
+    // (The map repeats round the globe by itself: wrapping the number here would leave a
+    // seam where it jumps from 1 to 0.)
+    vec3 a = texture2D(map, vec2(vUV.x + time * flow * beltSpeed(belt), vUV.y)).rgb;
+    vec3 b = texture2D(map, vec2(vUV.x + time * flow * beltSpeed(belt + 1.), vUV.y)).rgb;
     col = mix(a, b, mixTo);
   }
   // Hide the seam where the map's left and right edges meet: over the last third of a

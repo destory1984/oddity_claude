@@ -22,7 +22,7 @@ void main(){
   vec3 north=cross(N,east);
   float reach=.0035/max(light,.18);
   vec2 toSun=vec2(dot(sun,east)/max(sqrt(1.-N.y*N.y),.2),-dot(sun,north)*2.)*reach;
-  float shade=smoothstep(.3,.8,texture2D(cloudMap,vec2(fract(vUV.x-cloudShift+toSun.x),clamp(vUV.y+toSun.y,0.,1.))).r);
+  float shade=smoothstep(.3,.8,texture2D(cloudMap,vec2(vUV.x-cloudShift+toSun.x,clamp(vUV.y+toSun.y,0.,1.))).r);
   vec3 col=tex*(.095+max(0.,light)*1.28*(1.-.4*shade));
   vec3 cities=texture2D(night,vUV).rgb;
   col+=cities*vec3(1.25,.89,.5)*(1.-daySide)*1.25;

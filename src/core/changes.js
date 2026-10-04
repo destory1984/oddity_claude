@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '오로라, 번개 같은 볼거리 알림은 기기마다 한 번만 뜹니다. 열 때마다 되풀이되지 않습니다.' },
   { day: '2026-10-04', text: '별자리 선이 태양 위로 지나가 보이던 것을 고쳤습니다. 태양이 뒤의 선과 별을 가립니다.' },
   { day: '2026-10-04', text: '수첩의 사진첩에 "지나온 길 돌아보기"가 생겼습니다. 찍은 사진이 오래된 것부터 차례로 넘어갑니다.' },
   { day: '2026-10-04', text: '넓은 화면에서 움직임 단추 넷이 오른쪽 아래에 나란히 서고, 화면 밖 화살표가 미니맵과 목적지 칸을 가리지 않습니다.' },

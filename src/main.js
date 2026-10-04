@@ -30,7 +30,7 @@ import {
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
-  loadDaily, saveDaily, loadScreen, saveScreen, loadStunts, saveStunts,
+  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, loadStunts, saveStunts,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
@@ -145,16 +145,24 @@ let album = loadAlbum(MISSIONS);
 let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
 let simTime = 0;
 // The note on entering the asteroid belt shows once per visit to the game.
-let beltSeen = false;
+// Lights and plumes already told about (core/glows.js), with 'belt', 'meteor' and
+// 'start' (how to look round). Kept on the device: each is told once, not at every
+// opening (the user, 2026-10-04: "처음 지구 근처에서 시작할 때에 메시지가 되게 반복적으로 많이 뜨네").
+const glowsTold = new Set(loadTold());
+const markTold = (id) => {
+  glowsTold.add(id);
+  saveTold([...glowsTold]);
+};
+let beltSeen = glowsTold.has('belt');
 // So does the note on the first shooting star over Earth.
-let meteorSeen = false;
-// Lights and plumes already told about (core/glows.js).
-const glowsTold = new Set();
+let meteorSeen = glowsTold.has('meteor');
 // How far the close view of a craft is turned from straight on: to the side and up, in radians.
 const CRAFT_VIEW_TURN = [(35 * Math.PI) / 180, (18 * Math.PI) / 180];
-// Two sights in reach at once (Saturn's aurora and its ring spokes) are told this far apart.
-const SIGHT_GAP_S = 12;
-let glowTellWait = 0;
+// Sights are told this far apart, a flash too (they came 9 s apart beside Earth), and
+// none in the first seconds of a sitting.
+const SIGHT_GAP_S = 30;
+const SIGHT_START_S = 20;
+let glowTellWait = SIGHT_START_S;
 let feelingTold = null;
 // The craft the traveler is docked with, and the glide toward it (core/dock.js startDocking).
 let docked = null;
@@ -945,7 +953,7 @@ ${STORY_MORE[target.id]}` : told };
   // TEMPORARY, for testing the opening: wipe the log, the album, the daily record and the
   // first-visit guide (the settings stay) and start again from the first page.
   $('testReset').addEventListener('click', () => {
-    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1']) {
+    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1', 'oddity.told.v1']) {
       try { localStorage.removeItem(key); } catch { /* storage shut: nothing to wipe */ }
     }
     location.reload();
@@ -1054,7 +1062,10 @@ ${STORY_MORE[target.id]}` : told };
 
   $('loading').style.display = 'none';
   document.body.dataset.ready = 'true';
-  toast.show(`${bodyById(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);
+  if (!glowsTold.has('start')) {
+    markTold('start');
+    toast.show(`${bodyById(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);
+  }
   progressChanged(null);
   const touch = document.body.classList.contains('touch');
   const journalHow = touch ? '수첩 버튼' : 'J 키나 수첩 버튼';
@@ -1410,8 +1421,11 @@ ${STORY_MORE[target.id]}` : told };
     say.place(view.heroCard);
     ringHit = view.ringCrossed && !ringSkip ? { body: view.ringCrossed, t: view.ringAt } : null;
     if (ringHit) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`, null, SIGHT_S);
-    if (view.meteorLit && !meteorSeen) {
+    glowTellWait = Math.max(0, glowTellWait - elapsed);
+    if (view.meteorLit && !meteorSeen && glowTellWait === 0) {
       meteorSeen = true;
+      markTold('meteor');
+      glowTellWait = SIGHT_GAP_S;
       toast.show(eventMessage({ type: 'meteor' }), null, SIGHT_S);
     }
     // Say why she shivers or shields her eyes: once each time she comes into the cold
@@ -1426,20 +1440,18 @@ ${STORY_MORE[target.id]}` : told };
       toast.show(eventMessage(feeling), null, SIGHT_S);
     }
     if (!docked && shownSpeed() > 1) feelingTold = null;
-    // Lights and plumes, each told once: a flash when it happens; of the standing
-    // sights in reach, the first not yet told, and the next only after this one has
-    // had its time on screen.
-    glowTellWait = Math.max(0, glowTellWait - elapsed);
-    const sight = view.glow && !glowsTold.has(view.glow)
-      ? view.glow
-      : (glowTellWait === 0 ? view.glowsNear.find((id) => !glowsTold.has(id)) : null);
+    // Lights and plumes, each told once on this device: a flash that is lit now, or of
+    // the standing sights in reach the first not yet told; the next only SIGHT_GAP_S on.
+    const sight = glowTellWait > 0 ? null
+      : (view.glow && !glowsTold.has(view.glow) ? view.glow : view.glowsNear.find((id) => !glowsTold.has(id)));
     if (sight) {
-      glowsTold.add(sight);
-      if (sight !== view.glow) glowTellWait = SIGHT_GAP_S;
+      markTold(sight);
+      glowTellWait = SIGHT_GAP_S;
       toast.show(eventMessage({ type: 'glow', id: sight }), null, SIGHT_S);
     }
     if (view.inBelt && !beltSeen) {
       beltSeen = true;
+      markTold('belt');
       toast.show(eventMessage({ type: 'beltEntered' }), null, SIGHT_S);
     }
     world.render();

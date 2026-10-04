@@ -143,6 +143,27 @@ export function saveStunts(records) {
   }
 }
 
+const TOLD_KEY = 'oddity.told.v1';
+
+// The notices already given on this device (sights near a world, the first shooting
+// star, the belt, how to look round): each is given once, not at every opening.
+export function loadTold() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(TOLD_KEY));
+    return Array.isArray(raw) ? raw.filter((id) => typeof id === 'string').slice(0, 200) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveTold(ids) {
+  try {
+    localStorage.setItem(TOLD_KEY, JSON.stringify(ids));
+  } catch {
+    // They are told again next time.
+  }
+}
+
 const SCREEN_KEY = 'oddity.screen.v1';
 
 // On a wide window the game is shown in a phone-shaped frame (core/screen.js) unless

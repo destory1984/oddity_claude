@@ -88,7 +88,7 @@ const MAX_FRAME_GAP_S = 0.5;
 const VISTA_YAW = 0.3;
 // Turned to face a target (바라보기, 목표 고정, the big map), the view is tipped down by
 // this much, 15 degrees, so the target stands over her head: square on, it sat in the
-// very middle of the view, behind her ("서라의 머리가 그걸 막게 되어서 움직이기 불편해").
+// very middle of the view, behind her ("소라의 머리가 그걸 막게 되어서 움직이기 불편해").
 const AIM_OVER = 0.26;
 const faceToward = (toward) => rotateLocal(lookAtDirection(toward), 0, AIM_OVER);
 // The line of the view, in its own axes, that a faced target lies on (over her head).
@@ -292,7 +292,7 @@ function progressChanged(before) {
   $('journalButton').textContent = `${done}/${total}`;
   $('journalButton').setAttribute('aria-label', `수첩 ${done}/${total}`);
   $('journalButton').title = '탐험 수첩 (J)';
-  // Eighty, a hundred and twenty, a hundred and sixty slots: Seora counts aloud.
+  // Eighty, a hundred and twenty, a hundred and sixty slots: Sora counts aloud.
   const counted = before ? milestoneLine(score(summarize(before, BODIES, MISSIONS, STORIES)).done, done) : null;
   if (counted) say.show(counted);
   // The last slot is not listed in the journal until every other slot is filled
@@ -1111,7 +1111,7 @@ ${STORY_MORE[target.id]}` : told };
   let cardDue = null;
   const CARD_AFTER_S = 1.2;
 
-  // Grandmother's notes (core/story.js): the game waits while one is open, and Seora
+  // Grandmother's notes (core/story.js): the game waits while one is open, and Sora
   // answers the first reading with a line of her own.
   let notePriorPause = false;
   let noteWait = 0;
@@ -1151,13 +1151,13 @@ ${STORY_MORE[target.id]}` : told };
       image: 'mailbox.png',
       imageAlt: '아침의 대문 옆 나무 우편함. 우표와 소인이 찍힌 누런 봉투가 반쯤 나와 있다',
       scene: count > 1 ? `우편함에 할머니의 답장이 ${count}통 와 있다.` : '우편함에 할머니의 답장이 와 있다.',
-      title: '서라에게',
+      title: '소라에게',
       text: texts.join('\n\n'),
       button: '답장을 넣어 둔다',
       line: best === 3 ? '할머니가 별 세 개 주셨어!' : '답장 왔다! 또 보내야지.',
     });
   }
-  // What Seora says when the journal closes after a postcard was sent from it.
+  // What Sora says when the journal closes after a postcard was sent from it.
   let sayAfterJournal = null;
 
   let journalPriorPause = false;
@@ -1609,7 +1609,7 @@ ${STORY_MORE[target.id]}` : told };
     }
     ringSkip = stuntJumped;
     stuntJumped = false;
-    // A tour under way: at its next stop, Seora says her line and the tour moves on.
+    // A tour under way: at its next stop, Sora says her line and the tour moves on.
     const leg = guide.step === null ? currentStop(progress) : null;
     // Her line at a tour's stop is not talked over by the line for finding the body.
     let saidAtStop = false;
@@ -1654,7 +1654,7 @@ ${STORY_MORE[target.id]}` : told };
       if (text) toast.show(text);
       const cue = cueForEvent(event);
       if (cue) sound.cue(cue);
-      // Somewhere new: Seora says her line (the same one the journal keeps).
+      // Somewhere new: Sora says her line (the same one the journal keeps).
       if (event.type === 'discovered' && MEMOS[event.bodyId] && !saidAtStop) say.show(MEMOS[event.bodyId].line);
       // A first landing: her line for standing there.
       if (event.type === 'landed' && LANDED[event.bodyId] && !saidAtStop) say.show(LANDED[event.bodyId]);

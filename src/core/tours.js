@@ -10,7 +10,7 @@ import { vistaKm } from './teleport.js';
 // order. A stop is a story place ({ story }), a body ({ body }: come within discovery
 // range) or a craft ({ craft }: come within docking range).
 //   memo: grandmother's hand, why she wanted this route.
-//   line: what Seora says at the stop (반말, 25 characters at most).
+//   line: what Sora says at the stop (반말, 25 characters at most).
 //   stamp: the rubber stamp for going round it, public/assets/notebook/stamp-<stamp>.png.
 // The film behind the ninth tour is never named; only the real places on its road are used.
 export const TOURS = [

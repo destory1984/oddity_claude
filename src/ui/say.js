@@ -1,4 +1,4 @@
-// Seora's speech bubble: one short line above her head for a few seconds.
+// Sora's speech bubble: one short line above her head for a few seconds.
 // A line stays up at least this long before the next takes its place: at a tour's stop
 // her line for the stop and her line for finding the body came 0.2 s apart, and the
 // first was gone before it could be read.

@@ -1,4 +1,4 @@
-// What Seora says to herself on the way (docs/재미-기획서.md 3.2): one line in the speech
+// What Sora says to herself on the way (docs/재미-기획서.md 3.2): one line in the speech
 // bubble, 반말, 25 characters at most, one exclamation at most. Her lines on finding a
 // body are in core/story.js MEMOS and those at a tour's stops in core/tours.js. Numbers
 // equal core/facts.js.
@@ -56,7 +56,7 @@ export const IDLE = [
   '집에 가면 다 얘기해 줘야지.',
   '멀리 왔다. 그래도 안 무서워.',
   '다음엔 어디 갈까.',
-  // Eighteen more (the user, 2026-10-04: "서라가 말이 별로 없는 편이잖아. 좀 더 많은 대화를 하게 해줘").
+  // Eighteen more (the user, 2026-10-04: "소라가 말이 별로 없는 편이잖아. 좀 더 많은 대화를 하게 해줘").
   '발끝에 별이 걸릴 것 같아.',
   '숨 한번 크게 쉬고.',
   '이 고요함, 나쁘지 않네.',

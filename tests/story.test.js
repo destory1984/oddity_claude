@@ -11,12 +11,12 @@ import { MISSIONS } from '../src/core/missions.js';
 
 const seen = (...ids) => ({ ...createProgress(), notes: ids });
 
-test("grandmother's notes come in the order of their years, each with a line from Seora", () => {
+test("grandmother's notes come in the order of their years, each with a line from Sora", () => {
   assert.deepEqual(NOTES.map((n) => n.id), ['opening', 'y1969', 'y1979', 'y1986', 'last']);
   assert.equal(new Set(NOTES.map((n) => n.id)).size, NOTES.length);
   for (const note of NOTES) {
     assert.ok(note.title && note.text && note.button, note.id);
-    // Seora: one short line, one exclamation at most.
+    // Sora: one short line, one exclamation at most.
     assert.ok(note.line.length <= 25, `${note.id}: ${note.line.length}`);
     assert.ok((note.line.match(/!/g) ?? []).length <= 1, note.id);
     // The paper must not break in a blog editor or look like a strikethrough.
@@ -67,7 +67,7 @@ test('the notes of 1969, 1979 and 1986 are told over four pages: the scene, then
     // The rest are her hand only, and joined they are the one sheet read again from the journal.
     for (const sheet of sheets) assert.ok(sheet.text && !sheet.scene && !sheet.image, id);
     assert.equal(sheets.map((p) => p.text).join('\n\n'), note.text, id);
-    // Seora has a word under every page but the last, where her line follows the note.
+    // Sora has a word under every page but the last, where her line follows the note.
     for (const page of note.pages.slice(0, -1)) {
       assert.ok(page.say.length <= 25 && (page.say.match(/!/g) ?? []).length <= 1, page.say);
       assert.ok(!page.say.includes('~'), page.say);
@@ -115,7 +115,7 @@ test('a note read is remembered once, and junk in storage is dropped', () => {
   assert.deepEqual(sanitizeProgress({ discovered: ['mars'] }, BODIES, MISSIONS, [], [], NOTES).notes, []);
 });
 
-test("every body has grandmother's memo and a line from Seora", () => {
+test("every body has grandmother's memo and a line from Sora", () => {
   for (const body of BODIES) {
     const entry = MEMOS[body.id];
     assert.ok(entry, `${body.id} has no memo`);
@@ -175,7 +175,7 @@ test('a log that already had the last slot keeps it, and is told nothing more', 
   assert.deepEqual(photoSlots([LAST_SLOT], { open: true, earthKm: 7e7, progress: half }), { missions: [LAST_SLOT], stories: [LAST_SLOT], held: null });
 });
 
-test('Seora has a word for each probe left alone, and each is a real place or craft', () => {
+test('Sora has a word for each probe left alone, and each is a real place or craft', () => {
   const known = new Set([...STORIES.map((s) => s.id), ...CRAFT.map((c) => c.id)]);
   assert.deepEqual(Object.keys(GREETINGS).sort(), ['danuri', 'lunokhod1', 'opportunity', 'phoenix', 'spirit', 'voyager1', 'voyager2']);
   for (const [id, line] of Object.entries(GREETINGS)) {

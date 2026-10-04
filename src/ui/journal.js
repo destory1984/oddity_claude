@@ -163,7 +163,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       });
       li.append(name, marks, distance, go);
       if (found) li.append(jumpButton(body.id, body.name));
-      // Grandmother's memo is there from the start; Seora's line joins it once she has
+      // Grandmother's memo is there from the start; Sora's line joins it once she has
       // been there. Without the story, the fact as before.
       const entry = memos[body.id];
       if (entry) {
@@ -175,7 +175,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       if (found && (entry || FACTS[body.id])) {
         const fact = document.createElement('small');
         fact.className = entry ? 'fact said' : 'fact';
-        fact.textContent = entry ? `서라: ${entry.line}` : FACTS[body.id];
+        fact.textContent = entry ? `소라: ${entry.line}` : FACTS[body.id];
         li.append(fact);
       }
       list.append(li);

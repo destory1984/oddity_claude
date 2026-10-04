@@ -78,7 +78,7 @@ test("grandmother's hand is shipped with the game too: Nanum Pen Script, woff2 o
   assert.ok(!/font-family:\s*"Gowun Batang"/.test(style));
 });
 
-test("Seora's hand is shipped with the game: Gaegu, woff2 only, with its licence", () => {
+test("Sora's hand is shipped with the game: Gaegu, woff2 only, with its licence", () => {
   const css = fs.readFileSync('public/fonts/gaegu/400.css', 'utf8');
   const files = [...new Set([...css.matchAll(/url\(\.\/(files\/[^)]+)\)/g)].map((m) => m[1]))];
   assert.equal(files.length, 89);

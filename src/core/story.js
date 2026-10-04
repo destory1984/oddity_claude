@@ -8,14 +8,14 @@
 // line is spoken instead of going into a speech bubble.
 // scene: a line of plain telling above the paper. text: grandmother's hand.
 // image: a drawing above the scene line (public/assets/notebook), on the first reading.
-// line: what Seora says once the note is put away (반말, 25 characters at most).
+// line: what Sora says once the note is put away (반말, 25 characters at most).
 // The opening is told over five pages (ui/noteCard.js turns them): she arrives, finds
 // the notebook, and reads grandmother's letter in three parts, with a word of her own
 // under each page. Grandmother is out; she speaks only through the letter. Read again
 // from the journal, the letter is one sheet (`text`, the three parts joined).
 // The notes of 1969, 1979 and 1986 are told over four pages each (`paged`).
 const LETTER = [
-  '서라야, 왔구나. 반찬은 부엌에 두고 이 수첩 좀 보련.\n\n'
+  '소라야, 왔구나. 반찬은 부엌에 두고 이 수첩 좀 보련.\n\n'
     + '열다섯 살 때부터 하늘에서 본 것을 적어 온 수첩이란다. 본 것은 적고, 못 본 것은 빈칸으로 남겨 두었지.\n\n'
     + '세어 보니 빈칸이 백여든 개가 넘더구나.',
   '내 망원경으로는 거기까지였단다. 나머지는 가까이 가서 봐야 채울 수 있는 칸들이야.\n\n'
@@ -27,7 +27,7 @@ const LETTER = [
 ];
 
 // A one-sheet note told over pages: the drawing and the scene first, then her hand, a
-// paragraph a page. says: Seora's word under each page but the last, where her `line`
+// paragraph a page. says: Sora's word under each page but the last, where her `line`
 // follows the note instead.
 function paged(note, says) {
   return {
@@ -46,7 +46,7 @@ export const NOTES = [
     scene: '심부름으로 온 할머니 댁. 할머니는 마실 나가셨고, 마루에 낡은 수첩과 쪽지가 놓여 있다.',
     image: 'porch.png',
     imageAlt: '햇빛이 드는 마루 위의 낡은 수첩과 접힌 쪽지, 돋보기안경과 연필',
-    title: '서라에게',
+    title: '소라에게',
     text: LETTER.join('\n\n'),
     pages: [
       {
@@ -58,7 +58,7 @@ export const NOTES = [
       {
         image: 'porch.png',
         imageAlt: '햇빛이 드는 마루 위의 낡은 수첩과 접힌 쪽지, 돋보기안경과 연필',
-        scene: '마루에 낡은 수첩이 놓여 있다. 표지 모서리가 닳아 둥글다. 그 위에 접힌 쪽지 한 장. 겉에 "서라에게"라고 적혀 있다.',
+        scene: '마루에 낡은 수첩이 놓여 있다. 표지 모서리가 닳아 둥글다. 그 위에 접힌 쪽지 한 장. 겉에 "소라에게"라고 적혀 있다.',
         say: '어, 내 이름이네.',
       },
       {
@@ -124,7 +124,7 @@ export const NOTES = [
       + '이 장을 읽는 사람은 갔다 왔구나. 와서 얘기해 주련.',
     button: '수첩을 덮는다',
     line: '할머니, 나 왔어!',
-    gate: '할머니 댁 대문 앞. 서라가 문을 두드린다.',
+    gate: '할머니 댁 대문 앞. 소라가 문을 두드린다.',
   },
 ];
 
@@ -186,7 +186,7 @@ export function photoSlots(missionIds, { open, earthKm, progress }) {
 
 // Beside each of the 35 bodies in the journal: grandmother's memo (what she saw from
 // Earth, or read, in a short record; "봤다" for what an amateur's telescope or the naked
-// eye shows, "읽었다" for the rest) and Seora's line on getting there (the speech bubble
+// eye shows, "읽었다" for the rest) and Sora's line on getting there (the speech bubble
 // at the discovery, then under the memo). Numbers in a line equal core/facts.js.
 export const MEMOS = {
   sun: { memo: '2009.7.22. 부분일식. 해가 80%쯤 가려졌다. 필터를 대고 봤다.', line: '더워, 부채 어디 갔지.' },
@@ -226,7 +226,7 @@ export const MEMOS = {
   churyumov: { memo: '1969년 발견. 내 수첩과 같은 해. 2014년 로제타 소식을 신문에서 읽었다.', line: '고무 오리다! 두 덩이야.' },
 };
 
-// The probes left alone out there: on reaching one, Seora says a word to it (story
+// The probes left alone out there: on reaching one, Sora says a word to it (story
 // places by their id in core/stories.js, craft by their id in core/craft.js). This is
 // the only place the story's feeling for them is spoken.
 export const GREETINGS = {

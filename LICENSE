@@ -13,7 +13,7 @@ This repository is licensed in three parts.
      with a gold hem, folded brown boots). The code and data that drew it,
      src/render/hero.js and src/render/mageModel.js, were taken out of the game
      in v0.1.23 and stay reserved in the repository's history.
-   - The pixel-art character "Seora": its design and every drawing of it in
+   - The pixel-art character "Sora" (소라; named "Seora", 서라, until 2026-10-05): its design and every drawing of it in
      public/assets/seora-sprites/.
    - The drawings made for the story in public/assets/notebook/ (the gate,
      porch, note and mailbox scenes, the stamps, the postage stamps and

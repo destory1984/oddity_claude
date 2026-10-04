@@ -12,7 +12,7 @@ const short = (line, at) => {
   assert.ok((line.match(/!/g) ?? []).length <= 1 && !line.includes('~'), at);
 };
 
-test('Seora has a line for landing on every body, different from the one for finding it', () => {
+test('Sora has a line for landing on every body, different from the one for finding it', () => {
   assert.equal(Object.keys(LANDED).length, BODIES.length);
   for (const body of BODIES) {
     short(LANDED[body.id], body.id);

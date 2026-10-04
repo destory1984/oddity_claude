@@ -20,7 +20,7 @@ const load = (src) => new Promise((resolve, reject) => {
 // Resolves to a PNG blob.
 export async function postcardBlob(entry, words, stampUrl) {
   const [photo, stamp] = await Promise.all([load(entry.image), load(stampUrl).catch(() => null)]);
-  // Seora's own hand, as in her speech bubble.
+  // Sora's own hand, as in her speech bubble.
   const family = getComputedStyle(document.documentElement).getPropertyValue('--seora').trim() || 'sans-serif';
   await document.fonts?.load(`${26 * SCALE}px ${family}`, words.place + words.day).catch(() => {});
 

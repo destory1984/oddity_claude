@@ -7,7 +7,7 @@
   --blue:#72c8ff;
   --glass:rgba(6,17,31,.64);
   /* Grandmother's hand: Nanum Pen Script, shipped with the game (public/fonts). */
-  /* Seora's own voice (her speech bubble, her lines in the journal): Gaegu, a child's
+  /* Sora's own voice (her speech bubble, her lines in the journal): Gaegu, a child's
      careful hand, shipped with the game too. */
   --seora:"Gaegu","Pretendard Variable",Pretendard,"Malgun Gothic",sans-serif;
   --hand:"Nanum Pen Script","Gowun Batang","Nanum Myeongjo","AppleMyungjo","Batang",cursive;
@@ -960,7 +960,7 @@ body.touch #reticle span {
   font-size: 12px;
 }
 
-/* Grandmother's hand beside the slot, and Seora's line under it. */
+/* Grandmother's hand beside the slot, and Sora's line under it. */
 #journalBodies .memo {
   grid-column: 1 / -1;
   margin-top: -6px;
@@ -1495,7 +1495,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   font-size:12px;
 }
 
-/* Seora's speech bubble, above her head (ui/say.js). */
+/* Sora's speech bubble, above her head (ui/say.js). */
 #heroSay {
   position:fixed;
   left:50%;
@@ -2178,7 +2178,7 @@ footer button:active,
   }
 
   /* The goal line goes right under the top buttons, in the gap above the readouts:
-     lower down, Seora's speech bubble or a two-line notice would lie across it. */
+     lower down, Sora's speech bubble or a two-line notice would lie across it. */
   #guide {
     top:calc(var(--edge-top) + var(--top-key) + var(--gap));
     left:calc(124px + 2 * var(--gap));
@@ -2297,7 +2297,7 @@ footer button:active,
   color:var(--gold);
 }
 
-/* Seora's bubble: soft paper with a small point under it. */
+/* Sora's bubble: soft paper with a small point under it. */
 #heroSay {
   border:0;
   border-radius:16px;
@@ -2451,7 +2451,7 @@ input[type=range] {
   color:#a35a00;
 }
 
-/* Grandmother writes in brown ink, Seora in navy. */
+/* Grandmother writes in brown ink, Sora in navy. */
 #journalBodies .memo,
 #journalTours .memo,
 #journalStunts .memo,
@@ -2550,7 +2550,7 @@ html.shell body {
   line-height:1.3;
 }
 
-/* Seora speaks and writes in her own hand. */
+/* Sora speaks and writes in her own hand. */
 #heroSay {
   font-family:var(--seora);
   font-size:18px;
@@ -2659,7 +2659,7 @@ dialog:where(:not(#journal)) button:hover {
   }
 }
 
-/* A phone: the stamp comes down at the lower left, clear of the notice and of Seora's
+/* A phone: the stamp comes down at the lower left, clear of the notice and of Sora's
    bubble (at the right of the middle it covered the end of both). */
 @media (max-width: 480px) {
   #stampFx {
@@ -2748,7 +2748,7 @@ dialog:where(:not(#journal)) button:hover {
   z-index:1;
 }
 
-/* The loading screen stands in grandmother's yard at night: the sky above for Seora to
+/* The loading screen stands in grandmother's yard at night: the sky above for Sora to
    fly in, the porch with the notebook and the telescope below (public/assets/scenes/). */
 #loading {
   justify-content:flex-start;
@@ -2784,7 +2784,7 @@ html.shell body {
   image-rendering:pixelated;
 }
 
-/* Seora's word under a page of the opening: her own hand, like her speech bubble. */
+/* Sora's word under a page of the opening: her own hand, like her speech bubble. */
 #noteCardSay {
   position:relative;
   width:max-content;

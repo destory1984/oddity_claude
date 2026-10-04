@@ -28,7 +28,7 @@ test('a photo is rated on size, place, light and company: two of four make one s
   assert.equal(plain.subject, 'moon');
   assert.deepEqual(plain.met, ['size', 'light']);
   assert.equal(plain.stars, 1);
-  // Seora in the picture: three of four.
+  // Sora in the picture: three of four.
   assert.equal(shot({ heroVisible: true }).stars, 2);
   // And the Moon off to a third: all four.
   const best = shot({ heroVisible: true, yaw: 25 * DEG });

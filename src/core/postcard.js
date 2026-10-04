@@ -17,7 +17,7 @@ const COMPANION_FILL = 0.005;
 //   size: the subject (the largest body in view, the Sun aside) is 25 to 70% of the height
 //   place: its centre is outside the middle third of the view (a rule-of-thirds spot)
 //   light: more than 40% of its lit side shows, or it is a thin backlit crescent (under 10%)
-//   company: another body, or Seora herself, is in the picture
+//   company: another body, or Sora herself, is in the picture
 // Two of the four make one star, three make two, four make three.
 // Returns { stars: 0..3, subject: body id or null, met: [names of what was met] }.
 // subject is the planet for a photo of one of its moons (the Moon is its own).
@@ -108,7 +108,7 @@ const BY_MISSION = {
 const lineOf = (table, key) => (typeof key === 'string' && Object.hasOwn(table, key) ? table[key] : undefined);
 
 // By the story place the photo was taken at (an album entry's `place`): the two ends of
-// the ninth tour. Seora thinks the film was shot on Mars; grandmother puts it right. The
+// the ninth tour. Sora thinks the film was shot on Mars; grandmother puts it right. The
 // film is not named anywhere.
 const BY_PLACE = {
   acidalia: '영화에서 본 그 평원이구나. 그런데 그 장면은 요르단 사막에서 찍었단다.',

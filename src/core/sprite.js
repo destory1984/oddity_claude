@@ -169,7 +169,8 @@ const loop = (time, fps) => Math.floor(time * fps) % FRAMES;
 // the others the legs jerked about ("다리 움직임이 매우 이상한데?"). It is left out: the
 // first drawing comes round again in its place.
 const CALM_ORDER = [0, 1, 0, 3];
-const CALM_SHEETS = ['away', 'away-left', 'away-right'];
+// (Nosing down, the third drawing throws her hair and ribbons up: left out too.)
+const CALM_SHEETS = ['away', 'away-left', 'away-right', 'back-down'];
 export function flightFrame(sheet, n) {
   return CALM_SHEETS.includes(sheet) ? CALM_ORDER[n] : n;
 }

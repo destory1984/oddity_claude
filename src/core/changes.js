@@ -3,6 +3,7 @@
 // is heard goes in here; how it was done does not. Add a line at the top of its day
 // when something a player would notice is changed.
 export const CHANGES = [
+  { day: '2026-10-04', text: '휴대전화에서 화면 밖 화살표가 고도 표시와 목적지 칸을 가리지 않고 그 아래에 뜹니다.' },
   { day: '2026-10-04', text: '"다음 곡" 단추를 누르면 곡이 바로 바뀌고, 단추 옆에 곡 이름이 뜹니다.' },
   { day: '2026-10-04', text: '종이 인형 캐릭터를 없앴습니다. 캐릭터는 도트 그림 서라 하나입니다.' },
   { day: '2026-10-04', text: '다누리 곁에서 달의 한낮 땅이 하얗게 날아가 보이던 것을 고쳤습니다.' },

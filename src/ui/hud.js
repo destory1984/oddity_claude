@@ -107,12 +107,18 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       const crowded = crowdedMoons(placed.map(({ body, spot, selected: sel }) => ({
         id: body.id, parent: ['moon', 'craft', 'site'].includes(body.kind) ? body.parent : null, x: spot.x, y: spot.y, outside: spot.outside, selected: sel || body.id === goalId,
       })));
+      // On a phone the readouts, the minimap and the target panel fill the top of the
+      // screen: an off-screen arrow that would stand on them is brought down under them
+      // (the label of Mars 3's site once lay over the target's name).
+      const arrowTop = compact
+        ? Math.max($('minimap').getBoundingClientRect().bottom, $('targetPanel').getBoundingClientRect().bottom) + 18
+        : 0;
       const arrows = [];
       for (const { body, el, spot, keep, selected: sel } of placed) {
         el.hidden = !keep || crowded.has(body.id) || hiddenIds.includes(body.id);
         el.classList.toggle('selected', sel);
         el.classList.toggle('goal', body.id === goalId);
-        if (!el.hidden && spot.outside) arrows.push({ el, ...spot });
+        if (!el.hidden && spot.outside) arrows.push({ el, ...spot, y: Math.max(spot.y, arrowTop) });
       }
       // Labels in view that would cover each other: the nearer thing keeps its label.
       const inView = placed.filter(({ el, spot }) => !el.hidden && !spot.outside);

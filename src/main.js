@@ -3,7 +3,7 @@ import {
 } from './core/bodies.js';
 import { C, speedLimit } from './core/flight.js';
 import {
-  createState, step, stopNow, totalSpeed, carryAlong, boostLift, velocity, TURN_RATE, START_YAW,
+  createState, step, stopNow, totalSpeed, carryAlong, boostLift, velocity, TURN_RATE, START_YAW, keepRange,
 } from './core/game.js';
 import {
   rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, blend, right,
@@ -1466,6 +1466,8 @@ ${STORY_MORE[target.id]}` : told };
       }
     }
     const slowPoints = craft.map((c) => c.position);
+    // (How far the locked target is before this step: sliding round it keeps that.)
+    const lockRange = locked ? Math.hypot(...here(selectedId).position.map((n, i) => n - state.position[i])) : 0;
     const result = step(state, intent, dt, bodies, slowPoints);
     state = result.state;
     // Target lock: the view swings onto the target and stays on it as she moves. Turning
@@ -1477,7 +1479,11 @@ ${STORY_MORE[target.id]}` : told };
         const aim = here(selectedId);
         const toward = aim.position.map((n, i) => n - state.position[i]);
         if (Math.hypot(...toward) > 1 && state.restingOn !== aim.id) {
-          state = { ...state, orientation: blend(state.orientation, lookAtDirection(toward), 1 - Math.exp(-dt * LOCK_RATE)) };
+          // Only sliding (not going forward or back): she goes round it at the distance
+          // she was at. A straight slide drew away: 1,900 km in 2.5 s beside Earth.
+          const sliding = state.speed < 0.01 && Math.max(state.sideSpeed ?? 0, state.riseSpeed ?? 0) > 0.01;
+          const position = sliding && !state.restingOn && lockRange > 1 ? keepRange(state.position, aim.position, lockRange) : state.position;
+          state = { ...state, position, orientation: blend(state.orientation, lookAtDirection(aim.position.map((n, i) => n - position[i])), 1 - Math.exp(-dt * LOCK_RATE)) };
         }
       }
     }

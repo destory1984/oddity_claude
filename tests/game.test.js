@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { createState, step, stopNow, totalSpeed, carryAlong, START_ORIENTATION, startOrientation } from '../src/core/game.js';
+import { createState, step, stopNow, totalSpeed, carryAlong, START_ORIENTATION, startOrientation, keepRange } from '../src/core/game.js';
 import { C, speedLimit, MAX_SPEED, ACCELERATION_SECONDS } from '../src/core/flight.js';
 import { lookAtDirection } from '../src/core/orientation.js';
 import { BODIES, START_POSITION, bodyById, nearestSurface } from '../src/core/bodies.js';
@@ -284,4 +284,12 @@ test('rise slides her along her own up axis without turning her, and keeps to th
   const all = run(state, { drive: 1, strafe: 1, rise: 1 }, 400, []).state;
   assert.ok(totalSpeed(all) <= MAX_SPEED + 1e-6);
   assert.equal(stopNow(all).riseSpeed, 0);
+});
+
+test('keepRange puts her back at the same distance from the centre, the same way from it', () => {
+  const at = keepRange([30, 40, 0], [0, 0, 0], 100);
+  assert.ok(Math.abs(at[0] - 60) < 1e-9 && Math.abs(at[1] - 80) < 1e-9 && at[2] === 0);
+  const off = keepRange([10, 0, 5], [10, 0, 0], 2);
+  assert.deepEqual(off, [10, 0, 2]);
+  assert.deepEqual(keepRange([1, 2, 3], [1, 2, 3], 50), [1, 2, 3]);
 });

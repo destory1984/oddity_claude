@@ -83,6 +83,15 @@ export function totalSpeed(state) {
   return Math.hypot(...velocityOf(state));
 }
 
+// The same way from `centre` as `position`, but `km` from it: sliding round a locked
+// target keeps its distance (a straight slide would draw away from it).
+export function keepRange(position, centre, km) {
+  const out = position.map((n, i) => n - centre[i]);
+  const far = Math.hypot(...out);
+  if (far === 0) return position;
+  return centre.map((n, i) => n + (out[i] / far) * km);
+}
+
 // The traveler's velocity in world axes, km/s.
 export function velocity(state) {
   return velocityOf(state);

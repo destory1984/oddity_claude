@@ -1647,6 +1647,42 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   display:none;
 }
 
+/* Sky news in the journal (core/forecast.js): what is crossing a planet now or soon. */
+#journalSky {
+  margin:8px 22px 0;
+  font-size:13px;
+  color:#3b2a1a;
+}
+
+#journalSky[hidden] {
+  display:none;
+}
+
+#journalSky p {
+  display:flex;
+  align-items:center;
+  gap:4px 10px;
+  margin:4px 0 0;
+  word-break:keep-all;
+}
+
+#journalSky p span {
+  flex:1 1 auto;
+}
+
+#journalSky b {
+  color:#7a5a36;
+}
+
+#journal #journalSky button {
+  flex:none;
+  width:auto;
+  min-height:30px;
+  margin:0;
+  padding:3px 10px;
+  font-size:12px;
+}
+
 #dailyText {
   flex:1 1 220px;
   font-family:var(--hand);

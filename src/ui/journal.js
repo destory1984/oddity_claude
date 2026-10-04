@@ -30,7 +30,7 @@ function picture(file, alt, className = '') {
 const CLIPPING = '1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.';
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, sky = null }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -103,6 +103,26 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     $('dailyWeek').replaceChildren(...today.week.map((did) => (did ? picture('notebook/day-star.png', '') : document.createElement('i'))));
     $('dailyCount').textContent = `해낸 날 ${today.days}일${today.streak > 1 ? ` · ${today.streak}일째 이어서` : ''}`;
     $('dailyGo').hidden = today.done;
+  }
+
+  // Sky news (core/forecast.js): sky() gives [{ text, planet: { id, name } }]. A planet
+  // already found can be jumped to.
+  function renderSky() {
+    const news = sky ? sky() : [];
+    $('journalSky').hidden = news.length === 0;
+    $('journalSky').replaceChildren(...news.map(({ text, planet }, i) => {
+      const line = document.createElement('p');
+      const words = document.createElement('span');
+      if (i === 0) {
+        const head = document.createElement('b');
+        head.textContent = '하늘 소식 ';
+        words.append(head);
+      }
+      words.append(text);
+      line.append(words);
+      if (lastProgress.discovered.includes(planet.id)) line.append(jumpButton(planet.id, planet.name));
+      return line;
+    }));
   }
 
   let lastProgress = null;
@@ -435,6 +455,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     onOpen();
     render();
     renderDaily();
+    renderSky();
     renderStories();
     renderCraft();
     renderTours();

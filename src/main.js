@@ -40,6 +40,7 @@ import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
+import { skyNews, newsLine } from './core/forecast.js';
 import { dailyRequest, requestTarget, requestMet, recordDay, streak, lastWeek } from './core/daily.js';
 import { palFor } from './core/pal.js';
 import {
@@ -857,6 +858,7 @@ ${STORY_MORE[target.id]}` : told };
     },
     notes: NOTES,
     memos: MEMOS,
+    sky: () => skyNews(bodiesAt, simTime).map((news) => ({ text: newsLine(news), planet: bodyById(news.planet, bodies) })),
     daily: () => ({
       text: request.text,
       done: requestDone(),

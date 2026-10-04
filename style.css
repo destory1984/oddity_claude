@@ -42,9 +42,11 @@ button {
   backdrop-filter:blur(14px);
 }
 
-button:hover {
-  background:#26456199;
-  border-color:#93d2ff88;
+@media (hover: hover) {
+  button:hover {
+    background:#26456199;
+    border-color:#93d2ff88;
+  }
 }
 
 button:focus-visible,input:focus-visible {
@@ -1999,13 +2001,17 @@ footer button,
   color:#eef3ff;
 }
 
-#hud nav button:hover,
-#targetPanel button:hover,
-footer button:hover,
-#guide button:hover,
-#photoTools button:hover {
-  background:#182a5ccc;
-  border-color:#c3d0ffaa;
+/* Only where there is a pointer to hover with. On a touch screen the hover look stays on
+   after a tap: on an iPhone the stop button stayed lit and its picture was gone. */
+@media (hover: hover) {
+  #hud nav button:hover,
+  #targetPanel button:hover,
+  footer button:hover,
+  #guide button:hover,
+  #photoTools button:hover {
+    background:#182a5ccc;
+    border-color:#c3d0ffaa;
+  }
 }
 
 #hud nav button:active,

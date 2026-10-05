@@ -146,7 +146,7 @@ function distance(km) {
 // The numbers of a body, from the same table the game flies by: [[label, value], ...].
 // parentName: the name of what it goes round. Rows without data are left out.
 export function bodyFacts(body, parentName = null) {
-  const facts = [[t('지름'), `${round(body.radiusKm * 2)}km`]];
+  const facts = [[t('지름'), `${round(body.radiusKm * 2)}${english() ? ' km' : 'km'}`]];
   const orbit = body.orbitKm ?? body.ellipse?.semiMajorKm;
   if (orbit && parentName) facts.push([t`${parentName}에서`, distance(orbit)]);
   const period = body.periodS ?? body.ellipse?.periodS;

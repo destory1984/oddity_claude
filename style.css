@@ -4093,3 +4093,8 @@ html[lang="en"] #appVersion {
   border-color:var(--gold);
   color:var(--gold);
 }
+
+/* The page of changes is kept in Korean only: its tab is not offered in English. */
+html[lang="en"] #settingsTabs [data-tab="news"] {
+  display:none;
+}

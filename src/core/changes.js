@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-05', text: t('게임 시계를 실제의 50배로 늦췄습니다. 지구의 하루가 29분입니다.') },
   { day: '2026-10-05', text: t('토성 구름 위로 고리의 비가 내리고, 이오의 밤 쪽에서 용암 호수가 붉게 빛납니다.') },
   { day: '2026-10-05', text: t('화성 땅 위로 먼지 회오리가 걸어가고, 타이탄에 흰 메탄 구름이 흘러갑니다.') },
   { day: '2026-10-05', text: t('천왕성의 극이 밝게 덮이고, 해를 등진 목성 둘레에 실 같은 고리가 빛납니다.') },

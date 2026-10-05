@@ -21,7 +21,7 @@ import { SHADOW_SLOTS } from '../core/shadows.js';
 
 const SIDEREAL_DAY_S = SPIN_DAY_S.earth;
 // Real rotation is too slow to see (Earth turns 1.25 degrees in five minutes), so
-// every body spins with the game clock (core/bodies.js TIME_SCALE, 100 times real
+// every body spins with the game clock (core/bodies.js TIME_SCALE, 50 times real
 // time): one Earth day passes in 14 minutes.
 const SPIN_SPEEDUP = TIME_SCALE;
 // Clouds drift a little faster than the ground so the weather visibly moves.

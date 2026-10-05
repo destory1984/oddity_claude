@@ -6,7 +6,7 @@ import {
   DOCK_ASIDE, dockFacing, dockingFacing,
 } from '../src/core/dock.js';
 import { forward, rotateVector, conjugate } from '../src/core/orientation.js';
-import { bodiesAt } from '../src/core/bodies.js';
+import { bodiesAt, TIME_SCALE } from '../src/core/bodies.js';
 import { craftAt } from '../src/core/craft.js';
 import { createState } from '../src/core/game.js';
 
@@ -65,11 +65,12 @@ test('thrusting any way undocks; turning to look around does not', () => {
 });
 
 test('riding with Hubble shows its speed round Earth: about 72 km a second of play', () => {
-  // One frame at 60 frames a second; the game clock runs 720 times faster.
+  // One frame at 60 frames a second, on a clock 7.2 times the game's (720 when the game's
+  // was 100): Hubble's lap is so many seconds of play whatever the game clock.
   const dt = 1 / 60;
   const before = bodiesAt(1000);
-  const after = bodiesAt(1000 + dt * 720);
-  const speed = rideSpeed('hubble', craftAt(1000, before), craftAt(1000 + dt * 720, after), before, after, dt);
+  const after = bodiesAt(1000 + dt * 7.2 * TIME_SCALE);
+  const speed = rideSpeed('hubble', craftAt(1000, before), craftAt(1000 + dt * 7.2 * TIME_SCALE, after), before, after, dt);
   near(speed, (2 * Math.PI * (6371 + 540)) / 600, 0.5);
 });
 
@@ -163,9 +164,9 @@ test('on contact the craft is jolted for a moment, at once', () => {
 test('letting go of Hubble keeps its speed round Earth: 72 km/s, measured against Earth', () => {
   const dt = 1 / 60;
   const before = bodiesAt(1000);
-  const after = bodiesAt(1000 + dt * 720);
+  const after = bodiesAt(1000 + dt * 7.2 * TIME_SCALE);
   const craftBefore = craftAt(1000, before);
-  const craftAfter = craftAt(1000 + dt * 720, after);
+  const craftAfter = craftAt(1000 + dt * 7.2 * TIME_SCALE, after);
   const hubbleNow = craftAfter.find((c) => c.id === 'hubble');
   const drift = releaseDrift('hubble', craftBefore, craftAfter, before, after, hubbleNow.position, dt);
   near(Math.hypot(...drift), (2 * Math.PI * (6371 + 540)) / 600, 0.5);

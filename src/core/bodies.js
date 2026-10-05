@@ -11,10 +11,11 @@ export const START_ALTITUDE_KM = 9129;
 export const AU_KM = 149597870.7;
 const DAY_S = 86400;
 // Game time runs this many times faster than real time, for spin and orbits alike:
-// one Earth day passes in 14 minutes, the Moon circles Earth in 6.6 hours. (It was 720
+// one Earth day passes in 29 minutes, the Moon circles Earth in 13 hours. (It was 720
 // until 2026-10-03, then 180 for a day: the ground, the moons and the craft moved too
-// fast to steer by. The user chose 100.)
-export const TIME_SCALE = 100;
+// fast to steer by. The user chose 100, and on 2026-10-05 halved it: "게임 시간 속도를
+// 100배 -> 50배로 줄여봐".)
+export const TIME_SCALE = 50;
 
 // Parents must be listed before their children. orbitKm is the real mean
 // distance (semi-major axis); directions are fixed, not today's positions.

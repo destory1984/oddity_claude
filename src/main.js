@@ -845,7 +845,7 @@ ${STORY_MORE[target.id]}` : told };
     if (eclipse && (!visit || visit.id === eventPlace.id)) {
       const watch = canWatch(eclipse, eventPlace, here('sun'), state.position);
       if (watch === 'yes') return startShow();
-      if (watch === 'night') return toast.show(t('이곳은 지금 밤입니다. 해가 뜨면 볼 수 있습니다. 게임의 하루는 14분 24초입니다.'));
+      if (watch === 'night') return toast.show(t('이곳은 지금 밤입니다. 해가 뜨면 볼 수 있습니다. 게임의 하루는 28분 48초입니다.'));
     }
     const onBody = !visit && state.restingOn ? replayOn(state.restingOn) : null;
     if (onBody) {

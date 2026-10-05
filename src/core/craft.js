@@ -10,7 +10,7 @@ const AU_KM = 149597870.7;
 const rad = (deg) => (deg * Math.PI) / 180;
 
 export const HUBBLE_ALTITUDE_KM = 540;
-// The real orbit takes 95 minutes, which is 57 s on the game clock (100x): too fast to
+// The real orbit takes 95 minutes, which is 114 s on the game clock (50x; 57 s when it ran at 100x): too fast to
 // catch at the 0.01c limit. One lap in 72 minutes of play keeps it at 10 km/s.
 const HUBBLE_PERIOD_S = 4320;
 // Webb is at the Sun-Earth L2 point, 1.5 million km behind Earth. Gaps around a

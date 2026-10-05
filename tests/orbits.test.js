@@ -7,7 +7,7 @@ const dist = (a, b) => Math.hypot(...sub(a, b));
 const at = (t, id) => bodyById(id, bodiesAt(t));
 
 test('game time runs 100 times real time', () => {
-  assert.equal(TIME_SCALE, 100);
+  assert.equal(TIME_SCALE, 50);
 });
 
 test('at time zero the bodies sit where the static table puts them', () => {

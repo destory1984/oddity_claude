@@ -5009,3 +5009,20 @@ html.gaze #gazeButton {
 #noteCard .journalActions button {
   margin:0;
 }
+
+/* The three keys stand over the target's name, not under it (the user, 2026-10-06, with
+   red rings round both: "두 그룹을 서로 바꿔줘"). In index.html the row comes first; the
+   gap that was over the row is now over the name. */
+#hud #targetPanel #targetRow {
+  margin-top:0;
+}
+
+#hud #targetPanel > #targetName {
+  margin-top:8px;
+}
+
+@media (max-width: 480px) {
+  #hud #targetPanel > #targetName {
+    margin-top:var(--gap);
+  }
+}

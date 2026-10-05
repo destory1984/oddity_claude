@@ -62,6 +62,11 @@ export function createStoryCard({ onOpen, onClose, onSolve = () => {}, isSolved 
       }
       onOpen();
       dialog.showModal();
+      // It opens at its top. (Opening gives the closing button at the foot the focus,
+      // and the sheet scrolled down to it: a long card began at its last lines. The
+      // user, 2026-10-06: "시점이 글의 제일 뒤에 가 있다.. 제일 위로 바꿔야지?")
+      dialog.scrollTop = 0;
+      requestAnimationFrame(() => { dialog.scrollTop = 0; });
     },
   };
 }

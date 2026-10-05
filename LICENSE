@@ -25,7 +25,8 @@ This repository is licensed in three parts.
      schiaparelli.jpg, wadiRum.jpg and bohyunsan.jpg in
      public/assets/stories/), the 35 small drawings of constellations,
      galaxies, nebulae and clusters in public/assets/sky/, the small drawings
-     of the spacecraft in public/assets/craft/, the link preview
+     of the spacecraft in public/assets/craft/ and of the bodies in
+     public/assets/bodies/, the link preview
      picture public/og.jpg and the companions in public/assets/pals/.
    - The app icons in public/icons/.
    - The title lettering in public/assets/ui/title.png.

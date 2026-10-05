@@ -259,6 +259,9 @@ export function bodiesAt(timeS) {
   return placeBodies(BODY_DATA, timeS);
 }
 
+// A body's small drawing (public/assets/bodies, 128 px): beside its name in the notebook.
+export const bodyPicture = (id) => `bodies/${id}.png`;
+
 export function bodyById(id, bodies = BODIES) {
   return bodies.find((body) => body.id === id);
 }

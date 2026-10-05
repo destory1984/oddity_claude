@@ -3635,6 +3635,35 @@ footer .throttle .rangeLabels {
   }
 }
 
+/* A body's small drawing (public/assets/bodies) before its name in the notebook. One
+   not yet found is a dark shape; a moon stands a little way in under its planet. */
+#journalBodies li strong {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+#journalBodies .bodyArt {
+  flex:none;
+  width:40px;
+  height:40px;
+  border-radius:8px;
+}
+
+#journalBodies li.moon strong {
+  padding-left:16px;
+}
+
+#journalBodies li.moon .bodyArt {
+  width:32px;
+  height:32px;
+  border-radius:6px;
+}
+
+#journalBodies li:not(.found) .bodyArt {
+  filter:brightness(.3) saturate(.2);
+}
+
 /* A craft's small drawing (public/assets/craft): at the left of its lines in the
    notebook, and at the head of the card that is up while docked. One not yet met is a
    dark shape. */

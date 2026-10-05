@@ -170,3 +170,13 @@ test('small moons keep their real sizes and parents', () => {
   const d = (id) => Math.hypot(...sub(bodyById(id).position, mars.position));
   assert.ok(d('phobos') < d('deimos'));
 });
+
+test('every body has its small drawing on file, and no drawing is without a body', async () => {
+  const { existsSync, readdirSync } = await import('node:fs');
+  const { BODY_DATA, bodyPicture } = await import('../src/core/bodies.js');
+  for (const b of BODY_DATA) {
+    assert.equal(bodyPicture(b.id), `bodies/${b.id}.png`);
+    assert.ok(existsSync(`public/assets/${bodyPicture(b.id)}`), b.id);
+  }
+  assert.equal(readdirSync('public/assets/bodies').length, BODY_DATA.length);
+});

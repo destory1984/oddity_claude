@@ -1,7 +1,7 @@
 import { famousFor } from '../core/famous.js';
 import { lastSlotLast } from '../core/story.js';
 import { summarize, journalOrder } from '../core/progress.js';
-import { surfaceDistance } from '../core/bodies.js';
+import { surfaceDistance, bodyPicture } from '../core/bodies.js';
 import { objectParticle } from './messages.js';
 import { FACTS } from '../core/facts.js';
 import { photoCaption, ALBUM_MAX } from '../core/album.js';
@@ -157,8 +157,14 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const landed = progress.landed.includes(body.id);
       const li = document.createElement('li');
       const name = document.createElement('strong');
-      // A moon sits under its planet, four spaces in.
-      name.textContent = `${moon ? '    ' : ''}${found ? body.name : t`${body.name} (미발견)`}`;
+      // Its small drawing before its name; one not yet found is a dark shape, and a moon
+      // sits under its planet, a little way in (style.css).
+      const art = picture(bodyPicture(body.id), '', 'bodyArt');
+      art.loading = 'lazy';
+      art.width = 128;
+      art.height = 128;
+      name.append(art, found ? body.name : t`${body.name} (미발견)`);
+      li.className = `${found ? 'found' : ''}${moon ? ' moon' : ''}`.trim();
       const marks = document.createElement('span');
       marks.className = 'marks';
       // The question under its reading, answered right (core/readingQuiz.js).

@@ -175,12 +175,25 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
           { left: Math.min(map.left, readout.left), top: readout.top, right: Math.max(map.right, readout.right), bottom: map.bottom },
           { left: target.left, top: target.top, right: target.right, bottom: target.bottom },
         ];
+      // What Sora is saying, while it is up: an arrow's label does not stand under it
+      // (the bubble is drawn over the labels and hid them).
+      const bubble = $('heroSay');
+      const saying = bubble?.classList.contains('on') ? [bubble.getBoundingClientRect()] : [];
       const arrows = [];
       for (const { body, el, spot, keep, selected: sel } of placed) {
         el.hidden = !keep || crowded.has(body.id) || hiddenIds.includes(body.id);
         el.classList.toggle('selected', sel);
         el.classList.toggle('goal', body.id === goalId);
-        if (!el.hidden && spot.outside) arrows.push({ el, ...spot, y: clearOfPanels(spot, panels) });
+        if (el.hidden || !spot.outside) continue;
+        // An arrow's label stays whole on screen, one gap from the edge: a long one
+        // ("← ✓ 지구 · 6,794km") ran past the left edge of a phone, and two of them
+        // stood at two different distances from it.
+        const half = el.offsetWidth / 2;
+        const x = Math.max(EDGE_GAP + half, Math.min(innerWidth - EDGE_GAP - half, spot.x));
+        const y = clearOfPanels(spot, panels);
+        const clear = clearOfPanels({ x, y }, saying, 18, half + 4);
+        // Those moved from under the bubble keep their order from top to bottom.
+        arrows.push({ el, ...spot, x, y: clear === y ? y : clear + y * 1e-4 });
       }
       // Labels in view that would cover each other: the nearer thing keeps its label.
       const inView = placed.filter(({ el, spot }) => !el.hidden && !spot.outside);
@@ -193,13 +206,8 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       }));
       for (const { body, el } of inView) if (covered.has(body.id)) el.hidden = true;
       spreadArrows(arrows, 40, innerHeight).forEach((spot, i) => {
-        const { el, x } = arrows[i];
-        el.style.top = `${spot.y}px`;
-        // An arrow's label stays whole on screen, one gap from the edge: a long one
-        // ("← ✓ 지구 · 6,794km") ran past the left edge of a phone, and two of them
-        // stood at two different distances from it.
-        const half = el.offsetWidth / 2;
-        el.style.left = `${Math.max(EDGE_GAP + half, Math.min(innerWidth - EDGE_GAP - half, x))}px`;
+        arrows[i].el.style.top = `${spot.y}px`;
+        arrows[i].el.style.left = `${arrows[i].x}px`;
       });
       // On a phone the notice stands one gap under the minimap and the target panel,
       // however tall they are (style.css reads --heads-foot).

@@ -71,6 +71,31 @@ export const CONSTELLATION_NOTES = {
   boo: '주황빛 아르크투루스의 목동',
 };
 
+// Two or three lines about each constellation, shown when it is touched (the user,
+// 2026-10-05: "별자리 터치하면 설명 보여줘", "2~3줄"). Each line fits one row on a phone.
+export const CONSTELLATION_STORIES = {
+  ori: ['붉은 어깨 베텔게우스와 푸른 발 리겔의 사냥꾼.', '허리 세 별 아래 칼에 오리온 대성운이 있다.', '겨울 저녁 남쪽 하늘에 선다.'],
+  uma: ['엉덩이와 꼬리의 일곱 별이 북두칠성이다.', '국자 끝 두 별을 이어 다섯 배 가면 북극성.', '봄 저녁에 가장 높이 뜬다.'],
+  umi: ['꼬리 끝 폴라리스가 지금의 북극성이다.', '하늘의 북극에서 1도도 안 떨어져 있다.', '약 430광년 떨어진 노란 초거성.'],
+  cas: ['에티오피아의 왕비 카시오페이아.', '북극성을 사이에 두고 북두칠성 맞은편에 있다.', '1572년 튀코 브라헤가 여기서 초신성을 보았다.'],
+  cru: ['88개 별자리 가운데 가장 작다.', '긴 막대를 네 배 반 늘이면 하늘의 남극이다.', '남반구 여러 나라의 국기에 그려져 있다.'],
+  sco: ['안타레스는 태양 지름의 700배쯤인 붉은 초거성.', '이름은 "화성의 맞수"라는 뜻이다.', '오리온을 쏜 전갈이라 둘은 함께 뜨지 않는다.'],
+  cyg: ['꼬리별 데네브는 천 광년 넘게 멀어도 1등성이다.', '베가, 알타이르와 여름의 대삼각형을 이룬다.', '부리의 알비레오는 금빛과 푸른빛의 짝별.'],
+  leo: ['머리는 물음표를 뒤집은 낫 모양이다.', '심장 레굴루스는 79광년 떨어진 푸른 별.', '11월 사자자리 별똥별이 여기서 퍼져 나온다.'],
+  tau: ['붉은 눈 알데바란은 65광년 떨어진 거성이다.', '어깨에 플레이아데스, 얼굴에 히아데스가 있다.', '뿔 끝에 1054년 초신성의 자취 게성운이 있다.'],
+  gem: ['카스토르와 폴룩스는 쌍둥이 형제의 머리다.', '더 밝은 쪽이 폴룩스, 34광년 떨어져 있다.', '12월 쌍둥이자리 별똥별이 여기서 퍼져 나온다.'],
+  cma: ['시리우스는 8.6광년, 밤하늘에서 가장 밝은 별.', '곁에 지구만 한 백색왜성이 돌고 있다.', '오리온의 허리 세 별을 이어 내려가면 닿는다.'],
+  lyr: ['베가는 25광년 떨어진 푸른 흰빛의 별.', '1만 2천 년 뒤에는 베가가 북극성이 된다.', '칠월칠석 이야기의 직녀다.'],
+  aql: ['알타이르는 17광년 떨어진 가까운 별이다.', '열 시간도 안 되어 한 바퀴 돌아 옆으로 납작하다.', '은하수 건너 직녀를 바라보는 견우다.'],
+  sgr: ['찻주전자 주둥이 쪽이 우리 은하의 중심이다.', '2만 6천 광년 저편에 큰 블랙홀이 있다.', '여름 은하수가 가장 짙은 곳.'],
+  and: ['바다 괴물에게 바쳐진 공주 안드로메다.', '허리께의 흐린 얼룩이 안드로메다은하다.', '페가수스의 사각형과 별 하나를 나눠 쓴다.'],
+  peg: ['네 별이 큰 사각형을 이루는 날개 달린 말.', '가을 밤하늘의 길잡이다.', '1995년 이곳 51번 별에서 외계행성을 찾았다.'],
+  per: ['메두사의 머리를 든 영웅 페르세우스.', '알골은 2.9일마다 어두워지는 "악마의 별".', '8월 페르세우스 별똥별이 여기서 퍼져 나온다.'],
+  vir: ['둘째로 큰 별자리. 보리 이삭을 든 여신이다.', '스피카는 250광년 떨어진 푸른 별.', '이쪽에 은하 천여 개가 모인 은하단이 있다.'],
+  cen: ['반은 사람, 반은 말인 켄타우로스.', '알파 센타우리는 4.4광년, 가장 가까운 이웃 별.', '그 곁의 프록시마는 4.2광년으로 더 가깝다.'],
+  boo: ['아르크투루스는 37광년 떨어진 주황빛 거성.', '북두칠성 손잡이의 굽은 길을 따라가면 닿는다.', '하늘의 북쪽 절반에서 가장 밝은 별이다.'],
+};
+
 const star = (name, raH, decDeg, mag) => ({ name, raH, decDeg, mag });
 
 export { CONSTELLATIONS };
@@ -84,11 +109,43 @@ export const BRIGHT_STARS = [
 ];
 
 // Where to write each name: a constellation's label point, the centre of a galaxy,
-// a nebula or a cluster. note: a line about it, shown while it is looked at.
+// a nebula or a cluster. note: a line about it, shown while it is looked at. story: what
+// it tells when touched (a constellation's two or three lines; else its note). figure: a
+// constellation's drawing as lists of unit directions, so a touch on a line finds it.
 export function skyLabels() {
-  const labels = CONSTELLATIONS.map((c) => ({ id: c.id, name: c.name, note: CONSTELLATION_NOTES[c.id] ?? '', direction: fromEquatorial(c.label[0], c.label[1]) }));
-  for (const g of [...GALAXIES, ...NEBULAE]) labels.push({ id: g.id, name: g.name, note: g.note, direction: fromEquatorial(g.raH, g.decDeg) });
+  const labels = CONSTELLATIONS.map((c) => ({
+    id: c.id,
+    name: c.name,
+    note: CONSTELLATION_NOTES[c.id] ?? '',
+    story: (CONSTELLATION_STORIES[c.id] ?? [CONSTELLATION_NOTES[c.id] ?? '']).join('\n'),
+    direction: fromEquatorial(c.label[0], c.label[1]),
+    figure: c.lines.map((line) => line.map(([raH, decDeg]) => fromEquatorial(raH, decDeg))),
+  }));
+  for (const g of [...GALAXIES, ...NEBULAE]) labels.push({ id: g.id, name: g.name, note: g.note, story: g.note, direction: fromEquatorial(g.raH, g.decDeg), figure: [] });
   return labels;
+}
+
+// How far a point is from the stroke between a and b (all [x, y] in pixels).
+function strokeDistance([px, py], [ax, ay], [bx, by]) {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const along = dx || dy ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy))) : 0;
+  return Math.hypot(px - ax - dx * along, py - ay - dy * along);
+}
+
+// Of the sky things on screen, the one a finger touched: the one whose middle or whose
+// drawn line is nearest to the touch, within `reach` pixels.
+// shapes: [{ id, x, y, lines: [[[x, y], ...], ...] }]; point: { x, y }. Returns an id, or null.
+export function touchedSky(shapes, point, reach) {
+  let best = null;
+  for (const shape of shapes) {
+    let far = Math.hypot(shape.x - point.x, shape.y - point.y);
+    for (const line of shape.lines ?? []) {
+      for (let i = 1; i < line.length; i += 1) far = Math.min(far, strokeDistance([point.x, point.y], line[i - 1], line[i]));
+    }
+    if (far <= reach && (!best || far < best.far)) best = { id: shape.id, far };
+  }
+  return best ? best.id : null;
 }
 
 // Of the sky names on screen, the one being looked at: the nearest to the middle of

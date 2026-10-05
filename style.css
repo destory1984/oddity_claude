@@ -3939,6 +3939,36 @@ dialog .sheetHead .textSize button:disabled {
   display:block;
 }
 
+/* One that is touched tells two or three lines on a dark plate instead (the user,
+   2026-10-05: "별자리 터치하면 설명 보여줘"). */
+#skyTold {
+  position:absolute;
+  width:max-content;
+  padding:6px 10px 7px;
+  border-radius:10px;
+  background:#071522c7;
+  box-shadow:0 0 0 1px #9fc4ff33;
+  color:#f2f6ff;
+  font-size:12px;
+  letter-spacing:.08em;
+  text-align:center;
+  pointer-events:none;
+}
+
+#skyTold strong {
+  font-weight:normal;
+}
+
+#skyTold small {
+  display:block;
+  margin-top:4px;
+  font-size:11px;
+  line-height:1.55;
+  letter-spacing:0;
+  white-space:pre-line;
+  color:#dbe6f8;
+}
+
 /* The version stands at the head of the settings, between the title and the text size
    buttons (the user, 2026-10-04: "버전 표시를 설정 화면의 제일 위로 옮겨줘"). */
 #settings .sheetHead h1 {

@@ -2,11 +2,14 @@ import { controlIntent, rangeKeepsKey, tracksKey } from '../core/controls.js';
 
 const $ = (id) => document.getElementById(id);
 const DRAG_RATE = 0.0035;
+// A press on the view that ends within this time and this many pixels is a tap, not a drag.
+const TAP_MS = 300;
+const TAP_PIXELS = 8;
 
 // The keys that fly or turn her: pressing one while paused takes the game off pause (onMove).
 const MOVE_KEYS = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
-export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal, onMute, onMusic = () => {}, onRear = () => {}, onMove = () => {}, onEscape, onWheel, isBlocked }) {
+export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal, onMute, onMusic = () => {}, onRear = () => {}, onMove = () => {}, onTap = () => {}, onEscape, onWheel, isBlocked }) {
   const held = new Set();
   let flyingButton = false;
   let reversingButton = false;
@@ -80,10 +83,14 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
   canvas.addEventListener('pointerdown', (e) => {
     canvas.focus();
     canvas.setPointerCapture(e.pointerId);
-    drag = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, at: performance.now(), far: e.button !== 0 };
+  });
+  canvas.addEventListener('pointerup', (e) => {
+    if (drag?.id === e.pointerId && !drag.far && performance.now() - drag.at <= TAP_MS) onTap(e.clientX, e.clientY);
   });
   canvas.addEventListener('pointermove', (e) => {
     if (drag?.id !== e.pointerId) return;
+    if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > TAP_PIXELS) drag.far = true;
     onDrag((e.clientX - drag.x) * DRAG_RATE, (e.clientY - drag.y) * DRAG_RATE);
     drag.x = e.clientX;
     drag.y = e.clientY;

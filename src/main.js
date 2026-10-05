@@ -417,6 +417,10 @@ async function init() {
         dragTurn[1] += dy;
       }
     },
+    // A short touch on a constellation, a galaxy or a cluster: it tells its lines.
+    onTap(x, y) {
+      if (!photo.active() && !paused) hud.touchSky(x, y);
+    },
     onBrake: brake,
     onTogglePhoto: () => photo.toggle(),
     onJournal: () => journal.open(),

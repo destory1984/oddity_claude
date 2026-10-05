@@ -1,5 +1,5 @@
 import { objectParticle, distanceText, markedName } from './messages.js';
-import { lookedAt } from '../core/sky.js';
+import { lookedAt, touchedSky } from '../core/sky.js';
 import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, clearOfPanels, COMPACT_WIDTH } from '../core/markers.js';
 
 const $ = (id) => document.getElementById(id);
@@ -7,6 +7,10 @@ const ARROWS = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
 // Whole numbers only: the altitude and the speed are shown without a decimal.
 const fmt = (n) => Math.round(n).toLocaleString('ko-KR');
 const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
+// A touch on the sky counts within this many pixels of a name or a constellation's line,
+// and what it tells stays up this long.
+const TOUCH_REACH = 30;
+const TOUCH_SECONDS = 8;
 
 export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] }) {
   const markers = new Map();
@@ -29,9 +33,28 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
     el.append(note);
     el.hidden = true;
     $('markers').append(el);
-    return { id: label.id, el, direction: label.direction };
+    return { id: label.id, el, direction: label.direction, figure: label.figure ?? [], name: label.name, story: label.story ?? label.note ?? '' };
   });
+  // What a touched sky thing tells: its name and two or three lines on a plate. It
+  // stands over the label layer, so the character's outline is not cut out of it.
+  const plate = document.createElement('div');
+  plate.id = 'skyTold';
+  plate.hidden = true;
+  plate.append(document.createElement('strong'), document.createElement('small'));
+  $('markers').after(plate);
   let lastMask = null;
+  // Where the character is drawn, in pixels: the plate keeps off her.
+  let heroBox = null;
+  // The camera of the last frame drawn, and the sky thing touched: { id, until }.
+  let lastCamera = null;
+  let touched = null;
+  // A direction as a point on screen, from its middle; null when it is behind the view.
+  function skyPoint(direction, camera, least) {
+    const z = dot(direction, camera.forward);
+    if (z <= least) return null;
+    const focal = innerHeight / (2 * Math.tan(camera.fov / 2));
+    return [(dot(direction, camera.right) / z) * focal, (-dot(direction, camera.up) / z) * focal];
+  }
   $('faceTarget').addEventListener('click', onFace);
   $('inspectTarget').addEventListener('click', onInspect);
 
@@ -86,6 +109,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       $('speedLimit').textContent = `현재 제한 ${limitLabel}`;
       $('flightState').textContent = flightLabel;
       const compact = innerWidth <= COMPACT_WIDTH;
+      lastCamera = view.camera;
       // Every body in view gets a label; off-screen arrows only for the selected, the
       // nearest and nearby bodies (core/markers.js), so fifteen arrows do not pile up.
       const placed = bodies.map((body) => {
@@ -154,30 +178,101 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       const focal = innerHeight / (2 * Math.tan(view.camera.fov / 2));
       // The names of what is in the sky, on a phone too (they were left out there; the
       // user, 2026-10-04: "시야에 보일 때에는 설명 태그도 보여줘", "별자리도 설명 태그 보여줘").
+      if (touched && performance.now() > touched.until) touched = null;
       const shown = [];
+      let touchedSpot = null;
       for (const { id, el, direction } of skyNames) {
         const z = dot(direction, view.camera.forward);
         const px = (dot(direction, view.camera.right) / Math.max(0.001, z)) * focal;
         const py = (-dot(direction, view.camera.up) / Math.max(0.001, z)) * focal;
-        el.hidden = z <= 0.2 || Math.abs(px) > innerWidth / 2 || Math.abs(py) > innerHeight / 2;
+        const off = Math.abs(px) > innerWidth / 2 || Math.abs(py) > innerHeight / 2;
+        // The one touched keeps telling though its name's own place may be off screen (a
+        // large figure touched at its far end).
+        // It lets go once the view has turned half a screen past it.
+        const kept = touched?.id === id && z > 0.2 && Math.abs(px) < innerWidth && Math.abs(py) < innerHeight;
+        // The plate stands in for its name.
+        el.hidden = kept || z <= 0.2 || off;
+        if (kept) touchedSpot = { x: innerWidth / 2 + px, y: innerHeight / 2 + py };
         if (el.hidden) continue;
         el.style.left = `${innerWidth / 2 + px}px`;
         el.style.top = `${innerHeight / 2 + py}px`;
         shown.push({ id, x: px, y: py });
       }
-      // The one being looked at tells a line about itself.
-      const told = lookedAt(shown, Math.min(innerWidth, innerHeight) * 0.3);
+      // Turned away from what was touched: it stops telling.
+      if (touched && !touchedSpot) touched = null;
+      // The one being looked at tells a line about itself, unless a plate is up.
+      const told = touched ? null : lookedAt(shown, Math.min(innerWidth, innerHeight) * 0.3);
       for (const { id, el } of skyNames) el.classList.toggle('told', id === told);
+      plate.hidden = !touched;
+      if (touchedSpot) {
+        // The plate hangs under its point, whole on screen, clear of the panels above it
+        // and, on a phone, of the keys at the foot. It keeps off the character and what
+        // she is saying: it goes above them, and if there is no room there at its own
+        // place, to her left or her right, where the panels may end higher.
+        const width = plate.offsetWidth;
+        const height = plate.offsetHeight;
+        const foot = (compact ? document.querySelector('#hud footer').getBoundingClientRect().top : innerHeight) - 8;
+        const heads = ['#hud nav', '#minimap', '#targetPanel', '#guide'].map((q) => document.querySelector(q)?.getBoundingClientRect()).filter((box) => box?.width);
+        const bubble = $('heroSay');
+        const saying = bubble && getComputedStyle(bubble).opacity > 0.05 ? bubble.getBoundingClientRect() : null;
+        const across = (box, left) => left < box.right && left + width > box.left;
+        const place = (left) => {
+          const top = Math.max(0, ...heads.filter((box) => across(box, left)).map((box) => box.bottom)) + 8;
+          let y = Math.max(top, Math.min(foot - height, touchedSpot.y + 14));
+          const kept = [heroBox, saying].filter((box) => box && across(box, left));
+          const over = kept.some((box) => y < box.bottom && y + height > box.top);
+          if (over) y = Math.min(...kept.map((box) => box.top)) - 8 - height;
+          return { left, y: Math.max(top, y), fits: !over || y >= top };
+        };
+        const own = Math.max(8, Math.min(innerWidth - 8 - width, touchedSpot.x - width / 2));
+        // Beside her: as near as the screen lets it (on a phone that is the edge).
+        const hers = [heroBox, saying].filter(Boolean);
+        const within = (left) => Math.max(8, Math.min(innerWidth - 8 - width, left));
+        const sides = hers.length ? [within(Math.min(...hers.map((box) => box.left)) - 8 - width), within(Math.max(...hers.map((box) => box.right)) + 8)] : [];
+        if (touchedSpot.x > innerWidth / 2) sides.reverse();
+        const spots = [own, ...sides].map(place);
+        const spot = spots.find((s) => s.fits) ?? spots[0];
+        plate.style.left = `${spot.left}px`;
+        plate.style.top = `${spot.y}px`;
+      }
+    },
+    // A short touch on the sky at (x, y): the constellation, galaxy or cluster there tells
+    // its lines for a while. A touch on nothing puts them away. Returns its id, or null.
+    touchSky(x, y) {
+      if (!lastCamera) return null;
+      const shapes = [];
+      for (const { id, direction, figure } of skyNames) {
+        const middle = skyPoint(direction, lastCamera, 0.2);
+        if (!middle) continue;
+        // A stroke with an end behind the view is left out.
+        const lines = [];
+        for (const line of figure) {
+          const points = line.map((p) => skyPoint(p, lastCamera, 0.05));
+          for (let i = 1; i < points.length; i += 1) if (points[i - 1] && points[i]) lines.push([points[i - 1], points[i]]);
+        }
+        shapes.push({ id, x: middle[0], y: middle[1], lines });
+      }
+      // The name is written 14px under its point (style.css): count the touch from there.
+      const point = { x: x - innerWidth / 2, y: y - innerHeight / 2 };
+      const id = touchedSky(shapes, point, TOUCH_REACH) ?? touchedSky(shapes.map((s) => ({ ...s, y: s.y + 20, lines: [] })), point, TOUCH_REACH);
+      touched = id ? { id, until: performance.now() + TOUCH_SECONDS * 1000 } : null;
+      const thing = skyNames.find((s) => s.id === id);
+      plate.firstChild.textContent = thing?.name ?? '';
+      plate.lastChild.textContent = thing?.story ?? '';
+      if (!thing) plate.hidden = true;
+      return id;
     },
     // Labels pass behind the character: her outline is cut out of the label layer, using
     // the very drawing that is on screen. card: world.update's heroCard, or null.
     maskHero(card) {
       let mask = 'none';
+      heroBox = null;
       if (card) {
         const height = card.height * innerHeight;
         const width = height * card.shape;
         const left = innerWidth / 2 - width / 2;
         const top = innerHeight / 2 - card.up * innerHeight - height / 2;
+        heroBox = { left, top, right: left + width, bottom: top + height };
         mask = `url("${card.file}") ${left.toFixed(1)}px ${top.toFixed(1)}px / ${width.toFixed(1)}px ${height.toFixed(1)}px no-repeat, linear-gradient(#000, #000)`;
       }
       if (mask === lastMask) return;

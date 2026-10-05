@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { fromEquatorial, GALAXIES, NEBULAE, CONSTELLATIONS, BRIGHT_STARS, skyLabels, lookedAt } from '../src/core/sky.js';
+import { fromEquatorial, GALAXIES, NEBULAE, CONSTELLATIONS, BRIGHT_STARS, skyLabels, lookedAt, touchedSky, CONSTELLATION_STORIES } from '../src/core/sky.js';
 
 const deg = (r) => (r * 180) / Math.PI;
 const angle = (a, b) => deg(Math.acos(Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]))));
@@ -86,4 +86,37 @@ test('the Hyades lie behind the eye of the Bull, the Coalsack beside the Cross, 
   assert.ok(angle(at('hyades'), tau) < 3);
   assert.ok(angle(at('coalsack'), cru) < 8);
   assert.ok(angle(at('tuc47'), at('smc')) < 4);
+});
+
+test('every constellation has two or three lines to tell when it is touched', () => {
+  for (const c of CONSTELLATIONS) {
+    const lines = CONSTELLATION_STORIES[c.id];
+    assert.ok(lines && lines.length >= 2 && lines.length <= 3, c.id);
+    // Short enough for one row each on a phone 402 wide.
+    for (const line of lines) assert.ok(line.length >= 8 && line.length <= 30, `${c.id}: ${line} (${line.length})`);
+  }
+  const labels = skyLabels();
+  const orion = labels.find((l) => l.id === 'ori');
+  assert.equal(orion.story, CONSTELLATION_STORIES.ori.join('\n'));
+  // Its figure rides along as unit directions, one list per line of the drawing.
+  assert.equal(orion.figure.length, CONSTELLATIONS[0].lines.length);
+  for (const p of orion.figure.flat()) assert.ok(Math.abs(len(p) - 1) < 1e-9);
+  // A galaxy has no figure and tells its one line.
+  const m31 = labels.find((l) => l.id === 'm31');
+  assert.equal(m31.story, m31.note);
+  assert.deepEqual(m31.figure, []);
+});
+
+test('a touch picks the sky thing whose figure or middle is nearest, within reach', () => {
+  const shapes = [
+    // A figure of two strokes, its name far from the second stroke.
+    { id: 'ori', x: 0, y: 0, lines: [[[-50, 0], [50, 0]], [[50, 0], [50, 200]]] },
+    { id: 'm42', x: 80, y: 150, lines: [] },
+  ];
+  assert.equal(touchedSky(shapes, { x: 55, y: 100 }, 30), 'ori'); // 5px from the second stroke
+  assert.equal(touchedSky(shapes, { x: 72, y: 150 }, 30), 'm42'); // 8px from the cluster, 22 from the stroke
+  assert.equal(touchedSky(shapes, { x: 0, y: -20 }, 30), 'ori'); // beside the name and the first stroke
+  assert.equal(touchedSky(shapes, { x: 50, y: 240 }, 30), null); // past the end of the stroke
+  assert.equal(touchedSky(shapes, { x: -200, y: 0 }, 30), null);
+  assert.equal(touchedSky([], { x: 0, y: 0 }, 30), null);
 });

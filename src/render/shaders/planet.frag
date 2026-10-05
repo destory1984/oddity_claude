@@ -19,6 +19,25 @@ float cellNoise(vec2 p){
   f=f*f*(3.-2.*f);
   return mix(mix(cellHash(i),cellHash(i+vec2(1.,0.)),f.x),mix(cellHash(i+vec2(0.,1.)),cellHash(i+vec2(1.,1.)),f.x),f.y);
 }
+// How thick Etna's ash is at a place east (along) and south (aside) of its crater, in
+// radians of arc, 0 to 1. A column close and solid at the crater that breaks into lumps
+// as the wind carries it off and spreads it; and once in 90 s a burst: a great puff
+// that leaves the crater, swells and thins as it rides downwind for most of a minute.
+float etnaAsh(float along,float aside){
+  float drift=aside-.019*sin(along*25.)*along/.16;
+  float wide=(.0045+along*.1)*(.7+.6*cellNoise(vec2(along*55.-time*.2,3.7)));
+  float column=exp(-pow(drift/wide,2.))*exp(-max(along,0.)/.1)*smoothstep(-.003,.004,along);
+  float lumps=cellNoise(vec2(along*105.-time*.33,aside*150.));
+  float fine=cellNoise(vec2(along*290.-time*.6,aside*370.+7.));
+  float broken=smoothstep(.2,.75,lumps*.75+fine*.4);
+  column*=mix(1.,broken*1.5,smoothstep(.004,.05,along));
+  float since=mod(time,90.);
+  float middle=.005+since*.0042;
+  float size=.009+since*.0012;
+  float puff=exp(-(pow(along-middle,2.)+drift*drift)/(size*size))*exp(-since/24.)*1.7*(.55+.7*lumps);
+  return clamp(column*1.15+puff,0.,1.);
+}
+
 void main(){
   vec3 N=normalize(n),V=normalize(eye-wp);
   float light=dot(N,sun);
@@ -53,20 +72,38 @@ void main(){
     // (From far off the lamps are smaller than a pixel: a faint glow stands for them.)
     col+=vec3(.7,1.,.88)*(lit*1.6+.09*shoal)*fleet*(1.-daySide);
   }
-  // Etna, on Sicily (37.75 north, 15 east): a plume of grey ash carried east on the wind,
-  // widening and thinning over some 1,100 km, its puffs moving along it; at night the
-  // crater glows red (all 1.6 times larger since 2026-10-06, the user: "크기만 조금 더
-  // 키워봐"). along, aside: east and south of the crater, in radians of arc.
+  // Etna, on Sicily (37.75 north, 15 east), in eruption (the user, 2026-10-06, of the
+  // pale even streak it was: "화산 같은 느낌은 안 난다"): dark ash boiling out of the
+  // crater in lumps and carried east on the wind over some 1,100 km, its shadow on the
+  // sea beside it; fire in the crater by day and by night, and by night lava running
+  // down the slope; and once in 90 s it bursts (etnaAsh above). along, aside: east and
+  // south of the crater, in radians of arc.
   float along=(vUV.x-.5417)*6.28318*.79;
   float aside=(vUV.y-.2903)*3.14159;
-  if(along>-.016&&along<.26&&abs(aside)<.08){
-    float drift=aside-.019*sin(along*25.)*along/.16;
-    float wide=.0056+along*.11;
-    float ash=exp(-pow(drift/wide,2.))*exp(-max(along,0.)/.088)*smoothstep(-.003,.006,along);
-    ash*=.55+.45*cellNoise(vec2(along*140.-time*.35,aside*190.));
-    col=mix(col,vec3(.5,.47,.44)*(.095+max(0.,light)*1.1),clamp(ash,0.,1.)*.9);
-    float crater=exp(-(along*along+aside*aside)/.00003);
-    col+=vec3(1.,.32,.08)*crater*(1.-daySide)*(.7+.3*sin(time*1.7));
+  if(along>-.03&&along<.3&&abs(aside)<.1){
+    float ash=etnaAsh(along,aside);
+    // Its shadow, a little south of it, on whatever is not under the ash itself.
+    float shade=etnaAsh(along+.003,aside-.014);
+    col*=1.-.5*smoothstep(.06,.45,shade)*(1.-smoothstep(.06,.45,ash))*daySide;
+    // Lumps lit from above: pale tops, dark hollows.
+    float tone=cellNoise(vec2(along*105.-time*.33+.6,aside*150.+.35));
+    vec3 ashColour=mix(vec3(.1,.08,.07),vec3(.37,.31,.26),tone*tone);
+    col=mix(col,ashColour*(.095+max(0.,light)*1.1),smoothstep(.06,.45,ash)*.97);
+    // Fire. since: seconds since the last burst; flash: the burst's own light, a few
+    // seconds long.
+    float since=mod(time,90.);
+    float flash=exp(-since*.45);
+    float near2=along*along+aside*aside;
+    float vent=exp(-near2/.000006);
+    float halo=exp(-near2/.00003);
+    float flicker=.75+.25*sin(time*1.7);
+    col+=vec3(1.,.45,.12)*vent*(.85+1.6*flash)*flicker;
+    col+=vec3(1.,.32,.08)*halo*((1.-daySide)*.9+flash*1.1)*flicker;
+    // Lava down the south-east slope: a thin crooked line, faint by day, red by night.
+    float down=along*.45+aside*.89;
+    float off=along*.89-aside*.45-.0011*sin(down*900.);
+    float lava=exp(-pow(off/.0009,2.))*smoothstep(0.,.002,down)*smoothstep(.015,.006,down);
+    col+=vec3(1.,.28,.05)*lava*(.22+.78*(1.-daySide))*(.7+.3*sin(time*2.3+down*700.));
   }
   float water=clamp((tex.b-tex.r)*4.,0.,1.);
   vec3 H=normalize(sun+V);

@@ -1788,6 +1788,11 @@ ${STORY_MORE[target.id]}` : told };
     // (How far the locked target is before this step: sliding round it keeps that.)
     if (aimedId !== selectedId) aimedId = null;
     const guided = locked || aimedId !== null;
+    // Locked with the view turned away by hand, and now she moves (a slide key, forward,
+    // back): the view comes back onto the target and she goes round it facing it (the
+    // user, 2026-10-06: "지구 중심을 중심으로 움직이면서, 시점도 같이 지구 중심을 향한
+    // 상태로 움직이면 좋겠어"). Standing still she may look where she likes.
+    if (locked && lockFree && (intent.drive !== 0 || intent.strafe !== 0 || intent.rise !== 0)) lockFree = false;
     const lockRange = guided ? Math.hypot(...here(selectedId).position.map((n, i) => n - state.position[i])) : 0;
     const lockFrom = guided ? state.position : null;
     const result = step(state, intent, dt, bodies, slowPoints);

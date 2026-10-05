@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-06', text: t('에트나 화산이 짙은 화산재를 뿜고 90초마다 터집니다. 분화구가 붉게 타고 밤에는 용암이 흐릅니다.') },
   { day: '2026-10-06', text: t('화성의 먼지 회오리가 휘어 선 먼지 기둥이 되어 감아 돌고, 땅에 긴 그림자를 드리웁니다.') },
   { day: '2026-10-06', text: t('목표 고정이 땅과 함께 돌아 같은 곳 위에 머뭅니다. 화면을 끌어 둘러봐도 풀리지 않습니다.') },
   { day: '2026-10-06', text: t('밤 쪽에 든 태풍 속에서 번개가 번쩍여 소용돌이 모양이 드러납니다.') },

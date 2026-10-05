@@ -22,7 +22,7 @@ import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } f
 import { isLocalHost } from './core/count.js';
 import { pickSpot, fromSpot, toSpot } from './core/startSpots.js';
 import { teleportSpot } from './core/teleport.js';
-import { behindBody , nearestBodies, nearbyMoons } from './core/markers.js';
+import { behindBody, lostInGlare, nearestBodies, nearbyMoons } from './core/markers.js';
 import { FACTS } from './core/facts.js';
 import { eventMessage, limitText, dateText, withParticle, objectParticle, distanceText } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
@@ -2066,6 +2066,11 @@ ${STORY_MORE[target.id]}` : told };
         ...[...bodies, ...craft]
           .filter((t) => t.kind !== 'star' && t.id !== selectedId && t.id !== goalNow()?.targetId && behindBody(t, state.position, bodies))
           .map((t) => t.id),
+        // Far off and beside the Sun: lost in its light (core/markers.js lostInGlare). Home
+        // keeps its name from anywhere; so do the chosen target and the guide's goal.
+        ...bodies
+          .filter((b) => b.kind !== 'star' && b.id !== 'earth' && b.id !== selectedId && b.id !== goalNow()?.targetId && lostInGlare(b, state.position, bodyById('sun', bodies)))
+          .map((b) => b.id),
       ],
     });
     minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId, away });

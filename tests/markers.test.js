@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { clearOfPanels, keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody, nearestBodies, nearbyMoons, NEARBY_KM } from '../src/core/markers.js';
+import { clearOfPanels, keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody, nearestBodies, nearbyMoons, NEARBY_KM, lostInGlare, GLARE_FAR_KM } from '../src/core/markers.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 
 test('on-screen bodies always keep their label', () => {
@@ -168,4 +168,29 @@ test('an off-screen arrow is brought down under a panel it would stand on', () =
   assert.equal(clearOfPanels({ x: 200, y: 100 }, [{ left: 0, top: 0, right: 400, bottom: 330 }]), 348);
   // Under one panel it must not land on another.
   assert.equal(clearOfPanels({ x: 100, y: 50 }, [{ left: 0, top: 0, right: 200, bottom: 100 }, { left: 0, top: 110, right: 200, bottom: 200 }]), 218);
+});
+
+test('from the outer planets the inner ones are lost beside the Sun; from Earth they are not', () => {
+  const sun = bodyById('sun');
+  const beside = (viewer, id) => {
+    const from = bodyById(viewer);
+    // A little off the planet, on the side away from the Sun.
+    const out = from.position.map((n, i) => n - sun.position[i]);
+    const far = Math.hypot(...out);
+    const position = from.position.map((n, i) => n + (out[i] / far) * from.radiusKm * 3);
+    return lostInGlare(bodyById(id), position, sun);
+  };
+  for (const viewer of ['saturn', 'uranus', 'neptune']) for (const id of ['mercury', 'venus']) assert.equal(beside(viewer, id), true, `${id} from ${viewer}`);
+  assert.equal(beside('saturn', 'jupiter'), false);
+  assert.equal(beside('saturn', 'titan'), false);
+  for (const id of ['mercury', 'venus', 'mars', 'moon']) assert.equal(beside('earth', id), false, `${id} from earth`);
+});
+
+test('a body near at hand is never lost in the glare, even in line with the Sun', () => {
+  const sun = { id: 'sun', position: [0, 0, 0] };
+  const position = [5e6, 0, 0];
+  assert.equal(lostInGlare({ position: [5e6 - GLARE_FAR_KM * 0.9, 0, 0] }, position, sun), false);
+  assert.equal(lostInGlare({ position: [5e6 - GLARE_FAR_KM * 1.1, 0, 0] }, position, sun), true);
+  // Far, but well off to the side of the Sun.
+  assert.equal(lostInGlare({ position: [0, 4e6, 0] }, position, sun), false);
 });

@@ -126,6 +126,26 @@ export function crowdedMoons(spots, gap = 40) {
   return hidden;
 }
 
+// Seen from the outer planets, the inner ones stand right beside the Sun: lost in its
+// light, and their names lie on the Sun's own (the user at Saturn, 2026-10-05: "수성이나
+// 금성의 위치가 보이잖아.. 멀어서 안 그래도 될 것 같은데"). A body gets no label when it is
+// this far off (km) and within this angle of the Sun. Near at hand nothing changes: from
+// Earth, Mercury and Venus are neither that far nor that close to the Sun.
+export const GLARE_FAR_KM = 3e6;
+export const GLARE_DEG = 9;
+
+// True when the target (a body; km) is far off and nearly in line with the Sun.
+export function lostInGlare(target, position, sun) {
+  const to = target.position.map((n, i) => n - position[i]);
+  const far = Math.hypot(...to);
+  if (!(far > GLARE_FAR_KM)) return false;
+  const toSun = sun.position.map((n, i) => n - position[i]);
+  const sunFar = Math.hypot(...toSun);
+  if (!(sunFar > 0)) return false;
+  const cos = (to[0] * toSun[0] + to[1] * toSun[1] + to[2] * toSun[2]) / (far * sunFar);
+  return cos > Math.cos((GLARE_DEG * Math.PI) / 180);
+}
+
 // True when another body stands between the traveler and the target (a body or a
 // craft; km): the straight line to the target's nearest point passes through that body.
 // Such a thing cannot be seen, so it gets no label. Places on a surface are not asked

@@ -87,6 +87,7 @@ function voyagerPortrait(scene, name, mats) {
 // Hubble being mended: the shuttle comes up under its aft end, two people float out to
 // the telescope, a box the size of a phone booth goes in, and the shuttle backs away.
 // (The shuttle is drawn at half its true size beside the telescope, to fit the view.)
+// The scene faces the watcher (render/craft.js `face`): the shuttle is seen from its side.
 function hubbleService(scene, name, mats) {
   const { root } = based(scene, name, mats, 'hubble');
   const shuttle = group(scene, `${name}Shuttle`, root);
@@ -129,7 +130,7 @@ function hubbleService(scene, name, mats) {
     fixer.position.set(at[0], at[1], at[2]);
   }
   pose({ shuttle: 0, out: 0, fix: 0, away: 0 });
-  return { root, pose };
+  return { root, pose, face: true, fit: 0.7, lift: 0.2 };
 }
 
 // The station built up: its eight groups, each coming in from its own side and joining.
@@ -243,7 +244,9 @@ function parkerCorona(scene, name, mats) {
   return { root, pose };
 }
 
-// Cassini letting Huygens go: the probe, spinning, draws away toward Titan.
+// Cassini letting Huygens go: the probe, spinning, draws away toward Titan, a small
+// ball to one side. The scene faces the watcher, and the probe stays in view to the end
+// (it went 1.9 craft-widths sunward and was out of sight after nine seconds).
 function huygensLeaves(scene, name, mats) {
   const { root } = based(scene, name, mats, 'cassini', { probe: false });
   const probe = group(scene, `${name}Probe`, root);
@@ -252,21 +255,24 @@ function huygensLeaves(scene, name, mats) {
   // A mark on its rim, so that its turning shows.
   box(scene, `${name}Mark`, probe, mats.dark, [0.05, 0.02, 0.012], [0.085, 0, -0.03]);
   fuse(scene, probe);
-  ball(scene, `${name}Titan`, root, tint(scene, `${name}TitanPaint`, '#d9a34a'), 0.5, [0.9, 0.2, 3.2]);
+  ball(scene, `${name}Titan`, root, tint(scene, `${name}TitanPaint`, '#d9a34a'), 0.2, [-0.62, -0.42, 0.2]);
 
   function pose({ away, spin }) {
-    probe.position.set(0.45 * away, 0.1 * away, 0.115 + 1.9 * away);
+    probe.position.set(-0.5 * away, -0.34 * away, 0.115 + 0.2 * away);
     probe.rotation.z = spin;
-    probe.scaling.setAll(1 - 0.45 * away);
+    probe.scaling.setAll(1 - 0.6 * away);
   }
   pose({ away: 0, spin: 0 });
-  return { root, pose };
+  return { root, pose, face: true, fit: 0.8 };
 }
 
-// The Roadster shown to the sky: the fairing round it parts in two and falls away, and
-// Earth, behind it, grows small.
+// The Roadster shown to the sky: the fairing round it parts in two and falls away to
+// the sides, and Earth, behind it, grows small. The scene faces the watcher, so Earth
+// stands behind the car (it stood below and behind the craft's sunward side, out of sight).
 function roadsterReveal(scene, name, mats) {
-  const { root } = based(scene, name, mats, 'roadster');
+  const { root, base } = based(scene, name, mats, 'roadster');
+  // The car is seen from its side.
+  base.rotation.y = Math.PI / 2;
   const halves = [0, 1].map((k) => {
     const holder = group(scene, `${name}FairingHolder${k}`, root);
     const half = group(scene, `${name}Fairing${k}`, holder);
@@ -274,10 +280,10 @@ function roadsterReveal(scene, name, mats) {
     part(cyl(scene, `${name}FairingNose${k}`, { height: 0.34, diameterTop: 0.03, diameterBottom: 0.56, tessellation: 28, arc: 0.5 }), half, mats.white, [0, 0.87, 0]);
     part(cyl(scene, `${name}FairingBand${k}`, { height: 0.02, diameter: 0.565, tessellation: 28, arc: 0.5 }), half, mats.grey, [0, 0.7, 0]);
     fuse(scene, half);
-    holder.rotation.y = k * Math.PI;
+    holder.rotation.y = k * Math.PI + Math.PI / 2;
     return half;
   });
-  const earth = ball(scene, `${name}Earth`, root, tint(scene, `${name}EarthPaint`, '#3f78d8'), 1.4, [0, -1.6, -1.4]);
+  const earth = ball(scene, `${name}Earth`, root, tint(scene, `${name}EarthPaint`, '#3f78d8'), 1.1, [0.3, -0.35, -1.2]);
 
   function pose({ open, gone }) {
     for (const half of halves) {
@@ -285,11 +291,11 @@ function roadsterReveal(scene, name, mats) {
       half.position.set(0, -0.5 * open * open, 1.0 * open);
       half.rotation.x = 1.0 * open;
     }
-    earth.scaling.setAll(1 - 0.85 * gone);
-    earth.position.set(0, -1.6 - 2.4 * gone, -1.4 - 2.1 * gone);
+    earth.scaling.setAll(1 - 0.8 * gone);
+    earth.position.set(0.3 + 0.25 * gone, -0.35 - 0.2 * gone, -1.2 - 0.8 * gone);
   }
   pose({ open: 0, gone: 0 });
-  return { root, pose };
+  return { root, pose, face: true, fit: 0.85 };
 }
 
 // Juno braking into orbit: the whole craft turns about its axis and its main engine,

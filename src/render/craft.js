@@ -496,9 +496,13 @@ export function createCraft(scene, craftList) {
       }
       if (loose && replay?.id === c.id && replay.unfold) {
         loose.root.setEnabled(true);
-        loose.root.scaling.copyFrom(node.scaling);
+        // A scene with things round the craft (a shuttle under Hubble, Earth behind the
+        // Roadster) is a stage: it faces whoever watches, stands smaller by `fit` and
+        // higher by `lift` of its own size, so that all of it is in view from any side.
+        loose.root.scaling.copyFrom(node.scaling).scaleInPlace(loose.fit ?? 1);
         loose.root.position.copyFrom(node.position);
-        loose.root.lookAt(new Vector3(...sunPosition.map((n, i) => (n - position[i]) / KM_PER_UNIT)));
+        if (loose.lift) loose.root.position.y += loose.lift * node.scaling.y;
+        loose.root.lookAt(loose.face ? Vector3.Zero() : new Vector3(...sunPosition.map((n, i) => (n - position[i]) / KM_PER_UNIT)));
         loose.pose(replay.unfold);
         node.setEnabled(false);
       }

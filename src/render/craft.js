@@ -499,10 +499,19 @@ export function createCraft(scene, craftList) {
         // A scene with things round the craft (a shuttle under Hubble, Earth behind the
         // Roadster) is a stage: it faces whoever watches, stands smaller by `fit` and
         // higher by `lift` of its own size, so that all of it is in view from any side.
+        // (face: true, its sunward side to the watcher; 'side', below.)
         loose.root.scaling.copyFrom(node.scaling).scaleInPlace(loose.fit ?? 1);
         loose.root.position.copyFrom(node.position);
         if (loose.lift) loose.root.position.y += loose.lift * node.scaling.y;
-        loose.root.lookAt(loose.face ? Vector3.Zero() : new Vector3(...sunPosition.map((n, i) => (n - position[i]) / KM_PER_UNIT)));
+        if (loose.face) {
+          // Its +z toward the eye (as lookAt at the eye turned it: this look direction is
+          // the one from the eye), with the eye's own "up": docked from above or rolled
+          // over, the scene still stands upright in the view.
+          const eye = scene.activeCamera;
+          loose.root.rotationQuaternion = Quaternion.FromLookDirectionLH(loose.root.position.subtract(eye.globalPosition).normalize(), eye.getDirection(Vector3.Up()));
+        } else loose.root.lookAt(new Vector3(...sunPosition.map((n, i) => (n - position[i]) / KM_PER_UNIT)));
+        // 'side': its own z runs across the view (a rocket falling behind is seen from the side).
+        if (loose.face === 'side') loose.root.rotate(Vector3.Up(), Math.PI / 2);
         loose.pose(replay.unfold);
         node.setEnabled(false);
       }

@@ -81,7 +81,9 @@ function voyagerPortrait(scene, name, mats) {
     });
   }
   pose({ looking: 0, sweep: 0, cards: 0, earth: 0 });
-  return { root, pose };
+  // The row of pictures faces the watcher (seen from the side or from above they were
+  // thin slanted strips).
+  return { root, pose, face: true, fit: 0.8 };
 }
 
 // Hubble being mended: the shuttle comes up under its aft end, two people float out to
@@ -159,7 +161,11 @@ function issAssembly(scene, name, mats) {
 // Sputnik 1 leaving its rocket: the nose cone's two halves go, the rocket falls behind,
 // the four whips spring back, and each beep goes out as a shell of light.
 function sputnikLeaves(scene, name, mats) {
-  const root = new TransformNode(name, scene);
+  const top = new TransformNode(name, scene);
+  // Seen from the side (render/craft.js face: 'side'). Everything hangs from `root`,
+  // which slides along as the rocket falls behind: first the ball and its rocket are
+  // both in view, at the end the ball is in the middle.
+  const root = group(scene, `${name}Stage`, top);
   const body = group(scene, `${name}Body`, root);
   part(CreateSphere(`${name}Ball`, { diameter: 0.3, segments: 24 }, scene), body, mats.chrome);
   drum(scene, `${name}Seam`, body, mats.grey, { height: 0.01, diameter: 0.304, tessellation: 32 }, [0, 0, 0], Z);
@@ -203,6 +209,7 @@ function sputnikLeaves(scene, name, mats) {
     rocket.setEnabled(sep < 0.995);
     rocket.position.z = -2.8 * sep;
     rocket.scaling.setAll(1 - 0.5 * sep);
+    root.position.z = 0.6 * (1 - sep);
     const f = 0.06 + 0.94 * sprung;
     for (const pivot of whips) pivot.scaling.set(f, f, 1);
     shells.forEach((shell, k) => {
@@ -213,7 +220,7 @@ function sputnikLeaves(scene, name, mats) {
     });
   }
   pose({ fairing: 0, sep: 0, whips: 0, beeps: 0 });
-  return { root, pose };
+  return { root: top, pose, face: 'side', fit: 0.6 };
 }
 
 // Parker in the corona: the face of its shield glows, a haze of light stands before

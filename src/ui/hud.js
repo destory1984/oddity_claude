@@ -231,7 +231,8 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         const half = el.offsetWidth / 2;
         const x = Math.max(EDGE_GAP + half, Math.min(innerWidth - EDGE_GAP - half, spot.x));
         const y = clearOfPanels({ x, y: clearOfPanels(spot, panels) }, keptNames, 16, half + 4);
-        const clear = clearOfPanels({ x, y }, saying, 18, half + 4);
+        // Brought down from under her bubble it may come onto the target's name: off that again.
+        const clear = clearOfPanels({ x, y: clearOfPanels({ x, y }, saying, 18, half + 4) }, keptNames, 16, half + 4);
         // Those moved from under the bubble keep their order from top to bottom.
         arrows.push({ el, ...spot, x, half, y: clear === y ? y : clear + y * 1e-4 });
       }

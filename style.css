@@ -4795,3 +4795,25 @@ html.gaze #gazeButton {
   padding-right:4px;
   white-space:nowrap;
 }
+
+/* In the list of bodies the two buttons keep their own columns, 88px each: "목적지로"
+   stands in the same place on every row, alone or with "순간 이동" beside it (the user,
+   2026-10-06, over a picture: alone it stood at the right end, under where "순간 이동"
+   stands on other rows). */
+#journal #journalBodies li {
+  grid-template-columns:1fr auto auto 88px 88px;
+}
+
+#journal #journalBodies li button {
+  box-sizing:border-box;
+  width:100%;
+  padding-left:4px;
+  padding-right:4px;
+  white-space:nowrap;
+}
+
+@media (max-width: 480px) {
+  #journal #journalBodies li {
+    grid-template-columns:1fr 88px 88px;
+  }
+}

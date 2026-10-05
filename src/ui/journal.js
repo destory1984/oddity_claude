@@ -8,6 +8,7 @@ import { photoCaption, ALBUM_MAX } from '../core/album.js';
 import { starText, postageFile, cardWords } from '../core/postcard.js';
 import { postcardBlob, saveBlob } from './postcardImage.js';
 import { readingKey } from '../core/readingQuiz.js';
+import { EXO_PLANETS, exoJournal } from '../core/exo.js';
 import { TOURS, stopName, stampFile, sceneFile } from '../core/tours.js';
 import { stuntStampFile } from '../core/stunts.js';
 import { t } from '../core/i18n.js';
@@ -33,7 +34,7 @@ function picture(file, alt, className = '') {
 const CLIPPING = t('1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.');
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, sky = null }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, sky = null, exo = null }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -198,6 +199,39 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
         fact.textContent = entry ? t`소라: ${entry.line}` : FACTS[body.id];
         li.append(fact);
       }
+      list.append(li);
+    }
+
+    // Another star (core/exo.js): its lines join the list once she has been there, the
+    // star and then the planets she has come close to, each with its drawing and a word.
+    const away = exoJournal(exo?.());
+    if (away.length) {
+      const head = document.createElement('li');
+      head.className = 'found awayHead';
+      const title = document.createElement('strong');
+      title.textContent = t('다른 별');
+      const count = document.createElement('span');
+      count.className = 'marks';
+      count.textContent = t`가까이에서 본 행성 ${away.length - 1}/${EXO_PLANETS.length}`;
+      head.append(title, count);
+      list.append(head);
+    }
+    for (const row of away) {
+      const li = document.createElement('li');
+      li.className = row.star ? 'found' : 'found moon';
+      const name = document.createElement('strong');
+      const art = picture(bodyPicture(row.id), '', 'bodyArt');
+      art.loading = 'lazy';
+      art.width = 128;
+      art.height = 128;
+      name.append(art, row.name);
+      const marks = document.createElement('span');
+      marks.className = 'marks';
+      marks.textContent = row.star ? t('가 봄 ✓') : t('가까이에서 봄 ✓');
+      const fact = document.createElement('small');
+      fact.className = 'fact';
+      fact.textContent = row.note;
+      li.append(name, marks, fact);
       list.append(li);
     }
 

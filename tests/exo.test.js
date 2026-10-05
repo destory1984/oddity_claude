@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   EXO_STAR, EXO_PLANETS, EXO_IDS, EXO_CENTRE, EXO_NORMAL, EXO_ARRIVAL_KM, EXO_SEEN_KM,
-  exoBodiesAt, exoOrbitKm, inExo, exoArrival, createExoRecord, sanitizeExo, recordExo, exoNote,
+  exoBodiesAt, exoOrbitKm, inExo, exoArrival, createExoRecord, sanitizeExo, recordExo, exoNote, exoJournal,
 } from '../src/core/exo.js';
 import { BODIES } from '../src/core/bodies.js';
 import { forward } from '../src/core/orientation.js';
@@ -105,6 +105,15 @@ test('a kept record holds only the seven planets, each once', () => {
   assert.deepEqual(sanitizeExo(null), { been: false, seen: [] });
   assert.deepEqual(sanitizeExo({ been: true, seen: ['trappist1b', 'earth', 'trappist1b', 7] }), { been: true, seen: ['trappist1b'] });
   assert.deepEqual(sanitizeExo({ seen: 'x' }), { been: false, seen: [] });
+});
+
+test('the notebook lists the other star once she has been there, then the planets seen, in their order', () => {
+  assert.deepEqual(exoJournal(createExoRecord()), []);
+  assert.deepEqual(exoJournal({ been: true, seen: [] }).map((r) => r.id), ['trappist1']);
+  const rows = exoJournal({ been: true, seen: ['trappist1h', 'trappist1b'] });
+  assert.deepEqual(rows.map((r) => r.id), ['trappist1', 'trappist1b', 'trappist1h']);
+  assert.deepEqual(rows.map((r) => r.star), [true, false, false]);
+  for (const row of rows) assert.equal(row.note, exoNote(row.id));
 });
 
 test('the star and every planet have a word about them, in plain polite sentences', () => {

@@ -128,6 +128,15 @@ export function recordExo(record, position, bodies) {
   return { record: { ...record, been: true, seen: [...record.seen, ...newly] }, newly };
 }
 
+// What the notebook lists of the other star (ui/journal.js): nothing until she has
+// been there, then the star and the planets she has come close to, in their order
+// from the star.
+export function exoJournal(record) {
+  if (!record?.been) return [];
+  return [EXO_STAR, ...EXO_PLANETS.filter((p) => record.seen.includes(p.id))]
+    .map((b) => ({ id: b.id, name: b.name, note: b.note, star: b === EXO_STAR }));
+}
+
 export function exoNote(id) {
   return id === EXO_STAR.id ? EXO_STAR.note : EXO_PLANETS.find((p) => p.id === id)?.note ?? null;
 }

@@ -171,12 +171,14 @@ test('small moons keep their real sizes and parents', () => {
   assert.ok(d('phobos') < d('deimos'));
 });
 
-test('every body has its small drawing on file, and no drawing is without a body', async () => {
+test('every body has its small drawing on file, the other star and its planets too, and no drawing is without one', async () => {
   const { existsSync, readdirSync } = await import('node:fs');
   const { BODY_DATA, bodyPicture } = await import('../src/core/bodies.js');
+  const { EXO_IDS } = await import('../src/core/exo.js');
   for (const b of BODY_DATA) {
     assert.equal(bodyPicture(b.id), `bodies/${b.id}.png`);
     assert.ok(existsSync(`public/assets/${bodyPicture(b.id)}`), b.id);
   }
-  assert.equal(readdirSync('public/assets/bodies').length, BODY_DATA.length);
+  for (const id of EXO_IDS) assert.ok(existsSync(`public/assets/${bodyPicture(id)}`), id);
+  assert.equal(readdirSync('public/assets/bodies').length, BODY_DATA.length + EXO_IDS.length);
 });

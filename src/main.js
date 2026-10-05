@@ -146,7 +146,8 @@ const openedAt = (() => {
 const bodyData = layout === 'today' ? todayData(openedAt) : BODY_DATA;
 const bodiesAt = (timeS) => placeBodies(bodyData, timeS);
 // Everything that is flown among and drawn: the Solar System, and far off TRAPPIST-1
-// with its seven planets (core/exo.js), which are not in the journal.
+// with its seven planets (core/exo.js), which have no slot in the journal (it lists
+// the ones she has been to at the foot of its bodies, uncounted).
 const allAt = (timeS) => [...bodiesAt(timeS), ...exoBodiesAt(timeS)];
 let bodies = allAt(0);
 // The trip there: whether she has been, and which planets she has seen from close by.
@@ -1263,6 +1264,7 @@ ${STORY_MORE[target.id]}` : told };
     },
     notes: NOTES,
     memos: MEMOS,
+    exo: () => exo,
     // The next real eclipse first (core/eclipses.js), then the shadows of moons.
     sky: () => [
       ...(eclipseNews(openedAt) ? [{ text: eclipseNews(openedAt), planet: null, toward: null }] : []),

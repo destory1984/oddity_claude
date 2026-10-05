@@ -3660,6 +3660,12 @@ footer .throttle .rangeLabels {
   border-radius:6px;
 }
 
+/* The other star's lines under the 35 bodies (core/exo.js): a head line, then the star
+   and the planets seen. */
+#journalBodies li.awayHead {
+  margin-top:14px;
+}
+
 #journalBodies li:not(.found) .bodyArt {
   filter:brightness(.3) saturate(.2);
 }

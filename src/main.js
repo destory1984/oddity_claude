@@ -219,9 +219,22 @@ let dragTurn = [0, 0];
 // then take her round it, and forward and back bring her nearer and farther. Dragging
 // the view or turning with the arrow keys lets go.
 let locked = false;
-// Locked, and the view turned away by hand: the lock holds (she stays over the same
-// ground and goes round the target) but the view is left where she put it.
-let lockFree = false;
+// Where in her view the locked target is held: a direction in her own frame. It is the
+// framing she had when she locked on, if the target was in sight, and whatever she sets
+// by dragging the view after that; the lock keeps it there as she goes round the target
+// (the user, 2026-10-06: locking threw the view down to put Earth over the heroine's
+// head, they dragged it back to where they liked it, and the first slide threw it down
+// again). Out of sight when she locks on, the target is brought to AIM_LINE.
+let lockAim = null;
+// The target's direction in her own frame as she stands and looks now.
+function aimNow() {
+  const toward = here(selectedId).position.map((n, i) => n - state.position[i]);
+  const length = Math.hypot(...toward) || 1;
+  return rotateVector(conjugate(state.orientation), toward.map((n) => n / length));
+}
+// Locked on with the target farther than this from straight ahead (radians), the view
+// swings to bring it in: the upright screen shows 30 degrees above and below the middle.
+const LOCK_KEEP_VIEW = 0.5;
 // Turned to face a target without locking on (바라보기, the journal's 목적지로): the id of
 // it while the view has not been turned since. Forward then goes straight at it, though
 // the view is tipped to keep it over her head (along the view she flew 15 degrees under it).
@@ -438,9 +451,10 @@ async function init() {
     onDrag(dx, dy) {
       if (photo.active()) photo.rotate(dx, dy);
       else if (!paused) {
-        if (locked) lockFree = true;
         aimedId = null;
         state = { ...state, orientation: rotateLocal(state.orientation, ...(rear ? rearTurn(dx, dy) : [dx, dy])) };
+        // Locked: the lock holds, and the target is kept where this drag leaves it.
+        if (locked && !rear) lockAim = aimNow();
         dragTurn[0] += dx;
         dragTurn[1] += dy;
       }
@@ -991,15 +1005,19 @@ ${STORY_MORE[target.id]}` : told };
   hud.showSelection(named(selectedId));
   function unlock() {
     locked = false;
-    lockFree = false;
     toast.show(t('목표 고정을 풀었습니다.'));
   }
   $('lockTarget').addEventListener('click', () => {
     if (locked) return unlock();
     locked = true;
-    lockFree = false;
     const body = here(selectedId);
-    state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
+    // In sight already: the view stays as it is. Else it turns to the target.
+    const seen = aimNow();
+    if (Math.acos(Math.max(-1, Math.min(1, seen[2]))) <= LOCK_KEEP_VIEW) lockAim = seen;
+    else {
+      lockAim = AIM_LINE;
+      state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
+    }
     toast.show(t`${body.name}에 고정했습니다. 가까이에서는 땅과 함께 돌아 같은 곳 위에 머뭅니다.\n화면을 끌어 둘러봐도 풀리지 않습니다. 단추를 다시 누르면 풀립니다.`);
     return undefined;
   });
@@ -1047,7 +1065,7 @@ ${STORY_MORE[target.id]}` : told };
     hud.showSelection(named(mapPick));
     state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
     locked = true;
-    lockFree = false;
+    lockAim = AIM_LINE;
     $('bigMap').close();
     toast.show(t`${body.name} 쪽을 바라보고 화면을 고정했습니다. 전진을 누르면 다가갑니다.`);
   });
@@ -1788,25 +1806,21 @@ ${STORY_MORE[target.id]}` : told };
     // (How far the locked target is before this step: sliding round it keeps that.)
     if (aimedId !== selectedId) aimedId = null;
     const guided = locked || aimedId !== null;
-    // Locked with the view turned away by hand, and now she moves (a slide key, forward,
-    // back): the view comes back onto the target and she goes round it facing it (the
-    // user, 2026-10-06: "지구 중심을 중심으로 움직이면서, 시점도 같이 지구 중심을 향한
-    // 상태로 움직이면 좋겠어"). Standing still she may look where she likes.
-    if (locked && lockFree && (intent.drive !== 0 || intent.strafe !== 0 || intent.rise !== 0)) lockFree = false;
     const lockRange = guided ? Math.hypot(...here(selectedId).position.map((n, i) => n - state.position[i])) : 0;
     const lockFrom = guided ? state.position : null;
     const result = step(state, intent, dt, bodies, slowPoints);
     state = result.state;
-    // Target lock: the view swings onto the target and stays on it as she moves. Turning
-    // the view by hand (a drag, the keys) frees the view but keeps the lock (the user,
-    // 2026-10-06: "고정한 상태에서 시야를 돌리면, 고정이 풀려버리는데.. 이것도 해결해줘");
+    // Target lock: the target is held where it is in her view (lockAim) as she moves, so
+    // she goes round it looking at it the same way. Turning the view by hand (a drag,
+    // the keys) keeps the lock and sets where the target is held (the user, 2026-10-06:
+    // "고정한 상태에서 시야를 돌리면, 고정이 풀려버리는데.. 이것도 해결해줘");
     // only the button lets go. Docked, going down to a place, looking behind or resting
     // on the target itself it waits.
     // (Only faced, not locked: the view is left alone and sliding is a plain slide, but
     // forward and back still go straight to the target and away.)
     if (guided && dt > 0 && !docked && !visit && !rear && !photo.active()) {
       if (intent.turnX !== 0 || intent.turnY !== 0 || intent.roll !== 0) {
-        if (locked) lockFree = true;
+        if (locked) lockAim = aimNow();
         aimedId = null;
       } else {
         const aim = here(selectedId);
@@ -1827,14 +1841,14 @@ ${STORY_MORE[target.id]}` : told };
           // though the view is tipped to keep it over her head (along the view she would
           // curl in round it).
           const went = Math.hypot(...state.position.map((n, i) => n - lockFrom[i]));
-          if (!sliding && !lockFree && state.speed > 0.01 && went > 0 && !state.restingOn && lockRange > 1) {
+          if (!sliding && state.speed > 0.01 && went > 0 && !state.restingOn && lockRange > 1) {
             const along = Math.min(went, state.motionSign > 0 ? lockRange : Infinity) * state.motionSign;
             position = lockFrom.map((n, i) => n + ((aim.position[i] - n) / lockRange) * along);
           }
           // The view is swung onto the target from where it is, by the shortest turn
           // (core/orientation.js swingToward): built anew from world-up each frame it
           // span half round whenever she passed over or under the target.
-          const orientation = locked && !lockFree ? swingToward(state.orientation, AIM_LINE, aim.position.map((n, i) => n - position[i]), 1 - Math.exp(-dt * LOCK_RATE)) : state.orientation;
+          const orientation = locked ? swingToward(state.orientation, lockAim ?? AIM_LINE, aim.position.map((n, i) => n - position[i]), 1 - Math.exp(-dt * LOCK_RATE)) : state.orientation;
           state = { ...state, position, orientation };
         }
       }

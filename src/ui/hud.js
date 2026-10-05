@@ -180,6 +180,14 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       // (the bubble is drawn over the labels and hid them).
       const bubble = $('heroSay');
       const saying = bubble?.classList.contains('on') ? [bubble.getBoundingClientRect()] : [];
+      // The chosen target's and the goal's own names, when they are in view: an arrow
+      // keeps off them as off a panel (on a small phone two arrows lay on the target's
+      // name, which is never hidden).
+      const keptNames = placed
+        .filter(({ body, el, spot, keep, selected: sel }) => keep && !spot.outside && (sel || body.id === goalId) && !hiddenIds.includes(body.id) && !el.hidden)
+        .map(({ el }) => el.getBoundingClientRect())
+        .filter((box) => box.width)
+        .map(({ left, top, right, bottom }) => ({ left, top, right, bottom }));
       const arrows = [];
       for (const { body, el, spot, keep, selected: sel } of placed) {
         el.hidden = !keep || crowded.has(body.id) || hiddenIds.includes(body.id);
@@ -191,7 +199,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         // stood at two different distances from it.
         const half = el.offsetWidth / 2;
         const x = Math.max(EDGE_GAP + half, Math.min(innerWidth - EDGE_GAP - half, spot.x));
-        const y = clearOfPanels(spot, panels);
+        const y = clearOfPanels({ x, y: clearOfPanels(spot, panels) }, keptNames, 16, half + 4);
         const clear = clearOfPanels({ x, y }, saying, 18, half + 4);
         // Those moved from under the bubble keep their order from top to bottom.
         arrows.push({ el, ...spot, x, half, y: clear === y ? y : clear + y * 1e-4 });
@@ -220,10 +228,12 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       // the goal's own names stay.
       if (arrows.length) {
         const boxes = arrows.map(({ el }) => el.getBoundingClientRect());
+        const hits = (name, box) => name.left < box.right + 2 && box.left < name.right + 2 && name.top < box.bottom + 2 && box.top < name.bottom + 2;
         for (const { body, el, selected: sel } of inView) {
-          if (el.hidden || sel || body.id === goalId) continue;
+          if (el.hidden) continue;
           const name = el.getBoundingClientRect();
-          if (boxes.some((box) => name.left < box.right + 2 && box.left < name.right + 2 && name.top < box.bottom + 2 && box.top < name.bottom + 2)) el.hidden = true;
+          if (sel || body.id === goalId) continue;
+          if (boxes.some((box) => hits(name, box))) el.hidden = true;
         }
       }
       // On a phone the notice stands one gap under the minimap and the target panel,

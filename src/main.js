@@ -1424,8 +1424,18 @@ ${STORY_MORE[target.id]}` : told };
   // a piece about its own origin, not its middle, so the origin is found first (by
   // halving the piece for a moment) and the path allows for it.
   // Nothing moves for a player who asked the device for less motion.
+  // Two things more (the user, 2026-10-05, on my offer: "이거 해봐봐"): each piece drags a
+  // tail of ink behind it, the stretch of its own path it passed in the last moments,
+  // thinning to a point, so the tail grows long as the piece quickens at the drain; and
+  // rings of ripples spread from the moon while the water goes or comes. Both are drawn on
+  // one canvas laid under the words (`gazeInk`), which takes itself away when the last
+  // ring has faded.
   let gazing = false;
   let gazeMoves = [];
+  let gazeInkStop = () => {};
+  const GAZE_TAIL_MS = 280; // how far back in time a tail reaches
+  const GAZE_RIPPLE_MS = 900; // how long one ring lives
+  const GAZE_RIPPLES = [0.12, 0.34, 0.56, 0.78, 1]; // when the rings rise, as parts of the flight
   const GAZE_IN_MS = 1250;
   const GAZE_OUT_MS = 950;
   const GAZE_TURN = 2.4; // radians a far piece goes round the drain on its way in
@@ -1435,9 +1445,69 @@ ${STORY_MORE[target.id]}` : told };
     const all = `#hud header nav button, #hud header .brand, #hud .telemetry, #minimap, #reticle, #markers > *, ${panel}, #hud footer .speedBox, #hud footer .throttle, #hud footer button:not(#gazeButton), #hint, #guide, #toast, #heroSay, #skyTold, #testReset`;
     return [...document.querySelectorAll(all)].filter((el) => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden' && Number(getComputedStyle(el).opacity) > 0.02);
   };
+  const gazeInk = (pieces, moon, lasts) => {
+    const ratio = Math.min(2, window.devicePixelRatio || 1);
+    const canvas = document.createElement('canvas');
+    canvas.id = 'gazeInk';
+    canvas.width = Math.round(window.innerWidth * ratio);
+    canvas.height = Math.round(window.innerHeight * ratio);
+    $('hud').before(canvas);
+    const pen = canvas.getContext('2d');
+    pen.scale(ratio, ratio);
+    const [mx, my] = [moon.left + moon.width / 2, moon.top + moon.height / 2];
+    const SAMPLES = 9;
+    const began = performance.now();
+    let frame = 0;
+    const draw = (now) => {
+      const passed = now - began;
+      pen.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      for (const piece of pieces) {
+        const head = piece.when(passed);
+        const tail = piece.when(passed - GAZE_TAIL_MS);
+        if (head === tail) continue;
+        // The stretch of the path from where it was to where it is, as a blade: a point
+        // at the old end, as wide as the shrunken piece at the new.
+        const spots = [];
+        for (let i = 0; i <= SAMPLES; i += 1) spots.push(piece.spot(tail + (head - tail) * (i / SAMPLES)));
+        const left = [];
+        const right = [];
+        for (let i = 0; i <= SAMPLES; i += 1) {
+          const [a, b] = [spots[Math.max(0, i - 1)], spots[Math.min(SAMPLES, i + 1)]];
+          const long = Math.hypot(b.px - a.px, b.py - a.py) || 1;
+          const half = 0.5 * piece.thick * spots[i].size * (i / SAMPLES);
+          const [nx, ny] = [-(b.py - a.py) / long * half, (b.px - a.px) / long * half];
+          left.push([spots[i].px + nx, spots[i].py + ny]);
+          right.push([spots[i].px - nx, spots[i].py - ny]);
+        }
+        const fall = spots[SAMPLES].fall;
+        pen.globalAlpha = 0.7 * piece.shown * (fall < 0.9 ? 1 : Math.max(0, (1 - fall) / 0.1));
+        pen.fillStyle = piece.ink;
+        pen.beginPath();
+        pen.moveTo(left[0][0], left[0][1]);
+        for (const [x, y] of left) pen.lineTo(x, y);
+        for (const [x, y] of right.reverse()) pen.lineTo(x, y);
+        pen.fill();
+      }
+      pen.strokeStyle = '#e2daf6';
+      for (const rises of GAZE_RIPPLES) {
+        const age = (passed - rises * lasts) / GAZE_RIPPLE_MS;
+        if (age <= 0 || age >= 1) continue;
+        pen.globalAlpha = 0.42 * (1 - age) * (1 - age);
+        pen.lineWidth = 0.5 + 1.4 * (1 - age);
+        pen.beginPath();
+        pen.arc(mx, my, moon.width * 0.55 + 78 * (1 - (1 - age) * (1 - age)), 0, 2 * Math.PI);
+        pen.stroke();
+      }
+      frame = passed < lasts + GAZE_RIPPLE_MS ? requestAnimationFrame(draw) : (canvas.remove(), 0);
+    };
+    frame = requestAnimationFrame(draw);
+    return () => { cancelAnimationFrame(frame); canvas.remove(); };
+  };
   const gazeFlight = (inward) => {
     for (const move of gazeMoves) move.cancel();
     gazeMoves = [];
+    gazeInkStop();
+    gazeInkStop = () => {};
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve(true);
     const moon = $('gazeButton').getBoundingClientRect();
     const [mx, my] = [moon.left + moon.width / 2, moon.top + moon.height / 2];
@@ -1456,14 +1526,16 @@ ${STORY_MORE[target.id]}` : told };
       const bearing = Math.atan2(dy, dx);
       const [ox, oy] = [piece.at[0] - piece.origin[0], piece.at[1] - piece.origin[1]];
       const frames = [];
-      for (let i = 0; i <= STEPS; i += 1) {
-        const x = i / STEPS;
+      // Where its middle is, how far turned and how small, at the part `x` of its way in.
+      piece.spot = (x) => {
         // Slow to start, quick at the drain; it turns faster the nearer it is.
         const fall = x * x * (0.35 + 0.65 * x);
         const radius = far * (1 - fall);
         const turn = GAZE_TURN * (0.35 + 0.65 * (far / reach)) * fall * (0.4 + 0.6 * fall);
-        const size = 1 - 0.93 * fall;
-        const [px, py] = [mx + radius * Math.cos(bearing + turn), my + radius * Math.sin(bearing + turn)];
+        return { fall, turn, size: 1 - 0.93 * fall, px: mx + radius * Math.cos(bearing + turn), py: my + radius * Math.sin(bearing + turn) };
+      };
+      for (let i = 0; i <= STEPS; i += 1) {
+        const { fall, turn, size, px, py } = piece.spot(i / STEPS);
         // Turned and shrunk about its origin its middle would stand here; the rest is the move.
         const [sx, sy] = [piece.origin[0] + size * (ox * Math.cos(turn) - oy * Math.sin(turn)), piece.origin[1] + size * (ox * Math.sin(turn) + oy * Math.cos(turn))];
         frames.push({
@@ -1476,10 +1548,20 @@ ${STORY_MORE[target.id]}` : told };
       }
       // The nearest go first; the farthest wait for the water to reach them.
       const wait = 0.34 * lasts * (far / reach);
+      const delay = inward ? wait : 0.34 * lasts - wait;
       gazeMoves.push(piece.el.animate(inward ? frames : frames.reverse(), {
-        duration: lasts - 0.34 * lasts, delay: inward ? wait : 0.34 * lasts - wait, fill: 'both', easing: 'linear',
+        duration: lasts - 0.34 * lasts, delay, fill: 'both', easing: 'linear',
       }));
+      // The part of its way in it has reached, so many milliseconds after the start.
+      piece.when = (passed) => {
+        const part = Math.min(1, Math.max(0, (passed - delay) / (lasts - 0.34 * lasts)));
+        return inward ? part : 1 - part;
+      };
+      const box = piece.el.getBoundingClientRect();
+      piece.thick = Math.min(16, Math.max(3, 0.5 * Math.min(box.width, box.height)));
+      piece.ink = getComputedStyle(piece.el).color;
     }
+    gazeInkStop = gazeInk(pieces, moon, lasts);
     const moves = gazeMoves;
     $('gazeButton').animate([{ rotate: '0deg', scale: '1' }, { rotate: inward ? '50deg' : '-50deg', scale: inward ? '1.12' : '0.92' }, { rotate: '0deg', scale: '1' }], { duration: lasts, easing: 'ease-in-out' });
     return Promise.all(moves.map((move) => move.finished)).then(() => moves === gazeMoves, () => false);

@@ -4532,6 +4532,16 @@ html.gaze #testReset {
   visibility:hidden !important;
 }
 
+/* The ink's tails and the ripples round the drain, drawn while the pieces move (main.js
+   `gazeInk`): under the words and buttons, over the scene, taking no touch. */
+#gazeInk {
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+
 html.gaze #gazeButton {
   opacity:.4;
   border-color:var(--gold);

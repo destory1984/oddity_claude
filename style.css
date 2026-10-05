@@ -3942,17 +3942,33 @@ dialog .sheetHead .textSize button:disabled {
 /* One that is touched tells two or three lines on a dark plate instead (the user,
    2026-10-05: "별자리 터치하면 설명 보여줘"). */
 #skyTold {
-  position:absolute;
+  position:fixed;
+  display:flex;
+  align-items:center;
+  gap:10px;
   width:max-content;
-  padding:6px 10px 7px;
+  padding:7px 10px 7px 7px;
   border-radius:10px;
   background:#071522c7;
   box-shadow:0 0 0 1px #9fc4ff33;
   color:#f2f6ff;
   font-size:12px;
   letter-spacing:.08em;
-  text-align:center;
   pointer-events:none;
+}
+
+#skyTold[hidden],
+#skyTold img[hidden] {
+  display:none;
+}
+
+/* Its small drawing (public/assets/sky/, 128px shown at 56). */
+#skyTold img {
+  flex:none;
+  width:56px;
+  height:56px;
+  border-radius:8px;
+  image-rendering:pixelated;
 }
 
 #skyTold strong {

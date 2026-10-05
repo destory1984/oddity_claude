@@ -33,15 +33,25 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
     el.append(note);
     el.hidden = true;
     $('markers').append(el);
-    return { id: label.id, el, direction: label.direction, figure: label.figure ?? [], name: label.name, story: label.story ?? label.note ?? '' };
+    return { id: label.id, el, direction: label.direction, figure: label.figure ?? [], name: label.name, story: label.story ?? label.note ?? '', picture: label.picture ?? null };
   });
-  // What a touched sky thing tells: its name and two or three lines on a plate. It
+  // What a touched sky thing tells: its picture, its name and two or three lines on a plate. It
   // stands over the label layer, so the character's outline is not cut out of it.
   const plate = document.createElement('div');
   plate.id = 'skyTold';
   plate.hidden = true;
-  plate.append(document.createElement('strong'), document.createElement('small'));
-  $('markers').after(plate);
+  const platePicture = document.createElement('img');
+  platePicture.alt = '';
+  platePicture.width = 56;
+  platePicture.height = 56;
+  const plateName = document.createElement('strong');
+  const plateStory = document.createElement('small');
+  const plateWords = document.createElement('div');
+  plateWords.append(plateName, plateStory);
+  plate.append(platePicture, plateWords);
+  // Last in the page, so it also stands over the notice and over what she is saying when
+  // there is no room clear of them: what was asked for by a touch is read first.
+  document.body.append(plate);
   let lastMask = null;
   // Where the character is drawn, in pixels: the plate keeps off her.
   let heroBox = null;
@@ -267,8 +277,10 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       const id = touchedSky(shapes, point, TOUCH_REACH) ?? touchedSky(shapes.map((s) => ({ ...s, y: s.y + 20, lines: [] })), point, TOUCH_REACH);
       touched = id ? { id, until: performance.now() + TOUCH_SECONDS * 1000 } : null;
       const thing = skyNames.find((s) => s.id === id);
-      plate.firstChild.textContent = thing?.name ?? '';
-      plate.lastChild.textContent = thing?.story ?? '';
+      plateName.textContent = thing?.name ?? '';
+      plateStory.textContent = thing?.story ?? '';
+      platePicture.hidden = !thing?.picture;
+      if (thing?.picture) platePicture.src = `${import.meta.env.BASE_URL}assets/${thing.picture}`;
       if (!thing) plate.hidden = true;
       return id;
     },

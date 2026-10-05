@@ -20,10 +20,12 @@ This repository is licensed in three parts.
      postmark, the stars, the pencil marks, the newspaper clipping, the nine
      pictures of the tours), the two scenes in public/assets/scenes/, the
      drawings of Wadi Rum and of the Bohyunsan observatory in
-     public/assets/wadi-rum.png and public/assets/bohyunsan.png, the three
-     drawings among the story pictures (acidalia.jpg, procellarum.jpg and
-     schiaparelli.jpg in public/assets/stories/) and the companions in
-     public/assets/pals/.
+     public/assets/wadi-rum.png and public/assets/bohyunsan.png, the five
+     drawings among the story pictures (acidalia.jpg, procellarum.jpg,
+     schiaparelli.jpg, wadiRum.jpg and bohyunsan.jpg in
+     public/assets/stories/), the 35 small drawings of constellations,
+     galaxies, nebulae and clusters in public/assets/sky/, the link preview
+     picture public/og.jpg and the companions in public/assets/pals/.
    - The app icons in public/icons/.
    - The title lettering in public/assets/ui/title.png.
    - The game's name and title as a brand: "할머니의 수첩",

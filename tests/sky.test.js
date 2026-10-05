@@ -1,5 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
+import { existsSync, readdirSync } from 'node:fs';
 import { fromEquatorial, GALAXIES, NEBULAE, CONSTELLATIONS, BRIGHT_STARS, skyLabels, lookedAt, touchedSky, CONSTELLATION_STORIES, DEEP_SKY_STORIES } from '../src/core/sky.js';
 
 const deg = (r) => (r * 180) / Math.PI;
@@ -119,4 +120,13 @@ test('a touch picks the sky thing whose figure or middle is nearest, within reac
   assert.equal(touchedSky(shapes, { x: 50, y: 240 }, 30), null); // past the end of the stroke
   assert.equal(touchedSky(shapes, { x: -200, y: 0 }, 30), null);
   assert.equal(touchedSky([], { x: 0, y: 0 }, 30), null);
+});
+
+test('every sky name has its small drawing on file for the plate', () => {
+  const labels = skyLabels();
+  for (const l of labels) {
+    assert.equal(l.picture, `sky/${l.id}.png`);
+    assert.ok(existsSync(`public/assets/${l.picture}`), l.picture);
+  }
+  assert.equal(readdirSync('public/assets/sky').length, labels.length);
 });

@@ -4074,6 +4074,11 @@ dialog .sheetHead .textSize button:disabled {
   font-size:11px;
 }
 
+/* The link to the privacy policy on the settings' About page. */
+#settings dd a {
+  color:var(--gold);
+}
+
 /* ---- English (ui/translate.js sets lang="en") ----
    English words run longer than the Korean ones the layout was made for. */
 

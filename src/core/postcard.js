@@ -1,5 +1,6 @@
 import { frameBodies } from './framing.js';
 import { forward, right, up } from './orientation.js';
+import { t } from './i18n.js';
 
 // Postcards to grandmother (docs/스토리-할머니의-수첩.md): a photo in the album is sent
 // as a postcard, and her reply is there the next day the game is opened. The reply is
@@ -74,34 +75,34 @@ export function arrivedReplies(album, today) {
 // What grandmother feels about each place: one line each. Everything she says she saw
 // really happened (the same events as her memos in core/story.js).
 const HEARTS = {
-  sun: '해를 그리 가까이서 보다니. 나는 필터 너머로만 봤단다.',
-  mercury: '수성은 평생 몇 번 못 봤는데, 네가 대신 실컷 보는구나.',
-  venus: '새벽마다 제일 먼저 뜨던 별이 저렇게 생겼구나.',
-  earth: '우리 집이 저기 어디쯤이겠구나. 마당에 빨래 널어 놨단다.',
-  moon: '열다섯 살에 올려다본 그 달이구나. 하나도 안 변했네.',
-  mars: '2003년에 망원경으로 본 붉은 점이 이렇게 넓은 땅이었구나.',
-  jupiter: '그 붉은 점은 내가 처음 봤을 때보다 작아졌단다.',
-  saturn: '처음 망원경으로 고리를 봤을 때 숨이 멎는 줄 알았단다.',
-  uranus: '내 망원경으로는 푸른 점 하나였는데, 네 눈에는 다 보이는구나.',
-  neptune: '거기까지 갔구나. 춥지는 않으냐.',
-  pluto: '행성에서 빠지던 날 서운했는데, 하트가 있었구나.',
-  ceres: '그 작은 곳까지 들렀구나. 꼼꼼하기도 하지.',
-  halley: '그렇게 희미하던 것이 가까이서는 이렇구나. 고맙다.',
-  haleBopp: '1997년 저녁마다 나가서 보던 혜성이란다. 반갑구나.',
-  churyumov: '내 수첩과 같은 해에 찾은 혜성이란다. 동갑이지.',
+  sun: t('해를 그리 가까이서 보다니. 나는 필터 너머로만 봤단다.'),
+  mercury: t('수성은 평생 몇 번 못 봤는데, 네가 대신 실컷 보는구나.'),
+  venus: t('새벽마다 제일 먼저 뜨던 별이 저렇게 생겼구나.'),
+  earth: t('우리 집이 저기 어디쯤이겠구나. 마당에 빨래 널어 놨단다.'),
+  moon: t('열다섯 살에 올려다본 그 달이구나. 하나도 안 변했네.'),
+  mars: t('2003년에 망원경으로 본 붉은 점이 이렇게 넓은 땅이었구나.'),
+  jupiter: t('그 붉은 점은 내가 처음 봤을 때보다 작아졌단다.'),
+  saturn: t('처음 망원경으로 고리를 봤을 때 숨이 멎는 줄 알았단다.'),
+  uranus: t('내 망원경으로는 푸른 점 하나였는데, 네 눈에는 다 보이는구나.'),
+  neptune: t('거기까지 갔구나. 춥지는 않으냐.'),
+  pluto: t('행성에서 빠지던 날 서운했는데, 하트가 있었구나.'),
+  ceres: t('그 작은 곳까지 들렀구나. 꼼꼼하기도 하지.'),
+  halley: t('그렇게 희미하던 것이 가까이서는 이렇구나. 고맙다.'),
+  haleBopp: t('1997년 저녁마다 나가서 보던 혜성이란다. 반갑구나.'),
+  churyumov: t('내 수첩과 같은 해에 찾은 혜성이란다. 동갑이지.'),
 };
 // A photo of no body in particular.
 const PLAIN = [
-  '별이 참 많구나. 여기서는 가로등 때문에 잘 안 보인단다.',
-  '네가 본 것을 나도 보는구나. 고맙다.',
-  '사진을 벽에 붙여 놨단다. 벌써 여러 장이다.',
-  '멀리 갔구나. 밥은 잘 챙겨 먹으렴.',
+  t('별이 참 많구나. 여기서는 가로등 때문에 잘 안 보인단다.'),
+  t('네가 본 것을 나도 보는구나. 고맙다.'),
+  t('사진을 벽에 붙여 놨단다. 벌써 여러 장이다.'),
+  t('멀리 갔구나. 밥은 잘 챙겨 먹으렴.'),
 ];
 // By the photo missions it met: these come before the place.
 const BY_MISSION = {
-  eclipse: '나는 평생 개기일식을 못 봤단다. 네가 봤으니 됐다.',
-  earthrise: '달에서 지구가 뜨는 걸 보다니. 1968년 아폴로 8호가 찍은 그 사진 같구나.',
-  paleBlueDot: '저 점 안에 내가 있단다. 손 흔든 거 봤느냐.',
+  eclipse: t('나는 평생 개기일식을 못 봤단다. 네가 봤으니 됐다.'),
+  earthrise: t('달에서 지구가 뜨는 걸 보다니. 1968년 아폴로 8호가 찍은 그 사진 같구나.'),
+  paleBlueDot: t('저 점 안에 내가 있단다. 손 흔든 거 봤느냐.'),
 };
 // A line from one of the tables below by a key read from storage, which may be anything
 // ("constructor" is a key of every plain object).
@@ -111,8 +112,8 @@ const lineOf = (table, key) => (typeof key === 'string' && Object.hasOwn(table, 
 // the ninth tour. Sora thinks the film was shot on Mars; grandmother puts it right. The
 // film is not named anywhere.
 const BY_PLACE = {
-  acidalia: '영화에서 본 그 평원이구나. 그런데 그 장면은 요르단 사막에서 찍었단다.',
-  wadiRum: '2015년 극장에서 본 화성이 바로 그 사막이란다. 지구인 줄 몰랐지.',
+  acidalia: t('영화에서 본 그 평원이구나. 그런데 그 장면은 요르단 사막에서 찍었단다.'),
+  wadiRum: t('2015년 극장에서 본 화성이 바로 그 사막이란다. 지구인 줄 몰랐지.'),
 };
 // The place to keep with a photo, of the story places she is at (core/stories.js
 // completedStories), or null.
@@ -120,30 +121,30 @@ export const cardPlace = (storyIds) => storyIds.find((id) => lineOf(BY_PLACE, id
 
 // What she says when a place or a picture she has already answered comes again.
 const AGAIN = {
-  sun: '또 해구나. 눈 조심하렴. 나는 2009년 일식 때도 필터를 꼭 댔단다.',
-  mercury: '수성을 또 찍었구나. 해 뜨기 전에 나가도 번번이 놓치던 별인데.',
-  venus: '금성을 또 보냈구나. 2012년에 해 앞을 지나던 검은 점이 저것이란다.',
-  earth: '또 우리 집이구나. 이번에는 마당에 나가 손을 흔들었단다.',
-  moon: '달을 또 찍었구나. 볼 때마다 좋은 건 나도 그렇단다.',
-  mars: '화성을 또 보냈구나. 내 망원경으로는 흰 극관밖에 못 봤는데.',
-  jupiter: '목성을 또 찍었구나. 1994년에 혜성이 부딪혀 든 멍은 이제 없지?',
-  saturn: '토성을 또 보냈구나. 1995년에는 고리가 누워서 며칠 안 보였단다.',
-  uranus: '천왕성을 또 찍었구나. 정말 누워서 도느냐.',
-  neptune: '해왕성을 또 보냈구나. 1989년에 신문에서 본 그 푸른빛 그대로다.',
-  pluto: '명왕성을 또 찍었구나. 그 하트는 볼수록 정이 간다.',
-  ceres: '세레스를 또 찍었구나. 처음엔 행성이라 불렸던 곳이란다.',
-  halley: '핼리를 또 보냈구나. 2061년에 다시 온다니, 그때는 네가 보렴.',
-  haleBopp: '헤일-밥을 또 보냈구나. 저녁마다 마당에 나가던 생각이 난다.',
-  churyumov: '그 혜성을 또 찍었구나. 오리처럼 생긴 건 볼 때마다 우습다.',
-  eclipse: '개기일식을 또 봤구나. 부럽기도 하지.',
-  earthrise: '지구가 뜨는 걸 또 찍었구나. 몇 번을 봐도 곱다.',
-  paleBlueDot: '또 그 점이구나. 이번에도 손 흔들었단다.',
+  sun: t('또 해구나. 눈 조심하렴. 나는 2009년 일식 때도 필터를 꼭 댔단다.'),
+  mercury: t('수성을 또 찍었구나. 해 뜨기 전에 나가도 번번이 놓치던 별인데.'),
+  venus: t('금성을 또 보냈구나. 2012년에 해 앞을 지나던 검은 점이 저것이란다.'),
+  earth: t('또 우리 집이구나. 이번에는 마당에 나가 손을 흔들었단다.'),
+  moon: t('달을 또 찍었구나. 볼 때마다 좋은 건 나도 그렇단다.'),
+  mars: t('화성을 또 보냈구나. 내 망원경으로는 흰 극관밖에 못 봤는데.'),
+  jupiter: t('목성을 또 찍었구나. 1994년에 혜성이 부딪혀 든 멍은 이제 없지?'),
+  saturn: t('토성을 또 보냈구나. 1995년에는 고리가 누워서 며칠 안 보였단다.'),
+  uranus: t('천왕성을 또 찍었구나. 정말 누워서 도느냐.'),
+  neptune: t('해왕성을 또 보냈구나. 1989년에 신문에서 본 그 푸른빛 그대로다.'),
+  pluto: t('명왕성을 또 찍었구나. 그 하트는 볼수록 정이 간다.'),
+  ceres: t('세레스를 또 찍었구나. 처음엔 행성이라 불렸던 곳이란다.'),
+  halley: t('핼리를 또 보냈구나. 2061년에 다시 온다니, 그때는 네가 보렴.'),
+  haleBopp: t('헤일-밥을 또 보냈구나. 저녁마다 마당에 나가던 생각이 난다.'),
+  churyumov: t('그 혜성을 또 찍었구나. 오리처럼 생긴 건 볼 때마다 우습다.'),
+  eclipse: t('개기일식을 또 봤구나. 부럽기도 하지.'),
+  earthrise: t('지구가 뜨는 걸 또 찍었구나. 몇 번을 봐도 곱다.'),
+  paleBlueDot: t('또 그 점이구나. 이번에도 손 흔들었단다.'),
 };
 const STARS = [
-  '다음엔 무엇을 찍는지 잘 보이게 담아 보렴.',
-  '별 하나. 조금 더 크게, 조금 비켜서 찍어 보렴.',
-  '별 둘. 솜씨가 늘었구나.',
-  '별 셋. 이건 액자에 넣어야겠다.',
+  t('다음엔 무엇을 찍는지 잘 보이게 담아 보렴.'),
+  t('별 하나. 조금 더 크게, 조금 비켜서 찍어 보렴.'),
+  t('별 둘. 솜씨가 늘었구나.'),
+  t('별 셋. 이건 액자에 넣어야겠다.'),
 ];
 
 // The reply to a postcard. entry: an album entry (rate may be missing on an old photo).

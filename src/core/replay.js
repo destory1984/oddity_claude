@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 // "그날로": at a story place, the day it is known for is played again in the close
 // view. The model that stands there comes down as it did, and a few lines tell what
 // happened, each at its moment: Apollo 11's landing, Huygens's on Titan, Viking 1's and Curiosity's on Mars, and (not at a
@@ -6,57 +7,57 @@
 // fromKm: how high the model starts (it is drawn 6 km wide, so this is in drawn km).
 export const REPLAYS = {
   apollo11: {
-    name: '이글의 착륙',
-    day: '1969년 7월 20일',
+    name: t('이글의 착륙'),
+    day: t('1969년 7월 20일'),
     seconds: 24,
     downAt: 17,
     fromKm: 14,
     lines: [
-      { at: 0, text: '1969년 7월 20일. 암스트롱과 올드린이 탄 착륙선 이글이 고요의 바다로 내려옵니다.' },
-      { at: 5, text: '컴퓨터가 고른 자리는 바위가 널린 분화구였습니다. 암스트롱이 손으로 몰아 그 너머로 넘어갑니다.' },
-      { at: 11, text: '"60초." 연료가 얼마 남지 않았다고 지상에서 알립니다. 엔진 바람에 먼지가 사방으로 날립니다.' },
-      { at: 17, text: '"휴스턴, 여기는 고요의 기지. 이글은 착륙했다." 한국 시간으로 7월 21일 새벽 5시 17분이었습니다.' },
+      { at: 0, text: t('1969년 7월 20일. 암스트롱과 올드린이 탄 착륙선 이글이 고요의 바다로 내려옵니다.') },
+      { at: 5, text: t('컴퓨터가 고른 자리는 바위가 널린 분화구였습니다. 암스트롱이 손으로 몰아 그 너머로 넘어갑니다.') },
+      { at: 11, text: t('"60초." 연료가 얼마 남지 않았다고 지상에서 알립니다. 엔진 바람에 먼지가 사방으로 날립니다.') },
+      { at: 17, text: t('"휴스턴, 여기는 고요의 기지. 이글은 착륙했다." 한국 시간으로 7월 21일 새벽 5시 17분이었습니다.') },
     ],
   },
   // It came down under a parachute, with no engine (render/siteModels.js shows which).
   huygens: {
-    name: '하위헌스의 착륙',
-    day: '2005년 1월 14일',
+    name: t('하위헌스의 착륙'),
+    day: t('2005년 1월 14일'),
     seconds: 24,
     downAt: 17,
     fromKm: 14,
     lines: [
-      { at: 0, text: '2005년 1월 14일. 카시니에서 떨어져 나온 하위헌스가 낙하산을 펴고 타이탄의 주황빛 안개 속으로 내려옵니다.' },
-      { at: 6, text: '2시간 30분 동안 내려오며 강줄기와 바닷가처럼 보이는 땅을 찍어 보냈습니다.' },
-      { at: 12, text: '바닥은 영하 179도. 물이 언 얼음 자갈이 널린, 젖은 모래 같은 땅이었습니다.' },
-      { at: 17, text: '사람이 만든 것이 가장 먼 곳에 내려앉은 순간입니다. 그 뒤로도 한 시간 넘게 신호를 보냈습니다.' },
+      { at: 0, text: t('2005년 1월 14일. 카시니에서 떨어져 나온 하위헌스가 낙하산을 펴고 타이탄의 주황빛 안개 속으로 내려옵니다.') },
+      { at: 6, text: t('2시간 30분 동안 내려오며 강줄기와 바닷가처럼 보이는 땅을 찍어 보냈습니다.') },
+      { at: 12, text: t('바닥은 영하 179도. 물이 언 얼음 자갈이 널린, 젖은 모래 같은 땅이었습니다.') },
+      { at: 17, text: t('사람이 만든 것이 가장 먼 곳에 내려앉은 순간입니다. 그 뒤로도 한 시간 넘게 신호를 보냈습니다.') },
     ],
   },
   viking1: {
-    name: '바이킹 1호의 착륙',
-    day: '1976년 7월 20일',
+    name: t('바이킹 1호의 착륙'),
+    day: t('1976년 7월 20일'),
     seconds: 24,
     downAt: 17,
     fromKm: 14,
     lines: [
-      { at: 0, text: '1976년 7월 20일. 바이킹 1호 착륙선이 궤도선에서 떨어져 나와 크리세 평원으로 내려옵니다.' },
-      { at: 6, text: '낙하산을 버린 뒤 엔진 셋으로 속도를 줄입니다. 땅을 덜 건드리려고 불꽃을 넓게 퍼뜨린 엔진입니다.' },
-      { at: 12, text: '마침 아폴로 11호가 달에 내린 지 꼭 7년이 되는 날이었습니다.' },
-      { at: 17, text: '내린 지 25초 뒤 첫 사진을 찍기 시작했습니다. 제 발판과 화성의 자갈이 찍혔습니다.' },
+      { at: 0, text: t('1976년 7월 20일. 바이킹 1호 착륙선이 궤도선에서 떨어져 나와 크리세 평원으로 내려옵니다.') },
+      { at: 6, text: t('낙하산을 버린 뒤 엔진 셋으로 속도를 줄입니다. 땅을 덜 건드리려고 불꽃을 넓게 퍼뜨린 엔진입니다.') },
+      { at: 12, text: t('마침 아폴로 11호가 달에 내린 지 꼭 7년이 되는 날이었습니다.') },
+      { at: 17, text: t('내린 지 25초 뒤 첫 사진을 찍기 시작했습니다. 제 발판과 화성의 자갈이 찍혔습니다.') },
     ],
   },
   // It was let down on cords from a stage that hovered on its rockets.
   curiosity: {
-    name: '큐리오시티의 착륙',
-    day: '2012년 8월 6일',
+    name: t('큐리오시티의 착륙'),
+    day: t('2012년 8월 6일'),
     seconds: 24,
     downAt: 17,
     fromKm: 14,
     lines: [
-      { at: 0, text: '2012년 8월 6일. 무게 899kg의 큐리오시티는 에어백으로 받기에는 너무 무거웠습니다.' },
-      { at: 6, text: '그래서 로켓을 뿜는 하강단이 공중에 멈춰 서고, 줄로 차를 매달아 천천히 내립니다.' },
-      { at: 12, text: '대기권에 들어서 땅에 닿기까지 7분. 신호가 늦어 지구에서는 지켜볼 수밖에 없었습니다.' },
-      { at: 17, text: '바퀴가 닿자 줄을 끊고 하강단은 멀리 날아가 떨어졌습니다. 게일 분화구에 내린 순간입니다.' },
+      { at: 0, text: t('2012년 8월 6일. 무게 899kg의 큐리오시티는 에어백으로 받기에는 너무 무거웠습니다.') },
+      { at: 6, text: t('그래서 로켓을 뿜는 하강단이 공중에 멈춰 서고, 줄로 차를 매달아 천천히 내립니다.') },
+      { at: 12, text: t('대기권에 들어서 땅에 닿기까지 7분. 신호가 늦어 지구에서는 지켜볼 수밖에 없었습니다.') },
+      { at: 17, text: t('바퀴가 닿자 줄을 끊고 하강단은 멀리 날아가 떨어졌습니다. 게일 분화구에 내린 순간입니다.') },
     ],
   },
   // Not a place but a body: resting anywhere on Saturn's cloud tops (the story 'cassini';
@@ -64,8 +65,8 @@ export const REPLAYS = {
   // It does not come down to stand: it comes in from the side (acrossKm away, drawn km),
   // glows, and at downAt is gone.
   cassiniPlunge: {
-    name: '카시니의 마지막 돌입',
-    day: '2017년 9월 15일',
+    name: t('카시니의 마지막 돌입'),
+    day: t('2017년 9월 15일'),
     on: 'saturn',
     streak: true,
     seconds: 22,
@@ -77,10 +78,10 @@ export const REPLAYS = {
     toKm: 20,
     acrossKm: 130,
     lines: [
-      { at: 0, text: '2017년 9월 15일. 13년 동안 토성을 돈 카시니가 연료를 거의 다 쓰고 토성으로 뛰어듭니다.' },
-      { at: 5, text: '엔셀라두스와 타이탄의 바다를 지구의 미생물로 더럽히지 않으려고 고른 끝이었습니다.' },
-      { at: 10, text: '시속 11만km. 안테나를 지구로 돌린 채 추진기를 끝까지 뿜으며 대기 자료를 보냅니다.' },
-      { at: 15, text: '신호가 끊겼습니다. 마지막 전파는 83분 뒤 지구에 닿았고, 카시니는 토성의 일부가 되었습니다.' },
+      { at: 0, text: t('2017년 9월 15일. 13년 동안 토성을 돈 카시니가 연료를 거의 다 쓰고 토성으로 뛰어듭니다.') },
+      { at: 5, text: t('엔셀라두스와 타이탄의 바다를 지구의 미생물로 더럽히지 않으려고 고른 끝이었습니다.') },
+      { at: 10, text: t('시속 11만km. 안테나를 지구로 돌린 채 추진기를 끝까지 뿜으며 대기 자료를 보냅니다.') },
+      { at: 15, text: t('신호가 끊겼습니다. 마지막 전파는 83분 뒤 지구에 닿았고, 카시니는 토성의 일부가 되었습니다.') },
     ],
   },
 };

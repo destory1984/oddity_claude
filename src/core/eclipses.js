@@ -8,31 +8,32 @@
 // Moon, in its orbit, only 2: it cannot cover the Sun, nor can Earth's shadow reach it.
 // While an eclipse is watched the Moon is brought to where it must be to do so.
 import { surfaceDirection } from './surface.js';
+import { t } from './i18n.js';
 
 const DAY_MS = 86400000;
 export const ECLIPSE_DAYS = 3;
 
 // solar: latDeg, lonDeg (east) of greatest eclipse. long: how long it lasts there.
 export const ECLIPSES = [
-  { id: 's20270206', kind: 'solar', type: 'annular', day: '2027-02-06', latDeg: -31.3, lonDeg: -48.5, where: '브라질 남쪽 대서양', long: '7분 51초' },
-  { id: 's20270802', kind: 'solar', type: 'total', day: '2027-08-02', latDeg: 25.5, lonDeg: 33.2, where: '이집트 룩소르 근처', long: '6분 23초' },
-  { id: 's20280126', kind: 'solar', type: 'annular', day: '2028-01-26', latDeg: 3.0, lonDeg: -51.5, where: '브라질 북쪽 아마존 하구', long: '10분 27초' },
-  { id: 's20280722', kind: 'solar', type: 'total', day: '2028-07-22', latDeg: -15.6, lonDeg: 126.7, where: '오스트레일리아 북서쪽', long: '5분 10초' },
-  { id: 'l20281231', kind: 'lunar', type: 'total', day: '2028-12-31', where: '지구의 밤 쪽', long: '71분' },
-  { id: 'l20290626', kind: 'lunar', type: 'total', day: '2029-06-26', where: '지구의 밤 쪽', long: '102분' },
-  { id: 'l20291220', kind: 'lunar', type: 'total', day: '2029-12-20', where: '지구의 밤 쪽', long: null },
-  { id: 's20300601', kind: 'solar', type: 'annular', day: '2030-06-01', latDeg: 56.5, lonDeg: 80.1, where: '러시아 시베리아 서쪽', long: '5분 21초' },
-  { id: 's20301125', kind: 'solar', type: 'total', day: '2030-11-25', latDeg: -43.6, lonDeg: 71.2, where: '인도양 남쪽', long: '3분 44초' },
+  { id: 's20270206', kind: 'solar', type: 'annular', day: '2027-02-06', latDeg: -31.3, lonDeg: -48.5, where: t('브라질 남쪽 대서양'), long: t('7분 51초') },
+  { id: 's20270802', kind: 'solar', type: 'total', day: '2027-08-02', latDeg: 25.5, lonDeg: 33.2, where: t('이집트 룩소르 근처'), long: t('6분 23초') },
+  { id: 's20280126', kind: 'solar', type: 'annular', day: '2028-01-26', latDeg: 3.0, lonDeg: -51.5, where: t('브라질 북쪽 아마존 하구'), long: t('10분 27초') },
+  { id: 's20280722', kind: 'solar', type: 'total', day: '2028-07-22', latDeg: -15.6, lonDeg: 126.7, where: t('오스트레일리아 북서쪽'), long: t('5분 10초') },
+  { id: 'l20281231', kind: 'lunar', type: 'total', day: '2028-12-31', where: t('지구의 밤 쪽'), long: t('71분') },
+  { id: 'l20290626', kind: 'lunar', type: 'total', day: '2029-06-26', where: t('지구의 밤 쪽'), long: t('102분') },
+  { id: 'l20291220', kind: 'lunar', type: 'total', day: '2029-12-20', where: t('지구의 밤 쪽'), long: null },
+  { id: 's20300601', kind: 'solar', type: 'annular', day: '2030-06-01', latDeg: 56.5, lonDeg: 80.1, where: t('러시아 시베리아 서쪽'), long: t('5분 21초') },
+  { id: 's20301125', kind: 'solar', type: 'total', day: '2030-11-25', latDeg: -43.6, lonDeg: 71.2, where: t('인도양 남쪽'), long: t('3분 44초') },
 ];
 
 export function eclipseTitle(event) {
-  if (event.kind === 'lunar') return '개기월식';
-  return event.type === 'total' ? '개기일식' : '금환일식';
+  if (event.kind === 'lunar') return t('개기월식');
+  return event.type === 'total' ? t('개기일식') : t('금환일식');
 }
 
 export function eclipseDayText(event) {
   const [y, m, d] = event.day.split('-').map(Number);
-  return `${y}년 ${m}월 ${d}일`;
+  return t`${y}년 ${m}월 ${d}일`;
 }
 
 // Whole days from the local day of `date` to the event's day (negative: it has passed).
@@ -59,9 +60,9 @@ export function eclipseNews(date) {
   if (!event) return null;
   const days = daysUntil(event, date);
   const what = `${eclipseDayText(event)} ${eclipseTitle(event)}`;
-  if (Math.abs(days) > ECLIPSE_DAYS) return `다음 ${event.kind === 'solar' ? '일식' : '월식'}: ${what}(${event.where}). ${days}일 남았습니다.`;
-  const when = days === 0 ? '오늘입니다' : days > 0 ? `${days}일 뒤입니다` : `${-days}일 전이었습니다`;
-  return `${what}: ${when}. 이번 주 내내 ${event.where}에서 볼 수 있습니다.`;
+  if (Math.abs(days) > ECLIPSE_DAYS) return t`다음 ${event.kind === 'solar' ? t('일식') : t('월식')}: ${what}(${event.where}). ${days}일 남았습니다.`;
+  const when = days === 0 ? t('오늘입니다') : days > 0 ? t`${days}일 뒤입니다` : t`${-days}일 전이었습니다`;
+  return t`${what}: ${when}. 이번 주 내내 ${event.where}에서 볼 수 있습니다.`;
 }
 
 const unit = (v) => { const l = Math.hypot(...v) || 1; return v.map((n) => n / l); };
@@ -104,30 +105,30 @@ function linesFor(event) {
   const what = eclipseTitle(event);
   if (event.kind === 'lunar') {
     return [
-      { at: 0, text: `${eclipseDayText(event)}의 ${what}. 지구의 그림자가 보름달 한쪽부터 덮어 옵니다.` },
-      { at: 9, text: `달이 사라지지 않고 붉어집니다. 지구 둘레의 모든 해돋이와 해넘이 빛이 대기에서 꺾여 달에 닿기 때문입니다.${event.long ? ` 실제로는 ${event.long} 동안 이어집니다.` : ''}` },
-      { at: 16, text: '그림자가 물러나고 달이 다시 밝아집니다.' },
+      { at: 0, text: t`${eclipseDayText(event)}의 ${what}. 지구의 그림자가 보름달 한쪽부터 덮어 옵니다.` },
+      { at: 9, text: t`달이 사라지지 않고 붉어집니다. 지구 둘레의 모든 해돋이와 해넘이 빛이 대기에서 꺾여 달에 닿기 때문입니다.${event.long ? t` 실제로는 ${event.long} 동안 이어집니다.` : ''}` },
+      { at: 16, text: t('그림자가 물러나고 달이 다시 밝아집니다.') },
     ];
   }
   if (event.type === 'total') {
     return [
-      { at: 0, text: `${eclipseDayText(event)}의 ${what}. 달이 해의 한쪽부터 가려 들어옵니다.` },
-      { at: 9, text: `해가 다 가려지고 평소에는 보이지 않던 코로나가 드러납니다. 실제로는 이곳에서 ${event.long} 동안 이어집니다.` },
-      { at: 15, text: '달 가장자리로 첫 빛이 새어 나옵니다. 다이아몬드 반지입니다.' },
+      { at: 0, text: t`${eclipseDayText(event)}의 ${what}. 달이 해의 한쪽부터 가려 들어옵니다.` },
+      { at: 9, text: t`해가 다 가려지고 평소에는 보이지 않던 코로나가 드러납니다. 실제로는 이곳에서 ${event.long} 동안 이어집니다.` },
+      { at: 15, text: t('달 가장자리로 첫 빛이 새어 나옵니다. 다이아몬드 반지입니다.') },
     ];
   }
   return [
-    { at: 0, text: `${eclipseDayText(event)}의 ${what}. 달이 해의 한쪽부터 가려 들어옵니다.` },
-    { at: 9, text: `달이 지구에서 멀 때라 해를 다 가리지 못하고 가는 빛의 고리가 남습니다. 실제로는 이곳에서 ${event.long} 동안 이어집니다.` },
-    { at: 15, text: '달이 비켜나고 해가 다시 둥글어집니다.' },
+    { at: 0, text: t`${eclipseDayText(event)}의 ${what}. 달이 해의 한쪽부터 가려 들어옵니다.` },
+    { at: 9, text: t`달이 지구에서 멀 때라 해를 다 가리지 못하고 가는 빛의 고리가 남습니다. 실제로는 이곳에서 ${event.long} 동안 이어집니다.` },
+    { at: 15, text: t('달이 비켜나고 해가 다시 둥글어집니다.') },
   ];
 }
 
 // Said under every line of the show: what is seen is put on, and why.
 export function stagedNote(event) {
   return event.kind === 'lunar'
-    ? '이 장면은 연출입니다. 게임은 거리를 줄여 놓아 지구 그림자가 달에 닿지 않습니다. 보는 동안에만 달을 붉게 물들입니다.'
-    : '이 장면은 연출입니다. 게임은 거리를 줄여 놓아 달이 해를 가리지 못합니다. 보는 동안에만 달을 해 앞으로 옮겨 놓습니다.';
+    ? t('이 장면은 연출입니다. 게임은 거리를 줄여 놓아 지구 그림자가 달에 닿지 않습니다. 보는 동안에만 달을 붉게 물들입니다.')
+    : t('이 장면은 연출입니다. 게임은 거리를 줄여 놓아 달이 해를 가리지 못합니다. 보는 동안에만 달을 해 앞으로 옮겨 놓습니다.');
 }
 
 export function showSeconds(event) {

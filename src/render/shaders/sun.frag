@@ -206,19 +206,19 @@ void main(){
   float rain = 0.;
   float rainOn = smoothstep(.07, .14, u) * (1. - smoothstep(.42, .58, u));
   float sda = atan(sin(ang - where), cos(ang - where));
-  if (rainOn > 0. && abs(sda) < .5 && r > .12 && r < .22) {
+  if (rainOn > 0. && abs(sda) < .5 && r > .12 && r < .3) {
     for (int k = 0; k < 3; k++) {
       float fk = float(k);
-      float wideR = .09 + .05 * fk;
-      float tallR = .016 + .014 * fk;
-      float xR = (sda - (fk - 1.) * .03) / wideR;
+      float wideR = .13 + .07 * fk;
+      float tallR = .028 + .025 * fk;
+      float xR = (sda - (fk - 1.) * .045) / wideR;
       if (abs(xR) < 1.) {
         float bow = max(.05, sqrt(1. - xR * xR));
         // How steep the loop is here, to measure the distance across it and not up from it.
         float steep = tallR * xR / (bow * wideR * r);
         float gap = (r - (.127 + tallR * bow)) / sqrt(1. + steep * steep);
         float drops = pow(.5 + .5 * cos(6.2832 * (abs(xR) * (1.1 + .4 * fk) - time * (.11 + .02 * fk) - fk * .37)), 4.);
-        rain += exp(-pow(gap / .0016, 2.)) * (.16 + 1.5 * drops * (.4 + .6 * abs(xR)));
+        rain += exp(-pow(gap / .0024, 2.)) * (.16 + 1.5 * drops * (.4 + .6 * abs(xR)));
       }
     }
     rain *= rainOn * (1. - disc);

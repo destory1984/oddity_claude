@@ -187,7 +187,19 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       // while it is up.
       const headsBottom = Math.max(map.bottom, target.bottom);
       const notice = $('toast');
-      const noticeBottom = compact && notice.classList.contains('on') ? notice.getBoundingClientRect().bottom : 0;
+      const noticeUp = notice.classList.contains('on');
+      const noticeBottom = compact && noticeUp ? notice.getBoundingClientRect().bottom : 0;
+      // The chosen target's (and the goal's) own name in view comes down under the target
+      // panel too: turned to face Earth with the guide's line up, Earth's name lay under
+      // the name plate, where it is pressed again to jump (23: half a label and one gap);
+      // and, on a phone, under the notice while that is up.
+      for (const { body, el, spot, keep, selected: sel } of placed) {
+        if (!keep || spot.outside || !(sel || body.id === goalId)) continue;
+        const y = clearOfPanels(spot, compact && noticeUp ? [target, notice.getBoundingClientRect()] : [target], 23, el.offsetWidth / 2 + 4);
+        if (y === spot.y) continue;
+        spot.y = y;
+        el.style.top = `${y}px`;
+      }
       const panels = compact
         ? [{ left: 0, top: 0, right: innerWidth, bottom: Math.max(headsBottom, noticeBottom) }]
         : [

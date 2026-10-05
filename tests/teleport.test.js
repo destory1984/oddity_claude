@@ -65,6 +65,12 @@ test('a jump happens only from far away: nearby, choosing a name works as before
   assert.equal(farFrom(earth, onMoon), false);
   assert.equal(farFrom(earth, onMoon, bodies), true);
   assert.ok(teleportSpot(earth, { position: onMoon, progress: known, bodies }));
+  // Where a jump to the Moon ends, Earth is a jump away too, and from there the Moon is near.
+  const atMoon = teleportSpot(moon, { position: earth.position.map((n, i) => n + (i === 1 ? earth.radiusKm + 6794 : 0)), progress: known, bodies });
+  assert.ok(teleportSpot(earth, { position: atMoon, progress: known, bodies }));
+  assert.equal(teleportSpot(moon, { position: atMoon, progress: known, bodies }), null);
+  // And where a jump to Earth ends, Earth is near.
+  assert.equal(teleportSpot(earth, { position: bodyVista(earth, bodies), progress: known, bodies }), null);
   // In open space as near to Earth as the Moon is, Earth is still near.
   const open = earth.position.map((n, i) => n - (moon.position[i] - earth.position[i]));
   assert.equal(farFrom(earth, open, bodies), farFrom(earth, open));

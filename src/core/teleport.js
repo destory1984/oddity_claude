@@ -54,17 +54,19 @@ export function visited(target, progress) {
 
 // True when the target is far enough that going there is a journey: more than twice
 // the viewing distance from a body, out of docking range of a craft, 2,000 km from a place.
-// bodies: when given, a body is also far for someone standing beside ANOTHER body (within
-// that one's own viewing distance): the Moon is 1.2 of Earth's viewing distances from
-// Earth, so from the Moon Earth counted as near and its name only ticked (the user,
-// 2026-10-06: "달에서 지구로 워프를 못 함").
+// bodies: when given, a body is also far for someone who is near ANOTHER body (the one
+// whose ground is nearest, by this same measure): the Moon is 1.2 of Earth's viewing
+// distances from Earth, so from the Moon Earth counted as near and its name only ticked
+// (the user, 2026-10-06: "달에서 지구로 워프를 못 함"). A jump to the Moon ends exactly
+// at its viewing distance, and from there too Earth is a jump away.
+const nearKm = (body) => (NEAR_VISTAS[body.id] ?? 2) * vistaKm(body);
 export function farFrom(target, position, bodies = null) {
   const km = gap(position, target.position);
   if (target.kind === 'craft') return km > DOCK_RANGE_KM;
   if (target.kind === 'site') return km > 2000;
-  if (km > (NEAR_VISTAS[target.id] ?? 2) * vistaKm(target)) return true;
-  const beside = bodies ? nearestSurface(position, bodies) : null;
-  return Boolean(beside?.body) && beside.body.id !== target.id && gap(position, beside.body.position) < vistaKm(beside.body);
+  if (km > nearKm(target)) return true;
+  const beside = bodies ? nearestSurface(position, bodies).body : null;
+  return Boolean(beside) && beside.id !== target.id && gap(position, beside.position) <= nearKm(beside);
 }
 
 // How far from a body's centre its best view is.

@@ -20,9 +20,9 @@ const STILL = { speed: 0 };
 // In flight, showing her back, past the turn away from the camera.
 const flying = () => run(createSpriteState(), FLY, 1.2).state;
 
-test('72 sheets of four frames in use, and every drawing is in the assets folder', () => {
-  assert.equal(SHEETS.length, 72);
-  assert.equal(new Set(SHEETS).size, 72);
+test('73 sheets of four frames in use, and every drawing is in the assets folder', () => {
+  assert.equal(SHEETS.length, 73);
+  assert.equal(new Set(SHEETS).size, 73);
   assert.equal(FRAMES, 4);
   for (const sheet of SHEETS) {
     for (let frame = 0; frame < FRAMES; frame++) {
@@ -314,6 +314,10 @@ test('hovering, she points at a sight just told of and is drawn speaking while h
   // Speaking gives way to a sight.
   assert.equal(run(state, { ...still, talk: true }, 0.5).state.sheet, 'talk');
   assert.equal(run(state, { ...still, talk: true, see: 'up' }, 0.5).state.sheet, 'see-up');
+  // A finger to her lips is played once and held on its last drawing.
+  const hushed = run(state, { ...still, see: 'hush' }, 2.5).state;
+  assert.equal(hushed.sheet, 'see-hush');
+  assert.equal(hushed.frame, FRAMES - 1);
   // In flight she keeps flying: the gesture is for when she faces the camera.
   assert.ok(!run(createSpriteState(), { speed: 500, drive: 1, see: 'wow' }, 2).state.sheet.startsWith('see-'));
   // What she does for which sight.

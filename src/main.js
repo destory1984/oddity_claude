@@ -1448,6 +1448,12 @@ ${STORY_MORE[target.id]}` : told };
     location.reload();
   });
 
+  // The sound or the music switched off: a finger to her lips (core/sprite.js 'see-hush').
+  function hush() {
+    seeKind = 'hush';
+    seeUntil = performance.now() + SEE_S * 1000;
+    say.show(t('쉬잇~'), SEE_S);
+  }
   function showSoundButton() {
     $('soundButton').textContent = sound.muted() ? '🔇' : '🔊';
     $('soundButton').classList.toggle('off', sound.muted());
@@ -1458,6 +1464,7 @@ ${STORY_MORE[target.id]}` : told };
     sound.unlock();
     sound.setMuted(!sound.muted());
     showSoundButton();
+    if (sound.muted()) hush();
   }
   showSoundButton();
   $('soundButton').addEventListener('click', toggleSound);
@@ -1478,6 +1485,7 @@ ${STORY_MORE[target.id]}` : told };
     sound.unlock();
     sound.setMusic(!sound.musicOn());
     showMusicButton();
+    if (!sound.musicOn()) hush();
   }
   showMusicButton();
   $('musicButton').addEventListener('click', toggleMusic);

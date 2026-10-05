@@ -56,6 +56,10 @@ export const SHEETS = [
   // Drawn to order on 2026-10-04: what she does when a sight is pointed out (pointing
   // at it, wide-eyed at it, looking up at it), and speaking, while her bubble is up.
   'see-point', 'see-wow', 'see-up', 'talk',
+  // Drawn to order on 2026-10-06: a finger to her lips, when the sound or the music is
+  // switched off (the user: "소리 끄기 버튼을 누르면, 소라가 손가락을 입에 대고, 쉬잇~
+  // 하는 움직임 넣어줘", "소리/음악 공통으로 해줘"). Shown as a sight is: see 'hush'.
+  'see-hush',
 ];
 
 // Which of the three she does for a sight (the ids of core/glows.js, with 'meteor' and
@@ -206,11 +210,12 @@ function hover(state, input, dt, fresh) {
   let { rests, nextRest } = fresh ? { rests: state.rests, nextRest: FIRST_REST_S } : state;
   // A sight has just been pointed out, or she is speaking: that takes the place of
   // whatever she was at, and she is awake for it.
+  // (The finger to her lips is played once and held: the other three go round.)
   const showing = input.see ? `see-${input.see}` : input.talk ? 'talk' : null;
   if (showing) {
     const time = state.sheet === showing ? state.time + dt : 0;
     const awake = Math.min(still, SLEEP_AFTER_S - 5);
-    return { ...state, sheet: showing, time, frame: loop(time, input.see ? SPRITE_FPS.see : SPRITE_FPS.talk), still: awake, rests, nextRest: Math.max(nextRest, awake + 2) };
+    return { ...state, sheet: showing, time, frame: input.see === 'hush' ? once(time, SPRITE_FPS.see) : loop(time, input.see ? SPRITE_FPS.see : SPRITE_FPS.talk), still: awake, rests, nextRest: Math.max(nextRest, awake + 2) };
   }
   if (still >= SLEEP_AFTER_S) return { ...state, sheet: 'rest-sleep', time: still, frame: loop(still - SLEEP_AFTER_S, SPRITE_FPS.sleep), still, rests, nextRest };
   // A rest action under way.

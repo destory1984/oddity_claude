@@ -4027,6 +4027,7 @@ footer .throttle .rangeLabels {
 
 /* The day the making began: small, and if it must wrap, only between words. */
 #newsStarted {
+  white-space: pre-line;
   margin:0 0 10px;
   font-size:12px;
   word-break:keep-all;

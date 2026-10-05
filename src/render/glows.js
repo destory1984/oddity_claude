@@ -18,6 +18,12 @@ import {
 } from '../core/glows.js';
 
 const FLASHES = 8;
+// A dust devil's shadow: at most this many times its height long (at five its far end
+// stood 11 km clear of the ground and showed past the limb as a dark line on the sky),
+// and drawn this far above the ground (the ground is a ball: a flat strip laid on it
+// would dip under).
+const DEVIL_SHADOW_MAX = 3;
+const DEVIL_SHADOW_LIFT_KM = 1.2;
 // How many different bolts are drawn; each flash shows one of them, turned any way.
 const BOLTS = 4;
 
@@ -155,16 +161,18 @@ function lightCard(scene, name, texture) {
   return { mesh, material };
 }
 
-function veilMaterial(scene, name, { low, high, ripple, nightOnly, dark = false, soft = false }) {
+function veilMaterial(scene, name, { low, high, ripple, nightOnly, dark = false, soft = false, devil = false }) {
   Effect.ShadersStore.veilVertexShader = veilVert;
   Effect.ShadersStore.veilFragmentShader = veilFrag;
   const material = new ShaderMaterial(name, scene, { vertex: 'veil', fragment: 'veil' }, {
     attributes: ['position'],
-    uniforms: ['worldViewProjection', 'world', 'centre', 'colorLow', 'colorHigh', 'strength', 'time', 'ripple', 'nightOnly', 'sunDir', 'dark', 'soft'],
+    uniforms: ['worldViewProjection', 'world', 'centre', 'colorLow', 'colorHigh', 'strength', 'time', 'ripple', 'nightOnly', 'sunDir', 'dark', 'soft', 'devil', 'sway'],
   });
   // Smoke covers what is behind it; light is added to it.
-  material.alphaMode = dark ? Constants.ALPHA_COMBINE : Constants.ALPHA_ADD;
+  material.alphaMode = dark || devil ? Constants.ALPHA_COMBINE : Constants.ALPHA_ADD;
   material.setFloat('dark', dark ? 1 : 0);
+  material.setFloat('devil', devil ? 1 : 0);
+  material.setFloat('sway', 0);
   material.setFloat('soft', soft ? 1 : 0);
   material.needAlphaBlending = () => true;
   material.disableDepthWrite = true;
@@ -180,10 +188,32 @@ function veilMaterial(scene, name, { low, high, ripple, nightOnly, dark = false,
   return material;
 }
 
+// The shadow a dust devil lays on the ground: dark at its foot, fading along its length
+// (x) and soft at the sides.
+function shadowTexture(scene) {
+  const texture = new DynamicTexture('devilShadow', { width: 128, height: 32 }, scene, true);
+  const ctx = texture.getContext();
+  ctx.clearRect(0, 0, 128, 32);
+  const image = ctx.createImageData(128, 32);
+  for (let y = 0; y < 32; y++) {
+    for (let x = 0; x < 128; x++) {
+      const along = x / 127;
+      const across = Math.abs((y - 15.5) / 15.5);
+      const alpha = Math.min(1, along / 0.04) * (1 - along) ** 0.8 * Math.max(0, 1 - across * across) ** 1.5;
+      image.data[(y * 128 + x) * 4 + 3] = Math.round(255 * alpha);
+    }
+  }
+  ctx.putImageData(image, 0, 0);
+  texture.hasAlpha = true;
+  texture.update();
+  return texture;
+}
+
 // An open cone band one unit tall: radius `foot` at the bottom, `top` at the top.
-function band(scene, name, foot, top, tessellation) {
+// rings: how many bands it is cut into up its height (more for one bent by its shader).
+function band(scene, name, foot, top, tessellation, rings = 1) {
   const mesh = CreateCylinder(name, {
-    height: 1, diameterBottom: 2 * foot, diameterTop: 2 * top, tessellation, cap: Mesh.NO_CAP,
+    height: 1, diameterBottom: 2 * foot, diameterTop: 2 * top, tessellation, subdivisions: rings, cap: Mesh.NO_CAP,
   }, scene);
   mesh.isPickable = false;
   mesh.rotationQuaternion = new Quaternion();
@@ -206,9 +236,35 @@ export function createGlows(scene, bodies) {
     return { aurora, mesh, material, yKm: (foot.yKm + top.yKm) / 2 };
   }));
 
+  const devilShadow = shadowTexture(scene);
   const plumes = PLUMES.map((plume) => {
     const ice = plume.body === 'enceladus';
     const dusty = plume.body === 'mars';
+    // A dust devil on Mars: a column of dust and the shadow it lays on the ground.
+    if (dusty && !plume.dark) {
+      const material = veilMaterial(scene, `plume_${plume.id}`, { low: [0.8, 0.56, 0.38], high: [0.93, 0.74, 0.56], ripple: 0, nightOnly: false, devil: true });
+      material.setFloat('strength', 0.92);
+      const radius = (plume.widthKm * 0.3) / KM_PER_UNIT;
+      material.setFloat('sway', radius * 1.6);
+      const mesh = band(scene, `plume_${plume.id}`, radius, radius, 20, 24);
+      mesh.material = material;
+      mesh.scaling.y = plume.heightKm / KM_PER_UNIT;
+      const dark = new StandardMaterial(`shadow_${plume.id}`, scene);
+      dark.diffuseColor = new Color3(0, 0, 0);
+      dark.emissiveColor = new Color3(0.07, 0.03, 0.02);
+      dark.specularColor = new Color3(0, 0, 0);
+      dark.disableLighting = true;
+      dark.opacityTexture = devilShadow;
+      dark.alpha = 0.6;
+      dark.backFaceCulling = false;
+      dark.disableDepthWrite = true;
+      const shadow = CreatePlane(`shadow_${plume.id}`, { size: 1, sideOrientation: Mesh.DOUBLESIDE }, scene);
+      shadow.material = dark;
+      shadow.isPickable = false;
+      shadow.rotationQuaternion = new Quaternion();
+      shadow.setEnabled(false);
+      return { plume, mesh, material, shadow };
+    }
     const material = veilMaterial(scene, `plume_${plume.id}`, plume.dark
       ? { low: [0.1, 0.09, 0.09], high: [0.1, 0.09, 0.09], ripple: 0, nightOnly: false, dark: true }
       : dusty
@@ -460,10 +516,11 @@ export function createGlows(scene, bodies) {
       });
     }
 
-    for (const { plume, mesh } of plumes) {
+    for (const { plume, mesh, material, shadow } of plumes) {
       const body = find(plume.body);
       const on = height(body, position) <= PLUME_RANGE_RADII * body.radiusKm;
       mesh.setEnabled(on);
+      shadow?.setEnabled(false);
       if (!on) continue;
       const up = plumeUp(plume, -(elapsed * TIME_SCALE * 2 * Math.PI) / PLUME_DAY_S[plume.body]);
       // A dust devil is raised by the Sun warming the ground: none at night.
@@ -476,6 +533,29 @@ export function createGlows(scene, bodies) {
       const middle = rel(body.position.map((n, i) => n + up[i] * (body.radiusKm + plume.heightKm / 2)), position);
       mesh.position.set(middle[0], middle[1], middle[2]);
       Quaternion.FromUnitVectorsToRef(Vector3.Up(), new Vector3(...up), mesh.rotationQuaternion);
+      if (shadow) {
+        const toSun = sunFrom(body);
+        material.setVector3('centre', new Vector3(...rel(body.position, position)));
+        material.setVector3('sunDir', toSun);
+        material.setFloat('time', elapsed);
+        // The shadow lies on the ground from the foot, straight away from the Sun, as
+        // long as the Sun's height makes it (three heights at most, near sunset).
+        const above = new Vector3(...up);
+        const high = Vector3.Dot(above, toSun);
+        const away = above.scale(high).subtract(toSun);
+        const low = away.length();
+        if (low > 0.02) {
+          away.scaleInPlace(1 / low);
+          const lengthKm = Math.min(DEVIL_SHADOW_MAX, low / Math.max(high, 0.05)) * plume.heightKm;
+          const across = Vector3.Cross(above, away);
+          Quaternion.RotationQuaternionFromAxisToRef(away, across, above, shadow.rotationQuaternion);
+          const foot = rel(body.position.map((n, i) => n + up[i] * (body.radiusKm + DEVIL_SHADOW_LIFT_KM)), position);
+          const half = lengthKm / 2 / KM_PER_UNIT;
+          shadow.position.set(foot[0] + away.x * half, foot[1] + away.y * half, foot[2] + away.z * half);
+          shadow.scaling.set(lengthKm / KM_PER_UNIT, (plume.widthKm * 0.9) / KM_PER_UNIT, 1);
+          shadow.setEnabled(true);
+        }
+      }
     }
 
     // Lightning: patches of night-side cloud lighting up, on Jupiter and on Earth.

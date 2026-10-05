@@ -14,6 +14,10 @@ uniform float dark;
 // edge on, so the jet is a soft stream bright down its middle. With an even wall it
 // crossed the close view as a flat wedge with a hard edge.
 uniform float soft;
+// 1 for a dust devil on Mars: a column of dust lit by the Sun, drawn over the ground
+// (as a cone of added light it looked like a torch's beam, or a falling meteor: the
+// user, 2026-10-06, "이건 뭐야", "나는 유성 떨어지는건 줄 알았어").
+uniform float devil;
 varying float vFace;
 // A number between 0 and 1 for each whole step along x, joined smoothly; it comes round
 // to where it began after `period` steps, so a ring of it closes.
@@ -74,6 +78,18 @@ void main(){
     float drift = mix(1., 1.3 * downwind, smoothstep(.1, .5, h));
     float smoke = smoothstep(0., .08, h) * (1. - smoothstep(.45, 1., h)) * drift * (.85 + .15 * sin(a * 2. + h * 9.)) * strength;
     gl_FragColor = vec4(colorLow, smoke);
+    return;
+  }
+  if (devil > .5) {
+    // Dust wound up the column in bands that climb as they turn, with finer grain the
+    // other way; thick down the middle, thin at the edges; thickest in the skirt at the
+    // foot, gone by the top.
+    float wound = .5 + .5 * sin(a * 2. + h * 17. - time * 3.2);
+    float grain = .5 + .5 * sin(a * 5. - h * 33. + time * 1.9);
+    float dust = (.5 + .32 * wound + .18 * grain) * smoothstep(0., .55, vFace)
+      * smoothstep(1., .7, h) * (.7 + .5 * exp(-h * 10.));
+    float sunlit = .5 + .5 * clamp(dot(vDir, sunDir) * 1.6, 0., 1.);
+    gl_FragColor = vec4(mix(colorLow, colorHigh, h) * sunlit * (.85 + .15 * wound), clamp(dust * strength, 0., 1.));
     return;
   }
   float stream = mix(1., smoothstep(0., .75, vFace), soft);

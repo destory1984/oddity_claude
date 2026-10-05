@@ -20,6 +20,7 @@ import { createWarp } from './ui/warp.js';
 import { addPhoto, removePhoto, photoPlace, photoCaption } from './core/album.js';
 import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } from './core/postcard.js';
 import { isLocalHost } from './core/count.js';
+import { pickSpot, fromSpot, toSpot } from './core/startSpots.js';
 import { teleportSpot } from './core/teleport.js';
 import { behindBody , nearestBodies, nearbyMoons } from './core/markers.js';
 import { FACTS } from './core/facts.js';
@@ -172,13 +173,12 @@ function startAboveEarth() {
   return createState(position, innerWidth / innerHeight < 1 ? facing : rotateLocal(facing, START_YAW, 0));
 }
 
-// For the time being the game opens at dawn over Earth's night side (the user sent a
-// picture of the place on 2026-10-04: "당분간 시작 위치를 여기로 변경"): 6,794 km up, the dark
+// The first of the places the game may open at (core/startSpots.js 'dawn'): dawn over
+// Earth's night side (the user sent a picture of the place on 2026-10-04: "당분간 시작 위치를 여기로 변경"): 6,794 km up, the dark
 // Earth with its city lights filling the left of the view and the Sun coming up over
 // its edge at the upper right. The angles are read off that picture: from the middle
 // of the view the Sun stands 16.5 degrees to the right and 18.8 up, Earth's centre 23
-// to the left and 4.6 up. To go back to the old start, set START_AT_DAWN to false.
-const START_AT_DAWN = true;
+// to the left and 4.6 up.
 const DAWN_HEIGHT_KM = 6794;
 function startAtDawn() {
   const earth = bodyById('earth', bodies);
@@ -195,9 +195,18 @@ function startAtDawn() {
   return createState(position, lookAtDirection(way(turn, lift)));
 }
 
+// One of the places written down in core/startSpots.js, by chance (?start=2 in the
+// address opens at the second, for looking at one).
+function startAtSpot(spot) {
+  if (spot.id === 'dawn') return startAtDawn();
+  const { position, orientation } = fromSpot(spot, bodyById(spot.body, bodies), bodyById('sun', bodies));
+  return createState(position, orientation);
+}
+const startSpot = pickSpot(Math.random(), new URLSearchParams(location.search).get('start'));
+
 // After a change of language the game carries on where she was (ui/storage.js).
 const resume = takeResume();
-let state = resume ? createState(resume.position, resume.orientation) : START_NEAR ? startNear(START_NEAR) : START_AT_DAWN ? startAtDawn() : startAboveEarth();
+let state = resume ? createState(resume.position, resume.orientation) : START_NEAR ? startNear(START_NEAR) : startAtSpot(startSpot);
 let paused = false;
 let selectedId = START_NEAR ? START_NEAR.id : resume?.selectedId && BODIES.some((b) => b.id === resume.selectedId) ? resume.selectedId : 'earth';
 let dragTurn = [0, 0];
@@ -2077,6 +2086,8 @@ ${STORY_MORE[target.id]}` : told };
     bodies: () => bodies.map((b) => ({ id: b.id, position: [...b.position], radiusKm: b.radiusKm })),
     craft: () => craft.map((c) => ({ id: c.id, position: [...c.position] })),
     sites: () => sites.map((x) => ({ id: x.id, parent: x.parent, position: [...x.position] })),
+    // Where she stands now, as a line for core/startSpots.js (a place the game may open at).
+    spot: () => toSpot(state, nearestSurface(state.position, bodies).body, bodyById('sun', bodies)),
     place(position, toward) {
       state = createState(position, lookAtDirection(toward.map((n, i) => n - position[i])));
     },

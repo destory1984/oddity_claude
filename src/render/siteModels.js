@@ -40,8 +40,10 @@ function flag(scene, name, parent, mats, at) {
 // The Apollo Lunar Module: the eight-sided descent stage in gold foil on four legs
 // with the ladder down the front one, and the angular ascent stage with its two
 // triangular windows, hatch, thruster quads, radar dish and antennas. A flag beside it.
-function apollo(scene, name, mats, { withFlag = true } = {}) {
+// stage: 'descent' or 'ascent' builds only that half (the scene of Apollo 17 leaving).
+function apollo(scene, name, mats, { withFlag = true, stage = 'both' } = {}) {
   const root = new TransformNode(name, scene);
+  if (stage !== 'ascent') {
   drum(scene, `${name}Descent`, root, mats.goldFoil, { height: 0.2, diameter: 0.5, tessellation: 8 }, [0, 0.3, 0], null).rotation.y = Math.PI / 8;
   drum(scene, `${name}DescentTop`, root, mats.blackFoil, { height: 0.012, diameter: 0.5, tessellation: 8 }, [0, 0.404, 0]).rotation.y = Math.PI / 8;
   nozzle(scene, `${name}Engine`, root, mats.dark, [0, 0.21, 0], [0, -1, 0], 0.12, 0.16);
@@ -49,6 +51,9 @@ function apollo(scene, name, mats, { withFlag = true } = {}) {
   // The ladder on the front (+z... the leg at angle 0 is +x) leg, and the porch above it.
   for (let k = 0; k < 6; k++) box(scene, `${name}Rung${k}`, root, mats.grey, [0.012, 0.008, 0.07], [0.27 + k * 0.03, 0.34 - k * 0.05, 0]);
   box(scene, `${name}Porch`, root, mats.grey, [0.08, 0.01, 0.09], [0.23, 0.41, 0]);
+  if (withFlag) flag(scene, `${name}Flag`, root, mats, [0.62, 0, 0.3]);
+  }
+  if (stage === 'descent') return fuse(scene, root);
   // Ascent stage: a boxy cabin with a faceted face, grey and gold.
   const cabin = group(scene, `${name}Cabin`, root, [0, 0.53, 0]);
   drum(scene, `${name}Hull`, cabin, mats.foil, { height: 0.26, diameter: 0.3, tessellation: 8 }, [0, 0, 0], [1, 0, 0]);
@@ -69,7 +74,7 @@ function apollo(scene, name, mats, { withFlag = true } = {}) {
   dish(scene, `${name}Sband`, cabin, mats, { at: [-0.1, 0.24, 0.1], toward: [-0.3, 1, 0.2], diameter: 0.09 });
   rod(scene, `${name}SbandMast`, cabin, mats.grey, [-0.08, 0.13, 0.08], [-0.1, 0.24, 0.1], 0.01, 4);
   rod(scene, `${name}Vhf`, cabin, mats.chrome, [-0.05, 0.15, -0.1], [-0.07, 0.34, -0.14], 0.006, 4);
-  if (withFlag) flag(scene, `${name}Flag`, root, mats, [0.62, 0, 0.3]);
+  if (stage === 'ascent') nozzle(scene, `${name}AscentEngine`, cabin, mats.dark, [0, -0.1, 0], [0, -1, 0], 0.07, 0.09);
   return fuse(scene, root);
 }
 
@@ -129,18 +134,25 @@ function deckLander(scene, name, mats, { ascender = false, skin = 'goldFoil', ra
 
 // Luna 16 and 24, the Soviet sample-return landers: a ring of four round tanks on four
 // legs, and standing on it the return rocket with its ball-shaped capsule on top.
-function lunaReturn(scene, name, mats) {
+// stage: 'lander' or 'rocket' builds only that part (the scene of Luna 16 leaving).
+function lunaReturn(scene, name, mats, { stage = 'both' } = {}) {
   const root = new TransformNode(name, scene);
+  if (stage !== 'lander') {
+    drum(scene, `${name}Rocket`, root, mats.plate, { height: 0.24, diameter: 0.14, tessellation: 14 }, [0, 0.52, 0]);
+    for (const [x, z] of round(3, 0.09, 0.3)) sphere(scene, `${name}RocketTank${x}`, root, mats.foil, 0.09, [x, 0.46, z]);
+    sphere(scene, `${name}Capsule`, root, mats.chrome, 0.12, [0, 0.7, 0]);
+    for (const s of [-1, 1]) rod(scene, `${name}Whip${s}`, root, mats.chrome, [s * 0.05, 0.64, 0], [s * 0.3, 0.86, -0.1], 0.006, 4);
+    if (stage === 'rocket') {
+      nozzle(scene, `${name}RocketEngine`, root, mats.dark, [0, 0.4, 0], [0, -1, 0], 0.06, 0.08);
+      return fuse(scene, root);
+    }
+  }
   for (const [x, z] of round(4, 0.14, 0.785)) sphere(scene, `${name}Tank${x}${z}`, root, mats.foil, 0.2, [x, 0.3, z]);
   drum(scene, `${name}Ring`, root, mats.grey, { height: 0.03, diameter: 0.42, tessellation: 16 }, [0, 0.3, 0]);
   nozzle(scene, `${name}Engine`, root, mats.dark, [0, 0.22, 0], [0, -1, 0], 0.12, 0.13);
   legs(scene, `${name}Gear`, root, mats, 4, { top: 0.2, foot: 0.44, height: 0.3, turn: 0 });
-  drum(scene, `${name}Rocket`, root, mats.plate, { height: 0.24, diameter: 0.14, tessellation: 14 }, [0, 0.52, 0]);
-  for (const [x, z] of round(3, 0.09, 0.3)) sphere(scene, `${name}RocketTank${x}`, root, mats.foil, 0.09, [x, 0.46, z]);
-  sphere(scene, `${name}Capsule`, root, mats.chrome, 0.12, [0, 0.7, 0]);
   rod(scene, `${name}Drill0`, root, mats.chrome, [0.12, 0.4, 0.1], [0.3, 0.5, 0.22], 0.014, 5);
   rod(scene, `${name}Drill1`, root, mats.chrome, [0.3, 0.5, 0.22], [0.4, 0.04, 0.3], 0.014, 5);
-  for (const s of [-1, 1]) rod(scene, `${name}Whip${s}`, root, mats.chrome, [s * 0.05, 0.64, 0], [s * 0.3, 0.86, -0.1], 0.006, 4);
   return fuse(scene, root);
 }
 
@@ -369,9 +381,10 @@ function messenger(scene, name, mats) {
 
 // SLIM: a small box that touched down on target and then tipped onto its nose, its
 // engine bells pointing at the sky and its solar cells facing sideways.
-function slim(scene, name, mats) {
+// upright: as it flew, its middle at the model's own middle (the scene turns it over).
+function slim(scene, name, mats, { upright = false } = {}) {
   const root = new TransformNode(name, scene);
-  const body = group(scene, `${name}Tipped`, root, [0, 0.2, 0], [0, 0, 2.9]);
+  const body = group(scene, `${name}Tipped`, root, upright ? [0, 0, 0] : [0, 0.2, 0], [0, 0, upright ? 0 : 2.9]);
   box(scene, `${name}Body`, body, mats.goldFoil, [0.3, 0.34, 0.26]);
   box(scene, `${name}Cells`, body, mats.cells, [0.3, 0.34, 0.006], [0, 0, 0.134]);
   for (const s of [-1, 1]) {
@@ -385,9 +398,10 @@ function slim(scene, name, mats) {
 
 // Odysseus: a tall six-sided tower on six legs that caught a foot and came to rest
 // leaning well over on one side.
-function odysseus(scene, name, mats) {
+// upright: as it flew (the scene leans it over).
+function odysseus(scene, name, mats, { upright = false } = {}) {
   const root = new TransformNode(name, scene);
-  const lean = group(scene, `${name}Lean`, root, [0, 0.02, 0], [0, 0, -0.55]);
+  const lean = group(scene, `${name}Lean`, root, [0, 0.02, 0], [0, 0, upright ? 0 : -0.55]);
   drum(scene, `${name}Tower`, lean, mats.plate, { height: 0.6, diameter: 0.26, tessellation: 6 }, [0, 0.42, 0]);
   drum(scene, `${name}Top`, lean, mats.goldFoil, { height: 0.03, diameter: 0.27, tessellation: 6 }, [0, 0.735, 0]);
   for (const [x, z, a] of round(3, 0.131, 0.52)) box(scene, `${name}Cells${a}`, lean, mats.cells, [0.004, 0.44, 0.12], [x, 0.46, z], [0, -a, 0]);
@@ -553,6 +567,131 @@ function falconLaunch(scene, name, mats) {
   return { pad, booster: boosterNode, legs, upper: upperNode, ship: shipNode };
 }
 
+// The pieces of the Moon's eight scenes (core/moonScenes.js), under the names the scenes
+// move them by. flames: a flame under a piece, [x, y, z, height, width at its foot].
+// lit: pieces that are light itself (a flash).
+
+// Apollo's rover: four wire wheels under a flat frame, two seats, the dish on its mast
+// and the television camera that watched the others leave.
+function lunarRover(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  for (const sx of [-1, 1]) {
+    for (const sz of [-1, 1]) {
+      drum(scene, `${name}Wheel${sx}${sz}`, root, mats.grey, { height: 0.05, diameter: 0.16, tessellation: 12 }, [sx * 0.2, 0.08, sz * 0.17], [0, 0, 1]);
+      box(scene, `${name}Fender${sx}${sz}`, root, mats.goldFoil, [0.14, 0.01, 0.06], [sx * 0.2, 0.175, sz * 0.17]);
+    }
+  }
+  box(scene, `${name}Frame`, root, mats.plate, [0.5, 0.025, 0.26], [0, 0.13, 0]);
+  for (const sz of [-1, 1]) {
+    box(scene, `${name}Seat${sz}`, root, mats.white, [0.1, 0.015, 0.1], [-0.02, 0.19, sz * 0.07]);
+    box(scene, `${name}Back${sz}`, root, mats.white, [0.015, 0.11, 0.1], [-0.075, 0.24, sz * 0.07]);
+  }
+  box(scene, `${name}Console`, root, mats.dark, [0.03, 0.09, 0.1], [0.1, 0.2, 0]);
+  rod(scene, `${name}Mast`, root, mats.grey, [0.2, 0.14, 0.09], [0.2, 0.42, 0.09], 0.01, 4);
+  dish(scene, `${name}Dish`, root, mats, { at: [0.2, 0.44, 0.09], toward: [0.2, 1, 0.3], diameter: 0.16, material: mats.goldFoil });
+  rod(scene, `${name}CameraPost`, root, mats.grey, [0.2, 0.14, -0.09], [0.2, 0.3, -0.09], 0.01, 4);
+  box(scene, `${name}Camera`, root, mats.white, [0.06, 0.04, 0.04], [0.21, 0.32, -0.09], [0, 0, 0.5]);
+  box(scene, `${name}Tools`, root, mats.goldFoil, [0.1, 0.1, 0.22], [-0.2, 0.2, 0]);
+  return fuse(scene, root);
+}
+
+// A ring of scraps thrown off (foil as Apollo's cabin leaves, dust from Luna 2): bits
+// on a circle one unit wide, which the scene swells and lets fall.
+function scraps(scene, name, mats, material) {
+  const root = new TransformNode(name, scene);
+  for (const [x, z, a] of round(14, 0.5, 0.2)) {
+    const far = 0.75 + 0.25 * Math.sin(a * 5);
+    box(scene, `${name}Bit${a}`, root, material, [0.035, 0.012, 0.03], [x * far, 0.05 * Math.sin(a * 7), z * far], [a, a * 2, a * 3]);
+  }
+  return fuse(scene, root);
+}
+
+// Luna 2 as it flew: a ball with its antennas out.
+function lunaBall(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  part(CreateSphere(`${name}Ball`, { diameter: 0.5, segments: 16 }, scene), root, mats.chrome, [0, 0.25, 0]);
+  drum(scene, `${name}Seam`, root, mats.grey, { height: 0.014, diameter: 0.505, tessellation: 24 }, [0, 0.25, 0]);
+  for (const [x, z, a] of round(5, 0.18, 0.4)) rod(scene, `${name}Rod${a}`, root, mats.chrome, [x, 0.42, z], [x * 2.6, 0.78, z * 2.6], 0.01, 4);
+  rod(scene, `${name}Boom`, root, mats.chrome, [0, 0.5, 0], [0, 0.95, 0], 0.012, 4);
+  return fuse(scene, root);
+}
+
+const MOON_STAGES = {
+  apollo17: (scene, name, mats) => ({
+    pieces: {
+      descent: apollo(scene, `${name}Descent`, mats, { stage: 'descent' }),
+      ascent: apollo(scene, `${name}Ascent`, mats, { stage: 'ascent', withFlag: false }),
+      rover: lunarRover(scene, `${name}Rover`, mats),
+      scraps: scraps(scene, `${name}Scraps`, mats, mats.goldFoil),
+    },
+    flames: { ascent: [0, 0.3, 0, 0.2, 0.14] },
+  }),
+  luna16: (scene, name, mats) => ({
+    pieces: {
+      lander: lunaReturn(scene, `${name}Lander`, mats, { stage: 'lander' }),
+      rocket: lunaReturn(scene, `${name}Rocket`, mats, { stage: 'rocket' }),
+    },
+    flames: { rocket: [0, 0.24, 0, 0.26, 0.13] },
+  }),
+  lunokhod1: (scene, name, mats) => ({
+    pieces: {
+      lander: deckLander(scene, `${name}Lander`, mats, { skin: 'foil' }),
+      rover: rover(scene, `${name}Rover`, mats, { power: 'lid' }),
+    },
+    flames: { lander: [0, 0.02, 0, 0.34, 0.2] },
+  }),
+  slim: (scene, name, mats) => {
+    const bit = (id, material, size) => {
+      const root = new TransformNode(`${name}${id}`, scene);
+      sphere(scene, `${name}${id}Ball`, root, material, size, [0, size / 2, 0]);
+      return fuse(scene, root);
+    };
+    const nozzleRoot = new TransformNode(`${name}Nozzle`, scene);
+    nozzle(scene, `${name}NozzleBell`, nozzleRoot, mats.dark, [0, 0.1, 0], [0, -1, 0], 0.1, 0.1);
+    return {
+      pieces: {
+        slim: slim(scene, `${name}Body`, mats, { upright: true }),
+        nozzle: fuse(scene, nozzleRoot),
+        lev1: bit('Lev1', mats.goldFoil, 0.09),
+        lev2: bit('Lev2', mats.chrome, 0.07),
+      },
+      flames: { slim: [0, -0.42, 0, 0.3, 0.16] },
+    };
+  },
+  odysseus: (scene, name, mats) => ({
+    pieces: { lander: odysseus(scene, `${name}Lander`, mats, { upright: true }) },
+    flames: { lander: [0, -0.04, 0, 0.32, 0.18] },
+  }),
+  chandrayaan3: (scene, name, mats) => ({
+    pieces: {
+      lander: deckLander(scene, `${name}Lander`, mats, {}),
+      rover: rover(scene, `${name}Rover`, mats, { power: 'wings' }),
+    },
+    flames: { lander: [0, 0.02, 0, 0.34, 0.2] },
+  }),
+  luna2: (scene, name, mats) => {
+    const flash = new TransformNode(`${name}Flash`, scene);
+    part(CreateSphere(`${name}FlashBall`, { diameter: 1, segments: 14 }, scene), flash, mats.white, [0, 0, 0]);
+    return {
+      pieces: {
+        probe: lunaBall(scene, `${name}Probe`, mats),
+        wreck: impactor(scene, `${name}Wreck`, mats),
+        scraps: scraps(scene, `${name}Scraps`, mats, mats.grey),
+        flash,
+      },
+      flames: {},
+      lit: ['flash'],
+    };
+  },
+  apollo12: (scene, name, mats) => ({
+    pieces: {
+      surveyor: surveyor(scene, `${name}Surveyor`, mats),
+      lander: apollo(scene, `${name}Lander`, mats, { withFlag: false }),
+    },
+    flames: { lander: [0, 0.02, 0, 0.34, 0.2] },
+  }),
+};
+
 // Which model stands at which place.
 const apolloLm = [apollo, {}];
 export const SITE_BUILD = {
@@ -595,4 +734,6 @@ export const SITE_REPLAY_BUILD = {
   philaeLanding: [philae, {}, 'bare'],
   // 'launch': it goes up, in pieces (falconLaunch above; render/craft.js moves them).
   lc39a: [falconLaunch, {}, 'launch'],
+  // 'stage': pieces put where the scene says, each moment (MOON_STAGES above).
+  ...Object.fromEntries(Object.entries(MOON_STAGES).map(([id, build]) => [id, [build, {}, 'stage']])),
 };

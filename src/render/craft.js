@@ -149,7 +149,30 @@ export function createSiteModels(scene, siteList) {
   bagCloth.diffuseColor = new Color3(0.93, 0.88, 0.76);
   bagCloth.emissiveColor = new Color3(0.3, 0.27, 0.22);
   bagCloth.specularColor = new Color3(0.05, 0.05, 0.05);
+  // A flash: light itself, white, nearly solid.
+  const flashMaterial = new StandardMaterial('replayFlash', scene);
+  flashMaterial.disableLighting = true;
+  flashMaterial.emissiveColor = new Color3(1, 0.96, 0.86);
+  flashMaterial.alpha = 0.85;
   for (const [id, [build, options, coming = 'flame', flameY = -0.06]] of Object.entries(SITE_REPLAY_BUILD)) {
+    if (coming === 'stage') {
+      // Pieces under one root, which is placed and sized as any model is; the scene
+      // says where each stands at each moment (core/moonScenes.js). A piece that burns
+      // has a flame under it.
+      const root = new TransformNode(`then_${id}`, scene);
+      root.rotationQuaternion = new Quaternion();
+      const parts = build(scene, `then_${id}`, mats, options);
+      const flames = {};
+      for (const [name, piece] of Object.entries(parts.pieces)) {
+        piece.parent = root;
+        const spec = parts.flames?.[name];
+        if (spec) flames[name] = drum(scene, `then_${id}_${name}_flame`, piece, flameMaterial, { height: spec[3], diameterTop: spec[4] * 0.25, diameterBottom: spec[4], tessellation: 12 }, [spec[0], spec[1] - spec[3] / 2, spec[2]]);
+      }
+      for (const name of parts.lit ?? []) for (const mesh of parts.pieces[name].getChildMeshes()) mesh.material = flashMaterial;
+      root.setEnabled(false);
+      then.set(id, { node: root, flame: null, cords: null, stage: { pieces: parts.pieces, flames } });
+      continue;
+    }
     if (coming === 'launch') {
       // The pad stays; the rocket stands on it in two pieces, each with a flame under
       // it, and a ship waits to the side. Everything hangs from one root, which is
@@ -383,6 +406,17 @@ export function createSiteModels(scene, siteList) {
         parts.upper.setEnabled(!upper.gone);
         parts.upperFlame.setEnabled(upper.burn && upper.y > booster.y + 0.01);
         parts.ship.position.set(0.16 + 1.7, 0, 0);
+      }
+      if (old?.stage && replay.stage) {
+        for (const [name, piece] of Object.entries(old.stage.pieces)) {
+          const at = replay.stage[name];
+          piece.setEnabled(Boolean(at) && at.shown !== false);
+          if (!piece.isEnabled()) continue;
+          piece.position.set(at.x ?? 0, at.y ?? 0, at.z ?? 0);
+          piece.rotation.z = at.lean ?? 0;
+          piece.scaling.setAll(at.scale ?? 1);
+          old.stage.flames[name]?.setEnabled(Boolean(at.burn));
+        }
       }
       if (old?.fire) {
         // Its +x toward the place it is going to, its dish (+y) up.

@@ -4972,3 +4972,18 @@ html.gaze #gazeButton {
 #journal #journalTabs {
   padding-top:0;
 }
+
+/* Grandmother's note: the same space, 20px, at the sheet's sides, between the paper and
+   the button, and under the button (the user, 2026-10-06, over a picture with three
+   rings: "3개의 간격 통일"; they were 30, 20 and 30px, less on a phone). */
+#noteCard {
+  padding:20px;
+}
+
+#noteCard .journalActions {
+  margin-top:20px;
+}
+
+#noteCard .journalActions button {
+  margin:0;
+}

@@ -326,6 +326,53 @@ export function createSound() {
       noise({ start: 0.9, length: 0.05, volume: 0.2, type: 'bandpass', freq: 1800, out });
       noise({ start: 1.05, length: 0.05, volume: 0.2, type: 'bandpass', freq: 1500, out });
     },
+    // A small engine lighting to leave the Moon (an ascent stage, a return rocket): a
+    // bang as it parts from what it stood on, then a hiss that thins as it goes.
+    ascent: () => {
+      const out = scene();
+      noise({ length: 0.12, volume: 0.32, type: 'lowpass', freq: 900, to: 250, out });
+      tone({ freq: 120, to: 80, length: 0.3, volume: 0.16, out });
+      noise({ start: 0.05, length: 5, volume: 0.2, type: 'bandpass', freq: 700, to: 260, attack: 0.25, out });
+      noise({ start: 0.05, length: 3, volume: 0.07, type: 'highpass', freq: 3200, to: 1800, attack: 0.2, out });
+    },
+    // A rover's wheels turning: a low whirr with its cleats ticking.
+    roll: () => {
+      const out = scene();
+      tone({ freq: 96, to: 104, type: 'triangle', length: 3.2, volume: 0.07, attack: 0.3, out });
+      tone({ freq: 192, to: 208, type: 'triangle', length: 3.2, volume: 0.03, attack: 0.3, out });
+      for (let k = 0; k < 14; k++) noise({ start: 0.2 + k * 0.21, length: 0.03, volume: 0.07, type: 'bandpass', freq: 1300, out });
+    },
+    // Something breaks off: a sharp crack and a ring.
+    clunk: () => {
+      const out = scene();
+      noise({ length: 0.07, volume: 0.36, type: 'bandpass', freq: 1700, to: 600, out });
+      tone({ freq: 330, to: 180, length: 0.4, volume: 0.1, out });
+    },
+    // Two small things thrown out, one after the other.
+    toss: () => {
+      const out = scene();
+      for (const at of [0, 0.14]) {
+        noise({ start: at, length: 0.06, volume: 0.2, type: 'bandpass', freq: 2400, out });
+        tone({ freq: 620, to: 880, start: at, length: 0.16, volume: 0.07, out });
+      }
+    },
+    // A lander going over: its frame groans, and it comes down on its side.
+    topple: () => {
+      const out = scene();
+      tone({ freq: 240, to: 110, type: 'triangle', length: 1.5, volume: 0.09, attack: 0.2, out });
+      noise({ start: 0.2, length: 1.2, volume: 0.05, type: 'bandpass', freq: 500, to: 250, attack: 0.3, out });
+      noise({ start: 2.1, length: 0.3, volume: 0.2, type: 'lowpass', freq: 420, to: 140, attack: 0.03, out });
+      tone({ freq: 150, to: 110, start: 2.1, length: 0.5, volume: 0.12, out });
+    },
+    // Something hits the ground at kilometres a second: a crack, a deep boom rolling
+    // away, and what it threw up pattering down.
+    impact: () => {
+      const out = scene();
+      noise({ length: 0.09, volume: 0.5, type: 'bandpass', freq: 2600, to: 700, out });
+      noise({ length: 2.6, volume: 0.45, type: 'lowpass', freq: 300, to: 60, attack: 0.02, out });
+      tone({ freq: 70, to: 34, length: 2.2, volume: 0.3, out });
+      for (let k = 0; k < 12; k++) noise({ start: 0.5 + k * 0.17 + 0.05 * Math.sin(k * 5.1), length: 0.04, volume: 0.09 * (1 - k / 14), type: 'bandpass', freq: 1500 + 500 * Math.sin(k * 2.3), out });
+    },
     // It stands: two bells over the thump.
     stood: () => {
       bell(784, 0.25, 0.08);

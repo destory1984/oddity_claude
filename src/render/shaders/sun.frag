@@ -151,6 +151,25 @@ void main(){
       prom += .16 * (1. - smoothstep(.129, arch, r));
     }
   }
+  // An eruption: once in 150 s a prominence at the limb does not sink back. For a few
+  // seconds it stands and swells like the others, then it lifts off, faster and faster,
+  // out to a radius and a half, widening and thickening as it goes, and is torn into
+  // shreds that thin away: a red ribbon let go into space.
+  float lapE = time / 150. + .37;
+  float sE = fract(lapE) / .42;
+  if (sE < 1.) {
+    float seedE = floor(lapE);
+    float whereE = 6.2832 * fract(sin(seedE * 39.34) * 9871.3);
+    float lift = sE * sE * sE;
+    float xE = atan(sin(ang - whereE), cos(ang - whereE)) / (.16 + .25 * lift);
+    if (abs(xE) < 1.) {
+      float tallE = .012 + .02 * smoothstep(0., .35, sE) + .2 * lift;
+      float archE = .129 + tallE * sqrt(1. - xE * xE) * (.8 + .4 * fbm(vec2(xE * 2.5 + seedE, time * .15)));
+      float thickE = .0025 + .012 * lift;
+      float torn = smoothstep(lift * .75, lift * .75 + .25, fbm(vec2(ang * 26. + seedE, r * 40. - time * .2)) + .15 * (1. - lift));
+      prom += exp(-pow((r - archE) / thickE, 2.)) * torn * smoothstep(0., .08, sE) * (1. - smoothstep(.6, 1., sE)) * 1.3;
+    }
+  }
   prom *= 1. - disc;
   // The corona seen in a total eclipse: a pearly glow hugging the black disc, drawn out
   // into two broad streamers along the Sun's equator. Seen from over a pole there is no
@@ -181,10 +200,65 @@ void main(){
   float kernel = exp(-dot(p - from * .118, p - from * .118) / .00016) * smoothstep(0., .012, u) * exp(-u * 14.) * 2.5;
   float shell = exp(-pow((r - .129 * (1.05 + 2.2 * u)) / (.012 + .05 * u), 2.)) * exp(-pow(da / (.3 + .35 * u), 2.))
     * pow(1. - u, 2.) * smoothstep(0., .03, u) * .5;
-  vec3 col = (surface * disc * 1.35 + glow * visibility + vec3(1., .3, .27) * prom * .9
+  // Coronal rain: when the flare has flashed, three loops stand over its place for half
+  // a minute, one inside another, and bright drops of cooled gas slide down both legs of
+  // each from the top to the feet, one after another.
+  float rain = 0.;
+  float rainOn = smoothstep(.07, .14, u) * (1. - smoothstep(.42, .58, u));
+  float sda = atan(sin(ang - where), cos(ang - where));
+  if (rainOn > 0. && abs(sda) < .5 && r > .12 && r < .22) {
+    for (int k = 0; k < 3; k++) {
+      float fk = float(k);
+      float wideR = .09 + .05 * fk;
+      float tallR = .016 + .014 * fk;
+      float xR = (sda - (fk - 1.) * .03) / wideR;
+      if (abs(xR) < 1.) {
+        float bow = max(.05, sqrt(1. - xR * xR));
+        // How steep the loop is here, to measure the distance across it and not up from it.
+        float steep = tallR * xR / (bow * wideR * r);
+        float gap = (r - (.127 + tallR * bow)) / sqrt(1. + steep * steep);
+        float drops = pow(.5 + .5 * cos(6.2832 * (abs(xR) * (1.1 + .4 * fk) - time * (.11 + .02 * fk) - fk * .37)), 4.);
+        rain += exp(-pow(gap / .0016, 2.)) * (.16 + 1.5 * drops * (.4 + .6 * abs(xR)));
+      }
+    }
+    rain *= rainOn * (1. - disc);
+  }
+  // The wave on the surface (a Moreton wave): from the place of the flash a ring spreads
+  // over the face of the Sun for twelve seconds, a fainter one behind it, like a stone
+  // dropped in water. Measured on the ball itself, so it runs round the curve of it.
+  float wave = 0.;
+  float uw = u / .13;
+  if (uw < 1. && miss < 1.) {
+    vec3 burst = normalize((axisR * from.x + axisU * from.y) * .915 - axisF * .404);
+    float gone = acos(clamp(dot(n3, burst), -1., 1.));
+    float front = 1.3 * uw;
+    wave = (exp(-pow((gone - front) / .03, 2.)) + .4 * exp(-pow((gone - front * .72) / .04, 2.)))
+      * pow(1. - uw, 1.5) * smoothstep(0., .08, uw);
+  }
+  // A comet that grazes the Sun: once in 210 s a small one falls in from the edge of the
+  // glow, faster as it nears, its tail blown straight out from the Sun and growing, and
+  // at the limb it goes out in a puff. (Real ones come by the hundred each year, crumbs
+  // of one great comet broken long ago; few live through it.)
+  float graze = 0.;
+  float lapC = time / 210. + .61;
+  float sC = fract(lapC) / .26;
+  if (sC < 1.) {
+    float turnC = 6.2832 * fract(sin(floor(lapC) * 12.9898) * 43758.5) + .8 * sC * sC;
+    vec2 outC = vec2(cos(turnC), sin(turnC));
+    vec2 rel = p - outC * (.133 + .34 * (1. - sC * sC));
+    float outward = dot(rel, outC);
+    float beside = dot(rel, vec2(-outC.y, outC.x));
+    float tailC = outward > 0. ? exp(-pow(beside / (.0015 + outward * .07), 2.)) * exp(-outward / (.03 + .1 * sC)) : 0.;
+    float headC = exp(-dot(rel, rel) / .000012);
+    float shine = smoothstep(0., .12, sC) * (.35 + .65 * sC) * (1. - smoothstep(.94, 1., sC));
+    float puff = exp(-dot(rel, rel) / .0002) * smoothstep(.9, .97, sC) * (1. - smoothstep(.97, 1., sC));
+    graze = ((tailC * .7 + headC * 1.6) * shine + puff * 1.2) * (1. - disc);
+  }
+  vec3 col = (surface * (1. + .55 * wave) * disc * 1.35 + glow * visibility + vec3(1., .3, .27) * prom * .9
     + vec3(1., .96, .88) * kernel * disc + vec3(1., .8, .6) * shell * 3. * (1. - disc)
+    + vec3(1., .62, .7) * rain * 1.6 + vec3(.8, .9, 1.) * graze
     + vec3(.86, .9, 1.) * pearl + vec3(1., .97, .9) * diamond) * .68;
-  float a = clamp(disc + corona * .38 + rayH + rayV + ring + prom + pearl + diamond + shell, 0., 1.);
+  float a = clamp(disc + corona * .38 + rayH + rayV + ring + prom + pearl + diamond + shell + rain + graze, 0., 1.);
   // The glow is light added to the sky, but the disc itself hides what is behind it: the
   // colour goes out already multiplied by its strength, and the alpha says how much of
   // the background is taken away (all of it on the disc, none of it in the glow). Added

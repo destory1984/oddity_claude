@@ -9,6 +9,8 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-05', text: t('해의 홍염이 가끔 끊어져 날아가고, 작은 혜성이 해로 뛰어들어 사라집니다.') },
+  { day: '2026-10-05', text: t('해에서 플레어 뒤에 빛나는 비가 고리를 따라 내리고, 표면에 물결이 퍼집니다.') },
   { day: '2026-10-05', text: t('오른쪽 아래 구석에 우주멍 단추가 생겼습니다. 누르면 글자와 단추가 모두 사라지고 풍경만 남습니다.') },
   { day: '2026-10-05', text: t('일본어와 중국어를 고를 수 있습니다(설정의 Options). "Changes" 쪽도 고른 언어로 나옵니다.') },
   { day: '2026-10-05', text: t('케플러가 본 별에 다녀오면 수첩 천체 갈래 끝에 그 별과 가까이서 본 행성이 그림과 함께 적힙니다.') },

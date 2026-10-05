@@ -5,7 +5,7 @@
 import { stopNow } from './game.js';
 import { eyeHeightKm } from './eye.js';
 import { surfaceDirection, spinOf } from './surface.js';
-import { orientationFrom, rotateLocal, blend, multiply, turnAboutY } from './orientation.js';
+import { orientationFrom, rotateLocal, blend, multiply, turnAboutY, rotateVector } from './orientation.js';
 
 // The glide down runs under a countdown, like docking (core/dock.js): "Landing in
 // progress", then 3 down to 0, one number a second, and she touches down as the word
@@ -74,6 +74,16 @@ export function landingCounts(before, after) {
 // True once the glide is over and she stands at the place.
 export function hasArrived(visit) {
   return visit.elapsed >= VISIT_SECONDS;
+}
+
+// Carried round with a turning body, as one who hangs over the same ground: her place
+// and her view turned about the body's axis (the world's Y through its centre) by
+// `spun` radians, the turn the body made in this frame.
+export function carriedRound(position, orientation, centre, spun) {
+  if (!spun) return { position, orientation };
+  const turn = turnAboutY(spun);
+  const out = rotateVector(turn, sub(position, centre));
+  return { position: centre.map((n, i) => n + out[i]), orientation: multiply(turn, orientation) };
 }
 
 // The traveler dt seconds on. spot: the standSpot of this frame; body: the body the

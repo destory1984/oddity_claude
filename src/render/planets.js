@@ -15,7 +15,7 @@ import ringsGlsl from './shaders/rings.glsl?raw';
 import texturedFrag from './shaders/textured.frag?raw';
 import { KM_PER_UNIT, TIME_SCALE } from '../core/bodies.js';
 import { normalize } from './math.js';
-import { SPIN_DAY_S, EARTH_START_SPIN } from '../core/surface.js';
+import { SPIN_DAY_S, EARTH_START_SPIN, cloudSpin } from '../core/surface.js';
 import { SPOKES } from '../core/glows.js';
 import { SHADOW_SLOTS } from '../core/shadows.js';
 
@@ -24,8 +24,6 @@ const SIDEREAL_DAY_S = SPIN_DAY_S.earth;
 // every body spins with the game clock (core/bodies.js TIME_SCALE, 50 times real
 // time): one Earth day passes in 14 minutes.
 const SPIN_SPEEDUP = TIME_SCALE;
-// Clouds drift a little faster than the ground so the weather visibly moves.
-const CLOUD_DRIFT = 1.08;
 // Shell sizes relative to the Earth sphere, kept from the prototype (12.776 and 13.0 over 12.742).
 const CLOUD_SCALE = 12.776 / 12.742;
 const AIR_SCALE = 13.0 / 12.742;
@@ -97,7 +95,7 @@ function createEarth(scene, body, sunDir) {
       // (For the typhoon's turning, the fishing lamps' flicker and the volcano's ash.)
       surface.setFloat('time', elapsed);
       cloudMaterial.setFloat('time', elapsed);
-      clouds.rotation.y = EARTH_START_SPIN + 0.008 - turn * CLOUD_DRIFT;
+      clouds.rotation.y = cloudSpin(earth.rotation.y);
       // How far the cloud map stands east of the ground map, in turns (a larger
       // rotation.y carries a map eastward past a fixed place).
       surface.setFloat('cloudShift', (clouds.rotation.y - earth.rotation.y) / (2 * Math.PI));

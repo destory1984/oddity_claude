@@ -78,6 +78,11 @@ export function fromSpot(spot, body, sun) {
   };
 }
 
+// For now every start is near Earth, not only a first visit's (the user, 2026-10-06, while
+// looking at Earth's new sights: "당분간 지구 근처에서 나타나게 해줘"). Set this to false
+// to open at the far places again (Webb, behind the Moon).
+export const NEAR_EARTH_ONLY = true;
+
 // The place for this start. random: a number from 0 up to 1. forced: a place's number
 // from 1 (the address's ?start=2), for looking at one. newcomer: on a first visit only
 // the places near Earth are picked from (the first steps lead to the Moon).

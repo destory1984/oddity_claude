@@ -1,6 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
+  TYPHOON, typhoonUp, typhoonStrike,
   AURORAS, auroraBand, STORMS, LIGHTNING_GAP_S, LIGHTNING_LIFE_S, lightningGap, lightningGlow,
   PLUMES, PLUME_DAY_S, plumeUp, glowNear, glowsNear, TELL_RADII, TELL_JETS_KM, COUNTERGLOW_FROM_KM,
   IMPACT_GAP_S, IMPACT_LIFE_S, impactGap, impactGlow,
@@ -233,4 +234,23 @@ test('Uranus has an aurora and rings to tell of; Mars its polar jets from over t
   const away = venus.position.map((n, i) => n - sun.position[i]); const d = Math.hypot(...away);
   const night = venus.position.map((n, i) => n + (away[i] / d) * venus.radiusKm * 2);
   assert.ok(glowsNear(BODIES, night).includes('ashen:venus'));
+});
+
+test('the typhoon keeps its place on the drifting clouds and its lightning falls in the disc, off the eye', async () => {
+  const { cloudSpin, EARTH_START_SPIN, CLOUD_DRIFT, surfaceDirection } = await import('../src/core/surface.js');
+  // The clouds start a little east of the ground and turn 8% faster.
+  assert.ok(Math.abs(cloudSpin(EARTH_START_SPIN) - EARTH_START_SPIN - 0.008) < 1e-12);
+  assert.ok(Math.abs(cloudSpin(EARTH_START_SPIN - 1) - cloudSpin(EARTH_START_SPIN) + CLOUD_DRIFT) < 1e-12);
+  const eye = typhoonUp(0.7);
+  assert.deepEqual(eye, surfaceDirection(TYPHOON.latDeg, TYPHOON.lonDeg, 0.7));
+  const radiusKm = 6371;
+  let seed = 7;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  for (let i = 0; i < 200; i++) {
+    const up = typhoonStrike(rand, eye, radiusKm);
+    assert.ok(Math.abs(Math.hypot(...up) - 1) < 1e-9);
+    const km = Math.acos(Math.min(1, up[0] * eye[0] + up[1] * eye[1] + up[2] * eye[2])) * radiusKm;
+    assert.ok(km >= TYPHOON.eyeKm - 1e-6 && km <= TYPHOON.radiusKm + 1e-6, `${km} km from the eye`);
+  }
+  assert.ok(TYPHOON.sizeKm[1] < TYPHOON.radiusKm, 'a stroke lights a patch, not the whole storm');
 });

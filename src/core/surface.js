@@ -26,6 +26,17 @@ export const SPIN_DAY_S = {
 // Earth alone starts part-way through its turn, so the opening view shows it half lit
 // with the Pacific in front.
 export const EARTH_START_SPIN = 1.35;
+// Earth's clouds drift a little faster than the ground so the weather visibly moves,
+// and start a little east of it.
+export const CLOUD_DRIFT = 1.08;
+export const CLOUD_START = 0.008;
+
+// How far the cloud layer has turned when the ground has turned earthSpinRad (the
+// rotation.y of the cloud sphere in render/planets.js; what is drawn on the cloud map,
+// the typhoon, stands at its latitude and longitude turned by this).
+export function cloudSpin(earthSpinRad) {
+  return EARTH_START_SPIN + CLOUD_START + (earthSpinRad - EARTH_START_SPIN) * CLOUD_DRIFT;
+}
 
 // How far a body has turned at game time timeS: eastward, so the angle is negative
 // (the same as sphere.rotation.y in render/planets.js). startRad is where it began.

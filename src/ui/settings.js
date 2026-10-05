@@ -56,6 +56,15 @@ export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, 
     renderNews();
   });
   $('closeSettings').addEventListener('click', () => dialog.close());
+  // A press outside the sheet does what "비행 계속하기" does (the user, 2026-10-06: "메뉴의
+  // 바깥 부분을 누르면, 비행 계속하기 버튼을 누르는 것과 같은 효과로 해줘"). Outside is
+  // told by where the press fell, not by its target: the sheet's own margin and its
+  // scroll bar are the dialog too.
+  dialog.addEventListener('click', (e) => {
+    if (e.target !== dialog) return;
+    const box = dialog.getBoundingClientRect();
+    if (e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom) dialog.close();
+  });
   // The language: the game starts again in the one chosen, where she was, with the
   // settings open again (the notebook stays).
   for (const [id, choice] of [['langKo', 'ko'], ['langEn', 'en'], ['langJa', 'ja'], ['langZh', 'zh']]) {

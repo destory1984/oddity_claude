@@ -125,7 +125,7 @@
  "크기는 실제대로, 천체 사이의 빈 거리는 1/100(위성과 행성 사이는 1/10)로 압축된 우주를 날아보세요.": "Fly through a universe where sizes are real and the empty distances between bodies are squeezed to 1/100 (1/10 between a moon and its planet).",
  "방향 전환": "Turning",
  "화면 드래그": "Drag the screen",
- "\"목표 고정\" 단추. 고른 곳을 화면 가운데에 붙잡아 둡니다. 옆걸음 단추로 그 둘레를 돌고, 전진과 후진으로 다가가고 물러납니다. 화면을 끌면 풀립니다.": "The \"Lock target\" button. It keeps the chosen place in the middle of the screen. Circle it with the slide buttons, and go nearer or back off with forward and reverse. Dragging the screen lets go.",
+ "\"목표 고정\" 단추. 고른 곳을 화면 가운데에 붙잡아 둡니다. 가까이에서는 땅과 함께 돌아 같은 곳 위에 머뭅니다. 옆걸음 단추로 그 둘레를 돌고, 전진과 후진으로 다가가고 물러납니다. 화면을 끌어 둘러봐도 풀리지 않고, 단추를 다시 누르면 풀립니다.": "The \"Lock target\" button. It keeps the chosen place in the middle of the screen. From near by you turn with the ground and stay over the same spot. Circle it with the slide buttons, and go nearer or back off with forward and reverse. Dragging to look around does not let go; press the button again to release.",
  "큰 지도": "Big map",
  "왼쪽의 작은 지도를 누르면 열립니다. 지도나 이름에서 갈 곳을 고릅니다. \"순간 이동\"을 누르면 6초 뒤 그곳에 나타납니다(가 보지 않은 곳도 됩니다). \"이 방향으로\"는 그쪽을 바라보고 고정만 합니다.": "Press the small map at the left to open it. Pick a place on the map or by name. \"Jump\" puts you there six seconds later (even a place you have not been to). \"Face it\" only turns you that way and locks on.",
  "R 키 / 굽은 화살표 버튼. 시야만 뒤로 돌립니다. 나는 방향과 속도는 그대로이고, 다시 누르면 앞을 봅니다.": "The R key / the bent arrow button. Only the view turns back. Your heading and speed stay as they are, and pressing again looks forward.",
@@ -184,7 +184,7 @@
  "트라피스트-1에 왔습니다. 지구에서 약 40광년 떨어진 붉은 왜성과 행성 일곱입니다.\n크기와 궤도는 잰 값이고, 겉모습은 아무도 몰라 상상해서 그렸습니다.": "You have come to TRAPPIST-1: a red dwarf about 40 light-years from Earth, and its seven planets.\nThe sizes and orbits are measured; nobody knows what they look like, so that part is imagined.",
  "해가 빨개! 행성이 일곱이나 돼.": "The Sun is red! And there are seven planets.",
  "목표 고정을 풀었습니다.": "Target lock released.",
- "{}에 화면을 고정했습니다. 방향키 단추로 그 둘레를 돌고, 전진과 후진으로 다가가고 물러납니다.\n화면을 끌면 풀립니다.": "The view is locked on {the0}. Circle it with the arrow buttons, and go nearer or back off with forward and reverse.\nDragging the screen lets go.",
+ "{}에 고정했습니다. 가까이에서는 땅과 함께 돌아 같은 곳 위에 머뭅니다.\n화면을 끌어 둘러봐도 풀리지 않습니다. 단추를 다시 누르면 풀립니다.": "Locked on {the0}. From near by you turn with the ground and stay over the same spot.\nDragging to look around does not let go. Press the button again to release.",
  "{} 쪽을 바라보고 화면을 고정했습니다. 전진을 누르면 다가갑니다.": "Facing {the0} with the view locked. Press forward to go nearer.",
  "첫 안내를 마치거나 건너뛴 뒤에 할 수 있습니다.": "You can do that after finishing or skipping the first guide.",
  "코스를 마치거나 그만둔 뒤에 할 수 있습니다.": "You can do that after finishing or quitting the tour.",
@@ -2594,5 +2594,7 @@
  "우주멍 끝내기: 글자와 단추 보이기": "Stop just looking: show the words and buttons",
  "우주멍": "Just looking",
  "오른쪽 아래 구석의 달 모양 단추. 글자, 단추, 이름표를 모두 숨기고 풍경만 봅니다. 화면을 끌어 둘러볼 수 있고, 다시 누르면 돌아옵니다.": "The moon-shaped button in the lower right corner. It hides every word, button and label and leaves only the view. Drag the screen to look around, and press it again to bring them back.",
- "오른쪽 아래 구석에 우주멍 단추가 생겼습니다. 누르면 글자와 단추가 모두 사라지고 풍경만 남습니다.": "A \"just looking\" button in the lower right corner. Press it and every word and button goes, leaving only the view."
+ "오른쪽 아래 구석에 우주멍 단추가 생겼습니다. 누르면 글자와 단추가 모두 사라지고 풍경만 남습니다.": "A \"just looking\" button in the lower right corner. Press it and every word and button goes, leaving only the view.",
+ "목표 고정이 땅과 함께 돌아 같은 곳 위에 머뭅니다. 화면을 끌어 둘러봐도 풀리지 않습니다.": "The target lock turns with the ground and stays over the same spot. Dragging to look around no longer lets go.",
+ "밤 쪽에 든 태풍 속에서 번개가 번쩍여 소용돌이 모양이 드러납니다.": "Lightning flickers inside the typhoon on the night side and shows its spiral."
 }

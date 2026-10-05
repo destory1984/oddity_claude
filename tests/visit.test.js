@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { VISIT_SECONDS, STAND_KM, NARROW_STAND_KM, STAND_UP_KM, standSpot, startVisit, hasArrived, visitStep, landingCounts } from '../src/core/visit.js';
+import { VISIT_SECONDS, STAND_KM, NARROW_STAND_KM, STAND_UP_KM, standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from '../src/core/visit.js';
 import { STORIES, storySitesAt, completedStories } from '../src/core/stories.js';
 import { bodiesAt } from '../src/core/bodies.js';
 import { createState } from '../src/core/game.js';
@@ -67,6 +67,24 @@ test('the spot turns with the ground: the same turn about Y that the body makes'
   const spun = spinOf('mars', 100 + 7200) - spinOf('mars', 100);
   rotateVector(turnAboutY(spun), a.position).forEach((n, i) => near(n, b.position[i]));
   forward(multiply(turnAboutY(spun), a.facing)).forEach((n, i) => near(n, forward(b.facing)[i], 1e-9));
+});
+
+test('locked on a turning body she is carried round with it: the same place stays under her and before her eyes', () => {
+  const story = SURFACE.find((s) => s.body === 'mars');
+  const mars = { id: 'mars', radiusKm: 3389.5, position: [500, -20, 40] };
+  const a = standSpot(story, mars, 100);
+  const b = standSpot(story, mars, 100 + 7200);
+  const spun = spinOf('mars', 100 + 7200) - spinOf('mars', 100);
+  // She hangs three radii out over the place, looking down at it.
+  const over = mars.position.map((n, i) => n + (a.position[i] - n) * 3);
+  const facing = orientationFrom(a.position.map((n, i) => n - over[i]), [0, 1, 0]);
+  const moved = carriedRound(over, facing, mars.position, spun);
+  moved.position.forEach((n, i) => near(n, mars.position[i] + (b.position[i] - mars.position[i]) * 3, 1e-6));
+  const toPlace = b.position.map((n, i) => n - moved.position[i]);
+  const length = Math.hypot(...toPlace);
+  forward(moved.orientation).forEach((n, i) => near(n, toPlace[i] / length, 1e-9));
+  // No turn, no change.
+  assert.equal(carriedRound(over, facing, mars.position, 0).position, over);
 });
 
 test('the landing counts 3 to 0, one a second, after two seconds for "Landing in progress"; she touches down as "zero" ends', () => {

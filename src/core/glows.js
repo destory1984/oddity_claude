@@ -118,6 +118,35 @@ export const STORMS = [
   // Akatsuki caught one flash of light in 2020. Drawn seldom.
   { id: 'lightning:venus', body: 'venus', rangeKm: 80000, gapS: [3, 7], sizeKm: [500, 1100], liftKm: 70, spread: 0.05 },
 ];
+// Lightning in Earth's typhoon (the swirl clouds.frag draws on the cloud map at this
+// latitude and longitude): on the night side the storm cannot be seen, so its own
+// lightning shows it, as in the pictures taken from the space station. Strokes fall
+// anywhere in the disc of cloud but the eye, smaller and oftener than a common storm's,
+// so the round shape reads from the flashes.
+export const TYPHOON = { body: 'earth', latDeg: 18, lonDeg: 135, radiusKm: 520, eyeKm: 70, gapS: [0.25, 1.1], sizeKm: [160, 340] };
+
+// Unit vector from Earth's centre to the typhoon's eye when the cloud layer has turned
+// by cloudSpinRad (core/surface.js cloudSpin).
+export function typhoonUp(cloudSpinRad) {
+  return surfaceDirection(TYPHOON.latDeg, TYPHOON.lonDeg, cloudSpinRad);
+}
+
+// A place for a stroke in the typhoon: a unit vector from Earth's centre, between the
+// eye's wall and the rim of the disc, any way round. eye: typhoonUp; radiusKm: Earth's.
+export function typhoonStrike(rand, eye, radiusKm) {
+  const km = TYPHOON.eyeKm + Math.sqrt(rand()) * (TYPHOON.radiusKm - TYPHOON.eyeKm);
+  const turn = 2 * Math.PI * rand();
+  const side = Math.abs(eye[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+  let east = [side[1] * eye[2] - side[2] * eye[1], side[2] * eye[0] - side[0] * eye[2], side[0] * eye[1] - side[1] * eye[0]];
+  const length = Math.hypot(...east);
+  east = east.map((n) => n / length);
+  const north = [eye[1] * east[2] - eye[2] * east[1], eye[2] * east[0] - eye[0] * east[2], eye[0] * east[1] - eye[1] * east[0]];
+  const arc = km / radiusKm;
+  const up = eye.map((n, i) => n * Math.cos(arc) + (east[i] * Math.cos(turn) + north[i] * Math.sin(turn)) * Math.sin(arc));
+  const norm = Math.hypot(...up);
+  return up.map((n) => n / norm);
+}
+
 export const LIGHTNING_RANGE_KM = STORMS[0].rangeKm;
 export const LIGHTNING_GAP_S = STORMS[0].gapS;
 // Each stroke lasts this long.

@@ -21,7 +21,7 @@ import { createWarp } from './ui/warp.js';
 import { addPhoto, removePhoto, photoPlace, photoCaption } from './core/album.js';
 import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } from './core/postcard.js';
 import { isLocalHost } from './core/count.js';
-import { pickSpot, fromSpot, toSpot } from './core/startSpots.js';
+import { pickSpot, fromSpot, toSpot, NEAR_EARTH_ONLY } from './core/startSpots.js';
 import { teleportSpot } from './core/teleport.js';
 import { behindBody, lostInGlare, nearestBodies, nearbyMoons } from './core/markers.js';
 import { FACTS } from './core/facts.js';
@@ -79,7 +79,7 @@ import { STORY_MORE } from './core/storyMore.js';
 import { replayFor, replayFrame, replayOn } from './core/replay.js';
 import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
-import { standSpot, startVisit, hasArrived, visitStep, landingCounts } from './core/visit.js';
+import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from './core/visit.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -96,6 +96,9 @@ const VISTA_YAW = 0.3;
 const AIM_OVER = 0.26;
 const faceToward = (toward) => rotateLocal(lookAtDirection(toward), 0, AIM_OVER);
 // The line of the view, in its own axes, that a faced target lies on (over her head).
+// Locked on a turning body she is carried round with its ground from within this many
+// radii of its centre (the height of a geostationary satellite is 6.6 of Earth's).
+const LOCK_CARRY_RADII = 12;
 const AIM_LINE = rotateVector(conjugate(faceToward([0, 0, 1])), [0, 0, 1]);
 const HUD_EVERY_N_FRAMES = 6;
 // The sprite character shields her eyes within this far of the Sun's surface, and fans
@@ -204,7 +207,7 @@ function startAtSpot(spot) {
   const { position, orientation } = fromSpot(spot, bodyById(spot.body, bodies), bodyById('sun', bodies));
   return createState(position, orientation);
 }
-const startSpot = pickSpot(Math.random(), new URLSearchParams(location.search).get('start'), !loadGuideDone());
+const startSpot = pickSpot(Math.random(), new URLSearchParams(location.search).get('start'), NEAR_EARTH_ONLY || !loadGuideDone());
 
 // After a change of language the game carries on where she was (ui/storage.js).
 const resume = takeResume();
@@ -216,6 +219,9 @@ let dragTurn = [0, 0];
 // then take her round it, and forward and back bring her nearer and farther. Dragging
 // the view or turning with the arrow keys lets go.
 let locked = false;
+// Locked, and the view turned away by hand: the lock holds (she stays over the same
+// ground and goes round the target) but the view is left where she put it.
+let lockFree = false;
 // Turned to face a target without locking on (바라보기, the journal's 목적지로): the id of
 // it while the view has not been turned since. Forward then goes straight at it, though
 // the view is tipped to keep it over her head (along the view she flew 15 degrees under it).
@@ -432,7 +438,7 @@ async function init() {
     onDrag(dx, dy) {
       if (photo.active()) photo.rotate(dx, dy);
       else if (!paused) {
-        if (locked) unlock();
+        if (locked) lockFree = true;
         aimedId = null;
         state = { ...state, orientation: rotateLocal(state.orientation, ...(rear ? rearTurn(dx, dy) : [dx, dy])) };
         dragTurn[0] += dx;
@@ -985,14 +991,16 @@ ${STORY_MORE[target.id]}` : told };
   hud.showSelection(named(selectedId));
   function unlock() {
     locked = false;
+    lockFree = false;
     toast.show(t('목표 고정을 풀었습니다.'));
   }
   $('lockTarget').addEventListener('click', () => {
     if (locked) return unlock();
     locked = true;
+    lockFree = false;
     const body = here(selectedId);
     state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
-    toast.show(t`${body.name}에 화면을 고정했습니다. 방향키 단추로 그 둘레를 돌고, 전진과 후진으로 다가가고 물러납니다.\n화면을 끌면 풀립니다.`);
+    toast.show(t`${body.name}에 고정했습니다. 가까이에서는 땅과 함께 돌아 같은 곳 위에 머뭅니다.\n화면을 끌어 둘러봐도 풀리지 않습니다. 단추를 다시 누르면 풀립니다.`);
     return undefined;
   });
 
@@ -1039,6 +1047,7 @@ ${STORY_MORE[target.id]}` : told };
     hud.showSelection(named(mapPick));
     state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
     locked = true;
+    lockFree = false;
     $('bigMap').close();
     toast.show(t`${body.name} 쪽을 바라보고 화면을 고정했습니다. 전진을 누르면 다가갑니다.`);
   });
@@ -1784,13 +1793,15 @@ ${STORY_MORE[target.id]}` : told };
     const result = step(state, intent, dt, bodies, slowPoints);
     state = result.state;
     // Target lock: the view swings onto the target and stays on it as she moves. Turning
-    // with the keys lets go; docked, going down to a place, looking behind or resting on
-    // the target itself it waits.
+    // the view by hand (a drag, the keys) frees the view but keeps the lock (the user,
+    // 2026-10-06: "고정한 상태에서 시야를 돌리면, 고정이 풀려버리는데.. 이것도 해결해줘");
+    // only the button lets go. Docked, going down to a place, looking behind or resting
+    // on the target itself it waits.
     // (Only faced, not locked: the view is left alone and sliding is a plain slide, but
     // forward and back still go straight to the target and away.)
     if (guided && dt > 0 && !docked && !visit && !rear && !photo.active()) {
       if (intent.turnX !== 0 || intent.turnY !== 0 || intent.roll !== 0) {
-        if (locked) unlock();
+        if (locked) lockFree = true;
         aimedId = null;
       } else {
         const aim = here(selectedId);
@@ -1811,16 +1822,30 @@ ${STORY_MORE[target.id]}` : told };
           // though the view is tipped to keep it over her head (along the view she would
           // curl in round it).
           const went = Math.hypot(...state.position.map((n, i) => n - lockFrom[i]));
-          if (!sliding && state.speed > 0.01 && went > 0 && !state.restingOn && lockRange > 1) {
+          if (!sliding && !lockFree && state.speed > 0.01 && went > 0 && !state.restingOn && lockRange > 1) {
             const along = Math.min(went, state.motionSign > 0 ? lockRange : Infinity) * state.motionSign;
             position = lockFrom.map((n, i) => n + ((aim.position[i] - n) / lockRange) * along);
           }
           // The view is swung onto the target from where it is, by the shortest turn
           // (core/orientation.js swingToward): built anew from world-up each frame it
           // span half round whenever she passed over or under the target.
-          const orientation = locked ? swingToward(state.orientation, AIM_LINE, aim.position.map((n, i) => n - position[i]), 1 - Math.exp(-dt * LOCK_RATE)) : state.orientation;
+          const orientation = locked && !lockFree ? swingToward(state.orientation, AIM_LINE, aim.position.map((n, i) => n - position[i]), 1 - Math.exp(-dt * LOCK_RATE)) : state.orientation;
           state = { ...state, position, orientation };
         }
+      }
+    }
+    // Locked on a turning body, or on a place of its ground, from near by: she is carried
+    // round with it and stays over the same land (the user, 2026-10-06: "고정을 눌러도,
+    // 지구에 고정이 안 되잖아": the ground slid away under her, 12.5 degrees a minute at
+    // Earth). Not from farther than LOCK_CARRY_RADII of its centre: from the Moon's
+    // distance that would sweep her 84,000 km a minute.
+    if (locked && dt > 0 && !docked && !visit && !photo.active()) {
+      const aim = here(selectedId);
+      const ground = sites.some((s) => s.id === aim.id) ? here(aim.parent) : bodyById(aim.id, bodies);
+      if (ground && state.restingOn !== ground.id) {
+        const far = Math.hypot(...state.position.map((n, i) => n - ground.position[i]));
+        const spun = spinOf(ground.id, simTime) - spinOf(ground.id, simTime - dt * TIME_SCALE);
+        if (spun && far <= ground.radiusKm * LOCK_CARRY_RADII) state = { ...state, ...carriedRound(state.position, state.orientation, ground.position, spun) };
       }
     }
     // The journal is of the Solar System: another star's planets are kept apart (below).

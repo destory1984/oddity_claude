@@ -4374,11 +4374,8 @@ html:not([lang="ko"]) #journal #journalTabs button {
   padding:4px 8px;
 }
 
-/* The version line beside "Settings" stays on one line. */
-html:not([lang="ko"]) #appVersion {
-  white-space:nowrap;
-  font-size:10px;
-}
+/* (The version line beside "Settings" was kept on one line in English; at a larger text
+   size it then ran under the size buttons, so it wraps as in Korean.) */
 
 /* The four language buttons stand on one line at any width and text size (the user,
    2026-10-05: "버튼은 한 줄에"): equal shares of the row, their words never wrapped. */
@@ -4438,14 +4435,15 @@ html:not([lang="ko"]) #appVersion {
 }
 
 /* Japanese and Chinese: Pretendard has no kana and few hanzi, so the device's own fonts
-   follow it (no font is shipped for them), and grandmother's hand is the device's
-   brush-like or rounded face. */
+   follow it (no font is shipped for them), grandmother's hand is the device's
+   brush-like or rounded face, and Sora's words (Gaegu in Korean) a plain rounded one. */
 html[lang="ja"] body {
   font-family:"Pretendard Variable",Pretendard,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic",Meiryo,"Noto Sans JP","Noto Sans CJK JP",sans-serif;
 }
 
 html[lang="ja"] {
   --hand:"Klee One",Klee,"Hiragino Maru Gothic ProN","Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;
+  --seora:"Hiragino Maru Gothic ProN","BIZ UDPGothic","Yu Gothic UI",Meiryo,"Noto Sans JP",sans-serif;
 }
 
 html[lang="zh-Hans"] body {
@@ -4454,4 +4452,22 @@ html[lang="zh-Hans"] body {
 
 html[lang="zh-Hans"] {
   --hand:"Kaiti SC",STKaiti,KaiTi,"Noto Serif SC",serif;
+  --seora:"PingFang SC","Microsoft YaHei UI","Microsoft YaHei","Noto Sans SC",sans-serif;
+}
+
+/* The notebook's six tabs in Japanese ("ミッション", "アルバム") fit a phone 360 wide. */
+html[lang="ja"] #journal #journalTabs button {
+  padding:4px 5px;
+  letter-spacing:-.02em;
+}
+
+/* Korean keeps a word whole at a line's end (word-break:keep-all, set in many rules
+   above). Japanese and Chinese have no spaces between words, so with that rule a line
+   could not be broken at all and ran out of its box: they break between any two
+   characters, by their own rules for punctuation. */
+html[lang="ja"] *,
+html[lang="zh-Hans"] * {
+  word-break:normal !important;
+  line-break:strict;
+  overflow-wrap:anywhere;
 }

@@ -99,7 +99,11 @@ export function named(list) {
         item.nameEn = '';
       }
     } else {
-      item.name = dictionary().get(item.name) ?? item.nameEn ?? item.name;
+      // (A name made with t('…') is already in the language: only one still in Korean
+      // and not in the dictionary falls back on its English.)
+      const own = dictionary().get(item.name);
+      if (own !== undefined) item.name = own;
+      else if (/[가-힣]/.test(item.name) && item.nameEn) item.name = item.nameEn;
       if (item.name === item.nameEn) item.nameEn = '';
     }
   }

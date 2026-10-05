@@ -72,7 +72,8 @@ test('Japanese and Chinese have each their own dictionary, names and counting wo
   assert.equal(counted('5.9억km (39.5AU)'), '5.9億km (39.5AU)');
   assert.equal(counted('84년'), '84年');
   // A name goes by the dictionary and keeps its English beside it; one not there goes by its English.
-  assert.deepEqual(named([{ name: '시험별', nameEn: 'Test Star' }, { name: '없는별', nameEn: 'No Star' }]), [{ name: '試験星', nameEn: 'Test Star' }, { name: 'No Star', nameEn: '' }]);
+  assert.deepEqual(named([{ name: '시험별', nameEn: 'Test Star' }, { name: '없는별', nameEn: 'No Star' }, { name: t('시험별'), nameEn: 'Test Star' }]),
+    [{ name: '試験星', nameEn: 'Test Star' }, { name: 'No Star', nameEn: '' }, { name: '試験星', nameEn: 'Test Star' }]);
   setLanguage('zh');
   assert.equal(pageLanguage(), 'zh-Hans');
   assert.equal(t('시험 문장입니다.'), '这是一句测试。');

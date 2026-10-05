@@ -144,7 +144,6 @@
  "사진": "Photos",
  "P 키 / 사진 모드 버튼": "The P key / the photo mode button",
  "고른 천체나 탐사선, 이야기 장소를 화면 가운데에 두고 가까이에서 봅니다. 드래그하면 그 둘레를 360도 돌아가며 봅니다. 화면 위쪽에 읽을거리가 뜨고, 수첩에 있는 천체와 탐사선이면 글 아래에 문제 하나가 붙습니다. 이때 찍은 사진은 사진첩에는 들어가지만 사진 임무로는 치지 않습니다.": "Puts the chosen body, spacecraft or story place in the middle of the screen and looks at it from close by. Drag to go all the way round it. Something to read shows at the top, and for a body or a spacecraft that is in the notebook there is one question under it. Photos taken here go into the album but do not count for photo missions.",
- "위쪽 맨 오른쪽의 톱니 버튼. 첫 쪽 \"옵션\"에서 화면 비율, 행성 배치, 소리를 바꿉니다. 둘째 쪽이 이 도움말이고, 셋째 쪽에서 바뀐 것들을 봅니다. 앱으로 설치하는 방법도 거기에 있습니다.": "The gear button at the far right of the top. The first page, \"Options\", changes the language, the screen shape, the planet layout and the sounds. The second page is this help, and the third shows what has changed. How to install the game as an app is there too.",
  "J 키 / 수첩 버튼. 위쪽의 \"가−\", \"가+\"로 글자 크기를 다섯 단계(85% → 150%)로 바꿉니다(수첩, 설정, 이 도움말이 함께 바뀝니다). 새 천체를 발견하고, 표면에 내려앉고, 사진 임무를 달성하면 기록됩니다. 위쪽 갈래(천체, 임무, 사진첩, 이야기, 탐사선, 코스)를 눌러 넘겨 보고(사진첩에서는 사진을 엽서 그림으로 저장할 수 있고, 코스 갈래 아래에는 하고 싶을 때만 하는 묘기 비행이 있습니다), 오른쪽 위 ✕나 Esc, J 키, 수첩 바깥을 누르면 닫힙니다.": "The J key / the notebook button. \"A−\" and \"A+\" at the top change the text size in five steps (85% → 150%) for the notebook, the settings and this help together. Finding a new body, touching down on a surface and completing a photo mission are written down. Press the tabs at the top (Bodies, Tasks, Album, Stories, Craft, Tours) to turn the pages (in the album a photo can be saved as a postcard picture, and under the tours is stunt flying for when you feel like it). The ✕ at the top right, Esc, the J key or a press outside the notebook closes it.",
  "태양, 여덟 행성, 위성 21개, 왜행성 둘, 핼리 혜성의 실제 표면 바로 앞까지 접근할 수 있습니다. 천체 내부로는 들어갈 수 없습니다. 천체 표면 사이의 빈 거리만 1/100(위성은 1/10)로 줄였습니다. 기본인 여행 배치는 오늘의 실제 천문 위치가 아닙니다. 다른 앱이나 탭으로 갔다 오면 그동안 멈춰 있다가 돌아오는 대로 이어집니다.": "You can go right up to the real surfaces of the Sun, the eight planets, 21 moons, two dwarf planets and Halley's Comet. You cannot go inside a body. Only the empty distances between surfaces are cut to 1/100 (1/10 for moons). The default tour layout is not where things really are in the sky today. If you go to another app or tab, the game waits and carries on when you come back.",
  "만든 이유": "Why I made this",
@@ -2433,12 +2432,10 @@
  "화면 밖을 가리키는 이름표가 아래쪽 단추를 덮거나 서로 겹치던 것을 고쳤습니다.": "Fixed the labels that point off screen covering the lower buttons or each other.",
  "게임을 켤 때마다 시작하는 자리가 달라집니다. 지금은 다섯 곳 가운데 하나에서 열립니다.": "The game opens at a different place each time. For now it is one of five.",
  "안드로이드에서 화면 위의 안내 줄이 깜빡 사라졌다 나타나던 것을 고쳤습니다.": "Fixed the guide line at the top blinking away and back on Android.",
- "영어를 고를 수 있습니다(설정의 옵션). 화면 글자와 이야기 글이 모두 영어로 나옵니다.": "You can choose English (Settings, Options). Every word on screen and every story is in English.",
  "PC에 앱으로 설치해 세로로 긴 창으로 열면 단추와 칸이 서로 겹치던 것을 고쳤습니다.": "Fixed buttons and panels overlapping when the app installed on a PC is opened as a tall window.",
  "별자리와 은하를 누르면 뜨는 설명에 그림이 붙었습니다. 와디럼과 보현산천문대 이야기에도 그림이 생겼습니다.": "The notes shown when you press a constellation or a galaxy now have drawings. So do the Wadi Rum and Bohyunsan stories.",
  "별자리의 선이나 이름을 누르면 두세 줄 설명이 뜹니다. 은하와 성운, 성단도 누르면 설명이 뜹니다.": "Press a constellation's lines or name for two or three lines about it. Galaxies, nebulae and clusters too.",
  "오로라가 매끈한 띠가 아니라 빛줄기가 늘어선 커튼으로 보입니다.": "Auroras are no longer a smooth band but a curtain of rays.",
- "설정의 \"바뀐 것들\"이 만들기 시작한 날부터의 기록을 모두 보여 줍니다.": "\"Changes\" in the settings shows everything since the day the making began.",
  "아이폰에서 단추를 빠르게 두 번 누르면 화면이 커지던 것을 고쳤습니다.": "Fixed the screen zooming in on an iPhone when a button is pressed twice quickly.",
  "보현산천문대에 천문대 그림이 섰고, 사진이 없던 이야기 장소 세 곳에 그림이 붙었습니다.": "A drawing of the observatory stands at Bohyunsan, and three story places that had no photo have drawings.",
  "앞으로 날 때와 아래로 날 때의 뒷모습을 새로 그렸습니다. 띠와 머리카락 끝만 나부낍니다.": "Sora's back view when flying forward and downward is newly drawn. Only her ribbon and the tips of her hair flutter.",
@@ -2548,5 +2545,9 @@
  "효과음이 생기고, 인터넷 없이도 도는 앱으로 설치할 수 있게 됐습니다.": "Sound effects, and the game can be installed as an app that runs without the internet.",
  "이름을 Space Oddity로 정했습니다.": "The name was settled: Space Oddity.",
  "만들기 시작한 날: {}년 {}월 {}일": "Making began: {1}/{2}/{0}",
- "우주 탐험 오늘로 {}일째": "Day {0} of exploring space"
+ "우주 탐험 오늘로 {}일째": "Day {0} of exploring space",
+ "위쪽 맨 오른쪽의 톱니 버튼. 첫 쪽 \"Options\"에서 화면 비율, 행성 배치, 소리를 바꿉니다. 둘째 쪽이 이 도움말이고, 셋째 쪽에서 바뀐 것들을 봅니다. 앱으로 설치하는 방법도 거기에 있습니다.": "The gear button at the far right of the top. The first page, \"Options\", changes the language, the screen shape, the planet layout and the sounds. The second page is this help, and the third shows what has changed. How to install the game as an app is there too.",
+ "영어를 고를 수 있습니다(설정의 Options). 화면 글자와 이야기 글이 모두 영어로 나옵니다.": "You can choose English (Settings, Options). Every word on screen and every story is in English.",
+ "설정의 \"Changes\"가 만들기 시작한 날부터의 기록을 모두 보여 줍니다.": "\"Changes\" in the settings shows everything since the day the making began.",
+ "일본어와 중국어를 고를 수 있습니다(설정의 Options). \"Changes\" 쪽도 고른 언어로 나옵니다.": "You can choose Japanese or Chinese (Settings, Options). The \"Changes\" page comes in the chosen language too."
 }

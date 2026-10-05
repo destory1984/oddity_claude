@@ -27,6 +27,9 @@ export const START_SPOTS = [
   // round. far: 144,000 km from Earth, so not for a first visit, whose steps lead to the
   // Moon.
   { id: 'webb', body: 'earth', target: 'jwst', dock: 'jwst', far: true, at: [-149958.9, -29.9, -31.9], ahead: [-0.8245, 0.3647, 0.4326], above: [0.3351, 0.9308, -0.146] },
+  // Under Earth's south pole on the night side, 9,633 km off, the view turned over so
+  // the pole is at the foot of the screen: the whole ring of the southern aurora.
+  { id: 'auroraRing', body: 'earth', at: [-8500.5, -8539.7, 10532.4], ahead: [0.5767, -0.0241, -0.8166], above: [-0.0954, -0.9947, -0.038] },
 ];
 
 const unit = (v) => {

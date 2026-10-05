@@ -2549,5 +2549,10 @@
  "위쪽 맨 오른쪽의 톱니 버튼. 첫 쪽 \"Options\"에서 화면 비율, 행성 배치, 소리를 바꿉니다. 둘째 쪽이 이 도움말이고, 셋째 쪽에서 바뀐 것들을 봅니다. 앱으로 설치하는 방법도 거기에 있습니다.": "The gear button at the far right of the top. The first page, \"Options\", changes the language, the screen shape, the planet layout and the sounds. The second page is this help, and the third shows what has changed. How to install the game as an app is there too.",
  "영어를 고를 수 있습니다(설정의 Options). 화면 글자와 이야기 글이 모두 영어로 나옵니다.": "You can choose English (Settings, Options). Every word on screen and every story is in English.",
  "설정의 \"Changes\"가 만들기 시작한 날부터의 기록을 모두 보여 줍니다.": "\"Changes\" in the settings shows everything since the day the making began.",
- "일본어와 중국어를 고를 수 있습니다(설정의 Options). \"Changes\" 쪽도 고른 언어로 나옵니다.": "You can choose Japanese or Chinese (Settings, Options). The \"Changes\" page comes in the chosen language too."
+ "일본어와 중국어를 고를 수 있습니다(설정의 Options). \"Changes\" 쪽도 고른 언어로 나옵니다.": "You can choose Japanese or Chinese (Settings, Options). The \"Changes\" page comes in the chosen language too.",
+ "우주멍: 글자와 단추 숨기기": "Just looking: hide the words and buttons",
+ "우주멍 끝내기: 글자와 단추 보이기": "Stop just looking: show the words and buttons",
+ "우주멍": "Just looking",
+ "오른쪽 아래 구석의 달 모양 단추. 글자, 단추, 이름표를 모두 숨기고 풍경만 봅니다. 화면을 끌어 둘러볼 수 있고, 다시 누르면 돌아옵니다.": "The moon-shaped button in the lower right corner. It hides every word, button and label and leaves only the view. Drag the screen to look around, and press it again to bring them back.",
+ "오른쪽 아래 구석에 우주멍 단추가 생겼습니다. 누르면 글자와 단추가 모두 사라지고 풍경만 남습니다.": "A \"just looking\" button in the lower right corner. Press it and every word and button goes, leaving only the view."
 }

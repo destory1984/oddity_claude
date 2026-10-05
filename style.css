@@ -4471,3 +4471,56 @@ html[lang="zh-Hans"] * {
   line-break:strict;
   overflow-wrap:anywhere;
 }
+
+/* The "우주멍" button: the corner cell the key block left empty, at the right foot of the
+   screen, as large as the other keys. A crescent moon. */
+#gazeButton {
+  position:absolute;
+  right:0;
+  bottom:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:56px;
+  height:56px;
+  min-height:56px;
+  margin:0;
+  padding:0;
+  font-size:0;
+}
+
+#gazeButton::before {
+  content:"";
+  flex:none;
+  width:24px;
+  height:24px;
+  background:url("/assets/ui/icon-gaze.svg") center / contain no-repeat;
+}
+
+@media (max-width: 480px) {
+  #gazeButton {
+    width:var(--top-key);
+    height:var(--top-key);
+    min-height:var(--top-key);
+  }
+}
+
+/* Just looking: everything written or drawn over the view is put away (the panels, the
+   keys, the labels and arrows, the notices, Sora's words), only the scene and Sora are
+   left. The button itself stays, faint, to bring them back. Hidden things take no touch,
+   so a drag anywhere turns the view. */
+html.gaze #hud > :not(footer),
+html.gaze #hud footer > :not(#gazeButton),
+html.gaze #hint,
+html.gaze #guide,
+html.gaze #toast,
+html.gaze #heroSay,
+html.gaze #skyTold,
+html.gaze #testReset {
+  visibility:hidden !important;
+}
+
+html.gaze #gazeButton {
+  opacity:.4;
+  border-color:var(--gold);
+}

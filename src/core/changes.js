@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-05', text: t('오른쪽 아래 구석에 우주멍 단추가 생겼습니다. 누르면 글자와 단추가 모두 사라지고 풍경만 남습니다.') },
   { day: '2026-10-05', text: t('일본어와 중국어를 고를 수 있습니다(설정의 Options). "Changes" 쪽도 고른 언어로 나옵니다.') },
   { day: '2026-10-05', text: t('케플러가 본 별에 다녀오면 수첩 천체 갈래 끝에 그 별과 가까이서 본 행성이 그림과 함께 적힙니다.') },
   { day: '2026-10-05', text: t('수첩의 천체 갈래에 천체 그림 35장이 붙었습니다. 아직 못 찾은 천체는 어두운 형체로 보입니다.') },

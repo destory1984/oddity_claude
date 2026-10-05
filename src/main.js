@@ -1407,6 +1407,20 @@ ${STORY_MORE[target.id]}` : told };
 
   $('brake').addEventListener('click', brake);
   $('rearButton').addEventListener('click', () => setRear(!rear));
+  // Just looking ("우주멍", the reason the game was made; the user, 2026-10-05: "화면 제일
+  // 오른쪽 아랫 부분에 버튼을 하나 만들어서, 그걸 누르면 모든 글자 표시, 아이콘이 없어지게"):
+  // every word, label and button goes (style.css `html.gaze`) but this one, dimmed, which
+  // brings them back. She flies on as she was, and a drag still turns the view.
+  let gazing = false;
+  const setGaze = (on) => {
+    gazing = on;
+    document.documentElement.classList.toggle('gaze', on);
+    const words = on ? t('우주멍 끝내기: 글자와 단추 보이기') : t('우주멍: 글자와 단추 숨기기');
+    $('gazeButton').setAttribute('aria-pressed', String(on));
+    $('gazeButton').setAttribute('aria-label', words);
+    $('gazeButton').title = words;
+  };
+  $('gazeButton').addEventListener('click', () => setGaze(!gazing));
   $('pauseButton').addEventListener('click', () => setPaused(!paused));
   $('photoButton').addEventListener('click', () => photo.toggle());
   // The settings hold the game while they are open. (The help is their second page: it

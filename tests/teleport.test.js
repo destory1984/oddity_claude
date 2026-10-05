@@ -57,6 +57,17 @@ test('a jump happens only from far away: nearby, choosing a name works as before
   const apollo = sites.find((s) => s.id === 'apollo11');
   assert.equal(farFrom(apollo, [apollo.position[0], apollo.position[1] + 2001, apollo.position[2]]), true);
   assert.equal(farFrom(apollo, [apollo.position[0], apollo.position[1] + 1999, apollo.position[2]]), false);
+  // Beside another body the target is a journey however close it is: Earth from the Moon.
+  const earth = bodyById('earth', bodies);
+  const moon = bodyById('moon', bodies);
+  const onMoon = moon.position.map((n, i) => n + (i === 1 ? moon.radiusKm + 3 : 0));
+  const known = { ...createProgress(), discovered: ['earth', 'moon'] };
+  assert.equal(farFrom(earth, onMoon), false);
+  assert.equal(farFrom(earth, onMoon, bodies), true);
+  assert.ok(teleportSpot(earth, { position: onMoon, progress: known, bodies }));
+  // In open space as near to Earth as the Moon is, Earth is still near.
+  const open = earth.position.map((n, i) => n - (moon.position[i] - earth.position[i]));
+  assert.equal(farFrom(earth, open, bodies), farFrom(earth, open));
   const seen = { ...createProgress(), discovered: ['earth', 'mars'] };
   assert.equal(teleportSpot(mars, { position: at(1000 + mars.radiusKm), progress: seen, bodies }), null);
   assert.equal(teleportSpot(mars, { position: far, progress: createProgress(), bodies }), null);

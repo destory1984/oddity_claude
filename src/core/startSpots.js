@@ -30,6 +30,10 @@ export const START_SPOTS = [
   // Under Earth's south pole on the night side, 9,633 km off, the view turned over so
   // the pole is at the foot of the screen: the whole ring of the southern aurora.
   { id: 'auroraRing', body: 'earth', at: [-8500.5, -8539.7, 10532.4], ahead: [0.5767, -0.0241, -0.8166], above: [-0.0954, -0.9947, -0.038] },
+  // Behind the Moon, 14,536 km off its night side, looking past its dark disc at the Sun;
+  // the target is the place where SLIM came down. Measured from the Moon. far: a first
+  // visit's steps are the way to the Moon, which would be over before they began.
+  { id: 'moonNight', body: 'moon', target: 'slim', far: true, at: [-12491.1, 830.4, -10397.5], ahead: [0.8446, -0.2456, 0.4758], above: [0.2881, -0.5406, -0.7904] },
 ];
 
 const unit = (v) => {

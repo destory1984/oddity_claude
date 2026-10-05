@@ -54,17 +54,18 @@ void main(){
     col+=vec3(.7,1.,.88)*(lit*1.6+.09*shoal)*fleet*(1.-daySide);
   }
   // Etna, on Sicily (37.75 north, 15 east): a plume of grey ash carried east on the wind,
-  // widening and thinning over some 700 km, its puffs moving along it; at night the
-  // crater glows red. along, aside: east and south of the crater, in radians of arc.
+  // widening and thinning over some 1,100 km, its puffs moving along it; at night the
+  // crater glows red (all 1.6 times larger since 2026-10-06, the user: "크기만 조금 더
+  // 키워봐"). along, aside: east and south of the crater, in radians of arc.
   float along=(vUV.x-.5417)*6.28318*.79;
   float aside=(vUV.y-.2903)*3.14159;
-  if(along>-.01&&along<.16&&abs(aside)<.05){
-    float drift=aside-.012*sin(along*40.)*along/.1;
-    float wide=.0035+along*.11;
-    float ash=exp(-pow(drift/wide,2.))*exp(-max(along,0.)/.055)*smoothstep(-.002,.004,along);
-    ash*=.55+.45*cellNoise(vec2(along*220.-time*.35,aside*300.));
+  if(along>-.016&&along<.26&&abs(aside)<.08){
+    float drift=aside-.019*sin(along*25.)*along/.16;
+    float wide=.0056+along*.11;
+    float ash=exp(-pow(drift/wide,2.))*exp(-max(along,0.)/.088)*smoothstep(-.003,.006,along);
+    ash*=.55+.45*cellNoise(vec2(along*140.-time*.35,aside*190.));
     col=mix(col,vec3(.5,.47,.44)*(.095+max(0.,light)*1.1),clamp(ash,0.,1.)*.9);
-    float crater=exp(-(along*along+aside*aside)/.0000035);
+    float crater=exp(-(along*along+aside*aside)/.00003);
     col+=vec3(1.,.32,.08)*crater*(1.-daySide)*(.7+.3*sin(time*1.7));
   }
   float water=clamp((tex.b-tex.r)*4.,0.,1.);

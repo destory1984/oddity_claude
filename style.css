@@ -4380,15 +4380,27 @@ html:not([lang="ko"]) #appVersion {
   font-size:10px;
 }
 
+/* The four language buttons stand on one line at any width and text size (the user,
+   2026-10-05: "버튼은 한 줄에"): equal shares of the row, their words never wrapped. */
+#settings dd.langRow {
+  display:flex;
+  flex-wrap:nowrap;
+  gap:4px;
+}
+
+#settings dd.langRow button {
+  flex:1 1 0;
+  min-width:0;
+  margin-right:0;
+  padding:6px 0;
+  font-size:12px;
+  white-space:nowrap;
+}
+
 /* The language in use is marked among the four buttons (settings, options). */
 #settings dd button[aria-pressed="true"] {
   border-color:var(--gold);
   color:var(--gold);
-}
-
-/* The page of changes is kept in Korean only: its tab is not offered in another language. */
-html:not([lang="ko"]) #settingsTabs [data-tab="news"] {
-  display:none;
 }
 
 /* The goal line on a phone, in both languages: the buttons are narrower and the tour's

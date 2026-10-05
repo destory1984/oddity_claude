@@ -471,7 +471,11 @@ export function createCraft(scene, craftList) {
   // hidden: ids not to draw at all (core/craft.js hiddenCraft).
   // replay: { id, unfold } while a craft's day is played again (core/craftScenes.js):
   // the one with loose parts is drawn in its place, posed as the scene says.
+  // Which craft's scene is on and when it began (the turn to face the watcher).
+  let began = { id: null, at: 0 };
+  const TURN_MS = 1000;
   function update(craft, position, sunPosition, jolt = null, hidden = [], replay = null) {
+    if (!replay?.unfold) began = { id: null, at: 0 };
     for (const c of craft) {
       const node = nodes.get(c.id);
       const loose = unfolding.get(c.id);
@@ -500,18 +504,26 @@ export function createCraft(scene, craftList) {
         // Roadster) is a stage: it faces whoever watches, stands smaller by `fit` and
         // higher by `lift` of its own size, so that all of it is in view from any side.
         // (face: true, its sunward side to the watcher; 'side', below.)
-        loose.root.scaling.copyFrom(node.scaling).scaleInPlace(loose.fit ?? 1);
+        // It turns to its place over the first second (it jumped round at a stroke).
+        if (began.id !== c.id) began = { id: c.id, at: performance.now() };
+        const u = Math.min(1, (performance.now() - began.at) / TURN_MS);
+        const eased = u * u * (3 - 2 * u);
+        loose.root.scaling.copyFrom(node.scaling).scaleInPlace(1 + ((loose.fit ?? 1) - 1) * eased);
         loose.root.position.copyFrom(node.position);
-        if (loose.lift) loose.root.position.y += loose.lift * node.scaling.y;
+        if (loose.lift) loose.root.position.y += loose.lift * node.scaling.y * eased;
         if (loose.face) {
           // Its +z toward the eye (as lookAt at the eye turned it: this look direction is
           // the one from the eye), with the eye's own "up": docked from above or rolled
           // over, the scene still stands upright in the view.
           const eye = scene.activeCamera;
-          loose.root.rotationQuaternion = Quaternion.FromLookDirectionLH(loose.root.position.subtract(eye.globalPosition).normalize(), eye.getDirection(Vector3.Up()));
+          const facing = Quaternion.FromLookDirectionLH(loose.root.position.subtract(eye.globalPosition).normalize(), eye.getDirection(Vector3.Up()));
+          // 'side': its own z runs across the view (a rocket falling behind is seen from the side).
+          if (loose.face === 'side') facing.multiplyInPlace(Quaternion.RotationAxis(Vector3.Up(), Math.PI / 2));
+          if (eased < 1) {
+            node.computeWorldMatrix(true);
+            loose.root.rotationQuaternion = Quaternion.Slerp(node.absoluteRotationQuaternion, facing, eased);
+          } else loose.root.rotationQuaternion = facing;
         } else loose.root.lookAt(new Vector3(...sunPosition.map((n, i) => (n - position[i]) / KM_PER_UNIT)));
-        // 'side': its own z runs across the view (a rocket falling behind is seen from the side).
-        if (loose.face === 'side') loose.root.rotate(Vector3.Up(), Math.PI / 2);
         loose.pose(replay.unfold);
         node.setEnabled(false);
       }

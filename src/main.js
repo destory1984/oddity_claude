@@ -30,7 +30,7 @@ import {
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
-  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, loadStunts, saveStunts, loadFeel, saveFeel, loadExo, saveExo, loadEclipses, saveEclipses,
+  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, saveResume, takeResume, loadStunts, saveStunts, loadFeel, saveFeel, loadExo, saveExo, loadEclipses, saveEclipses,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
@@ -194,9 +194,11 @@ function startAtDawn() {
   return createState(position, lookAtDirection(way(turn, lift)));
 }
 
-let state = START_NEAR ? startNear(START_NEAR) : START_AT_DAWN ? startAtDawn() : startAboveEarth();
+// After a change of language the game carries on where she was (ui/storage.js).
+const resume = takeResume();
+let state = resume ? createState(resume.position, resume.orientation) : START_NEAR ? startNear(START_NEAR) : START_AT_DAWN ? startAtDawn() : startAboveEarth();
 let paused = false;
-let selectedId = START_NEAR ? START_NEAR.id : 'earth';
+let selectedId = START_NEAR ? START_NEAR.id : resume?.selectedId && BODIES.some((b) => b.id === resume.selectedId) ? resume.selectedId : 'earth';
 let dragTurn = [0, 0];
 // Target lock: the chosen target is held in the middle of the view; the slide buttons
 // then take her round it, and forward and back bring her nearer and farther. Dragging
@@ -214,7 +216,7 @@ let album = loadAlbum(MISSIONS);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
 // The first-visit guide assumes the opening view above Earth.
 let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
-let simTime = 0;
+let simTime = resume?.simTime ?? 0;
 // The note on entering the asteroid belt shows once per visit to the game.
 // Lights and plumes already told about (core/glows.js), with 'belt', 'meteor' and
 // 'start' (how to look round). Kept on the device for the day: each is told once a day,
@@ -1341,6 +1343,9 @@ ${STORY_MORE[target.id]}` : told };
     },
     onClose: () => setPaused(settingsPriorPause),
     today: () => dayOf(new Date()),
+    // The game starts again in the other language, from this very place and moment.
+    onLanguage: () => saveResume({ position: [...state.position], orientation: [...state.orientation], simTime, selectedId }),
+    reopen: Boolean(resume),
   });
   // Switching the layout moves every planet, so the game starts over (the log is kept).
   $('layoutNow').textContent = layout === 'today' ? t('지금: 오늘의 하늘(오늘 날짜의 실제 위치).') : t('지금: 여행 배치(행성을 태양 둘레에 고루 흩어 놓음).');
@@ -1395,7 +1400,7 @@ ${STORY_MORE[target.id]}` : told };
 
   $('loading').style.display = 'none';
   document.body.dataset.ready = 'true';
-  if (!glowsTold.has('start')) {
+  if (!glowsTold.has('start') && !resume) {
     markTold('start');
     toast.show(t`${bodyById(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);
   }

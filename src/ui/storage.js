@@ -254,3 +254,29 @@ export function saveLanguage(choice) {
     // The choice simply does not stick.
   }
 }
+
+// Where she was when the language was changed: the game starts again in the other
+// language (its sentences are made as the code loads) and carries on from this place.
+// Kept for the tab only, and taken once.
+const RESUME_KEY = 'oddity.resume';
+
+export function saveResume(place) {
+  try {
+    sessionStorage.setItem(RESUME_KEY, JSON.stringify(place));
+  } catch {
+    // The game then starts from its first place.
+  }
+}
+
+export function takeResume() {
+  try {
+    const raw = sessionStorage.getItem(RESUME_KEY);
+    sessionStorage.removeItem(RESUME_KEY);
+    const place = raw ? JSON.parse(raw) : null;
+    const numbers = (list, n) => Array.isArray(list) && list.length === n && list.every(Number.isFinite);
+    if (!place || !numbers(place.position, 3) || !Array.isArray(place.orientation) || !place.orientation.every(Number.isFinite)) return null;
+    return { position: place.position, orientation: place.orientation, simTime: Number.isFinite(place.simTime) ? place.simTime : 0, selectedId: typeof place.selectedId === 'string' ? place.selectedId : null };
+  } catch {
+    return null;
+  }
+}

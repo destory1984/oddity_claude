@@ -11,7 +11,9 @@ const $ = (id) => document.getElementById(id);
 
 // onOpen, onClose: the game is held while the settings are open.
 // today: () => 'YYYY-MM-DD', the device's own day.
-export function createSettings({ onOpen, onClose, today }) {
+// onLanguage: called just before the game starts again in the language chosen.
+// reopen: the settings open at once (the game has just started again from them).
+export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, reopen = false }) {
   const dialog = $('settings');
 
   function showTab(name) {
@@ -54,16 +56,20 @@ export function createSettings({ onOpen, onClose, today }) {
     renderNews();
   });
   $('closeSettings').addEventListener('click', () => dialog.close());
-  // The language: the game starts again in the one chosen (the notebook stays).
+  // The language: the game starts again in the one chosen, where she was, with the
+  // settings open again (the notebook stays).
   for (const [id, choice] of [['langKo', 'ko'], ['langEn', 'en']]) {
     $(id).setAttribute('aria-pressed', String(language() === choice));
     $(id).addEventListener('click', () => {
       if (language() === choice) return;
       saveLanguage(choice);
+      onLanguage();
       window.top.location.reload();
     });
   }
   dialog.addEventListener('close', () => onClose());
+
+  if (reopen) $('settingsButton').click();
 
   return { isOpen: () => dialog.open };
 }

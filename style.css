@@ -52,7 +52,6 @@ button {
   border-radius:8px;
   min-height:42px;
   padding:10px 16px;
-  backdrop-filter:blur(14px);
 }
 
 @media (hover: hover) {
@@ -405,7 +404,6 @@ kbd {
   border:1px solid #9ac1e533;
   border-radius:12px;
   max-width:96vw;
-  backdrop-filter:blur(14px);
 }
 
 #photoTools[hidden] {
@@ -2018,6 +2016,10 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   --gold:#f6b951;
 }
 
+/* Nothing over the flight view blurs what is behind it (backdrop-filter). On Chrome
+   124 in an Android emulator the blurred buttons made the goal line and whatever else
+   lay over the view vanish for a frame or two, some twenty times a minute; with a fill
+   this dark the blur could hardly be seen anyway. */
 #hud nav button,
 #targetPanel button,
 footer button,
@@ -2026,7 +2028,6 @@ footer button,
   border:1px solid var(--glass-line);
   border-radius:12px;
   background:var(--glass-fill);
-  backdrop-filter:blur(8px);
   box-shadow:0 2px 10px #0006;
   color:#eef3ff;
 }
@@ -2308,7 +2309,6 @@ footer button:active,
   border:1px solid var(--gold);
   border-radius:14px;
   background:var(--glass-fill);
-  backdrop-filter:blur(8px);
   padding:6px 8px 6px 14px;
 }
 
@@ -2861,8 +2861,9 @@ html.shell body {
   width:min(560px,calc(100vw - 24px));
   border:1px solid var(--glass-line);
   border-radius:16px;
-  background:#0d1a3ae6;
-  backdrop-filter:blur(8px);
+  /* Nearly solid: with no blur behind it, words under the sheet (her bubble, the goal
+     line) would show through the reading. */
+  background:#0d1a3af7;
   box-shadow:0 8px 30px #0008;
   color:#eef3ff;
   pointer-events:auto;

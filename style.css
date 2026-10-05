@@ -2240,8 +2240,11 @@ footer button:active,
     height:124px;
   }
 
+  /* One gap under the minimap and the target panel, whichever ends lower (--heads-foot,
+     measured by ui/hud.js; until then, the panel's usual height of 81px). It stood
+     124px lower, from when the minimap was under the buttons. */
   #toast {
-    top:calc(var(--row2) + 124px + var(--gap));
+    top:calc(var(--heads-foot, calc(var(--row2) + 81px)) + var(--gap));
   }
 
   #guideText {

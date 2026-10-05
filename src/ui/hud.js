@@ -10,6 +10,8 @@ const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
 // A touch on the sky counts within this many pixels of a name or a constellation's line,
 // and what it tells stays up this long.
 const TOUCH_REACH = 30;
+// The space kept between an arrow's label and the side of the screen (--gap on a phone).
+const EDGE_GAP = 8;
 const TOUCH_SECONDS = 10;
 
 export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] }) {
@@ -53,6 +55,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
   // there is no room clear of them: what was asked for by a touch is read first.
   document.body.append(plate);
   let lastMask = null;
+  let headsFoot = null;
   // Where the character is drawn, in pixels: the plate keeps off her.
   let heroBox = null;
   // The camera of the last frame drawn, and the sky thing touched: { id, until }.
@@ -161,8 +164,13 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       const map = $('minimap').getBoundingClientRect();
       const readout = $('altitudeLabel').getBoundingClientRect();
       const target = $('targetPanel').getBoundingClientRect();
+      // On a phone the notice stands right under those, so an arrow goes under it too
+      // while it is up.
+      const headsBottom = Math.max(map.bottom, target.bottom);
+      const notice = $('toast');
+      const noticeBottom = compact && notice.classList.contains('on') ? notice.getBoundingClientRect().bottom : 0;
       const panels = compact
-        ? [{ left: 0, top: 0, right: innerWidth, bottom: Math.max(map.bottom, target.bottom) }]
+        ? [{ left: 0, top: 0, right: innerWidth, bottom: Math.max(headsBottom, noticeBottom) }]
         : [
           { left: Math.min(map.left, readout.left), top: readout.top, right: Math.max(map.right, readout.right), bottom: map.bottom },
           { left: target.left, top: target.top, right: target.right, bottom: target.bottom },
@@ -185,8 +193,22 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       }));
       for (const { body, el } of inView) if (covered.has(body.id)) el.hidden = true;
       spreadArrows(arrows, 40, innerHeight).forEach((spot, i) => {
-        arrows[i].el.style.top = `${spot.y}px`;
+        const { el, x } = arrows[i];
+        el.style.top = `${spot.y}px`;
+        // An arrow's label stays whole on screen, one gap from the edge: a long one
+        // ("← ✓ 지구 · 6,794km") ran past the left edge of a phone, and two of them
+        // stood at two different distances from it.
+        const half = el.offsetWidth / 2;
+        el.style.left = `${Math.max(EDGE_GAP + half, Math.min(innerWidth - EDGE_GAP - half, x))}px`;
       });
+      // On a phone the notice stands one gap under the minimap and the target panel,
+      // however tall they are (style.css reads --heads-foot).
+      const foot = compact ? Math.round(headsBottom) : null;
+      if (foot !== headsFoot) {
+        headsFoot = foot;
+        if (foot === null) document.documentElement.style.removeProperty('--heads-foot');
+        else document.documentElement.style.setProperty('--heads-foot', `${foot}px`);
+      }
       const focal = innerHeight / (2 * Math.tan(view.camera.fov / 2));
       // The names of what is in the sky, on a phone too (they were left out there; the
       // user, 2026-10-04: "시야에 보일 때에는 설명 태그도 보여줘", "별자리도 설명 태그 보여줘").

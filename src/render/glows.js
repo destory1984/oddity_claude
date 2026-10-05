@@ -23,6 +23,8 @@ const FLASHES = 8;
 // and drawn this far above the ground (the ground is a ball: a flat strip laid on it
 // would dip under).
 const DEVIL_SHADOW_MAX = 3;
+// And never longer than this: the strip is flat and the ground falls away under it.
+const DEVIL_SHADOW_MAX_KM = 170;
 const DEVIL_SHADOW_LIFT_KM = 1.2;
 // How many different bolts are drawn; each flash shows one of them, turned any way.
 const BOLTS = 4;
@@ -546,7 +548,7 @@ export function createGlows(scene, bodies) {
         const low = away.length();
         if (low > 0.02) {
           away.scaleInPlace(1 / low);
-          const lengthKm = Math.min(DEVIL_SHADOW_MAX, low / Math.max(high, 0.05)) * plume.heightKm;
+          const lengthKm = Math.min(DEVIL_SHADOW_MAX_KM, Math.min(DEVIL_SHADOW_MAX, low / Math.max(high, 0.05)) * plume.heightKm);
           const across = Vector3.Cross(above, away);
           Quaternion.RotationQuaternionFromAxisToRef(away, across, above, shadow.rotationQuaternion);
           const foot = rel(body.position.map((n, i) => n + up[i] * (body.radiusKm + DEVIL_SHADOW_LIFT_KM)), position);

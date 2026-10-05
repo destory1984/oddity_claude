@@ -197,11 +197,11 @@ export const PLUMES = [
   { id: 'loki', body: 'io', name: t('로키'), latDeg: 13, lonDeg: 51, heightKm: 200, widthKm: 500 },
   { id: 'prometheus', body: 'io', name: t('프로메테우스'), latDeg: -1.5, lonDeg: -153.9, heightKm: 100, widthKm: 300 },
   // Dust devils on Mars: whirlwinds that the Sun raises off the warm ground by day. The
-  // real ones are up to 20 km tall and a few hundred metres across; drawn 55 km by 12
-  // (the column itself 7 km thick, its skirt of dust at the foot wider), with a shadow
+  // real ones are up to 20 km tall and a few hundred metres across; drawn 90 km by 20
+  // (the user, 2026-10-06, picked "더 크게" over nearer the truth; the column itself 12 km thick, its skirt of dust at the foot wider), with a shadow
   // on the ground (render/glows.js).
   ...[[30, -155], [-14, -175], [22, 60], [-28, -45], [8, 110], [-40, 20]].map(([latDeg, lonDeg], i) => ({
-    id: `devil${i + 1}`, body: 'mars', name: t('먼지 회오리'), latDeg, lonDeg, heightKm: 55, widthKm: 12,
+    id: `devil${i + 1}`, body: 'mars', name: t('먼지 회오리'), latDeg, lonDeg, heightKm: 90, widthKm: 20,
   })),
   // The jets of Mars's south polar cap: in spring the Sun warms the ground under the
   // clear dry ice, the gas bursts out and carries dark dust with it, which the wind lays

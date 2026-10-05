@@ -87,7 +87,7 @@ void main(){
     float wound = .5 + .5 * sin(a * 2. + h * 17. - time * 3.2);
     float grain = .5 + .5 * sin(a * 5. - h * 33. + time * 1.9);
     float dust = (.5 + .32 * wound + .18 * grain) * smoothstep(0., .55, vFace)
-      * smoothstep(1., .7, h) * (.7 + .5 * exp(-h * 10.));
+      * smoothstep(0., .05, h) * smoothstep(1., .7, h) * (.7 + .5 * exp(-h * 10.));
     float sunlit = .5 + .5 * clamp(dot(vDir, sunDir) * 1.6, 0., 1.);
     gl_FragColor = vec4(mix(colorLow, colorHigh, h) * sunlit * (.85 + .15 * wound), clamp(dust * strength, 0., 1.));
     return;

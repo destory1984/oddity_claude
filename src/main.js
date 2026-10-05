@@ -67,7 +67,7 @@ import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
 import {
   dockable, DOCK_RANGE_KM, dockedState, wantsToLeave, rideSpeed, startDocking, dockingOffset, countsBetween, isDocked, latchJolt,
-  releaseDrift, dockingFacing,
+  releaseDrift, dockingFacing, DOCK_SECONDS,
 } from './core/dock.js';
 import { inspectLight } from './core/lamp.js';
 import { READINGS, bodyFacts } from './core/readings.js';
@@ -202,13 +202,13 @@ function startAtSpot(spot) {
   const { position, orientation } = fromSpot(spot, bodyById(spot.body, bodies), bodyById('sun', bodies));
   return createState(position, orientation);
 }
-const startSpot = pickSpot(Math.random(), new URLSearchParams(location.search).get('start'));
+const startSpot = pickSpot(Math.random(), new URLSearchParams(location.search).get('start'), !loadGuideDone());
 
 // After a change of language the game carries on where she was (ui/storage.js).
 const resume = takeResume();
 let state = resume ? createState(resume.position, resume.orientation) : START_NEAR ? startNear(START_NEAR) : startAtSpot(startSpot);
 let paused = false;
-let selectedId = START_NEAR ? START_NEAR.id : resume?.selectedId && BODIES.some((b) => b.id === resume.selectedId) ? resume.selectedId : 'earth';
+let selectedId = START_NEAR ? START_NEAR.id : resume?.selectedId && BODIES.some((b) => b.id === resume.selectedId) ? resume.selectedId : resume ? 'earth' : startSpot.target ?? 'earth';
 let dragTurn = [0, 0];
 // Target lock: the chosen target is held in the middle of the view; the slide buttons
 // then take her round it, and forward and back bring her nearer and farther. Dragging
@@ -268,6 +268,13 @@ const shownSpeed = () => (docked ? rideKmS : visit ? visitKmS : totalSpeed(state
 // Spacecraft and telescopes: found and selected like bodies, but they are not in the
 // journal and only slow the traveler nearby (core/craft.js).
 let craft = craftAt(0, bodies);
+// A place that opens docked (core/startSpots.js `dock`): held at the craft from the first
+// frame, with no glide and no count; she is free to look round and leaves as from any dock.
+if (!resume && !START_NEAR && startSpot.dock) {
+  const at = craft.find((c) => c.id === startSpot.dock);
+  const offset = state.position.map((n, i) => n - at.position[i]);
+  docked = { id: at.id, from: offset, to: offset, elapsed: DOCK_SECONDS, facing: state.orientation };
+}
 // Story places on a surface: named and selected like craft, turning with their body.
 let sites = storySitesAt(0, bodies);
 // The week of a real eclipse (core/eclipses.js): which one, the place on Earth it is
@@ -572,6 +579,9 @@ async function init() {
     $('craftCardName').textContent = `${target.name} ${target.nameEn}`;
     $('craftCardIntro').textContent = target.intro;
   }
+
+  // Opened docked (a start place): the craft's card is up from the first.
+  if (docked) showCraftCard(here(docked.id));
 
   function dock(target) {
     if (visit && !hasArrived(visit)) sound.hush();
@@ -1414,7 +1424,7 @@ ${STORY_MORE[target.id]}` : told };
   document.body.dataset.ready = 'true';
   if (!glowsTold.has('start') && !resume) {
     markTold('start');
-    toast.show(t`${bodyById(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);
+    toast.show(t`${here(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);
   }
   // The week of a real eclipse: say so each time the game is opened.
   if (eclipse) toast.show(t`${eclipseNews(openedAt)}\n"${eclipseTitle(eclipse)} 자리로" 단추를 누르면 그곳으로 갑니다.`);
@@ -2087,7 +2097,7 @@ ${STORY_MORE[target.id]}` : told };
     craft: () => craft.map((c) => ({ id: c.id, position: [...c.position] })),
     sites: () => sites.map((x) => ({ id: x.id, parent: x.parent, position: [...x.position] })),
     // Where she stands now, as a line for core/startSpots.js (a place the game may open at).
-    spot: () => toSpot(state, nearestSurface(state.position, bodies).body, bodyById('sun', bodies)),
+    spot: (bodyId = null) => toSpot(state, (bodyId && bodyById(bodyId, bodies)) || nearestSurface(state.position, bodies).body, bodyById('sun', bodies)),
     place(position, toward) {
       state = createState(position, lookAtDirection(toward.map((n, i) => n - position[i])));
     },

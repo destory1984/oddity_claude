@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { START_SPOTS, pickSpot, toSpot, fromSpot, sunFrame } from '../src/core/startSpots.js';
 import { forward, up, lookAtDirection } from '../src/core/orientation.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
+import { JWST_FROM_EARTH_KM } from '../src/core/craft.js';
 
 const near = (a, b, slack) => a.every((n, i) => Math.abs(n - b[i]) <= slack);
 
@@ -55,4 +56,17 @@ test('the start is picked by chance among all the places, or by its number', () 
   for (let i = 0; i < n; i++) assert.equal(pickSpot((i + 0.5) / n), START_SPOTS[i]);
   assert.equal(pickSpot(0, '2'), START_SPOTS[1]);
   for (const bad of ['0', String(n + 1), 'x', '1.5', null]) assert.equal(pickSpot(0, bad), START_SPOTS[0]);
+});
+
+test('a first visit opens near Earth, never at a far place', () => {
+  const near = START_SPOTS.filter((s) => !s.far);
+  assert.ok(near.length >= 2 && near.length < START_SPOTS.length);
+  for (let i = 0; i < 50; i++) assert.equal(pickSpot(i / 50, null, true).far, undefined);
+  assert.equal(pickSpot(0.9999, null, true), near[near.length - 1]);
+});
+
+test('the place beside Webb is where Webb is kept: 150,000 km from Earth, away from the Sun', () => {
+  const spot = START_SPOTS.find((s) => s.id === 'webb');
+  assert.equal(spot.body, 'earth');
+  assert.ok(Math.hypot(spot.at[0] + JWST_FROM_EARTH_KM, spot.at[1], spot.at[2]) < 100);
 });

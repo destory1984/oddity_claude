@@ -9,13 +9,24 @@ import { forward, up, orientationFrom } from './orientation.js';
 // the body's centre in km (toward the Sun, up, aside), `ahead` and `above` are the way
 // she looks and the top of her view in those same three directions. What land lies under
 // her is not kept: the body has turned by the next start.
-// To write a new one down: stand there and read `window.oddity.spot()`.
+// To write a new one down: stand there and read `window.oddity.spot()` (the nearest body
+// is taken to measure from; `spot('earth')` names another). target: what is chosen as
+// the target there, when it is not the body. dock: the craft she is docked with from the
+// first moment (no glide, no count).
 // 'dawn' is the first start (main.js startAtDawn), kept as it was.
 export const START_SPOTS = [
   { id: 'dawn' },
   // Over Earth's night side, 4,108 km up, looking out past the lit edge and its aurora
   // to the stars; the Moon is high on the left.
   { id: 'nightEdge', body: 'earth', at: [-9327.6, 2335.4, 4165.9], ahead: [0.6662, 0.5823, -0.466], above: [-0.5544, 0.8046, 0.2129] },
+  // Docked with the Webb telescope, 60 km from it, looking up at its mirror and sunshield
+  // (the user, 2026-10-05: "도킹한 상태이어야 해").
+  // Webb is kept 150,000 km from Earth straight away from the Sun (core/craft.js), which
+  // in these three directions is always (-150000, 0, 0): it is there at every start. The
+  // place is measured from Earth, not from the Moon (the nearest body there), which goes
+  // round. far: 144,000 km from Earth, so not for a first visit, whose steps lead to the
+  // Moon.
+  { id: 'webb', body: 'earth', target: 'jwst', dock: 'jwst', far: true, at: [-149958.9, -29.9, -31.9], ahead: [-0.8245, 0.3647, 0.4326], above: [0.3351, 0.9308, -0.146] },
 ];
 
 const unit = (v) => {
@@ -61,9 +72,11 @@ export function fromSpot(spot, body, sun) {
 }
 
 // The place for this start. random: a number from 0 up to 1. forced: a place's number
-// from 1 (the address's ?start=2), for looking at one.
-export function pickSpot(random = Math.random(), forced = null) {
+// from 1 (the address's ?start=2), for looking at one. newcomer: on a first visit only
+// the places near Earth are picked from (the first steps lead to the Moon).
+export function pickSpot(random = Math.random(), forced = null, newcomer = false) {
   const n = Number(forced);
   if (Number.isInteger(n) && n >= 1 && n <= START_SPOTS.length) return START_SPOTS[n - 1];
-  return START_SPOTS[Math.min(START_SPOTS.length - 1, Math.floor(random * START_SPOTS.length))];
+  const among = newcomer ? START_SPOTS.filter((spot) => !spot.far) : START_SPOTS;
+  return among[Math.min(among.length - 1, Math.floor(random * among.length))];
 }

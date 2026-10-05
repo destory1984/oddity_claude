@@ -9,10 +9,10 @@ export const METEOR_ALTITUDE_KM = 90;
 export const METEOR_GAP_S = [0.4, 1.2];
 export const METEOR_LIFE_S = 0.9;
 // A fireball, a larger crumb, burns longer and bursts at its end. One meteor in 25 is
-// one, one in 9 during a shower; it is drawn this many times as long and thick.
+// one, one in 12 during a shower; it is drawn this many times as long and thick.
 export const FIREBALL_LIFE_S = 1.8;
-export const FIREBALL_CHANCE = [0.04, 0.11];
-export const FIREBALL_SIZE = 2.4;
+export const FIREBALL_CHANCE = [0.04, 0.08];
+export const FIREBALL_SIZE = 1.8;
 // The light of the tail and of the glow round the head, by what burns (red, green,
 // blue of 255): white; green (oxygen, magnesium), the commonest tint; gold (sodium);
 // blue-white (fast ones). Half are white.

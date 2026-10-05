@@ -7,11 +7,12 @@ import {
 
 const POOL = 64; // six were enough until the showers (core/meteors.js inShower)
 // Trail thickness as a share of its distance from the traveler: a few pixels at the head.
-const THICK = 0.0075;
+// (0.0075 at first, with heads 7 wide and showers 1.5 times: the user, "너무 큰데? ㅋㅋㅋ".)
+const THICK = 0.0042;
 // A shower's meteors are drawn this many times as long and thick as the common ones.
-const SHOWER_SIZE = 1.5;
+const SHOWER_SIZE = 1.2;
 // The glow round the head, as many times the trail's thickness across.
-const HEAD = 7;
+const HEAD = 5;
 
 // A trail's light along its length: white hot at the head, its own colour behind, gone
 // at the tail. Drawn down the picture; the cylinder's head end takes the top of it.

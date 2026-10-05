@@ -171,6 +171,90 @@ function webb(scene, name, mats) {
   return fuse(scene, root);
 }
 
+// Webb again with its moving parts loose, for the scene of its unfolding
+// (core/craftScenes.js): the same measures as `webb` above. pose({ pallets, tower,
+// booms, tension, secondary, wingLeft, wingRight }), each 0 (folded) → 1 (as it flies).
+// Folded, the shield is a narrow short bundle of five layers lying together, the
+// telescope sits low on it, the secondary mirror's legs lie flat and the mirror's two
+// outer columns are swung back behind it.
+function webbUnfolding(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  // What does not move: the bus and what hangs on the hot side, and the tower.
+  const fixed = group(scene, `${name}Fixed`, root);
+  box(scene, `${name}Bus`, fixed, mats.foil, [0.15, 0.13, 0.07], [0, -0.04, 0.105]);
+  box(scene, `${name}BusRadiator`, fixed, mats.white, [0.152, 0.06, 0.02], [0, -0.04, 0.142]);
+  wing(scene, `${name}Panel`, fixed, mats, { from: [0, -0.1, 0.11], to: [0, -0.46, 0.2], width: 0.1, panels: 5, face: [0, 0.25, 1], yoke: 0.08 });
+  dish(scene, `${name}Antenna`, fixed, mats, { at: [0.05, 0.0, 0.17], toward: Z, diameter: 0.07 });
+  box(scene, `${name}Tower`, fixed, mats.black, [0.05, 0.05, 0.1], [0, 0.0, -0.08]);
+  fuse(scene, fixed);
+  // The shield: its bars and pallets in one group that widens (the booms) and lengthens
+  // (the pallets), and five layers that also draw apart.
+  const frame = group(scene, `${name}Frame`, root);
+  for (let k = 0; k < 6; k++) {
+    const a = (k * Math.PI) / 3;
+    rod(scene, `${name}Bar${k}`, frame, mats.grey, [0, 0, 0.056], [Math.cos(a) * 0.5 * 0.66, Math.sin(a) * 0.5, 0.056], 0.008, 4);
+  }
+  box(scene, `${name}PalletFore`, frame, mats.dark, [0.09, 0.42, 0.02], [0, 0.26, 0.068]);
+  box(scene, `${name}PalletAft`, frame, mats.dark, [0.09, 0.42, 0.02], [0, -0.26, 0.068]);
+  const layers = [];
+  for (let i = 0; i < 5; i++) {
+    layers.push(part(cyl(scene, `${name}Shield${i}`, { height: 0.004, diameter: 1 - i * 0.035, tessellation: 6 }), root, i === 0 ? mats.shield : mats.silver,
+      [0, 0, 0.05], [QUARTER, 0, 0], [0.66, 1, 1]));
+  }
+  // The telescope: the middle three columns of the mirror with what is behind them, a
+  // wing of three hexagons hinged to either side, and the secondary on its legs.
+  const mirror = group(scene, `${name}Mirror`, root, [0, 0.03, -0.24]);
+  const pitch = 0.064;
+  const across = pitch * Math.cos(Math.PI / 6);
+  const wings = { [-1]: group(scene, `${name}WingLeft`, mirror, [-1.5 * across, 0, 0]), 1: group(scene, `${name}WingRight`, mirror, [1.5 * across, 0, 0]) };
+  let n = 0;
+  for (let q = -2; q <= 2; q++) {
+    for (let r = -2; r <= 2; r++) {
+      if ((q === 0 && r === 0) || Math.abs(q + r) > 2) continue;
+      const x = across * q;
+      const z = pitch * (r + q * Math.sin(Math.PI / 6));
+      const side = Math.abs(q) === 2 ? Math.sign(q) : 0;
+      const parent = side ? wings[side] : mirror;
+      const at = side ? x - side * 1.5 * across : x;
+      part(cyl(scene, `${name}Hex${n}`, { height: 0.01, diameter: pitch * 1.1, tessellation: 6 }), parent, mats.gold, [at, 0, z]);
+      part(cyl(scene, `${name}HexBack${n++}`, { height: 0.012, diameter: pitch * 0.9, tessellation: 6 }), parent, mats.black, [at, -0.012, z]);
+    }
+  }
+  part(cyl(scene, `${name}Back`, { height: 0.012, diameter: 0.25, tessellation: 6 }), mirror, mats.black, [0, -0.026, 0], [0, Math.PI / 6, 0]);
+  box(scene, `${name}Instruments`, mirror, mats.blackFoil, [0.17, 0.08, 0.15], [0, -0.07, 0]);
+  box(scene, `${name}Radiator`, mirror, mats.white, [0.17, 0.004, 0.12], [0, -0.112, 0]);
+  drum(scene, `${name}Aft`, mirror, mats.black, { height: 0.08, diameterTop: 0.012, diameterBottom: 0.04, tessellation: 12 }, [0, 0.045, 0]);
+  const secondary = group(scene, `${name}SecondaryLegs`, mirror);
+  const apex = [0, 0.34, 0];
+  for (const [i, x, z] of [[0, -0.15, 0.09], [1, 0.15, 0.09], [2, 0, -0.17]]) rod(scene, `${name}Strut${i}`, secondary, mats.black, [x, 0, z], apex, 0.007, 4);
+  drum(scene, `${name}Secondary`, secondary, mats.gold, { height: 0.01, diameter: 0.04, tessellation: 16 }, apex);
+  drum(scene, `${name}SecondaryBack`, secondary, mats.black, { height: 0.012, diameter: 0.046, tessellation: 16 }, [0, 0.351, 0]);
+  for (const mesh of root.getChildMeshes(false)) mesh.isPickable = false;
+
+  function pose({ pallets, tower, booms, tension, secondary: legs, wingLeft, wingRight }) {
+    const wide = 0.16 + 0.84 * booms;
+    const long = 0.36 + 0.64 * pallets;
+    frame.scaling.set(wide, long, 1);
+    layers.forEach((layer, i) => {
+      // The local z of a layer lies along the craft's length (it is turned a quarter).
+      layer.scaling.set(0.66 * wide, 1, long);
+      // Together at first, 0.004 apart; each in turn goes out to its own 0.02.
+      const out = Math.max(0, Math.min(1, tension * 5 - (4 - i)));
+      layer.position.z = 0.05 - i * (0.004 + 0.016 * out);
+    });
+    mirror.position.z = -0.17 - 0.07 * tower;
+    secondary.scaling.y = 0.1 + 0.9 * legs;
+    // Swung back behind the mirror by 100 degrees, then round into its plane.
+    wings[-1].rotation.z = 1.75 * (1 - wingLeft);
+    wings[1].rotation.z = -1.75 * (1 - wingRight);
+  }
+  pose({ pallets: 0, tower: 0, booms: 0, tension: 0, secondary: 0, wingLeft: 0, wingRight: 0 });
+  return { root, pose };
+}
+
+// The craft that have a scene of unfolding: id → builder giving { root, pose }.
+export const CRAFT_UNFOLD = { jwst: webbUnfolding };
+
 // Kepler: a photometer tube under a slanted sunshade, solar panels wrapped round the
 // sunward side, a six-sided bus with its radiator, star trackers and thrusters, and a
 // dish antenna at the foot. The tube points across the sunward axis; the panels face the Sun.

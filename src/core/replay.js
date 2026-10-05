@@ -1,5 +1,6 @@
 import { t } from './i18n.js';
 import { MOON_SCENES, APOLLO11 } from './moonScenes.js';
+import { CRAFT_SCENES } from './craftScenes.js';
 // "그날로": at a story place, the day it is known for is played again in the close
 // view. The model that stands there comes down as it did, and a few lines tell what
 // happened, each at its moment: Apollo 11's landing and first steps, Huygens's on Titan, Viking 1's and Curiosity's on Mars, and (not at a
@@ -192,6 +193,8 @@ export const REPLAYS = {
   },
   // Eight on the Moon, each a stage of pieces (core/moonScenes.js).
   ...MOON_SCENES,
+  // At a craft, while docked with it: its parts unfold (core/craftScenes.js).
+  ...CRAFT_SCENES,
 };
 
 // The scene played by resting on this body, if there is one.
@@ -219,6 +222,17 @@ export function replayFrame(id, t) {
   scene.lines.forEach((l, i) => { if (t >= l.at) line = i; });
   if (scene.hops) return { ...hopFrame(scene, t), line, text: scene.lines[line].text, done: t >= scene.seconds };
   if (scene.launch) return { ...launchFrame(scene, t), line, text: scene.lines[line].text, done: t >= scene.seconds };
+  // A craft unfolding: how far each of its parts has come. Nothing comes down.
+  if (scene.unfold) {
+    return {
+      unfold: scene.unfold(t),
+      liftKm: 0, acrossKm: 0, glow: 0, slope: 0, gone: false, flame: false, down: false,
+      after: Math.max(0, t - scene.downAt),
+      line,
+      text: scene.lines[line].text,
+      done: t >= scene.seconds,
+    };
+  }
   // A stage: its pieces stand where the scene says. Nothing of the plain kind comes
   // down, and what is heard is in the scene's own list (replaySounds), so `down` stays
   // false: the thump of a landing is not played a second time.

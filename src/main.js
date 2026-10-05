@@ -869,6 +869,17 @@ ${STORY_MORE[target.id]}` : told };
       if (watch === 'yes') return startShow();
       if (watch === 'night') return toast.show(t('이곳은 지금 밤입니다. 해가 뜨면 볼 수 있습니다. 게임의 하루는 28분 48초입니다.'));
     }
+    // Docked with a craft that has a day of its own (Webb unfolding): its close view,
+    // and the scene in it.
+    if (!visit && docked && isDocked(docked) && replayFor(docked.id)) {
+      const { id } = docked;
+      selectedId = id;
+      hud.showSelection(named(id));
+      $('inspectTarget').click();
+      if (photo.orbit()?.id !== id) return;
+      replay = { id, startedAt: performance.now(), down: false };
+      return;
+    }
     const onBody = !visit && state.restingOn ? replayOn(state.restingOn) : null;
     if (onBody) {
       // Where she rests, seen along the ground from 15 degrees above it; what comes in
@@ -946,6 +957,7 @@ ${STORY_MORE[target.id]}` : told };
       turn: frame.turn ?? 0, tilt: frame.tilt ?? 0, bag: frame.bag ?? 0, open: Boolean(frame.open), sizeKm: frame.sizeKm ?? null,
       launch: frame.launch ?? null,
       stage: frame.stage ?? null,
+      unfold: frame.unfold ?? null,
     };
   }
 
@@ -2334,7 +2346,7 @@ ${STORY_MORE[target.id]}` : told };
     const offer = docked || onGround() ? null : dockable(state.position, craft);
     $('dockTarget').hidden = !docked && !offer;
     // Standing at a place that has a scene of its day.
-    const thenHere = visit ? (hasArrived(visit) ? replayFor(visit.id) : null) : (state.restingOn ? replayFor(replayOn(state.restingOn)) : null);
+    const thenHere = visit ? (hasArrived(visit) ? replayFor(visit.id) : null) : docked ? (isDocked(docked) ? replayFor(docked.id) : null) : (state.restingOn ? replayFor(replayOn(state.restingOn)) : null);
     // The week of a real eclipse: near its place the same button plays it, and from
     // elsewhere another jumps there.
     if (landAtEclipse && !warp.busy()) {

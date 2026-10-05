@@ -2,12 +2,15 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { REPLAYS, replayFor, replayFrame, replayOn, replaySounds } from '../src/core/replay.js';
 import { STORIES } from '../src/core/stories.js';
+import { CRAFT } from '../src/core/craft.js';
 
 test('every scene belongs to a story place on a surface and tells its lines in order', () => {
   for (const [id, scene] of Object.entries(REPLAYS)) {
     // A scene on a body belongs to a story told there: by landing on it (Saturn), or by
     // passing near it (Philae's comet).
-    if (scene.on) assert.ok(STORIES.some((s) => (s.type === 'land' && s.body === scene.on) || (s.type === 'near' && s.target === scene.on)), id);
+    // A scene of unfolding belongs to a craft she can dock with.
+    if (scene.unfold) assert.ok(CRAFT.some((c) => c.id === id), id);
+    else if (scene.on) assert.ok(STORIES.some((s) => (s.type === 'land' && s.body === scene.on) || (s.type === 'near' && s.target === scene.on)), id);
     else assert.equal(STORIES.find((s) => s.id === id)?.type, 'surface', id);
     assert.equal(scene.lines[0].at, 0);
     for (let i = 1; i < scene.lines.length; i++) assert.ok(scene.lines[i].at > scene.lines[i - 1].at);
@@ -96,7 +99,7 @@ test('Curiosity has a scene of its own day, told in four lines', () => {
   assert.equal(replayFor('curiosity').day, '2012년 8월 6일');
   assert.equal(replayFor('curiosity').lines.length, 4);
   assert.match(replayFrame('curiosity', 17).text, /게일 분화구/);
-  assert.equal(Object.keys(REPLAYS).length, 17);
+  assert.equal(Object.keys(REPLAYS).length, 18);
   assert.equal(replayFor('viking1').day, '1976년 7월 20일');
   assert.match(replayFrame('viking1', 17).text, /25초/);
 });
@@ -368,4 +371,34 @@ test('on the Moon two go up, three land, two roll out, one falls on its nose, on
   assert.ok(Math.abs(gap(1, 2) - gap(7, 8)) < 1e-9);
   assert.ok(at('luna2', 8.9).probe.shown && !at('luna2', 9).probe.shown && at('luna2', 9).wreck.shown && !at('luna2', 8.9).wreck.shown);
   assert.ok(!at('luna2', 8.9).flash.shown && at('luna2', 9.25).flash.scale > 1.9 && !at('luna2', 11).flash.shown);
+});
+
+test('Webb unfolds while she is docked with it: pallets, tower, booms, the five layers, the secondary mirror, then the two wings', async () => {
+  const { CRAFT_SCENES } = await import('../src/core/craftScenes.js');
+  const scene = CRAFT_SCENES.jwst;
+  assert.equal(REPLAYS.jwst, scene);
+  const order = ['pallets', 'tower', 'booms', 'tension', 'secondary', 'wingLeft', 'wingRight'];
+  assert.deepEqual(Object.keys(scene.unfold(0)), order);
+  // Folded as it left, open as it flies now, and nothing folds back on the way.
+  assert.ok(order.every((name) => scene.unfold(0)[name] === 0 && scene.unfold(scene.downAt)[name] === 1));
+  const last = Object.fromEntries(order.map((name) => [name, 0]));
+  const doneAt = {};
+  for (let t = 0; t <= scene.seconds; t += 0.05) {
+    const frame = replayFrame('jwst', t);
+    assert.ok(!frame.down && !frame.flame && frame.liftKm === 0 && frame.acrossKm === 0);
+    for (const name of order) {
+      const now = frame.unfold[name];
+      assert.ok(now >= last[name] - 1e-12 && now >= 0 && now <= 1, `${name} at ${t}`);
+      last[name] = now;
+      if (now === 1 && doneAt[name] === undefined) doneAt[name] = t;
+    }
+  }
+  // One part at a time, in the order it really went.
+  order.forEach((name, i) => {
+    if (i > 0) assert.ok(scene.unfold(doneAt[order[i - 1]] - 0.1)[name] === 0, `${name} waits for ${order[i - 1]}`);
+  });
+  // The last wing latches as the last line is told, and each latch is heard as it happens.
+  assert.match(replayFrame('jwst', scene.downAt).text, /344/);
+  assert.deepEqual(scene.sounds.filter(([, name]) => name === 'clunk').map(([at]) => at), [34, 37]);
+  assert.ok(!replayFrame('jwst', scene.seconds - 0.1).done && replayFrame('jwst', scene.seconds).done);
 });

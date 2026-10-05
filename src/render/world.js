@@ -139,7 +139,7 @@ export async function createWorld(canvas, bodies = BODIES) {
       directions[c.id] = rel.map((n) => n / length);
       distances[c.id] = length * KM_PER_UNIT;
     }
-    craftMeshes.update(craft, position, sunNow.position, jolt, hiddenCraft);
+    craftMeshes.update(craft, position, sunNow.position, jolt, hiddenCraft, replay);
     siteModels.update(sites, now, position, replay);
     craftSun.direction = new Vector3(...normalize(sunRel)).scale(-1);
     for (const { id, glow } of comets) glow.update(now.find((b) => b.id === id), position, sunNow.position);

@@ -2,7 +2,7 @@ import { Vector3, Quaternion, Color3, CreatePlane, CreateSphere, StandardMateria
 import { KM_PER_UNIT } from '../core/bodies.js';
 import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
-import { CRAFT_BUILD } from './craftModels.js';
+import { CRAFT_BUILD, CRAFT_UNFOLD } from './craftModels.js';
 import { SITE_BUILD, SITE_REPLAY_BUILD } from './siteModels.js';
 import { drum, rod, group, box } from './craftParts.js';
 
@@ -459,13 +459,22 @@ export function createSiteModels(scene, siteList) {
 export function createCraft(scene, craftList) {
   const mats = craftMaterials(scene);
   const nodes = new Map(craftList.map((c) => [c.id, CRAFT_BUILD[c.id](scene, c.id, mats)]));
+  const unfolding = new Map(Object.entries(CRAFT_UNFOLD).map(([id, build]) => {
+    const loose = build(scene, `${id}Unfolding`, mats);
+    loose.root.setEnabled(false);
+    return [id, loose];
+  }));
 
   // craft: this frame's positions (km); position: the traveler (km); sunPosition (km).
   // jolt: { id, push, tilt } for the craft being docked with (core/dock.js latchJolt).
   // hidden: ids not to draw at all (core/craft.js hiddenCraft).
-  function update(craft, position, sunPosition, jolt = null, hidden = []) {
+  // replay: { id, unfold } while a craft's day is played again (core/craftScenes.js):
+  // the one with loose parts is drawn in its place, posed as the scene says.
+  function update(craft, position, sunPosition, jolt = null, hidden = [], replay = null) {
     for (const c of craft) {
       const node = nodes.get(c.id);
+      const loose = unfolding.get(c.id);
+      loose?.root.setEnabled(false);
       const rel = c.position.map((n, i) => (n - position[i]) / KM_PER_UNIT);
       const distanceKm = Math.hypot(...rel) * KM_PER_UNIT;
       const rule = RULES[c.id];
@@ -483,6 +492,14 @@ export function createCraft(scene, craftList) {
         const reach = (jolt.push * sizeKm) / KM_PER_UNIT;
         node.position.addInPlace(across.scale(reach)).addInPlace(away.scale(reach * 0.5));
         node.rotate(Vector3.Forward(), jolt.tilt);
+      }
+      if (loose && replay?.id === c.id && replay.unfold) {
+        loose.root.setEnabled(true);
+        loose.root.scaling.copyFrom(node.scaling);
+        loose.root.position.copyFrom(node.position);
+        loose.root.lookAt(new Vector3(...sunPosition.map((n, i) => (n - position[i]) / KM_PER_UNIT)));
+        loose.pose(replay.unfold);
+        node.setEnabled(false);
       }
     }
   }

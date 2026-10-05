@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-06', text: t('제임스 웹에 도킹하면 그날로 갑니다. 가리개 다섯 겹과 금빛 거울이 차례로 펼쳐집니다.') },
   { day: '2026-10-06', text: t('아폴로 11호 장면이 길어졌습니다. 사다리를 내려와 깃발을 세우고 통통 뛰어다닙니다.') },
   { day: '2026-10-06', text: t('착륙 장면마다 소리가 납니다. 엔진이 울리고, 낙하산에 바람이 일고, 공기 주머니가 튑니다.') },
   { day: '2026-10-06', text: t('달의 여덟 곳에서 그날을 다시 봅니다. 떠나고, 내리고, 굴러 나오고, 넘어지고, 부딪힙니다.') },

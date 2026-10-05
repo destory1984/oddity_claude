@@ -472,7 +472,7 @@ async function init() {
     onJournal: () => journal.open(),
     onMute: () => toggleSound(),
     onMusic: () => toggleMusic(),
-    onRear: () => { if (!photo.active()) setRear(!rear); },
+    onRear: (on) => { if (!on || !photo.active()) setRear(on); },
     // A flight key pressed while paused flies on at once (not in photo mode, which is
     // paused on purpose, nor behind a story card).
     onMove() {
@@ -806,6 +806,19 @@ ${STORY_MORE[target.id]}` : told };
     return { id: ground.id, direction };
   }
 
+  // Turn her to look at what is chosen (the "바라보기" key, and a body's name tag).
+  function facePicked() {
+    const body = here(selectedId);
+    const direction = body.position.map((n, i) => n - state.position[i]);
+    state = { ...state, orientation: faceToward(direction) };
+    aimedId = selectedId;
+    // Somewhere already known: say again what it is.
+    const about = aboutKnown(body);
+    toast.show(about ? `${hud.faceToast(body)}\n${about}` : hud.faceToast(body));
+  }
+  // She counts as looking at a thing within this of the way the "바라보기" key turns her.
+  const FACING_RAD = 0.05;
+
   // Choosing a craft from close by docks with it; choosing somewhere already visited
   // from far away jumps there.
   function selectBody(id) {
@@ -813,15 +826,40 @@ ${STORY_MORE[target.id]}` : told };
     hud.showSelection(named(id));
     if (paused || warp.busy()) return;
     const chosen = here(id);
+    // A body's name tag first turns her to look at it; pressed again while she looks at
+    // it, it jumps there if it is far, and if it is near only ticks twice (the user,
+    // 2026-10-06, of Earth's and the Moon's tags: "1) 해당 물체를 바라본다. 2) 바라보고
+    // 있는 상태에서 누르면, 멀면 워프하고, 가까우면 틱틱 소리만 낸다"). A craft's or a
+    // place's tag acts at once, as before.
+    if (chosen.kind !== 'craft' && chosen.kind !== 'site') {
+      const want = forward(faceToward(chosen.position.map((n, i) => n - state.position[i])));
+      const now = forward(state.orientation);
+      if (want.reduce((sum, n, i) => sum + n * now[i], 0) < Math.cos(FACING_RAD)) {
+        facePicked();
+        return;
+      }
+      if (teleportSpot(chosen, { position: state.position, progress, bodies })) teleport(id);
+      else {
+        sound.cue('click');
+        setTimeout(() => sound.cue('click'), 110);
+      }
+      return;
+    }
     if (teleportSpot(chosen, { position: state.position, progress, bodies, parent: chosen.parent ? here(chosen.parent) : null })) {
       teleport(id);
       return;
     }
     const target = craft.find((c) => c.id === id);
     if (target && !docked && dockable(state.position, [target])) dock(target);
+    // Docked with it already: its name tag shows its card again.
+    else if (target && docked?.id === id && isDocked(docked)) showCraftCard(target);
     const place = sites.find((s) => s.id === id) ?? (eventPlace?.id === id && eclipse.kind === 'solar' ? eventPlace : null);
     if (place && !docked && visit?.id !== id
       && !siteHidden(place, here(place.parent), state.position) && !siteFar(here(place.parent), state.position)) goDownTo(place);
+    // Standing there already: its name tag opens its story card again (the user,
+    // 2026-10-06, at Mauna Kea: "착륙한 후에 다시 천문대를 누르면, 천문대 소개 글로
+    // 돌아가게 해줘").
+    else if (place && visit?.id === id && hasArrived(visit) && !photo.active() && progress.stories.includes(id) && STORIES.some((s) => s.id === id)) showStory(id);
   }
 
   const onGround = () => Boolean(state.restingOn || visit);
@@ -992,15 +1030,7 @@ ${STORY_MORE[target.id]}` : told };
   const hud = createHud([...BODIES, ...exoBodiesAt(0), ...craft, ...sites, ...(eventPlace ? [eventPlace] : [])], {
     skyLabels: skyLabels(),
     onSelect: selectBody,
-    onFace() {
-      const body = here(selectedId);
-      const direction = body.position.map((n, i) => n - state.position[i]);
-      state = { ...state, orientation: faceToward(direction) };
-      aimedId = selectedId;
-      // Somewhere already known: say again what it is.
-      const about = aboutKnown(body);
-      toast.show(about ? `${hud.faceToast(body)}\n${about}` : hud.faceToast(body));
-    },
+    onFace: () => facePicked(),
     onInspect() {
       const body = here(selectedId);
       // The view goes close and circles the target; she herself stays where she is, so
@@ -1459,7 +1489,12 @@ ${STORY_MORE[target.id]}` : told };
   });
 
   $('brake').addEventListener('click', brake);
-  $('rearButton').addEventListener('click', () => setRear(!rear));
+  // The view behind lasts while the button (or R) is held, and the view ahead comes
+  // back when it is let go (the user, 2026-10-06: "뒤보기 버튼은 누르고 있으면, 뒤가
+  // 보이고, 떼면 다시 앞으로 돌아오게 해줘"). It was a switch pressed once for each.
+  $('rearButton').addEventListener('pointerdown', () => { if (!photo.active()) setRear(true); });
+  for (const type of ['pointerup', 'pointercancel', 'pointerleave']) $('rearButton').addEventListener(type, () => setRear(false));
+  window.addEventListener('blur', () => setRear(false));
   // Just looking ("우주멍", the reason the game was made; the user, 2026-10-05: "화면 제일
   // 오른쪽 아랫 부분에 버튼을 하나 만들어서, 그걸 누르면 모든 글자 표시, 아이콘이 없어지게"):
   // every word, label and button goes (style.css `html.gaze`) but this one, dimmed, which
@@ -1527,7 +1562,9 @@ ${STORY_MORE[target.id]}` : told };
         for (let i = 0; i <= SAMPLES; i += 1) {
           const [a, b] = [spots[Math.max(0, i - 1)], spots[Math.min(SAMPLES, i + 1)]];
           const long = Math.hypot(b.px - a.px, b.py - a.py) || 1;
-          const half = 0.5 * piece.thick * spots[i].size * (i / SAMPLES);
+          // (1.7 times as wide as the piece, and never under 5px at its head: the user,
+          // 2026-10-06, "글자들에 따라오는 꼬리가 좀 더 굵게 해줘".)
+          const half = Math.max(2.5, 0.5 * 1.7 * piece.thick * spots[i].size) * (i / SAMPLES);
           const [nx, ny] = [-(b.py - a.py) / long * half, (b.px - a.px) / long * half];
           left.push([spots[i].px + nx, spots[i].py + ny]);
           right.push([spots[i].px - nx, spots[i].py - ny]);

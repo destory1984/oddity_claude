@@ -5026,3 +5026,44 @@ html.gaze #gazeButton {
     margin-top:var(--gap);
   }
 }
+
+/* The top buttons are four in a row and one under them (the user, 2026-10-06, with
+   arrows on a picture: "아이콘 위치 변경"): the journal stands where the camera stood,
+   and the camera one row down, left of the target's three keys. The far left place of
+   the top row is empty. Moved by left / top, not by a transform (the gaze effect uses
+   translate on these same buttons). */
+#hud nav #journalButton,
+#hud nav #photoButton {
+  position:relative;
+}
+
+#hud nav #journalButton {
+  left:52px;
+}
+
+#hud nav #photoButton {
+  top:52px;
+  z-index:6;
+}
+
+@media (max-width: 480px) {
+  #hud nav #journalButton {
+    left:calc(var(--top-key) + var(--gap));
+  }
+
+  /* (Lower by the goal line's height while the first-visit guide shows it, as the
+     target's keys are.) */
+  #hud nav #photoButton {
+    top:calc(var(--top-key) + var(--gap) + var(--guide));
+  }
+}
+
+/* The target's name plate has the line the keys have round them, and is as wide as two,
+   three, four … of the keys over it with their gaps (ui/hud.js `fitName` sets the
+   width; the user, 2026-10-06: "테두리에도 다른 아이콘과 마찬가지 색의 외곽선 넣어주고,
+   길이는 윗쪽 아이콘과 맞춰서 길었다가 짧았다가 해줘"). */
+#hud #targetPanel > #targetName {
+  justify-content:center;
+  border:1px solid var(--glass-line, #9fb4ff66);
+  white-space:nowrap;
+}

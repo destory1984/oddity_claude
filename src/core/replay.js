@@ -1,5 +1,5 @@
 import { t } from './i18n.js';
-import { MOON_SCENES, APOLLO11 } from './moonScenes.js';
+import { MOON_SCENES, APOLLO11, PLACE_STAGES } from './moonScenes.js';
 import { CRAFT_SCENES } from './craftScenes.js';
 // "그날로": at a story place, the day it is known for is played again in the close
 // view. The model that stands there comes down as it did, and a few lines tell what
@@ -191,6 +191,37 @@ export const REPLAYS = {
       { at: 24, text: t('1단이 배 위에 섰습니다. 드래건은 19시간 뒤 국제우주정거장에 닿았습니다.') },
     ],
   },
+  // Venus, twice: the first landing on another planet, and the one that lasted longest.
+  venera7: {
+    name: t('베네라 7호의 착륙'),
+    day: t('1970년 12월 15일'),
+    seconds: 24,
+    downAt: 17,
+    fromKm: 14,
+    sounds: [[0, 'chute']],
+    lines: [
+      { at: 0, text: t('1970년 12월 15일. 소련의 베네라 7호가 금성의 두꺼운 구름을 뚫고 낙하산으로 내려옵니다.') },
+      { at: 6, text: t('기압은 지구의 90배, 온도는 475도입니다. 앞서 온 탐사선들은 바닥에 닿기 전에 찌그러졌습니다.') },
+      { at: 12, text: t('낙하산이 찢어져 마지막 29분은 떨어지다시피 했습니다. 초속 17m로 부딪혀 옆으로 쓰러집니다.') },
+      { at: 17, text: t('그래도 23분 동안 약한 신호를 보냈습니다. 다른 행성의 땅에서 온 첫 소식입니다.') },
+    ],
+  },
+  venera13: {
+    name: t('베네라 13호의 착륙'),
+    day: t('1982년 3월 1일'),
+    seconds: 24,
+    downAt: 17,
+    fromKm: 14,
+    sounds: [[0, 'chute']],
+    lines: [
+      { at: 0, text: t('1982년 3월 1일. 베네라 13호가 금성으로 내려옵니다. 공기가 워낙 짙어 낙하산은 중간에 버립니다.') },
+      { at: 6, text: t('몸에 두른 둥근 판이 공기를 받아 속도를 줄입니다. 물속에 가라앉듯 천천히 내려갑니다.') },
+      { at: 12, text: t('32분을 버티게 만든 기계입니다. 내리자마자 카메라 덮개를 떼고, 드릴로 땅을 팝니다.') },
+      { at: 17, text: t('457도, 89기압에서 127분을 버텼습니다. 금성 땅의 첫 컬러 사진과 바람 소리를 보냈습니다.') },
+    ],
+  },
+  // Stages that are not on the Moon: Pluto's heart, Nuri leaving Naro.
+  ...PLACE_STAGES,
   // Eight on the Moon, each a stage of pieces (core/moonScenes.js).
   ...MOON_SCENES,
   // At a craft, while docked with it: its parts unfold (core/craftScenes.js).

@@ -1,6 +1,8 @@
-import { TransformNode, CreateSphere } from './babylon.js';
+import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, StandardMaterial, Color3 } from './babylon.js';
+import { t } from '../core/i18n.js';
+import { CRAFT_BUILD } from './craftModels.js';
 import {
-  QUARTER, part, group, aim, box, drum, rod, dish, wing, rtg, nozzle, truss, fuse,
+  QUARTER, part, cyl, group, aim, box, drum, rod, dish, wing, rtg, nozzle, truss, fuse,
 } from './craftParts.js';
 
 // What stands at the story places on the Moon, Mars and Titan, and at Earth's two launch
@@ -619,7 +621,7 @@ function lunaBall(scene, name, mats) {
 // A person in a moon suit, 0.22 tall (drawn a little large beside the lander, to be
 // seen), feet at y = 0: white suit and pack, a gold visor toward +x.
 // climbing: both arms up and forward, hands on a ladder's rails.
-function astronaut(scene, name, mats, { climbing = false } = {}) {
+export function astronaut(scene, name, mats, { climbing = false } = {}) {
   const root = new TransformNode(name, scene);
   for (const s of [-1, 1]) {
     box(scene, `${name}Leg${s}`, root, mats.white, [0.035, 0.085, 0.035], [0, 0.0425, s * 0.022]);
@@ -640,7 +642,152 @@ function flagAlone(scene, name, mats) {
   return fuse(scene, root);
 }
 
+// A flat card that shows a drawing, lit by nothing: `draw(ctx, w, h)` paints it on a
+// canvas w by h. It faces the one who watches (a stage's +z is away from them).
+function card(scene, name, [width, height], [w, h], draw) {
+  const root = new TransformNode(name, scene);
+  const texture = new DynamicTexture(`${name}Texture`, { width: w, height: h }, scene, true);
+  texture.hasAlpha = true;
+  draw(texture.getContext(), w, h);
+  texture.update();
+  const material = new StandardMaterial(`${name}Material`, scene);
+  material.disableLighting = true;
+  material.emissiveTexture = texture;
+  material.opacityTexture = texture;
+  material.diffuseColor = new Color3(0, 0, 0);
+  material.specularColor = new Color3(0, 0, 0);
+  material.backFaceCulling = false;
+  const plane = CreatePlane(`${name}Plane`, { width, height }, scene);
+  plane.parent = root;
+  plane.material = material;
+  plane.isPickable = false;
+  return root;
+}
+const heartPath = (ctx, x, y, size) => {
+  ctx.beginPath();
+  ctx.moveTo(x, y + size * 0.3);
+  ctx.bezierCurveTo(x, y - size * 0.25, x - size * 0.6, y - size * 0.25, x - size * 0.6, y + size * 0.15);
+  ctx.bezierCurveTo(x - size * 0.6, y + size * 0.5, x - size * 0.2, y + size * 0.7, x, y + size);
+  ctx.bezierCurveTo(x + size * 0.2, y + size * 0.7, x + size * 0.6, y + size * 0.5, x + size * 0.6, y + size * 0.15);
+  ctx.bezierCurveTo(x + size * 0.6, y - size * 0.25, x, y - size * 0.25, x, y + size * 0.3);
+  ctx.closePath();
+};
+// The picture New Horizons took: Pluto, tan and brown, with its pale heart.
+function plutoPhoto(scene, name) {
+  return card(scene, name, [0.8, 0.8], [256, 256], (ctx, w, h) => {
+    ctx.fillStyle = '#f4f1e8';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#05060a';
+    ctx.fillRect(12, 12, w - 24, h - 24);
+    const shade = ctx.createRadialGradient(108, 104, 10, 128, 128, 92);
+    shade.addColorStop(0, '#d8b48c');
+    shade.addColorStop(0.7, '#a9805c');
+    shade.addColorStop(1, '#5d4332');
+    ctx.fillStyle = shade;
+    ctx.beginPath();
+    ctx.arc(128, 128, 92, 0, Math.PI * 2);
+    ctx.fill();
+    // The dark band to the left of the heart, and the heart.
+    ctx.fillStyle = '#6b4a36';
+    ctx.beginPath();
+    ctx.ellipse(86, 150, 34, 20, 0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f6ecd8';
+    heartPath(ctx, 150, 118, 58);
+    ctx.fill();
+  });
+}
+// What it says, in a bubble with a tail toward the lower left.
+function sayBubble(scene, name, words) {
+  return card(scene, name, [1.0, 0.5], [512, 256], (ctx, w, h) => {
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#1b2440';
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(60, 20);
+    ctx.lineTo(w - 60, 20);
+    ctx.quadraticCurveTo(w - 16, 20, w - 16, 64);
+    ctx.lineTo(w - 16, 140);
+    ctx.quadraticCurveTo(w - 16, 184, w - 60, 184);
+    ctx.lineTo(150, 184);
+    ctx.lineTo(70, 240);
+    ctx.lineTo(96, 184);
+    ctx.lineTo(60, 184);
+    ctx.quadraticCurveTo(16, 184, 16, 140);
+    ctx.lineTo(16, 64);
+    ctx.quadraticCurveTo(16, 20, 60, 20);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#1b2440';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // Smaller letters for longer words (the other languages).
+    let size = 84;
+    do {
+      ctx.font = `700 ${size}px "Gaegu", "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif`;
+      size -= 6;
+    } while (ctx.measureText(words).width > w - 80 && size > 30);
+    ctx.fillText(words, w / 2, 104);
+  });
+}
+
+// Nuri in the pieces that go their own ways (core/moonScenes.js PLACE_STAGES.naro), each
+// with its foot at its own y = 0, and the pad it leaves.
+function nuriPieces(scene, name, mats) {
+  const first = new TransformNode(`${name}First`, scene);
+  for (const [x, z] of round(4, 0.035, 0.785)) nozzle(scene, `${name}Engine${x}${z}`, first, mats.dark, [x, 0, z], [0, -1, 0], 0.06, 0.05);
+  drum(scene, `${name}S1`, first, mats.white, { height: 0.5, diameter: 0.13 }, [0, 0.25, 0]);
+  drum(scene, `${name}Band1`, first, mats.black, { height: 0.02, diameter: 0.1313 }, [0, 0.5, 0]);
+  box(scene, `${name}Flag`, first, mats.taegukgi, [0.004, 0.06, 0.09], [0.066, 0.36, 0]);
+  const second = new TransformNode(`${name}Second`, scene);
+  nozzle(scene, `${name}Engine2`, second, mats.dark, [0, 0.04, 0], [0, -1, 0], 0.06, 0.07);
+  drum(scene, `${name}S2`, second, mats.white, { height: 0.22, diameter: 0.13 }, [0, 0.14, 0]);
+  drum(scene, `${name}Band2`, second, mats.black, { height: 0.015, diameter: 0.1313 }, [0, 0.25, 0]);
+  const third = new TransformNode(`${name}Third`, scene);
+  nozzle(scene, `${name}Engine3`, third, mats.dark, [0, 0.03, 0], [0, -1, 0], 0.04, 0.04);
+  drum(scene, `${name}S3`, third, mats.white, { height: 0.1, diameter: 0.13 }, [0, 0.07, 0]);
+  const halves = [0, 1].map((k) => {
+    const half = new TransformNode(`${name}Fairing${k}`, scene);
+    const shell = part(cyl(scene, `${name}FairingShell${k}`, { height: 0.2, diameterTop: 0.012, diameterBottom: 0.13, tessellation: 20, arc: 0.5 }), half, mats.white, [0, 0.1, 0]);
+    // A half ring about the upright: one toward -x, the other toward +x.
+    shell.rotation.y = k ? -Math.PI / 2 : Math.PI / 2;
+    return half;
+  });
+  const satellite = new TransformNode(`${name}Satellite`, scene);
+  box(scene, `${name}SatBody`, satellite, mats.goldFoil, [0.06, 0.06, 0.06], [0, 0.04, 0]);
+  for (const s of [-1, 1]) box(scene, `${name}SatWing${s}`, satellite, mats.cells, [0.004, 0.05, 0.1], [0, 0.04, s * 0.085]);
+  return {
+    pieces: {
+      pad: launchPad(scene, `${name}Pad`, mats, { rocket: 'none' }),
+      first: fuse(scene, first),
+      second: fuse(scene, second),
+      third: fuse(scene, third),
+      fairingLeft: halves[0],
+      fairingRight: halves[1],
+      satellite: fuse(scene, satellite),
+    },
+    flames: { first: [0, -0.04, 0, 0.42, 0.12], second: [0, -0.02, 0, 0.3, 0.1], third: [0, -0.01, 0, 0.18, 0.06] },
+  };
+}
+
 const MOON_STAGES = {
+  naro: nuriPieces,
+  tombaughRegio: (scene, name, mats) => {
+    const flash = new TransformNode(`${name}Flash`, scene);
+    part(CreateSphere(`${name}FlashBall`, { diameter: 1, segments: 14 }, scene), flash, mats.white, [0, 0, 0]);
+    return {
+      pieces: {
+        probe: CRAFT_BUILD.newHorizons(scene, `${name}Probe`, mats),
+        flash,
+        photo: plutoPhoto(scene, `${name}Photo`),
+        bubble: sayBubble(scene, `${name}Bubble`, t('앗. 하트네')),
+      },
+      flames: {},
+      lit: ['flash'],
+    };
+  },
   apollo11: (scene, name, mats) => ({
     pieces: {
       lander: apollo(scene, `${name}Lander`, mats, { withFlag: false }),
@@ -757,6 +904,8 @@ export const SITE_REPLAY_BUILD = {
   // body, between the legs.)
   viking1: [viking, {}, 'flame', 0.1],
   huygens: [huygens, {}, 'chute'],
+  // Venus: both came down under a parachute through the thick air.
+  venera7: [capsule, {}, 'chute'], venera13: [capsule, {}, 'chute'],
   curiosity: [rover, { power: 'rtg' }, 'crane'],
   // Those that bounced. 'bag': it comes down inside air bags (the fourth item: the
   // ball's radius, how high the model's middle is, and how many lobes: Luna 9's two

@@ -63,12 +63,14 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
     else if (e.code === 'KeyJ' && !e.repeat && tracksKey(e)) onJournal();
     else if (e.code === 'KeyM' && !e.repeat && tracksKey(e)) onMute();
     else if (e.code === 'KeyB' && !e.repeat && tracksKey(e)) onMusic();
-    else if (e.code === 'KeyR' && !e.repeat && tracksKey(e)) onRear();
+    else if (e.code === 'KeyR' && !e.repeat && tracksKey(e)) onRear(true);
     else if (e.code === 'Escape' && !e.repeat) onEscape();
     if (tracksKey(e)) held.add(e.code);
   });
   document.addEventListener('keyup', (e) => {
     held.delete(e.code);
+    // The view behind lasts only while its key is held.
+    if (e.code === 'KeyR') onRear(false);
     // Releasing a modifier may swallow the keyups of letters pressed with it.
     if (['MetaLeft', 'MetaRight', 'ControlLeft', 'ControlRight'].includes(e.code)) held.clear();
   });

@@ -15,7 +15,24 @@ const TOUCH_REACH = 30;
 const EDGE_GAP = 8;
 const TOUCH_SECONDS = 10;
 
+// The name plate is as wide as a whole number of the keys over it with the gaps between
+// them: two at least, and as many more as its words need. (Nothing is set while the
+// panel does not show: the keys then have no width to count by.)
+function fitName() {
+  const plate = $('targetName');
+  const keys = [$('faceTarget'), $('lockTarget')].map((key) => key.getBoundingClientRect());
+  const key = keys[0].width;
+  if (!(key > 0)) return;
+  const step = keys[1].left - keys[0].left;
+  plate.style.width = '';
+  const needs = plate.getBoundingClientRect().width;
+  const count = Math.max(2, Math.ceil((needs + (step - key) - 0.5) / step));
+  plate.style.width = `${count * step - (step - key)}px`;
+}
+
 export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] }) {
+  window.addEventListener('resize', fitName);
+  document.fonts?.ready.then(fitName);
   const markers = new Map();
   for (const body of bodies) {
     const el = document.createElement('button');
@@ -104,6 +121,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
   return {
     showSelection(body) {
       $('targetName').innerHTML = `${body.name} <small>${body.nameEn}</small>`;
+      fitName();
       $('faceTarget').textContent = t`${body.name} 바라보기`;
       // The button shows a picture only: its words are its name and its tip.
       $('faceTarget').title = t`${body.name} 바라보기`;

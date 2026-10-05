@@ -310,3 +310,104 @@ export const MOON_SCENES = {
     },
   },
 };
+
+// Two more stages that are not on the Moon (the user, 2026-10-06: "톰보 지역도 애니메이션
+// 이벤트 넣어줘.. 탐사선이 사진 찍고, 앗. 하트네 하는 말풍선 넣어주고", "나로우주센터도
+// 애니 이벤트 넣고").
+export const PLACE_STAGES = {
+  // New Horizons goes by over Pluto's heart: it crosses the sky, a flash as it takes its
+  // picture, the picture comes up (Pluto with its heart) and it says what it sees.
+  tombaughRegio: {
+    name: t('명왕성의 하트를 찍다'),
+    day: t('2015년 7월 14일'),
+    seconds: 34,
+    downAt: 12,
+    viewKm: 56,
+    sounds: [[12, 'shutter'], [13.5, 'discovered']],
+    lines: [
+      { at: 0, text: t('2015년 7월 14일. 9년 반 동안 48억km를 날아온 뉴허라이즌스가 명왕성 곁을 스쳐 갑니다.') },
+      { at: 6, text: t('초속 14km, 높이 12,500km. 멈출 연료는 없습니다. 지나가는 몇 시간 안에 다 찍어야 합니다.') },
+      { at: 12, text: t('찰칵. 사진 속 명왕성에는 너비 1,600km의 하얀 하트가 있었습니다. 질소 얼음이 덮인 벌판입니다.') },
+      { at: 20, text: t('명왕성을 찾은 클라이드 톰보의 이름을 붙였습니다. 탐사선에는 그의 유골 한 줌이 실려 있습니다.') },
+      { at: 27, text: t('찍은 것을 지구로 다 보내는 데 열여섯 달이 걸렸습니다. 뉴허라이즌스는 지금도 멀어지고 있습니다.') },
+    ],
+    stage(t) {
+      const x = -2.4 + 4.8 * clamp(t / 27);
+      const s = t - 12;
+      const flash = s < 0 ? 0 : s < 0.12 ? s / 0.12 : Math.max(0, 1 - (s - 0.12) / 0.5);
+      return {
+        probe: { x, y: 1.1, scale: 0.75, shown: t < 27 },
+        flash: { x: x + 0.1, y: 1.05, scale: Math.max(0.01, 0.5 * flash), shown: flash > 0 },
+        // The picture stays up to the end.
+        photo: { x: -0.95, y: 0.55, scale: Math.max(0.01, ease(t, 12.3, 13.3)), shown: t >= 12.3 },
+        // What it says goes along with it for six seconds.
+        bubble: { x: x + 0.55, y: 1.6, scale: Math.max(0.01, ease(t, 13.5, 14) * (1 - ease(t, 19, 19.5))), shown: t >= 13.5 && t < 19.5 },
+      };
+    },
+  },
+  // Nuri's second flight from Naro, the first to reach orbit: three stages, each left
+  // behind in turn, the fairing's two halves, and the satellite let go at the top.
+  // The stack stands 0.16 to the side of the pad's middle, 0.2 up on its deck; each
+  // piece has its foot at its own y = 0 (the first stage is 0.52 tall, the second 0.26,
+  // the third 0.12). It rises faster and faster until the first stage is spent (11 s),
+  // then goes on leaning over downrange. (The real times, 127 s to 875 s, are drawn as
+  // eleven to twenty-seven seconds, and the heights, 59 to 700 km, as what fits the view.)
+  naro: {
+    name: t('누리호의 발사'),
+    day: t('2022년 6월 21일'),
+    seconds: 40,
+    downAt: 27,
+    viewKm: 70,
+    sounds: [[2, 'liftoff'], [11, 'staging'], [15, 'toss'], [18, 'staging'], [27, 'toss'], [27.5, 'stood']],
+    lines: [
+      { at: 0, text: t('2022년 6월 21일 오후 4시. 나로우주센터에서 누리호가 두 번째로 떠납니다. 여덟 달 전 첫 발사는 마지막에 실패했습니다.') },
+      { at: 6, text: t('75톤 엔진 넷이 200톤의 몸을 들어 올립니다. 엔진부터 발사대까지 모두 한국에서 만들었습니다.') },
+      { at: 11, text: t('127초, 높이 59km에서 1단이 떨어집니다. 이어 위성을 감싼 덮개가 갈라지고 2단도 떨어집니다.') },
+      { at: 19, text: t('3단의 7톤 엔진이 여덟 분 넘게 탑니다. 지난번에는 이 엔진이 46초 일찍 꺼졌습니다.') },
+      { at: 27, text: t('875초, 높이 700km. 성능 검증 위성이 떨어져 나갑니다. 초속 7.5km, 목표한 그대로입니다.') },
+      { at: 33, text: t('한국은 1톤 넘는 위성을 제 힘으로 올린 일곱 번째 나라가 됐습니다. 남극 세종기지가 첫 신호를 받았습니다.') },
+    ],
+    stage(t) {
+      // Where the foot of the stack is, and how far it leans, s seconds after lift-off.
+      const fly = (s) => {
+        if (s <= 8) return { x: 0, y: 0.7 * (Math.max(0, s) / 8) ** 2, lean: 0 };
+        const u = s - 8;
+        return { x: 0.006 * u * u, y: 0.7 + 0.12 * u - 0.004 * u * u, lean: -Math.min(1.2, 0.08 * u) };
+      };
+      // A piece let go at `at` (seconds after lift-off) from `from`, `up` above the foot:
+      // it coasts on a little, falls back and tumbles; gone when it is back at the ground.
+      const dropped = (s, at, up) => {
+        const from = fly(at);
+        const u = s - at;
+        const y = from.y + up + 0.12 * u - 0.05 * u * u;
+        return { x: from.x - 0.03 * u, y: Math.max(0, y), lean: from.lean - 0.5 * u, shown: y > 0 };
+      };
+      const s = t - 3;
+      const now = fly(s);
+      const stack = (up) => ({ x: now.x - up * Math.sin(now.lean), y: now.y + up * Math.cos(now.lean), lean: now.lean });
+      const first = s < 8 ? { ...stack(0), burn: t >= 2 } : dropped(s, 8, 0);
+      const second = s < 15 ? { ...stack(0.52), burn: s >= 8.6 } : dropped(s, 15, 0.52);
+      const third = { ...stack(0.78), burn: s >= 15.6 && s < 24 };
+      // The halves fall away to either side from twelve seconds after lift-off.
+      const half = (way) => {
+        if (s < 12) return stack(0.9);
+        const from = fly(12);
+        const u = s - 12;
+        const y = from.y + 0.9 + 0.1 * u - 0.05 * u * u;
+        return { x: from.x + way * 0.12 * u, y: Math.max(0, y), lean: from.lean + way * 0.6 * u, shown: y > 0 };
+      };
+      // The satellite rides on the third stage and leaves it at 27 s of the scene.
+      const top = stack(0.92);
+      const free = Math.max(0, t - 27);
+      return {
+        pad: { x: 0, y: 0 },
+        first: { ...first, x: 0.16 + first.x, y: 0.2 + first.y },
+        second: { ...second, x: 0.16 + second.x, y: 0.2 + second.y },
+        third: { ...third, x: 0.16 + third.x - 0.02 * free, y: 0.2 + third.y - 0.015 * free },
+        fairingLeft: { ...half(-1), x: 0.16 + half(-1).x, y: 0.2 + half(-1).y },
+        fairingRight: { ...half(1), x: 0.16 + half(1).x, y: 0.2 + half(1).y },
+        satellite: { x: 0.16 + top.x + 0.05 * free, y: 0.2 + top.y + 0.02 * free, lean: top.lean, shown: s >= 12 },
+      };
+    },
+  },
+};

@@ -371,56 +371,64 @@ function ship(scene, name, parent, mats, at, out, size = 0.09) {
 // wings on turning joints, folded radiators, and the string of modules across its
 // middle: the Russian end, the node, the American lab, the European and Japanese labs,
 // the cupola, the robot arm and two ships docked.
-function iss(scene, name, mats) {
+// stage: for the scene of its building (render/craftUnfold.js), a map of group nodes
+// to build into instead of one root: zarya, unity, zvezda, destiny, port, starboard,
+// labs, rooms. Nothing is fused then.
+function iss(scene, name, mats, stage = null) {
   const root = new TransformNode(name, scene);
-  truss(scene, `${name}Truss`, root, mats.grey, [-0.5, 0, 0], [0.5, 0, 0], 0.045, 12, 0.006);
+  const P = (key) => (stage ? stage[key] : root);
+  if (stage) {
+    truss(scene, `${name}TrussMid`, stage.destiny, mats.grey, [-0.2, 0, 0], [0.2, 0, 0], 0.045, 5, 0.006);
+    for (const s of [-1, 1]) truss(scene, `${name}TrussSide${s}`, s < 0 ? stage.port : stage.starboard, mats.grey, [s * 0.2, 0, 0], [s * 0.5, 0, 0], 0.045, 4, 0.006);
+  } else truss(scene, `${name}Truss`, root, mats.grey, [-0.5, 0, 0], [0.5, 0, 0], 0.045, 12, 0.006);
   for (const s of [-1, 1]) {
+    const side = stage ? (s < 0 ? stage.port : stage.starboard) : root;
     // Turning joints, then two masts each carrying a pair of blankets.
-    drum(scene, `${name}Joint${s}`, root, mats.dark, { height: 0.02, diameter: 0.07 }, [s * 0.23, 0, 0], [1, 0, 0]);
+    drum(scene, `${name}Joint${s}`, side, mats.dark, { height: 0.02, diameter: 0.07 }, [s * 0.23, 0, 0], [1, 0, 0]);
     for (const x of [0.31, 0.45]) {
       for (const up of [-1, 1]) {
-        rod(scene, `${name}Mast${s}${x}${up}`, root, mats.grey, [s * x, 0, 0], [s * x, up * 0.36, 0], 0.008, 4);
-        for (const side of [-1, 1]) {
-          box(scene, `${name}Blanket${s}${x}${up}${side}`, root, mats.cells, [0.05, 0.3, 0.003], [s * x + side * 0.03, up * 0.2, 0.004]);
-          box(scene, `${name}BlanketBack${s}${x}${up}${side}`, root, mats.goldFoil, [0.05, 0.3, 0.003], [s * x + side * 0.03, up * 0.2, 0]);
+        rod(scene, `${name}Mast${s}${x}${up}`, side, mats.grey, [s * x, 0, 0], [s * x, up * 0.36, 0], 0.008, 4);
+        for (const half of [-1, 1]) {
+          box(scene, `${name}Blanket${s}${x}${up}${half}`, side, mats.cells, [0.05, 0.3, 0.003], [s * x + half * 0.03, up * 0.2, 0.004]);
+          box(scene, `${name}BlanketBack${s}${x}${up}${half}`, side, mats.goldFoil, [0.05, 0.3, 0.003], [s * x + half * 0.03, up * 0.2, 0]);
         }
-        box(scene, `${name}Tip${s}${x}${up}`, root, mats.grey, [0.12, 0.008, 0.01], [s * x, up * 0.352, 0]);
+        box(scene, `${name}Tip${s}${x}${up}`, side, mats.grey, [0.12, 0.008, 0.01], [s * x, up * 0.352, 0]);
       }
     }
     // Radiators: three white panels folded like a fan, behind the truss.
     for (let k = 0; k < 3; k++) {
-      box(scene, `${name}Radiator${s}${k}`, root, mats.white, [0.035, 0.004, 0.2], [s * (0.1 + k * 0.038), 0, -0.14], [0, 0, (k - 1) * 0.5]);
+      box(scene, `${name}Radiator${s}${k}`, side, mats.white, [0.035, 0.004, 0.2], [s * (0.1 + k * 0.038), 0, -0.14], [0, 0, (k - 1) * 0.5]);
     }
-    box(scene, `${name}SmallRadiator${s}`, root, mats.white, [0.03, 0.004, 0.12], [s * 0.38, 0, -0.09]);
+    box(scene, `${name}SmallRadiator${s}`, side, mats.white, [0.03, 0.004, 0.12], [s * 0.38, 0, -0.09]);
   }
   // The pressurised string, fore (+z) to aft.
   const y = -0.04;
-  module(scene, `${name}Harmony`, root, mats, [0, y, 0.22], [0, y, 0.3], 0.07);
-  module(scene, `${name}Destiny`, root, mats, [0, y, 0.07], [0, y, 0.22], 0.07);
-  module(scene, `${name}Unity`, root, mats, [0, y, -0.02], [0, y, 0.07], 0.075);
-  module(scene, `${name}Zarya`, root, mats, [0, y, -0.2], [0, y, -0.02], 0.065, mats.foil);
-  module(scene, `${name}Zvezda`, root, mats, [0, y, -0.38], [0, y, -0.2], 0.065, mats.foil);
+  module(scene, `${name}Harmony`, P('labs'), mats, [0, y, 0.22], [0, y, 0.3], 0.07);
+  module(scene, `${name}Destiny`, P('destiny'), mats, [0, y, 0.07], [0, y, 0.22], 0.07);
+  module(scene, `${name}Unity`, P('unity'), mats, [0, y, -0.02], [0, y, 0.07], 0.075);
+  module(scene, `${name}Zarya`, P('zarya'), mats, [0, y, -0.2], [0, y, -0.02], 0.065, mats.foil);
+  module(scene, `${name}Zvezda`, P('zvezda'), mats, [0, y, -0.38], [0, y, -0.2], 0.065, mats.foil);
   // Labs to either side of the forward node, with Japan's porch and its own arm.
-  module(scene, `${name}Columbus`, root, mats, [0.035, y, 0.26], [0.14, y, 0.26], 0.065);
-  module(scene, `${name}Kibo`, root, mats, [-0.035, y, 0.26], [-0.2, y, 0.26], 0.07);
-  box(scene, `${name}Porch`, root, mats.grey, [0.07, 0.01, 0.08], [-0.24, y, 0.26]);
-  module(scene, `${name}KiboAttic`, root, mats, [-0.12, y + 0.035, 0.26], [-0.12, y + 0.09, 0.26], 0.05);
+  module(scene, `${name}Columbus`, P('labs'), mats, [0.035, y, 0.26], [0.14, y, 0.26], 0.065);
+  module(scene, `${name}Kibo`, P('labs'), mats, [-0.035, y, 0.26], [-0.2, y, 0.26], 0.07);
+  box(scene, `${name}Porch`, P('labs'), mats.grey, [0.07, 0.01, 0.08], [-0.24, y, 0.26]);
+  module(scene, `${name}KiboAttic`, P('labs'), mats, [-0.12, y + 0.035, 0.26], [-0.12, y + 0.09, 0.26], 0.05);
   // Side rooms on the middle node, and the cupola looking down at Earth.
-  module(scene, `${name}Tranquility`, root, mats, [-0.035, y, 0.025], [-0.14, y, 0.025], 0.065);
-  drum(scene, `${name}Cupola`, root, mats.glass, { height: 0.02, diameterTop: 0.05, diameterBottom: 0.03, tessellation: 6 }, [-0.1, y - 0.045, 0.025]);
-  module(scene, `${name}Airlock`, root, mats, [0.035, y, 0.025], [0.1, y, 0.025], 0.06);
+  module(scene, `${name}Tranquility`, P('rooms'), mats, [-0.035, y, 0.025], [-0.14, y, 0.025], 0.065);
+  drum(scene, `${name}Cupola`, P('rooms'), mats.glass, { height: 0.02, diameterTop: 0.05, diameterBottom: 0.03, tessellation: 6 }, [-0.1, y - 0.045, 0.025]);
+  module(scene, `${name}Airlock`, P('rooms'), mats, [0.035, y, 0.025], [0.1, y, 0.025], 0.06);
   // Russian solar wings on the aft modules.
   for (const z of [-0.11, -0.3]) {
-    for (const s of [-1, 1]) wing(scene, `${name}RuWing${z}${s}`, root, mats, { from: [s * 0.03, y, z], to: [s * 0.2, y, z], width: 0.05, panels: 3, face: [0, 0, 1], yoke: 0.15 });
+    for (const s of [-1, 1]) wing(scene, `${name}RuWing${z}${s}`, P(z > -0.2 ? 'zarya' : 'zvezda'), mats, { from: [s * 0.03, y, z], to: [s * 0.2, y, z], width: 0.05, panels: 3, face: [0, 0, 1], yoke: 0.15 });
   }
-  ship(scene, `${name}Soyuz`, root, mats, [0, y - 0.03, -0.3], [0, -1, 0], 0.06);
-  ship(scene, `${name}Progress`, root, mats, [0, y, -0.38], [0, 0, -1], 0.06);
-  ship(scene, `${name}Dragon`, root, mats, [0, y, 0.3], [0, 0, 1], 0.065);
+  ship(scene, `${name}Soyuz`, P('zvezda'), mats, [0, y - 0.03, -0.3], [0, -1, 0], 0.06);
+  ship(scene, `${name}Progress`, P('zvezda'), mats, [0, y, -0.38], [0, 0, -1], 0.06);
+  ship(scene, `${name}Dragon`, P('labs'), mats, [0, y, 0.3], [0, 0, 1], 0.065);
   // The robot arm, bent at its elbow.
-  rod(scene, `${name}Arm0`, root, mats.white, [0.05, 0.02, 0.12], [0.16, 0.12, 0.2], 0.012, 6);
-  rod(scene, `${name}Arm1`, root, mats.white, [0.16, 0.12, 0.2], [0.24, 0.03, 0.3], 0.012, 6);
-  sphere(scene, `${name}Elbow`, root, mats.grey, 0.02, [0.16, 0.12, 0.2]);
-  return fuse(scene, root);
+  rod(scene, `${name}Arm0`, P('destiny'), mats.white, [0.05, 0.02, 0.12], [0.16, 0.12, 0.2], 0.012, 6);
+  rod(scene, `${name}Arm1`, P('destiny'), mats.white, [0.16, 0.12, 0.2], [0.24, 0.03, 0.3], 0.012, 6);
+  sphere(scene, `${name}Elbow`, P('destiny'), mats.grey, 0.02, [0.16, 0.12, 0.2]);
+  return stage ? root : fuse(scene, root);
 }
 
 // Tiangong: the core module with its docking hub, two lab modules to either side in a
@@ -523,7 +531,8 @@ function juno(scene, name, mats) {
 // Cassini: a four-metre dish over a stack of gold-wrapped modules, the Huygens probe
 // on its side like a shield, three power units, two engines, the eleven-metre
 // magnetometer boom, three radio whips and the camera pallet.
-function cassini(scene, name, mats) {
+// probe: false leaves Huygens off (the scene of its leaving has it as a part of its own).
+function cassini(scene, name, mats, { probe = true } = {}) {
   const root = new TransformNode(name, scene);
   dish(scene, `${name}Dish`, root, mats, { at: [0, 0.3, 0], toward: [0, 1, 0], diameter: 0.5 });
   drum(scene, `${name}Upper`, root, mats.goldFoil, { height: 0.08, diameter: 0.24, tessellation: 12 }, [0, 0.24, 0]);
@@ -531,8 +540,10 @@ function cassini(scene, name, mats) {
   drum(scene, `${name}Lower`, root, mats.blackFoil, { height: 0.08, diameter: 0.24, tessellation: 12 }, [0, -0.16, 0]);
   for (const y of [0.2, -0.12]) drum(scene, `${name}Ring${y}`, root, mats.grey, { height: 0.01, diameter: 0.25, tessellation: 12 }, [0, y, 0]);
   // Huygens: the Titan probe under its gold heat shield.
-  drum(scene, `${name}Huygens`, root, mats.goldFoil, { height: 0.06, diameterTop: 0.24, diameterBottom: 0.1, tessellation: 24 }, [0, 0.0, 0.13], [0, 0, -1]);
-  drum(scene, `${name}HuygensBack`, root, mats.silver, { height: 0.02, diameter: 0.2, tessellation: 24 }, [0, 0.0, 0.1], Z);
+  if (probe) {
+    drum(scene, `${name}Huygens`, root, mats.goldFoil, { height: 0.06, diameterTop: 0.24, diameterBottom: 0.1, tessellation: 24 }, [0, 0.0, 0.13], [0, 0, -1]);
+    drum(scene, `${name}HuygensBack`, root, mats.silver, { height: 0.02, diameter: 0.2, tessellation: 24 }, [0, 0.0, 0.1], Z);
+  }
   // The remote-sensing pallet: cameras and spectrometers on one side.
   box(scene, `${name}Pallet`, root, mats.white, [0.03, 0.12, 0.1], [-0.14, 0.14, -0.02]);
   drum(scene, `${name}NarrowCamera`, root, mats.white, { height: 0.11, diameter: 0.035 }, [-0.19, 0.16, -0.02], [-1, 0, 0]);

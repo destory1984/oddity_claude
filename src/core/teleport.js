@@ -8,7 +8,17 @@ import { DOCK_RANGE_KM } from './dock.js';
 // about a third of the screen's height (the view is 60 degrees tall).
 export const VISTA_RADII = 5;
 // Saturn's rings reach 2.35 radii out, so stand back and look from higher up.
-const RINGED = { saturn: { radii: 9, liftDeg: 22 } };
+const RINGED = {
+  saturn: { radii: 9, liftDeg: 22 },
+  // The Sun is drawn at its true size but the planets stand close in (Earth is 2.2
+  // million km from it, 3.1 of its radii): five radii out would be beyond Earth, and
+  // choosing the Sun from Earth did nothing (the user, 2026-10-06: "태양 워프는 왜 안
+  // 되?"). It is seen from 2.4 radii, where it fills most of the view's height.
+  sun: { radii: 2.4, liftDeg: 12 },
+};
+// A body counts as near, and is not jumped to, within this many times its viewing
+// distance: the Sun's is counted closely, or it would be "near" from Earth.
+const NEAR_VISTAS = { sun: 1.25 };
 // Off to one side of the line to the Sun, so most of the disc is lit and the night
 // edge shows; and a little above the planets' plane.
 const SIDE_DEG = 40;
@@ -48,7 +58,7 @@ export function farFrom(target, position) {
   const km = gap(position, target.position);
   if (target.kind === 'craft') return km > DOCK_RANGE_KM;
   if (target.kind === 'site') return km > 2000;
-  return km > 2 * vistaKm(target);
+  return km > (NEAR_VISTAS[target.id] ?? 2) * vistaKm(target);
 }
 
 // How far from a body's centre its best view is.

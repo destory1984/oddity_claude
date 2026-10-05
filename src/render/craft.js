@@ -2,7 +2,8 @@ import { Vector3, Quaternion, Color3, CreatePlane, CreateSphere, StandardMateria
 import { KM_PER_UNIT } from '../core/bodies.js';
 import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
-import { CRAFT_BUILD, CRAFT_UNFOLD } from './craftModels.js';
+import { CRAFT_BUILD } from './craftModels.js';
+import { CRAFT_UNFOLD_ALL as CRAFT_UNFOLD } from './craftUnfold.js';
 import { SITE_BUILD, SITE_REPLAY_BUILD } from './siteModels.js';
 import { drum, rod, group, box } from './craftParts.js';
 

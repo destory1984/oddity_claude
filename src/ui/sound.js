@@ -423,6 +423,21 @@ export function createSound() {
         }
       }
     },
+    // Sputnik's signal: a beep of 0.3 s and as long a pause, for twenty seconds.
+    beeps: () => {
+      const out = scene();
+      for (let k = 0; k < 33; k++) tone({ freq: 1000, start: k * 0.6, length: 0.3, volume: 0.05, attack: 0.02, out });
+    },
+    // A main engine burning in space for a long while (Juno at Jupiter, 21 s): a steady
+    // low hiss that comes on at once and is cut at the end.
+    burnLong: () => {
+      const out = scene();
+      for (const at of [0, 7, 14]) {
+        noise({ start: at, length: 7.6, volume: 0.2, type: 'lowpass', freq: 260, to: 200, attack: 0.4, out });
+        noise({ start: at, length: 7.6, volume: 0.06, type: 'bandpass', freq: 1100, to: 800, attack: 0.4, out });
+      }
+      tone({ freq: 58, to: 50, length: 21, volume: 0.12, attack: 0.5, out });
+    },
     // It stands: two bells over the thump.
     stood: () => {
       bell(784, 0.25, 0.08);

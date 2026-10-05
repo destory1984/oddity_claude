@@ -178,7 +178,7 @@ export function createSound() {
 
   // attack: seconds to swell from silence. 0 starts at full volume, which is a hard
   // tick at the front of the sound.
-  function noise({ start = 0, length = 0.1, volume = 0.2, type = 'highpass', freq = 2000, to = freq, attack = 0 }) {
+  function noise({ start = 0, length = 0.1, volume = 0.2, type = 'highpass', freq = 2000, to = freq, attack = 0, out = sfx }) {
     const t = ctx.currentTime + start;
     const src = ctx.createBufferSource();
     src.buffer = noiseBuffer;
@@ -194,7 +194,7 @@ export function createSound() {
       env.gain.setValueAtTime(volume, t);
     }
     env.gain.exponentialRampToValueAtTime(0.0001, t + length);
-    src.connect(filter).connect(env).connect(sfx);
+    src.connect(filter).connect(env).connect(out);
     src.start(t);
     src.stop(t + length + 0.05);
   }
@@ -213,6 +213,19 @@ export function createSound() {
   }
 
   const PENTATONIC = [523, 587, 659, 784, 880, 1047, 1175, 1319];
+
+  // The long sounds of a scene played again (a rocket's roar runs ten seconds) go
+  // through a bus of their own, so that leaving the scene can still them at once.
+  let sceneBus = null;
+  function scene() {
+    if (!sceneBus) {
+      sceneBus = ctx.createGain();
+      sceneBus.connect(sfx);
+    }
+    sceneBus.gain.cancelScheduledValues(ctx.currentTime);
+    sceneBus.gain.setValueAtTime(1, ctx.currentTime);
+    return sceneBus;
+  }
 
   const CUES = {
     discovered: () => [523, 659, 784, 880, 1047].forEach((f, i) => pluck(f, i * 0.1, 0.14)),
@@ -279,6 +292,45 @@ export function createSound() {
       bell(988, 0.02, 0.07);
       bell(659, 0.16, 0.07);
     },
+    // A rocket leaves its pad (the launch played again, core/replay.js `sounds`): the
+    // engines light with a bark, then a deep roar swells for a second and thins for ten
+    // as it climbs away, with a crackle riding on it and a low note under it.
+    liftoff: () => {
+      const out = scene();
+      noise({ length: 0.5, volume: 0.3, type: 'bandpass', freq: 700, to: 250, attack: 0.04, out });
+      noise({ length: 11, volume: 0.42, type: 'lowpass', freq: 240, to: 90, attack: 1.1, out });
+      noise({ start: 0.3, length: 8, volume: 0.1, type: 'bandpass', freq: 1500, to: 500, attack: 0.9, out });
+      tone({ freq: 55, to: 41, length: 9, volume: 0.2, attack: 1.2, out });
+      // The crackle: short hard bursts, thick at first and thinning.
+      for (let k = 0; k < 34; k++) {
+        const at = 0.5 + 8.5 * (k / 34) ** 1.4 + 0.11 * Math.sin(k * 7.3);
+        noise({ start: at, length: 0.05, volume: 0.12 * (1 - k / 40), type: 'bandpass', freq: 2200 + 900 * Math.sin(k * 3.1), out });
+      }
+    },
+    // The stages part: a clunk and a puff, then the second stage's engine, a thinner
+    // hiss going away.
+    staging: () => {
+      const out = scene();
+      noise({ length: 0.14, volume: 0.34, type: 'lowpass', freq: 800, to: 200, out });
+      tone({ freq: 110, to: 70, length: 0.35, volume: 0.2, out });
+      noise({ start: 0.08, length: 0.7, volume: 0.16, type: 'highpass', freq: 3000, to: 1200, out });
+      noise({ start: 0.6, length: 6, volume: 0.14, type: 'bandpass', freq: 500, to: 220, attack: 0.5, out });
+    },
+    // The first stage lights again to come down: a roar that grows until it stands on
+    // the deck (the thump of that is 'landed'), and the legs lock out with two clicks.
+    landingBurn: () => {
+      const out = scene();
+      noise({ length: 3.7, volume: 0.36, type: 'lowpass', freq: 160, to: 420, attack: 3.1, out });
+      noise({ length: 3.7, volume: 0.09, type: 'bandpass', freq: 900, to: 1800, attack: 3.1, out });
+      tone({ freq: 46, to: 62, length: 3.7, volume: 0.16, attack: 3, out });
+      noise({ start: 0.9, length: 0.05, volume: 0.2, type: 'bandpass', freq: 1800, out });
+      noise({ start: 1.05, length: 0.05, volume: 0.2, type: 'bandpass', freq: 1500, out });
+    },
+    // It stands: two bells over the thump.
+    stood: () => {
+      bell(784, 0.25, 0.08);
+      bell(1175, 0.45, 0.08);
+    },
   };
 
   return {
@@ -289,6 +341,10 @@ export function createSound() {
     cue(name) {
       if (!ctx || muted || !CUES[name]) return;
       CUES[name]();
+    },
+    // Still a scene's long sounds (the scene was left before its end).
+    hushScene() {
+      if (ctx && sceneBus) sceneBus.gain.setTargetAtTime(0, ctx.currentTime, 0.12);
     },
     // { gain, pitch, sparkle } from core/audio.js engineSound(); called every frame.
     engine({ gain, pitch }) {

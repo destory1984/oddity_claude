@@ -176,10 +176,14 @@ export const REPLAYS = {
     fromKm: 0,
     viewKm: 70,
     launch: { igniteAt: 2, liftAt: 3, partAt: 12, partUnits: 1.6, shipUnits: 1.7 },
+    // What is heard and when (ui/sound.js cues): the engines light, the stages part,
+    // the first stage lights again (when its `burn` begins, 0.7 of its way down) and
+    // it stands on the ship.
+    sounds: [[2, 'liftoff'], [12, 'staging'], [20.4, 'landingBurn'], [24, 'stood']],
     lines: [
       { at: 0, text: t('2020년 5월 30일. 39A 발사대에서 팰컨 9이 크루 드래건을 싣고 떠납니다. 헐리와 벵컨이 탔습니다.') },
       { at: 6, text: t('미국 땅에서 사람이 궤도로 오르는 것은 9년 만이고, 민간 회사의 우주선으로는 처음입니다.') },
-      { at: 12, text: t('2분 반 뒤 1단이 떨어집니다. 2단은 드래건을 밀고 궤도로 가고, 1단은 되돌아옵니다.') },
+      { at: 12, text: t('2분 30초 뒤 1단이 떨어집니다. 2단은 드래건을 밀고 궤도로 가고, 1단은 되돌아옵니다.') },
       { at: 18, text: t('1단이 엔진을 다시 켜 속도를 줄이고 다리 넷을 폅니다. 대서양에 띄운 배로 내려갑니다.') },
       { at: 24, text: t('1단이 배 위에 섰습니다. 드래건은 19시간 뒤 국제우주정거장에 닿았습니다.') },
     ],
@@ -193,6 +197,12 @@ export function replayOn(bodyId) {
 
 export function replayFor(id) {
   return REPLAYS[id] ?? null;
+}
+
+// The sounds of a scene that fall due between `before` (not counted) and `after`
+// seconds in: the names of ui/sound.js cues, in order.
+export function replaySounds(id, before, after) {
+  return (REPLAYS[id]?.sounds ?? []).filter(([at]) => at > before && at <= after).map(([, name]) => name);
 }
 
 // The scene t seconds in: how high the model is (it slows as it nears the ground),

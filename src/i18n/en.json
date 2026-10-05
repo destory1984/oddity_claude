@@ -1047,7 +1047,7 @@
  "2020년 5월 30일": "May 30, 2020",
  "2020년 5월 30일. 39A 발사대에서 팰컨 9이 크루 드래건을 싣고 떠납니다. 헐리와 벵컨이 탔습니다.": "May 30, 2020. A Falcon 9 leaves pad 39A with Crew Dragon. Hurley and Behnken are aboard.",
  "미국 땅에서 사람이 궤도로 오르는 것은 9년 만이고, 민간 회사의 우주선으로는 처음입니다.": "People rise to orbit from American soil for the first time in nine years, and for the first time ever on a private company's ship.",
- "2분 반 뒤 1단이 떨어집니다. 2단은 드래건을 밀고 궤도로 가고, 1단은 되돌아옵니다.": "Two and a half minutes on, the first stage lets go. The second pushes Dragon on to orbit; the first turns back.",
+ "2분 30초 뒤 1단이 떨어집니다. 2단은 드래건을 밀고 궤도로 가고, 1단은 되돌아옵니다.": "Two minutes and thirty seconds on, the first stage lets go. The second pushes Dragon on to orbit; the first turns back.",
  "1단이 엔진을 다시 켜 속도를 줄이고 다리 넷을 폅니다. 대서양에 띄운 배로 내려갑니다.": "The first stage lights its engines again to slow down and puts out four legs. It comes down to a ship afloat in the Atlantic.",
  "1단이 배 위에 섰습니다. 드래건은 19시간 뒤 국제우주정거장에 닿았습니다.": "The first stage stands on the ship. Nineteen hours later Dragon reached the International Space Station.",
  "케네디 39A 발사대에 내려서면 \"그날로\" 단추가 뜹니다. 누르면 2020년 크루 드래건의 발사를 보여 줍니다.": "Stand at Kennedy pad 39A and a \"That day\" button appears. Press it to watch Crew Dragon lift off in 2020.",
@@ -2599,5 +2599,7 @@
  "밤 쪽에 든 태풍 속에서 번개가 번쩍여 소용돌이 모양이 드러납니다.": "Lightning flickers inside the typhoon on the night side and shows its spiral.",
  "화성의 먼지 회오리가 휘어 선 먼지 기둥이 되어 감아 돌고, 땅에 긴 그림자를 드리웁니다.": "Mars's dust devils are now bent columns of dust that wind as they turn and lay long shadows on the ground.",
  "에트나 화산이 짙은 화산재를 뿜고 90초마다 터집니다. 분화구가 붉게 타고 밤에는 용암이 흐릅니다.": "Etna pours out dark ash and bursts every 90 seconds. Its crater burns red, and lava runs down by night.",
- "별똥별이 굵고 밝아져 흰빛, 초록, 금빛, 푸른빛으로 타고, 가끔 불덩이가 터집니다. 유성우는 2분마다 옵니다.": "Shooting stars are thicker and brighter, burning white, green, gold and blue, and now and then a fireball bursts. A shower comes every two minutes."
+ "별똥별이 굵고 밝아져 흰빛, 초록, 금빛, 푸른빛으로 타고, 가끔 불덩이가 터집니다. 유성우는 2분마다 옵니다.": "Shooting stars are thicker and brighter, burning white, green, gold and blue, and now and then a fireball bursts. A shower comes every two minutes.",
+ "크루 드래건의 발사 장면에 소리가 납니다. 엔진이 울리고, 단이 갈라지고, 1단이 다시 불을 켭니다.": "Crew Dragon's launch has sound: the engines roar, the stages part, and the first stage lights again.",
+ "다시 보기": "Replay"
 }

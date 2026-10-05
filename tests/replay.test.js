@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { REPLAYS, replayFor, replayFrame, replayOn } from '../src/core/replay.js';
+import { REPLAYS, replayFor, replayFrame, replayOn, replaySounds } from '../src/core/replay.js';
 import { STORIES } from '../src/core/stories.js';
 
 test('every scene belongs to a story place on a surface and tells its lines in order', () => {
@@ -200,4 +200,22 @@ test('Crew Dragon goes up from pad 39A: the stages part, the first comes back to
   const landed = replayFrame('lc39a', scene.downAt);
   assert.ok(landed.down && landed.launch.booster.y < 1e-9 && !landed.launch.booster.burn);
   assert.ok(Math.abs(landed.launch.booster.x - scene.launch.shipUnits) < 1e-9);
+});
+
+test('the launch is heard: the engines at 2 s, the stages parting at 12, the landing burn as it begins, the bells as it stands', () => {
+  assert.deepEqual(replaySounds('lc39a', -1, 30), ['liftoff', 'staging', 'landingBurn', 'stood']);
+  // Each once, in the frame its moment falls in.
+  assert.deepEqual(replaySounds('lc39a', -1, 1.9), []);
+  assert.deepEqual(replaySounds('lc39a', 1.99, 2.01), ['liftoff']);
+  assert.deepEqual(replaySounds('lc39a', 2.01, 2.03), []);
+  assert.deepEqual(replaySounds('lc39a', 11, 25), ['staging', 'landingBurn', 'stood']);
+  // The landing burn sounds when the first stage's engine lights again, the bells when it is down.
+  const scene = REPLAYS.lc39a;
+  const burnAt = scene.sounds.find(([, name]) => name === 'landingBurn')[0];
+  assert.ok(!replayFrame('lc39a', burnAt - 0.1).launch.booster.burn && replayFrame('lc39a', burnAt + 0.1).launch.booster.burn);
+  assert.equal(scene.sounds.find(([, name]) => name === 'stood')[0], scene.downAt);
+  assert.equal(scene.sounds.find(([, name]) => name === 'liftoff')[0], scene.launch.igniteAt);
+  // A scene with no sounds of its own gives none.
+  assert.deepEqual(replaySounds('apollo11', -1, 100), []);
+  assert.deepEqual(replaySounds('nowhere', -1, 100), []);
 });

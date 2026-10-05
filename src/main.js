@@ -76,7 +76,7 @@ import { readingQuizFor, readingKey } from './core/readingQuiz.js';
 import { STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, recordText, valueText, stuntById } from './core/stunts.js';
 import { STORY_DETAILS } from './core/storyDetails.js';
 import { STORY_MORE } from './core/storyMore.js';
-import { replayFor, replayFrame, replayOn } from './core/replay.js';
+import { replayFor, replayFrame, replaySounds, replayOn } from './core/replay.js';
 import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from './core/visit.js';
@@ -903,6 +903,15 @@ ${STORY_MORE[target.id]}` : told };
     // (A launch is seen from farther still: core/replay.js viewKm.)
     photo.orbitAround({ id: visit.id, facing: photo.orbit().orientation, distanceKm: replayFor(visit.id).viewKm ?? REPLAY_VIEW.distanceKm, fovDeg: REPLAY_VIEW.fovDeg });
     replay = { id: visit.id, startedAt: performance.now(), down: false };
+  });
+  // The scene from its first moment again, while its close view is still up: during it
+  // or after it has ended (the user, 2026-10-06, of the launch: "발사 장면 다시 보기 버튼
+  // 넣고").
+  $('replayAgain').addEventListener('click', () => {
+    const id = photo.orbit()?.id;
+    if (!id || !replayFor(id)) return;
+    sound.hushScene();
+    replay = { id, startedAt: performance.now(), down: false };
   });
 
   // A scene's frame as the renderer wants it: with the way it comes in from the side as
@@ -2122,16 +2131,25 @@ ${STORY_MORE[target.id]}` : told };
       const length = Math.hypot(...local);
       heading = local.map((n) => n / length);
     }
+    // The scene's own button shows while its close view is up.
+    $('replayAgain').hidden = !(photo.orbit() && replayFor(photo.orbit().id));
     // A day being played again: over when its time is up or the close view is left.
     let replayNow = null;
     if (replay) {
-      replayNow = photo.orbit()?.id === replay.id ? replayFrame(replay.id, (performance.now() - replay.startedAt) / 1000) : null;
+      const into = (performance.now() - replay.startedAt) / 1000;
+      replayNow = photo.orbit()?.id === replay.id ? replayFrame(replay.id, into) : null;
       if (!replayNow || replayNow.done) {
+        // Left before its end: its long sounds (a rocket's roar) stop with it.
+        if (!replayNow) sound.hushScene();
         replay = null;
         replayNow = null;
-      } else if (replayNow.down && !replay.down) {
-        replay.down = true;
-        if (!replayNow.gone) sound.cue('landed');
+      } else {
+        for (const name of replaySounds(replay.id, replay.heard ?? -1, into)) sound.cue(name);
+        replay.heard = into;
+        if (replayNow.down && !replay.down) {
+          replay.down = true;
+          if (!replayNow.gone) sound.cue('landed');
+        }
       }
     }
     if (scenePlace) {

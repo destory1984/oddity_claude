@@ -1440,8 +1440,8 @@ ${STORY_MORE[target.id]}` : told };
   const GAZE_OUT_MS = 950;
   const GAZE_TURN = 2.4; // radians a far piece goes round the drain on its way in
   const gazePieces = () => {
-    // On a phone the target panel is a name and bare keys; on a wide screen it is one plate.
-    const panel = matchMedia('(max-width: 480px)').matches ? '#targetPanel > *' : '#targetPanel';
+    // The target panel is a name and bare keys (on a wide screen too since v0.1.186).
+    const panel = '#targetPanel > *';
     const all = `#hud header nav button, #hud header .brand, #hud .telemetry, #minimap, #reticle, #markers > *, ${panel}, #hud footer .speedBox, #hud footer .throttle, #hud footer button:not(#gazeButton), #hint, #guide, #toast, #heroSay, #skyTold, #testReset`;
     return [...document.querySelectorAll(all)].filter((el) => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden' && Number(getComputedStyle(el).opacity) > 0.02);
   };

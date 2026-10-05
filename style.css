@@ -4553,3 +4553,101 @@ html.gaze #gazeButton {
 #speedLimit {
   display:none;
 }
+
+/* A wide screen takes the phone's look for four things (the user, 2026-10-05, four red
+   rings on a picture of the wide screen: "넓은 모드도 세로 모드랑 다 같이 해줘"):
+   - top right: the journal's button is a square like the rest, its count under its
+     picture; the target is a name on a plate and three bare keys in the columns of the
+     buttons over them, one gap under those (no plate round the whole, no "선택한 천체",
+     no line about the surface);
+   - bottom right: the keys are as large as the top buttons (44px, 8px apart; they were
+     56px) and carry no letter of the keyboard (the line at the foot and the help say them);
+   - no thrust bar (the thrust is always full, as on a phone);
+   - no line of the speed in c under the speed. */
+@media (min-width: 481px) {
+  #hud nav {
+    gap:8px;
+  }
+
+  #hud nav #journalButton {
+    flex-direction:column;
+    gap:1px;
+    width:44px;
+    padding:0;
+    font-size:9px;
+    line-height:1;
+    white-space:nowrap;
+  }
+
+  #hud nav #journalButton::before {
+    width:19px;
+    height:19px;
+  }
+
+  #hud #targetPanel {
+    --target-key:44px;
+    top:93px;
+    background:none;
+    box-shadow:none;
+  }
+
+  #hud #targetPanel > span,
+  #hud #targetPanel #surfaceInfo {
+    display:none;
+  }
+
+  #hud #targetPanel > #targetName {
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    box-sizing:border-box;
+    min-height:44px;
+    margin:0;
+    padding:0 12px;
+    border-radius:12px;
+    background:#0b1630c8;
+  }
+
+  #hud #targetPanel #targetRow {
+    gap:8px;
+    margin-top:8px;
+  }
+
+  #hud #targetPanel #dockTarget,
+  #hud #targetPanel #exoJump,
+  #hud #targetPanel #replayButton,
+  #hud #targetPanel #eclipseJump {
+    margin-top:8px;
+  }
+
+  #hud #targetPanel #craftCard {
+    margin-top:8px;
+    padding:8px 10px;
+    border-radius:10px;
+    background:#0b1630c8;
+  }
+
+  #hud footer {
+    --step:52px;
+  }
+
+  #hud footer #rearButton,
+  #hud footer #reverseButton,
+  #hud footer #brake,
+  #hud footer #flyButton,
+  #hud footer #gazeButton {
+    width:44px;
+    height:44px;
+    min-height:44px;
+  }
+
+  #hud footer #slidePad {
+    --key:44px;
+  }
+
+  #hud footer button kbd,
+  #hud footer .throttle,
+  #hud footer #lightSpeed {
+    display:none;
+  }
+}

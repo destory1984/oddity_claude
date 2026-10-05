@@ -4933,3 +4933,42 @@ html.gaze #gazeButton {
     letter-spacing:-0.5px;
   }
 }
+
+/* One gap in the journal, 8px (the user, 2026-10-06, over two pictures with rings:
+   "버튼 간격이 다 틀리지?", "여기 간격도 다 맞추고"): between the three buttons of the
+   head, between grandmother's notes, between the tabs, and between the blocks that stand
+   one under another above the tabs (the notes, the day's request, the sky news, the
+   tabs). They were 6, 10, 6, 4 and from 6 to 14px. */
+#journal .journalHead,
+#journal .journalHead .textSize,
+#journal #journalNotes,
+#journal #journalTabs {
+  gap:8px;
+}
+
+#journal #journalNotes {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+#journal #journalNotes[hidden] {
+  display:none;
+}
+
+#journal #journalNotes button {
+  margin:0;
+}
+
+#journal #journalSummary,
+#journal #journalNotes,
+#journal #journalDaily,
+#journal #journalSky,
+#journal #journalTabs {
+  margin-top:8px;
+  margin-bottom:0;
+}
+
+#journal #journalTabs {
+  padding-top:0;
+}

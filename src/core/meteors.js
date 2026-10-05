@@ -5,9 +5,18 @@
 // They show from within this far of Earth's surface.
 export const METEOR_RANGE_KM = 30000;
 export const METEOR_ALTITUDE_KM = 90;
-// One starts every 0.4 to 1.2 seconds and burns for 0.7.
+// One starts every 0.4 to 1.2 seconds and burns for 0.9.
 export const METEOR_GAP_S = [0.4, 1.2];
-export const METEOR_LIFE_S = 0.7;
+export const METEOR_LIFE_S = 0.9;
+// A fireball, a larger crumb, burns longer and bursts at its end. One meteor in 25 is
+// one, one in 9 during a shower; it is drawn this many times as long and thick.
+export const FIREBALL_LIFE_S = 1.8;
+export const FIREBALL_CHANCE = [0.04, 0.11];
+export const FIREBALL_SIZE = 2.4;
+// The light of the tail and of the glow round the head, by what burns (red, green,
+// blue of 255): white; green (oxygen, magnesium), the commonest tint; gold (sodium);
+// blue-white (fast ones). Half are white.
+export const METEOR_COLOURS = [[255, 245, 225], [120, 255, 170], [255, 190, 90], [150, 200, 255]];
 // Trail length, far longer than the real 20 km so it can be seen from orbit.
 export const METEOR_LENGTH_KM = [300, 700];
 
@@ -48,13 +57,14 @@ export function meteorGap(rand) {
 }
 
 // A shower: every SHOWER_EVERY_S seconds spent near Earth, for SHOWER_S seconds, they
-// come five times as thick and all run away from one point of the sky, the radiant, as
+// come fifteen times as thick and all run away from one point of the sky, the radiant, as
 // the meteors of a real shower seem to. (Earth is crossing the trail a comet left; the
 // crumbs fly side by side, and that they spread from a point is how side-by-side lines
 // look from below.) near: seconds spent in range so far.
-export const SHOWER_EVERY_S = 200;
-export const SHOWER_S = 30;
-export const SHOWER_GAP_S = [0.08, 0.25];
+// (It was 200 and 30 until 2026-10-06: the user waited over three minutes for one.)
+export const SHOWER_EVERY_S = 120;
+export const SHOWER_S = 35;
+export const SHOWER_GAP_S = [0.025, 0.08];
 export function inShower(near) {
   return near % SHOWER_EVERY_S >= SHOWER_EVERY_S - SHOWER_S;
 }
@@ -77,8 +87,18 @@ export function showerSpot(rand, toSun, toTraveler, radiant) {
 }
 
 // How bright a meteor is `age` seconds after it lit: a quick flare, then fading out.
-export function meteorGlow(age) {
-  if (age < 0 || age >= METEOR_LIFE_S) return 0;
-  const t = age / METEOR_LIFE_S;
+// life: how long it burns (a fireball's is longer).
+export function meteorGlow(age, life = METEOR_LIFE_S) {
+  if (age < 0 || age >= life) return 0;
+  const t = age / life;
   return t < 0.2 ? t / 0.2 : (1 - t) / 0.8;
+}
+
+// What a new meteor is like: which of METEOR_COLOURS it burns with, whether it is a
+// fireball, and how large it is drawn (1, or FIREBALL_SIZE). shower: one is falling.
+export function meteorKind(rand, shower = false) {
+  const pick = rand();
+  const colour = pick < 0.5 ? 0 : pick < 0.75 ? 1 : pick < 0.9 ? 2 : 3;
+  const fireball = rand() < FIREBALL_CHANCE[shower ? 1 : 0];
+  return { colour, fireball, size: fireball ? FIREBALL_SIZE : 1 };
 }

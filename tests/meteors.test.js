@@ -42,18 +42,18 @@ test('none where the traveler sees only the day side', () => {
   for (let i = 0; i < 50; i++) assert.equal(meteorSpot(rand, [0, 0, 1], [0, 0, 1]), null);
 });
 
-test('one every 0.4 to 1.2 seconds, each burning for 0.7: a quick flare, then fading', () => {
+test('one every 0.4 to 1.2 seconds, each burning for 0.9: a quick flare, then fading', () => {
   assert.deepEqual(METEOR_GAP_S, [0.4, 1.2]);
-  assert.equal(METEOR_LIFE_S, 0.7);
+  assert.equal(METEOR_LIFE_S, 0.9);
   assert.equal(METEOR_RANGE_KM, 30000);
   assert.equal(METEOR_ALTITUDE_KM, 90);
   assert.equal(meteorGap(() => 0), 0.4);
   near(meteorGap(() => 0.5), 0.8);
   assert.equal(meteorGlow(-0.1), 0);
   assert.equal(meteorGlow(0), 0);
-  near(meteorGlow(0.14), 1);
+  near(meteorGlow(0.18), 1);
   assert.ok(meteorGlow(0.4) < 1 && meteorGlow(0.4) > meteorGlow(0.6));
-  assert.equal(meteorGlow(0.7), 0);
+  assert.equal(meteorGlow(0.9), 0);
   assert.equal(
     eventMessage({ type: 'meteor' }),
     '지구의 밤 쪽에 별똥별이 떨어집니다. 혜성이 흘린 부스러기가 대기에서 타는 빛입니다.',
@@ -93,8 +93,9 @@ test('both new comets go round the same way as the planets; Halley goes backward
   assert.ok(swirl('halley') < 0);
 });
 
-test('a shower comes every 200 seconds near Earth, lasts 30, and its meteors run away from one point', async () => {
+test('a shower comes every 120 seconds near Earth, lasts 35, and its meteors run away from one point', async () => {
   const { inShower, showerGap, showerRadiant, showerSpot, SHOWER_EVERY_S, SHOWER_S } = await import('../src/core/meteors.js');
+  assert.deepEqual([SHOWER_EVERY_S, SHOWER_S], [120, 35]);
   assert.ok(!inShower(0) && !inShower(SHOWER_EVERY_S - SHOWER_S - 1));
   assert.ok(inShower(SHOWER_EVERY_S - SHOWER_S) && inShower(SHOWER_EVERY_S - 0.1) && !inShower(SHOWER_EVERY_S));
   assert.ok(showerGap(() => 0.5) < 0.25);
@@ -115,4 +116,17 @@ test('a shower comes every 200 seconds near Earth, lasts 30, and its meteors run
     assert.ok(dot(spot.along, radiant) < 0);
   }
   assert.ok(found > 50);
+});
+
+test('a meteor has a colour and now and then is a fireball, oftener in a shower, that burns twice as long', async () => {
+  const { meteorKind, meteorGlow, METEOR_COLOURS, FIREBALL_LIFE_S, FIREBALL_CHANCE, FIREBALL_SIZE, METEOR_LIFE_S } = await import('../src/core/meteors.js');
+  assert.equal(METEOR_COLOURS.length, 4);
+  const rand = seeded(11);
+  const count = (shower) => { let n = 0; for (let i = 0; i < 4000; i++) { const kind = meteorKind(rand, shower); assert.ok(kind.colour >= 0 && kind.colour < 4); assert.equal(kind.size, kind.fireball ? FIREBALL_SIZE : 1); if (kind.fireball) n++; } return n / 4000; };
+  const calm = count(false);
+  const falling = count(true);
+  assert.ok(Math.abs(calm - FIREBALL_CHANCE[0]) < 0.015 && Math.abs(falling - FIREBALL_CHANCE[1]) < 0.02, `${calm} ${falling}`);
+  assert.equal(FIREBALL_LIFE_S, 2 * METEOR_LIFE_S);
+  assert.equal(meteorGlow(METEOR_LIFE_S), 0);
+  assert.ok(meteorGlow(METEOR_LIFE_S, FIREBALL_LIFE_S) > 0 && meteorGlow(FIREBALL_LIFE_S, FIREBALL_LIFE_S) === 0);
 });

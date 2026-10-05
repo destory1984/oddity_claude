@@ -1411,33 +1411,82 @@ ${STORY_MORE[target.id]}` : told };
   // 오른쪽 아랫 부분에 버튼을 하나 만들어서, 그걸 누르면 모든 글자 표시, 아이콘이 없어지게"):
   // every word, label and button goes (style.css `html.gaze`) but this one, dimmed, which
   // brings them back. She flies on as she was, and a drag still turns the view.
-  // They are drawn into the moon and come back out of it (the user: "모든 글자표시들이 달
-  // 아이콘으로 빨려들어가게"): each piece shrinks toward the button's middle, the whole
-  // layer of labels as one, so every label runs to the same point. Nothing moves for a
-  // player who asked the device for less motion.
+  // They drain into the moon (the user: "별 아이콘이 물이 빠지는 곳이라고 생각하고, 글자 및
+  // 아이콘들이 물에 떠있는 잉크인데, 그것들이 물이 빠짐에 따라서 이동해서 빨려 들어가는
+  // 느낌으로"). The button is the drain; every word and button is ink afloat on the water,
+  // and as the water goes each is carried round the drain on a spiral, the nearest first,
+  // turning with the water, growing small and thin, and is gone down it. Pressed again,
+  // they well back up the same way. Three earlier tries were put aside by the user's word
+  // (each piece shrinking in place, a bar rolling the screen up like a carpet, a ring of
+  // light closing on the button: "효과가 독특하긴 한데.. 좀 예쁘진 않다").
+  // Each piece is moved by `translate`, `rotate` and `scale` (which leave its own
+  // `transform` alone: the labels are placed by theirs every frame). Those turn and shrink
+  // a piece about its own origin, not its middle, so the origin is found first (by
+  // halving the piece for a moment) and the path allows for it.
+  // Nothing moves for a player who asked the device for less motion.
   let gazing = false;
   let gazeMoves = [];
-  const GAZE_PIECES = '#hud > :not(footer), #hud footer > :not(#gazeButton), #hint, #guide, #toast, #heroSay, #skyTold, #testReset';
-  const GAZE_IN_MS = 520;
-  const GAZE_OUT_MS = 380;
+  const GAZE_IN_MS = 1250;
+  const GAZE_OUT_MS = 950;
+  const GAZE_TURN = 2.4; // radians a far piece goes round the drain on its way in
+  const gazePieces = () => {
+    // On a phone the target panel is a name and bare keys; on a wide screen it is one plate.
+    const panel = matchMedia('(max-width: 480px)').matches ? '#targetPanel > *' : '#targetPanel';
+    const all = `#hud header nav button, #hud header .brand, #hud .telemetry, #minimap, #reticle, #markers > *, ${panel}, #hud footer .speedBox, #hud footer .throttle, #hud footer button:not(#gazeButton), #hint, #guide, #toast, #heroSay, #skyTold, #testReset`;
+    return [...document.querySelectorAll(all)].filter((el) => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden' && Number(getComputedStyle(el).opacity) > 0.02);
+  };
   const gazeFlight = (inward) => {
     for (const move of gazeMoves) move.cancel();
     gazeMoves = [];
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve();
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve(true);
     const moon = $('gazeButton').getBoundingClientRect();
     const [mx, my] = [moon.left + moon.width / 2, moon.top + moon.height / 2];
-    for (const el of document.querySelectorAll(GAZE_PIECES)) {
-      if (!el.getClientRects().length || getComputedStyle(el).visibility === 'hidden') continue;
-      const box = el.getBoundingClientRect();
-      const origin = `${mx - box.left}px ${my - box.top}px`;
-      const far = { scale: '0.02', opacity: 0, transformOrigin: origin };
-      const near = { scale: '1', opacity: getComputedStyle(el).opacity, transformOrigin: origin };
-      gazeMoves.push(el.animate(inward ? [near, far] : [far, near], {
-        duration: inward ? GAZE_IN_MS : GAZE_OUT_MS, easing: inward ? 'cubic-bezier(.55,0,.85,.35)' : 'cubic-bezier(.15,.65,.45,1)', fill: inward ? 'forwards' : 'none',
+    const middle = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+    const pieces = gazePieces().map((el) => ({ el, at: middle(el), shown: Number(getComputedStyle(el).opacity) }));
+    // Where each piece's origin is on the screen: halved about it, its middle moves half way to it.
+    for (const piece of pieces) piece.el.style.scale = '0.5';
+    for (const piece of pieces) { const half = middle(piece.el); piece.origin = [2 * half[0] - piece.at[0], 2 * half[1] - piece.at[1]]; }
+    for (const piece of pieces) piece.el.style.scale = '';
+    const reach = Math.max(1, ...pieces.map((piece) => Math.hypot(piece.at[0] - mx, piece.at[1] - my)));
+    const lasts = inward ? GAZE_IN_MS : GAZE_OUT_MS;
+    const STEPS = 28;
+    for (const piece of pieces) {
+      const [dx, dy] = [piece.at[0] - mx, piece.at[1] - my];
+      const far = Math.hypot(dx, dy);
+      const bearing = Math.atan2(dy, dx);
+      const [ox, oy] = [piece.at[0] - piece.origin[0], piece.at[1] - piece.origin[1]];
+      const frames = [];
+      for (let i = 0; i <= STEPS; i += 1) {
+        const x = i / STEPS;
+        // Slow to start, quick at the drain; it turns faster the nearer it is.
+        const fall = x * x * (0.35 + 0.65 * x);
+        const radius = far * (1 - fall);
+        const turn = GAZE_TURN * (0.35 + 0.65 * (far / reach)) * fall * (0.4 + 0.6 * fall);
+        const size = 1 - 0.93 * fall;
+        const [px, py] = [mx + radius * Math.cos(bearing + turn), my + radius * Math.sin(bearing + turn)];
+        // Turned and shrunk about its origin its middle would stand here; the rest is the move.
+        const [sx, sy] = [piece.origin[0] + size * (ox * Math.cos(turn) - oy * Math.sin(turn)), piece.origin[1] + size * (ox * Math.sin(turn) + oy * Math.cos(turn))];
+        frames.push({
+          translate: `${(px - sx).toFixed(2)}px ${(py - sy).toFixed(2)}px`,
+          rotate: `${turn.toFixed(4)}rad`,
+          scale: `${size.toFixed(4)} ${(size * (1 - 0.35 * fall)).toFixed(4)}`,
+          opacity: piece.shown * (fall < 0.55 ? 1 : Math.max(0, 1 - (fall - 0.55) / 0.42)),
+          filter: `blur(${(2.2 * fall).toFixed(2)}px)`,
+        });
+      }
+      // The nearest go first; the farthest wait for the water to reach them.
+      const wait = 0.34 * lasts * (far / reach);
+      gazeMoves.push(piece.el.animate(inward ? frames : frames.reverse(), {
+        duration: lasts - 0.34 * lasts, delay: inward ? wait : 0.34 * lasts - wait, fill: 'both', easing: 'linear',
       }));
     }
-    $('gazeButton').animate([{ scale: '1' }, { scale: inward ? '1.18' : '0.9' }, { scale: '1' }], { duration: inward ? GAZE_IN_MS + 160 : GAZE_OUT_MS, easing: 'ease-out' });
-    return Promise.all(gazeMoves.map((move) => move.finished)).catch(() => {});
+    const moves = gazeMoves;
+    $('gazeButton').animate([{ rotate: '0deg', scale: '1' }, { rotate: inward ? '50deg' : '-50deg', scale: inward ? '1.12' : '0.92' }, { rotate: '0deg', scale: '1' }], { duration: lasts, easing: 'ease-in-out' });
+    return Promise.all(moves.map((move) => move.finished)).then(() => moves === gazeMoves, () => false);
+  };
+  const gazeClear = () => {
+    for (const move of gazeMoves) move.cancel();
+    gazeMoves = [];
   };
   const setGaze = (on) => {
     gazing = on;
@@ -1446,16 +1495,15 @@ ${STORY_MORE[target.id]}` : told };
     $('gazeButton').setAttribute('aria-label', words);
     $('gazeButton').title = words;
     if (on) {
-      // Put away only once they have flown in (and only if she has not changed her mind).
-      gazeFlight(true).then(() => {
-        if (!gazing) return;
+      // Put away only once they have gone down (and only if she has not changed her mind).
+      gazeFlight(true).then((whole) => {
+        if (!whole || !gazing) return;
         document.documentElement.classList.add('gaze');
-        for (const move of gazeMoves) move.cancel();
-        gazeMoves = [];
+        gazeClear();
       });
     } else {
       document.documentElement.classList.remove('gaze');
-      gazeFlight(false);
+      gazeFlight(false).then((whole) => { if (whole && !gazing) gazeClear(); });
     }
   };
   $('gazeButton').addEventListener('click', () => setGaze(!gazing));

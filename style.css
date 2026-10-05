@@ -3615,6 +3615,18 @@ footer .throttle .rangeLabels {
     background:#0b1630c8;
   }
 
+  /* The name's plate is as tall as the keys round it (the user, 2026-10-05: "높이를 다른
+     아이콘과 동일하게 맞춰줘.. 넓이는 어쩔 수 없고"); it was 12px lower than they. */
+  #hud #targetPanel > #targetName {
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    box-sizing:border-box;
+    min-height:var(--top-key);
+    padding:0 12px;
+    border-radius:12px;
+  }
+
   #hud #targetPanel #targetRow {
     gap:var(--gap);
     margin-top:var(--gap);
@@ -4523,4 +4535,11 @@ html.gaze #testReset {
 html.gaze #gazeButton {
   opacity:.4;
   border-color:var(--gold);
+}
+
+/* The line "현재 제한 0.01c" under the speed is gone (the user, 2026-10-05: "없애자"): the
+   number in c told most players nothing, and the speed above it already shows the limit
+   at work. The help's "자동 속도" still explains it. */
+#speedLimit {
+  display:none;
 }

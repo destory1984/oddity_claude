@@ -156,7 +156,7 @@ export const STARTED = '2026-09-30';
 export function startedLine(today, started = STARTED) {
   const [y, m, d] = started.split('-').map(Number);
   const days = Math.round((stamp(today) - stamp(started)) / DAY_MS) + 1;
-  return `만들기 시작한 날: ${y}년 ${m}월 ${d}일${days >= 1 ? ` · 오늘로 ${days.toLocaleString('ko-KR')}일째` : ''}`;
+  return `만들기 시작한 날: ${y}년 ${m}월 ${d}일${days >= 1 ? ` · 우주 탐험 오늘로 ${days.toLocaleString('ko-KR')}일째` : ''}`;
 }
 
 // '2026-10-04' → '10.4'

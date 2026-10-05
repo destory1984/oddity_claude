@@ -43,9 +43,9 @@ test('a day is written short', () => {
 
 test('the page tells the day the making began and how many days it has been, the first day being day 1', () => {
   assert.equal(STARTED, '2026-09-30');
-  assert.equal(startedLine('2026-09-30'), '만들기 시작한 날: 2026년 9월 30일 · 오늘로 1일째');
-  assert.equal(startedLine('2026-10-04'), '만들기 시작한 날: 2026년 9월 30일 · 오늘로 5일째');
-  assert.equal(startedLine('2029-06-26'), '만들기 시작한 날: 2026년 9월 30일 · 오늘로 1,001일째');
+  assert.equal(startedLine('2026-09-30'), '만들기 시작한 날: 2026년 9월 30일 · 우주 탐험 오늘로 1일째');
+  assert.equal(startedLine('2026-10-04'), '만들기 시작한 날: 2026년 9월 30일 · 우주 탐험 오늘로 5일째');
+  assert.equal(startedLine('2029-06-26'), '만들기 시작한 날: 2026년 9월 30일 · 우주 탐험 오늘로 1,001일째');
   // A clock set before the start tells only the day.
   assert.equal(startedLine('2026-09-01'), '만들기 시작한 날: 2026년 9월 30일');
 });

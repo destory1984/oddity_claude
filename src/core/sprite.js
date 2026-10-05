@@ -32,6 +32,13 @@ export const REST_ACTIONS = [
   { sheet: 'rest-map', times: 1 }, { sheet: 'rest-letter', times: 1 }, { sheet: 'rest-bubble', times: 2 },
   { sheet: 'rest-float', times: 3 }, { sheet: 'rest-socks', times: 1 }, { sheet: 'rest-plush', times: 1 },
   { sheet: 'rest-music', times: 3 },
+  // And the last ten, on 2026-10-06 (the user: "10개 오면... 그걸로 끝하자": thirty-seven
+  // is enough): knitting, bubble gum, a sketch, a yo-yo, a comb and a hand mirror, three
+  // stars juggled, an umbrella, stars counted on her fingers, a cat's cradle, clapping.
+  { sheet: 'rest-knit', times: 3 }, { sheet: 'rest-gum', times: 1 }, { sheet: 'rest-draw', times: 1 },
+  { sheet: 'rest-yoyo', times: 3 }, { sheet: 'rest-comb', times: 1 }, { sheet: 'rest-juggle', times: 3 },
+  { sheet: 'rest-umbrella', times: 1 }, { sheet: 'rest-count', times: 1 }, { sheet: 'rest-string', times: 1 },
+  { sheet: 'rest-clap', times: 2 },
 ];
 export const SHEETS = [
   ...FLIGHT_SHEETS, 'brake', 'idle', ...REST_ACTIONS.map((a) => a.sheet), 'rest-sleep',

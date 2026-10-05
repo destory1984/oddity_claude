@@ -19,14 +19,8 @@ export const START_SPOTS = [
   // Over Earth's night side, 4,108 km up, looking out past the lit edge and its aurora
   // to the stars; the Moon is high on the left.
   { id: 'nightEdge', body: 'earth', at: [-9327.6, 2335.4, 4165.9], ahead: [0.6662, 0.5823, -0.466], above: [-0.5544, 0.8046, 0.2129] },
-  // Docked with the Webb telescope, 60 km from it, looking up at its mirror and sunshield
-  // (the user, 2026-10-05: "도킹한 상태이어야 해").
-  // Webb is kept 150,000 km from Earth straight away from the Sun (core/craft.js), which
-  // in these three directions is always (-150000, 0, 0): it is there at every start. The
-  // place is measured from Earth, not from the Moon (the nearest body there), which goes
-  // round. far: 144,000 km from Earth, so not for a first visit, whose steps lead to the
-  // Moon.
-  { id: 'webb', body: 'earth', target: 'jwst', dock: 'jwst', far: true, at: [-149958.9, -29.9, -31.9], ahead: [-0.8245, 0.3647, 0.4326], above: [0.3351, 0.9308, -0.146] },
+  // (A place docked with the Webb telescope stood here until 2026-10-06, the user: "웹
+  // 망원경의 시작점은 없애줘". A place may still open docked: `dock` above.)
   // Under Earth's south pole on the night side, 9,633 km off, the view turned over so
   // the pole is at the foot of the screen: the whole ring of the southern aurora.
   { id: 'auroraRing', body: 'earth', at: [-8500.5, -8539.7, 10532.4], ahead: [0.5767, -0.0241, -0.8166], above: [-0.0954, -0.9947, -0.038] },

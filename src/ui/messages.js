@@ -1,7 +1,7 @@
 import { FACTS } from '../core/facts.js';
 import { BODY_DATA } from '../core/bodies.js';
 import { SHADOW_CASTERS, shadowEdge } from '../core/shadows.js';
-import { t, english, englishKm } from '../core/i18n.js';
+import { t, english, englishKm, counted } from '../core/i18n.js';
 
 const HANGUL_START = 0xac00;
 const HANGUL_END = 0xd7a3;
@@ -142,11 +142,12 @@ export function dateText(date) {
 // (millions of millions: the way home from another star).
 export function distanceText(km) {
   if (english()) return englishKm(km);
+  // (Japanese and Chinese count the same way, with their own characters.)
   if (km < 1e4) return `${Math.round(km).toLocaleString('ko-KR')}km`;
-  if (km < 999950) return `${(km / 1e4).toFixed(1)}만km`;
-  if (km < 1e8) return `${Math.round(km / 1e4).toLocaleString('ko-KR')}만km`;
-  if (km < 1e12) return `${(km / 1e8).toFixed(1)}억km`;
-  return `${(km / 1e12).toFixed(1)}조km`;
+  if (km < 999950) return counted(`${(km / 1e4).toFixed(1)}만km`);
+  if (km < 1e8) return counted(`${Math.round(km / 1e4).toLocaleString('ko-KR')}만km`);
+  if (km < 1e12) return counted(`${(km / 1e8).toFixed(1)}억km`);
+  return counted(`${(km / 1e12).toFixed(1)}조km`);
 }
 
 // The live speed limit as a multiple of light speed.

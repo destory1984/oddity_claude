@@ -58,7 +58,7 @@ export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, 
   $('closeSettings').addEventListener('click', () => dialog.close());
   // The language: the game starts again in the one chosen, where she was, with the
   // settings open again (the notebook stays).
-  for (const [id, choice] of [['langKo', 'ko'], ['langEn', 'en']]) {
+  for (const [id, choice] of [['langKo', 'ko'], ['langEn', 'en'], ['langJa', 'ja'], ['langZh', 'zh']]) {
     $(id).setAttribute('aria-pressed', String(language() === choice));
     $(id).addEventListener('click', () => {
       if (language() === choice) return;

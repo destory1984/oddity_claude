@@ -39,7 +39,7 @@ const NO_LETTER = ['mercury', 'venus'];
 // A planet of another star (core/exo.js) has its own letter: TRAPPIST-1 e is "e".
 export function mapLetter(body) {
   if (NO_LETTER.includes(body.id)) return null;
-  if (body.kind === 'exoplanet') return body.nameEn.slice(-1);
+  if (body.kind === 'exoplanet') return (body.nameEn || body.name).slice(-1);
   return body.kind === 'planet' || body.kind === 'dwarf' ? (body.nameEn || body.name)[0].toUpperCase() : null;
 }
 

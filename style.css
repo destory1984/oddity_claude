@@ -4370,24 +4370,24 @@ dialog .sheetHead .textSize button:disabled {
    English words run longer than the Korean ones the layout was made for. */
 
 /* The notebook's six tabs fit a phone 402 wide. */
-html[lang="en"] #journal #journalTabs button {
+html:not([lang="ko"]) #journal #journalTabs button {
   padding:4px 8px;
 }
 
 /* The version line beside "Settings" stays on one line. */
-html[lang="en"] #appVersion {
+html:not([lang="ko"]) #appVersion {
   white-space:nowrap;
   font-size:10px;
 }
 
-/* The language in use is marked among the two buttons (settings, options). */
+/* The language in use is marked among the four buttons (settings, options). */
 #settings dd button[aria-pressed="true"] {
   border-color:var(--gold);
   color:var(--gold);
 }
 
-/* The page of changes is kept in Korean only: its tab is not offered in English. */
-html[lang="en"] #settingsTabs [data-tab="news"] {
+/* The page of changes is kept in Korean only: its tab is not offered in another language. */
+html:not([lang="ko"]) #settingsTabs [data-tab="news"] {
   display:none;
 }
 
@@ -4423,4 +4423,23 @@ html[lang="en"] #settingsTabs [data-tab="news"] {
     font-size:11px;
     line-height:1.15;
   }
+}
+
+/* Japanese and Chinese: Pretendard has no kana and few hanzi, so the device's own fonts
+   follow it (no font is shipped for them), and grandmother's hand is the device's
+   brush-like or rounded face. */
+html[lang="ja"] body {
+  font-family:"Pretendard Variable",Pretendard,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic",Meiryo,"Noto Sans JP","Noto Sans CJK JP",sans-serif;
+}
+
+html[lang="ja"] {
+  --hand:"Klee One",Klee,"Hiragino Maru Gothic ProN","Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;
+}
+
+html[lang="zh-Hans"] body {
+  font-family:"Pretendard Variable",Pretendard,"PingFang SC","Microsoft YaHei UI","Microsoft YaHei","Noto Sans SC","Noto Sans CJK SC",sans-serif;
+}
+
+html[lang="zh-Hans"] {
+  --hand:"Kaiti SC",STKaiti,KaiTi,"Noto Serif SC",serif;
 }

@@ -1,4 +1,4 @@
-import { t, english, englishKm } from './i18n.js';
+import { t, english, englishKm, language, counted } from './i18n.js';
 // The photo album: small copies of the photos the traveler saved, newest first, with
 // where each was taken and which photo missions it met. Kept in the browser (ui/storage.js).
 
@@ -79,9 +79,11 @@ export function photoPlace(label, altitudeKm, besideName = null) {
   // In English the label already reads "Over Mars".
   if (english()) return `${label}, ${englishKm(km)}`;
   if (km < 1e5) return `${label} ${km.toLocaleString('ko-KR')}km`;
-  const from = label.replace(/ 상공$/, '에서');
   const man = Math.round(km / 1e4);
-  return man >= 10000 ? `${from} ${(km / 1e8).toFixed(1)}억km` : `${from} ${man.toLocaleString('ko-KR')}만km`;
+  const far = man >= 10000 ? `${(km / 1e8).toFixed(1)}억km` : `${man.toLocaleString('ko-KR')}만km`;
+  // (Japanese and Chinese: the label as it is, the number in their own characters.)
+  if (language() !== 'ko') return `${label} ${counted(far)}`;
+  return `${label.replace(/ 상공$/, '에서')} ${far}`;
 }
 
 // The small copy's size for a view of the given size: THUMB_WIDTH wide, same shape.

@@ -245,7 +245,7 @@ export function saveExo(record) {
   }
 }
 
-// The language chosen in the settings ('ko' or 'en'); until one is chosen the device's
+// The language chosen in the settings (one of LANGUAGES); until one is chosen the device's
 // own language decides (core/i18n.js).
 export function saveLanguage(choice) {
   try {

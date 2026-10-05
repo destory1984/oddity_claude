@@ -1,16 +1,22 @@
 # -*- coding: utf-8 -*-
-"""Tools for the English version (src/core/i18n.js, src/i18n/en.json).
+"""Tools for the other languages (src/core/i18n.js, src/i18n/en.json, ja.json, zh.json).
 
   python build/i18n.py tag <file.js ...>   wrap the Korean strings of these files in t('…') / t`…`
   python build/i18n.py todo [out.txt]      list the keys that have no English yet, numbered
   python build/i18n.py merge <done.txt>    add "number<TAB>English" lines to src/i18n/en.json
   python build/i18n.py check               count keys with and without English
 
+With `--lang ja` or `--lang zh` before the command, todo, merge and check work on that
+language's dictionary (the list of what is left is then assets/i18n/todo-ja.json). Their
+keys are the same sentences and, besides, the names English takes from nameEn (bodies,
+craft, story places, constellations: build/i18n-names.mjs) and the entries English has
+that the scanner does not find (names looked up as the game runs).
+
 A key is the Korean sentence itself; in a template each ${…} is written {} in the key and
 {0}, {1}… in the English. Keys come from index.html (texts and the title, aria-label, alt,
 placeholder and data-label attributes) and from every t('…') and t`…` under src/.
 """
-import io, json, os, re, sys
+import io, json, os, re, subprocess, sys
 from html.parser import HTMLParser
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -18,7 +24,16 @@ os.chdir(ROOT)
 sys.stdout.reconfigure(encoding='utf-8')
 HANGUL = re.compile(r'[가-힣]')
 EN_JSON = 'src/i18n/en.json'
-TODO = 'assets/i18n/todo.json'
+LANG = 'en'
+if '--lang' in sys.argv:
+    at = sys.argv.index('--lang')
+    LANG = sys.argv[at + 1]
+    del sys.argv[at:at + 2]
+assert LANG in ('en', 'ja', 'zh'), LANG
+LANG_JSON = 'src/i18n/%s.json' % LANG
+TODO = 'assets/i18n/todo.json' if LANG == 'en' else 'assets/i18n/todo-%s.json' % LANG
+# Never put into another language: the name of Korean on its own button.
+KEPT = {'한국어'}
 # Particles joined to a name: they have no English and are never looked up.
 PARTICLES = {'을', '를', '과', '와', '이', '가', '로', '으로', '은', '는', '에서', '에'}
 ATTRS = ('title', 'aria-label', 'alt', 'placeholder', 'data-label')
@@ -199,8 +214,20 @@ def all_keys():
     return [k for k in keys if not (k in seen or seen.add(k))]
 
 
-def load():
-    return json.loads(read(EN_JSON)) if os.path.exists(EN_JSON) else {}
+def load(path=None):
+    path = path or LANG_JSON
+    return json.loads(read(path)) if os.path.exists(path) else {}
+
+
+def lang_keys():
+    """The keys of the language in hand: for English what the scanner finds; for the
+    others also the names and English's own extra entries, less what is kept Korean."""
+    keys = all_keys()
+    if LANG == 'en':
+        return keys
+    names = json.loads(subprocess.run(['node', 'build/i18n-names.mjs'], capture_output=True, check=True).stdout.decode('utf-8'))
+    seen = set()
+    return [k for k in keys + names + list(load(EN_JSON)) if k not in KEPT and not (k in seen or seen.add(k))]
 
 
 def main():
@@ -210,7 +237,7 @@ def main():
             print(path, tag(path))
     elif cmd == 'todo':
         have = load()
-        todo = [k for k in all_keys() if k not in have]
+        todo = [k for k in lang_keys() if k not in have]
         os.makedirs(os.path.dirname(TODO), exist_ok=True)
         write(TODO, json.dumps(todo, ensure_ascii=False, indent=0))
         text = ''.join('%d\t%s\n' % (i, k.replace('\n', '\\n')) for i, k in enumerate(todo))
@@ -218,7 +245,7 @@ def main():
             write(sys.argv[2], text)
         else:
             sys.stdout.write(text)
-        print(len(todo), 'without English')
+        print(len(todo), 'without', LANG)
     elif cmd == 'merge':
         todo = json.loads(read(TODO))
         have = load()
@@ -232,12 +259,12 @@ def main():
             assert ko.count('\n') == en.count('\n') or '\n' not in ko, (num, ko, en)
             have[ko] = en
             n += 1
-        write(EN_JSON, json.dumps(have, ensure_ascii=False, indent=1) + '\n')
+        write(LANG_JSON, json.dumps(have, ensure_ascii=False, indent=1) + '\n')
         print('added', n, 'total', len(have))
     else:
         have = load()
-        keys = all_keys()
-        print(len(keys), 'keys,', sum(1 for k in keys if k in have), 'with English,', len([k for k in have if k not in keys]), 'English entries no longer used')
+        keys = lang_keys()
+        print(LANG + ':', len(keys), 'keys,', sum(1 for k in keys if k in have), 'with it,', len([k for k in have if k not in keys]), 'entries no longer used')
 
 
 main()

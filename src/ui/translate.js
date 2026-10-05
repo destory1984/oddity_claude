@@ -1,9 +1,9 @@
-// In English, every Korean text put on the page is replaced by its English as it
-// appears (core/i18n.js englishOf): the words in index.html, and whatever the game
-// writes later (a button's name, a notice, what Sora says). A text with no English yet
-// stays as it is. Sentences made with names or numbers in them are put into English
-// where they are made (t`…`), not here.
-import { english, englishOf } from '../core/i18n.js';
+// In another language than Korean, every Korean text put on the page is replaced by its
+// sentence in that language as it appears (core/i18n.js englishOf): the words in
+// index.html, and whatever the game writes later (a button's name, a notice, what Sora
+// says). A text not in the dictionary yet stays as it is. Sentences made with names or
+// numbers in them are put into the language where they are made (t`…`), not here.
+import { language, pageLanguage, englishOf } from '../core/i18n.js';
 
 const ATTRIBUTES = ['title', 'aria-label', 'alt', 'placeholder', 'data-label'];
 const KOREAN = /[가-힣]/;
@@ -37,8 +37,8 @@ function tree(root) {
 }
 
 export function startTranslating() {
-  if (!english()) return;
-  document.documentElement.lang = 'en';
+  if (language() === 'ko') return;
+  document.documentElement.lang = pageLanguage();
   const title = englishOf(document.title);
   if (title) document.title = title;
   tree(document.body);

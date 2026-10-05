@@ -6,7 +6,7 @@
 // core/readingQuiz.js are phrases of these texts: a change here may need one there.
 import { SPIN_DAY_S } from './surface.js';
 import { AU_KM } from './bodies.js';
-import { t, english, englishKm } from './i18n.js';
+import { t, english, englishKm, counted } from './i18n.js';
 
 export const READINGS = {
   sun: t('태양은 지름 약 139만km로 지구 109개를 나란히 놓은 크기입니다. 수소가 헬륨으로 바뀌는 핵융합으로 빛을 내며, 중심 온도는 약 1,500만 도, 표면은 약 5,500도입니다. 이상하게도 바깥 대기인 코로나는 100만 도가 넘어, 그 까닭을 알아내려고 파커 태양 탐사선이 코로나 속을 지나고 있습니다.\n\n')
@@ -133,13 +133,13 @@ function duration(seconds) {
   const days = hours / 24;
   if (days < 1000) return t`${round(days, days < 10 ? 2 : 1)}일`;
   // ("{}년" is also a year's name, "1969년", which English writes bare.)
-  return english() ? `${round(days / 365.25, 1)} years` : `${round(days / 365.25, 1)}년`;
+  return english() ? `${round(days / 365.25, 1)} years` : counted(`${round(days / 365.25, 1)}년`);
 }
 function distance(km) {
   // English counts in thousands and millions, not in 만 and 억.
   if (english()) return km >= 1e8 ? `${englishKm(km)} (${round(km / AU_KM, 1)} AU)` : englishKm(km);
-  if (km >= 1e8) return `${round(km / 1e8, 1)}억km (${round(km / AU_KM, 1)}AU)`;
-  if (km >= 1e4) return `${round(km / 1e4, km >= 1e6 ? 0 : 1)}만km`;
+  if (km >= 1e8) return counted(`${round(km / 1e8, 1)}억km (${round(km / AU_KM, 1)}AU)`);
+  if (km >= 1e4) return counted(`${round(km / 1e4, km >= 1e6 ? 0 : 1)}만km`);
   return `${round(km)}km`;
 }
 

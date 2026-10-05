@@ -1,6 +1,6 @@
 import { objectParticle, distanceText, markedName } from './messages.js';
 import { lookedAt, touchedSky } from '../core/sky.js';
-import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, clearOfPanels, COMPACT_WIDTH } from '../core/markers.js';
+import { keepMarker, spreadArrows, settleAbove, crowdedMoons, nearCentre, overlapped, clearOfPanels, COMPACT_WIDTH } from '../core/markers.js';
 import { t } from '../core/i18n.js';
 
 const $ = (id) => document.getElementById(id);
@@ -194,7 +194,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         const y = clearOfPanels(spot, panels);
         const clear = clearOfPanels({ x, y }, saying, 18, half + 4);
         // Those moved from under the bubble keep their order from top to bottom.
-        arrows.push({ el, ...spot, x, y: clear === y ? y : clear + y * 1e-4 });
+        arrows.push({ el, ...spot, x, half, y: clear === y ? y : clear + y * 1e-4 });
       }
       // Labels in view that would cover each other: the nearer thing keeps its label.
       const inView = placed.filter(({ el, spot }) => !el.hidden && !spot.outside);
@@ -206,10 +206,26 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         };
       }));
       for (const { body, el } of inView) if (covered.has(body.id)) el.hidden = true;
-      spreadArrows(arrows, 40, innerHeight).forEach((spot, i) => {
+      // The keys and the readouts along the foot: no arrow's label lies on them (30: y is
+      // the middle of a label some 28px tall, and a plate's ring reaches 8px past its box).
+      const feet = ['footer .speedBox', 'footer .throttle', '#hint', '#slidePad', '#reverseButton', '#flyButton', '#rearButton', '#slideDown', '#craftCard']
+        .map((q) => document.querySelector(q)?.getBoundingClientRect())
+        .filter((box) => box?.width && box.top > innerHeight / 2);
+      settleAbove(spreadArrows(arrows, 40, innerHeight).map((spot, i) => ({ ...arrows[i], y: spot.y })), feet, 30).forEach((spot, i) => {
         arrows[i].el.style.top = `${spot.y}px`;
         arrows[i].el.style.left = `${arrows[i].x}px`;
       });
+      // An arrow's label that has come to lie on a name in view: the name waits (the arrows
+      // are few and chosen: the nearest body, the target, the Sun). The chosen target's and
+      // the goal's own names stay.
+      if (arrows.length) {
+        const boxes = arrows.map(({ el }) => el.getBoundingClientRect());
+        for (const { body, el, selected: sel } of inView) {
+          if (el.hidden || sel || body.id === goalId) continue;
+          const name = el.getBoundingClientRect();
+          if (boxes.some((box) => name.left < box.right + 2 && box.left < name.right + 2 && name.top < box.bottom + 2 && box.top < name.bottom + 2)) el.hidden = true;
+        }
+      }
       // On a phone the notice stands one gap under the minimap and the target panel,
       // however tall they are (style.css reads --heads-foot).
       const foot = compact ? Math.round(headsBottom) : null;

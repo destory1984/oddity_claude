@@ -571,9 +571,12 @@ async function init() {
     if (cue) sound.cue(cue);
   }
 
-  // The card beside the view while docked: when it went up and what it does.
+  // The card beside the view while docked: when it went up and what it does. On a low
+  // phone screen it is folded to two lines (style.css) and a press unfolds it.
+  $('craftCard').addEventListener('click', () => $('craftCard').classList.toggle('open'));
   function showCraftCard(target) {
     $('craftCard').hidden = !target;
+    $('craftCard').classList.remove('open');
     if (!target) return;
     $('craftCardYear').textContent = t`${target.launched}년 발사`;
     $('craftCardName').textContent = `${target.name} ${target.nameEn}`;

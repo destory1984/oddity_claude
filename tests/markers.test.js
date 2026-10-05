@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { clearOfPanels, keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody, nearestBodies, nearbyMoons, NEARBY_KM, lostInGlare, GLARE_FAR_KM } from '../src/core/markers.js';
+import { clearOfPanels, keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody, nearestBodies, nearbyMoons, NEARBY_KM, lostInGlare, GLARE_FAR_KM, settleAbove } from '../src/core/markers.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 
 test('on-screen bodies always keep their label', () => {
@@ -193,4 +193,32 @@ test('a body near at hand is never lost in the glare, even in line with the Sun'
   assert.equal(lostInGlare({ position: [5e6 - GLARE_FAR_KM * 1.1, 0, 0] }, position, sun), true);
   // Far, but well off to the side of the Sun.
   assert.equal(lostInGlare({ position: [0, 4e6, 0] }, position, sun), false);
+});
+
+test('long labels side by side along the foot are stacked, not laid across each other', () => {
+  // Three labels 180px wide, 100px apart, on one line: 40px was the only measure before.
+  const input = [{ x: 400, y: 620, half: 90 }, { x: 500, y: 620, half: 90 }, { x: 600, y: 620, half: 90 }];
+  const out = spreadArrows(input, 40, 720);
+  // Any two whose labels reach each other sideways are 40px apart up and down. (The first
+  // and the third do not reach each other and may share a line.)
+  for (let i = 0; i < out.length; i++) for (let j = i + 1; j < out.length; j++) {
+    if (Math.abs(out[i].x - out[j].x) < out[i].half + out[j].half + 4) assert.ok(Math.abs(out[i].y - out[j].y) >= 40, `${i} and ${j}`);
+  }
+  assert.ok(new Set(out.map((a) => a.y)).size > 1);
+  // Short ones that do not reach each other stay on their line.
+  const short = [{ x: 400, y: 620, half: 30 }, { x: 500, y: 620, half: 30 }];
+  assert.deepEqual(spreadArrows(short, 40, 720).map((a) => a.y), [620, 620]);
+});
+
+test('an arrow is lifted above the keys at the foot, and those over it move up in turn', () => {
+  const keys = [{ left: 250, top: 505, right: 394, bottom: 649 }];
+  const out = settleAbove([{ x: 300, y: 560, half: 60 }, { x: 310, y: 480, half: 60 }, { x: 60, y: 560, half: 40 }], keys, 30);
+  // On the keys: up to 30 above their top. The one that was just above it: 40 higher still.
+  assert.equal(out[0].y, 475);
+  assert.equal(out[1].y, 435);
+  // Far to the side of the keys: left where it was.
+  assert.equal(out[2].y, 560);
+  // Nothing at the foot: nothing moves.
+  const free = [{ x: 300, y: 560, half: 60 }, { x: 310, y: 300, half: 60 }];
+  assert.deepEqual(settleAbove(free, [], 30).map((a) => a.y), [560, 300]);
 });

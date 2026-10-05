@@ -71,15 +71,20 @@ export function clearOfPanels({ x, y }, panels, gap = 18, reach = 90) {
   return at;
 }
 
+// Two arrows' labels would lie on each other sideways: nearer than `gap`, or, when their
+// labels' half widths are known (`half`), nearer than the two halves together.
+const sideBySide = (a, b, gap) => Math.abs(a.x - b.x) < Math.max(gap, (a.half ?? 0) + (b.half ?? 0) + 4);
+
 // Arrows closer than `gap` pixels (in both x and y) are pushed apart vertically,
-// staying within the screen height.
+// staying within the screen height. half: half the width of an arrow's label, when known
+// (two long labels side by side along the foot of a wide screen lay across each other).
 export function spreadArrows(arrows, gap, height) {
   const placed = [];
   const order = arrows.map((a, i) => ({ ...a, i })).sort((a, b) => a.y - b.y);
   for (const a of order) {
     let y = a.y;
     for (const p of placed) {
-      if (Math.abs(p.x - a.x) < gap && Math.abs(p.y - y) < gap) y = p.y + gap;
+      if (sideBySide(p, a, gap) && Math.abs(p.y - y) < gap) y = p.y + gap;
     }
     placed.push({ ...a, y });
   }
@@ -88,6 +93,27 @@ export function spreadArrows(arrows, gap, height) {
   if (overflow > 0) for (const p of placed) if (p.y !== arrows[p.i].y || p.y > height) p.y -= overflow;
   const result = [];
   for (const p of placed) result[p.i] = { ...arrows[p.i], y: Math.max(0, p.y) };
+  return result;
+}
+
+// The keys and the readouts at the foot of the screen: an arrow whose label would lie on
+// one of them is lifted to `gap` above it, and those above it in turn, so that none lies
+// on another (on a phone "↓ 지구 · 4,108km" lay across the keys; on a wide screen three
+// labels lay in a row over the thrust bar). arrows: [{ x, y, half }]; panels:
+// [{ left, top, right, bottom }]. Returns the arrows with their y.
+export function settleAbove(arrows, panels, gap = 12, step = 40) {
+  const order = arrows.map((a, i) => ({ ...a, i })).sort((a, b) => b.y - a.y);
+  const placed = [];
+  const result = [];
+  for (const a of order) {
+    let y = a.y;
+    const reach = (a.half ?? 0) + 4;
+    for (const { left, top, right } of panels) if (a.x > left - reach && a.x < right + reach && y > top - gap) y = Math.min(y, top - gap);
+    for (const p of placed) if (sideBySide(p, a, step) && y > p.y - step) y = p.y - step;
+    y = Math.max(0, y);
+    placed.push({ ...a, y });
+    result[a.i] = { ...arrows[a.i], y };
+  }
   return result;
 }
 

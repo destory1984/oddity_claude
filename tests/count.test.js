@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { COUNT_AT, shouldCount, plainReferrer, countUrl } from '../src/core/count.js';
+import { COUNT_AT, shouldCount, plainReferrer, countUrl, isLocalHost } from '../src/core/count.js';
 
 test('only the real site is counted, once, and never a test tool', () => {
   assert.equal(shouldCount({ hostname: 'destory1984.github.io' }), true);
@@ -25,4 +25,9 @@ test('the request tells the path, the title, the referrer and the screen, and no
   assert.equal(url.searchParams.get('r'), 'https://a.example/x');
   assert.equal(url.searchParams.get('s'), '390,844,3');
   assert.ok(!countUrl({ path: '/', rnd: 1 }).includes('s='));
+});
+
+test('the wipe-all test button shows only on the own machine or home network of the maker', () => {
+  for (const hostname of ['localhost', '127.0.0.1', '[::1]', 'app.localhost', 'old.test', '192.168.0.12', '10.0.0.5', '172.16.4.1', '172.31.255.9']) assert.equal(isLocalHost(hostname), true, hostname);
+  for (const hostname of ['destory1984.github.io', '', '172.32.0.1', '8.8.8.8', '192.169.0.1', 'localhost.example.com']) assert.equal(isLocalHost(hostname), false, hostname);
 });

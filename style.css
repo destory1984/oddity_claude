@@ -2831,6 +2831,10 @@ html.shell body {
 }
 
 /* TEMPORARY: the test button that wipes every record, in the strip above the top buttons. */
+#testReset[hidden] {
+  display:none;
+}
+
 #testReset {
   position:fixed;
   top:0;

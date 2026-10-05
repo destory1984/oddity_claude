@@ -19,6 +19,7 @@ import { createToast } from './ui/toast.js';
 import { createWarp } from './ui/warp.js';
 import { addPhoto, removePhoto, photoPlace, photoCaption } from './core/album.js';
 import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } from './core/postcard.js';
+import { isLocalHost } from './core/count.js';
 import { teleportSpot } from './core/teleport.js';
 import { behindBody , nearestBodies, nearbyMoons } from './core/markers.js';
 import { FACTS } from './core/facts.js';
@@ -1280,8 +1281,10 @@ ${STORY_MORE[target.id]}` : told };
   // Opened before the first frame, the journal still has something to show.
   journal.update(progress, state.position, bodies);
 
-  // TEMPORARY, for testing the opening: wipe the log, the album, the daily record and the
-  // first-visit guide (the settings stay) and start again from the first page.
+  // For testing the opening: wipe the log, the album, the daily record and the first-visit
+  // guide (the settings stay) and start again from the first page. Only the maker sees the
+  // button: on the dev server, not on the public site or in the store app.
+  $('testReset').hidden = !isLocalHost(location.hostname);
   $('testReset').addEventListener('click', () => {
     for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1', 'oddity.told.v1', 'oddity.exo.v1', 'oddity.eclipse.v1']) {
       try { localStorage.removeItem(key); } catch { /* storage shut: nothing to wipe */ }

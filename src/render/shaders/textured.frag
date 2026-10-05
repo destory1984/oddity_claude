@@ -374,15 +374,16 @@ void main(){
         for (int z = -1; z <= 1; z++) {
           vec3 g = vec3(float(x), float(y), float(z));
           vec3 o = hash3(gi + g);
-          if (o.y > .35) continue;
+          if (o.y > .45) continue;
           float d = length(g + o - gf);
-          float size = .05 + .09 * o.x;
+          // (.05 + .09 at first: "너무 작아.. 조금 더 키워줘", the user, 2026-10-06.)
+          float size = .09 + .14 * o.x;
           lava += exp(-pow(d / size, 2.)) * (.55 + .45 * sin(time * (.35 + .5 * o.z) + o.x * 40.));
         }
       }
     }
     lava = min(lava, 1.2);
-    light += (vec3(1., .3, .05) * lava + vec3(1., .75, .3) * pow(lava, 3.) * .6) * sights.y * 1.5 * (1. - .8 * smoothstep(-.1, .25, l));
+    light += (vec3(1., .3, .05) * lava + vec3(1., .75, .3) * pow(lava, 3.) * .6) * sights.y * 1.8 * (1. - .8 * smoothstep(-.1, .25, l));
   }
   if (glint > 0.) {
     vec3 H = normalize(sun + V);

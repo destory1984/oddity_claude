@@ -1,3 +1,4 @@
+import { t } from '../core/i18n.js';
 // A photo from the album as a postcard picture, to keep or to send to someone: the photo
 // on paper, and under it a band with where and when it was taken (core/postcard.js
 // cardWords) and a stamp. Drawn at twice the small copy's size so the words stay sharp.
@@ -12,7 +13,7 @@ const FADED = '#7a5a36';
 const load = (src) => new Promise((resolve, reject) => {
   const img = new Image();
   img.onload = () => resolve(img);
-  img.onerror = () => reject(new Error('그림을 읽지 못했습니다'));
+  img.onerror = () => reject(new Error(t('그림을 읽지 못했습니다')));
   img.src = src;
 });
 
@@ -66,7 +67,7 @@ export async function postcardBlob(entry, words, stampUrl) {
   write(words.day, 18, 64, FADED);
 
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('이미지 생성 실패'))), 'image/png');
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error(t('이미지 생성 실패')))), 'image/png');
   });
 }
 

@@ -1,3 +1,4 @@
+import { LANG_KEY } from '../core/i18n.js';
 import { sanitizeExo } from '../core/exo.js';
 import { sanitizeEclipses } from '../core/eclipses.js';
 import { createProgress, sanitizeProgress } from '../core/progress.js';
@@ -241,5 +242,15 @@ export function saveExo(record) {
     localStorage.setItem(EXO_KEY, JSON.stringify(record));
   } catch {
     // The record lasts only until the page is closed.
+  }
+}
+
+// The language chosen in the settings ('ko' or 'en'); until one is chosen the device's
+// own language decides (core/i18n.js).
+export function saveLanguage(choice) {
+  try {
+    localStorage.setItem(LANG_KEY, choice);
+  } catch {
+    // The choice simply does not stick.
   }
 }

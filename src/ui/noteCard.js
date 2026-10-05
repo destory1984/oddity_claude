@@ -1,3 +1,4 @@
+import { t } from '../core/i18n.js';
 const $ = (id) => document.getElementById(id);
 
 // A note from grandmother, on paper (core/story.js NOTES). The game waits while it is
@@ -33,7 +34,7 @@ export function createNoteCard({ onOpen, onClose }) {
     $('noteCardText').textContent = now.text ?? '';
     $('noteCardSay').textContent = now.say ?? '';
     $('noteCardSay').hidden = !now.say;
-    $('closeNoteCard').textContent = index + 1 < pages.length ? '다음' : shown.note.button;
+    $('closeNoteCard').textContent = index + 1 < pages.length ? t('다음') : shown.note.button;
     dialog.scrollTop = 0;
   }
   $('closeNoteCard').addEventListener('click', () => {
@@ -66,7 +67,7 @@ export function createNoteCard({ onOpen, onClose }) {
         $('noteCardPaper').hidden = false;
         $('noteCardText').textContent = note.text;
         $('noteCardSay').hidden = true;
-        $('closeNoteCard').textContent = first ? note.button : '쪽지를 접는다';
+        $('closeNoteCard').textContent = first ? note.button : t('쪽지를 접는다');
       }
       onOpen();
       dialog.showModal();

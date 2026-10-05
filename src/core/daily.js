@@ -3,6 +3,7 @@ import { STORIES } from './stories.js';
 import { CRAFT } from './craft.js';
 import { DISCOVERY_KM } from './progress.js';
 import { DOCK_RANGE_KM } from './dock.js';
+import { t } from './i18n.js';
 
 // Today's request (docs/재미-기획서.md 3.3): one small errand a day, on a slip of paper
 // grandmother tucked into the journal. The date is the seed, so everyone gets the same
@@ -47,23 +48,23 @@ export function dailyRequest(day, progress) {
   const event = ANNIVERSARIES.find(([m, d]) => m === month && d === date);
   if (event) {
     const [, , year, id] = event;
-    return { kind: 'day', id, year, text: `${year}년 오늘이 그날이란다. ${nameOf(id)}에 다녀와 다오.` };
+    return { kind: 'day', id, year, text: t`${year}년 오늘이 그날이란다. ${nameOf(id)}에 다녀와 다오.` };
   }
   const n = dayNumber(day);
   const found = progress.discovered.filter((id) => id !== 'earth' && id !== 'sun');
   const kind = pick(['visit', 'photo', 'craft'], n);
   if (kind === 'visit') {
     const id = pick(found.length ? found : ['moon'], Math.floor(n / 3));
-    return { kind, id, text: `오늘은 ${nameOf(id)}에 들러 다오. 잘 있는지 궁금하구나.` };
+    return { kind, id, text: t`오늘은 ${nameOf(id)}에 들러 다오. 잘 있는지 궁금하구나.` };
   }
   if (kind === 'photo') {
     const seen = found.filter((id) => PHOTO_BODIES.includes(id));
     const id = pick(seen.length ? seen : ['moon'], Math.floor(n / 3));
-    return { kind, id, text: `오늘은 ${nameOf(id)} 사진을 한 장 찍어 다오. 벽에 붙여 두마.` };
+    return { kind, id, text: t`오늘은 ${nameOf(id)} 사진을 한 장 찍어 다오. 벽에 붙여 두마.` };
   }
   const met = (progress.craft ?? []).filter((id) => CRAFT.some((c) => c.id === id));
   const id = pick(met.length ? met : NEAR_CRAFT, Math.floor(n / 3));
-  return { kind, id, text: `${nameOf(id)} 곁에 가서 안부 좀 전해 다오.` };
+  return { kind, id, text: t`${nameOf(id)} 곁에 가서 안부 좀 전해 다오.` };
 }
 
 // What to point at for a request: the place itself on a surface, else the body or craft.

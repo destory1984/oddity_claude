@@ -1,3 +1,4 @@
+import { t } from '../core/i18n.js';
 const $ = (id) => document.getElementById(id);
 
 // Something to read while a target is looked at closely ("확대 관찰"): its name, a few
@@ -13,7 +14,7 @@ export function createInspectInfo({ onSolve = () => {} } = {}) {
   function setFolded(now) {
     folded = now;
     panel.classList.toggle('folded', folded);
-    fold.textContent = folded ? '펴기' : '접기';
+    fold.textContent = folded ? t('펴기') : t('접기');
     fold.setAttribute('aria-expanded', String(!folded));
   }
   fold.addEventListener('click', () => setFolded(!folded));
@@ -22,8 +23,8 @@ export function createInspectInfo({ onSolve = () => {} } = {}) {
   function showQuiz(quiz) {
     $('inspectQuiz').hidden = !quiz;
     if (!quiz) return;
-    $('inspectQuizQuestion').textContent = `한 문제. ${quiz.question}`;
-    $('inspectQuizResult').textContent = quiz.solved ? '전에 맞힌 문제입니다.' : '';
+    $('inspectQuizQuestion').textContent = t`한 문제. ${quiz.question}`;
+    $('inspectQuizResult').textContent = quiz.solved ? t('전에 맞힌 문제입니다.') : '';
     const buttons = quiz.choices.map((choice, i) => {
       const button = document.createElement('button');
       button.textContent = choice;
@@ -32,7 +33,7 @@ export function createInspectInfo({ onSolve = () => {} } = {}) {
         buttons[quiz.right].classList.add('right');
         if (!right) button.classList.add('wrong');
         for (const b of buttons) b.disabled = true;
-        $('inspectQuizResult').textContent = right ? '맞았습니다.' : `답은 "${quiz.choices[quiz.right]}"입니다. 다음에 다시 풀 수 있습니다.`;
+        $('inspectQuizResult').textContent = right ? t('맞았습니다.') : t`답은 "${quiz.choices[quiz.right]}"입니다. 다음에 다시 풀 수 있습니다.`;
         if (right) onSolve(quiz.id);
       });
       return button;

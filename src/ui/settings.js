@@ -4,6 +4,8 @@
 // until then), what changed, a hundred lines at a time (core/changes.js), and "About"
 // (the title and why the game was made). They open on the options.
 import { changesUntil, firstLines, PAGE_LINES, dayLabel, startedLine } from '../core/changes.js';
+import { language } from '../core/i18n.js';
+import { saveLanguage } from './storage.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -52,6 +54,15 @@ export function createSettings({ onOpen, onClose, today }) {
     renderNews();
   });
   $('closeSettings').addEventListener('click', () => dialog.close());
+  // The language: the game starts again in the one chosen (the notebook stays).
+  for (const [id, choice] of [['langKo', 'ko'], ['langEn', 'en']]) {
+    $(id).setAttribute('aria-pressed', String(language() === choice));
+    $(id).addEventListener('click', () => {
+      if (language() === choice) return;
+      saveLanguage(choice);
+      window.top.location.reload();
+    });
+  }
   dialog.addEventListener('close', () => onClose());
 
   return { isOpen: () => dialog.open };

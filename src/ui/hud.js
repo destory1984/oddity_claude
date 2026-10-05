@@ -1,6 +1,7 @@
 import { objectParticle, distanceText, markedName } from './messages.js';
 import { lookedAt, touchedSky } from '../core/sky.js';
 import { keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, clearOfPanels, COMPACT_WIDTH } from '../core/markers.js';
+import { t } from '../core/i18n.js';
 
 const $ = (id) => document.getElementById(id);
 const ARROWS = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
@@ -103,9 +104,9 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
   return {
     showSelection(body) {
       $('targetName').innerHTML = `${body.name} <small>${body.nameEn}</small>`;
-      $('faceTarget').textContent = `${body.name} 바라보기`;
+      $('faceTarget').textContent = t`${body.name} 바라보기`;
       // The button shows a picture only: its words are its name and its tip.
-      $('faceTarget').title = `${body.name} 바라보기`;
+      $('faceTarget').title = t`${body.name} 바라보기`;
     },
     // goalId: the body the first-visit guide points at; its label always shows and pulses.
     // knownIds: a Set of what is in the journal (bodies found, craft met, places logged).
@@ -118,10 +119,10 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       $('altitudeLabel').textContent = local.label;
       $('altitude').textContent = fmt(local.altitude);
       const backward = speed > 0.01 && motionSign < 0;
-      $('speed').innerHTML = `${backward ? '후진 ' : ''}${fmt(speed)} <small>km/s</small>`;
+      $('speed').innerHTML = `${backward ? t('후진 ') : ''}${fmt(speed)} <small>km/s</small>`;
       $('lightSpeed').textContent = `${backward ? '-' : ''}${(speed / C).toFixed(6)} c`;
       $('throttleValue').textContent = `${Math.round(throttle * 100)}%`;
-      $('speedLimit').textContent = `현재 제한 ${limitLabel}`;
+      $('speedLimit').textContent = t`현재 제한 ${limitLabel}`;
       $('flightState').textContent = flightLabel;
       const compact = innerWidth <= COMPACT_WIDTH;
       lastCamera = view.camera;
@@ -133,7 +134,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         // ✓ somewhere already in the journal, ○ somewhere not yet.
         const name = knownIds ? markedName(body.name, knownIds.has(body.id)) : body.name;
         el.classList.toggle('unknown', Boolean(knownIds) && !knownIds.has(body.id));
-        const spot = placeMarker(el, view.directions[body.id], view.camera, hidden ? `${name} · 가려짐` : name);
+        const spot = placeMarker(el, view.directions[body.id], view.camera, hidden ? t`${name} · 가려짐` : name);
         // What the traveler is looking toward also says how far its surface is.
         const nearestHere = nearestIds.includes(body.id);
         el.classList.toggle('nearest', nearestHere);
@@ -336,7 +337,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       layer.style.maskComposite = card ? 'exclude' : '';
     },
     faceToast(body) {
-      return `${body.name}${objectParticle(body.name)} 바라봅니다. 위치와 속도는 유지됩니다.`;
+      return t`${body.name}${objectParticle(body.name)} 바라봅니다. 위치와 속도는 유지됩니다.`;
     },
   };
 }

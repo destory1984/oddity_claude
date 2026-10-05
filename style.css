@@ -4073,3 +4073,17 @@ dialog .sheetHead .textSize button:disabled {
   color:#7f97ad;
   font-size:11px;
 }
+
+/* ---- English (ui/translate.js sets lang="en") ----
+   English words run longer than the Korean ones the layout was made for. */
+
+/* The notebook's six tabs fit a phone 402 wide. */
+html[lang="en"] #journal #journalTabs button {
+  padding:4px 8px;
+}
+
+/* The version line beside "Settings" stays on one line. */
+html[lang="en"] #appVersion {
+  white-space:nowrap;
+  font-size:10px;
+}

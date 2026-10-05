@@ -1,6 +1,7 @@
 // Spacecraft and telescopes. They are not bodies: nothing lands on them, they are
 // not in the journal and they block nothing. Flying near one only lowers the speed
 // limit, like nearing a surface (see step() in game.js).
+import { named } from './i18n.js';
 import { DISTANCE_COMPRESSION, SATELLITE_COMPRESSION, TIME_SCALE, compressedCenterDistance } from './bodies.js';
 import { ellipsePoint } from './kepler.js';
 
@@ -165,6 +166,7 @@ export const CRAFT = [
     intro: '1979년 토성을 처음으로 지나간 탐사선입니다. 10호와 같은 금속판을 싣고 반대쪽으로 태양계를 떠나고 있으며, 1995년 교신이 끊겼습니다.',
   },
 ];
+named(CRAFT);
 
 // Shown size: real craft are metres across and would be invisible at this scale.
 export const CRAFT_SIZE_KM = 30;

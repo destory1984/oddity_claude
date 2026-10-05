@@ -40,7 +40,7 @@ const NO_LETTER = ['mercury', 'venus'];
 export function mapLetter(body) {
   if (NO_LETTER.includes(body.id)) return null;
   if (body.kind === 'exoplanet') return body.nameEn.slice(-1);
-  return body.kind === 'planet' || body.kind === 'dwarf' ? body.nameEn[0].toUpperCase() : null;
+  return body.kind === 'planet' || body.kind === 'dwarf' ? (body.nameEn || body.name)[0].toUpperCase() : null;
 }
 
 // Where that letter goes: `gap` pixels from the dot, on the side away from the Sun

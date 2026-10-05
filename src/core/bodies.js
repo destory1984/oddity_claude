@@ -1,3 +1,4 @@
+import { t, named } from './i18n.js';
 import { ellipsePoint } from './kepler.js';
 
 export const DISTANCE_COMPRESSION = 100;
@@ -251,7 +252,7 @@ export function placeBodies(data, timeS = 0) {
   return Object.freeze([...placed.values()]);
 }
 
-export const BODIES = placeBodies(BODY_DATA);
+export const BODIES = placeBodies(named(BODY_DATA));
 
 // Bodies where they are at game time timeS (seconds of simulated time).
 export function bodiesAt(timeS) {
@@ -287,11 +288,11 @@ export function nearestLocalBody(position, bodies = BODIES) {
   // the label would otherwise keep flipping.
   const moon = nearestSurface(position, bodies.filter((body) => body.kind === 'moon'));
   if (moon.body && moon.distance <= moon.body.radiusKm) {
-    return { body: moon.body, altitude: moon.distance, label: `${moon.body.name} 상공` };
+    return { body: moon.body, altitude: moon.distance, label: t`${moon.body.name} 상공` };
   }
   const local = bodies.filter((body) => body.kind !== 'moon');
   const { body, distance } = nearestSurface(position, local);
-  return { body, altitude: distance, label: `${body.name} 상공` };
+  return { body, altitude: distance, label: t`${body.name} 상공` };
 }
 
 export function apparentAngularRadius(radius, distance) {

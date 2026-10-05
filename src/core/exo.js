@@ -6,6 +6,7 @@
 import { AU_KM, DISTANCE_COMPRESSION, SATELLITE_COMPRESSION, compressedCenterDistance, surfaceDistance } from './bodies.js';
 import { fromEquatorial } from './sky.js';
 import { lookAtDirection, rotateLocal } from './orientation.js';
+import { t, named } from './i18n.js';
 
 const DAY_S = 86400;
 const EARTH_KM = 6371;
@@ -14,26 +15,26 @@ export const EXO_LIGHT_YEARS = 40.66;
 
 export const EXO_STAR = {
   id: 'trappist1', name: '트라피스트-1', nameEn: 'TRAPPIST-1', kind: 'exostar', radiusKm: 82930,
-  note: '목성보다 조금 큰 붉은 왜성입니다. 표면 온도는 약 2,300도로 태양(약 5,500도)의 절반이 안 됩니다. 지구에서 약 40광년, 물병자리 쪽에 있습니다.',
+  note: t('목성보다 조금 큰 붉은 왜성입니다. 표면 온도는 약 2,300도로 태양(약 5,500도)의 절반이 안 됩니다. 지구에서 약 40광년, 물병자리 쪽에 있습니다.'),
 };
 
 // radius in Earth radii, orbit in AU, period in days, light: starlight received, Earth = 1.
 // turn: where on its orbit it starts (in turns), spread so the seven are not in a row.
 const PLANETS = [
   { letter: 'b', radius: 1.116, orbit: 0.01154, period: 1.510826, light: 4.153, turn: 0.05,
-    note: '별빛을 지구의 4.2배 받습니다. 제임스 웹 망원경이 잰 낮 쪽 온도는 약 230도였고, 두꺼운 대기는 없어 보입니다.' },
+    note: t('별빛을 지구의 4.2배 받습니다. 제임스 웹 망원경이 잰 낮 쪽 온도는 약 230도였고, 두꺼운 대기는 없어 보입니다.') },
   { letter: 'c', radius: 1.097, orbit: 0.01580, period: 2.421937, light: 2.214, turn: 0.42,
-    note: '별빛을 지구의 2.2배 받습니다. 웹 망원경이 잰 낮 쪽 온도는 약 110도로, 금성 같은 두꺼운 이산화탄소 대기는 없어 보입니다.' },
+    note: t('별빛을 지구의 2.2배 받습니다. 웹 망원경이 잰 낮 쪽 온도는 약 110도로, 금성 같은 두꺼운 이산화탄소 대기는 없어 보입니다.') },
   { letter: 'd', radius: 0.788, orbit: 0.02227, period: 4.049219, light: 1.115, turn: 0.71,
-    note: '지름은 지구의 0.79배, 질량은 0.39배로 가벼운 편입니다. 받는 빛은 지구의 1.1배로 비슷합니다.' },
+    note: t('지름은 지구의 0.79배, 질량은 0.39배로 가벼운 편입니다. 받는 빛은 지구의 1.1배로 비슷합니다.') },
   { letter: 'e', radius: 0.920, orbit: 0.02925, period: 6.101013, light: 0.646, turn: 0.18,
-    note: '지름은 지구의 0.92배입니다. 받는 빛이 지구의 0.65배로, 물이 액체로 있을 수 있는 구역 안에 있습니다.' },
+    note: t('지름은 지구의 0.92배입니다. 받는 빛이 지구의 0.65배로, 물이 액체로 있을 수 있는 구역 안에 있습니다.') },
   { letter: 'f', radius: 1.045, orbit: 0.03849, period: 9.207540, light: 0.373, turn: 0.55,
-    note: '크기가 지구와 거의 같습니다(1.05배). 받는 빛은 지구의 0.37배로 화성(0.43배)보다 조금 적습니다.' },
+    note: t('크기가 지구와 거의 같습니다(1.05배). 받는 빛은 지구의 0.37배로 화성(0.43배)보다 조금 적습니다.') },
   { letter: 'g', radius: 1.129, orbit: 0.04683, period: 12.352446, light: 0.252, turn: 0.86,
-    note: '일곱 가운데 가장 큽니다(지구의 1.13배). 받는 빛은 지구의 4분의 1입니다.' },
+    note: t('일곱 가운데 가장 큽니다(지구의 1.13배). 받는 빛은 지구의 4분의 1입니다.') },
   { letter: 'h', radius: 0.755, orbit: 0.06189, period: 18.772866, light: 0.144, turn: 0.31,
-    note: '가장 작고 가장 멉니다. 18.8일에 한 바퀴 돈다는 것은 케플러 망원경이 79일 동안 지켜보고 알아냈습니다.' },
+    note: t('가장 작고 가장 멉니다. 18.8일에 한 바퀴 돈다는 것은 케플러 망원경이 79일 동안 지켜보고 알아냈습니다.') },
 ];
 
 export const EXO_PLANETS = PLANETS.map((p) => ({
@@ -41,6 +42,7 @@ export const EXO_PLANETS = PLANETS.map((p) => ({
   radiusKm: Math.round(p.radius * EARTH_KM), orbitKm: p.orbit * AU_KM, periodS: p.period * DAY_S, light: p.light, turn: p.turn, note: p.note,
 }));
 
+named([EXO_STAR, ...EXO_PLANETS]);
 export const EXO_IDS = [EXO_STAR.id, ...EXO_PLANETS.map((p) => p.id)];
 
 const unit = (v) => { const l = Math.hypot(...v); return v.map((n) => n / l); };

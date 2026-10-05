@@ -1,5 +1,6 @@
 import { mapPoint, mapHeading, pickNearest, mapLetter, letterPoint } from '../core/minimap.js';
 import { BELT } from '../core/belt.js';
+import { t } from '../core/i18n.js';
 
 const COLORS = {
   sun: '#ffd27a',
@@ -142,7 +143,7 @@ export function createMinimap(canvas, { onPick = () => {}, onTap = null, big = f
       ctx.arc(px, py, 3, 0, Math.PI * 2);
     }
     ctx.fill();
-    named.push({ id: 'me', x: px, y: py, name: '나' });
+    named.push({ id: 'me', x: px, y: py, name: t('나') });
 
     // The name of the circle under the pointer, kept inside the map.
     const shown = named.find((n) => n.id === hover);

@@ -1,3 +1,4 @@
+import { named } from './i18n.js';
 import { SPIN_DAY_S, EARTH_START_SPIN, spinAngle, surfaceDirection } from './surface.js';
 
 // Story places: spots where something real happened. Reaching one logs it in the
@@ -309,6 +310,7 @@ STORIES.push(
     text: '경북 영천 보현산 꼭대기에 한국에서 가장 큰 지름 1.8m 광학 망원경이 있습니다. 1996년에 문을 열었습니다.',
   },
 );
+named(STORIES);
 
 // A place's label shows only from within this many of its body's radii above the
 // surface (the Moon: 6,950 km; Mars: 13,560 km), like the craft that circle a planet

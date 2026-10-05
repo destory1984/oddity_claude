@@ -1,3 +1,4 @@
+import { t, english, englishKm } from './i18n.js';
 // The photo album: small copies of the photos the traveler saved, newest first, with
 // where each was taken and which photo missions it met. Kept in the browser (ui/storage.js).
 
@@ -73,8 +74,10 @@ export function photoCaption(entry, missions) {
 // the height. Far out the plain number grows too long to read ("명왕성 상공
 // 212,468,948km"), so from 100,000 km it is told in 만 and 억, as a distance from the body.
 export function photoPlace(label, altitudeKm, besideName = null) {
-  if (besideName) return `${besideName} 곁`;
+  if (besideName) return t`${besideName} 곁`;
   const km = Math.round(altitudeKm);
+  // In English the label already reads "Over Mars".
+  if (english()) return `${label}, ${englishKm(km)}`;
   if (km < 1e5) return `${label} ${km.toLocaleString('ko-KR')}km`;
   const from = label.replace(/ 상공$/, '에서');
   const man = Math.round(km / 1e4);

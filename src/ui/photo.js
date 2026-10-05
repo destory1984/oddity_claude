@@ -1,5 +1,6 @@
 import { rotateLocal } from '../core/orientation.js';
 import { thumbSize } from '../core/album.js';
+import { t } from '../core/i18n.js';
 
 const $ = (id) => document.getElementById(id);
 const DEFAULT_FOV_DEG = 60;
@@ -13,7 +14,7 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
   // Looking round a target ("확대 관찰"): { id, distanceKm, orientation }. The view
   // circles the target, which stays in the middle; null in plain photo mode.
   let orbit = null;
-  const HINTS = { look: '드래그로 구도 조절 · 휠로 확대', orbit: '드래그로 둘레를 돌아보기 · 휠로 확대' };
+  const HINTS = { look: t('드래그로 구도 조절 · 휠로 확대'), orbit: t('드래그로 둘레를 돌아보기 · 휠로 확대') };
 
   function setFovDeg(deg) {
     const clamped = Math.max(5, Math.min(95, deg));
@@ -72,7 +73,7 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
         shot.thumb = null;
       }
       const blob = await new Promise((resolve, reject) => {
-        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('이미지 생성 실패'))), 'image/png');
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error(t('이미지 생성 실패')))), 'image/png');
       });
       const file = new File([blob], `oddity-${new Date().toISOString().replace(/[:.]/g, '-')}.png`, { type: 'image/png' });
       const touch = document.body.classList.contains('touch');
@@ -89,11 +90,11 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
         a.download = file.name;
         a.click();
         setTimeout(() => URL.revokeObjectURL(url), 10000);
-        toast.show('화면 표시 없는 우주 사진을 저장했습니다.');
+        toast.show(t('화면 표시 없는 우주 사진을 저장했습니다.'));
       }
       onCaptured(shot);
     } catch (e) {
-      toast.show('사진을 저장하지 못했습니다. 다시 시도해 주세요.');
+      toast.show(t('사진을 저장하지 못했습니다. 다시 시도해 주세요.'));
       console.error(e);
     } finally {
       button.disabled = false;

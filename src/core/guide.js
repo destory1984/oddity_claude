@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 // The newcomer's first goal: five steps from the opening view to an Earthrise photo
 // taken from the Moon. Pure state; ui/guide.js draws it.
 
@@ -48,11 +49,11 @@ export function updateGuide(guide, { heading, toMoon, progress }) {
 }
 
 const TEXT = {
-  look: () => '화면을 드래그해 주변을 둘러보세요',
-  face: () => '달 이름표를 누르고 "달 바라보기"를 누르세요',
-  fly: (touch) => (touch ? '전진 버튼을 누르고 있으면 달로 날아갑니다' : 'W 키를 누르고 있으면 달로 날아갑니다'),
-  land: () => '그대로 달 표면까지 내려가 닿아 보세요',
-  photo: (touch) => `${touch ? '사진 모드 버튼을' : 'P 키를'} 누르고 달과 지구를 함께 찍으세요`,
+  look: () => t('화면을 드래그해 주변을 둘러보세요'),
+  face: () => t('달 이름표를 누르고 "달 바라보기"를 누르세요'),
+  fly: (touch) => (touch ? t('전진 버튼을 누르고 있으면 달로 날아갑니다') : t('W 키를 누르고 있으면 달로 날아갑니다')),
+  land: () => t('그대로 달 표면까지 내려가 닿아 보세요'),
+  photo: (touch) => t`${touch ? t('사진 모드 버튼을') : t('P 키를')} 누르고 달과 지구를 함께 찍으세요`,
 };
 
 export function guideGoal(guide, touch = false) {

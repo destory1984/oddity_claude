@@ -1,3 +1,4 @@
+import { t } from '../core/i18n.js';
 const $ = (id) => document.getElementById(id);
 
 // Draws the goal line: the first-visit guide (core/guide.js decides what it says), or
@@ -19,7 +20,7 @@ export function createGuideView({ onSkip, onJump = () => {} }) {
       $('guideCount').textContent = goal.count;
       $('guideText').textContent = goal.text;
       $('guideJump').hidden = !goal.jump;
-      $('guideSkip').textContent = goal.jump || goal.quit ? '그만두기' : '건너뛰기';
+      $('guideSkip').textContent = goal.jump || goal.quit ? t('그만두기') : t('건너뛰기');
     },
   };
 }

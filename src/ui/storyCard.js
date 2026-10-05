@@ -1,5 +1,6 @@
 import { STORY_DETAILS, storyPhotoFile, DRAWN } from '../core/storyDetails.js';
 import { quizFor } from '../core/storyQuiz.js';
+import { t } from '../core/i18n.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -18,7 +19,7 @@ export function createStoryCard({ onOpen, onClose, onSolve = () => {}, isSolved 
     show(story) {
       const more = STORY_DETAILS[story.id];
       if (!more || dialog.open) return;
-      $('storyCardYear').textContent = story.year ? `${story.year}년` : '';
+      $('storyCardYear').textContent = story.year ? t`${story.year}년` : '';
       $('storyCardTitle').textContent = story.name;
       $('storyCardEn').textContent = story.nameEn ?? '';
       $('storyCardText').textContent = more.detail;
@@ -29,7 +30,7 @@ export function createStoryCard({ onOpen, onClose, onSolve = () => {}, isSolved 
         $('storyCardPhoto').alt = more.photo.caption;
         $('storyCardCaption').textContent = more.photo.caption;
         // (A picture drawn for the game is not called a photograph.)
-        $('storyCardCredit').textContent = more.photo.credit === DRAWN ? more.photo.credit : `사진: ${more.photo.credit}`;
+        $('storyCardCredit').textContent = more.photo.credit === DRAWN ? more.photo.credit : t`사진: ${more.photo.credit}`;
       } else {
         $('storyCardPhoto').removeAttribute('src');
       }
@@ -38,8 +39,8 @@ export function createStoryCard({ onOpen, onClose, onSolve = () => {}, isSolved 
       $('storyQuiz').hidden = !quiz;
       if (quiz) {
         const solved = isSolved(story.id);
-        $('storyQuizQuestion').textContent = `맞혀 보렴. ${quiz.question}`;
-        $('storyQuizResult').textContent = solved ? '전에 맞힌 문제란다.' : '';
+        $('storyQuizQuestion').textContent = t`맞혀 보렴. ${quiz.question}`;
+        $('storyQuizResult').textContent = solved ? t('전에 맞힌 문제란다.') : '';
         const buttons = quiz.choices.map((choice, i) => {
           const button = document.createElement('button');
           button.textContent = choice;
@@ -50,8 +51,8 @@ export function createStoryCard({ onOpen, onClose, onSolve = () => {}, isSolved 
             for (const b of buttons) b.disabled = true;
             const mark = document.createElement('img');
             mark.src = `${import.meta.env.BASE_URL}assets/notebook/mark-${right ? 'right' : 'wrong'}.png`;
-            mark.alt = right ? '동그라미' : '세모';
-            $('storyQuizResult').replaceChildren(mark, right ? '맞았다. 꼼꼼히 읽었구나.' : `답은 "${quiz.choices[quiz.right]}". 다음에 또 맞혀 보렴.`);
+            mark.alt = right ? t('동그라미') : t('세모');
+            $('storyQuizResult').replaceChildren(mark, right ? t('맞았다. 꼼꼼히 읽었구나.') : t`답은 "${quiz.choices[quiz.right]}". 다음에 또 맞혀 보렴.`);
             if (right) onSolve(story.id);
           });
           return button;

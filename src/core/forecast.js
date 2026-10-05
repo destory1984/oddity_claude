@@ -3,6 +3,7 @@
 // crossing its planet now, and whose crosses next (core/shadows.js).
 import { BODY_DATA, TIME_SCALE } from './bodies.js';
 import { SHADOW_CASTERS, shadowEdge, shadowSpot } from './shadows.js';
+import { t } from './i18n.js';
 
 // Only shadows wide enough to be seen from where a planet is looked at: this many km
 // across the outer edge at least (Io, Europa, Ganymede, Callisto, Titan).
@@ -44,6 +45,6 @@ export const playMinutes = (gameS) => Math.max(1, Math.round(gameS / TIME_SCALE 
 // One line for the journal.
 export function newsLine({ moon, planet, inS, forS }) {
   const [moonName, planetName] = [data(moon).name, data(planet).name];
-  if (inS === 0) return `지금 ${moonName}의 그림자가 ${planetName} 위를 지나가고 있습니다. ${playMinutes(forS)}분 더 보입니다.`;
-  return `${playMinutes(inS)}분 뒤 ${moonName}의 그림자가 ${planetName} 위를 지나갑니다. ${playMinutes(forS)}분 동안 보입니다.`;
+  if (inS === 0) return t`지금 ${moonName}의 그림자가 ${planetName} 위를 지나가고 있습니다. ${playMinutes(forS)}분 더 보입니다.`;
+  return t`${playMinutes(inS)}분 뒤 ${moonName}의 그림자가 ${planetName} 위를 지나갑니다. ${playMinutes(forS)}분 동안 보입니다.`;
 }

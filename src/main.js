@@ -81,6 +81,7 @@ import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
 } from './core/eclipses.js';
+import { t } from './core/i18n.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
@@ -264,7 +265,7 @@ const eclipse = eclipseNow(openedAt);
 let eclipsesSeen = loadEclipses();
 const eclipseSpotAt = (timeS, at) => eclipseSpot(eclipse, bodyById('earth', at), bodyById('sun', at), spinAngle(SPIN_DAY_S.earth, timeS, EARTH_START_SPIN));
 const eventPlace = eclipse
-  ? { id: 'eclipseSpot', name: `${eclipseTitle(eclipse)} 자리`, nameEn: '', kind: 'site', parent: 'earth', radiusKm: 0, landmark: true, ...eclipseSpotAt(0, bodies) }
+  ? { id: 'eclipseSpot', name: t`${eclipseTitle(eclipse)} 자리`, nameEn: '', kind: 'site', parent: 'earth', radiusKm: 0, landmark: true, ...eclipseSpotAt(0, bodies) }
   : null;
 let show = null;
 let showNow = null;
@@ -290,15 +291,15 @@ function progressChanged(before) {
   const { done, total } = score(now);
   // The button shows a notebook icon and the count; its name says the rest.
   $('journalButton').textContent = `${done}/${total}`;
-  $('journalButton').setAttribute('aria-label', `수첩 ${done}/${total}`);
-  $('journalButton').title = '탐험 수첩 (J)';
+  $('journalButton').setAttribute('aria-label', t`수첩 ${done}/${total}`);
+  $('journalButton').title = t('탐험 수첩 (J)');
   // Eighty, a hundred and twenty, a hundred and sixty slots: Sora counts aloud.
   const counted = before ? milestoneLine(score(summarize(before, BODIES, MISSIONS, STORIES)).done, done) : null;
   if (counted) say.show(counted);
   // The last slot is not listed in the journal until every other slot is filled
   // (ui/journal.js): the moment it comes into the lists, a notice says so.
   if (before && !lastSlotOpen(before, score(summarize(before, BODIES, MISSIONS, STORIES)).done, total) && lastSlotOpen(progress, done, total) && done < total) {
-    toast.show('수첩에 마지막 칸이 나타났습니다. 임무 갈래의 맨 끝을 보세요.');
+    toast.show(t('수첩에 마지막 칸이 나타났습니다. 임무 갈래의 맨 끝을 보세요.'));
   }
   return Boolean(before) && !isComplete(summarize(before, BODIES, MISSIONS, STORIES)) && isComplete(now);
 }
@@ -355,14 +356,14 @@ let sunShown = 1;
 function celebrate() {
   cheerUntil = performance.now() + 6000;
   sound.cue('complete');
-  toast.show(`태양계 탐험을 모두 마쳤습니다. 수첩이 가득 찼습니다!${album.length >= 2 ? '\n수첩의 사진첩에서 "지나온 길 돌아보기"를 눌러 보세요.' : ''}`);
+  toast.show(t`태양계 탐험을 모두 마쳤습니다. 수첩이 가득 찼습니다!${album.length >= 2 ? t('\n수첩의 사진첩에서 "지나온 길 돌아보기"를 눌러 보세요.') : ''}`);
 }
 
 function setPaused(value) {
   paused = value;
   input?.clear();
-  $('pauseButton').textContent = paused ? '비행 계속' : '일시 정지';
-  $('pauseButton').title = paused ? '비행 계속' : '일시 정지 (Esc)';
+  $('pauseButton').textContent = paused ? t('비행 계속') : t('일시 정지');
+  $('pauseButton').title = paused ? t('비행 계속') : t('일시 정지 (Esc)');
   $('pauseButton').classList.toggle('paused', paused);
 }
 
@@ -380,15 +381,15 @@ function setRear(value) {
   rear = value;
   document.body.classList.toggle('rear', rear);
   $('rearButton').setAttribute('aria-pressed', String(rear));
-  $('rearButton').title = rear ? '앞 보기 (R)' : '뒤 보기 (R)';
-  $('reticle').querySelector('span').textContent = rear ? '뒤 보기' : '비행 방향';
+  $('rearButton').title = rear ? t('앞 보기 (R)') : t('뒤 보기 (R)');
+  $('reticle').querySelector('span').textContent = rear ? t('뒤 보기') : t('비행 방향');
 }
 
 function brake() {
   input.clear();
   if (totalSpeed(state) > 0) sound.cue('brake');
   state = stopNow(state);
-  toast.show('정지했습니다. 주변을 둘러보세요.');
+  toast.show(t('정지했습니다. 주변을 둘러보세요.'));
 }
 
 let input;
@@ -401,7 +402,7 @@ async function init() {
     world = await createWorld(canvas, bodies);
   } catch (e) {
     console.error(e);
-    $('loadError').textContent = `${e.message} 최신 Chrome이나 Edge에서 하드웨어 가속을 켜고 다시 열어 주세요.`;
+    $('loadError').textContent = t`${e.message} 최신 Chrome이나 Edge에서 하드웨어 가속을 켜고 다시 열어 주세요.`;
     return;
   }
 
@@ -441,7 +442,7 @@ async function init() {
       if (photo.active()) return photo.toggle();
       setPaused(!paused);
       // (Behind another notice it waits four seconds at most: later it may no longer be true.)
-      if (paused) toast.show('멈췄습니다. Esc나 비행 키를 누르면 이어집니다.', 'pause', 4);
+      if (paused) toast.show(t('멈췄습니다. Esc나 비행 키를 누르면 이어집니다.'), 'pause', 4);
     },
     onWheel: (deltaY) => photo.zoom(deltaY),
     isBlocked: () => $('settings').open || $('journal').open || $('noteCard').open || $('bigMap').open,
@@ -460,7 +461,7 @@ async function init() {
       if (shot.orbit) {
         if (shot.thumb) {
           album = saveAlbum(addPhoto(album, {
-            at: new Date().toISOString(), where: `${here(shot.orbit.id).name} 확대 관찰`, missions: [], image: shot.thumb,
+            at: new Date().toISOString(), where: t`${here(shot.orbit.id).name} 확대 관찰`, missions: [], image: shot.thumb,
           }));
           journal.setAlbum(album);
         }
@@ -522,8 +523,8 @@ async function init() {
       const before = progress;
       const result = recordPhotos(progress, done);
       const told = recordStories(result.progress, slots.stories);
-      if (slots.held === 'locked') toast.show('창백한 푸른 점은 수첩의 마지막 칸입니다. 나머지 칸을 모두 채우면 열립니다.');
-      if (slots.held === 'near') toast.show('마지막 칸은 지구에서 6,000만km 넘게 떨어져서 찍어야 채워집니다.');
+      if (slots.held === 'locked') toast.show(t('창백한 푸른 점은 수첩의 마지막 칸입니다. 나머지 칸을 모두 채우면 열립니다.'));
+      if (slots.held === 'near') toast.show(t('마지막 칸은 지구에서 6,000만km 넘게 떨어져서 찍어야 채워집니다.'));
       if (!result.newly.length && !told.newly.length) return;
       progress = told.progress;
       const finished = progressChanged(before);
@@ -535,7 +536,7 @@ async function init() {
       for (const id of told.newly) {
         const story = STORIES.find((s) => s.id === id);
         toast.show(eventMessage({ type: 'story', name: story.name, text: story.text }));
-        say.show('저 점이 지구야? 진짜 작다.');
+        say.show(t('저 점이 지구야? 진짜 작다.'));
       }
       if (finished) celebrate();
       // A mission after a famous photograph, met for the first time: the real one is
@@ -555,7 +556,7 @@ async function init() {
   function showCraftCard(target) {
     $('craftCard').hidden = !target;
     if (!target) return;
-    $('craftCardYear').textContent = `${target.launched}년 발사`;
+    $('craftCardYear').textContent = t`${target.launched}년 발사`;
     $('craftCardName').textContent = `${target.name} ${target.nameEn}`;
     $('craftCardIntro').textContent = target.intro;
   }
@@ -637,7 +638,7 @@ async function init() {
       // On a tour, a stop the jump alone does not reach says what is left to do.
       const leg = known ? currentStop(progress) : null;
       const todo = leg ? stopHint(leg.stop) : null;
-      const about = todo ? `할 일: ${todo}` : docking ? null : aboutKnown(target);
+      const about = todo ? t`할 일: ${todo}` : docking ? null : aboutKnown(target);
       const arrived = eventMessage({ type: 'teleported', name: target.name });
       // A tour's jump: its notices replace one another (kind 'tour'), so word of the
       // stop reached is not kept waiting behind this one.
@@ -672,27 +673,27 @@ async function init() {
 
   // What there is to read about the target being looked at closely: a body found, a
   // craft met, a place been to. Before that, only how to open it.
-  const KIND = { star: '별', planet: '행성', moon: '위성', dwarf: '왜행성', comet: '혜성' };
+  const KIND = { star: t('별'), planet: t('행성'), moon: t('위성'), dwarf: t('왜행성'), comet: t('혜성') };
   function readingFor(target) {
     const head = { name: target.name, nameEn: target.nameEn };
     if (target.kind === 'craft') {
-      if (!(progress.craft ?? []).includes(target.id)) return { ...head, kicker: '탐사선', text: '아직 수첩에 없는 탐사선입니다. 3,000km 안까지 다가가면 읽을거리가 열립니다.' };
-      return { ...head, kicker: `${target.launched}년 발사`, text: READINGS[target.id] ?? target.intro, quiz: readingQuiz(target.id) };
+      if (!(progress.craft ?? []).includes(target.id)) return { ...head, kicker: t('탐사선'), text: t('아직 수첩에 없는 탐사선입니다. 3,000km 안까지 다가가면 읽을거리가 열립니다.') };
+      return { ...head, kicker: t`${target.launched}년 발사`, text: READINGS[target.id] ?? target.intro, quiz: readingQuiz(target.id) };
     }
     if (target.kind === 'site') {
       const story = STORIES.find((s) => s.id === target.id);
-      const kicker = `${story.year ? `${story.year}년 · ` : ''}${here(target.parent).name}`;
-      if (!progress.stories.includes(target.id)) return { ...head, kicker, text: `아직 수첩에 없는 곳입니다. ${story.hint}.` };
+      const kicker = `${story.year ? t`${story.year}년 · ` : ''}${here(target.parent).name}`;
+      if (!progress.stories.includes(target.id)) return { ...head, kicker, text: t`아직 수첩에 없는 곳입니다. ${story.hint}.` };
       const told = STORY_DETAILS[target.id]?.detail ?? story.text;
       return { ...head, kicker, text: STORY_MORE[target.id] ? `${told}
 
 ${STORY_MORE[target.id]}` : told };
     }
     // Another star and its planets (core/exo.js): a word each, no journal slot.
-    if (target.exo) return { ...head, kicker: target.kind === 'exostar' ? '붉은 왜성 · 지구에서 약 40광년' : '외계 행성 · 겉모습은 상상해서 그림', text: exoNote(target.id) };
+    if (target.exo) return { ...head, kicker: target.kind === 'exostar' ? t('붉은 왜성 · 지구에서 약 40광년') : t('외계 행성 · 겉모습은 상상해서 그림'), text: exoNote(target.id) };
     const parent = target.parent ? bodyById(target.parent) : null;
-    const kicker = `${KIND[target.kind] ?? '천체'}${parent && target.kind === 'moon' ? ` · ${parent.name}의 위성` : ''}`;
-    if (!progress.discovered.includes(target.id)) return { ...head, kicker, text: '아직 수첩에 없는 천체입니다. 표면에서 5만km 안까지 다가가면 읽을거리가 열립니다.' };
+    const kicker = `${KIND[target.kind] ?? t('천체')}${parent && target.kind === 'moon' ? t` · ${parent.name}의 위성` : ''}`;
+    if (!progress.discovered.includes(target.id)) return { ...head, kicker, text: t('아직 수첩에 없는 천체입니다. 표면에서 5만km 안까지 다가가면 읽을거리가 열립니다.') };
     return { ...head, kicker, facts: bodyFacts(BODY_DATA.find((b) => b.id === target.id), parent?.name), text: READINGS[target.id] ?? FACTS[target.id] ?? '', quiz: readingQuiz(target.id) };
   }
   function readingQuiz(id) {
@@ -718,7 +719,7 @@ ${STORY_MORE[target.id]}` : told };
       inspectInfo.show({ name: eclipseTitle(eclipse), nameEn: '', kicker: `${eclipseDayText(eclipse)} · ${eclipse.where}`, text: `${showNow.text}\n\n${stagedNote(eclipse)}` });
       return;
     }
-    if (scene) inspectInfo.show({ name: replayFor(id).name, nameEn: '', kicker: `그날로 · ${replayFor(id).day}`, text: scene.text });
+    if (scene) inspectInfo.show({ name: replayFor(id).name, nameEn: '', kicker: t`그날로 · ${replayFor(id).day}`, text: scene.text });
     else inspectInfo.show(id ? readingFor(here(id)) : null);
   }
 
@@ -739,7 +740,7 @@ ${STORY_MORE[target.id]}` : told };
     if (!direction) return null;
     if (lampTold !== target.id) {
       lampTold = target.id;
-      toast.show('이곳은 지금 밤입니다. 살펴보는 동안만 빛을 비춥니다.');
+      toast.show(t('이곳은 지금 밤입니다. 살펴보는 동안만 빛을 비춥니다.'));
     }
     return { id: ground.id, direction };
   }
@@ -805,7 +806,7 @@ ${STORY_MORE[target.id]}` : told };
     if (eclipse && (!visit || visit.id === eventPlace.id)) {
       const watch = canWatch(eclipse, eventPlace, here('sun'), state.position);
       if (watch === 'yes') return startShow();
-      if (watch === 'night') return toast.show('이곳은 지금 밤입니다. 해가 뜨면 볼 수 있습니다. 게임의 하루는 14분 24초입니다.');
+      if (watch === 'night') return toast.show(t('이곳은 지금 밤입니다. 해가 뜨면 볼 수 있습니다. 게임의 하루는 14분 24초입니다.'));
     }
     const onBody = !visit && state.restingOn ? replayOn(state.restingOn) : null;
     if (onBody) {
@@ -862,8 +863,8 @@ ${STORY_MORE[target.id]}` : told };
         exo = { ...exo, been: true };
         saveExo(exo);
       }
-      toast.show('트라피스트-1에 왔습니다. 지구에서 약 40광년 떨어진 붉은 왜성과 행성 일곱입니다.\n크기와 궤도는 잰 값이고, 겉모습은 아무도 몰라 상상해서 그렸습니다.');
-      say.show('해가 빨개! 행성이 일곱이나 돼.');
+      toast.show(t('트라피스트-1에 왔습니다. 지구에서 약 40광년 떨어진 붉은 왜성과 행성 일곱입니다.\n크기와 궤도는 잰 값이고, 겉모습은 아무도 몰라 상상해서 그렸습니다.'));
+      say.show(t('해가 빨개! 행성이 일곱이나 돼.'));
     });
     return undefined;
   });
@@ -910,14 +911,14 @@ ${STORY_MORE[target.id]}` : told };
   hud.showSelection(named(selectedId));
   function unlock() {
     locked = false;
-    toast.show('목표 고정을 풀었습니다.');
+    toast.show(t('목표 고정을 풀었습니다.'));
   }
   $('lockTarget').addEventListener('click', () => {
     if (locked) return unlock();
     locked = true;
     const body = here(selectedId);
     state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
-    toast.show(`${body.name}에 화면을 고정했습니다. 방향키 단추로 그 둘레를 돌고, 전진과 후진으로 다가가고 물러납니다.\n화면을 끌면 풀립니다.`);
+    toast.show(t`${body.name}에 화면을 고정했습니다. 방향키 단추로 그 둘레를 돌고, 전진과 후진으로 다가가고 물러납니다.\n화면을 끌면 풀립니다.`);
     return undefined;
   });
 
@@ -942,7 +943,7 @@ ${STORY_MORE[target.id]}` : told };
     const prior = paused;
     setPaused(true);
     mapPick = null;
-    $('bigMapInfo').textContent = '갈 곳을 지도나 이름에서 고르세요.';
+    $('bigMapInfo').textContent = t('갈 곳을 지도나 이름에서 고르세요.');
     $('bigMapGo').disabled = true;
     $('bigMapJump').disabled = true;
     $('bigMapList').replaceChildren(...mapBodies().map((b) => {
@@ -965,7 +966,7 @@ ${STORY_MORE[target.id]}` : told };
     state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
     locked = true;
     $('bigMap').close();
-    toast.show(`${body.name} 쪽을 바라보고 화면을 고정했습니다. 전진을 누르면 다가갑니다.`);
+    toast.show(t`${body.name} 쪽을 바라보고 화면을 고정했습니다. 전진을 누르면 다가갑니다.`);
   });
   $('bigMapJump').addEventListener('click', () => {
     const id = mapPick;
@@ -1036,20 +1037,20 @@ ${STORY_MORE[target.id]}` : told };
   // A stunt flight: taken up from the journal, given up from the goal line.
   function beginStunt(id) {
     if (guide.step !== null) {
-      toast.show('첫 안내를 마치거나 건너뛴 뒤에 할 수 있습니다.');
+      toast.show(t('첫 안내를 마치거나 건너뛴 뒤에 할 수 있습니다.'));
       return;
     }
     if (currentStop(progress)) {
-      toast.show('코스를 마치거나 그만둔 뒤에 할 수 있습니다.');
+      toast.show(t('코스를 마치거나 그만둔 뒤에 할 수 있습니다.'));
       return;
     }
     stunt = startStunt(id);
     const { name, todo } = stuntById(id);
-    toast.show(`묘기 "${name}": ${todo}.\n순간 이동을 쓰면 처음부터 다시 잽니다. 화면 위의 "그만두기"로 그만둡니다.`);
+    toast.show(t`묘기 "${name}": ${todo}.\n순간 이동을 쓰면 처음부터 다시 잽니다. 화면 위의 "그만두기"로 그만둡니다.`);
   }
   function quitStunt() {
     stunt = null;
-    toast.show('묘기를 그만두었습니다. 수첩의 코스 갈래에서 다시 할 수 있습니다.');
+    toast.show(t('묘기를 그만두었습니다. 수첩의 코스 갈래에서 다시 할 수 있습니다.'));
   }
   function finishStunt(value) {
     const { id, name, line } = stuntById(stunt.id);
@@ -1057,12 +1058,12 @@ ${STORY_MORE[target.id]}` : told };
     stuntRecords = result.records;
     saveStunts(stuntRecords);
     stunt = null;
-    const beside = result.best ? '새 기록입니다.' : `가장 좋은 기록은 ${valueText(id, stuntRecords[id])}입니다.`;
-    toast.show(`묘기 "${name}": ${valueText(id, value)}. ${beside}\n수첩의 코스 갈래에서 다시 할 수 있습니다.`);
+    const beside = result.best ? t('새 기록입니다.') : t`가장 좋은 기록은 ${valueText(id, stuntRecords[id])}입니다.`;
+    toast.show(t`묘기 "${name}": ${valueText(id, value)}. ${beside}\n수첩의 코스 갈래에서 다시 할 수 있습니다.`);
     say.show(line);
     sound.cue('discovered');
   }
-  const stuntGoal = () => ({ count: '묘기', text: stuntStatus(stunt), quit: true });
+  const stuntGoal = () => ({ count: t('묘기'), text: stuntStatus(stunt), quit: true });
   function beginTour(id) {
     stunt = null;
     // A tour takes over from the first-visit guide.
@@ -1074,12 +1075,12 @@ ${STORY_MORE[target.id]}` : told };
     saveProgress(progress);
     aimAtStop();
     const now = currentStop(progress);
-    toast.show(`코스 "${now.tour.name}"${objectParticle(now.tour.name)} 시작합니다. 첫 곳은 ${stopName(now.stop)}입니다.\n화면 위의 "근처로"를 누르면 그 가까이로 순간 이동합니다.`, 'tour');
+    toast.show(t`코스 "${now.tour.name}"${objectParticle(now.tour.name)} 시작합니다. 첫 곳은 ${stopName(now.stop)}입니다.\n화면 위의 "근처로"를 누르면 그 가까이로 순간 이동합니다.`, 'tour');
   }
   function endTour() {
     progress = quitTour(progress);
     saveProgress(progress);
-    toast.show('코스를 그만두었습니다. 수첩의 코스 갈래에서 다시 떠날 수 있습니다.');
+    toast.show(t('코스를 그만두었습니다. 수첩의 코스 갈래에서 다시 떠날 수 있습니다.'));
   }
 
   // The card at a story place; the game waits while it is open.
@@ -1162,12 +1163,12 @@ ${STORY_MORE[target.id]}` : told };
     repliesDue = [];
     noteCard.show({
       image: 'mailbox.png',
-      imageAlt: '아침의 대문 옆 나무 우편함. 우표와 소인이 찍힌 누런 봉투가 반쯤 나와 있다',
-      scene: count > 1 ? `우편함에 할머니의 답장이 ${count}통 와 있다.` : '우편함에 할머니의 답장이 와 있다.',
-      title: '소라에게',
+      imageAlt: t('아침의 대문 옆 나무 우편함. 우표와 소인이 찍힌 누런 봉투가 반쯤 나와 있다'),
+      scene: count > 1 ? t`우편함에 할머니의 답장이 ${count}통 와 있다.` : t('우편함에 할머니의 답장이 와 있다.'),
+      title: t('소라에게'),
       text: texts.join('\n\n'),
-      button: '답장을 넣어 둔다',
-      line: best === 3 ? '할머니가 별 세 개 주셨어!' : '답장 왔다! 또 보내야지.',
+      button: t('답장을 넣어 둔다'),
+      line: best === 3 ? t('할머니가 별 세 개 주셨어!') : t('답장 왔다! 또 보내야지.'),
     });
   }
   // What Sora says when the journal closes after a postcard was sent from it.
@@ -1177,7 +1178,7 @@ ${STORY_MORE[target.id]}` : told };
   const journal = createJournal({
     onSendPhoto(index) {
       album = saveAlbum(sendPostcard(album, index, dayOf(new Date())));
-      sayAfterJournal = '할머니, 이거 보면 깜짝 놀랄걸.';
+      sayAfterJournal = t('할머니, 이거 보면 깜짝 놀랄걸.');
       return album;
     },
     // A card or a note opened from the journal: the journal's own closing comes after
@@ -1266,7 +1267,7 @@ ${STORY_MORE[target.id]}` : told };
       progressChanged(null);
       journal.update(progress, state.position, bodies);
       $('journal').close();
-      toast.show('탐험 기록을 지웠습니다.');
+      toast.show(t('탐험 기록을 지웠습니다.'));
     },
   });
   journal.setAlbum(album);
@@ -1289,8 +1290,8 @@ ${STORY_MORE[target.id]}` : told };
   function showSoundButton() {
     $('soundButton').textContent = sound.muted() ? '🔇' : '🔊';
     $('soundButton').classList.toggle('off', sound.muted());
-    $('soundButton').setAttribute('aria-label', sound.muted() ? '효과음 켜기' : '효과음 끄기');
-    $('soundButton').title = sound.muted() ? '효과음 꺼짐 (M)' : '효과음 켜짐 (M)';
+    $('soundButton').setAttribute('aria-label', sound.muted() ? t('효과음 켜기') : t('효과음 끄기'));
+    $('soundButton').title = sound.muted() ? t('효과음 꺼짐 (M)') : t('효과음 켜짐 (M)');
   }
   function toggleSound() {
     sound.unlock();
@@ -1307,10 +1308,10 @@ ${STORY_MORE[target.id]}` : told };
   // Music has its own switch, in the top bar (and the same one in the help dialog).
   function showMusicButton() {
     const on = sound.musicOn();
-    $('musicButton').textContent = on ? '배경 음악 끄기' : '배경 음악 켜기';
+    $('musicButton').textContent = on ? t('배경 음악 끄기') : t('배경 음악 켜기');
     $('bgmButton').classList.toggle('off', !on);
-    $('bgmButton').setAttribute('aria-label', on ? '배경 음악 끄기' : '배경 음악 켜기');
-    $('bgmButton').title = on ? '배경 음악 켜짐 (B)' : '배경 음악 꺼짐 (B)';
+    $('bgmButton').setAttribute('aria-label', on ? t('배경 음악 끄기') : t('배경 음악 켜기'));
+    $('bgmButton').title = on ? t('배경 음악 켜짐 (B)') : t('배경 음악 꺼짐 (B)');
   }
   function toggleMusic() {
     sound.unlock();
@@ -1323,7 +1324,7 @@ ${STORY_MORE[target.id]}` : told };
   $('tuneButton').addEventListener('click', () => {
     sound.unlock();
     // Told beside the button: a notice would be hidden behind the settings.
-    $('tuneNow').textContent = `♪ ${sound.nextTune()}${sound.musicOn() ? '' : ' (배경 음악이 꺼져 있습니다)'}`;
+    $('tuneNow').textContent = `♪ ${sound.nextTune()}${sound.musicOn() ? '' : t(' (배경 음악이 꺼져 있습니다)')}`;
   });
 
   $('brake').addEventListener('click', brake);
@@ -1342,8 +1343,8 @@ ${STORY_MORE[target.id]}` : told };
     today: () => dayOf(new Date()),
   });
   // Switching the layout moves every planet, so the game starts over (the log is kept).
-  $('layoutNow').textContent = layout === 'today' ? '지금: 오늘의 하늘(오늘 날짜의 실제 위치).' : '지금: 여행 배치(행성을 태양 둘레에 고루 흩어 놓음).';
-  $('layoutButton').textContent = layout === 'today' ? '여행 배치로 바꾸기' : '오늘의 하늘로 바꾸기';
+  $('layoutNow').textContent = layout === 'today' ? t('지금: 오늘의 하늘(오늘 날짜의 실제 위치).') : t('지금: 여행 배치(행성을 태양 둘레에 고루 흩어 놓음).');
+  $('layoutButton').textContent = layout === 'today' ? t('여행 배치로 바꾸기') : t('오늘의 하늘로 바꾸기');
   // On a PC the game is in a phone-shaped frame (src/shell.js) unless the wide view was
   // chosen; a phone has neither, and is not offered the switch.
   const inFrame = window.self !== window.top;
@@ -1351,8 +1352,8 @@ ${STORY_MORE[target.id]}` : told };
   if (inFrame || wideChosen) {
     $('screenTerm').hidden = false;
     $('screenRow').hidden = false;
-    $('screenNow').textContent = inFrame ? '지금: 휴대전화와 같은 세로 화면.' : '지금: 창을 가득 채운 넓은 화면.';
-    $('screenButton').textContent = inFrame ? '넓은 화면으로 바꾸기' : '세로 화면으로 바꾸기';
+    $('screenNow').textContent = inFrame ? t('지금: 휴대전화와 같은 세로 화면.') : t('지금: 창을 가득 채운 넓은 화면.');
+    $('screenButton').textContent = inFrame ? t('넓은 화면으로 바꾸기') : t('세로 화면으로 바꾸기');
     $('screenButton').addEventListener('click', () => {
       saveScreen(inFrame ? 'wide' : 'phone');
       window.top.location.reload();
@@ -1364,8 +1365,8 @@ ${STORY_MORE[target.id]}` : told };
   });
   // The feel of speed: switched at once, no restart.
   const showFeel = () => {
-    $('feelNow').textContent = feel ? '지금: 켜짐.' : '지금: 꺼짐.';
-    $('feelButton').textContent = feel ? '끄기' : '켜기';
+    $('feelNow').textContent = feel ? t('지금: 켜짐.') : t('지금: 꺼짐.');
+    $('feelButton').textContent = feel ? t('끄기') : t('켜기');
   };
   showFeel();
   $('feelButton').addEventListener('click', () => {
@@ -1396,13 +1397,13 @@ ${STORY_MORE[target.id]}` : told };
   document.body.dataset.ready = 'true';
   if (!glowsTold.has('start')) {
     markTold('start');
-    toast.show(`${bodyById(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);
+    toast.show(t`${bodyById(selectedId).name} 근처에 도착했습니다. 드래그로 둘러보세요.`);
   }
   // The week of a real eclipse: say so each time the game is opened.
-  if (eclipse) toast.show(`${eclipseNews(openedAt)}\n"${eclipseTitle(eclipse)} 자리로" 단추를 누르면 그곳으로 갑니다.`);
+  if (eclipse) toast.show(t`${eclipseNews(openedAt)}\n"${eclipseTitle(eclipse)} 자리로" 단추를 누르면 그곳으로 갑니다.`);
   progressChanged(null);
   const touch = document.body.classList.contains('touch');
-  const journalHow = touch ? '수첩 버튼' : 'J 키나 수첩 버튼';
+  const journalHow = touch ? t('수첩 버튼') : t('J 키나 수첩 버튼');
   const guideView = createGuideView({
     onSkip() {
       // The same button ends a stunt or a tour once the first-visit guide is over.
@@ -1414,7 +1415,7 @@ ${STORY_MORE[target.id]}` : told };
       guide = skipGuide(guide);
       saveGuideDone();
       guideView.show(null);
-      toast.show(`${journalHow}으로 탐험 목표를 확인하세요.`);
+      toast.show(t`${journalHow}으로 탐험 목표를 확인하세요.`);
     },
     onJump() {
       const goal = tourGoal();
@@ -1565,11 +1566,11 @@ ${STORY_MORE[target.id]}` : told };
       if (seenNow.newly.length) {
         exo = seenNow.record;
         saveExo(exo);
-        for (const id of seenNow.newly) toast.show(`${here(id).name}\n${exoNote(id)}\n가까이에서 본 외계 행성 ${exo.seen.length}/${EXO_PLANETS.length}`, null, SIGHT_S);
+        for (const id of seenNow.newly) toast.show(t`${here(id).name}\n${exoNote(id)}\n가까이에서 본 외계 행성 ${exo.seen.length}/${EXO_PLANETS.length}`, null, SIGHT_S);
         sound.cue('discovered');
         if (exo.seen.length === EXO_PLANETS.length) {
-          toast.show('트라피스트-1의 행성 일곱을 모두 가까이에서 보았습니다.');
-          say.show('일곱 개 다 봤다! 할머니가 믿으실까?');
+          toast.show(t('트라피스트-1의 행성 일곱을 모두 가까이에서 보았습니다.'));
+          say.show(t('일곱 개 다 봤다! 할머니가 믿으실까?'));
         }
       }
     }
@@ -1608,8 +1609,8 @@ ${STORY_MORE[target.id]}` : told };
       daily = recordDay(daily, today);
       saveDaily(daily);
       const run = streak(daily, today);
-      toast.show(`오늘의 부탁을 해냈습니다. 수첩에 별이 붙었습니다(해낸 날 ${daily.days.length}일${run > 1 ? `, ${run}일째 이어서` : ''}).`);
-      say.show(run > 0 && run % 7 === 0 ? '일주일 내내 했어! 대단하지?' : '부탁 끝! 할머니 좋아하시겠다.');
+      toast.show(t`오늘의 부탁을 해냈습니다. 수첩에 별이 붙었습니다(해낸 날 ${daily.days.length}일${run > 1 ? t`, ${run}일째 이어서` : ''}).`);
+      say.show(run > 0 && run % 7 === 0 ? t('일주일 내내 했어! 대단하지?') : t('부탁 끝! 할머니 좋아하시겠다.'));
       // Seven days running: a stamp of seven stars.
       if (run > 0 && run % 7 === 0) stampDown('notebook/stamp-week.png');
       sound.cue('discovered');
@@ -1639,19 +1640,19 @@ ${STORY_MORE[target.id]}` : told };
         const finish = () => {
           cheerUntil = performance.now() + 6000;
           sound.cue('complete');
-          toast.show(`코스 "${leg.tour.name}"${objectParticle(leg.tour.name)} 다 돌았습니다. 수첩의 코스 갈래에 도장이 찍혔습니다.`, 'tour');
+          toast.show(t`코스 "${leg.tour.name}"${objectParticle(leg.tour.name)} 다 돌았습니다. 수첩의 코스 갈래에 도장이 찍혔습니다.`, 'tour');
           // Not under the white of a jump: the stamp waits until the flash has cleared.
           const after = warp.busy() ? 3600 : 0;
           setTimeout(() => stampDown(stampFile(leg.tour)), after);
           if (all) setTimeout(() => stampDown(CRANE_FILE), after + 2600);
-          if (all) toast.show('아홉 길을 모두 돌았습니다. 수첩 사이에서 할머니가 접어 둔 종이학이 나왔습니다.');
+          if (all) toast.show(t('아홉 길을 모두 돌았습니다. 수첩 사이에서 할머니가 접어 둔 종이학이 나왔습니다.'));
         };
         // A story card is about to cover the view: celebrate once it is put away.
         if (cardDue) afterCard = finish;
         else finish();
       } else {
         aimAtStop();
-        toast.show(`${leg.tour.name} ${leg.step + 1}/${leg.tour.stops.length}: ${stopName(leg.stop)}에 왔습니다. 다음은 ${stopName(currentStop(progress).stop)}입니다.`, 'tour');
+        toast.show(t`${leg.tour.name} ${leg.step + 1}/${leg.tour.stops.length}: ${stopName(leg.stop)}에 왔습니다. 다음은 ${stopName(currentStop(progress).stop)}입니다.`, 'tour');
       }
     }
     if (cardDue && dt > 0) {
@@ -1735,10 +1736,10 @@ ${STORY_MORE[target.id]}` : told };
     if (dailyDue && settled && noteWait === 0 && !note && (guide.step === null || guide.step === 'photo') && (progress.notes ?? []).length > 0) {
       dailyDue = false;
       noteCard.show({
-        scene: '수첩 사이에 오늘 날짜가 적힌 쪽지가 끼워져 있다.',
-        title: '오늘의 부탁',
-        text: `${request.text}\n\n수첩을 열면 다시 볼 수 있단다.`,
-        button: '확인',
+        scene: t('수첩 사이에 오늘 날짜가 적힌 쪽지가 끼워져 있다.'),
+        title: t('오늘의 부탁'),
+        text: t`${request.text}\n\n수첩을 열면 다시 볼 수 있단다.`,
+        button: t('확인'),
       });
     } else if (note && calm) {
       progress = recordNote(progress, note.id);
@@ -1756,7 +1757,7 @@ ${STORY_MORE[target.id]}` : told };
       });
       if (guide.finished) {
         saveGuideDone();
-        toast.show(`첫 탐험을 마쳤습니다. ${journalHow}을 열고 코스 갈래에서 "${tourById('firstSteps').name}"을 골라 보세요.`);
+        toast.show(t`첫 탐험을 마쳤습니다. ${journalHow}을 열고 코스 갈래에서 "${tourById('firstSteps').name}"을 골라 보세요.`);
       }
     }
     guideView.show(goalNow());
@@ -1835,8 +1836,8 @@ ${STORY_MORE[target.id]}` : told };
             eclipsesSeen = { seen: [...eclipsesSeen.seen, eclipse.id] };
             saveEclipses(eclipsesSeen);
           }
-          toast.show(`${eclipseDayText(eclipse)}의 ${eclipseTitle(eclipse)}${first ? '을 보았습니다' : '을 다시 보았습니다'}. 이번 주 동안 몇 번이든 볼 수 있습니다.`);
-          say.show(eclipse.kind === 'lunar' ? '달이 빨개졌어. 할머니한테 말해야지.' : eclipse.type === 'total' ? '해가 사라졌어. 저 하얀 게 코로나구나.' : '불반지다! 가운데가 까매.');
+          toast.show(t`${eclipseDayText(eclipse)}의 ${eclipseTitle(eclipse)}${first ? t('을 보았습니다') : t('을 다시 보았습니다')}. 이번 주 동안 몇 번이든 볼 수 있습니다.`);
+          say.show(eclipse.kind === 'lunar' ? t('달이 빨개졌어. 할머니한테 말해야지.') : eclipse.type === 'total' ? t('해가 사라졌어. 저 하얀 게 코로나구나.') : t('불반지다! 가운데가 까매.'));
         }
       } else stageMoon(showNow);
     }
@@ -1925,7 +1926,7 @@ ${STORY_MORE[target.id]}` : told };
     hud.maskHero(view.heroCard);
     say.place(view.heroCard);
     ringHit = view.ringCrossed && !ringSkip ? { body: view.ringCrossed, t: view.ringAt } : null;
-    if (ringHit) toast.show(`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`, null, SIGHT_S);
+    if (ringHit) toast.show(t`${bodyById(view.ringCrossed).name} 고리를 지났습니다. 얼음 알갱이가 흩날립니다.`, null, SIGHT_S);
     glowTellWait = Math.max(0, glowTellWait - elapsed);
     if (view.meteorLit && !meteorSeen && glowTellWait === 0) {
       meteorSeen = true;
@@ -1972,17 +1973,17 @@ ${STORY_MORE[target.id]}` : told };
     if (frame++ % HUD_EVERY_N_FRAMES !== 0) return;
     const selected = here(selectedId);
     const driving = input.driving();
-    let flightLabel = '자유 비행';
-    if (paused) flightLabel = '일시 정지';
-    else if (docked && !isDocked(docked)) flightLabel = `${here(docked.id).name}에 도킹 중`;
-    else if (docked) flightLabel = `${here(docked.id).name}${withParticle(here(docked.id).name)} 함께 비행`;
-    else if (visit && !hasArrived(visit)) flightLabel = `${here(visit.id).name}에 착륙 중`;
-    else if (visit) flightLabel = `${here(visit.id).name} 곁`;
-    else if (state.restingOn) flightLabel = `${bodyById(state.restingOn).name} 표면`;
-    else if (shownSpeed() < 0.01) flightLabel = '정지 비행';
-    else if (!driving) flightLabel = '관성 비행';
-    else if (Math.max(state.sideSpeed, state.riseSpeed ?? 0) > state.speed) flightLabel = (state.riseSpeed ?? 0) > state.sideSpeed ? (state.riseSign > 0 ? '위로 비행' : '아래로 비행') : '옆으로 비행';
-    else if (state.motionSign < 0) flightLabel = '후진 비행';
+    let flightLabel = t('자유 비행');
+    if (paused) flightLabel = t('일시 정지');
+    else if (docked && !isDocked(docked)) flightLabel = t`${here(docked.id).name}에 도킹 중`;
+    else if (docked) flightLabel = t`${here(docked.id).name}${withParticle(here(docked.id).name)} 함께 비행`;
+    else if (visit && !hasArrived(visit)) flightLabel = t`${here(visit.id).name}에 착륙 중`;
+    else if (visit) flightLabel = t`${here(visit.id).name} 곁`;
+    else if (state.restingOn) flightLabel = t`${bodyById(state.restingOn).name} 표면`;
+    else if (shownSpeed() < 0.01) flightLabel = t('정지 비행');
+    else if (!driving) flightLabel = t('관성 비행');
+    else if (Math.max(state.sideSpeed, state.riseSpeed ?? 0) > state.speed) flightLabel = (state.riseSpeed ?? 0) > state.sideSpeed ? (state.riseSign > 0 ? t('위로 비행') : t('아래로 비행')) : t('옆으로 비행');
+    else if (state.motionSign < 0) flightLabel = t('후진 비행');
     journal.update(progress, state.position, bodies);
     // Not while she stands on the ground or is going down to a place: the station
     // passing overhead put a docking button over a launch pad. (Its name tag still docks.)
@@ -2001,15 +2002,15 @@ ${STORY_MORE[target.id]}` : told };
     const watch = eclipse && (!visit || visit.id === eventPlace.id) && !photo.active() ? canWatch(eclipse, eventPlace, here('sun'), state.position) : null;
     const watchable = watch === 'yes' || watch === 'night';
     $('replayButton').hidden = !thenHere && !watchable;
-    if (watchable) $('replayButton').textContent = watch === 'yes' ? `${eclipseTitle(eclipse)} 보기` : '해가 뜨면 일식을 볼 수 있습니다';
-    else if (thenHere) $('replayButton').textContent = `그날로 · ${thenHere.day}`;
+    if (watchable) $('replayButton').textContent = watch === 'yes' ? t`${eclipseTitle(eclipse)} 보기` : t('해가 뜨면 일식을 볼 수 있습니다');
+    else if (thenHere) $('replayButton').textContent = t`그날로 · ${thenHere.day}`;
     $('eclipseJump').hidden = watch !== 'far' || away;
-    if (eclipse) $('eclipseJump').textContent = `${eclipseTitle(eclipse)} 자리로`;
+    if (eclipse) $('eclipseJump').textContent = t`${eclipseTitle(eclipse)} 자리로`;
     // Latched to Kepler: the jump to the star it watched. There: the way home.
     $('exoJump').hidden = !away && !(docked?.id === 'kepler' && isDocked(docked));
-    $('exoJump').textContent = away ? '태양계로 돌아가기' : '케플러가 본 별로';
-    if (docked) $('dockTarget').textContent = '도킹 풀기';
-    else if (offer) $('dockTarget').textContent = `${offer.name}에 도킹`;
+    $('exoJump').textContent = away ? t('태양계로 돌아가기') : t('케플러가 본 별로');
+    if (docked) $('dockTarget').textContent = t('도킹 풀기');
+    else if (offer) $('dockTarget').textContent = t`${offer.name}에 도킹`;
     // In today's sky the game clock's date rides along with the flight state.
     if (layout === 'today') flightLabel += ` · ${dateText(new Date(openedAt.getTime() + simTime * 1000))}`;
     hud.update({
@@ -2043,7 +2044,7 @@ ${STORY_MORE[target.id]}` : told };
     minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId, away });
     if ($('bigMap').open) bigMap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId: mapPick ?? selectedId, away });
     $('lockTarget').setAttribute('aria-pressed', String(locked));
-    $('lockTarget').textContent = locked ? '고정 풀기' : '목표 고정';
+    $('lockTarget').textContent = locked ? t('고정 풀기') : t('목표 고정');
   });
 
   // Read-only diagnostics for verification. No travel shortcuts.

@@ -1,3 +1,5 @@
+import './i18n/en.js';
+import { startTranslating } from './ui/translate.js';
 import { phoneFrame } from './core/screen.js';
 import { loadScreen } from './ui/storage.js';
 import { countVisit } from './ui/count.js';
@@ -7,6 +9,9 @@ import { countVisit } from './ui/count.js';
 // player chose the wide view, the game starts here.
 const inFrame = window.self !== window.top;
 const framed = !inFrame && loadScreen() !== 'wide' && phoneFrame({ width: innerWidth, height: innerHeight });
+
+// In English the page's Korean words are replaced as they appear (ui/translate.js).
+startTranslating();
 
 // One visit is counted per page opened (ui/count.js): by the outer page, never by the frame.
 countVisit();

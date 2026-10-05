@@ -10,6 +10,7 @@ import { postcardBlob, saveBlob } from './postcardImage.js';
 import { readingKey } from '../core/readingQuiz.js';
 import { TOURS, stopName, stampFile, sceneFile } from '../core/tours.js';
 import { stuntStampFile } from '../core/stunts.js';
+import { t } from '../core/i18n.js';
 
 const $ = (id) => document.getElementById(id);
 // 로 after a vowel or ㄹ, 으로 after any other final consonant.
@@ -28,7 +29,7 @@ function picture(file, alt, className = '') {
   return img;
 }
 // The last slot before it opens (core/story.js LAST_SLOT).
-const CLIPPING = '1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.';
+const CLIPPING = t('1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.');
 
 // The explorer's journal: bodies found and landed on, photo missions done.
 export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, sky = null }) {
@@ -55,7 +56,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   }
   for (const button of $('journalTabs').children) button.addEventListener('click', () => showTab(button.dataset.tab));
   $('resetJournal').addEventListener('click', () => {
-    if (window.confirm('탐험 기록을 모두 지울까요? 되돌릴 수 없습니다. 지금 가까이 있는 천체는 곧바로 다시 기록됩니다.')) onReset();
+    if (window.confirm(t('탐험 기록을 모두 지울까요? 되돌릴 수 없습니다. 지금 가까이 있는 천체는 곧바로 다시 기록됩니다.'))) onReset();
   });
   dialog.addEventListener('close', () => onClose());
 
@@ -63,8 +64,8 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   // toward: see onJump in main.js (sky news).
   function jumpButton(id, name, toward = null) {
     const jump = document.createElement('button');
-    jump.textContent = '순간 이동';
-    jump.setAttribute('aria-label', `${name}${hasFinalRieulOrNone(name) ? '로' : '으로'} 순간 이동`);
+    jump.textContent = t('순간 이동');
+    jump.setAttribute('aria-label', t`${name}${hasFinalRieulOrNone(name) ? '로' : '으로'} 순간 이동`);
     jump.addEventListener('click', () => {
       dialog.close();
       onJump(id, toward);
@@ -81,11 +82,11 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     const today = daily ? daily() : null;
     $('journalDaily').hidden = !today;
     if (!today) return;
-    $('dailyText').textContent = `${today.done ? '★' : '☆'} 오늘의 부탁: ${today.text}`;
+    $('dailyText').textContent = t`${today.done ? '★' : '☆'} 오늘의 부탁: ${today.text}`;
     // The last seven days, today last.
-    $('dailyWeek').setAttribute('aria-label', `지난 7일 가운데 ${today.week.filter(Boolean).length}일 해냄`);
+    $('dailyWeek').setAttribute('aria-label', t`지난 7일 가운데 ${today.week.filter(Boolean).length}일 해냄`);
     $('dailyWeek').replaceChildren(...today.week.map((did) => (did ? picture('notebook/day-star.png', '') : document.createElement('i'))));
-    $('dailyCount').textContent = `해낸 날 ${today.days}일${today.streak > 1 ? ` · ${today.streak}일째 이어서` : ''}`;
+    $('dailyCount').textContent = t`해낸 날 ${today.days}일${today.streak > 1 ? t` · ${today.streak}일째 이어서` : ''}`;
     $('dailyGo').hidden = today.done;
   }
 
@@ -102,10 +103,10 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     fold.id = 'skyFold';
     fold.setAttribute('aria-expanded', String(skyOpen));
     const head = document.createElement('b');
-    head.textContent = `하늘 소식 ${news.length}`;
+    head.textContent = t`하늘 소식 ${news.length}`;
     const first = document.createElement('span');
     first.textContent = skyOpen ? '' : news[0]?.text ?? '';
-    fold.append(head, first, skyOpen ? '접기' : '펼치기');
+    fold.append(head, first, skyOpen ? t('접기') : t('펼치기'));
     fold.addEventListener('click', () => {
       skyOpen = !skyOpen;
       renderSky();
@@ -130,17 +131,17 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     const progress = lastProgress;
     const s = summarize(progress, bodies, missions, stories);
     $('journalSummary').textContent =
-      `발견 ${s.discovered}/${s.bodies} · 착지 ${s.landed}/${s.bodies} · 사진 ${s.photos}/${s.missions} · 이야기 ${s.stories}/${s.storyTotal}`;
+      t`발견 ${s.discovered}/${s.bodies} · 착지 ${s.landed}/${s.bodies} · 사진 ${s.photos}/${s.missions} · 이야기 ${s.stories}/${s.storyTotal}`;
 
     // Grandmother's notes read so far: press one to read it again.
     const read = notes.filter((n) => (progress.notes ?? []).includes(n.id));
     const noteRow = $('journalNotes');
     noteRow.hidden = !read.length || !onNote;
-    noteRow.replaceChildren('할머니의 쪽지');
+    noteRow.replaceChildren(t('할머니의 쪽지'));
     for (const note of read) {
       const again = document.createElement('button');
       again.textContent = note.title;
-      again.setAttribute('aria-label', `쪽지 ${note.title} 다시 읽기`);
+      again.setAttribute('aria-label', t`쪽지 ${note.title} 다시 읽기`);
       again.addEventListener('click', () => {
         dialog.close();
         onNote(note.id);
@@ -156,19 +157,19 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const li = document.createElement('li');
       const name = document.createElement('strong');
       // A moon sits under its planet, four spaces in.
-      name.textContent = `${moon ? '    ' : ''}${found ? body.name : `${body.name} (미발견)`}`;
+      name.textContent = `${moon ? '    ' : ''}${found ? body.name : t`${body.name} (미발견)`}`;
       const marks = document.createElement('span');
       marks.className = 'marks';
       // The question under its reading, answered right (core/readingQuiz.js).
       const solved = found && (progress.quiz ?? []).includes(readingKey(body.id));
-      marks.textContent = `${found ? '발견 ✓' : '발견 —'}  ${landed ? '착지 ✓' : '착지 —'}${solved ? '  문제 ✓' : ''}`;
+      marks.textContent = `${found ? t('발견 ✓') : t('발견 —')}  ${landed ? t('착지 ✓') : t('착지 —')}${solved ? t('  문제 ✓') : ''}`;
       const distance = document.createElement('span');
       distance.className = 'distance';
       const now = lastBodies.find((b) => b.id === body.id) ?? body;
       distance.textContent = `${fmt(surfaceDistance(lastPosition, now))} km`;
       const go = document.createElement('button');
-      go.textContent = '목적지로';
-      go.setAttribute('aria-label', `${body.name}${objectParticle(body.name)} 목적지로`);
+      go.textContent = t('목적지로');
+      go.setAttribute('aria-label', t`${body.name}${objectParticle(body.name)} 목적지로`);
       go.addEventListener('click', () => {
         dialog.close();
         onGo(body.id);
@@ -187,7 +188,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       if (found && (entry || FACTS[body.id])) {
         const fact = document.createElement('small');
         fact.className = entry ? 'fact said' : 'fact';
-        fact.textContent = entry ? `소라: ${entry.line}` : FACTS[body.id];
+        fact.textContent = entry ? t`소라: ${entry.line}` : FACTS[body.id];
         li.append(fact);
       }
       list.append(li);
@@ -223,17 +224,17 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     // every other slot is filled: until then it is not listed.
     const lastHidden = !told.includes(lastSlot) && lastShut(lastProgress);
     const groups = [
-      ['지구와 먼 곳', (s) => s.body !== 'moon' && s.body !== 'mars' && s.id !== lastSlot],
-      ['달', (s) => s.body === 'moon'],
-      ['화성', (s) => s.body === 'mars'],
-      ['마지막 칸', (s) => s.id === lastSlot && !lastHidden],
+      [t('지구와 먼 곳'), (s) => s.body !== 'moon' && s.body !== 'mars' && s.id !== lastSlot],
+      [t('달'), (s) => s.body === 'moon'],
+      [t('화성'), (s) => s.body === 'mars'],
+      [t('마지막 칸'), (s) => s.id === lastSlot && !lastHidden],
     ];
     for (const [label, belongs] of groups) {
       const members = stories.filter(belongs);
       if (!members.length) continue;
       const heading = document.createElement('h2');
       const solvedCount = members.filter((s) => (lastProgress.quiz ?? []).includes(s.id)).length;
-      heading.textContent = `${label} ${members.filter((s) => told.includes(s.id)).length}/${members.length}${solvedCount ? ` · 맞힌 문제 ${solvedCount}` : ''}`;
+      heading.textContent = `${label} ${members.filter((s) => told.includes(s.id)).length}/${members.length}${solvedCount ? t` · 맞힌 문제 ${solvedCount}` : ''}`;
       const list = document.createElement('ul');
       box.append(heading, list);
       renderStoryList(list, members);
@@ -249,17 +250,17 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const solved = done && (lastProgress.quiz ?? []).includes(story.id);
       li.className = solved ? 'done solved' : done ? 'done' : shut ? 'clipping' : '';
       const title = document.createElement('strong');
-      title.textContent = `${done ? '✓' : '○'} ${story.name}${story.year ? ` (${story.year}년)` : ''}`;
+      title.textContent = `${done ? '✓' : '○'} ${story.name}${story.year ? t` (${story.year}년)` : ''}`;
       // Its question answered right: grandmother's red ring before the name.
-      if (solved) title.prepend(picture('notebook/mark-right.png', '문제를 맞힘'));
+      if (solved) title.prepend(picture('notebook/mark-right.png', t('문제를 맞힘')));
       const line = document.createElement('span');
-      line.textContent = done ? story.text : shut ? CLIPPING : last ? `${story.hint}. 거기서 지구를 사진에 담기` : story.hint;
+      line.textContent = done ? story.text : shut ? CLIPPING : last ? t`${story.hint}. 거기서 지구를 사진에 담기` : story.hint;
       li.append(title, line);
       // A place already visited opens its card again: the photograph and the longer telling.
       if (done && onDetail) {
         const more = document.createElement('button');
-        more.textContent = '자세히';
-        more.setAttribute('aria-label', `${story.name} 자세히`);
+        more.textContent = t('자세히');
+        more.setAttribute('aria-label', t`${story.name} 자세히`);
         more.addEventListener('click', () => {
           dialog.close();
           onDetail(story.id);
@@ -280,8 +281,8 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     // Looking back turns through the photos (ui/lookBack.js): it needs two at least.
     $('lookBackButton').hidden = album.length < 2;
     $('albumNote').textContent = album.length
-      ? `사진 모드에서 저장한 사진 ${album.length}장입니다(최근 ${ALBUM_MAX}장까지). 사진을 누르면 크게 보입니다. 할머니께 엽서로 보내면 다음 날 답장과 별이 옵니다.`
-      : '사진 모드에서 "사진 저장"을 누르면 여기에 모입니다.';
+      ? t`사진 모드에서 저장한 사진 ${album.length}장입니다(최근 ${ALBUM_MAX}장까지). 사진을 누르면 크게 보입니다. 할머니께 엽서로 보내면 다음 날 답장과 별이 옵니다.`
+      : t('사진 모드에서 "사진 저장"을 누르면 여기에 모입니다.');
     album.forEach((entry, index) => {
       const caption = photoCaption(entry, missions);
       const figure = document.createElement('figure');
@@ -308,7 +309,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
           const stars = document.createElement('span');
           stars.className = 'stars';
           stars.setAttribute('role', 'img');
-          stars.setAttribute('aria-label', `별 ${entry.rate.stars}개 (${starText(entry.rate.stars)})`);
+          stars.setAttribute('aria-label', t`별 ${entry.rate.stars}개 (${starText(entry.rate.stars)})`);
           for (let i = 0; i < 3; i++) stars.append(picture(`notebook/star-${i < entry.rate.stars ? 'on' : 'off'}.png`, ''));
           reply.append(stars);
         }
@@ -317,12 +318,12 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       } else if (entry.sent) {
         const sent = document.createElement('span');
         sent.className = 'sent';
-        sent.textContent = '엽서로 보냈다. 답장은 다음 날 게임을 열면 와 있다.';
+        sent.textContent = t('엽서로 보냈다. 답장은 다음 날 게임을 열면 와 있다.');
         text.append(sent);
       } else if (onSendPhoto) {
         send = document.createElement('button');
-        send.textContent = '할머니께 엽서로';
-        send.setAttribute('aria-label', `${caption.title} 사진을 할머니께 엽서로 보내기`);
+        send.textContent = t('할머니께 엽서로');
+        send.setAttribute('aria-label', t`${caption.title} 사진을 할머니께 엽서로 보내기`);
         send.addEventListener('click', () => {
           album = onSendPhoto(index);
           renderAlbum();
@@ -330,19 +331,19 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       }
       // The photo as a postcard picture with where and when on it: a file to keep or send on.
       const card = document.createElement('button');
-      card.textContent = '엽서 그림 저장';
-      card.setAttribute('aria-label', `${caption.title} 사진을 엽서 그림으로 저장`);
+      card.textContent = t('엽서 그림 저장');
+      card.setAttribute('aria-label', t`${caption.title} 사진을 엽서 그림으로 저장`);
       card.addEventListener('click', async () => {
         card.disabled = true;
         try {
           const blob = await postcardBlob(entry, cardWords(entry, missions), `${import.meta.env.BASE_URL}assets/${postageFile(entry)}`);
           saveBlob(blob, `oddity-postcard-${caption.title.slice(0, 10)}.png`);
-          card.textContent = '저장했습니다';
+          card.textContent = t('저장했습니다');
         } catch {
-          card.textContent = '저장하지 못했습니다';
+          card.textContent = t('저장하지 못했습니다');
         }
         setTimeout(() => {
-          card.textContent = '엽서 그림 저장';
+          card.textContent = t('엽서 그림 저장');
           card.disabled = false;
         }, 2000);
       });
@@ -351,13 +352,13 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       let pair = null;
       if (famous) {
         pair = document.createElement('button');
-        pair.textContent = '실제 사진과 나란히';
-        pair.setAttribute('aria-label', `${caption.title} 사진을 ${famous.name}의 실제 사진과 나란히 보기`);
+        pair.textContent = t('실제 사진과 나란히');
+        pair.setAttribute('aria-label', t`${caption.title} 사진을 ${famous.name}의 실제 사진과 나란히 보기`);
         pair.addEventListener('click', () => onPair(entry, famous));
       }
       const remove = document.createElement('button');
-      remove.textContent = '지우기';
-      remove.setAttribute('aria-label', `${caption.title} 사진 지우기`);
+      remove.textContent = t('지우기');
+      remove.setAttribute('aria-label', t`${caption.title} 사진 지우기`);
       remove.addEventListener('click', () => {
         album = onDeletePhoto(index);
         renderAlbum();
@@ -366,7 +367,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const frame = document.createElement('div');
       frame.className = 'photoFrame';
       frame.append(img);
-      if (entry.sent) frame.append(picture('notebook/postmark.png', '', 'postmark'), picture(postageFile(entry), '우표', 'postage'));
+      if (entry.sent) frame.append(picture('notebook/postmark.png', '', 'postmark'), picture(postageFile(entry), t('우표'), 'postage'));
       figure.append(frame, text, ...(pair ? [pair] : []), ...(send ? [send] : []), card, remove);
       grid.append(figure);
     });
@@ -382,9 +383,9 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       li.className = met ? 'done' : '';
       const title = document.createElement('strong');
       const solved = met && (lastProgress.quiz ?? []).includes(readingKey(c.id));
-      title.textContent = `${met ? '✓' : '○'} ${c.name} (${c.launched}년)${solved ? ' · 문제 ✓' : ''}`;
+      title.textContent = t`${met ? '✓' : '○'} ${c.name} (${c.launched}년)${solved ? t(' · 문제 ✓') : ''}`;
       const line = document.createElement('span');
-      line.textContent = met ? c.intro : '아직 만나지 못했습니다.';
+      line.textContent = met ? c.intro : t('아직 만나지 못했습니다.');
       li.append(title, line);
       if (met) li.append(jumpButton(c.id, c.name));
       list.append(li);
@@ -404,14 +405,14 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const li = document.createElement('li');
       li.className = isGoing ? 'going' : isDone ? 'done' : '';
       const title = document.createElement('strong');
-      title.textContent = `${isDone ? '✓' : '○'} ${tour.name}${isGoing ? ` · 가는 중 ${going.step}/${tour.stops.length}` : ''}`;
+      title.textContent = `${isDone ? '✓' : '○'} ${tour.name}${isGoing ? t` · 가는 중 ${going.step}/${tour.stops.length}` : ''}`;
       // A picture of the road, pasted in like a photograph (it says nothing the words do not).
       const scene = picture(sceneFile(tour), '', 'scene');
       scene.loading = 'lazy';
       scene.width = 384;
       scene.height = 216;
       li.append(scene);
-      if (isDone) li.append(picture(stampFile(tour), `${tour.name} 도장`, 'stamp'));
+      if (isDone) li.append(picture(stampFile(tour), t`${tour.name} 도장`, 'stamp'));
       const memo = document.createElement('span');
       memo.className = 'memo';
       memo.textContent = tour.memo;
@@ -421,7 +422,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       li.append(title, memo, stops);
       if (onTourStart) {
         const button = document.createElement('button');
-        button.textContent = isGoing ? '그만두기' : isDone ? '이 길로 다시 떠나기' : '이 길로 떠나기';
+        button.textContent = isGoing ? t('그만두기') : isDone ? t('이 길로 다시 떠나기') : t('이 길로 떠나기');
         button.setAttribute('aria-label', `${tour.name} ${button.textContent}`);
         button.addEventListener('click', () => {
           dialog.close();
@@ -444,7 +445,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const li = document.createElement('li');
       li.className = stunt.on ? 'going' : '';
       const title = document.createElement('strong');
-      title.textContent = `${stunt.name}${stunt.on ? ' · 하는 중' : ''}`;
+      title.textContent = `${stunt.name}${stunt.on ? t(' · 하는 중') : ''}`;
       const todo = document.createElement('span');
       todo.className = 'stops';
       todo.textContent = `${stunt.todo}.`;
@@ -453,7 +454,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       record.className = 'record';
       record.textContent = stunt.record;
       const button = document.createElement('button');
-      button.textContent = stunt.on ? '그만두기' : '해 보기';
+      button.textContent = stunt.on ? t('그만두기') : t('해 보기');
       button.setAttribute('aria-label', `${stunt.name} ${button.textContent}`);
       button.addEventListener('click', () => {
         dialog.close();
@@ -462,7 +463,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       });
       li.append(title, todo, record, button);
       // Done once, it carries its stamp, as a tour gone round does.
-      if (stunt.done) li.append(picture(stuntStampFile(stunt.id), `${stunt.name} 도장`, 'stamp'));
+      if (stunt.done) li.append(picture(stuntStampFile(stunt.id), t`${stunt.name} 도장`, 'stamp'));
       list.append(li);
     }
   }

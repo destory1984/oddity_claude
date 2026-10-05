@@ -3,6 +3,7 @@
 // in the browser. One is under way at a time; a jump (teleport) starts it over.
 import { surfaceDistance } from './bodies.js';
 import { CASSINI_GAP } from './rings.js';
+import { t } from './i18n.js';
 
 // There is no gravity here and she can hang still anywhere, so staying somewhere is no
 // feat: each stunt is about covering ground.
@@ -16,10 +17,10 @@ const LAP_STARTS_AT = 0.005;
 
 // better: which way a record is beaten. unit: what the value is counted in.
 export const STUNTS = [
-  { id: 'moonRun', name: '달까지 달리기', todo: '지구 표면에서 떠나 달 표면에 닿기. 걸린 시간을 잰다', better: 'less', unit: '초', line: '달까지 금방이네!' },
-  { id: 'moonSkim', name: '달 스치기', todo: '달 표면 100km 안을 닿지도 벗어나지도 않고 1,000km 넘게 날기. 날아간 거리를 잰다', better: 'more', unit: 'km', line: '아슬아슬했어!' },
-  { id: 'earthLap', name: '지구 한 바퀴', todo: '지구 표면 1,000km 안에서 한 바퀴 돌기. 걸린 시간을 잰다', better: 'less', unit: '초', line: '지구 한 바퀴 돌았다!' },
-  { id: 'ringGap', name: '고리 틈 지나기', todo: '토성 고리의 검은 틈(카시니 간극, 폭 4,700km)으로 고리를 건너기. 지나는 빠르기를 잰다', better: 'more', unit: 'km/s', line: '고리 사이로 쏙 지나왔어!' },
+  { id: 'moonRun', name: t('달까지 달리기'), todo: t('지구 표면에서 떠나 달 표면에 닿기. 걸린 시간을 잰다'), better: 'less', unit: t('초'), line: t('달까지 금방이네!') },
+  { id: 'moonSkim', name: t('달 스치기'), todo: t('달 표면 100km 안을 닿지도 벗어나지도 않고 1,000km 넘게 날기. 날아간 거리를 잰다'), better: 'more', unit: 'km', line: t('아슬아슬했어!') },
+  { id: 'earthLap', name: t('지구 한 바퀴'), todo: t('지구 표면 1,000km 안에서 한 바퀴 돌기. 걸린 시간을 잰다'), better: 'less', unit: t('초'), line: t('지구 한 바퀴 돌았다!') },
+  { id: 'ringGap', name: t('고리 틈 지나기'), todo: t('토성 고리의 검은 틈(카시니 간극, 폭 4,700km)으로 고리를 건너기. 지나는 빠르기를 잰다'), better: 'more', unit: 'km/s', line: t('고리 사이로 쏙 지나왔어!') },
 ];
 
 // The rubber stamp a stunt leaves in the journal once it has a record (drawn to order,
@@ -111,12 +112,12 @@ export function stuntStatus(run) {
   const stunt = stuntById(run.id);
   const s = Math.floor(run.seconds);
   if (run.id === 'moonRun') {
-    if (run.going) return `${stunt.name} ${s}초`;
-    return run.from === 'earth' ? `${stunt.name}: 준비됐습니다. 떠나면 시계가 갑니다` : `${stunt.name}: 지구 표면에 내려서면 준비됩니다`;
+    if (run.going) return t`${stunt.name} ${s}초`;
+    return run.from === 'earth' ? t`${stunt.name}: 준비됐습니다. 떠나면 시계가 갑니다` : t`${stunt.name}: 지구 표면에 내려서면 준비됩니다`;
   }
-  if (run.id === 'ringGap') return run.from === 'ice' ? `${stunt.name}: 얼음을 지났습니다. 밝은 고리 사이의 검은 틈으로` : `${stunt.name}: 토성 고리의 검은 틈으로`;
-  if (run.id === 'moonSkim') return run.going ? `${stunt.name} ${Math.floor(run.km).toLocaleString('ko-KR')}km` : `${stunt.name}: 달 표면 100km 안으로`;
-  return run.going ? `${stunt.name} ${Math.floor((Math.abs(run.angle) / (2 * Math.PI)) * 100)}% · ${s}초` : `${stunt.name}: 지구 표면 1,000km 안으로`;
+  if (run.id === 'ringGap') return run.from === 'ice' ? t`${stunt.name}: 얼음을 지났습니다. 밝은 고리 사이의 검은 틈으로` : t`${stunt.name}: 토성 고리의 검은 틈으로`;
+  if (run.id === 'moonSkim') return run.going ? `${stunt.name} ${Math.floor(run.km).toLocaleString('ko-KR')}km` : t`${stunt.name}: 달 표면 100km 안으로`;
+  return run.going ? t`${stunt.name} ${Math.floor((Math.abs(run.angle) / (2 * Math.PI)) * 100)}% · ${s}초` : t`${stunt.name}: 지구 표면 1,000km 안으로`;
 }
 
 // Records: { stunt id: best value }. Returns the records after a result and whether it
@@ -136,12 +137,12 @@ export function sanitizeStunts(raw) {
 
 // A record as the journal shows it.
 export function recordText(id, records) {
-  return records[id] === undefined ? '아직 기록 없음' : `기록 ${valueText(id, records[id])}`;
+  return records[id] === undefined ? t('아직 기록 없음') : t`기록 ${valueText(id, records[id])}`;
 }
 
 // A value with its unit: '8.3초', '2,140km', '12,000km/s'.
 export function valueText(id, value) {
   const { unit } = stuntById(id);
-  if (unit === 'km/s') return `초속 ${Math.round(value).toLocaleString('ko-KR')}km`;
-  return unit === 'km' ? `${Math.round(value).toLocaleString('ko-KR')}km` : `${value.toFixed(1)}초`;
+  if (unit === 'km/s') return t`초속 ${Math.round(value).toLocaleString('ko-KR')}km`;
+  return unit === 'km' ? `${Math.round(value).toLocaleString('ko-KR')}km` : t`${value.toFixed(1)}초`;
 }

@@ -5,6 +5,7 @@
 // Mercury's sodium tail, the jets of Halley's nucleus. Decided here; drawn by
 // render/glows.js. Every one of them has been photographed.
 import { surfaceDirection } from './surface.js';
+import { t } from './i18n.js';
 
 const RAD = Math.PI / 180;
 
@@ -163,29 +164,29 @@ export function impactGlow(age) {
 // it is at the top. Io's heights are about the real ones; the jets of Enceladus really
 // reach hundreds of km, several times the moon's own 252 km radius.
 export const PLUMES = [
-  { id: 'pele', body: 'io', name: '펠레', latDeg: -18.7, lonDeg: 104.7, heightKm: 350, widthKm: 1100 },
-  { id: 'loki', body: 'io', name: '로키', latDeg: 13, lonDeg: 51, heightKm: 200, widthKm: 500 },
-  { id: 'prometheus', body: 'io', name: '프로메테우스', latDeg: -1.5, lonDeg: -153.9, heightKm: 100, widthKm: 300 },
+  { id: 'pele', body: 'io', name: t('펠레'), latDeg: -18.7, lonDeg: 104.7, heightKm: 350, widthKm: 1100 },
+  { id: 'loki', body: 'io', name: t('로키'), latDeg: 13, lonDeg: 51, heightKm: 200, widthKm: 500 },
+  { id: 'prometheus', body: 'io', name: t('프로메테우스'), latDeg: -1.5, lonDeg: -153.9, heightKm: 100, widthKm: 300 },
   // Dust devils on Mars: whirlwinds that the Sun raises off the warm ground by day. The
   // real ones are up to 20 km tall and a few hundred metres across; drawn 45 km by 9.
   ...[[30, -155], [-14, -175], [22, 60], [-28, -45], [8, 110], [-40, 20]].map(([latDeg, lonDeg], i) => ({
-    id: `devil${i + 1}`, body: 'mars', name: '먼지 회오리', latDeg, lonDeg, heightKm: 45, widthKm: 9,
+    id: `devil${i + 1}`, body: 'mars', name: t('먼지 회오리'), latDeg, lonDeg, heightKm: 45, widthKm: 9,
   })),
   // The jets of Mars's south polar cap: in spring the Sun warms the ground under the
   // clear dry ice, the gas bursts out and carries dark dust with it, which the wind lays
   // down in fans ("spiders" are the channels it cuts). Real jets are some hundred metres
   // tall; drawn 40 km tall like the dust devils, dark against the ice.
   ...[[-84, 20], [-86, 140], [-83, 250], [-87, 320]].map(([latDeg, lonDeg], i) => ({
-    id: `geyser${i + 1}`, body: 'mars', name: '극관 분출', latDeg, lonDeg, heightKm: 40, widthKm: 60, dark: true,
+    id: `geyser${i + 1}`, body: 'mars', name: t('극관 분출'), latDeg, lonDeg, heightKm: 40, widthKm: 60, dark: true,
   })),
   ...[0, 72, 144, 216, 288].map((turnDeg, i) => ({
-    id: `tiger${i + 1}`, body: 'enceladus', name: '호랑이 줄무늬', latDeg: -84, lonDeg: turnDeg, heightKm: 450, widthKm: 130,
+    id: `tiger${i + 1}`, body: 'enceladus', name: t('호랑이 줄무늬'), latDeg: -84, lonDeg: turnDeg, heightKm: 450, widthKm: 130,
   })),
   // Triton's two plumes, seen by Voyager 2 in 1989: dark columns 8 km tall whose smoke
   // the thin wind carries more than a hundred km sideways. Drawn 70 km tall and wide at
   // the top (the cloud), dark against the bright ice.
-  { id: 'hili', body: 'triton', name: '힐리', latDeg: -57, lonDeg: 28, heightKm: 70, widthKm: 150, dark: true },
-  { id: 'mahilani', body: 'triton', name: '마힐라니', latDeg: -50, lonDeg: 359.4, heightKm: 70, widthKm: 180, dark: true },
+  { id: 'hili', body: 'triton', name: t('힐리'), latDeg: -57, lonDeg: 28, heightKm: 70, widthKm: 150, dark: true },
+  { id: 'mahilani', body: 'triton', name: t('마힐라니'), latDeg: -50, lonDeg: 359.4, heightKm: 70, widthKm: 180, dark: true },
 ];
 // Io's day (it keeps one face to Jupiter), for turning its plumes with its ground:
 // the same number as render/planets.js.

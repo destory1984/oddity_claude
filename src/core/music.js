@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 // Background music, decided here and played by ui/sound.js. No sound files: a slow pad
 // of three notes per bar under a few bell notes, different every bar but always the
 // same for a given bar number. Eleven tunes take turns, each with its own four chords,
@@ -35,14 +36,14 @@ export const MELODY = scale('A4 C5 D5 E5 G5 A5 C6 D6');
 //   order instead of being picked by chance (which notes sound is still by chance).
 export const TUNES = [
   {
-    id: 'box', name: '오르골',
+    id: 'box', name: t('오르골'),
     chords: CHORDS, melody: MELODY,
     slots: [0, 1, 2, 3, 4, 5, 6, 7], busy: 0.45,
     bell: { length: 1.4, overtone: 3, overtoneVolume: 0.2 },
   },
   {
     // C major, bright and open.
-    id: 'dawn', name: '새벽',
+    id: 'dawn', name: t('새벽'),
     chords: [chord('C3', 'G3', 'C4', 'E4'), chord('A2', 'A3', 'C4', 'E4'), chord('F2', 'A3', 'C4', 'F4'), chord('G2', 'G3', 'B3', 'D4')],
     melody: scale('C5 D5 E5 G5 A5 C6 D6 E6'),
     slots: [0, 1, 2, 3, 4, 5, 6, 7], busy: 0.5,
@@ -50,7 +51,7 @@ export const TUNES = [
   },
   {
     // D dorian: minor with a raised sixth, like a calm sea.
-    id: 'sea', name: '먼 바다',
+    id: 'sea', name: t('먼 바다'),
     chords: [chord('D2', 'A3', 'D4', 'F4'), chord('G2', 'G3', 'B3', 'D4'), chord('C3', 'G3', 'C4', 'E4'), chord('A2', 'A3', 'C4', 'E4')],
     melody: scale('D5 F5 G5 A5 C6 D6 F6 G6'),
     slots: [0, 1.5, 3, 4, 5.5, 7], busy: 0.5,
@@ -58,7 +59,7 @@ export const TUNES = [
   },
   {
     // F major in threes: a cradle song.
-    id: 'lullaby', name: '자장가',
+    id: 'lullaby', name: t('자장가'),
     chords: [chord('F2', 'A3', 'C4', 'F4'), chord('D2', 'A3', 'D4', 'F4'), chord('Bb2', 'Bb3', 'D4', 'F4'), chord('C3', 'G3', 'C4', 'E4')],
     melody: scale('C5 D5 F5 G5 A5 C6 D6 F6'),
     slots: [0, 1.33, 2.67, 4, 5.33, 6.67], busy: 0.6,
@@ -66,7 +67,7 @@ export const TUNES = [
   },
   {
     // E minor, high and glassy.
-    id: 'stars', name: '별무리',
+    id: 'stars', name: t('별무리'),
     chords: [chord('E2', 'G3', 'B3', 'E4'), chord('C3', 'G3', 'C4', 'E4'), chord('G2', 'G3', 'B3', 'D4'), chord('D2', 'A3', 'D4', 'F#4')],
     melody: scale('E5 G5 A5 B5 D6 E6 G6 A6'),
     slots: [0, 0.5, 1, 2, 3, 4, 4.5, 5, 6, 7], busy: 0.35,
@@ -74,7 +75,7 @@ export const TUNES = [
   },
   {
     // D minor, low and slow, one long note at a time.
-    id: 'night', name: '깊은 밤',
+    id: 'night', name: t('깊은 밤'),
     chords: [chord('D2', 'A3', 'D4', 'F4'), chord('A2', 'A3', 'C4', 'E4'), chord('Bb2', 'Bb3', 'D4', 'F4'), chord('F2', 'A3', 'C4', 'F4')],
     melody: scale('D4 F4 G4 A4 C5 D5 F5 G5'),
     slots: [0, 2, 4, 6], busy: 0.7,
@@ -84,7 +85,7 @@ export const TUNES = [
   // figure of its own, so they do not sound like the first six with other notes.
   {
     // G major in fives: a slow climb and back down.
-    id: 'drift', name: '유영',
+    id: 'drift', name: t('유영'),
     chords: [chord('G2', 'G3', 'B3', 'D4'), chord('E2', 'G3', 'B3', 'E4'), chord('C3', 'G3', 'C4', 'E4'), chord('D2', 'A3', 'D4', 'F#4')],
     melody: scale('G4 A4 B4 D5 E5 G5 A5 B5'),
     slots: [0, 1.6, 3.2, 4.8, 6.4], busy: 0.62,
@@ -93,7 +94,7 @@ export const TUNES = [
   },
   {
     // B minor, many short drops: rain on a window.
-    id: 'rain', name: '빗방울',
+    id: 'rain', name: t('빗방울'),
     chords: [chord('B2', 'F#3', 'B3', 'D4'), chord('G2', 'G3', 'B3', 'D4'), chord('D2', 'A3', 'D4', 'F#4'), chord('A2', 'A3', 'C#4', 'E4')],
     melody: scale('D5 E5 F#5 A5 B5 D6 E6 F#6'),
     slots: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7], busy: 0.24,
@@ -101,7 +102,7 @@ export const TUNES = [
   },
   {
     // The five notes of a Korean tune on G, plucked: two close together, then a wait.
-    id: 'gayageum', name: '가야금',
+    id: 'gayageum', name: t('가야금'),
     chords: [chord('G2', 'G3', 'C4', 'D4'), chord('C3', 'G3', 'C4', 'E4'), chord('G2', 'G3', 'A3', 'D4'), chord('D2', 'A3', 'D4', 'E4')],
     melody: scale('D4 E4 G4 A4 C5 D5 E5 G5'),
     slots: [0, 0.4, 2, 2.4, 4, 5, 5.4, 7], busy: 0.5,
@@ -110,7 +111,7 @@ export const TUNES = [
   },
   {
     // D major, wide and bright, a falling line.
-    id: 'aurora', name: '오로라',
+    id: 'aurora', name: t('오로라'),
     chords: [chord('D2', 'A3', 'D4', 'F#4'), chord('B2', 'F#3', 'B3', 'D4'), chord('G2', 'G3', 'B3', 'D4'), chord('A2', 'A3', 'C#4', 'E4')],
     melody: scale('A4 B4 D5 E5 F#5 A5 B5 D6'),
     slots: [0, 1, 2, 3, 4, 5, 6, 7], busy: 0.4,
@@ -119,7 +120,7 @@ export const TUNES = [
   },
   {
     // B flat major in threes, up and down like a merry-go-round.
-    id: 'carousel', name: '회전목마',
+    id: 'carousel', name: t('회전목마'),
     chords: [chord('Bb2', 'Bb3', 'D4', 'F4'), chord('G2', 'G3', 'Bb3', 'D4'), chord('Eb2', 'G3', 'Bb3', 'Eb4'), chord('F2', 'A3', 'C4', 'F4')],
     melody: scale('Bb4 C5 D5 F5 G5 Bb5 C6 D6'),
     slots: [0, 1.33, 2.67, 4, 5.33, 6.67], busy: 0.62,

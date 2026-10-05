@@ -92,3 +92,27 @@ test('both new comets go round the same way as the planets; Halley goes backward
   assert.ok(swirl('haleBopp') > 0);
   assert.ok(swirl('halley') < 0);
 });
+
+test('a shower comes every 200 seconds near Earth, lasts 30, and its meteors run away from one point', async () => {
+  const { inShower, showerGap, showerRadiant, showerSpot, SHOWER_EVERY_S, SHOWER_S } = await import('../src/core/meteors.js');
+  assert.ok(!inShower(0) && !inShower(SHOWER_EVERY_S - SHOWER_S - 1));
+  assert.ok(inShower(SHOWER_EVERY_S - SHOWER_S) && inShower(SHOWER_EVERY_S - 0.1) && !inShower(SHOWER_EVERY_S));
+  assert.ok(showerGap(() => 0.5) < 0.25);
+  let seed = 7;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const toSun = [1, 0, 0];
+  const radiant = showerRadiant(rand, toSun);
+  // Over the night side.
+  assert.ok(radiant[0] < -0.8 && Math.abs(Math.hypot(...radiant) - 1) < 1e-9);
+  let found = 0;
+  for (let i = 0; i < 200; i++) {
+    const spot = showerSpot(rand, toSun, [-1, 0, 0], radiant);
+    if (!spot) continue;
+    found += 1;
+    const dot = (a, b) => a.reduce((sum, n, k) => sum + n * b[k], 0);
+    // Level, and heading away from the radiant.
+    assert.ok(Math.abs(dot(spot.along, spot.up)) < 1e-9);
+    assert.ok(dot(spot.along, radiant) < 0);
+  }
+  assert.ok(found > 50);
+});

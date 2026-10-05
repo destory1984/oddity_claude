@@ -47,6 +47,35 @@ export function meteorGap(rand) {
   return METEOR_GAP_S[0] + rand() * (METEOR_GAP_S[1] - METEOR_GAP_S[0]);
 }
 
+// A shower: every SHOWER_EVERY_S seconds spent near Earth, for SHOWER_S seconds, they
+// come five times as thick and all run away from one point of the sky, the radiant, as
+// the meteors of a real shower seem to. (Earth is crossing the trail a comet left; the
+// crumbs fly side by side, and that they spread from a point is how side-by-side lines
+// look from below.) near: seconds spent in range so far.
+export const SHOWER_EVERY_S = 200;
+export const SHOWER_S = 30;
+export const SHOWER_GAP_S = [0.08, 0.25];
+export function inShower(near) {
+  return near % SHOWER_EVERY_S >= SHOWER_EVERY_S - SHOWER_S;
+}
+export function showerGap(rand) {
+  return SHOWER_GAP_S[0] + rand() * (SHOWER_GAP_S[1] - SHOWER_GAP_S[0]);
+}
+// A shower's radiant: a point over the middle of the night side, a little to one side.
+export function showerRadiant(rand, toSun) {
+  return unit(toSun.map((n) => -n + 0.5 * (rand() - 0.5)));
+}
+// A place for a meteor of the shower: as meteorSpot, but it runs straight away from the
+// radiant along the top of the air (none right at the radiant, where it would be a dot).
+export function showerSpot(rand, toSun, toTraveler, radiant) {
+  const spot = meteorSpot(rand, toSun, toTraveler);
+  if (!spot) return null;
+  const lean = dot(radiant, spot.up);
+  const toward = radiant.map((n, k) => n - spot.up[k] * lean);
+  if (Math.hypot(...toward) < 0.1) return null;
+  return { ...spot, along: unit(toward).map((n) => -n) };
+}
+
 // How bright a meteor is `age` seconds after it lit: a quick flare, then fading out.
 export function meteorGlow(age) {
   if (age < 0 || age >= METEOR_LIFE_S) return 0;

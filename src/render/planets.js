@@ -56,7 +56,8 @@ function createEarth(scene, body, sunDir) {
   const diameter = (2 * body.radiusKm) / KM_PER_UNIT;
 
   const earth = CreateSphere('earth', { diameter, segments: 112 }, scene);
-  const surface = shader(scene, 'planet', planetFrag, ['sun', 'eye', 'cloudShift'], ['day', 'night', 'cloudMap']);
+  const surface = shader(scene, 'planet', planetFrag, ['sun', 'eye', 'cloudShift', 'time'], ['day', 'night', 'cloudMap']);
+  surface.setFloat('time', 0);
   surface.setFloat('cloudShift', 0);
   surface.setTexture('day', texture(scene, 'earth-day.jpg'));
   surface.setTexture('night', texture(scene, 'earth-night.jpg'));
@@ -65,7 +66,8 @@ function createEarth(scene, body, sunDir) {
   earth.material = surface;
 
   const clouds = CreateSphere('clouds', { diameter: diameter * CLOUD_SCALE, segments: 96 }, scene);
-  const cloudMaterial = shader(scene, 'cloudLayer', cloudsFrag, ['sun'], ['cloudMap']);
+  const cloudMaterial = shader(scene, 'cloudLayer', cloudsFrag, ['sun', 'time'], ['cloudMap']);
+  cloudMaterial.setFloat('time', 0);
   const cloudMap = texture(scene, 'earth-clouds.jpg');
   cloudMaterial.setTexture('cloudMap', cloudMap);
   // The ground shader reads the same map, to lay the clouds' shadows on the ground.
@@ -92,6 +94,9 @@ function createEarth(scene, body, sunDir) {
       const turn = (elapsed * SPIN_SPEEDUP * 2 * Math.PI) / SIDEREAL_DAY_S;
       // Negative rotation turns counterclockwise seen from the north: the ground moves east.
       earth.rotation.y = EARTH_START_SPIN - turn;
+      // (For the typhoon's turning, the fishing lamps' flicker and the volcano's ash.)
+      surface.setFloat('time', elapsed);
+      cloudMaterial.setFloat('time', elapsed);
       clouds.rotation.y = EARTH_START_SPIN + 0.008 - turn * CLOUD_DRIFT;
       // How far the cloud map stands east of the ground map, in turns (a larger
       // rotation.y carries a map eastward past a fixed place).

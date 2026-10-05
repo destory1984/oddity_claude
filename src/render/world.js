@@ -193,6 +193,8 @@ export async function createWorld(canvas, bodies = BODIES) {
       ringAt,
       inBelt: inBelt(traveler, sunNow.position),
       meteorLit,
+      // A meteor shower is falling (core/meteors.js).
+      showerOn: meteors.shower(),
       // A flash (lightning, a sprite, an impact on the Moon) in the frame it happens.
       glow: flashed,
       // Everything of that kind within reach, the nearest thing first (core/glows.js).

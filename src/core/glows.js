@@ -205,7 +205,7 @@ export function plumeUp(plume, spinRad) {
 // flashes are told when one lights.) Several may be in reach at once (near Jupiter: its
 // aurora and Io's footprint); the game tells them one at a time.
 // (Saturn is looked at from nine radii off, to take in its rings: the spokes are told from there.)
-export const TELL_RADII = { aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, backlit: 12, haze: 8, shine: 4, rings: 6, geyser: 3, ashen: 4, horizon: 4, ering: 40, flare: 3, flow: 5, tracks: 0.2, rain: 4, lava: 4, devils: 0.25, methane: 4, hood: 5, thread: 10 };
+export const TELL_RADII = { aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, backlit: 12, haze: 8, shine: 4, rings: 6, geyser: 3, ashen: 4, horizon: 4, ering: 40, flare: 3, flow: 5, tracks: 0.2, rain: 4, lava: 4, devils: 0.25, methane: 4, hood: 5, thread: 10, typhoon: 2.5, boats: 1.5, ash: 1.5 };
 // A comet's tail is told from within this far of its nucleus, while it is within this
 // many AU of the Sun (farther out it has no tail to speak of).
 export const TELL_TAIL_KM = 300000;
@@ -281,6 +281,12 @@ export function glowsNear(bodies, position) {
   if (near('titan', TELL_RADII.methane)) found.push('methane:titan');
   if (near('uranus', TELL_RADII.hood)) found.push('hood:uranus');
   if (behind('jupiter', TELL_RADII.thread)) found.push('thread:jupiter');
+  // Three on Earth (v0.1.192): the typhoon and the volcano's ash from over the day
+  // side, the fishing lamps of the East Sea from over the night side. (Where on the
+  // globe each is, the notice says: the turn of the Earth is not known here.)
+  if (near('earth', TELL_RADII.typhoon) && sun && side('earth', sun.position) > 0.2) found.push('typhoon:earth');
+  if (near('earth', TELL_RADII.ash) && sun && side('earth', sun.position) > 0.2) found.push('ash:earth');
+  if (near('earth', TELL_RADII.boats) && sun && side('earth', sun.position) < -0.2) found.push('boats:earth');
   // The dark jets of Mars's south polar cap, from over the south.
   const mars = bodies.find((b) => b.id === 'mars');
   if (mars && near('mars', TELL_RADII.geyser) && side('mars', mars.position.map((n, i) => n - (i === 1 ? 1 : 0))) > 0.4) found.push('geyser:mars');

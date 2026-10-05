@@ -2,9 +2,10 @@ import { CreateCylinder, StandardMaterial, Color3, Vector3, Quaternion } from '.
 import { KM_PER_UNIT } from '../core/bodies.js';
 import {
   METEOR_RANGE_KM, METEOR_ALTITUDE_KM, METEOR_LIFE_S, meteorSpot, meteorGap, meteorGlow,
+  inShower, showerGap, showerRadiant, showerSpot,
 } from '../core/meteors.js';
 
-const POOL = 6;
+const POOL = 14; // six were enough until the showers (core/meteors.js inShower)
 // Trail thickness as a share of its distance from the traveler: a pixel or two.
 const THICK = 0.003;
 
@@ -26,6 +27,9 @@ export function createMeteors(scene) {
     trails.push({ mesh, material, spot: null, age: 0 });
   }
   let wait = 0.5;
+  // Seconds spent near Earth, for the showers, and the shower's radiant while one falls.
+  let near = 0;
+  let radiant = null;
 
   // earth, sunPosition, position: km. Returns true in the frame a meteor lights.
   function update(dt, earth, sunPosition, position) {
@@ -35,13 +39,21 @@ export function createMeteors(scene) {
     let lit = false;
     if (inRange) {
       wait -= dt;
+      near += dt;
+      const toSun = sunPosition.map((n, i) => n - earth.position[i]);
+      const sunLength = Math.hypot(...toSun);
+      const sunward = toSun.map((n) => n / sunLength);
+      const shower = inShower(near);
+      if (shower && !radiant) {
+        radiant = showerRadiant(Math.random, sunward);
+        wait = 0;
+      } else if (!shower) radiant = null;
       const free = trails.find((t) => !t.spot);
       if (wait <= 0 && free) {
-        const toSun = sunPosition.map((n, i) => n - earth.position[i]);
-        const sunLength = Math.hypot(...toSun);
-        free.spot = meteorSpot(Math.random, toSun.map((n) => n / sunLength), out.map((n) => n / distance));
+        const toTraveler = out.map((n) => n / distance);
+        free.spot = radiant ? showerSpot(Math.random, sunward, toTraveler, radiant) : meteorSpot(Math.random, sunward, toTraveler);
         free.age = 0;
-        wait = meteorGap(Math.random);
+        wait = radiant ? showerGap(Math.random) : meteorGap(Math.random);
         lit = Boolean(free.spot);
       }
     }
@@ -70,5 +82,6 @@ export function createMeteors(scene) {
     return lit;
   }
 
-  return { update };
+  // Whether a shower is falling now.
+  return { update, shower: () => Boolean(radiant) };
 }

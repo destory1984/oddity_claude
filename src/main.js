@@ -2194,6 +2194,15 @@ ${STORY_MORE[target.id]}` : told };
       seeUntil = performance.now() + SEE_S * 1000;
       toast.show(eventMessage({ type: 'meteor' }), null, SIGHT_S);
     }
+    // A meteor shower: told the first time one of its meteors lights where she can see it.
+    if (view.meteorLit && view.showerOn && !glowsTold.has('shower') && glowTellWait === 0) {
+      markTold('shower');
+      glowTellWait = SIGHT_GAP_S;
+      say.show(SIGHTS.shower);
+      seeKind = seeFor('meteor');
+      seeUntil = performance.now() + SEE_S * 1000;
+      toast.show(eventMessage({ type: 'shower' }), null, SIGHT_S);
+    }
     // Say why she shivers or shields her eyes: once each time she comes into the cold
     // or the glare, at the first such drawing.
     const sunKm = surfaceDistance(state.position, here('sun'));

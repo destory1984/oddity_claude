@@ -580,7 +580,14 @@ async function init() {
     if (!target) return;
     $('craftCardArt').src = `${import.meta.env.BASE_URL}assets/${craftPicture(target.id)}`;
     $('craftCardYear').textContent = t`${target.launched}년 발사`;
-    $('craftCardName').textContent = `${target.name} ${target.nameEn}`;
+    // Its English name after it, in a part the folded card leaves out (style.css).
+    $('craftCardName').textContent = target.name;
+    if (target.nameEn) {
+      const en = document.createElement('span');
+      en.className = 'en';
+      en.textContent = ` ${target.nameEn}`;
+      $('craftCardName').append(en);
+    }
     $('craftCardIntro').textContent = target.intro;
   }
 
@@ -1092,7 +1099,10 @@ ${STORY_MORE[target.id]}` : told };
     if (!now) return null;
     return {
       count: `${now.step + 1}/${now.tour.stops.length}`,
-      text: t`${now.tour.name}: ${stopName(now.stop)}`,
+      // The tour's name leads on a wide screen only: on a phone the line has room for
+      // the place alone (style.css).
+      lead: `${now.tour.name}: `,
+      text: stopName(now.stop),
       targetId: stopTarget(now.stop),
       jump: true,
     };

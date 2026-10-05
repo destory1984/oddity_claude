@@ -6,6 +6,7 @@
 // buttons about, evening out spaces, renaming a tab or rewording a sentence does not
 // (the user had six such lines taken out on 2026-10-05: "이런건 바뀐 것에서 빼줘").
 export const CHANGES = [
+  { day: '2026-10-05', text: '휴대전화에서 코스를 돌 때 화면 위 목표 줄의 글이 잘리던 것을 고쳤습니다.' },
   { day: '2026-10-05', text: '수첩의 탐사선 갈래와 도킹했을 때 뜨는 카드에 탐사선 그림 22장이 붙었습니다.' },
   { day: '2026-10-05', text: '"그날로" 장면 셋이 늘었습니다: 튀면서 내린 루나 9호, 패스파인더, 혜성의 필레.' },
   { day: '2026-10-05', text: '도킹했을 때 탐사선 설명 카드가 소라를 덮던 것을 고쳤습니다. 작게 접혀 있고 누르면 펴집니다.' },

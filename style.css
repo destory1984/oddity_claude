@@ -801,7 +801,7 @@ body.touch #reticle span {
   display:none;
 }
 
-#craftCard span {
+#craftCard > span {
   display:block;
   color:#ffdfa6;
   font-size:12px;
@@ -3762,8 +3762,13 @@ footer .throttle .rangeLabels {
     text-overflow:ellipsis;
   }
 
-  #hud #targetPanel #craftCard span {
+  #hud #targetPanel #craftCard > span {
     font-size:10px;
+  }
+
+  /* Folded, the name alone: with its English name after it, it ran out of the line. */
+  #hud #targetPanel #craftCard:not(.open) strong .en {
+    display:none;
   }
 
   /* A small mark that there is more: it points up when folded (the card opens upward)
@@ -4350,15 +4355,36 @@ html[lang="en"] #settingsTabs [data-tab="news"] {
   display:none;
 }
 
-/* The goal line on a phone: the buttons are narrower, so a tour's next place (the line
-   says only that in English: "Voyager 2 at Neptune") has its two lines of room. */
+/* The goal line on a phone, in both languages: the buttons are narrower and the tour's
+   name is left out, so a tour's next place has its two lines of room ("보이저 2호의
+   해왕성", "Voyager 2 at Neptune"). With the tour's name and the wider buttons the words
+   had 52px at a width of 402 and 10px at 360: 39 of the 42 stops were cut off in Korean,
+   all of them at 360. */
 @media (max-width: 480px) {
-  html[lang="en"] #guide {
+  #guide {
     padding-left:8px;
     gap:4px;
   }
 
-  html[lang="en"] #guide button {
+  #guide button {
     padding:2px 6px;
+  }
+
+  #guideText .lead {
+    display:none;
+  }
+}
+
+/* A small phone (under 390px wide): smaller words on three lines. */
+@media (max-width: 389px) {
+  #guide button {
+    padding:2px 4px;
+    font-size:11px;
+  }
+
+  #guideText {
+    max-height:3.5em;
+    font-size:11px;
+    line-height:1.15;
   }
 }

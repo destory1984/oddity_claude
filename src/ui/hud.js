@@ -10,7 +10,7 @@ const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
 // A touch on the sky counts within this many pixels of a name or a constellation's line,
 // and what it tells stays up this long.
 const TOUCH_REACH = 30;
-const TOUCH_SECONDS = 8;
+const TOUCH_SECONDS = 10;
 
 export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] }) {
   const markers = new Map();
@@ -48,6 +48,8 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
   // The camera of the last frame drawn, and the sky thing touched: { id, until }.
   let lastCamera = null;
   let touched = null;
+  // When a press on the view last put the plate away: that same press tells nothing new.
+  let putAwayAt = -Infinity;
   // A direction as a point on screen, from its middle; null when it is behind the view.
   function skyPoint(direction, camera, least) {
     const z = dot(direction, camera.forward);
@@ -236,10 +238,18 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         plate.style.top = `${spot.y}px`;
       }
     },
+    // A press anywhere on the view while a plate is up puts it away (the user,
+    // 2026-10-05: "화면을 터치 OR 10초 지나면 없어지게 해").
+    pressSky() {
+      if (!touched) return;
+      touched = null;
+      plate.hidden = true;
+      putAwayAt = performance.now();
+    },
     // A short touch on the sky at (x, y): the constellation, galaxy or cluster there tells
-    // its lines for a while. A touch on nothing puts them away. Returns its id, or null.
+    // its lines for a while. Returns its id, or null.
     touchSky(x, y) {
-      if (!lastCamera) return null;
+      if (!lastCamera || performance.now() - putAwayAt < 500) return null;
       const shapes = [];
       for (const { id, direction, figure } of skyNames) {
         const middle = skyPoint(direction, lastCamera, 0.2);

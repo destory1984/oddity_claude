@@ -421,6 +421,8 @@ async function init() {
     onTap(x, y) {
       if (!photo.active() && !paused) hud.touchSky(x, y);
     },
+    // Any press on the view puts away what the last touch was telling.
+    onPress: () => hud.pressSky(),
     onBrake: brake,
     onTogglePhoto: () => photo.toggle(),
     onJournal: () => journal.open(),

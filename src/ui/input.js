@@ -9,7 +9,7 @@ const TAP_PIXELS = 8;
 // The keys that fly or turn her: pressing one while paused takes the game off pause (onMove).
 const MOVE_KEYS = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
-export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal, onMute, onMusic = () => {}, onRear = () => {}, onMove = () => {}, onTap = () => {}, onEscape, onWheel, isBlocked }) {
+export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal, onMute, onMusic = () => {}, onRear = () => {}, onMove = () => {}, onTap = () => {}, onPress = () => {}, onEscape, onWheel, isBlocked }) {
   const held = new Set();
   let flyingButton = false;
   let reversingButton = false;
@@ -82,6 +82,7 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
 
   canvas.addEventListener('pointerdown', (e) => {
     canvas.focus();
+    onPress();
     canvas.setPointerCapture(e.pointerId);
     drag = { id: e.pointerId, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, at: performance.now(), far: e.button !== 0 };
   });

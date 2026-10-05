@@ -67,6 +67,8 @@ export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, 
       window.top.location.reload();
     });
   }
+  // The policy page holds the four languages one under another: the link opens it at hers.
+  if (language() !== 'ko') $('privacyLink').href = `./privacy.html#${language()}`;
   dialog.addEventListener('close', () => onClose());
 
   if (reopen) $('settingsButton').click();

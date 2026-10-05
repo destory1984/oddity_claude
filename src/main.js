@@ -679,18 +679,22 @@ async function init() {
     if (!orbit) return null;
     const target = here(orbit.id);
     let centre = target.position;
+    // A scene drawn small (Philae on its comet, 4 km across: core/replay.js sizeKm) is
+    // looked at from close by: the measures below, made for models 6 km wide, are its own.
+    const small = replayFor(target.id)?.sizeKm ?? null;
+    const clearKm = small ? small * 0.6 : INSPECT_CLEAR_KM;
     if (target.kind === 'site') {
       // The middle of what stands there, not the ground under it.
       const ground = here(target.parent);
-      centre = centre.map((n, i) => n + ((n - ground.position[i]) / ground.radiusKm) * 2);
+      centre = centre.map((n, i) => n + ((n - ground.position[i]) / ground.radiusKm) * (small ? small * 0.5 : 2));
     }
     const ahead = forward(orbit.orientation);
     let position = centre.map((n, i) => n - ahead[i] * orbit.distanceKm);
     const { body, distance } = nearestSurface(position, bodies);
-    if (body && body.id !== target.id && distance < INSPECT_CLEAR_KM) {
+    if (body && body.id !== target.id && distance < clearKm) {
       const up = position.map((n, i) => n - body.position[i]);
       const height = Math.hypot(...up) || 1;
-      position = body.position.map((n, i) => n + (up[i] / height) * (body.radiusKm + INSPECT_CLEAR_KM));
+      position = body.position.map((n, i) => n + (up[i] / height) * (body.radiusKm + clearKm));
       return { position, orientation: lookAtDirection(centre.map((n, i) => n - position[i])) };
     }
     return { position, orientation: orbit.orientation };
@@ -867,6 +871,39 @@ ${STORY_MORE[target.id]}` : told };
     photo.orbitAround({ id: visit.id, facing: photo.orbit().orientation, distanceKm: REPLAY_VIEW.distanceKm, fovDeg: REPLAY_VIEW.fovDeg });
     replay = { id: visit.id, startedAt: performance.now(), down: false };
   });
+
+  // A scene's frame as the renderer wants it: with the way it comes in from the side as
+  // a direction in space. At a scene's own spot (Cassini, Philae) that is to the left of
+  // the view, across the ground, square to the way the view looks; at a story place it
+  // is along the ground toward the east. What comes in over round ground is lowered by
+  // as much as the ground falls away under it (on Philae's comet, 2 km in radius, a
+  // tenth of a kilometre at the first touch).
+  function replayForWorld(frame) {
+    const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    let side = [0, 0, 0];
+    let radiusKm = Infinity;
+    if (scenePlace) {
+      side = cross(scenePlace.up, scenePlace.level);
+      radiusKm = here(scenePlace.parent).radiusKm;
+    } else if (frame.acrossKm) {
+      const site = here(replay.id);
+      const ground = site && here(site.parent);
+      if (ground) {
+        const out = site.position.map((n, i) => n - ground.position[i]);
+        const flat = cross([0, 1, 0], out);
+        const length = Math.hypot(...flat);
+        side = length > 1e-9 ? flat.map((n) => n / length) : [1, 0, 0];
+        radiusKm = ground.radiusKm;
+      }
+    }
+    return {
+      id: replay.id, flame: frame.flame, after: frame.after, glow: frame.glow, gone: frame.gone, slope: frame.slope,
+      liftKm: frame.liftKm - (frame.acrossKm ** 2) / (2 * radiusKm),
+      across: side.map((n) => n * frame.acrossKm),
+      side,
+      turn: frame.turn ?? 0, tilt: frame.tilt ?? 0, bag: frame.bag ?? 0, open: Boolean(frame.open), sizeKm: frame.sizeKm ?? null,
+    };
+  }
 
   // The jump to TRAPPIST-1, offered while latched to Kepler, and the way home from there.
   $('exoJump').addEventListener('click', () => {
@@ -1890,15 +1927,7 @@ ${STORY_MORE[target.id]}` : told };
       : null;
     const view = world.update({
       trail,
-      replay: replayNow && {
-        id: replay.id, liftKm: replayNow.liftKm, flame: replayNow.flame, after: replayNow.after, glow: replayNow.glow, gone: replayNow.gone, slope: replayNow.slope,
-        // To the left of the view: across the ground, square to the way the view looks.
-        across: scenePlace ? [
-          scenePlace.up[1] * scenePlace.level[2] - scenePlace.up[2] * scenePlace.level[1],
-          scenePlace.up[2] * scenePlace.level[0] - scenePlace.up[0] * scenePlace.level[2],
-          scenePlace.up[0] * scenePlace.level[1] - scenePlace.up[1] * scenePlace.level[0],
-        ].map((n) => n * replayNow.acrossKm) : [0, 0, 0],
-      },
+      replay: replayNow && replayForWorld(replayNow),
       bodies,
       craft,
       hiddenCraft: awayCraft,

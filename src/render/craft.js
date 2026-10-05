@@ -144,7 +144,58 @@ export function createSiteModels(scene, siteList) {
   flameMaterial.emissiveColor = new Color3(1, 0.82, 0.5);
   flameMaterial.alpha = 0.38;
   flameMaterial.backFaceCulling = false;
+  // The cloth of an air bag: pale, and lit a little from within so it is not lost in shadow.
+  const bagCloth = new StandardMaterial('replayBag', scene);
+  bagCloth.diffuseColor = new Color3(0.93, 0.88, 0.76);
+  bagCloth.emissiveColor = new Color3(0.3, 0.27, 0.22);
+  bagCloth.specularColor = new Color3(0.05, 0.05, 0.05);
   for (const [id, [build, options, coming = 'flame', flameY = -0.06]] of Object.entries(SITE_REPLAY_BUILD)) {
+    if (coming === 'bag' || coming === 'bare') {
+      // One that bounces: the model hangs from a node that turns (a ball rolling, Philae
+      // leaning over), and a bagged one sits in the middle of its ball of air bags, which
+      // hide it until they go down. The ball's foot is on the ground when the lift is 0.
+      const root = new TransformNode(`then_${id}`, scene);
+      root.rotationQuaternion = new Quaternion();
+      const tumble = group(scene, `then_${id}_tumble`, root);
+      const model = build(scene, `then_${id}_model`, mats, options);
+      model.parent = tumble;
+      const shape = coming === 'bag' ? flameY : null;
+      let bag = null;
+      if (shape) {
+        model.position.y = -shape.centre;
+        bag = group(scene, `then_${id}_bag`, tumble);
+        const lobe = (name, diameter, at, squash = [1, 1, 1]) => {
+          const ball = CreateSphere(`then_${id}_${name}`, { diameter, segments: 14 }, scene);
+          ball.parent = bag;
+          ball.material = bagCloth;
+          ball.position.set(...at);
+          ball.scaling.set(...squash);
+          return ball;
+        };
+        if (shape.lobes === 2) {
+          // Two halves with a seam between them.
+          lobe('half0', shape.radius * 2, [0, shape.radius * 0.06, 0], [1, 0.9, 1]);
+          lobe('half1', shape.radius * 2, [0, -shape.radius * 0.06, 0], [1, 0.9, 1]);
+          drum(scene, `then_${id}_seam`, bag, mats.grey, { height: shape.radius * 0.05, diameter: shape.radius * 2.02, tessellation: 24 }, [0, 0, 0]);
+        } else {
+          // A cluster: a ball in the middle and four lobes at the corners of a tetrahedron,
+          // each of them with three smaller bulges.
+          lobe('core', shape.radius * 1.5, [0, 0, 0]);
+          const corners = [[0, 1, 0], [0.943, -0.333, 0], [-0.471, -0.333, 0.816], [-0.471, -0.333, -0.816]];
+          corners.forEach((c, k) => {
+            lobe(`lobe${k}`, shape.radius * 1.16, c.map((n) => n * shape.radius * 0.42));
+            for (let j = 0; j < 3; j++) {
+              const a = (j * 2 * Math.PI) / 3 + k;
+              const side = [Math.cos(a), Math.sin(a) * 0.6, Math.sin(a + 1.3)];
+              lobe(`bulge${k}${j}`, shape.radius * 0.62, c.map((n, i) => (n * 0.62 + side[i] * 0.3) * shape.radius));
+            }
+          });
+        }
+      }
+      root.setEnabled(false);
+      then.set(id, { node: root, flame: null, cords: null, tumble, bag, shape });
+      continue;
+    }
     const node = build(scene, `then_${id}`, mats, options);
     node.rotationQuaternion = new Quaternion();
     let flame;
@@ -247,8 +298,11 @@ export function createSiteModels(scene, siteList) {
   // it was then stands liftKm above the ground in place of the one that is there now.
   // A streak (Cassini) also has across: [x, y, z] km to the side of the place, glow 0 → 1
   // and gone; it has no model of now, and flies nose first along the way it goes.
+  // One that bounced (core/replay.js hopFrame) also has turn and tilt (radians), bag
+  // (1 → 0), open (it now stands as the place's own model does), side (the way it comes
+  // from) and sizeKm (drawn that wide whatever the distance: Philae on its small comet).
   function update(sites, bodies, position, replay = null) {
-    for (const [id, old] of then) if (replay?.id !== id) old.node.setEnabled(false);
+    for (const [id, old] of then) if (replay?.id !== id || replay.open) old.node.setEnabled(false);
     for (const site of sites) {
       const card = cards.get(site.id);
       if (card) {
@@ -256,7 +310,7 @@ export function createSiteModels(scene, siteList) {
         continue;
       }
       const now = nodes.get(site.id);
-      const old = replay?.id === site.id ? then.get(site.id) : null;
+      const old = replay?.id === site.id && !replay.open ? then.get(site.id) : null;
       if (!now && !old) continue;
       if (old && now) now.setEnabled(false);
       const node = old ? old.node : now;
@@ -280,10 +334,26 @@ export function createSiteModels(scene, siteList) {
       }
       // Stand it on the ground: turn the model's +y onto the local "up".
       Quaternion.FromUnitVectorsToRef(Vector3.Up(), up, node.rotationQuaternion);
-      if (old?.fire) {
+      if (old && replay.across) {
         rel[0] += replay.across[0] / KM_PER_UNIT;
         rel[1] += replay.across[1] / KM_PER_UNIT;
         rel[2] += replay.across[2] / KM_PER_UNIT;
+      }
+      if (old?.tumble) {
+        // Its +x along the ground the way it travels, so that it rolls and leans that way.
+        const from = new Vector3(...(replay.side ?? [1, 0, 0]));
+        const x = from.subtract(up.scale(Vector3.Dot(from, up))).scale(-1).normalize();
+        const z = Vector3.Cross(x, up).normalize();
+        Quaternion.RotationQuaternionFromAxisToRef(x, up, z, node.rotationQuaternion);
+        old.tumble.rotation.z = -((replay.turn ?? 0) + (replay.tilt ?? 0));
+        if (old.bag) {
+          const full = replay.bag ?? 0;
+          old.bag.setEnabled(full > 0.03);
+          old.bag.scaling.setAll(Math.max(0.03, full));
+          old.tumble.position.y = old.shape.centre + (old.shape.radius - old.shape.centre) * full;
+        }
+      }
+      if (old?.fire) {
         // Its +x toward the place it is going to, its dish (+y) up.
         // (and down the slope it comes in on).
         const x = new Vector3(...replay.across).scale(-1).normalize().subtract(up.scale(replay.slope)).normalize();
@@ -292,7 +362,7 @@ export function createSiteModels(scene, siteList) {
         old.fireMaterial.alpha = replay.glow;
         old.fire.setEnabled(replay.glow > 0);
       }
-      node.scaling.setAll(Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT)) / KM_PER_UNIT);
+      node.scaling.setAll((old && replay.sizeKm ? replay.sizeKm : Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT))) / KM_PER_UNIT);
       node.position.set(rel[0], rel[1], rel[2]);
     }
   }

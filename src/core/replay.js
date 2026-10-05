@@ -2,7 +2,8 @@ import { t } from './i18n.js';
 // "그날로": at a story place, the day it is known for is played again in the close
 // view. The model that stands there comes down as it did, and a few lines tell what
 // happened, each at its moment: Apollo 11's landing, Huygens's on Titan, Viking 1's and Curiosity's on Mars, and (not at a
-// place but on a body) Cassini's plunge into Saturn.
+// place but on a body) Cassini's plunge into Saturn. Three came down bouncing: Luna 9 and
+// Pathfinder inside air bags, and Philae on its comet, which could not hold on.
 // seconds: how long the scene lasts. downAt: when it touches the ground.
 // fromKm: how high the model starts (it is drawn 6 km wide, so this is in drawn km).
 export const REPLAYS = {
@@ -84,6 +85,82 @@ export const REPLAYS = {
       { at: 15, text: t('신호가 끊겼습니다. 마지막 전파는 83분 뒤 지구에 닿았고, 카시니는 토성의 일부가 되었습니다.') },
     ],
   },
+  // The three that bounced. fall: seconds until it first touches. hops: each bounce, by
+  // the moment it ends and how high it goes (drawn km). It comes in from acrossKm to the
+  // side and is at the place when it stops (downAt): `rollFrom` says whether that way is
+  // covered over the whole scene ('start': a ball thrown in at a slant) or only from the
+  // first touch ('touch': it came straight down and bounced away). turns: how many times
+  // a ball goes round on the way. bagSeconds: how long its air bags take to go down once
+  // it has stopped. openAt: when it has opened and stands as it stands there now.
+  //
+  // Luna 9, 1966: the first thing to land whole on the Moon. The ball was thrown clear
+  // just above the ground, bounced in its air bags, and opened four petals.
+  luna9: {
+    name: t('루나 9호의 착륙'),
+    day: t('1966년 2월 3일'),
+    seconds: 24,
+    downAt: 13,
+    fromKm: 10,
+    fall: 6,
+    hops: [{ until: 9, peakKm: 5 }, { until: 11.4, peakKm: 2.4 }, { until: 13, peakKm: 0.9 }],
+    acrossKm: 8,
+    rollFrom: 'start',
+    turns: 3,
+    bagSeconds: 2,
+    openAt: 17,
+    lines: [
+      { at: 0, text: t('1966년 2월 3일. 소련의 루나 9호가 폭풍의 대양으로 내려옵니다. 달에 온전히 내린 기계는 아직 없었습니다.') },
+      { at: 5, text: t('땅에 닿기 직전 공 모양 캡슐을 내던집니다. 공기 주머니에 싸인 99kg짜리 캡슐이 튀고 구릅니다.') },
+      { at: 13, text: t('멈추자 공기 주머니가 떨어져 나가고, 꽃잎 넷이 열려 몸을 바로 세웁니다. 안테나도 펴집니다.') },
+      { at: 18, text: t('달은 먼지 늪이 아니었습니다. 단단한 땅에서 찍은 첫 사진이 지구로 왔습니다.') },
+    ],
+  },
+  // Mars Pathfinder, 1997: under a parachute, then inside air bags, bouncing at least
+  // fifteen times (six are shown) and rolling a kilometre.
+  pathfinder: {
+    name: t('패스파인더의 착륙'),
+    day: t('1997년 7월 4일'),
+    seconds: 26,
+    downAt: 16,
+    fromKm: 10,
+    fall: 5,
+    hops: [{ until: 8, peakKm: 6 }, { until: 10.4, peakKm: 4 }, { until: 12.3, peakKm: 2.6 }, { until: 13.8, peakKm: 1.6 }, { until: 15, peakKm: 0.9 }, { until: 16, peakKm: 0.4 }],
+    acrossKm: 10,
+    rollFrom: 'start',
+    turns: 5,
+    bagSeconds: 2.5,
+    lines: [
+      { at: 0, text: t('1997년 7월 4일. 패스파인더가 낙하산에 매달려 아레스 계곡으로 내려옵니다. 화성에 21년 만에 내리는 탐사선입니다.') },
+      { at: 5, text: t('공기 주머니에 싸인 채 시속 50km쯤으로 떨어져, 건물 5층 높이로 튀어 오릅니다.') },
+      { at: 11, text: t('적어도 열다섯 번을 튀고 굴러, 처음 닿은 곳에서 1km쯤 떨어진 데서 멈췄습니다.') },
+      { at: 17, text: t('공기 주머니를 빼고 꽃잎 셋을 엽니다. 이틀 뒤 전자레인지만 한 로버 소저너가 화성 땅으로 내려갑니다.') },
+    ],
+  },
+  // Philae on comet 67P, 2014: resting anywhere on the comet (the story 'rosetta' is told
+  // by passing near it). Its harpoons did not fire, so it bounced: once for an hour and
+  // fifty minutes, once for seven, and came to rest leaning in a cliff's shadow. The
+  // comet is 4 km across, so the model is drawn small (sizeKm) and seen from close by.
+  philaeLanding: {
+    name: t('필레의 착륙'),
+    day: t('2014년 11월 12일'),
+    on: 'churyumov',
+    seconds: 26,
+    downAt: 19,
+    viewKm: 4.2,
+    sizeKm: 0.34,
+    fromKm: 1.2,
+    fall: 7,
+    hops: [{ until: 16.5, peakKm: 0.7 }, { until: 19, peakKm: 0.12 }],
+    acrossKm: 0.6,
+    rollFrom: 'touch',
+    tiltRad: 1.05,
+    lines: [
+      { at: 0, text: t('2014년 11월 12일. 로제타에서 떨어져 나온 필레가 일곱 시간에 걸쳐 혜성으로 내려옵니다.') },
+      { at: 7, text: t('닿았지만 붙잡지 못했습니다. 몸을 땅에 박을 작살 둘이 쏘아지지 않았습니다.') },
+      { at: 11, text: t('중력이 지구의 10만분의 1쯤이라, 1km 높이까지 튀어 올라 1시간 50분을 떠 있었습니다.') },
+      { at: 19, text: t('두 번을 튄 끝에 절벽 그늘에 비스듬히 멈췄습니다. 햇빛이 모자라 57시간쯤 뒤 전지가 다해 잠들었습니다.') },
+    ],
+  },
 };
 
 // The scene played by resting on this body, if there is one.
@@ -103,6 +180,7 @@ export function replayFrame(id, t) {
   const u = Math.max(0, Math.min(1, t / scene.downAt));
   let line = 0;
   scene.lines.forEach((l, i) => { if (t >= l.at) line = i; });
+  if (scene.hops) return { ...hopFrame(scene, t), line, text: scene.lines[line].text, done: t >= scene.seconds };
   return {
     liftKm: scene.streak ? scene.fromKm + (scene.toKm - scene.fromKm) * u : scene.fromKm * (1 - u) ** 2,
     // A streak: how far to the side it still is, how hot it glows (from a third of the
@@ -119,5 +197,46 @@ export function replayFrame(id, t) {
     line,
     text: scene.lines[line].text,
     done: t >= scene.seconds,
+  };
+}
+
+// One that bounced, t seconds in: how high it is (falling, then each hop a parabola),
+// how far to the side it still is, how far a ball has turned (radians; it stops the
+// right way up), how full its air bags are (1 → 0 once it has stopped), how far it leans
+// (Philae, as its last hop ends), and whether it has opened.
+function hopFrame(scene, t) {
+  const clamp = (n) => Math.max(0, Math.min(1, n));
+  let liftKm = 0;
+  if (t < scene.fall) liftKm = scene.fromKm * (1 - t / scene.fall) ** 1.4;
+  else {
+    let start = scene.fall;
+    for (const hop of scene.hops) {
+      if (t < hop.until) {
+        const x = (t - start) / (hop.until - start);
+        liftKm = hop.peakKm * 4 * x * (1 - x);
+        break;
+      }
+      start = hop.until;
+    }
+  }
+  const way = scene.rollFrom === 'touch' ? clamp((t - scene.fall) / (scene.downAt - scene.fall)) : clamp(t / scene.downAt);
+  const lastHop = scene.hops.length > 1 ? scene.hops[scene.hops.length - 2].until : scene.fall;
+  const settling = clamp((t - lastHop) / (scene.downAt - lastHop));
+  const down = t >= scene.downAt;
+  return {
+    liftKm,
+    acrossKm: scene.acrossKm * (1 - way),
+    // Faster at first, stopping as it stops: whole turns, so it ends as it began.
+    turn: (scene.turns ?? 0) * 2 * Math.PI * (1 - (1 - way) ** 2),
+    tilt: (scene.tiltRad ?? 0) * settling * settling * (3 - 2 * settling),
+    bag: scene.bagSeconds ? (down ? clamp(1 - (t - scene.downAt) / scene.bagSeconds) : 1) : 0,
+    open: scene.openAt !== undefined && t >= scene.openAt,
+    sizeKm: scene.sizeKm ?? null,
+    glow: 0,
+    slope: 0,
+    gone: false,
+    flame: false,
+    down,
+    after: Math.max(0, t - scene.downAt),
   };
 }

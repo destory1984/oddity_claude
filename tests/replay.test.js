@@ -5,7 +5,9 @@ import { STORIES } from '../src/core/stories.js';
 
 test('every scene belongs to a story place on a surface and tells its lines in order', () => {
   for (const [id, scene] of Object.entries(REPLAYS)) {
-    if (scene.on) assert.ok(STORIES.some((s) => s.type === 'land' && s.body === scene.on), id);
+    // A scene on a body belongs to a story told there: by landing on it (Saturn), or by
+    // passing near it (Philae's comet).
+    if (scene.on) assert.ok(STORIES.some((s) => (s.type === 'land' && s.body === scene.on) || (s.type === 'near' && s.target === scene.on)), id);
     else assert.equal(STORIES.find((s) => s.id === id)?.type, 'surface', id);
     assert.equal(scene.lines[0].at, 0);
     for (let i = 1; i < scene.lines.length; i++) assert.ok(scene.lines[i].at > scene.lines[i - 1].at);
@@ -53,8 +55,9 @@ test('the line told is the last one whose moment has come, and the scene ends at
   assert.ok(at(24).done);
 });
 
-test('resting on Saturn offers the plunge of Cassini, and no other body offers a scene', () => {
+test('resting on Saturn offers the plunge of Cassini, on Philae\'s comet its landing, and no other body a scene', () => {
   assert.equal(replayOn('saturn'), 'cassiniPlunge');
+  assert.equal(replayOn('churyumov'), 'philaeLanding');
   assert.equal(replayOn('moon'), null);
   assert.equal(replayOn('jupiter'), null);
 });
@@ -93,7 +96,7 @@ test('Curiosity has a scene of its own day, told in four lines', () => {
   assert.equal(replayFor('curiosity').day, '2012년 8월 6일');
   assert.equal(replayFor('curiosity').lines.length, 4);
   assert.match(replayFrame('curiosity', 17).text, /게일 분화구/);
-  assert.equal(Object.keys(REPLAYS).length, 5);
+  assert.equal(Object.keys(REPLAYS).length, 8);
   assert.equal(replayFor('viking1').day, '1976년 7월 20일');
   assert.match(replayFrame('viking1', 17).text, /25초/);
 });
@@ -102,4 +105,79 @@ test('the seconds since it came down are counted from the moment it is down', ()
   assert.equal(replayFrame('curiosity', 10).after, 0);
   assert.equal(replayFrame('curiosity', 17).after, 0);
   assert.equal(replayFrame('curiosity', 19.5).after, 2.5);
+});
+
+test('Luna 9 and Pathfinder come in bouncing inside their air bags and stop at the place', () => {
+  for (const id of ['luna9', 'pathfinder']) {
+    const scene = REPLAYS[id];
+    const at = (t) => replayFrame(id, t);
+    assert.equal(at(0).liftKm, scene.fromKm, id);
+    assert.equal(at(0).acrossKm, scene.acrossKm, id);
+    assert.equal(at(0).bag, 1, id);
+    assert.ok(!at(0).flame && !at(0).gone);
+    // It touches the ground at the end of the fall and at the end of every hop, and is
+    // in the air between; each hop is lower than the one before.
+    assert.ok(at(scene.fall).liftKm < 1e-9, id);
+    let start = scene.fall;
+    let last = Infinity;
+    for (const hop of scene.hops) {
+      assert.ok(Math.abs(at((start + hop.until) / 2).liftKm - hop.peakKm) < 1e-9, `${id} peak`);
+      assert.ok(hop.peakKm < last, id);
+      last = hop.peakKm;
+      start = hop.until;
+    }
+    assert.equal(scene.hops[scene.hops.length - 1].until, scene.downAt, id);
+    // Nearer all the way, and never going back.
+    let side = Infinity;
+    for (let t = 0; t <= scene.downAt; t += 0.5) {
+      assert.ok(at(t).acrossKm <= side, id);
+      side = at(t).acrossKm;
+    }
+    assert.equal(at(scene.downAt).acrossKm, 0, id);
+    assert.equal(at(scene.downAt).liftKm, 0, id);
+    assert.ok(at(scene.downAt).down && !at(scene.downAt - 0.1).down, id);
+    // The ball has gone round whole turns, so what is inside is the right way up.
+    assert.ok(Math.abs(at(scene.downAt).turn - scene.turns * 2 * Math.PI) < 1e-9, id);
+    // The bags go down after it has stopped, not before.
+    assert.equal(at(scene.downAt).bag, 1, id);
+    assert.ok(at(scene.downAt + scene.bagSeconds / 2).bag > 0 && at(scene.downAt + scene.bagSeconds / 2).bag < 1, id);
+    assert.equal(at(scene.downAt + scene.bagSeconds).bag, 0, id);
+    assert.ok(at(scene.seconds).done && !at(scene.seconds - 0.1).done, id);
+  }
+});
+
+test('Luna 9 opens its petals after its bags are off; Pathfinder is shown open as its bags go down', () => {
+  const luna = REPLAYS.luna9;
+  assert.ok(luna.openAt >= luna.downAt + luna.bagSeconds);
+  assert.ok(!replayFrame('luna9', luna.openAt - 0.1).open);
+  assert.ok(replayFrame('luna9', luna.openAt).open);
+  assert.ok(!replayFrame('pathfinder', 25).open);
+});
+
+test('Philae comes straight down, bounces away twice and ends leaning, with no bags round it', () => {
+  const scene = REPLAYS.philaeLanding;
+  const at = (t) => replayFrame('philaeLanding', t);
+  // Straight down: it does not move sideways until it has touched.
+  assert.equal(at(0).acrossKm, scene.acrossKm);
+  assert.equal(at(scene.fall).acrossKm, scene.acrossKm);
+  assert.ok(at(scene.fall + 2).acrossKm < scene.acrossKm);
+  assert.equal(at(scene.downAt).acrossKm, 0);
+  // The first bounce is far the longer and higher (1 h 50 min against 7 min).
+  const [first, second] = scene.hops;
+  assert.ok(first.until - scene.fall > 3 * (second.until - first.until));
+  assert.ok(first.peakKm > 5 * second.peakKm);
+  // Upright until the last hop, leaning over by the end of it.
+  assert.equal(at(first.until).tilt, 0);
+  assert.ok(Math.abs(at(scene.downAt).tilt - scene.tiltRad) < 1e-9);
+  assert.equal(at(5).bag, 0);
+  assert.equal(at(5).turn, 0);
+  // Drawn small: the comet is 4 km across.
+  assert.ok(at(0).sizeKm < 1 && scene.fromKm < 2 && scene.viewKm < 5);
+});
+
+test('a scene that does not bounce has none of the bouncing measures', () => {
+  const frame = replayFrame('apollo11', 3);
+  assert.equal(frame.bag, undefined);
+  assert.equal(frame.open, undefined);
+  assert.ok(frame.flame);
 });

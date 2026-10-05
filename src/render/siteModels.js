@@ -200,8 +200,8 @@ function fanLander(scene, name, mats, { insight = false } = {}) {
 
 // Mars Pathfinder: the lander's three petals lying open like a flower with the base in
 // the middle, the deflated airbags round them, a camera mast, and the little Sojourner
-// rover out on the ground.
-function pathfinder(scene, name, mats) {
+// rover out on the ground. stowed: on the day it landed, the rover still rides on a petal.
+function pathfinder(scene, name, mats, { stowed = false } = {}) {
   const root = new TransformNode(name, scene);
   drum(scene, `${name}Base`, root, mats.cells, { height: 0.02, diameter: 0.36, tessellation: 3 }, [0, 0.06, 0]);
   for (const [x, z, a] of round(3, 0.27, 1.047)) {
@@ -215,7 +215,8 @@ function pathfinder(scene, name, mats) {
   rod(scene, `${name}Antenna`, root, mats.chrome, [-0.04, 0.15, -0.03], [-0.04, 0.34, -0.03], 0.008, 4);
   dish(scene, `${name}Dish`, root, mats, { at: [-0.08, 0.22, 0.05], toward: [-0.4, 1, 0.3], diameter: 0.1, feed: false });
   // Sojourner: the size of a microwave oven, six wheels, a solar panel for a roof.
-  const rover = group(scene, `${name}Rover`, root, [0.5, 0, -0.28], [0, 0.6, 0]);
+  const [petalX, petalZ] = round(3, 0.27, 1.047)[0];
+  const rover = stowed ? group(scene, `${name}Rover`, root, [petalX, 0.055, petalZ], [0, 1.047, 0]) : group(scene, `${name}Rover`, root, [0.5, 0, -0.28], [0, 0.6, 0]);
   box(scene, `${name}RoverBody`, rover, mats.goldFoil, [0.14, 0.04, 0.09], [0, 0.07, 0]);
   box(scene, `${name}RoverPanel`, rover, mats.cells, [0.15, 0.006, 0.1], [0, 0.094, 0]);
   for (const s of [-1, 1]) for (const x of [-0.055, 0, 0.055]) drum(scene, `${name}RoverWheel${s}${x}`, rover, mats.dark, { height: 0.025, diameter: 0.045, tessellation: 10 }, [x, 0.0225, s * 0.06], [0, 0, 1]);
@@ -313,11 +314,17 @@ function rover(scene, name, mats, { power = 'wings', helicopter = false } = {}) 
 }
 
 // An early probe: a ball that opened four petals to stand itself upright (Luna 9,
-// Mars 3), with its whip antennas up.
-function capsule(scene, name, mats) {
+// Mars 3), with its whip antennas up. closed: as it came down, a bare ball, its petals
+// still shut round it and its antennas folded.
+function capsule(scene, name, mats, { closed = false } = {}) {
   const root = new TransformNode(name, scene);
   part(CreateSphere(`${name}Ball`, { diameter: 0.4, segments: 16 }, scene), root, mats.chrome, [0, 0.22, 0]);
   drum(scene, `${name}Band`, root, mats.grey, { height: 0.02, diameter: 0.404, tessellation: 24 }, [0, 0.22, 0]);
+  if (closed) {
+    // The four petals lie against the ball, their seams showing.
+    for (let k = 0; k < 4; k++) drum(scene, `${name}Seam${k}`, root, mats.foil, { height: 0.012, diameter: 0.408, tessellation: 24 }, [0, 0.22, 0], [Math.cos((k * Math.PI) / 4), 0.0001, Math.sin((k * Math.PI) / 4)]);
+    return fuse(scene, root);
+  }
   for (let k = 0; k < 4; k++) {
     const a = (k * Math.PI) / 2;
     box(scene, `${name}Petal${k}`, root, mats.foil, [0.2, 0.01, 0.34], [Math.sin(a) * 0.3, 0.04, Math.cos(a) * 0.3], [-0.25, a, 0]);
@@ -404,6 +411,24 @@ function beagle(scene, name, mats) {
   rod(scene, `${name}Arm0`, root, mats.chrome, [0, 0.08, 0], [-0.14, 0.3, 0.06], 0.014, 5);
   rod(scene, `${name}Arm1`, root, mats.chrome, [-0.14, 0.3, 0.06], [-0.3, 0.1, 0.1], 0.014, 5);
   box(scene, `${name}Paw`, root, mats.grey, [0.07, 0.05, 0.07], [-0.31, 0.08, 0.1]);
+  return fuse(scene, root);
+}
+
+// Philae: a six-sided box the size of a washing machine, its sides covered in solar
+// cells, standing on three thin legs splayed wide (they were to dig screws into the ice).
+function philae(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  drum(scene, `${name}Body`, root, mats.cells, { height: 0.3, diameter: 0.52, tessellation: 6 }, [0, 0.47, 0]);
+  drum(scene, `${name}Top`, root, mats.plate, { height: 0.014, diameter: 0.53, tessellation: 6 }, [0, 0.627, 0]);
+  drum(scene, `${name}Floor`, root, mats.goldFoil, { height: 0.014, diameter: 0.53, tessellation: 6 }, [0, 0.313, 0]);
+  // The open side with the instruments (the "balcony"), and the drill under it.
+  box(scene, `${name}Balcony`, root, mats.goldFoil, [0.14, 0.2, 0.26], [0.27, 0.45, 0]);
+  box(scene, `${name}Eye`, root, mats.dark, [0.02, 0.06, 0.06], [0.345, 0.5, 0.06]);
+  rod(scene, `${name}Drill`, root, mats.chrome, [0.3, 0.34, -0.06], [0.3, 0.12, -0.06], 0.012, 5);
+  // The hub the legs turn on, and the three legs.
+  drum(scene, `${name}Hub`, root, mats.grey, { height: 0.12, diameter: 0.14, tessellation: 10 }, [0, 0.26, 0]);
+  legs(scene, `${name}Gear`, root, mats, 3, { top: 0.08, foot: 0.62, height: 0.26, turn: 0.52, pad: 0.1 });
+  for (const [x, z, a] of round(2, 0.16, 0.4)) rod(scene, `${name}Antenna${a}`, root, mats.chrome, [x, 0.63, z], [x * 1.3, 0.8, z * 1.3], 0.008, 4);
   return fuse(scene, root);
 }
 
@@ -517,4 +542,11 @@ export const SITE_REPLAY_BUILD = {
   viking1: [viking, {}, 'flame', 0.1],
   huygens: [huygens, {}, 'chute'],
   curiosity: [rover, { power: 'rtg' }, 'crane'],
+  // Those that bounced. 'bag': it comes down inside air bags (the fourth item: the
+  // ball's radius, how high the model's middle is, and how many lobes: Luna 9's two
+  // halves, Pathfinder's cluster), which go down when it stops. 'bare': nothing round it.
+  luna9: [capsule, { closed: true }, 'bag', { radius: 0.37, centre: 0.22, lobes: 2 }],
+  pathfinder: [pathfinder, { stowed: true }, 'bag', { radius: 0.66, centre: 0.2, lobes: 4 }],
+  // Not a story place of its own: played on the comet (core/replay.js philaeLanding).
+  philaeLanding: [philae, {}, 'bare'],
 };

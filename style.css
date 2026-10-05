@@ -4098,3 +4098,16 @@ html[lang="en"] #appVersion {
 html[lang="en"] #settingsTabs [data-tab="news"] {
   display:none;
 }
+
+/* The goal line on a phone: the buttons are narrower, so a tour's next place (the line
+   says only that in English: "Voyager 2 at Neptune") has its two lines of room. */
+@media (max-width: 480px) {
+  html[lang="en"] #guide {
+    padding-left:8px;
+    gap:4px;
+  }
+
+  html[lang="en"] #guide button {
+    padding:2px 6px;
+  }
+}

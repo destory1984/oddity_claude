@@ -1031,7 +1031,7 @@ ${STORY_MORE[target.id]}` : told };
     if (!now) return null;
     return {
       count: `${now.step + 1}/${now.tour.stops.length}`,
-      text: `${now.tour.name}: ${stopName(now.stop)}`,
+      text: t`${now.tour.name}: ${stopName(now.stop)}`,
       targetId: stopTarget(now.stop),
       jump: true,
     };

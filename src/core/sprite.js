@@ -25,6 +25,13 @@ export const REST_ACTIONS = [
   // notebook, a look through a small telescope, a rice ball.
   { sheet: 'rest-yawn', times: 1 }, { sheet: 'rest-note', times: 2 }, { sheet: 'rest-scope', times: 2 },
   { sheet: 'rest-snack', times: 2 },
+  // Ten more, drawn to order on 2026-10-05 (the user: "10개 더 넣자"): tea, a camera, a
+  // paper crane let go, a map turned upside down, a postcard held close, soap bubbles,
+  // curled up afloat, a sock pulled up, a toy rabbit, headphones.
+  { sheet: 'rest-tea', times: 2 }, { sheet: 'rest-photo', times: 1 }, { sheet: 'rest-crane', times: 1 },
+  { sheet: 'rest-map', times: 1 }, { sheet: 'rest-letter', times: 1 }, { sheet: 'rest-bubble', times: 2 },
+  { sheet: 'rest-float', times: 3 }, { sheet: 'rest-socks', times: 1 }, { sheet: 'rest-plush', times: 1 },
+  { sheet: 'rest-music', times: 3 },
 ];
 export const SHEETS = [
   ...FLIGHT_SHEETS, 'brake', 'idle', ...REST_ACTIONS.map((a) => a.sheet), 'rest-sleep',

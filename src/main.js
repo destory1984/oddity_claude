@@ -1411,14 +1411,52 @@ ${STORY_MORE[target.id]}` : told };
   // 오른쪽 아랫 부분에 버튼을 하나 만들어서, 그걸 누르면 모든 글자 표시, 아이콘이 없어지게"):
   // every word, label and button goes (style.css `html.gaze`) but this one, dimmed, which
   // brings them back. She flies on as she was, and a drag still turns the view.
+  // They are drawn into the moon and come back out of it (the user: "모든 글자표시들이 달
+  // 아이콘으로 빨려들어가게"): each piece shrinks toward the button's middle, the whole
+  // layer of labels as one, so every label runs to the same point. Nothing moves for a
+  // player who asked the device for less motion.
   let gazing = false;
+  let gazeMoves = [];
+  const GAZE_PIECES = '#hud > :not(footer), #hud footer > :not(#gazeButton), #hint, #guide, #toast, #heroSay, #skyTold, #testReset';
+  const GAZE_IN_MS = 520;
+  const GAZE_OUT_MS = 380;
+  const gazeFlight = (inward) => {
+    for (const move of gazeMoves) move.cancel();
+    gazeMoves = [];
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve();
+    const moon = $('gazeButton').getBoundingClientRect();
+    const [mx, my] = [moon.left + moon.width / 2, moon.top + moon.height / 2];
+    for (const el of document.querySelectorAll(GAZE_PIECES)) {
+      if (!el.getClientRects().length || getComputedStyle(el).visibility === 'hidden') continue;
+      const box = el.getBoundingClientRect();
+      const origin = `${mx - box.left}px ${my - box.top}px`;
+      const far = { scale: '0.02', opacity: 0, transformOrigin: origin };
+      const near = { scale: '1', opacity: getComputedStyle(el).opacity, transformOrigin: origin };
+      gazeMoves.push(el.animate(inward ? [near, far] : [far, near], {
+        duration: inward ? GAZE_IN_MS : GAZE_OUT_MS, easing: inward ? 'cubic-bezier(.55,0,.85,.35)' : 'cubic-bezier(.15,.65,.45,1)', fill: inward ? 'forwards' : 'none',
+      }));
+    }
+    $('gazeButton').animate([{ scale: '1' }, { scale: inward ? '1.18' : '0.9' }, { scale: '1' }], { duration: inward ? GAZE_IN_MS + 160 : GAZE_OUT_MS, easing: 'ease-out' });
+    return Promise.all(gazeMoves.map((move) => move.finished)).catch(() => {});
+  };
   const setGaze = (on) => {
     gazing = on;
-    document.documentElement.classList.toggle('gaze', on);
     const words = on ? t('우주멍 끝내기: 글자와 단추 보이기') : t('우주멍: 글자와 단추 숨기기');
     $('gazeButton').setAttribute('aria-pressed', String(on));
     $('gazeButton').setAttribute('aria-label', words);
     $('gazeButton').title = words;
+    if (on) {
+      // Put away only once they have flown in (and only if she has not changed her mind).
+      gazeFlight(true).then(() => {
+        if (!gazing) return;
+        document.documentElement.classList.add('gaze');
+        for (const move of gazeMoves) move.cancel();
+        gazeMoves = [];
+      });
+    } else {
+      document.documentElement.classList.remove('gaze');
+      gazeFlight(false);
+    }
   };
   $('gazeButton').addEventListener('click', () => setGaze(!gazing));
   $('pauseButton').addEventListener('click', () => setPaused(!paused));

@@ -7,7 +7,8 @@ import { t } from './i18n.js';
 // Each is a `stage`: a few pieces, and for every moment where each piece stands. A
 // piece's place is in the model's own units (a lander is about one unit across, the
 // ground is y = 0): x to the side, y up, lean in radians about the axis toward the eye
-// (negative: its top goes toward +x), scale (1 if not given), shown (true if not given)
+// (negative: its top goes toward +x), turn in radians about its upright (Apollo 11's two
+// on the ladder), scale (1 if not given), shown (true if not given)
 // and burn (its flame shows). render/siteModels.js builds the pieces under the same
 // names (SITE_REPLAY_BUILD) and render/craft.js puts them where this says.
 // downAt is the scene's own moment (it leaves, it lands, it hits); sounds: what is
@@ -37,6 +38,76 @@ function rollOut(t, { rollAt, ramp, drive, to, liftY = 0, scale }) {
   }
   return { x: 0.66 + (to - 0.66) * ease(t, rollAt + ramp, rollAt + ramp + drive), y: 0, lean: 0, scale };
 }
+
+// One hop of a walker on the Moon: `high` at the top, down again every `period` seconds.
+const hop = (s, period, high) => {
+  const u = (s / period) % 1;
+  return high * 4 * u * (1 - u);
+};
+// Down the ladder on the front leg (its top at the porch, x 0.25, y 0.41; its foot on the
+// ground at x 0.5) between two moments, a rung at a time.
+function downLadder(t, from, to) {
+  const u = clamp((t - from) / (to - from));
+  const rung = Math.min(9, Math.floor(u * 9));
+  const v = (rung + ease(u * 9 - rung, 0.2, 0.8)) / 9;
+  return { x: 0.25 + 0.25 * v, y: 0.41 * (1 - v), z: 0 };
+}
+
+// Apollo 11, the longest of them (the user, 2026-10-06: "착륙 -> 우주인이 사다리 타고
+// 나와서 -> 그 위대한 문장 말하고, 국기 꽂고 -> 통통통 뛰어다니는 것까지 해줘"): Eagle
+// comes down, Armstrong climbs down the ladder and says his sentence, Aldrin follows, the
+// flag goes up where it stands now, and the two hop about. (Six and a half hours passed
+// between the landing and the first step: told, and drawn as seconds.)
+export const APOLLO11 = {
+  name: t('이글의 착륙'),
+  day: t('1969년 7월 20일'),
+  seconds: 58,
+  downAt: 17,
+  viewKm: 42,
+  sounds: [[13.3, 'landingBurn'], [17, 'landed'], [30, 'stood'], [42, 'stood'], [44, 'hops']],
+  lines: [
+    { at: 0, text: t('1969년 7월 20일. 암스트롱과 올드린이 탄 착륙선 이글이 고요의 바다로 내려옵니다.') },
+    { at: 5, text: t('컴퓨터가 고른 자리는 바위가 널린 분화구였습니다. 암스트롱이 손으로 몰아 그 너머로 넘어갑니다.') },
+    { at: 11, text: t('"60초." 연료가 얼마 남지 않았다고 지상에서 알립니다. 엔진 바람에 먼지가 사방으로 날립니다.') },
+    { at: 17, text: t('"휴스턴, 여기는 고요의 기지. 이글은 착륙했다." 한국 시간으로 7월 21일 새벽 5시 17분이었습니다.') },
+    { at: 23, text: t('여섯 시간 반 뒤, 암스트롱이 문을 열고 나와 사다리 아홉 칸을 천천히 내려옵니다.') },
+    { at: 30, text: t('"이것은 한 사람에게는 작은 한 걸음이지만, 인류에게는 위대한 도약이다." 6억 명이 지켜봤습니다.') },
+    { at: 37, text: t('19분 뒤 올드린도 내려옵니다. 둘은 성조기를 세웁니다. 바람이 없어 깃발 위쪽에 가로대를 넣었습니다.') },
+    { at: 44, text: t('달의 중력은 지구의 6분의 1입니다. 둘은 캥거루처럼 통통 뛰는 것이 가장 편하다는 것을 알아냅니다.') },
+    { at: 51, text: t('2시간 31분 동안 돌과 흙 21.5kg을 모으고 돌아갔습니다. 발자국은 지금도 그대로 남아 있습니다.') },
+  ],
+  stage(t) {
+    // The hopping about: twelve seconds from 44, each ending on the ground.
+    const s = Math.min(Math.max(t, 44), 56) - 44;
+    const p = s / 12;
+    const turn = 2 * Math.PI * p;
+    let neil;
+    if (t < 37) neil = { x: 0.5, y: 0, z: 0 };
+    // Over to where the flag will stand, in short steps.
+    else if (t < 40) neil = { x: 0.5, y: hop(t - 37, 0.6, 0.04), z: 0.3 * ease(t, 37, 40) };
+    // Round in a ring and back to the flag.
+    else neil = { x: 1.1 - 0.6 * Math.cos(turn), y: hop(s, 0.8, 0.14), z: 0.3 - 0.5 * Math.sin(turn) };
+    let buzz;
+    if (t < 42.5) buzz = { x: 0.5 + 0.28 * ease(t, 40, 42.5), y: hop(t - 40, 0.5, 0.04), z: 0.3 * ease(t, 40, 42.5) };
+    // Out along the ground and back, swinging to either side.
+    else buzz = { x: 0.78 + 0.75 * Math.sin(Math.PI * p), y: hop(s, 0.75, 0.12), z: 0.3 + 0.4 * Math.sin(turn) };
+    return {
+      // It flies on over the crater the computer had chosen, then straight down.
+      lander: { x: -1.0 * (1 - ease(t, 4, 14)), y: comeDown(t, 17, 2), burn: t < 17 },
+      // Each came down backwards, facing the lander with both hands on the ladder (the
+      // user: "내 기억으로는 내려올 떄에 손으로 사다리를 잡고, 반대로 내려왔는데"):
+      // a piece of its own with the arms up (turn: radians about the upright; half a
+      // turn faces it to the lander), and on the ground he turns round to face out.
+      // Drawn half as large again as they were, to be seen at all.
+      neilLadder: { ...downLadder(t, 23.5, 29.5), turn: Math.PI, scale: 1.5, shown: t >= 23.5 && t < 29.5 },
+      neil: { ...neil, turn: Math.PI * (1 - ease(t, 29.5, 30.5)), scale: 1.5, shown: t >= 29.5 },
+      buzzLadder: { ...downLadder(t, 36, 40), turn: Math.PI, scale: 1.5, shown: t >= 36 && t < 40 },
+      buzz: { ...buzz, turn: Math.PI * (1 - ease(t, 40, 41)), scale: 1.5, shown: t >= 40 },
+      // It goes up where it stands in the place as it is now (render/siteModels.js apollo).
+      flag: { x: 0.62, y: 0, z: 0.3, scale: Math.max(0.02, ease(t, 40.5, 42)), shown: t >= 40.5 },
+    };
+  },
+};
 
 export const MOON_SCENES = {
   // Apollo 17's ascent stage leaves the Moon, seen as the rover's camera saw it (the
@@ -178,7 +249,7 @@ export const MOON_SCENES = {
     lines: [
       { at: 0, text: t('2023년 8월 23일. 인도의 착륙선 비크람이 달 남극 가까이, 남위 69도의 땅으로 내려옵니다.') },
       { at: 9, text: t('내려앉았습니다. 인도는 달에 내린 네 번째 나라가 되었고, 남극 가까이에 내린 것은 처음입니다.') },
-      { at: 15, text: t('몇 시간 뒤 경사로가 펴지고, 여섯 바퀴 달린 26kg짜리 탐사차 프라기안이 굴러 내려옵니다.') },
+      { at: 15, text: t('몇 시간 뒤 경사로가 펴지고, 여섯 바퀴 달린 26kg짜리 탐사차 프라그얀이 굴러 내려옵니다.') },
       { at: 21, text: t('둘은 달의 낮 하루, 지구 날로 두 주를 일했습니다. 남극 가까운 흙에서 황을 찾아냈습니다.') },
     ],
     stage(t) {
@@ -207,7 +278,7 @@ export const MOON_SCENES = {
       const u = clamp(t / 9);
       const s = t - 9;
       // The flash swells in a quarter of a second and dies away in a second and a half.
-      const flash = s < 0 ? 0 : s < 0.25 ? (s / 0.25) * 2.8 : 2.8 * Math.max(0, 1 - (s - 0.25) / 1.4);
+      const flash = s < 0 ? 0 : s < 0.25 ? (s / 0.25) * 2 : 2 * Math.max(0, 1 - (s - 0.25) / 1.4);
       return {
         probe: { x: -6.3 * (1 - u), y: 0.1 + 5.4 * (1 - u), shown: t < 9 },
         flash: { x: 0, y: 0.15, scale: Math.max(0.01, flash), shown: flash > 0 },

@@ -182,6 +182,8 @@ export function createSound() {
     const t = ctx.currentTime + start;
     const src = ctx.createBufferSource();
     src.buffer = noiseBuffer;
+    // The buffer holds two seconds: a longer sound (a rocket's roar) goes round it.
+    src.loop = true;
     const filter = ctx.createBiquadFilter();
     filter.type = type;
     filter.frequency.setValueAtTime(freq, t);
@@ -225,6 +227,17 @@ export function createSound() {
     sceneBus.gain.cancelScheduledValues(ctx.currentTime);
     sceneBus.gain.setValueAtTime(1, ctx.currentTime);
     return sceneBus;
+  }
+
+  // Wind past a parachute for `seconds`: a soft band of noise that swells twice a
+  // breath, with a low flutter of the canopy under it.
+  function windDown(seconds) {
+    const out = scene();
+    noise({ length: seconds, volume: 0.1, type: 'bandpass', freq: 420, to: 300, attack: seconds * 0.7, out });
+    for (let at = 0.6; at < seconds - 1.6; at += 2.3) {
+      noise({ start: at, length: 2.1, volume: 0.11, type: 'bandpass', freq: 650, to: 420, attack: 0.9, out });
+    }
+    tone({ freq: 70, to: 62, type: 'triangle', length: seconds, volume: 0.04, attack: seconds * 0.5, out });
   }
 
   const CUES = {
@@ -372,6 +385,43 @@ export function createSound() {
       noise({ length: 2.6, volume: 0.45, type: 'lowpass', freq: 300, to: 60, attack: 0.02, out });
       tone({ freq: 70, to: 34, length: 2.2, volume: 0.3, out });
       for (let k = 0; k < 12; k++) noise({ start: 0.5 + k * 0.17 + 0.05 * Math.sin(k * 5.1), length: 0.04, volume: 0.09 * (1 - k / 14), type: 'bandpass', freq: 1500 + 500 * Math.sin(k * 2.3), out });
+    },
+    // Coming down under a parachute where there is air (Titan, Mars): wind past the
+    // canopy, swelling and sinking, for the whole way down. `chute` runs seventeen
+    // seconds (Huygens), `chuteShort` five (Pathfinder, before its air bags hit).
+    chute: () => windDown(17),
+    chuteShort: () => windDown(5),
+    // A ball in air bags hits and springs back: a soft thud and a rubbery note rising.
+    bounce: () => {
+      const out = scene();
+      noise({ length: 0.22, volume: 0.22, type: 'lowpass', freq: 520, to: 160, attack: 0.02, out });
+      tone({ freq: 110, to: 190, type: 'triangle', length: 0.3, volume: 0.13, out });
+    },
+    // Burning up in an atmosphere (Cassini into Saturn): a roar that grows for ten
+    // seconds with a crackle on it, and is cut off as the craft comes apart.
+    burnUp: () => {
+      const out = scene();
+      noise({ length: 10, volume: 0.4, type: 'lowpass', freq: 180, to: 700, attack: 9.6, out });
+      noise({ length: 10, volume: 0.1, type: 'bandpass', freq: 1200, to: 3000, attack: 9.6, out });
+      tone({ freq: 52, to: 90, length: 10, volume: 0.16, attack: 9.5, out });
+      for (let k = 0; k < 26; k++) {
+        const at = 3 + 7 * (k / 26) ** 0.7 + 0.09 * Math.sin(k * 6.1);
+        noise({ start: at, length: 0.05, volume: 0.05 + 0.006 * k, type: 'bandpass', freq: 2000 + 800 * Math.sin(k * 2.7), out });
+      }
+      // It comes apart: a crack, and pieces fizzing out.
+      noise({ start: 10, length: 0.1, volume: 0.4, type: 'bandpass', freq: 2400, to: 800, out });
+      noise({ start: 10.05, length: 1.6, volume: 0.14, type: 'highpass', freq: 3500, to: 1500, out });
+    },
+    // Two people hopping about on the Moon for twelve seconds (Apollo 11): a soft pat
+    // and a small note springing up at each landing, one of them a little lower.
+    hops: () => {
+      const out = scene();
+      for (const [period, freq, volume] of [[0.8, 392, 0.07], [0.75, 330, 0.05]]) {
+        for (let at = period; at < 12.05; at += period) {
+          noise({ start: at, length: 0.09, volume: volume * 1.6, type: 'lowpass', freq: 500, to: 200, attack: 0.01, out });
+          tone({ freq, to: freq * 1.5, type: 'triangle', start: at, length: 0.18, volume, out });
+        }
+      }
     },
     // It stands: two bells over the thump.
     stood: () => {

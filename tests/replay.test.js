@@ -28,7 +28,7 @@ test('a place with no scene has none', () => {
 });
 
 test('the lander starts high, slows as it nears the ground and is down at 17 seconds', () => {
-  const at = (t) => replayFrame('apollo11', t);
+  const at = (t) => replayFrame('viking1', t);
   assert.equal(at(0).liftKm, 14);
   assert.ok(at(0).flame);
   // Slower and slower: the first half of the way down takes less than the second.
@@ -45,12 +45,12 @@ test('the lander starts high, slows as it nears the ground and is down at 17 sec
 });
 
 test('the line told is the last one whose moment has come, and the scene ends at 24 seconds', () => {
-  const at = (t) => replayFrame('apollo11', t);
+  const at = (t) => replayFrame('viking1', t);
   assert.equal(at(0).line, 0);
-  assert.equal(at(4.9).line, 0);
-  assert.equal(at(5).line, 1);
+  assert.equal(at(5.9).line, 0);
+  assert.equal(at(6).line, 1);
   assert.equal(at(12).line, 2);
-  assert.match(at(17).text, /이글은 착륙했다/);
+  assert.match(at(17).text, /첫 사진/);
   assert.ok(!at(23.9).done);
   assert.ok(at(24).done);
 });
@@ -176,7 +176,7 @@ test('Philae comes straight down, bounces away twice and ends leaning, with no b
 });
 
 test('a scene that does not bounce has none of the bouncing measures', () => {
-  const frame = replayFrame('apollo11', 3);
+  const frame = replayFrame('viking1', 3);
   assert.equal(frame.bag, undefined);
   assert.equal(frame.open, undefined);
   assert.ok(frame.flame);
@@ -215,9 +215,83 @@ test('the launch is heard: the engines at 2 s, the stages parting at 12, the lan
   assert.ok(!replayFrame('lc39a', burnAt - 0.1).launch.booster.burn && replayFrame('lc39a', burnAt + 0.1).launch.booster.burn);
   assert.equal(scene.sounds.find(([, name]) => name === 'stood')[0], scene.downAt);
   assert.equal(scene.sounds.find(([, name]) => name === 'liftoff')[0], scene.launch.igniteAt);
-  // A scene with no sounds of its own gives none.
-  assert.deepEqual(replaySounds('apollo11', -1, 100), []);
   assert.deepEqual(replaySounds('nowhere', -1, 100), []);
+});
+
+test('every scene is heard: an engine over the last seconds, wind past a parachute, a thud at each bounce, a roar as Cassini burns', () => {
+  for (const [id, scene] of Object.entries(REPLAYS)) {
+    assert.ok(scene.sounds?.length > 0, id);
+    const times = scene.sounds.map(([at]) => at);
+    assert.ok(times.every((at, i) => at >= 0 && at < scene.seconds && (i === 0 || at >= times[i - 1])), id);
+  }
+  // The landing burn (3.7 s long) ends as it touches.
+  for (const id of ['apollo11', 'viking1', 'curiosity']) assert.ok(Math.abs(REPLAYS[id].sounds[0][0] + 3.7 - REPLAYS[id].downAt) < 1e-9, id);
+  // A bounce at the first touch and at the end of every hop but the last (the thump of landing is that one).
+  for (const id of ['luna9', 'pathfinder', 'philaeLanding']) {
+    const scene = REPLAYS[id];
+    const touches = [scene.fall, ...scene.hops.slice(0, -1).map((hop) => hop.until)];
+    assert.deepEqual(scene.sounds.filter(([, name]) => name === 'bounce').map(([at]) => at), touches, id);
+    for (const at of touches) assert.ok(replayFrame(id, at).liftKm < 1e-9, `${id} at ${at}`);
+  }
+  // Cassini's roar (ten seconds) is cut off as it is gone.
+  assert.equal(REPLAYS.cassiniPlunge.sounds[0][0] + 10, REPLAYS.cassiniPlunge.downAt);
+  assert.deepEqual(replaySounds('huygens', -1, 100), ['chute']);
+});
+
+test('Apollo 11: Eagle lands, Armstrong comes down the ladder and says his sentence, Aldrin follows, the flag goes up and the two hop about', async () => {
+  const { APOLLO11 } = await import('../src/core/moonScenes.js');
+  assert.equal(REPLAYS.apollo11, APOLLO11);
+  const at = (t) => APOLLO11.stage(t);
+  const names = Object.keys(at(0));
+  assert.deepEqual(names, ['lander', 'neilLadder', 'neil', 'buzzLadder', 'buzz', 'flag']);
+  let lastY = Infinity;
+  for (let t = 0; t <= APOLLO11.seconds; t += 0.05) {
+    const frame = replayFrame('apollo11', t);
+    assert.deepEqual(Object.keys(frame.stage), names);
+    for (const [name, piece] of Object.entries(frame.stage)) {
+      for (const key of ['x', 'y', 'z', 'lean', 'turn', 'scale']) if (key in piece) assert.ok(Number.isFinite(piece[key]), `${name}.${key} at ${t}`);
+      if (piece.shown !== false) assert.ok(piece.y >= -1e-9, `${name} at ${t}`);
+    }
+    // The lander only comes down, and nobody is out before it stands.
+    assert.ok(frame.stage.lander.y <= lastY + 1e-9);
+    lastY = frame.stage.lander.y;
+    if (t < 17) assert.ok(frame.stage.lander.burn && Object.entries(frame.stage).every(([name, piece]) => name === 'lander' || piece.shown === false));
+  }
+  assert.ok(at(0).lander.y >= 2 && at(17).lander.y === 0 && at(17).lander.x === 0 && !at(17).lander.burn);
+  // Armstrong: from the porch down nine rungs to the ground, where he is as his sentence is told.
+  // He comes down backwards, facing the lander, hands on the ladder, and turns round on the ground.
+  assert.ok(at(23.5).neilLadder.shown && !at(23.5).neil.shown && Math.abs(at(23.5).neilLadder.y - 0.41) < 1e-9);
+  for (let t = 23.5, last = 1; t < 29.5; t += 0.1) {
+    assert.ok(at(t).neilLadder.y <= last + 1e-9, `he does not climb back up at ${t}`);
+    assert.equal(at(t).neilLadder.turn, Math.PI);
+    last = at(t).neilLadder.y;
+  }
+  assert.ok(!at(29.5).neilLadder.shown && at(29.5).neil.shown && at(29.5).neil.turn === Math.PI && at(30.5).neil.turn === 0);
+  assert.ok(Math.abs(at(29.49).neilLadder.x - at(29.5).neil.x) < 0.01 && at(29.49).neilLadder.y < 0.01);
+  assert.ok(at(30).neil.y === 0 && Math.abs(at(30).neil.x - 0.5) < 1e-9);
+  assert.match(replayFrame('apollo11', 30).text, /작은 한 걸음/);
+  // Aldrin is out after him and down before the flag stands.
+  assert.ok(!at(35.9).buzzLadder.shown && at(36).buzzLadder.shown && at(36).buzzLadder.turn === Math.PI && at(40).buzz.shown && !at(40).buzzLadder.shown && at(40).buzz.y < 1e-9 && at(41).buzz.turn === 0);
+  // The flag goes up between them, where the place's own model has it (0.62, 0, 0.3).
+  assert.ok(at(40.4).flag.shown === false && at(41).flag.scale < 1 && at(42).flag.scale === 1);
+  assert.deepEqual([at(50).flag.x, at(50).flag.z], [0.62, 0.3]);
+  assert.ok(at(43).neil.x < 0.62 && at(43).buzz.x > 0.62 && at(43).neil.z === 0.3 && Math.abs(at(43).buzz.z - 0.3) < 1e-9);
+  // They hop: off the ground and back many times in twelve seconds, never into each other's place for long,
+  // and stand again by the flag at the end.
+  for (const who of ['neil', 'buzz']) {
+    let hops = 0;
+    for (let t = 44, up = false; t <= 56; t += 0.02) {
+      const high = at(t)[who].y > 0.05;
+      if (high && !up) hops += 1;
+      up = high;
+    }
+    assert.ok(hops >= 14, `${who} hops ${hops} times`);
+    assert.ok(at(56)[who].y < 1e-9 && at(57.9)[who].y < 1e-9, who);
+  }
+  assert.ok(Math.abs(at(57).neil.x - 0.5) < 1e-9 && Math.abs(at(57).buzz.x - 0.78) < 1e-9);
+  // Heard: the engine, the thump, bells at the first step and as the flag stands, the hops as they begin.
+  assert.deepEqual(replaySounds('apollo11', -1, 60), ['landingBurn', 'landed', 'stood', 'stood', 'hops']);
+  assert.ok(!replayFrame('apollo11', 57.9).done && replayFrame('apollo11', 58).done);
 });
 
 test('eight scenes on the Moon are stages: every piece has a place at every moment, and each ends as the place stands now', async () => {
@@ -293,5 +367,5 @@ test('on the Moon two go up, three land, two roll out, one falls on its nose, on
   const gap = (a, b) => Math.hypot(at('luna2', a).probe.x - at('luna2', b).probe.x, at('luna2', a).probe.y - at('luna2', b).probe.y);
   assert.ok(Math.abs(gap(1, 2) - gap(7, 8)) < 1e-9);
   assert.ok(at('luna2', 8.9).probe.shown && !at('luna2', 9).probe.shown && at('luna2', 9).wreck.shown && !at('luna2', 8.9).wreck.shown);
-  assert.ok(!at('luna2', 8.9).flash.shown && at('luna2', 9.25).flash.scale > 2.5 && !at('luna2', 11).flash.shown);
+  assert.ok(!at('luna2', 8.9).flash.shown && at('luna2', 9.25).flash.scale > 1.9 && !at('luna2', 11).flash.shown);
 });

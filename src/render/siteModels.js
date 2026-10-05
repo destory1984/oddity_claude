@@ -616,7 +616,42 @@ function lunaBall(scene, name, mats) {
   return fuse(scene, root);
 }
 
+// A person in a moon suit, 0.22 tall (drawn a little large beside the lander, to be
+// seen), feet at y = 0: white suit and pack, a gold visor toward +x.
+// climbing: both arms up and forward, hands on a ladder's rails.
+function astronaut(scene, name, mats, { climbing = false } = {}) {
+  const root = new TransformNode(name, scene);
+  for (const s of [-1, 1]) {
+    box(scene, `${name}Leg${s}`, root, mats.white, [0.035, 0.085, 0.035], [0, 0.0425, s * 0.022]);
+    box(scene, `${name}Boot${s}`, root, mats.grey, [0.05, 0.016, 0.036], [0.008, 0.008, s * 0.022]);
+    rod(scene, `${name}Arm${s}`, root, mats.white, [0.005, 0.15, s * 0.045], climbing ? [0.075, 0.185, s * 0.04] : [0.03, 0.085, s * 0.06], 0.026, 6);
+  }
+  box(scene, `${name}Body`, root, mats.white, [0.06, 0.085, 0.085], [0, 0.125, 0]);
+  box(scene, `${name}Pack`, root, mats.white, [0.04, 0.1, 0.075], [-0.045, 0.14, 0]);
+  box(scene, `${name}Chest`, root, mats.grey, [0.014, 0.03, 0.04], [0.034, 0.13, 0]);
+  sphere(scene, `${name}Helmet`, root, mats.white, 0.07, [0, 0.19, 0]);
+  sphere(scene, `${name}Visor`, root, mats.goldFoil, 0.052, [0.014, 0.19, 0]);
+  return fuse(scene, root);
+}
+
+function flagAlone(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  flag(scene, name, root, mats, [0, 0, 0]);
+  return fuse(scene, root);
+}
+
 const MOON_STAGES = {
+  apollo11: (scene, name, mats) => ({
+    pieces: {
+      lander: apollo(scene, `${name}Lander`, mats, { withFlag: false }),
+      neilLadder: astronaut(scene, `${name}NeilLadder`, mats, { climbing: true }),
+      neil: astronaut(scene, `${name}Neil`, mats),
+      buzzLadder: astronaut(scene, `${name}BuzzLadder`, mats, { climbing: true }),
+      buzz: astronaut(scene, `${name}Buzz`, mats),
+      flag: flagAlone(scene, `${name}Flag`, mats),
+    },
+    flames: { lander: [0, 0.12, 0, 0.34, 0.2] },
+  }),
   apollo17: (scene, name, mats) => ({
     pieces: {
       descent: apollo(scene, `${name}Descent`, mats, { stage: 'descent' }),
@@ -638,7 +673,7 @@ const MOON_STAGES = {
       lander: deckLander(scene, `${name}Lander`, mats, { skin: 'foil' }),
       rover: rover(scene, `${name}Rover`, mats, { power: 'lid' }),
     },
-    flames: { lander: [0, 0.02, 0, 0.34, 0.2] },
+    flames: { lander: [0, 0.12, 0, 0.34, 0.2] },
   }),
   slim: (scene, name, mats) => {
     const bit = (id, material, size) => {
@@ -655,19 +690,19 @@ const MOON_STAGES = {
         lev1: bit('Lev1', mats.goldFoil, 0.09),
         lev2: bit('Lev2', mats.chrome, 0.07),
       },
-      flames: { slim: [0, -0.42, 0, 0.3, 0.16] },
+      flames: { slim: [0, -0.25, 0, 0.3, 0.16] },
     };
   },
   odysseus: (scene, name, mats) => ({
     pieces: { lander: odysseus(scene, `${name}Lander`, mats, { upright: true }) },
-    flames: { lander: [0, -0.04, 0, 0.32, 0.18] },
+    flames: { lander: [0, 0.06, 0, 0.32, 0.18] },
   }),
   chandrayaan3: (scene, name, mats) => ({
     pieces: {
       lander: deckLander(scene, `${name}Lander`, mats, {}),
       rover: rover(scene, `${name}Rover`, mats, { power: 'wings' }),
     },
-    flames: { lander: [0, 0.02, 0, 0.34, 0.2] },
+    flames: { lander: [0, 0.12, 0, 0.34, 0.2] },
   }),
   luna2: (scene, name, mats) => {
     const flash = new TransformNode(`${name}Flash`, scene);
@@ -688,7 +723,7 @@ const MOON_STAGES = {
       surveyor: surveyor(scene, `${name}Surveyor`, mats),
       lander: apollo(scene, `${name}Lander`, mats, { withFlag: false }),
     },
-    flames: { lander: [0, 0.02, 0, 0.34, 0.2] },
+    flames: { lander: [0, 0.12, 0, 0.34, 0.2] },
   }),
 };
 
@@ -714,12 +749,10 @@ export const SITE_BUILD = {
   messenger: [messenger, {}], venera7: [capsule, {}], venera13: [capsule, {}],
 };
 
-// For "그날로" (core/replay.js): what came down that day, as it was then. The Apollo
-// lander has no flag beside it yet.
+// For "그날로" (core/replay.js): what came down that day, as it was then.
 // The third item says what shows while it comes down: an engine's flame (the default)
 // a parachute, or a rocket stage it hangs from (the sky crane).
 export const SITE_REPLAY_BUILD = {
-  apollo11: [apollo, { withFlag: false }],
   // (The fourth item: how high the flame's middle is; Viking's engines are under its
   // body, between the legs.)
   viking1: [viking, {}, 'flame', 0.1],

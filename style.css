@@ -3503,6 +3503,28 @@ footer .throttle .rangeLabels {
   display:none;
 }
 
+/* "그날로" (and an eclipse to watch): a scene waits behind it, so it is the one filled
+   button of the panel, gold with dark letters, and a ring goes out from it every two
+   seconds (the user, 2026-10-06: "색깔을 좀 달리해서, 사람들이 눌러보게 쉽게 해줘"). */
+#hud #targetPanel #replayButton {
+  border-color:#ffe2a6;
+  background:var(--gold);
+  color:#1b1406;
+  font-weight:700;
+  animation:thenRing 2.2s ease-out infinite;
+}
+
+@keyframes thenRing {
+  0% { box-shadow:0 0 0 0 rgba(246,185,81,.6); }
+  70%, 100% { box-shadow:0 0 0 9px rgba(246,185,81,0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hud #targetPanel #replayButton {
+    animation:none;
+  }
+}
+
 /* On a phone five rows of them must end above the notice (288px from the top): 6px
    between rows there. */
 @media (max-width: 480px) {

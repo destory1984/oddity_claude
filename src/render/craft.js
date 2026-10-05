@@ -332,6 +332,13 @@ export function createSiteModels(scene, siteList) {
     then.set('cassiniPlunge', { node, flame: null, fire, fireMaterial });
   }
 
+  // A stage of pieces is turned to face whoever watches as it begins: its +x across the
+  // view to the right, its +z away (Apollo 11's ladder was on the far side of the lander
+  // and the two who came down it were hidden). The place's own model keeps that turn
+  // afterwards, so nothing swings round as the scene ends. id → the way that was "away".
+  const faced = new Map();
+  let playing = null;
+
   // sites, bodies: this frame's positions (km); position: the traveler (km).
   // replay: { id, liftKm, flame } while that place's day is played again: its model as
   // it was then stands liftKm above the ground in place of the one that is there now.
@@ -341,6 +348,7 @@ export function createSiteModels(scene, siteList) {
   // (1 → 0), open (it now stands as the place's own model does), side (the way it comes
   // from) and sizeKm (drawn that wide whatever the distance: Philae on its small comet).
   function update(sites, bodies, position, replay = null) {
+    if (!replay) playing = null;
     for (const [id, old] of then) if (replay?.id !== id || replay.open) old.node.setEnabled(false);
     for (const site of sites) {
       const card = cards.get(site.id);
@@ -371,8 +379,20 @@ export function createSiteModels(scene, siteList) {
           old.flame.position.set(0.6 * replay.after ** 2, 0.5 * replay.after, 0);
         }
       }
+      if (old?.stage && playing !== site.id) {
+        playing = site.id;
+        faced.set(site.id, new Vector3(rel[0], rel[1], rel[2]));
+      }
       // Stand it on the ground: turn the model's +y onto the local "up".
       Quaternion.FromUnitVectorsToRef(Vector3.Up(), up, node.rotationQuaternion);
+      const away = faced.get(site.id);
+      if (away) {
+        const z = away.subtract(up.scale(Vector3.Dot(away, up)));
+        if (z.length() > 1e-9) {
+          z.normalize();
+          Quaternion.RotationQuaternionFromAxisToRef(Vector3.Cross(up, z), up, z, node.rotationQuaternion);
+        }
+      }
       if (old && replay.across) {
         rel[0] += replay.across[0] / KM_PER_UNIT;
         rel[1] += replay.across[1] / KM_PER_UNIT;
@@ -414,6 +434,7 @@ export function createSiteModels(scene, siteList) {
           if (!piece.isEnabled()) continue;
           piece.position.set(at.x ?? 0, at.y ?? 0, at.z ?? 0);
           piece.rotation.z = at.lean ?? 0;
+          piece.rotation.y = at.turn ?? 0;
           piece.scaling.setAll(at.scale ?? 1);
           old.stage.flames[name]?.setEnabled(Boolean(at.burn));
         }

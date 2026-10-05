@@ -1,26 +1,16 @@
 import { t } from './i18n.js';
-import { MOON_SCENES } from './moonScenes.js';
+import { MOON_SCENES, APOLLO11 } from './moonScenes.js';
 // "그날로": at a story place, the day it is known for is played again in the close
 // view. The model that stands there comes down as it did, and a few lines tell what
-// happened, each at its moment: Apollo 11's landing, Huygens's on Titan, Viking 1's and Curiosity's on Mars, and (not at a
+// happened, each at its moment: Apollo 11's landing and first steps, Huygens's on Titan, Viking 1's and Curiosity's on Mars, and (not at a
 // place but on a body) Cassini's plunge into Saturn. Three came down bouncing: Luna 9 and
 // Pathfinder inside air bags, and Philae on its comet, which could not hold on.
 // seconds: how long the scene lasts. downAt: when it touches the ground.
 // fromKm: how high the model starts (it is drawn 6 km wide, so this is in drawn km).
 export const REPLAYS = {
-  apollo11: {
-    name: t('이글의 착륙'),
-    day: t('1969년 7월 20일'),
-    seconds: 24,
-    downAt: 17,
-    fromKm: 14,
-    lines: [
-      { at: 0, text: t('1969년 7월 20일. 암스트롱과 올드린이 탄 착륙선 이글이 고요의 바다로 내려옵니다.') },
-      { at: 5, text: t('컴퓨터가 고른 자리는 바위가 널린 분화구였습니다. 암스트롱이 손으로 몰아 그 너머로 넘어갑니다.') },
-      { at: 11, text: t('"60초." 연료가 얼마 남지 않았다고 지상에서 알립니다. 엔진 바람에 먼지가 사방으로 날립니다.') },
-      { at: 17, text: t('"휴스턴, 여기는 고요의 기지. 이글은 착륙했다." 한국 시간으로 7월 21일 새벽 5시 17분이었습니다.') },
-    ],
-  },
+  // Apollo 11 is a stage of pieces now (core/moonScenes.js APOLLO11): it lands, the two
+  // climb down, the flag goes up and they hop about.
+  apollo11: APOLLO11,
   // It came down under a parachute, with no engine (render/siteModels.js shows which).
   huygens: {
     name: t('하위헌스의 착륙'),
@@ -28,6 +18,8 @@ export const REPLAYS = {
     seconds: 24,
     downAt: 17,
     fromKm: 14,
+    // Titan has air: the wind past its parachute, all the way down.
+    sounds: [[0, 'chute']],
     lines: [
       { at: 0, text: t('2005년 1월 14일. 카시니에서 떨어져 나온 하위헌스가 낙하산을 펴고 타이탄의 주황빛 안개 속으로 내려옵니다.') },
       { at: 6, text: t('2시간 30분 동안 내려오며 강줄기와 바닷가처럼 보이는 땅을 찍어 보냈습니다.') },
@@ -41,6 +33,7 @@ export const REPLAYS = {
     seconds: 24,
     downAt: 17,
     fromKm: 14,
+    sounds: [[13.3, 'landingBurn']],
     lines: [
       { at: 0, text: t('1976년 7월 20일. 바이킹 1호 착륙선이 궤도선에서 떨어져 나와 크리세 평원으로 내려옵니다.') },
       { at: 6, text: t('낙하산을 버린 뒤 엔진 셋으로 속도를 줄입니다. 땅을 덜 건드리려고 불꽃을 넓게 퍼뜨린 엔진입니다.') },
@@ -55,6 +48,8 @@ export const REPLAYS = {
     seconds: 24,
     downAt: 17,
     fromKm: 14,
+    // The cords are cut and the stage flies off.
+    sounds: [[13.3, 'landingBurn'], [17.2, 'clunk'], [17.5, 'ascent']],
     lines: [
       { at: 0, text: t('2012년 8월 6일. 무게 899kg의 큐리오시티는 에어백으로 받기에는 너무 무거웠습니다.') },
       { at: 6, text: t('그래서 로켓을 뿜는 하강단이 공중에 멈춰 서고, 줄로 차를 매달아 천천히 내립니다.') },
@@ -79,6 +74,8 @@ export const REPLAYS = {
     fromKm: 70,
     toKm: 20,
     acrossKm: 130,
+    // It begins to glow a third of the way in and is gone at downAt.
+    sounds: [[5, 'burnUp']],
     lines: [
       { at: 0, text: t('2017년 9월 15일. 13년 동안 토성을 돈 카시니가 연료를 거의 다 쓰고 토성으로 뛰어듭니다.') },
       { at: 5, text: t('엔셀라두스와 타이탄의 바다를 지구의 미생물로 더럽히지 않으려고 고른 끝이었습니다.') },
@@ -109,6 +106,8 @@ export const REPLAYS = {
     turns: 3,
     bagSeconds: 2,
     openAt: 17,
+    // Each touch before the last (that one is the thump of landing).
+    sounds: [[6, 'bounce'], [9, 'bounce'], [11.4, 'bounce']],
     lines: [
       { at: 0, text: t('1966년 2월 3일. 소련의 루나 9호가 폭풍의 대양으로 내려옵니다. 달에 온전히 내린 기계는 아직 없었습니다.') },
       { at: 5, text: t('땅에 닿기 직전 공 모양 캡슐을 내던집니다. 공기 주머니에 싸인 99kg짜리 캡슐이 튀고 구릅니다.') },
@@ -130,6 +129,7 @@ export const REPLAYS = {
     rollFrom: 'start',
     turns: 5,
     bagSeconds: 2.5,
+    sounds: [[0, 'chuteShort'], [5, 'bounce'], [8, 'bounce'], [10.4, 'bounce'], [12.3, 'bounce'], [13.8, 'bounce'], [15, 'bounce']],
     lines: [
       { at: 0, text: t('1997년 7월 4일. 패스파인더가 낙하산에 매달려 아레스 계곡으로 내려옵니다. 화성에 21년 만에 내리는 탐사선입니다.') },
       { at: 5, text: t('공기 주머니에 싸인 채 시속 50km쯤으로 떨어져, 건물 5층 높이로 튀어 오릅니다.') },
@@ -155,6 +155,7 @@ export const REPLAYS = {
     acrossKm: 0.6,
     rollFrom: 'touch',
     tiltRad: 1.05,
+    sounds: [[7, 'bounce'], [16.5, 'bounce']],
     lines: [
       { at: 0, text: t('2014년 11월 12일. 로제타에서 떨어져 나온 필레가 일곱 시간에 걸쳐 혜성으로 내려옵니다.') },
       { at: 7, text: t('닿았지만 붙잡지 못했습니다. 몸을 땅에 박을 작살 둘이 쏘아지지 않았습니다.') },

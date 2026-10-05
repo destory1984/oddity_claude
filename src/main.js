@@ -16,6 +16,7 @@ import { createHud } from './ui/hud.js';
 import { createMinimap } from './ui/minimap.js';
 import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
+import { createBackKey } from './ui/backKey.js';
 import { createWarp } from './ui/warp.js';
 import { addPhoto, removePhoto, photoPlace, photoCaption } from './core/album.js';
 import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } from './core/postcard.js';
@@ -2121,6 +2122,9 @@ ${STORY_MORE[target.id]}` : told };
     $('lockTarget').setAttribute('aria-pressed', String(locked));
     $('lockTarget').textContent = locked ? t('고정 풀기') : t('목표 고정');
   });
+
+  // As an app, the phone's back key puts away what is open before it leaves the game.
+  createBackKey({ isView: () => photo.active(), leaveView: () => $('exitPhoto').click(), watch: [$('photoTools')] });
 
   // Read-only diagnostics for verification. No travel shortcuts.
   window.oddity = {

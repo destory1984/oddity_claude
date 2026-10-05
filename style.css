@@ -4074,6 +4074,14 @@ dialog .sheetHead .textSize button:disabled {
   font-size:11px;
 }
 
+/* Opened as an app (installed from the browser, or the Android app from the store):
+   how to install it is not told again. */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  #settings .installRow {
+    display:none;
+  }
+}
+
 /* The link to the privacy policy on the settings' About page. */
 #settings dd a {
   color:var(--gold);

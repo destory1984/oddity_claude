@@ -3357,6 +3357,43 @@ body.rear.touch #reticle span {
   }
 }
 
+/* A wide screen keeps the phone's block of keys, in the bottom right corner (the user,
+   2026-10-05: "넓은 화면에서도 화면 아랫쪽 아이콘 형태를 그대로 유지해"; the pad was a
+   cross with the four in a row beside it):
+     [reverse] [up]   [forward]
+     [left]    [stop] [right]
+     [rear]    [down]
+   Keys 56px, 8px apart. The speed and the thrust bar stay at the left. */
+@media (min-width: 481px) {
+  #hud footer {
+    --step:64px;
+  }
+
+  #hud footer #rearButton,
+  #hud footer #reverseButton,
+  #hud footer #brake,
+  #hud footer #flyButton {
+    position:absolute;
+    margin:0;
+  }
+
+  #hud footer #reverseButton { right:calc(2 * var(--step)); bottom:calc(2 * var(--step)); }
+  #hud footer #flyButton { right:0; bottom:calc(2 * var(--step)); }
+  #hud footer #brake { right:var(--step); bottom:var(--step); z-index:1; }
+  #hud footer #rearButton { right:calc(2 * var(--step)); bottom:0; }
+
+  #hud footer #slidePad {
+    right:0;
+    bottom:var(--step);
+  }
+
+  /* The pad's down key stands one row lower, and the stop button lies in the cell it left. */
+  #hud footer #slideDown {
+    position:relative;
+    top:var(--step);
+  }
+}
+
 /* The week of a real eclipse: the way to the place it is seen from. */
 #eclipseJump {
   display:block;

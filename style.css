@@ -4087,3 +4087,9 @@ html[lang="en"] #appVersion {
   white-space:nowrap;
   font-size:10px;
 }
+
+/* The language in use is marked among the two buttons (settings, options). */
+#settings dd button[aria-pressed="true"] {
+  border-color:var(--gold);
+  color:var(--gold);
+}

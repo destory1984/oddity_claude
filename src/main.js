@@ -99,6 +99,8 @@ const faceToward = (toward) => rotateLocal(lookAtDirection(toward), 0, AIM_OVER)
 // Locked on a turning body she is carried round with its ground from within this many
 // radii of its centre (the height of a geostationary satellite is 6.6 of Earth's).
 const LOCK_CARRY_RADII = 12;
+// Locked on a craft she rides along with it from within this far of it.
+const LOCK_RIDE_KM = 10000;
 const AIM_LINE = rotateVector(conjugate(faceToward([0, 0, 1])), [0, 0, 1]);
 const HUD_EVERY_N_FRAMES = 6;
 // The sprite character shields her eyes within this far of the Sun's surface, and fans
@@ -1744,7 +1746,20 @@ ${STORY_MORE[target.id]}` : told };
       }
       sites = storySitesAt(simTime, bodies);
       if (eventPlace) Object.assign(eventPlace, eclipseSpotAt(simTime, bodies));
+      const stood = state.position;
       state = carryAlong(state, before, bodies);
+      // Locked on a craft from near by, she rides along with it instead: a craft goes
+      // round its planet fast on this clock (Chandra, hundreds of km a second), and
+      // left behind she was dragged after it at the end of the lock's range in a path
+      // nobody could follow (the user, 2026-10-06: "찬드라에 고정해서 이동하니까, 어떻게
+      // 도는지 설명할 수 없게 도는데").
+      if (locked && !docked && !visit) {
+        const was = craftBefore.find((c) => c.id === selectedId);
+        const is = was && craft.find((c) => c.id === selectedId);
+        if (is && Math.hypot(...stood.map((n, i) => n - was.position[i])) <= LOCK_RIDE_KM) {
+          state = { ...state, position: stood.map((n, i) => n + is.position[i] - was.position[i]) };
+        }
+      }
     }
     // Photo mode has a view of its own, which starts looking ahead.
     if (rear && photo.active()) setRear(false);

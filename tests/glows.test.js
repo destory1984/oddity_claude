@@ -104,7 +104,7 @@ test('where several sights are in reach they are all listed, the nearest thing f
   assert.deepEqual(glowsNear(BODIES, above('earth', 1)), ['aurora:earth', 'clouds:earth', 'flare:sun']);
   assert.deepEqual(glowsNear(BODIES, above('earth', 2.5)), ['aurora:earth', 'flare:sun']);
   assert.deepEqual(glowsNear(BODIES, above('jupiter', 1)), ['aurora:jupiter', 'footprint:io', 'flow:jupiter']);
-  assert.deepEqual(glowsNear(BODIES, above('saturn', 1)), ['aurora:saturn', 'spokes:saturn', 'hexagon:saturn']);
+  assert.deepEqual(glowsNear(BODIES, above('saturn', 1)), ['aurora:saturn', 'spokes:saturn', 'hexagon:saturn', 'rain:saturn']);
   assert.deepEqual(glowsNear(BODIES, above('neptune', 1)), ['spot:neptune']);
   // Triton is within three radii of Neptune.
   assert.deepEqual(glowsNear(BODIES, above('triton', 5)), ['plume:triton', 'spot:neptune']);

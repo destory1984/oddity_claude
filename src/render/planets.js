@@ -180,6 +180,8 @@ const LOOKS = {
     rim: [0.4, 0.58, 1], rimLight: 0.9,
     // The tracks dust devils leave on its ground.
     tracks: 1,
+    // ...and the dust devils themselves, walking.
+    sights: [0, 0, 1, 0],
     // The white cap over its south pole, which the dark jets stand out against.
     polarCap: 1,
   },
@@ -189,14 +191,20 @@ const LOOKS = {
     // Its belts slide past each other: the fastest gains a turn on the slowest in about
     // ten minutes (the real winds differ by some hundred m/s: speeded up to be seen).
     flow: 0.0016,
+    // A thread of dust that shows only against the light (ring.frag, style 2).
+    rings: { innerKm: 100000, outerKm: 129000, tilt: 0.05, style: 2 },
   },
   saturn: {
     shader: 'textured', map: 'saturn.jpg', saturation: 1.15, tint: [1.03, 0.99, 0.9], base: [0.9, 0.8, 0.6],
     mapWeight: 1, haze: 0.15, detail: 0.12, dayS: SPIN_DAY_S.saturn, hexagon: 1, rings: { innerKm: 74500, outerKm: 136775, tilt: 0.47 },
+    // The rain of the rings on its middle latitudes (textured.frag `sights`).
+    sights: [1, 0, 0, 0],
   },
   io: {
     shader: 'textured', map: 'io.jpg', saturation: 1.25, tint: [1.06, 1, 0.9], base: [0.82, 0.72, 0.38],
     mapWeight: 1, haze: 0, detail: 0.12, dayS: SPIN_DAY_S.io,
+    // Its lakes of lava, glowing on the night side.
+    sights: [0, 1, 0, 0],
   },
   europa: {
     shader: 'textured', map: 'europa.jpg', saturation: 1, tint: [1.03, 0.97, 0.88], base: [0.82, 0.76, 0.68],
@@ -215,10 +223,14 @@ const LOOKS = {
     mapWeight: 1, haze: 1.2, detail: 0.03, dayS: SPIN_DAY_S.titan,
     // Backlit, its thick haze is an orange ring; sunlight glints off its northern lakes.
     rim: [1, 0.62, 0.25], rimLight: 2, glint: 1,
+    // White clouds of methane drifting under the haze.
+    sights: [0, 0, 0, 1],
   },
   uranus: {
     shader: 'gas', colorA: [0.62, 0.85, 0.88], colorB: [0.57, 0.81, 0.86], colorC: [0.74, 0.92, 0.94],
     bands: 5, turbulence: 0.12, spot: 0, dayS: -62064,
+    // The pale hood over its spring pole and small bright clouds (gas.frag).
+    clouds: 1,
     // Nine narrow dark rings, found in 1977. Uranus lies on its side, so they stand
     // nearly upright to its orbit: here they face the Sun, as Voyager 2 found them in 1986.
     rings: { innerKm: 41000, outerKm: 52000, tilt: 1.43, style: 1 },
@@ -336,7 +348,8 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
       ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy',
-        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'eclipsed', 'nightGlow', 'flow', 'tracks', 'polarCap'], ['map']);
+        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'eclipsed', 'nightGlow', 'flow', 'tracks', 'polarCap', 'sights'], ['map']);
+    material.setVector4('sights', new Vector4(...(look.sights ?? [0, 0, 0, 0])));
     material.setFloat('flow', look.flow ?? 0);
     material.setFloat('tracks', look.tracks ?? 0);
     material.setFloat('polarCap', look.polarCap ?? 0);
@@ -367,7 +380,9 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     material.setFloat('haze', look.haze);
     material.setFloat('detail', look.detail);
   } else if (look.shader === 'gas') {
-    material = shader(scene, 'gas', gasFrag, ['sun', 'colorA', 'colorB', 'colorC', 'bands', 'turbulence', 'spot']);
+    material = shader(scene, 'gas', gasFrag, ['sun', 'colorA', 'colorB', 'colorC', 'bands', 'turbulence', 'spot', 'clouds', 'time']);
+    material.setFloat('clouds', look.clouds ?? 0);
+    material.setFloat('time', 0);
     material.setColor3('colorC', color(look.colorC));
     material.setFloat('bands', look.bands);
     material.setFloat('turbulence', look.turbulence);
@@ -392,19 +407,23 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   if (look.rings) {
     ring = createRings(scene, body, look.rings, sunDir);
     meshes.push(ring.plane);
-    material.setVector3('ringNormal', ring.normal);
-    material.setFloat('ringInner', look.rings.innerKm / body.radiusKm);
-    material.setFloat('ringOuter', look.rings.outerKm / body.radiusKm);
+    // (Jupiter's thread of dust throws no shadow on Jupiter.)
+    if (look.rings.style !== 2) {
+      material.setVector3('ringNormal', ring.normal);
+      material.setFloat('ringInner', look.rings.innerKm / body.radiusKm);
+      material.setFloat('ringOuter', look.rings.outerKm / body.radiusKm);
+    }
   }
   return {
     body,
     meshes,
     // For the rings: the plane's normal and its edges, to notice the traveler flying through.
-    rings: ring && { normal: [ring.normal.x, ring.normal.y, ring.normal.z], innerKm: look.rings.innerKm, outerKm: look.rings.outerKm },
+    // (Not Jupiter's: there is nothing there to fly through and be told of.)
+    rings: ring && look.rings.style !== 2 ? { normal: [ring.normal.x, ring.normal.y, ring.normal.z], innerKm: look.rings.innerKm, outerKm: look.rings.outerKm } : null,
     spin(elapsed) {
       sphere.rotation.y = -(elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
       if (ring) ring.setTime(elapsed);
-      if (look.storm || look.nightGlow || look.flow || look.shader === 'ember') material.setFloat('time', elapsed);
+      if (look.storm || look.nightGlow || look.flow || look.sights || look.clouds || look.shader === 'ember') material.setFloat('time', elapsed);
     },
     // heightRadii: the camera's height above the ground, in this body's radii.
     setClose(heightRadii) {

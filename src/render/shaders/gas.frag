@@ -9,6 +9,10 @@ uniform vec3 colorC;
 uniform float bands;
 uniform float turbulence;
 uniform float spot;
+// Uranus: the pale hood over the pole that has come into spring, and small bright
+// clouds of methane ice that drift round its middle latitudes (0 for none).
+uniform float clouds;
+uniform float time;
 #include<noise>
 void main(){
   float lat = vUV.y;
@@ -24,6 +28,12 @@ void main(){
     vec2 d = vec2(atan(sin(ang - 1.9), cos(ang - 1.9)) * 1.6, (lat - .38) * 9.);
     float s = 1. - smoothstep(.55, 1., length(d));
     col = mix(col, vec3(.74, .34, .2), s * .85);
+  }
+  if (clouds > 0.) {
+    col = mix(col, colorC * 1.06, (1. - smoothstep(.08, .24, lat)) * .55 * clouds);
+    float drift = ang + time * .003;
+    float puffs = smoothstep(.68, .84, fbm(vec2(cos(drift), sin(drift)) * 4. + vec2(lat * 34., 1.)));
+    col = mix(col, vec3(.97, .99, 1.), puffs * exp(-pow((lat - .32) / .05, 2.)) * .75 * clouds);
   }
   vec3 N = normalize(n);
   vec3 V = normalize(-wp);

@@ -8,7 +8,8 @@ uniform float outer;
 // and the planet's radius as a share of the outer ring radius.
 uniform vec3 sunLocal;
 uniform float planetRadius;
-// 0: Saturn's broad bright rings; 1: the nine narrow dark rings of Uranus.
+// 0: Saturn's broad bright rings; 1: the nine narrow dark rings of Uranus; 2: Jupiter's
+// thread of dust, which shows only against the light.
 uniform float style;
 // The way to the Sun and the ring plane's normal, both in the world's axes: for the
 // rings seen against the light (the eye is at the world's origin).
@@ -30,7 +31,7 @@ void main(){
   float r = length(p);
   if (r < inner || r > 1.) discard;
   vec4 ring = ringProfile((r - inner) / (1. - inner));
-  if (style > .5) {
+  if (style > .5 && style < 1.5) {
     // 6, 5, 4, alpha, beta, eta, gamma, delta, epsilon, by distance between 41,000 and
     // 52,000 km. Each is a few km to a hundred km wide: drawn some hundreds wide so
     // they show at all, the outermost (epsilon) the widest and brightest.
@@ -75,6 +76,18 @@ void main(){
   // the side the Sun does not light, the dense B ring lets little through and is dark,
   // while the thin C ring, the Cassini division and the A ring pass the light on and
   // glow; and looking toward the Sun every thin part scatters its light forward.
+  if (style > 1.5) {
+    // Jupiter's ring (Voyager 1, 1979): dust knocked off its small inner moons, a
+    // narrow main ring from 122,500 to 129,000 km and a faint halo inside it. Dust so
+    // fine throws sunlight forward: from the Sun's side there is next to nothing to
+    // see, from behind Jupiter it is a bright thread.
+    float at = (r - inner) / (1. - inner);
+    float dust = smoothstep(.72, .8, at) * (1. - smoothstep(.96, 1., at)) + .12 * smoothstep(0., .5, at) * (1. - smoothstep(.72, .8, at));
+    dust *= .8 + .2 * noise(vec2(at * 60., 2.));
+    float ahead = pow(max(dot(-normalize(-wp), sunWorld), 0.), 5.);
+    gl_FragColor = vec4(vec3(1., .86, .66) * (1. - .96 * shadow), dust * (.025 + .85 * ahead));
+    return;
+  }
   vec3 V = normalize(-wp);
   float through = step(dot(V, normalWorld) * sunLocal.z, 0.);
   float passed = .07 + 22. * ring.a * exp(-6. * ring.a);

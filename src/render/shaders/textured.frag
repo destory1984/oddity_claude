@@ -50,6 +50,9 @@ uniform float flow;
 uniform float tracks;
 // Mars: the white cap of ice over its south pole (how far it reaches, 0 for none).
 uniform float polarCap;
+// Four sights more, each on one world (0 elsewhere): x Saturn, the rain of its rings;
+// y Io, its lakes of lava; z Mars, dust devils walking; w Titan, clouds of methane.
+uniform vec4 sights;
 uniform vec3 nightGlow;
 uniform vec4 shine;
 // Earth's shadow coming over the Moon in a lunar eclipse (core/eclipses.js): xyz the
@@ -204,6 +207,43 @@ void main(){
     col *= 1. - .28 * line * swept * tracks * (1. - smoothstep(.1, .3, close));
   }
 
+  if (sights.z > 0. && close < .3) {
+    // Dust devils: here and there a pale puff walks across the ground along its own
+    // straight way, comes out of nothing and thins away again, trailing a little dust.
+    // (A real one is a few hundred metres wide and up to 8 km tall: drawn 10 km wide to
+    // be seen from above.) They come into view within a third of a radius.
+    vec3 gp = lp * 50.;
+    vec3 gi = floor(gp);
+    vec3 gf = fract(gp);
+    float puff = 0.;
+    for (int x = -1; x <= 1; x++) {
+      for (int y = -1; y <= 1; y++) {
+        for (int z = -1; z <= 1; z++) {
+          vec3 g = vec3(float(x), float(y), float(z));
+          vec3 o = hash3(gi + g);
+          if (o.y > .3) continue;
+          vec3 way = normalize(hash3(gi + g + 31.) - .5);
+          float walk = fract(time * (.012 + .01 * o.x) + o.z);
+          vec3 d = g + vec3(.5) + way * (walk - .5) * .9 - gf;
+          float back = dot(d, way);
+          float aside = length(d - way * back);
+          float body = exp(-dot(d, d) / .006);
+          float trail = back > 0. ? exp(-pow(aside / .045, 2.)) * exp(-back / .3) * .45 : 0.;
+          puff += (body + trail) * sin(walk * 3.14159);
+        }
+      }
+    }
+    col = mix(col, vec3(1., .93, .82), clamp(puff, 0., 1.) * .9 * sights.z * (1. - smoothstep(.15, .3, close)));
+  }
+  if (sights.w > 0.) {
+    // Titan: streaks of white methane cloud at its southern middle latitudes and over
+    // the lakes of the north, carried slowly east.
+    float ca = vUV.x * 6.28318 + time * .004;
+    float streaks = smoothstep(.55, .75, fbm(vec2(cos(ca), sin(ca)) * 5. + vec2(vUV.y * 46., 3.)));
+    float where = exp(-pow((lp.y + .62) / .08, 2.)) + .7 * smoothstep(.72, .86, lp.y);
+    col = mix(col, vec3(1., .95, .86), streaks * where * .55 * sights.w);
+  }
+
   if (storm.z > 0.) {
     // Across the spot: x along the latitude (wrapped), y across it; the spot is an oval
     // about twice as wide as it is tall.
@@ -299,6 +339,51 @@ void main(){
   }
   // The planet's light on the side turned to it: it shows where the Sun does not reach.
   light += col * shineColor * max(dot(N, shine.xyz), 0.) * shine.w;
+  if (sights.x > 0.) {
+    // Saturn, the rain of the rings: ice from the rings slides down the magnetic field
+    // and falls on the middle latitudes of both halves. Thin pale streaks come down
+    // toward the equator there, each at its own pace, clearest on the night side.
+    float alat = abs(lp.y);
+    float belt = smoothstep(.56, .62, alat) * (1. - smoothstep(.78, .84, alat));
+    if (belt > 0.) {
+      float down = (alat - .56) / .28;
+      float around = atan(lp.z, lp.x);
+      float drops = 0.;
+      for (int k = 0; k < 2; k++) {
+        float fk = float(k);
+        float lane = around * (70. + 37. * fk) + fk * 1.7;
+        float id = floor(lane);
+        float h = fract(sin(id * 91.7 + fk * 13.) * 43758.5453);
+        float at = 1. - fract(time * (.07 + .09 * h) + h * 7.);
+        float above = down - at;
+        drops += exp(-pow((fract(lane) - .5) / .11, 2.)) * (above > 0. ? exp(-above / .16) : 0.) * smoothstep(.0, .12, at);
+      }
+      light += vec3(.72, .88, 1.) * drops * belt * sights.x * .3 * (1.15 - .85 * smoothstep(-.1, .3, l));
+    }
+  }
+  if (sights.y > 0.) {
+    // Io, the lakes of lava: red spots on its ground that breathe, each brightening
+    // as its cooled crust founders and dimming as a new one forms. They show at night;
+    // by day the sunlit ground drowns them.
+    vec3 gp = lp * 6.;
+    vec3 gi = floor(gp);
+    vec3 gf = fract(gp);
+    float lava = 0.;
+    for (int x = -1; x <= 1; x++) {
+      for (int y = -1; y <= 1; y++) {
+        for (int z = -1; z <= 1; z++) {
+          vec3 g = vec3(float(x), float(y), float(z));
+          vec3 o = hash3(gi + g);
+          if (o.y > .35) continue;
+          float d = length(g + o - gf);
+          float size = .05 + .09 * o.x;
+          lava += exp(-pow(d / size, 2.)) * (.55 + .45 * sin(time * (.35 + .5 * o.z) + o.x * 40.));
+        }
+      }
+    }
+    lava = min(lava, 1.2);
+    light += (vec3(1., .3, .05) * lava + vec3(1., .75, .3) * pow(lava, 3.) * .6) * sights.y * 1.5 * (1. - .8 * smoothstep(-.1, .25, l));
+  }
   if (glint > 0.) {
     vec3 H = normalize(sun + V);
     float lakes = smoothstep(.55, .8, lp.y) * smoothstep(.42, .6, fbm(lp.xz * 9. + 3.));

@@ -878,7 +878,8 @@ ${STORY_MORE[target.id]}` : told };
     $('inspectTarget').click();
     if (photo.orbit()?.id !== visit.id) return;
     // Seen from farther back than a plain close look, so the way down fits in the view.
-    photo.orbitAround({ id: visit.id, facing: photo.orbit().orientation, distanceKm: REPLAY_VIEW.distanceKm, fovDeg: REPLAY_VIEW.fovDeg });
+    // (A launch is seen from farther still: core/replay.js viewKm.)
+    photo.orbitAround({ id: visit.id, facing: photo.orbit().orientation, distanceKm: replayFor(visit.id).viewKm ?? REPLAY_VIEW.distanceKm, fovDeg: REPLAY_VIEW.fovDeg });
     replay = { id: visit.id, startedAt: performance.now(), down: false };
   });
 
@@ -912,6 +913,7 @@ ${STORY_MORE[target.id]}` : told };
       across: side.map((n) => n * frame.acrossKm),
       side,
       turn: frame.turn ?? 0, tilt: frame.tilt ?? 0, bag: frame.bag ?? 0, open: Boolean(frame.open), sizeKm: frame.sizeKm ?? null,
+      launch: frame.launch ?? null,
     };
   }
 

@@ -455,6 +455,8 @@ function huygens(scene, name, mats) {
 function launchPad(scene, name, mats, { rocket = 'saturn' } = {}) {
   const root = new TransformNode(name, scene);
   const saturn = rocket === 'saturn';
+  // 'none': the pad alone, for a scene whose rocket leaves it (falconLaunch below).
+  const bare = rocket === 'none';
   // The platform, and the flame trench cut under the rocket.
   box(scene, `${name}Apron`, root, mats.grey, [1.3, 0.04, 0.9], [0, 0.02, 0]);
   box(scene, `${name}Deck`, root, mats.silver, [0.62, 0.1, 0.5], [0.08, 0.09, 0]);
@@ -462,7 +464,7 @@ function launchPad(scene, name, mats, { rocket = 'saturn' } = {}) {
   // The tower beside the rocket, a crane on its top, arms reaching across.
   const towerX = -0.2;
   const top = saturn ? 1.5 : 1.2;
-  truss(scene, `${name}Tower`, root, saturn ? mats.red : mats.solar, [towerX, 0.14, 0], [towerX, top, 0], 0.16, saturn ? 9 : 7, 0.014);
+  truss(scene, `${name}Tower`, root, bare ? mats.dark : saturn ? mats.red : mats.solar, [towerX, 0.14, 0], [towerX, top, 0], 0.16, saturn ? 9 : 7, 0.014);
   box(scene, `${name}TowerBase`, root, mats.dark, [0.2, 0.06, 0.2], [towerX, 0.17, 0]);
   rod(scene, `${name}Crane`, root, mats.grey, [towerX - 0.14, top + 0.03, 0], [towerX + 0.3, top + 0.03, 0], 0.02, 5);
   rod(scene, `${name}Mast`, root, mats.grey, [towerX, top, 0], [towerX, top + 0.14, 0], 0.012, 5);
@@ -470,7 +472,10 @@ function launchPad(scene, name, mats, { rocket = 'saturn' } = {}) {
   const base = 0.2;
   const band = (id, y, diameter, height = 0.03) => drum(scene, `${name}Band${id}`, root, mats.black, { height, diameter: diameter * 1.01 }, [rocketX, y, 0]);
   let arms;
-  if (saturn) {
+  if (bare) {
+    // One arm high up: the walkway the crew went along.
+    arms = [1.0];
+  } else if (saturn) {
     // First stage and its five engines.
     for (const [x, z] of [[0, 0], ...round(4, 0.055, 0.785)]) nozzle(scene, `${name}F1${x}${z}`, root, mats.dark, [rocketX + x, base, z], [0, -1, 0], 0.07, 0.07);
     drum(scene, `${name}S1`, root, mats.white, { height: 0.5, diameter: 0.2 }, [rocketX, base + 0.25, 0]);
@@ -507,6 +512,45 @@ function launchPad(scene, name, mats, { rocket = 'saturn' } = {}) {
   // Four lightning masts at the corners of the apron.
   for (const [x, z, a] of round(4, 1, 0.785)) rod(scene, `${name}Rod${a}`, root, mats.grey, [x * 0.58, 0.04, z * 0.4], [x * 0.58, saturn ? 0.5 : 0.9, z * 0.4], 0.01, 4);
   return fuse(scene, root);
+}
+
+// Pad 39A on 30 May 2020, for the scene of Crew Dragon's launch (core/replay.js lc39a):
+// the pad with a black tower, and Falcon 9 in the pieces that go their own ways. Each
+// piece has its foot at its own y = 0.
+//   booster: the first stage, white, sooty at the foot, a black band at its top where
+//     the grid fins are; nine engines. legs: its four legs, put out to land.
+//   upper: the second stage, Dragon's trunk and the capsule, white, its nose a cone.
+//   ship: the barge it comes down on, a black deck with a ring painted on it.
+function falconLaunch(scene, name, mats) {
+  const pad = launchPad(scene, `${name}Pad`, mats, { rocket: 'none' });
+  const booster = new TransformNode(`${name}Booster`, scene);
+  nozzle(scene, `${name}Engines`, booster, mats.dark, [0, 0, 0], [0, -1, 0], 0.05, 0.085);
+  drum(scene, `${name}Soot`, booster, mats.grey, { height: 0.1, diameter: 0.092 }, [0, 0.05, 0]);
+  drum(scene, `${name}S1`, booster, mats.white, { height: 0.38, diameter: 0.09 }, [0, 0.29, 0]);
+  drum(scene, `${name}Inter`, booster, mats.black, { height: 0.07, diameter: 0.091 }, [0, 0.515, 0]);
+  for (const [x, z, a] of round(4, 0.06, 0.785)) box(scene, `${name}Grid${a}`, booster, mats.grey, [0.04, 0.008, 0.03], [x, 0.5, z], [0, -a, 0]);
+  const boosterNode = fuse(scene, booster);
+  const legsRoot = new TransformNode(`${name}Legs`, scene);
+  for (const [x, z, a] of round(4, 1, 0.785)) {
+    rod(scene, `${name}Leg${a}`, legsRoot, mats.black, [x * 0.045, 0.12, z * 0.045], [x * 0.2, -0.03, z * 0.2], 0.016, 5);
+    rod(scene, `${name}Strut${a}`, legsRoot, mats.grey, [x * 0.045, 0.02, z * 0.045], [x * 0.2, -0.03, z * 0.2], 0.008, 4);
+  }
+  const legs = fuse(scene, legsRoot);
+  const upper = new TransformNode(`${name}Upper`, scene);
+  nozzle(scene, `${name}Vac`, upper, mats.dark, [0, 0.02, 0], [0, -1, 0], 0.05, 0.06);
+  drum(scene, `${name}S2`, upper, mats.white, { height: 0.16, diameter: 0.09 }, [0, 0.1, 0]);
+  drum(scene, `${name}Trunk`, upper, mats.white, { height: 0.07, diameter: 0.088 }, [0, 0.215, 0]);
+  drum(scene, `${name}TrunkBand`, upper, mats.dark, { height: 0.012, diameter: 0.09 }, [0, 0.182, 0]);
+  drum(scene, `${name}Dragon`, upper, mats.white, { height: 0.075, diameterTop: 0.03, diameterBottom: 0.088 }, [0, 0.288, 0]);
+  drum(scene, `${name}Nose`, upper, mats.chrome, { height: 0.02, diameterTop: 0.006, diameterBottom: 0.03 }, [0, 0.335, 0]);
+  const upperNode = fuse(scene, upper);
+  const ship = new TransformNode(`${name}Ship`, scene);
+  box(scene, `${name}Deck`, ship, mats.black, [0.62, 0.06, 0.4], [0, 0.03, 0]);
+  drum(scene, `${name}Ring`, ship, mats.white, { height: 0.004, diameter: 0.3, tessellation: 28 }, [0, 0.062, 0]);
+  drum(scene, `${name}RingIn`, ship, mats.black, { height: 0.005, diameter: 0.26, tessellation: 28 }, [0, 0.063, 0]);
+  for (const sx of [-1, 1]) box(scene, `${name}Wall${sx}`, ship, mats.grey, [0.03, 0.07, 0.4], [sx * 0.3, 0.09, 0]);
+  const shipNode = fuse(scene, ship);
+  return { pad, booster: boosterNode, legs, upper: upperNode, ship: shipNode };
 }
 
 // Which model stands at which place.
@@ -549,4 +593,6 @@ export const SITE_REPLAY_BUILD = {
   pathfinder: [pathfinder, { stowed: true }, 'bag', { radius: 0.66, centre: 0.2, lobes: 4 }],
   // Not a story place of its own: played on the comet (core/replay.js philaeLanding).
   philaeLanding: [philae, {}, 'bare'],
+  // 'launch': it goes up, in pieces (falconLaunch above; render/craft.js moves them).
+  lc39a: [falconLaunch, {}, 'launch'],
 };

@@ -161,6 +161,29 @@ export const REPLAYS = {
       { at: 19, text: t('두 번을 튄 끝에 절벽 그늘에 비스듬히 멈췄습니다. 햇빛이 모자라 57시간쯤 뒤 전지가 다해 잠들었습니다.') },
     ],
   },
+  // Pad 39A again, fifty-one years on (the story 'lc39a' tells of Apollo 11 leaving from
+  // it): SpaceX's Falcon 9 with Crew Dragon, Demo-2. This one goes UP. Measures are in
+  // the model's own units (it is drawn 6 km to a unit): the rocket lights at igniteAt,
+  // leaves at liftAt, and at partAt, partUnits up, the first stage lets go. The second
+  // goes on, up and out of the view; the first falls back, burns again and stands on a
+  // ship shipUnits to the side at downAt. (The real ship waited 500 km out to sea, and
+  // the first stage came down nine minutes after it left: drawn near and soon.)
+  lc39a: {
+    name: t('크루 드래건의 발사'),
+    day: t('2020년 5월 30일'),
+    seconds: 30,
+    downAt: 24,
+    fromKm: 0,
+    viewKm: 70,
+    launch: { igniteAt: 2, liftAt: 3, partAt: 12, partUnits: 1.6, shipUnits: 1.7 },
+    lines: [
+      { at: 0, text: t('2020년 5월 30일. 39A 발사대에서 팰컨 9이 크루 드래건을 싣고 떠납니다. 헐리와 벵컨이 탔습니다.') },
+      { at: 6, text: t('미국 땅에서 사람이 궤도로 오르는 것은 9년 만이고, 민간 회사의 우주선으로는 처음입니다.') },
+      { at: 12, text: t('2분 반 뒤 1단이 떨어집니다. 2단은 드래건을 밀고 궤도로 가고, 1단은 되돌아옵니다.') },
+      { at: 18, text: t('1단이 엔진을 다시 켜 속도를 줄이고 다리 넷을 폅니다. 대서양에 띄운 배로 내려갑니다.') },
+      { at: 24, text: t('1단이 배 위에 섰습니다. 드래건은 19시간 뒤 국제우주정거장에 닿았습니다.') },
+    ],
+  },
 };
 
 // The scene played by resting on this body, if there is one.
@@ -181,6 +204,7 @@ export function replayFrame(id, t) {
   let line = 0;
   scene.lines.forEach((l, i) => { if (t >= l.at) line = i; });
   if (scene.hops) return { ...hopFrame(scene, t), line, text: scene.lines[line].text, done: t >= scene.seconds };
+  if (scene.launch) return { ...launchFrame(scene, t), line, text: scene.lines[line].text, done: t >= scene.seconds };
   return {
     liftKm: scene.streak ? scene.fromKm + (scene.toKm - scene.fromKm) * u : scene.fromKm * (1 - u) ** 2,
     // A streak: how far to the side it still is, how hot it glows (from a third of the
@@ -197,6 +221,42 @@ export function replayFrame(id, t) {
     line,
     text: scene.lines[line].text,
     done: t >= scene.seconds,
+  };
+}
+
+// A launch, t seconds in, in the model's units. Until they part the two stages rise as
+// one, faster and faster. Then `upper` (the second stage and the capsule) goes on up,
+// leaning over downrange, and is gone from the view; `booster` coasts a little higher,
+// drifts over to the ship, falls, lights its engines again (burn) and puts out its legs
+// to stand on the deck. x: to the side; y: up; lean: radians from upright.
+function launchFrame(scene, t) {
+  const { igniteAt, liftAt, partAt, partUnits, shipUnits } = scene.launch;
+  const clamp = (n) => Math.max(0, Math.min(1, n));
+  const down = t >= scene.downAt;
+  const rise = partUnits * clamp((t - liftAt) / (partAt - liftAt)) ** 2;
+  // How fast it rises as they part (units a second).
+  const speed = (2 * partUnits) / (partAt - liftAt);
+  let upper = { x: 0, y: rise, lean: 0, burn: t >= igniteAt, gone: false };
+  let booster = { x: 0, y: rise, lean: 0, burn: t >= igniteAt, legs: false };
+  if (t >= partAt) {
+    const since = t - partAt;
+    upper = { x: 0.05 * since * since, y: partUnits + speed * since + 0.06 * since * since, lean: Math.min(0.9, 0.09 * since), burn: since > 0.6, gone: since > 7 };
+    const p = clamp(since / (scene.downAt - partAt));
+    const over = p * p * (3 - 2 * p);
+    booster = {
+      x: shipUnits * over,
+      // It ends on the deck with no speed left.
+      y: (1 - p) ** 2 * (partUnits + 6.5 * p),
+      lean: -0.45 * Math.sin(Math.PI * p) * (1 - p),
+      burn: p > 0.7 && !down,
+      legs: p > 0.75,
+    };
+  }
+  return {
+    launch: { upper, booster },
+    liftKm: 0, acrossKm: 0, glow: 0, slope: 0, gone: false, flame: false,
+    down,
+    after: Math.max(0, t - scene.downAt),
   };
 }
 

@@ -150,6 +150,22 @@ export function createSiteModels(scene, siteList) {
   bagCloth.emissiveColor = new Color3(0.3, 0.27, 0.22);
   bagCloth.specularColor = new Color3(0.05, 0.05, 0.05);
   for (const [id, [build, options, coming = 'flame', flameY = -0.06]] of Object.entries(SITE_REPLAY_BUILD)) {
+    if (coming === 'launch') {
+      // The pad stays; the rocket stands on it in two pieces, each with a flame under
+      // it, and a ship waits to the side. Everything hangs from one root, which is
+      // placed and sized as any model is; the pieces move within it (core/replay.js
+      // launchFrame gives where, in the model's own units).
+      const root = new TransformNode(`then_${id}`, scene);
+      root.rotationQuaternion = new Quaternion();
+      const parts = build(scene, `then_${id}`, mats, options);
+      for (const piece of [parts.pad, parts.booster, parts.upper, parts.ship]) piece.parent = root;
+      parts.legs.parent = parts.booster;
+      const boosterFlame = drum(scene, `then_${id}_flame1`, parts.booster, flameMaterial, { height: 0.5, diameterTop: 0.05, diameterBottom: 0.17, tessellation: 12 }, [0, -0.27, 0]);
+      const upperFlame = drum(scene, `then_${id}_flame2`, parts.upper, flameMaterial, { height: 0.3, diameterTop: 0.04, diameterBottom: 0.13, tessellation: 12 }, [0, -0.16, 0]);
+      root.setEnabled(false);
+      then.set(id, { node: root, flame: null, cords: null, launch: { ...parts, boosterFlame, upperFlame } });
+      continue;
+    }
     if (coming === 'bag' || coming === 'bare') {
       // One that bounces: the model hangs from a node that turns (a ball rolling, Philae
       // leaning over), and a bagged one sits in the middle of its ball of air bags, which
@@ -352,6 +368,21 @@ export function createSiteModels(scene, siteList) {
           old.bag.scaling.setAll(Math.max(0.03, full));
           old.tumble.position.y = old.shape.centre + (old.shape.radius - old.shape.centre) * full;
         }
+      }
+      if (old?.launch && replay.launch) {
+        // The rocket stands 0.16 to the side of the pad's middle, 0.2 up on its deck;
+        // the second stage sits on the first (0.55 tall). The ship lies to the same side.
+        const { upper, booster } = replay.launch;
+        const parts = old.launch;
+        parts.booster.position.set(0.16 + booster.x, 0.2 + booster.y - 0.14 * Math.min(1, booster.x / 0.6), 0);
+        parts.booster.rotation.z = booster.lean;
+        parts.legs.setEnabled(booster.legs);
+        parts.boosterFlame.setEnabled(booster.burn);
+        parts.upper.position.set(0.16 + upper.x, 0.75 + upper.y, 0);
+        parts.upper.rotation.z = -upper.lean;
+        parts.upper.setEnabled(!upper.gone);
+        parts.upperFlame.setEnabled(upper.burn && upper.y > booster.y + 0.01);
+        parts.ship.position.set(0.16 + 1.7, 0, 0);
       }
       if (old?.fire) {
         // Its +x toward the place it is going to, its dish (+y) up.

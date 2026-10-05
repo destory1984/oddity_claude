@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-05', text: t('케네디 39A 발사대에 내려서면 "그날로" 단추가 뜹니다. 누르면 2020년 크루 드래건의 발사를 보여 줍니다.') },
   { day: '2026-10-05', text: t('게임 시계를 실제의 50배로 늦췄습니다. 지구의 하루가 29분입니다.') },
   { day: '2026-10-05', text: t('토성 구름 위로 고리의 비가 내리고, 이오의 밤 쪽에서 용암 호수가 붉게 빛납니다.') },
   { day: '2026-10-05', text: t('화성 땅 위로 먼지 회오리가 걸어가고, 타이탄에 흰 메탄 구름이 흘러갑니다.') },

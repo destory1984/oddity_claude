@@ -96,7 +96,7 @@ test('Curiosity has a scene of its own day, told in four lines', () => {
   assert.equal(replayFor('curiosity').day, '2012년 8월 6일');
   assert.equal(replayFor('curiosity').lines.length, 4);
   assert.match(replayFrame('curiosity', 17).text, /게일 분화구/);
-  assert.equal(Object.keys(REPLAYS).length, 8);
+  assert.equal(Object.keys(REPLAYS).length, 9);
   assert.equal(replayFor('viking1').day, '1976년 7월 20일');
   assert.match(replayFrame('viking1', 17).text, /25초/);
 });
@@ -180,4 +180,24 @@ test('a scene that does not bounce has none of the bouncing measures', () => {
   assert.equal(frame.bag, undefined);
   assert.equal(frame.open, undefined);
   assert.ok(frame.flame);
+});
+
+test('Crew Dragon goes up from pad 39A: the stages part, the first comes back to stand on the ship', () => {
+  const scene = REPLAYS.lc39a;
+  const at = (t) => replayFrame('lc39a', t).launch;
+  assert.equal(replayFor('lc39a').day, '2020년 5월 30일');
+  // On the pad until it leaves; the engines light a second before.
+  assert.equal(at(0).booster.y, 0);
+  assert.ok(!at(1).booster.burn && at(2.5).booster.burn && at(2.5).booster.y === 0);
+  // One piece until they part, rising faster and faster.
+  assert.equal(at(8).booster.y, at(8).upper.y);
+  assert.ok(at(8).booster.y - at(6).booster.y > at(6).booster.y - at(4).booster.y);
+  assert.ok(Math.abs(at(scene.launch.partAt).booster.y - scene.launch.partUnits) < 1e-9);
+  // Then the second stage goes on up and is gone; the first falls back to the ship.
+  assert.ok(at(16).upper.y > at(16).booster.y + 2);
+  assert.ok(at(20).upper.gone);
+  assert.ok(at(22).booster.burn && at(22).booster.legs && at(22).booster.y > 0);
+  const landed = replayFrame('lc39a', scene.downAt);
+  assert.ok(landed.down && landed.launch.booster.y < 1e-9 && !landed.launch.booster.burn);
+  assert.ok(Math.abs(landed.launch.booster.x - scene.launch.shipUnits) < 1e-9);
 });

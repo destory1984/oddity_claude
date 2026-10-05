@@ -35,3 +35,16 @@ test('the frame has the shape of the page on the phone in its browser, and is sc
   near(phoneFrame({ width: 2560, height: 1440 }).scale, 1440 / 657);
   assert.ok(phoneFrame({ width: 1024, height: 600 }).scale < 1);
 });
+
+test('a tall narrow window wider than a phone (the installed app\'s window on a PC) gets the phone layout filling it', () => {
+  // The wide layout does not fit it: its panels and keys lay over each other at 565 x 1065.
+  for (const [width, height] of [[565, 1065], [600, 1000], [706, 1330], [481, 900]]) {
+    const frame = phoneFrame({ width, height });
+    assert.ok(frame, `${width}x${height}`);
+    assert.equal(frame.width, PHONE_WIDTH);
+    // Scaled, it is exactly as wide and as tall as the window: a taller phone.
+    near(frame.width * frame.scale, width, 1e-6);
+    near(frame.height * frame.scale, height, 1e-6);
+    assert.ok(frame.height > PHONE_HEIGHT);
+  }
+});

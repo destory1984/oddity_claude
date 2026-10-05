@@ -6,6 +6,7 @@
 // buttons about, evening out spaces, renaming a tab or rewording a sentence does not
 // (the user had six such lines taken out on 2026-10-05: "이런건 바뀐 것에서 빼줘").
 export const CHANGES = [
+  { day: '2026-10-05', text: 'PC에 앱으로 설치해 세로로 긴 창으로 열면 단추와 칸이 서로 겹치던 것을 고쳤습니다.' },
   { day: '2026-10-05', text: '별자리와 은하를 누르면 뜨는 설명에 그림이 붙었습니다. 와디럼과 보현산천문대 이야기에도 그림이 생겼습니다.' },
   { day: '2026-10-05', text: '별자리의 선이나 이름을 누르면 두세 줄 설명이 뜹니다. 은하와 성운, 성단도 누르면 설명이 뜹니다.' },
   { day: '2026-10-05', text: '오로라가 매끈한 띠가 아니라 빛줄기가 늘어선 커튼으로 보입니다.' },

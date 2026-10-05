@@ -4817,3 +4817,119 @@ html.gaze #gazeButton {
     grid-template-columns:1fr 88px 88px;
   }
 }
+
+/* (And the telling above them is a block of its own, so the two buttons begin a line of
+   their own under it: after inline words "자세히" stood at the end of the last line and
+   "순간 이동" dropped to the next, the user's picture of 2026-10-06.) */
+#journal #journalStories li > span,
+#journal #journalCraft li > span {
+  display:block;
+}
+
+/* One size for the journal's buttons, group by group (the user, 2026-10-06: "이 화면에
+   버튼이 몇 그룹이 있는데, 크기가 다 제각각이야"). The three at the head are 44px
+   squares (they were 44 x 40, 44 x 40 and a 40px circle). Every button with a word on
+   it (grandmother's notes, the day's request, the lists of bodies, missions, stories,
+   craft and tours) is 88 x 36px; a note's name that is longer makes its own wider. The
+   tabs and the folded line of sky news are not buttons of this kind and keep theirs;
+   under a photo each button is as wide as the photo. */
+#journal .journalHead .textSize button,
+#journal #closeJournal {
+  box-sizing:border-box;
+  width:44px;
+  height:44px;
+  min-height:44px;
+  padding:0;
+  border-radius:9px;
+}
+
+#journal #journalNotes button,
+#journal #dailyGo,
+#journal #journalBodies li button,
+#journal #journalMissions li button,
+#journal #journalStories li button,
+#journal #journalCraft li button,
+#journal #journalTours li button,
+#journal #journalAlbum button {
+  box-sizing:border-box;
+  height:36px;
+  min-height:36px;
+  padding:0 6px;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+#journal #dailyGo,
+#journal #journalBodies li button,
+#journal #journalMissions li button,
+#journal #journalStories li button,
+#journal #journalCraft li button,
+#journal #journalTours li button {
+  width:88px;
+}
+
+#journal #journalNotes button {
+  width:auto;
+  min-width:88px;
+}
+
+#journal #journalText button {
+  width:44px;
+  height:44px;
+  min-height:44px;
+}
+
+/* A long name makes its own button wider (a tour's "이 길로 다시 떠나기"). */
+#journal #journalTours li button {
+  width:auto;
+  min-width:88px;
+}
+
+#journal #journalStunts button,
+#journal #resetJournal {
+  box-sizing:border-box;
+  width:auto;
+  min-width:88px;
+  height:36px;
+  min-height:36px;
+  padding:0 6px;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+/* The six tabs are one size and share the row evenly, their words in the middle (the
+   user, 2026-10-06, over a picture: "탭 버튼들... 크기 맞추고, 가운데 정렬로"; each was
+   as wide as its word, the chosen one taller, all pushed to the left). The chosen one
+   is told by its gold alone. */
+#journal #journalTabs {
+  justify-content:center;
+}
+
+#journal #journalTabs button,
+#journal #journalTabs button[aria-selected="true"] {
+  box-sizing:border-box;
+  flex:1 1 0;
+  min-width:0;
+  max-width:96px;
+  height:36px;
+  min-height:36px;
+  padding:0 2px;
+  text-align:center;
+  white-space:nowrap;
+}
+
+@media (max-width: 480px) {
+  /* (Six even tabs on a phone are 51 to 58px wide: "Stories" and "ミッション" need
+     smaller letters to fit.) */
+  #journal #journalTabs button,
+  #journal #journalTabs button[aria-selected="true"] {
+    padding:0;
+    font-size:11px;
+    letter-spacing:-0.3px;
+  }
+
+  html[lang="ja"] #journal #journalTabs button {
+    font-size:10px;
+    letter-spacing:-0.5px;
+  }
+}

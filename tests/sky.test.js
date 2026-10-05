@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { fromEquatorial, GALAXIES, NEBULAE, CONSTELLATIONS, BRIGHT_STARS, skyLabels, lookedAt, touchedSky, CONSTELLATION_STORIES } from '../src/core/sky.js';
+import { fromEquatorial, GALAXIES, NEBULAE, CONSTELLATIONS, BRIGHT_STARS, skyLabels, lookedAt, touchedSky, CONSTELLATION_STORIES, DEEP_SKY_STORIES } from '../src/core/sky.js';
 
 const deg = (r) => (r * 180) / Math.PI;
 const angle = (a, b) => deg(Math.acos(Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]))));
@@ -88,9 +88,9 @@ test('the Hyades lie behind the eye of the Bull, the Coalsack beside the Cross, 
   assert.ok(angle(at('tuc47'), at('smc')) < 4);
 });
 
-test('every constellation has two or three lines to tell when it is touched', () => {
-  for (const c of CONSTELLATIONS) {
-    const lines = CONSTELLATION_STORIES[c.id];
+test('every constellation, galaxy, nebula and cluster has two or three lines to tell when it is touched', () => {
+  for (const c of [...CONSTELLATIONS, ...GALAXIES, ...NEBULAE]) {
+    const lines = CONSTELLATION_STORIES[c.id] ?? DEEP_SKY_STORIES[c.id];
     assert.ok(lines && lines.length >= 2 && lines.length <= 3, c.id);
     // Short enough for one row each on a phone 402 wide.
     for (const line of lines) assert.ok(line.length >= 8 && line.length <= 30, `${c.id}: ${line} (${line.length})`);
@@ -101,9 +101,9 @@ test('every constellation has two or three lines to tell when it is touched', ()
   // Its figure rides along as unit directions, one list per line of the drawing.
   assert.equal(orion.figure.length, CONSTELLATIONS[0].lines.length);
   for (const p of orion.figure.flat()) assert.ok(Math.abs(len(p) - 1) < 1e-9);
-  // A galaxy has no figure and tells its one line.
+  // A galaxy has no figure.
   const m31 = labels.find((l) => l.id === 'm31');
-  assert.equal(m31.story, m31.note);
+  assert.equal(m31.story, DEEP_SKY_STORIES.m31.join('\n'));
   assert.deepEqual(m31.figure, []);
 });
 

@@ -96,6 +96,26 @@ export const CONSTELLATION_STORIES = {
   boo: ['아르크투루스는 37광년 떨어진 주황빛 거성.', '북두칠성 손잡이의 굽은 길을 따라가면 닿는다.', '하늘의 북쪽 절반에서 가장 밝은 별이다.'],
 };
 
+// The same for the galaxies, the nebulae and the clusters (the user, 2026-10-05: "ㅇㅇ
+// 그렇게 해" to giving these two or three lines too).
+export const DEEP_SKY_STORIES = {
+  m31: ['250만 광년 떨어진 가장 가까운 큰 은하.', '별이 1조 개쯤으로 우리 은하보다 크다.', '40억 년쯤 뒤 우리 은하와 만난다.'],
+  m33: ['270만 광년. 우리 은하군에서 셋째로 큰 은하.', '별이 400억 개쯤인 나선 은하다.', '아주 어두운 밤에만 맨눈에 보인다.'],
+  lmc: ['16만 광년. 우리 은하 곁을 도는 작은 은하.', '1987년 여기서 터진 초신성이 맨눈에 보였다.', '남반구에서만 보인다.'],
+  smc: ['20만 광년 떨어진 작은 은하.', '이곳의 변광성으로 우주의 거리를 재기 시작했다.', '대마젤란은하와 가스 다리로 이어져 있다.'],
+  m42: ['1,340광년. 가장 가까운 큰 별 탄생 구름.', '가운데 네 별 트라페지움이 가스를 빛낸다.', '오리온의 칼에서 맨눈에 뿌옇게 보인다.'],
+  carina: ['7,500광년. 오리온 대성운의 네 배 크기.', '안의 별 에타 카리나이는 1843년 크게 터졌다.', '남쪽 은하수에서 가장 밝은 성운.'],
+  m8: ['4,100광년 떨어진 궁수자리의 별 요람.', '어두운 띠가 가운데를 갈라 석호처럼 보인다.', '여름 밤 맨눈에 희미하게 보인다.'],
+  m45: ['444광년. 1억 살쯤 된 젊은 푸른 별 무리.', '맨눈에 예닐곱 개, 실제로는 천 개가 넘는다.', '우리말로 좀생이별, 일본말로 스바루다.'],
+  omegaCen: ['1만 7천 광년. 별 천만 개가 뭉친 공.', '우리 은하에서 가장 크고 밝은 구상성단.', '삼켜진 작은 은하의 고갱이로 여겨진다.'],
+  hyades: ['153광년. 가장 가까운 산개성단.', 'V자 모양으로 황소의 얼굴을 그린다.', '알데바란은 식구가 아니라 그 앞에 있는 별이다.'],
+  m44: ['610광년 떨어진 게자리의 성단.', '맨눈에는 뿌연 얼룩, 별은 천 개쯤이다.', '갈릴레이가 망원경으로 처음 별로 갈라 보았다.'],
+  doubleCluster: ['7,500광년. 나란히 붙은 두 젊은 성단.', '나이는 1,300만 살쯤으로 아주 어리다.', '카시오페이아와 페르세우스 사이에 있다.'],
+  tuc47: ['1만 3천 광년. 둘째로 밝은 구상성단.', '별 백만 개쯤이 120광년 안에 모여 있다.', '하늘에서 소마젤란은하 바로 곁에 보인다.'],
+  m7: ['980광년. 전갈의 꼬리 곁에 있는 성단.', '서기 130년 프톨레마이오스가 적어 두었다.', '맨눈에 보이는 별 80개쯤의 무리다.'],
+  coalsack: ['600광년. 은하수를 가린 검은 먼지 구름.', '남십자자리 바로 곁의 까만 구멍처럼 보인다.', '호주 원주민은 에뮤의 머리로 보았다.'],
+};
+
 const star = (name, raH, decDeg, mag) => ({ name, raH, decDeg, mag });
 
 export { CONSTELLATIONS };
@@ -110,7 +130,7 @@ export const BRIGHT_STARS = [
 
 // Where to write each name: a constellation's label point, the centre of a galaxy,
 // a nebula or a cluster. note: a line about it, shown while it is looked at. story: what
-// it tells when touched (a constellation's two or three lines; else its note). figure: a
+// it tells when touched (two or three lines; its note if it has none). figure: a
 // constellation's drawing as lists of unit directions, so a touch on a line finds it.
 export function skyLabels() {
   const labels = CONSTELLATIONS.map((c) => ({
@@ -121,7 +141,7 @@ export function skyLabels() {
     direction: fromEquatorial(c.label[0], c.label[1]),
     figure: c.lines.map((line) => line.map(([raH, decDeg]) => fromEquatorial(raH, decDeg))),
   }));
-  for (const g of [...GALAXIES, ...NEBULAE]) labels.push({ id: g.id, name: g.name, note: g.note, story: g.note, direction: fromEquatorial(g.raH, g.decDeg), figure: [] });
+  for (const g of [...GALAXIES, ...NEBULAE]) labels.push({ id: g.id, name: g.name, note: g.note, story: (DEEP_SKY_STORIES[g.id] ?? [g.note]).join('\n'), direction: fromEquatorial(g.raH, g.decDeg), figure: [] });
   return labels;
 }
 

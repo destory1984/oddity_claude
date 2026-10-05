@@ -322,3 +322,13 @@ test('no craft is ever inside a body', () => {
     }
   }
 });
+
+test('every craft has its small drawing on file, and no drawing is without a craft', async () => {
+  const { existsSync, readdirSync } = await import('node:fs');
+  const { craftPicture } = await import('../src/core/craft.js');
+  for (const c of CRAFT) {
+    assert.equal(craftPicture(c.id), `craft/${c.id}.png`);
+    assert.ok(existsSync(`public/assets/${craftPicture(c.id)}`), c.id);
+  }
+  assert.equal(readdirSync('public/assets/craft').length, CRAFT.length);
+});

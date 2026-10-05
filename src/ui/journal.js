@@ -11,6 +11,7 @@ import { readingKey } from '../core/readingQuiz.js';
 import { TOURS, stopName, stampFile, sceneFile } from '../core/tours.js';
 import { stuntStampFile } from '../core/stunts.js';
 import { t } from '../core/i18n.js';
+import { craftPicture } from '../core/craft.js';
 
 const $ = (id) => document.getElementById(id);
 // 로 after a vowel or ㄹ, 으로 after any other final consonant.
@@ -386,7 +387,12 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       title.textContent = t`${met ? '✓' : '○'} ${c.name} (${c.launched}년)${solved ? t(' · 문제 ✓') : ''}`;
       const line = document.createElement('span');
       line.textContent = met ? c.intro : t('아직 만나지 못했습니다.');
-      li.append(title, line);
+      // Its small drawing; one not yet met is a dark shape (style.css).
+      const art = picture(craftPicture(c.id), '', 'craftArt');
+      art.loading = 'lazy';
+      art.width = 128;
+      art.height = 128;
+      li.append(art, title, line);
       if (met) li.append(jumpButton(c.id, c.name));
       list.append(li);
     }

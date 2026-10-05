@@ -219,6 +219,10 @@ export function craftById(id) {
   return CRAFT.find((c) => c.id === id);
 }
 
+// A craft's small drawing (public/assets/craft, 128 px): beside its name in the notebook
+// and on the card that is up while docked with it.
+export const craftPicture = (id) => `craft/${id}.png`;
+
 // Where every craft is at simulated time timeS, given the bodies at that time.
 export function craftAt(timeS, bodies) {
   const sun = bodies.find((b) => b.kind === 'star');

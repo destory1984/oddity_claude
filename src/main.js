@@ -8,7 +8,7 @@ import {
 import {
   rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, right, swingToward,
 } from './core/orientation.js';
-import { CRAFT, craftAt, craftById, hiddenCraft } from './core/craft.js';
+import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/craft.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
@@ -578,6 +578,7 @@ async function init() {
     $('craftCard').hidden = !target;
     $('craftCard').classList.remove('open');
     if (!target) return;
+    $('craftCardArt').src = `${import.meta.env.BASE_URL}assets/${craftPicture(target.id)}`;
     $('craftCardYear').textContent = t`${target.launched}년 발사`;
     $('craftCardName').textContent = `${target.name} ${target.nameEn}`;
     $('craftCardIntro').textContent = target.intro;

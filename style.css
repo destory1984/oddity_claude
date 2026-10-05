@@ -3635,24 +3635,122 @@ footer .throttle .rangeLabels {
   }
 }
 
+/* A craft's small drawing (public/assets/craft): at the left of its lines in the
+   notebook, and at the head of the card that is up while docked. One not yet met is a
+   dark shape. */
+#journalCraft li {
+  display:grid;
+  grid-template-columns:56px 1fr;
+  column-gap:10px;
+  align-items:start;
+}
+
+#journalCraft li > .craftArt {
+  grid-row:1 / span 3;
+  width:56px;
+  height:56px;
+  border-radius:8px;
+}
+
+#journalCraft li > :not(.craftArt) {
+  grid-column:2;
+}
+
+#journalCraft li > button {
+  justify-self:start;
+}
+
+#journalCraft li:not(.done) > .craftArt {
+  filter:brightness(.3) saturate(.2);
+}
+
+#craftCard {
+  display:grid;
+  grid-template-columns:52px 1fr;
+  column-gap:12px;
+  align-items:center;
+}
+
+#craftCard[hidden] {
+  display:none;
+}
+
+#craftCardArt {
+  grid-row:1 / span 2;
+  width:52px;
+  height:52px;
+  border-radius:8px;
+}
+
+#craftCard p {
+  grid-column:1 / -1;
+  margin-top:8px;
+}
+
 /* A phone with a low screen (the user's is 402 x 657): the card of the craft docked with
    lay right across Sora (a strip 127px tall through the middle of the view). Folded, it
    is two short lines in the bottom left corner, over the speed and beside the keys:
    when it went up and its name. A press unfolds it to the whole card where it used to
    lie; another press folds it again. A taller phone has the room under her and keeps
-   the whole card there. */
+   the whole card there.
+   A wide screen that is low (a phone held sideways, 854 x 480) folds it the same way,
+   over the speed at the left: in the target's column it lay right across the keys. */
 @media (max-width: 480px) and (max-height: 760px) {
   #hud #targetPanel #craftCard {
-    left:var(--gap);
+    --card-left:var(--gap);
+    --card-foot:98px;
+    --card-width:calc(100vw - 3 * var(--top-key) - 5 * var(--gap));
+    --card-open-left:16px;
+    --card-open-right:16px;
+    --card-open-foot:210px;
+  }
+
+  #hud #targetPanel #craftCard.open {
+    width:auto;
+  }
+}
+
+@media (min-width: 481px) and (max-height: 560px) {
+  #hud #targetPanel #craftCard {
+    --card-left:36px;
+    --card-foot:165px;
+    --card-width:240px;
+    /* Open, it stands at the foot beside the speed (over the speed it reached up onto
+       the minimap). */
+    --card-open-left:312px;
+    --card-open-right:auto;
+    --card-open-foot:52px;
+  }
+
+  #hud #targetPanel #craftCard.open {
+    width:min(310px, calc(100vw - 36px - 3 * 64px - 16px - 312px));
+  }
+}
+
+@media (max-width: 480px) and (max-height: 760px), (min-width: 481px) and (max-height: 560px) {
+  #hud #targetPanel #craftCard {
+    position:fixed;
+    left:var(--card-left);
     right:auto;
-    bottom:98px;
+    bottom:var(--card-foot);
     box-sizing:border-box;
-    width:calc(100vw - 3 * var(--top-key) - 5 * var(--gap));
+    width:var(--card-width);
     margin:0;
     padding:6px 10px;
     line-height:1.3;
     pointer-events:auto;
     cursor:pointer;
+  }
+
+  #hud #targetPanel #craftCard:not(.open) {
+    grid-template-columns:40px 1fr;
+    column-gap:8px;
+  }
+
+  #hud #targetPanel #craftCard:not(.open) #craftCardArt {
+    width:40px;
+    height:40px;
+    border-radius:6px;
   }
 
   #hud #targetPanel #craftCard strong {
@@ -3686,10 +3784,9 @@ footer .throttle .rangeLabels {
   }
 
   #hud #targetPanel #craftCard.open {
-    left:16px;
-    right:16px;
-    bottom:210px;
-    width:auto;
+    left:var(--card-open-left);
+    right:var(--card-open-right);
+    bottom:var(--card-open-foot);
     padding:8px 10px;
     line-height:1.55;
   }
@@ -3708,6 +3805,29 @@ footer .throttle .rangeLabels {
     bottom:auto;
     top:12px;
     transform:rotate(180deg);
+  }
+}
+
+/* A tall phone: the whole card, a little lower than before, clear of her feet now that
+   it has a picture at its head and is that much taller. It ends 19px above the keys. */
+@media (max-width: 480px) and (min-height: 761px) {
+  #hud #targetPanel #craftCard {
+    bottom:170px;
+  }
+}
+
+/* A wide screen up to 860px tall (1280 x 720, 1366 x 768): the whole card stands at the
+   foot, to the left of the keys. Under the target's buttons it reached down onto the
+   keys (the block of keys is three rows tall since 2026-10-05). A taller screen has the
+   room and keeps it under the buttons. */
+@media (min-width: 801px) and (min-height: 561px) and (max-height: 860px) {
+  #hud #targetPanel #craftCard {
+    position:fixed;
+    right:calc(36px + 3 * 64px + 16px);
+    bottom:52px;
+    width:300px;
+    margin:0;
+    box-sizing:border-box;
   }
 }
 

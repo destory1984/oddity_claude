@@ -173,7 +173,8 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       const panels = compact
         ? [{ left: 0, top: 0, right: innerWidth, bottom: Math.max(headsBottom, noticeBottom) }]
         : [
-          { left: Math.min(map.left, readout.left), top: readout.top, right: Math.max(map.right, readout.right), bottom: map.bottom },
+          // (The height plate is hidden on every screen since v0.1.187: then the minimap alone.)
+          readout.width ? { left: Math.min(map.left, readout.left), top: readout.top, right: Math.max(map.right, readout.right), bottom: map.bottom } : { left: map.left, top: map.top, right: map.right, bottom: map.bottom },
           { left: target.left, top: target.top, right: target.right, bottom: target.bottom },
         ];
       // What Sora is saying, while it is up: an arrow's label does not stand under it

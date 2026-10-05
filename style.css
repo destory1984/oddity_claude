@@ -4586,7 +4586,8 @@ html.gaze #gazeButton {
 
   #hud #targetPanel {
     --target-key:44px;
-    top:93px;
+    /* One gap under the top buttons, which stand at 26px since the title went. */
+    top:78px;
     background:none;
     box-shadow:none;
   }
@@ -4649,5 +4650,28 @@ html.gaze #gazeButton {
   #hud footer .throttle,
   #hud footer #lightSpeed {
     display:none;
+  }
+}
+
+/* And three things more at the left of a wide screen (the user, 2026-10-05: "제목, 고도
+   판, 미니맵도 세로 모드랑 같게 해줘"): no title and no height plate (the nearest body's
+   label says how far its surface is; the title is on the loading picture and in the
+   settings' About), and the minimap, 124px, in the top left corner on the line of the top
+   buttons. */
+@media (min-width: 481px) {
+  #hud header .brand,
+  #hud .telemetry {
+    display:none;
+  }
+
+  #hud header nav {
+    margin-left:auto;
+  }
+
+  #hud #minimap {
+    top:26px;
+    left:36px;
+    width:124px;
+    height:124px;
   }
 }

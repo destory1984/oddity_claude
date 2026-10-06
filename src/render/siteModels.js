@@ -744,24 +744,34 @@ export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
     };
     let rows = [words];
     let size = fit(rows, 78, 46);
-    if (ctx.measureText(words).width > w - 80 && words.includes(' ')) {
-      const spaces = [...words].map((c, i) => (c === ' ' ? i : -1)).filter((i) => i > 0);
-      // (Before an aside in brackets, if there is one.)
-      const aside = words.indexOf(' (');
-      // (Or where a sentence ends, if one does; else at any space.)
-      const ends = spaces.filter((i) => '.?!,。？！、'.includes(words[i - 1]));
-      const nearest = (list) => list.reduce((best, i) => (Math.abs(i - words.length / 2) < Math.abs(best - words.length / 2) ? i : best), list[0]);
-      const cut = aside > 0 ? aside : nearest(ends.length ? ends : spaces);
-      rows = [words.slice(0, cut), words.slice(cut + 1)];
-      size = fit(rows, 60, 26);
-    } else if (ctx.measureText(words).width > w - 80) {
-      // (Japanese and Chinese have no spaces: after a mark if there is one, else in the
-      // middle.)
-      const marks = [...words].map((c, i) => ('、。！？，'.includes(c) ? i + 1 : -1)).filter((i) => i > 0 && i < words.length);
+    // Two rows when one does not fit, or when two can be written larger than one.
+    const over = ctx.measureText(words).width > w - 80;
+    if (over || size < 60) {
       const half = words.length / 2;
-      const cut = marks.length ? marks.reduce((best, i) => (Math.abs(i - half) < Math.abs(best - half) ? i : best)) : Math.round(half);
-      rows = [words.slice(0, cut), words.slice(cut)];
-      size = fit(rows, 60, 26);
+      const nearest = (list) => list.reduce((best, i) => (Math.abs(i - half) < Math.abs(best - half) ? i : best), list[0]);
+      let two = null;
+      if (words.includes(' ')) {
+        const spaces = [...words].map((c, i) => (c === ' ' ? i : -1)).filter((i) => i > 0);
+        // (Before an aside in brackets, if there is one.)
+        const aside = words.indexOf(' (');
+        // (Or where a sentence ends, if one does; else at any space.)
+        const ends = spaces.filter((i) => '.?!,。？！、'.includes(words[i - 1]));
+        const cut = aside > 0 ? aside : nearest(ends.length ? ends : spaces);
+        two = [words.slice(0, cut), words.slice(cut + 1)];
+      } else if (words.length > 3) {
+        // (Japanese and Chinese have no spaces: after a mark if there is one, else in the
+        // middle.)
+        const marks = [...words].map((c, i) => ('、。！？，'.includes(c) ? i + 1 : -1)).filter((i) => i > 0 && i < words.length);
+        const cut = marks.length ? nearest(marks) : Math.round(half);
+        two = [words.slice(0, cut), words.slice(cut)];
+      }
+      if (two) {
+        const twoSize = fit(two, 60, 26);
+        if (over || twoSize > size) {
+          rows = two;
+          size = twoSize;
+        } else size = fit(rows, 78, 46);
+      }
     }
     const middle = up ? h - 104 : 104;
     rows.forEach((row, k) => ctx.fillText(row, w / 2, middle + (k - (rows.length - 1) / 2) * (size + 8)));
@@ -959,6 +969,7 @@ const MOON_STAGES = {
     pieces: {
       lander: lunaReturn(scene, `${name}Lander`, mats, { stage: 'lander' }),
       rocket: lunaReturn(scene, `${name}Rocket`, mats, { stage: 'rocket' }),
+      say: sayBubble(scene, `${name}Say`, t('나는 왜 두고 가?')),
     },
     flames: { rocket: [0, 0.24, 0, 0.26, 0.13] },
   }),

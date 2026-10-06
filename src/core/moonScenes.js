@@ -187,7 +187,13 @@ export const MOON_SCENES = {
     stage(t) {
       const s = Math.max(0, t - 7);
       const y = 0.26 * s * s;
-      return { lander: { x: 0, y: 0 }, rocket: { x: 0, y, burn: t >= 7, shown: y < 7 } };
+      return {
+        lander: { x: 0, y: 0 },
+        rocket: { x: 0, y, burn: t >= 7, shown: y < 7 },
+        // The lander that is left, once the rocket is well up (the user, 2026-10-06, of
+        // five lines offered: "4").
+        say: said(t, 9.4, 13.8, 0.65, 1.15, 1.1),
+      };
     },
   },
   // Lunokhod 1, the first wheels on another world, comes down Luna 17's ramp.

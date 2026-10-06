@@ -340,6 +340,8 @@ test('on the Moon two go up, three land, two roll out, one falls on its nose, on
     assert.equal(at(id, MOON_SCENES[id].seconds)[piece].shown, false, id);
   }
   assert.deepEqual(at('apollo17', 20).descent, { x: 0, y: 0 });
+  // Luna 16's lander speaks only after its rocket has left.
+  assert.ok(!at('luna16', 8).say.shown && at('luna16', 11).say.shown && !at('luna16', 14.5).say.shown);
   // Its goodbye is up as it lifts off and gone soon after.
   assert.ok(!at('apollo17', 3).say.shown && at('apollo17', 6).say.shown && !at('apollo17', 8).say.shown);
   // The landers come down slower and slower and are down at their moment, engines off.

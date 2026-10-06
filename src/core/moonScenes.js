@@ -53,6 +53,13 @@ function downLadder(t, from, to) {
   return { x: 0.25 + 0.25 * v, y: 0.41 * (1 - v), z: 0 };
 }
 
+// A bubble that is up between two moments at (x, y), a little toward the watcher: it
+// swells in and shrinks away over 0.4 s.
+const said = (t, from, to, x, y) => {
+  const size = ease(t, from, from + 0.4) * (1 - ease(t, to - 0.4, to));
+  return { x, y, z: -0.25, scale: Math.max(0.01, 0.6 * size), shown: size > 0.01 };
+};
+
 // Apollo 11, the longest of them (the user, 2026-10-06: "착륙 -> 우주인이 사다리 타고
 // 나와서 -> 그 위대한 문장 말하고, 국기 꽂고 -> 통통통 뛰어다니는 것까지 해줘"): Eagle
 // comes down, Armstrong climbs down the ladder and says his sentence, Aldrin follows, the
@@ -105,6 +112,15 @@ export const APOLLO11 = {
       buzz: { ...buzz, turn: Math.PI * (1 - ease(t, 40, 41)), scale: 1.5, shown: t >= 40 },
       // It goes up where it stands in the place as it is now (render/siteModels.js apollo).
       flag: { x: 0.62, y: 0, z: 0.3, scale: Math.max(0.02, ease(t, 40.5, 42)), shown: t >= 40.5 },
+      // What is said, in bubbles (the user, 2026-10-06, of five lines offered: "1, \"이것은
+      // 한 사람에게는 작은 한 걸음이지만\", 4,6"; the last taken as the fifth): Eagle as it
+      // lands, Armstrong at the foot of the ladder, Aldrin when he is down, and Aldrin
+      // again as they hop (that one goes along with him).
+      // (A phone's view ends 1.3 units to the right of the lander: none goes past 1.25.)
+      sayLanded: said(t, 17.3, 22.5, 0.48, 1.12),
+      sayStep: said(t, 30.2, 36, 0.86, 0.66),
+      sayDesolation: said(t, 40.6, 44, 0.95, 0.7),
+      sayHops: said(t, 46, 52.5, Math.min(0.95, buzz.x + 0.34), 0.74),
     };
   },
 };

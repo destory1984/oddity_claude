@@ -248,7 +248,7 @@ test('Apollo 11: Eagle lands, Armstrong comes down the ladder and says his sente
   assert.equal(REPLAYS.apollo11, APOLLO11);
   const at = (t) => APOLLO11.stage(t);
   const names = Object.keys(at(0));
-  assert.deepEqual(names, ['lander', 'neilLadder', 'neil', 'buzzLadder', 'buzz', 'flag']);
+  assert.deepEqual(names, ['lander', 'neilLadder', 'neil', 'buzzLadder', 'buzz', 'flag', 'sayLanded', 'sayStep', 'sayDesolation', 'sayHops']);
   let lastY = Infinity;
   for (let t = 0; t <= APOLLO11.seconds; t += 0.05) {
     const frame = replayFrame('apollo11', t);

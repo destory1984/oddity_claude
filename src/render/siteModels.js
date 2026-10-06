@@ -1045,6 +1045,12 @@ export const SITE_BUILD = {
   messenger: [messenger, {}], venera7: [capsule, {}], venera13: [capsule, {}],
 };
 
+// What one that bounces says as it goes (core/replay.js `say`; the user, 2026-10-06, of
+// five lines offered for Luna 9: "1").
+export const SITE_SAYS = {
+  luna9: () => t('통. 통. 통. 어지러워~'),
+};
+
 // For "그날로" (core/replay.js): what came down that day, as it was then.
 // The third item says what shows while it comes down: an engine's flame (the default)
 // a parachute, or a rocket stage it hangs from (the sky crane).

@@ -156,6 +156,11 @@ test('Luna 9 opens its petals after its bags are off; Pathfinder is shown open a
   assert.ok(luna.openAt >= luna.downAt + luna.bagSeconds);
   assert.ok(!replayFrame('luna9', luna.openAt - 0.1).open);
   assert.ok(replayFrame('luna9', luna.openAt).open);
+  // It speaks only while it bounces; Pathfinder says nothing.
+  assert.equal(replayFrame('luna9', 5).say, 0);
+  assert.equal(replayFrame('luna9', 9).say, 1);
+  assert.equal(replayFrame('luna9', 13).say, 0);
+  assert.equal(replayFrame('pathfinder', 12).say, 0);
   assert.ok(!replayFrame('pathfinder', 25).open);
 });
 

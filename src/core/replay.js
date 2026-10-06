@@ -107,6 +107,8 @@ export const REPLAYS = {
     turns: 3,
     bagSeconds: 2,
     openAt: 17,
+    // It speaks while it bounces (render/siteModels.js SITE_SAYS): from, to.
+    say: [6.2, 12.8],
     // Each touch before the last (that one is the thump of landing).
     sounds: [[6, 'bounce'], [9, 'bounce'], [11.4, 'bounce']],
     lines: [
@@ -365,6 +367,8 @@ function hopFrame(scene, t) {
     tilt: (scene.tiltRad ?? 0) * settling * settling * (3 - 2 * settling),
     bag: scene.bagSeconds ? (down ? clamp(1 - (t - scene.downAt) / scene.bagSeconds) : 1) : 0,
     open: scene.openAt !== undefined && t >= scene.openAt,
+    // How large its bubble is (0 → 1): it swells in and shrinks away over 0.4 s.
+    say: scene.say ? clamp((t - scene.say[0]) / 0.4) * clamp((scene.say[1] - t) / 0.4) : 0,
     sizeKm: scene.sizeKm ?? null,
     glow: 0,
     slope: 0,

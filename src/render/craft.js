@@ -1,10 +1,10 @@
-import { Vector3, Quaternion, Color3, CreatePlane, CreateSphere, StandardMaterial, Texture, TransformNode, DynamicTexture } from './babylon.js';
+import { Vector3, Quaternion, Color3, CreatePlane, CreateSphere, StandardMaterial, Texture, TransformNode, DynamicTexture, Mesh } from './babylon.js';
 import { KM_PER_UNIT } from '../core/bodies.js';
 import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
 import { CRAFT_BUILD } from './craftModels.js';
 import { CRAFT_UNFOLD_ALL as CRAFT_UNFOLD } from './craftUnfold.js';
-import { SITE_BUILD, SITE_REPLAY_BUILD } from './siteModels.js';
+import { SITE_BUILD, SITE_REPLAY_BUILD, SITE_SAYS, sayBubble } from './siteModels.js';
 import { drum, rod, group, box } from './craftParts.js';
 
 // Spacecraft and landers. The models are in craftModels.js (in orbit) and
@@ -235,8 +235,19 @@ export function createSiteModels(scene, siteList) {
           });
         }
       }
+      // What it says as it goes: a bubble that goes along with it (not with its
+      // rolling) and always faces the eye.
+      let say = null;
+      if (SITE_SAYS[id]) {
+        say = sayBubble(scene, `then_${id}_say`, SITE_SAYS[id]());
+        say.parent = root;
+        for (const mesh of say.getChildMeshes()) {
+          mesh.billboardMode = Mesh.BILLBOARDMODE_ALL;
+          mesh.renderingGroupId = 1;
+        }
+      }
       root.setEnabled(false);
-      then.set(id, { node: root, flame: null, cords: null, tumble, bag, shape });
+      then.set(id, { node: root, flame: null, cords: null, tumble, bag, shape, say });
       continue;
     }
     const node = build(scene, `then_${id}`, mats, options);
@@ -417,6 +428,19 @@ export function createSiteModels(scene, siteList) {
           old.bag.setEnabled(full > 0.03);
           old.bag.scaling.setAll(Math.max(0.03, full));
           old.tumble.position.y = old.shape.centre + (old.shape.radius - old.shape.centre) * full;
+        }
+        if (old.say) {
+          const size = replay.say ?? 0;
+          old.say.setEnabled(size > 0.01);
+          if (old.say.isEnabled()) {
+            // Up and to the right of it as the eye sees it, so that its tail points at it.
+            const eye = scene.activeCamera;
+            // (Lower beside it when it is high, or the bubble would leave the view's top.)
+            const high = Math.min(1, replay.liftKm / (2 * Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT))));
+            const off = eye.getDirection(Vector3.Right()).scale(0.72 + 0.3 * high).add(eye.getDirection(Vector3.Up()).scale(1.05 - 1.0 * high));
+            off.rotateByQuaternionToRef(Quaternion.Inverse(node.rotationQuaternion), old.say.position);
+            old.say.scaling.setAll(Math.max(0.01, size));
+          }
         }
       }
       if (old?.launch && replay.launch) {

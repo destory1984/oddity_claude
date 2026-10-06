@@ -379,6 +379,8 @@ test('on the Moon two go up, three land, two roll out, one falls on its nose, on
   assert.ok(Math.abs(gap(1, 2) - gap(7, 8)) < 1e-9);
   assert.ok(at('luna2', 8.9).probe.shown && !at('luna2', 9).probe.shown && at('luna2', 9).wreck.shown && !at('luna2', 8.9).wreck.shown);
   assert.ok(!at('luna2', 8.9).flash.shown && at('luna2', 9.25).flash.scale > 1.9 && !at('luna2', 11).flash.shown);
+  // The wreck speaks after it has hit, not before.
+  assert.ok(!at('luna2', 9).say.shown && at('luna2', 12).say.shown && !at('luna2', 15.5).say.shown);
 });
 
 test('Webb unfolds while she is docked with it: pallets, tower, booms, the five layers, the secondary mirror, then the two wings', async () => {

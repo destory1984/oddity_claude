@@ -1007,6 +1007,7 @@ const MOON_STAGES = {
         wreck: impactor(scene, `${name}Wreck`, mats),
         scraps: scraps(scene, `${name}Scraps`, mats, mats.grey),
         flash,
+        say: sayBubble(scene, `${name}Say`, t('아야. 그래도 일등')),
       },
       flames: {},
       lit: ['flash'],

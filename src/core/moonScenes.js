@@ -315,6 +315,9 @@ export const MOON_SCENES = {
         wreck: { x: 0, y: 0, shown: t >= 9 },
         // What it threw out: a ring of dust that spreads and thins.
         scraps: { x: 0, y: 0.05 + 0.5 * Math.max(0, s) - 0.16 * s * s, scale: 0.3 + 1.6 * Math.max(0, s), shown: s >= 0 && s < 3 },
+        // What is left of it speaks once the flash is gone (the user, 2026-10-06, of five
+        // lines offered: "4").
+        say: said(t, 10.4, 15, 0.5, 0.78, 1.1),
       };
     },
   },

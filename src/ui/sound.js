@@ -283,8 +283,8 @@ export function createSound() {
     click: () => pluck(1319, 0, 0.05, 0.2),
     // Docking: air rushing up as the approach begins, a tick for each count, then the
     // latch: a low clunk and two rising bells. Letting go plays the bells falling.
-    // The sounds of docking and the spoken count are at 60% of what they were (the user,
-    // 2026-10-06: "도킹 준비 중. 삼이일영하고 피식~하는 소리.. 너무 크거든.. 음량을 70%로 줄여", then "60%").
+    // The sounds of docking are at 60% of what they were; the voice that counts is as it was (the user,
+    // 2026-10-06: "도킹 준비 중. 삼이일영하고 피식~하는 소리.. 너무 크거든.. 음량을 70%로 줄여", then "60%", then "성우 목소리는 100% 올리고, 효과음만 이대로").
     docking: () => {
       noise({ length: 1.2, volume: 0.06, type: 'bandpass', freq: 500, to: 1700 });
       pluck(392, 0, 0.06, 0.8);
@@ -541,7 +541,7 @@ export function createSound() {
       if (call.voice) words.voice = call.voice;
       words.rate = 1.2;
       // Half of what it was (0.9): the voice stood out over everything else.
-      words.volume = 0.27;
+      words.volume = 0.45;
       window.speechSynthesis.speak(words);
     },
     // Stop talking at once (the docking was called off).

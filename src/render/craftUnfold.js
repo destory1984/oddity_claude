@@ -1,4 +1,4 @@
-import { TransformNode, CreateSphere, CreatePlane, StandardMaterial, Color3, Mesh, VertexData, Texture, DynamicTexture } from './babylon.js';
+import { TransformNode, CreateSphere, CreatePlane, StandardMaterial, Color3, Mesh, VertexData, Texture, DynamicTexture, Vector3 } from './babylon.js';
 import { part, cyl, group, box, drum, rod, fuse } from './craftParts.js';
 import { CRAFT_BUILD, CRAFT_UNFOLD } from './craftModels.js';
 import { astronaut, sayBubble } from './siteModels.js';
@@ -420,7 +420,11 @@ function parkerCorona(scene, name, mats) {
     return box(scene, `${name}Stream${k}`, root, stream, [0.02, 0.02, 1.2 + 0.5 * ((k * 0.61) % 1)], [Math.cos(a) * r, Math.sin(a) * r, 0]);
   });
 
-  function pose({ heat, flow }) {
+  // (The user, 2026-10-06, picked the first of five lines offered.)
+  const say = saysToEye(scene, name, root, t('앗 뜨거. 앗 뜨거. 그래도 간다'));
+
+  function pose({ heat, flow, say: said = 0 }) {
+    say({ say: said });
     face.alpha = 0.85 * heat;
     haze.alpha = 0.16 * heat;
     stream.alpha = 0.3 * clamp((heat - 0.3) / 0.4);
@@ -572,6 +576,27 @@ function says(scene, name, root, words, at = [-0.27, 0.36 + CRAFT_Y, 0.35]) {
   return ({ say = 0 }) => {
     bubble.setEnabled(say > 0.01);
     bubble.scaling.setAll(Math.max(0.01, 0.5 * say));
+  };
+}
+
+// The same for a scene that does not turn to the watcher (Parker keeps its shield to the
+// Sun): the bubble always faces the eye, and each frame it is put up and to the right of
+// the craft as the eye sees it, so that its tail points at the craft from any side.
+function saysToEye(scene, name, root, words) {
+  const bubble = sayBubble(scene, `${name}Bubble`, words);
+  bubble.parent = root;
+  for (const mesh of bubble.getChildMeshes()) {
+    mesh.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    mesh.renderingGroupId = 1;
+  }
+  return ({ say = 0 }) => {
+    bubble.setEnabled(say > 0.01);
+    if (!bubble.isEnabled()) return;
+    bubble.scaling.setAll(Math.max(0.01, 0.42 * say));
+    const eye = scene.activeCamera;
+    const turned = root.computeWorldMatrix(true).getRotationMatrix().invert();
+    const at = Vector3.TransformNormal(eye.getDirection(Vector3.Right()).scale(0.2).add(eye.getDirection(Vector3.Up()).scale(0.3)), turned);
+    bubble.position.copyFrom(at);
   };
 }
 

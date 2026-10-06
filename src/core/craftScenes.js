@@ -172,6 +172,8 @@ export const CRAFT_SCENES = {
       return {
         heat: (0.25 * ease(t, 0, 6) + 0.75 * ease(t, 6, 14)) * (1 - 0.8 * ease(t, 31, 38)),
         flow: Math.max(0, t - 6) * 0.9,
+        // Its bubble ("앗 뜨거. 앗 뜨거. 그래도 간다") is up as it goes into the corona.
+        say: ease(t, 13.5, 13.9) * (1 - ease(t, 19.5, 20)),
       };
     },
   },

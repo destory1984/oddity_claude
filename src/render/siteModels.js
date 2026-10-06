@@ -748,7 +748,10 @@ export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
       const spaces = [...words].map((c, i) => (c === ' ' ? i : -1)).filter((i) => i > 0);
       // (Before an aside in brackets, if there is one.)
       const aside = words.indexOf(' (');
-      const cut = aside > 0 ? aside : spaces.reduce((best, i) => (Math.abs(i - words.length / 2) < Math.abs(best - words.length / 2) ? i : best), spaces[0]);
+      // (Or where a sentence ends, if one does; else at any space.)
+      const ends = spaces.filter((i) => '.?!,。？！、'.includes(words[i - 1]));
+      const nearest = (list) => list.reduce((best, i) => (Math.abs(i - words.length / 2) < Math.abs(best - words.length / 2) ? i : best), list[0]);
+      const cut = aside > 0 ? aside : nearest(ends.length ? ends : spaces);
       rows = [words.slice(0, cut), words.slice(cut + 1)];
       size = fit(rows, 60, 26);
     }

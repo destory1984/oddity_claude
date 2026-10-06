@@ -332,7 +332,8 @@ export const CRAFT_SCENES = {
       { at: 28, text: t('루시는 12년 동안 소행성 열한 곳을 찾아갑니다. 이름은 320만 년 전 사람 화석 루시에서 왔습니다.') },
     ],
     unfold(t) {
-      return { pass: clamp((t - 2) / 31), moon: ease(t, 14, 19), pair: ease(t, 21, 25) };
+      // say: its bubble ("누구냐. 넌") is up, between the two shutters.
+      return { pass: clamp((t - 2) / 31), moon: ease(t, 14, 19), pair: ease(t, 21, 25), say: ease(t, 16.2, 16.6) * (1 - ease(t, 20, 20.4)) };
     },
   },
   mro: {

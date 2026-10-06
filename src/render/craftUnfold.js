@@ -490,16 +490,21 @@ const marsGoesBy = goesBy('europaClipper', (scene, name, world, mats, root) => {
 
 // Lucy at Dinkinesh: the small asteroid, and from behind it a moon that turns out to be
 // two lumps joined. moon: it has come out; pair: its second lump is seen.
-const dinkineshGoesBy = goesBy('lucy', (scene, name, world) => {
+const dinkineshGoesBy = goesBy('lucy', (scene, name, world, mats, root) => {
   const rock = tint(scene, `${name}RockPaint`, '#8f867a');
   ball(scene, `${name}Dinkinesh`, world, rock, 0.6, [0, 0, 0], [1, 0.88, 0.95]);
   belt(scene, `${name}Ridge`, world, tint(scene, `${name}RidgePaint`, '#a39a8c'), 0.6 * 0.88, 0, 0.03).scaling.set(1.13, 1, 1.08);
   const moon = group(scene, `${name}Selam`, world);
   const lobes = [0, 1].map((k) => ball(scene, `${name}Lobe${k}`, moon, rock, 0.13 - 0.02 * k));
-  return ({ moon: out = 0, pair = 0 }) => {
+  // Between its two pictures it asks the moon who it is (the user, 2026-10-06: "찰칵. 중간에
+  // \"누구냐. 넌\" 그리고 찰칵 한 번 더").
+  const say = says(scene, name, root, t('누구냐. 넌'));
+  return (values) => {
+    const { moon: out = 0, pair = 0 } = values;
     const at = mix([0.05, 0.02, -0.3], [-0.42, 0.36, -0.05], out);
     moon.position.set(at[0], at[1], at[2]);
     lobes[1].position.set(0.11 * pair, 0.02 * pair, -0.05 * (1 - pair));
+    say(values);
   };
 }, { from: [-1.8, -0.3, -1.0], to: [1.4, 0.15, -1.0] });
 

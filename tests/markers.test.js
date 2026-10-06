@@ -88,6 +88,11 @@ test('a world keeps its name over a spacecraft or a surface place, even a nearer
   assert.deepEqual([...overlapped([box('earth', 0, 292000), box('hubble', 40, 291500, { minor: true })])], ['hubble']);
   // Even when Hubble is the chosen target.
   assert.deepEqual([...overlapped([box('earth', 0, 292000), box('hubble', 40, 291500, { minor: true, first: true })])], ['hubble']);
+  // But a craft keeps its name over worlds far behind it: Webb before Saturn and Neptune.
+  assert.deepEqual([...overlapped([box('saturn', 0, 1.4e9), box('neptune', 60, 4.35e7), box('jwst', 40, 11000, { minor: true })])].sort(), ['neptune', 'saturn']);
+  // Not over the chosen target, and not when one of the worlds it lies on is near.
+  assert.deepEqual([...overlapped([box('saturn', 0, 1.4e9, { first: true }), box('jwst', 40, 11000, { minor: true })])], ['jwst']);
+  assert.deepEqual([...overlapped([box('saturn', 0, 1.4e9), box('moon', 60, 12000), box('jwst', 40, 11000, { minor: true })])].sort(), ['jwst', 'saturn']);
   // A chosen craft that covers no world's name stays, over other craft.
   assert.deepEqual([...overlapped([box('iss', 0, 100, { minor: true }), box('hubble', 40, 900, { minor: true, first: true })])], ['iss']);
   // Two worlds: the nearer, as before; the chosen world is never hidden.

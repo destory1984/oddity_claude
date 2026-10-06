@@ -123,13 +123,27 @@ export function settleAbove(arrows, panels, gap = 12, step = 40) {
 // and the guide's goal, which are never hidden; minor: a spacecraft or a place on a
 // surface, which gives way to any planet, moon or the Sun however near it is (Hubble's
 // label once stood where Earth's should have been). Returns the ids to hide.
+// But not to a world far behind it: flying to Webb, Saturn's and Neptune's names lay
+// where Webb's should have been and Webb had no name until she was nearly there (the
+// user, 2026-10-06). A craft or place keeps its name over worlds more than FAR_BEHIND
+// times as far away as itself, and those wait instead, unless one is the chosen target.
+const FAR_BEHIND = 10;
 export function overlapped(labels, gap = 2) {
   // Worlds are placed first, then craft and places; within each, the chosen one, then the nearest.
   const order = [...labels].sort((a, b) => (Boolean(a.minor) - Boolean(b.minor)) || (Boolean(b.first) - Boolean(a.first)) || a.km - b.km);
   const shown = [];
   const hidden = new Set();
   for (const label of order) {
-    const hit = shown.some((s) => label.left < s.right + gap && s.left < label.right + gap && label.top < s.bottom + gap && s.top < label.bottom + gap);
+    const hits = shown.filter((s) => label.left < s.right + gap && s.left < label.right + gap && label.top < s.bottom + gap && s.top < label.bottom + gap);
+    const hit = hits.length > 0;
+    if (hit && label.minor && hits.every((s) => !s.minor && !s.first && s.km > label.km * FAR_BEHIND)) {
+      for (const s of hits) {
+        hidden.add(s.id);
+        shown.splice(shown.indexOf(s), 1);
+      }
+      shown.push(label);
+      continue;
+    }
     // The chosen target stays, unless it is a craft or place that would cover a world's
     // name (placed after the worlds and its own kind's chosen one, that is all it can hit).
     if (hit && (!label.first || label.minor)) hidden.add(label.id);

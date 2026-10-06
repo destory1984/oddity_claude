@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-06', text: t('웹 망원경처럼 가까운 탐사선의 이름표가 먼 행성의 이름표에 가려 숨던 것을 고쳤습니다.') },
   { day: '2026-10-06', text: t('소리나 음악을 끄면 소라가 손가락을 입에 대고 "쉬잇~" 합니다.') },
   { day: '2026-10-06', text: t('허블, 카시니, 로드스터의 그날로 장면이 보는 쪽을 향해 서서 왕복선, 하위헌스, 지구가 다 보입니다.') },
   { day: '2026-10-06', text: t('달에 서서 지구의 이름표를 누르면 지구로 워프합니다. 전에는 틱 소리만 났습니다.') },

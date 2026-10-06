@@ -698,7 +698,7 @@ function plutoPhoto(scene, name) {
   });
 }
 // What it says, in a bubble with a tail toward the lower left.
-function sayBubble(scene, name, words) {
+export function sayBubble(scene, name, words) {
   return card(scene, name, [1.0, 0.5], [512, 256], (ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = '#ffffff';

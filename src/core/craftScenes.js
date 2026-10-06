@@ -262,7 +262,8 @@ export const CRAFT_SCENES = {
       { at: 28, text: t('몸에는 사람 둘과 지구의 자리를 새긴 금빛 판이 붙어 있습니다. 2003년 1월 마지막 신호가 왔습니다.') },
     ],
     unfold(t) {
-      return { pass: clamp((t - 2) / 31) };
+      // say: its bubble ("목성아. 스마일~") is up, from a second and a half before the shutter.
+      return { pass: clamp((t - 2) / 31), say: ease(t, 12.3, 12.7) * (1 - ease(t, 15.6, 16)) };
     },
   },
   pioneer11: {

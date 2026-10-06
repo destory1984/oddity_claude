@@ -1,7 +1,8 @@
 import { TransformNode, CreateSphere, StandardMaterial, Color3, Mesh, VertexData } from './babylon.js';
 import { part, cyl, group, box, drum, rod, fuse } from './craftParts.js';
 import { CRAFT_BUILD, CRAFT_UNFOLD } from './craftModels.js';
-import { astronaut } from './siteModels.js';
+import { astronaut, sayBubble } from './siteModels.js';
+import { t } from '../core/i18n.js';
 
 // The craft that have a day played again (core/craftScenes.js), each built once more
 // with what moves in that scene left loose: id → builder giving { root, pose }.
@@ -439,10 +440,21 @@ const neptuneGoesBy = goesBy('voyager2', (scene, name, world) => {
 }, { from: [-2.1, -0.35, -1.4], to: [2.3, 0.15, -1.4] });
 
 // Pioneer 10 at Jupiter: belts and the red spot.
-const jupiterGoesBy = goesBy('pioneer10', (scene, name, world) => {
+const jupiterGoesBy = goesBy('pioneer10', (scene, name, world, mats, root) => {
   ball(scene, `${name}Jupiter`, world, tint(scene, `${name}JupiterPaint`, '#d8b890'), 1.7);
   for (const [y, hex] of [[0.5, '#a9744a'], [0.2, '#b98558'], [-0.22, '#a9744a'], [-0.55, '#b98558']]) belt(scene, `${name}Belt${y}`, world, tint(scene, `${name}BeltPaint${y}`, hex), 1.7, y, 0.1);
   ball(scene, `${name}RedSpot`, world, tint(scene, `${name}RedSpotPaint`, '#c2553a'), 0.3, [0.3, -0.36, 0.7], [1.4, 0.8, 0.3]);
+  // What it says before the shutter (the user, 2026-10-06: "중간에 \"목성아. 스마일~\"하고
+  // 셔터 소리 내줘"): a bubble up to the watcher's right of it (the craft's -x), turned
+  // half round so that its words face them.
+  const bubble = sayBubble(scene, `${name}Bubble`, t('목성아. 스마일~'));
+  bubble.parent = root;
+  bubble.position.set(-0.27, 0.36, 0.35);
+  bubble.rotation.y = Math.PI;
+  return ({ say = 0 }) => {
+    bubble.setEnabled(say > 0.01);
+    bubble.scaling.setAll(Math.max(0.01, 0.5 * say));
+  };
 }, { from: [-2.4, -0.3, -1.5], to: [2.4, 0.2, -1.5] });
 
 // Pioneer 11 at Saturn: the ball and its rings, tipped toward the watcher.

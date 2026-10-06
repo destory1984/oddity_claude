@@ -345,6 +345,54 @@ export const PLACE_STAGES = {
       };
     },
   },
+  // Shoemaker-Levy 9 hits Jupiter (the user, 2026-10-06: "레비 9 충돌은 그날 애니 없어?").
+  // Four of its twenty-one pieces are shown: each comes down the sky at a slant, a ball
+  // of fire swells and rises where it goes in, and a dark bruise spreads on the cloud
+  // tops and stays. Jupiter turns under the train of pieces, so the bruises stand in a
+  // row. (The stage is drawn 50 km to a unit and seen from 480 km: on Jupiter the eye is
+  // never lower than 140 km. The real fireballs rose 3,000 km and the bruises were as
+  // wide as Earth: drawn as what fits the view.)
+  // Not at the story place 'shoemakerLevy' itself: Jupiter's cloud tops turn once in ten
+  // hours and a spot on them goes by at 600 km/s of the game's clock, so nobody can stand
+  // beside it. Like Cassini's plunge on Saturn it is played by resting anywhere on
+  // Jupiter's cloud tops (`on`), and so has an id of its own.
+  levyImpact: {
+    name: t('혜성이 목성에 부딪히다'),
+    day: t('1994년 7월 16일'),
+    on: 'jupiter',
+    seconds: 34,
+    downAt: 7,
+    viewKm: 480,
+    sizeKm: 50,
+    sounds: [[7, 'impact'], [11, 'impact'], [15, 'impact'], [19, 'impact']],
+    lines: [
+      { at: 0, text: t('1994년 7월 16일. 두 해 전 목성에 붙잡혀 스물한 조각으로 부서진 혜성이 줄지어 떨어집니다.') },
+      { at: 6, text: t('첫 조각이 초속 60km로 구름 속에 박힙니다. 불덩이가 구름 위 3,000km까지 솟습니다.') },
+      { at: 11, text: t('가장 큰 조각은 18일에 떨어졌습니다. 터진 힘이 세상의 핵무기를 다 합친 것의 600배였습니다.') },
+      { at: 18, text: t('엿새 동안 스물한 번. 부딪힌 자리마다 검은 멍이 들었고, 큰 것은 지구만 했습니다.') },
+      { at: 26, text: t('멍은 작은 망원경으로도 보였고 몇 달 뒤에야 흐려졌습니다. 천체가 부딪히는 것을 사람이 처음 지켜봤습니다.') },
+    ],
+    stage(t) {
+      // [when it hits, where, how big]
+      const HITS = [[7, -0.9, 0.8], [11, -0.3, 1.3], [15, 0.3, 0.9], [19, 0.9, 1]];
+      const FALL_S = 1.6;
+      const pieces = {};
+      let flash = { x: 0, y: 0, scale: 0.01, shown: false };
+      HITS.forEach(([at, x, size], i) => {
+        const u = clamp((t - (at - FALL_S)) / FALL_S);
+        // It comes down from the left, its tail behind it.
+        pieces[`piece${i}`] = { x: x - 1.6 * (1 - u), y: 2.6 * (1 - u), lean: Math.atan2(1.6, 2.6), scale: size, shown: t >= at - FALL_S && t < at };
+        pieces[`bruise${i}`] = { x, y: 0.03, scale: Math.max(0.01, size * ease(t, at, at + 3)), shown: t >= at };
+        const s = t - at;
+        // The ball of fire swells in a sixth of a second, rises and fades in two.
+        if (s >= 0 && s < 2.2) {
+          const swell = s < 0.16 ? s / 0.16 : Math.max(0, 1 - (s - 0.16) / 2);
+          flash = { x, y: 0.1 + 0.9 * Math.min(1, s / 2), scale: Math.max(0.01, 1.1 * size * swell), shown: swell > 0 };
+        }
+      });
+      return { ...pieces, flash };
+    },
+  },
   // Nuri's second flight from Naro, the first to reach orbit: three stages, each left
   // behind in turn, the fairing's two halves, and the satellite let go at the top.
   // The stack stands 0.16 to the side of the pad's middle, 0.2 up on its deck; each

@@ -7,10 +7,11 @@ import { CRAFT } from '../src/core/craft.js';
 test('every scene belongs to a story place on a surface and tells its lines in order', () => {
   for (const [id, scene] of Object.entries(REPLAYS)) {
     // A scene on a body belongs to a story told there: by landing on it (Saturn), or by
-    // passing near it (Philae's comet).
+    // passing near it (Philae's comet), or by coming to a place on its cloud tops, where
+    // nobody can stand (Jupiter: the comet's bruises).
     // A scene of unfolding belongs to a craft she can dock with.
     if (scene.unfold) assert.ok(CRAFT.some((c) => c.id === id), id);
-    else if (scene.on) assert.ok(STORIES.some((s) => (s.type === 'land' && s.body === scene.on) || (s.type === 'near' && s.target === scene.on)), id);
+    else if (scene.on) assert.ok(STORIES.some((s) => (s.type === 'land' && s.body === scene.on) || (s.type === 'near' && s.target === scene.on) || (s.type === 'surface' && s.body === scene.on)), id);
     else assert.equal(STORIES.find((s) => s.id === id)?.type, 'surface', id);
     assert.equal(scene.lines[0].at, 0);
     for (let i = 1; i < scene.lines.length; i++) assert.ok(scene.lines[i].at > scene.lines[i - 1].at);
@@ -58,11 +59,12 @@ test('the line told is the last one whose moment has come, and the scene ends at
   assert.ok(at(24).done);
 });
 
-test('resting on Saturn offers the plunge of Cassini, on Philae\'s comet its landing, and no other body a scene', () => {
+test('resting on Saturn offers the plunge of Cassini, on Philae\'s comet its landing, on Jupiter the comet that hit it, and no other body a scene', () => {
   assert.equal(replayOn('saturn'), 'cassiniPlunge');
   assert.equal(replayOn('churyumov'), 'philaeLanding');
   assert.equal(replayOn('moon'), null);
-  assert.equal(replayOn('jupiter'), null);
+  assert.equal(replayOn('jupiter'), 'levyImpact');
+  assert.equal(replayOn('neptune'), null);
 });
 
 test('Cassini comes in from the side, glows from a third of the way and is gone at 15 seconds', () => {
@@ -99,7 +101,7 @@ test('Curiosity has a scene of its own day, told in four lines', () => {
   assert.equal(replayFor('curiosity').day, '2012년 8월 6일');
   assert.equal(replayFor('curiosity').lines.length, 4);
   assert.match(replayFrame('curiosity', 17).text, /게일 분화구/);
-  assert.equal(Object.keys(REPLAYS).length, 30);
+  assert.equal(Object.keys(REPLAYS).length, 31);
   assert.equal(replayFor('viking1').day, '1976년 7월 20일');
   assert.match(replayFrame('viking1', 17).text, /25초/);
 });
@@ -401,4 +403,23 @@ test('Webb unfolds while she is docked with it: pallets, tower, booms, the five 
   assert.match(replayFrame('jwst', scene.downAt).text, /344/);
   assert.deepEqual(scene.sounds.filter(([, name]) => name === 'clunk').map(([at]) => at), [34, 37]);
   assert.ok(!replayFrame('jwst', scene.seconds - 0.1).done && replayFrame('jwst', scene.seconds).done);
+});
+
+test('four pieces of the comet hit Jupiter in turn and each leaves a bruise that stays', () => {
+  const at = (t) => replayFrame('levyImpact', t);
+  assert.equal(replayFor('levyImpact').on, 'jupiter');
+  assert.equal(at(0).sizeKm, 50);
+  // Before the first hit: one piece on its way down, no fire, no bruise.
+  assert.ok(at(6.5).stage.piece0.shown && at(6.5).stage.piece0.y > 0);
+  assert.ok(!at(6.5).stage.flash.shown && !at(6.5).stage.bruise0.shown);
+  // Just after: the piece is gone, the fire is up, the bruise has begun.
+  assert.ok(!at(7.3).stage.piece0.shown && at(7.3).stage.flash.shown && at(7.3).stage.bruise0.shown);
+  assert.equal(at(7.3).stage.flash.x, at(7.3).stage.bruise0.x);
+  // At the end all four bruises stand in a row, left to right, and nothing burns.
+  const end = at(33).stage;
+  const xs = [0, 1, 2, 3].map((i) => end[`bruise${i}`].x);
+  assert.ok([0, 1, 2, 3].every((i) => end[`bruise${i}`].shown && !end[`piece${i}`].shown));
+  assert.deepEqual(xs, [...xs].sort((a, b) => a - b));
+  assert.ok(!end.flash.shown);
+  assert.deepEqual(replaySounds('levyImpact', 0, 34), ['impact', 'impact', 'impact', 'impact']);
 });

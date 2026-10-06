@@ -270,6 +270,8 @@ export function replayFrame(id, t) {
   if (scene.stage) {
     return {
       stage: scene.stage(t),
+      // (A stage on a planet of gas is seen from far off and drawn large: sizeKm.)
+      sizeKm: scene.sizeKm ?? null,
       liftKm: 0, acrossKm: 0, glow: 0, slope: 0, gone: false, flame: false, down: false,
       after: Math.max(0, t - scene.downAt),
       line,

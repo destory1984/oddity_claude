@@ -774,6 +774,41 @@ function nuriPieces(scene, name, mats) {
 
 const MOON_STAGES = {
   naro: nuriPieces,
+  // Shoemaker-Levy 9: four pieces of the comet (a bright head and its tail, light
+  // itself), the ball of fire, and four bruises on the cloud tops.
+  levyImpact: (scene, name, mats) => {
+    // Fire of its own colours, lit by nothing: white light was lost on the pale cloud
+    // tops of the day side.
+    const fire = (id, hex) => {
+      const material = new StandardMaterial(`${name}${id}`, scene);
+      material.disableLighting = true;
+      material.emissiveColor = Color3.FromHexString(hex);
+      return material;
+    };
+    const hot = fire('Hot', '#ff7a1f');
+    const ember = fire('Ember', '#c2330f');
+    const core = fire('Core', '#ffd27a');
+    const pieces = {};
+    for (let i = 0; i < 4; i++) {
+      const piece = new TransformNode(`${name}Piece${i}`, scene);
+      sphere(scene, `${name}Head${i}`, piece, core, 0.13, [0, 0, 0]);
+      drum(scene, `${name}Glow${i}`, piece, hot, { height: 0.5, diameterTop: 0.05, diameterBottom: 0.15, tessellation: 12 }, [0, 0.22, 0]);
+      drum(scene, `${name}Tail${i}`, piece, ember, { height: 1.1, diameterTop: 0.01, diameterBottom: 0.09, tessellation: 10 }, [0, 0.62, 0]);
+      pieces[`piece${i}`] = piece;
+      const bruise = new TransformNode(`${name}Bruise${i}`, scene);
+      drum(scene, `${name}Dark${i}`, bruise, mats.black, { height: 0.004, diameter: 0.5, tessellation: 28 }, [0, 0, 0]);
+      drum(scene, `${name}Ring${i}`, bruise, mats.dark, { height: 0.002, diameter: 0.8, tessellation: 28 }, [0, -0.002, 0]);
+      pieces[`bruise${i}`] = bruise;
+    }
+    // The ball of fire: a bright heart before an orange ball before a dark red one
+    // (the stage's -z is toward whoever watches).
+    const flash = new TransformNode(`${name}Flash`, scene);
+    sphere(scene, `${name}FlashEmber`, flash, ember, 1, [0, 0, 0]);
+    sphere(scene, `${name}FlashHot`, flash, hot, 0.8, [0, 0.04, -0.2]);
+    sphere(scene, `${name}FlashCore`, flash, core, 0.5, [0, 0.08, -0.42]);
+    pieces.flash = flash;
+    return { pieces, flames: {} };
+  },
   tombaughRegio: (scene, name, mats) => {
     const flash = new TransformNode(`${name}Flash`, scene);
     part(CreateSphere(`${name}FlashBall`, { diameter: 1, segments: 14 }, scene), flash, mats.white, [0, 0, 0]);

@@ -1,4 +1,4 @@
-import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, StandardMaterial, Color3 } from './babylon.js';
+import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, Texture, StandardMaterial, Color3 } from './babylon.js';
 import { t } from '../core/i18n.js';
 import { CRAFT_BUILD } from './craftModels.js';
 import {
@@ -772,8 +772,104 @@ function nuriPieces(scene, name, mats) {
   };
 }
 
+// Dokdo on the day its first lighthouse was lit (core/moonScenes.js PLACE_STAGES.dokdo):
+// the islets as the place's own drawing on a card two units wide with its foot at y = 0,
+// a boat, the square tower of iron, and for each of the two lights a lamp and a beam
+// that the scene turns about the upright (the beam lies along the piece's +x).
+function dokdoPieces(scene, name) {
+  const isle = new TransformNode(`${name}Isle`, scene);
+  const texture = new Texture(`${import.meta.env.BASE_URL}assets/dokdo.png`, scene, true, true, Texture.NEAREST_SAMPLINGMODE);
+  texture.hasAlpha = true;
+  // (Not wrapped: the sea at the drawing's foot showed as a dark line along its top.)
+  texture.wrapU = Texture.CLAMP_ADDRESSMODE;
+  texture.wrapV = Texture.CLAMP_ADDRESSMODE;
+  const drawn = new StandardMaterial(`${name}IsleMaterial`, scene);
+  drawn.disableLighting = true;
+  drawn.diffuseTexture = texture;
+  drawn.emissiveTexture = texture;
+  drawn.useAlphaFromDiffuseTexture = true;
+  drawn.backFaceCulling = false;
+  const plane = CreatePlane(`${name}IslePlane`, { width: 2, height: 1 }, scene);
+  plane.parent = isle;
+  plane.material = drawn;
+  plane.position.y = 0.5;
+  plane.isPickable = false;
+
+  const light = (id, hex, alpha) => {
+    const material = new StandardMaterial(`${name}${id}`, scene);
+    material.disableLighting = true;
+    material.emissiveColor = Color3.FromHexString(hex);
+    material.alpha = alpha;
+    material.backFaceCulling = false;
+    return material;
+  };
+  const glow = light('Glow', '#fff3c4', 1);
+  const ray = light('Ray', '#ffe9a0', 0.26);
+  // Painted iron and wood, lit a little of themselves: the place may be in the night.
+  const paint = (id, hex) => {
+    const material = new StandardMaterial(`${name}${id}`, scene);
+    material.diffuseColor = Color3.FromHexString(hex);
+    material.emissiveColor = Color3.FromHexString(hex).scale(0.45);
+    material.specularColor = new Color3(0, 0, 0);
+    return material;
+  };
+  const iron = paint('Iron', '#c9c4b8');
+  const wood = paint('Wood', '#7a5234');
+  const cloth = paint('Cloth', '#f2ead8');
+
+  // 0.16 tall: four legs that lean in, three rings of braces, a deck and the lamp's house.
+  const tower = new TransformNode(`${name}Tower`, scene);
+  const corner = (y) => {
+    const half = 0.034 - 0.02 * (y / 0.15);
+    return [[half, y, half], [half, y, -half], [-half, y, -half], [-half, y, half]];
+  };
+  corner(0).forEach((foot, k) => rod(scene, `${name}Leg${k}`, tower, iron, foot, corner(0.15)[k], 0.007, 4));
+  for (const y of [0.04, 0.08, 0.12]) {
+    const ring = corner(y);
+    const next = corner(y + 0.035);
+    ring.forEach((from, k) => {
+      rod(scene, `${name}Ring${y}${k}`, tower, iron, from, ring[(k + 1) % 4], 0.004, 4);
+      rod(scene, `${name}Brace${y}${k}`, tower, iron, from, next[(k + 1) % 4], 0.003, 4);
+    });
+  }
+  box(scene, `${name}Deck`, tower, iron, [0.05, 0.006, 0.05], [0, 0.152, 0]);
+  box(scene, `${name}House`, tower, cloth, [0.026, 0.026, 0.026], [0, 0.168, 0]);
+
+  const boat = new TransformNode(`${name}Boat`, scene);
+  box(scene, `${name}Hull`, boat, wood, [0.2, 0.03, 0.06], [0, 0.015, 0]);
+  box(scene, `${name}Bow`, boat, wood, [0.05, 0.04, 0.05], [-0.11, 0.022, 0]);
+  box(scene, `${name}Cabin`, boat, cloth, [0.05, 0.035, 0.045], [0.05, 0.047, 0]);
+  rod(scene, `${name}Mast`, boat, wood, [-0.02, 0.03, 0], [-0.02, 0.12, 0], 0.006, 4);
+  // What it carries: lengths of iron.
+  for (const k of [0, 1, 2]) rod(scene, `${name}Load${k}`, boat, iron, [-0.09, 0.036 + 0.006 * k, -0.015 + 0.015 * k], [0.01, 0.036 + 0.006 * k, -0.015 + 0.015 * k], 0.006, 4);
+
+  const lampOf = (id) => {
+    const lamp = new TransformNode(`${name}${id}`, scene);
+    sphere(scene, `${name}${id}Ball`, lamp, glow, 0.045, [0, 0, 0]);
+    return lamp;
+  };
+  const beamOf = (id) => {
+    const beam = new TransformNode(`${name}${id}`, scene);
+    drum(scene, `${name}${id}Cone`, beam, ray, { height: 0.9, diameterTop: 0.2, diameterBottom: 0.012, tessellation: 16, cap: 0 }, [0.45, 0, 0], [1, 0, 0]);
+    return beam;
+  };
+  return {
+    pieces: {
+      isle,
+      boat: fuse(scene, boat),
+      tower: fuse(scene, tower),
+      lamp: lampOf('Lamp'),
+      beam: beamOf('Beam'),
+      topLamp: lampOf('TopLamp'),
+      topBeam: beamOf('TopBeam'),
+    },
+    flames: {},
+  };
+}
+
 const MOON_STAGES = {
   naro: nuriPieces,
+  dokdo: dokdoPieces,
   // Shoemaker-Levy 9: four pieces of the comet (a bright head and its tail, light
   // itself), the ball of fire, and four bruises on the cloud tops.
   levyImpact: (scene, name, mats) => {

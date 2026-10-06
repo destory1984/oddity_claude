@@ -75,6 +75,9 @@ function createSiteCard(scene, id, file) {
   card.isPickable = false;
   const texture = new Texture(`${import.meta.env.BASE_URL}assets/${file}`, scene, true, true, Texture.NEAREST_SAMPLINGMODE);
   texture.hasAlpha = true;
+  // (Not wrapped: the sea at the drawing's foot showed as a dark line along its top.)
+  texture.wrapU = Texture.CLAMP_ADDRESSMODE;
+  texture.wrapV = Texture.CLAMP_ADDRESSMODE;
   const material = new StandardMaterial(`${id}Card`, scene);
   material.disableLighting = true;
   material.diffuseTexture = texture;
@@ -111,7 +114,7 @@ function createSiteCard(scene, id, file) {
     material.emissiveColor = new Color3(lit, lit, lit);
   }
 
-  return { update };
+  return { update, hide: () => node.setEnabled(false) };
 }
 
 // siteList: story places on a surface (core/stories.js storySitesAt). Those on the
@@ -353,7 +356,10 @@ export function createSiteModels(scene, siteList) {
     for (const [id, old] of then) if (replay?.id !== id || replay.open) old.node.setEnabled(false);
     for (const site of sites) {
       const card = cards.get(site.id);
-      if (card) {
+      // (A drawn place whose day is being played: the stage has the drawing as one of
+      // its pieces, and the card waits.)
+      if (card && replay?.id === site.id && then.has(site.id)) card.hide();
+      else if (card) {
         card.update(site, bodies.find((b) => b.id === site.parent), bodies.find((b) => b.kind === 'star'), position);
         continue;
       }

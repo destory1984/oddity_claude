@@ -393,6 +393,47 @@ export const PLACE_STAGES = {
       return { ...pieces, flash };
     },
   },
+  // Dokdo's first lighthouse (the user, 2026-10-06: "독도는 애니 없어?", and of the days
+  // offered: "등대에 불 켜진 날"). A boat brings the iron, a square tower of iron 10 m
+  // tall goes up on a rock 5 m over the sea by the old pier on the north of the east
+  // islet, and its light comes on and turns. Then the white lighthouse of 1998 on the
+  // islet's top lights too. The islets are the place's own drawing (the card is two units
+  // wide, its foot at y = 0; the east islet is the right one, its top at x 0.5, y 0.63).
+  // The tower is drawn three times its size beside the islet, to be seen at all, and
+  // the light goes round once in five seconds (the real one flashes once in ten).
+  dokdo: {
+    name: t('독도 등대의 첫 불빛'),
+    day: t('1954년 8월 10일'),
+    seconds: 32,
+    downAt: 12,
+    viewKm: 30,
+    sizeKm: 5,
+    sounds: [[5.5, 'clunk'], [12, 'stood'], [20, 'stood']],
+    lines: [
+      { at: 0, text: t('1954년 8월 10일. 동도 북쪽 옛 선착장 곁, 바다에서 5m 솟은 바위에 쇠기둥을 세웁니다.') },
+      { at: 6, text: t('높이 10m의 네모난 철탑입니다. 지키는 사람 없이 혼자 켜지는 무인 등대였습니다.') },
+      { at: 12, text: t('불이 켜졌습니다. 독도 등대의 첫 불빛이 동해를 지나는 배들에게 섬이 여기 있다고 알립니다.') },
+      { at: 20, text: t('1998년 12월 10일, 동도 꼭대기에 높이 15m의 흰 등대가 새로 섰습니다. 이때부터 사람이 지킵니다.') },
+      { at: 26, text: t('불빛은 10초에 한 번 깜빡이고 46km 밖까지 닿습니다. 등대원들이 번갈아 섬에 머뭅니다.') },
+    ],
+    stage(t) {
+      const TOWER = [0.78, 0.2, -0.04];
+      const TOP = [0.5, 0.64, -0.04];
+      const sweep = (from) => (2 * Math.PI * Math.max(0, t - from)) / 5;
+      // It comes on over a third of a second.
+      const lit = (from) => Math.max(0.01, clamp((t - from) / 0.35));
+      return {
+        isle: { x: 0, y: 0 },
+        // In from the right, and it lies by the rock while the tower goes up.
+        boat: { x: 1.02 + 0.9 * (1 - ease(t, 0, 5.5)), y: 0.13, z: -0.08 },
+        tower: { x: TOWER[0], y: TOWER[1], z: TOWER[2], scale: Math.max(0.02, ease(t, 5.5, 11)), shown: t >= 5.5 },
+        lamp: { x: TOWER[0], y: TOWER[1] + 0.17, z: TOWER[2], scale: lit(12), shown: t >= 12 },
+        beam: { x: TOWER[0], y: TOWER[1] + 0.17, z: TOWER[2], turn: sweep(12), scale: lit(12), shown: t >= 12 },
+        topLamp: { x: TOP[0], y: TOP[1], z: TOP[2], scale: 1.4 * lit(20), shown: t >= 20 },
+        topBeam: { x: TOP[0], y: TOP[1], z: TOP[2], turn: Math.PI + sweep(20), scale: 1.5 * lit(20), shown: t >= 20 },
+      };
+    },
+  },
   // Nuri's second flight from Naro, the first to reach orbit: three stages, each left
   // behind in turn, the fairing's two halves, and the satellite let go at the top.
   // The stack stands 0.16 to the side of the pad's middle, 0.2 up on its deck; each

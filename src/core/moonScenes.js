@@ -296,6 +296,9 @@ export const MOON_SCENES = {
       return {
         lander: { x: 0, y: comeDown(t, 9, 2.5), burn: t < 9 },
         rover: { ...rollOut(t, { rollAt: 15.5, ramp: 3, drive: 5.5, to: 1.7, scale: 0.42 }), shown: t >= 14 },
+        // What India's space agency wrote in Vikram's name as it set down ("India, I
+        // reached my destination and you too!"; the user chose it, 2026-10-07).
+        say: said(t, 9.5, 14.6, 0.55, 1.25, 1.1),
       };
     },
   },

@@ -340,6 +340,8 @@ test('on the Moon two go up, three land, two roll out, one falls on its nose, on
     assert.equal(at(id, MOON_SCENES[id].seconds)[piece].shown, false, id);
   }
   assert.deepEqual(at('apollo17', 20).descent, { x: 0, y: 0 });
+  // Vikram speaks once it is down, and has done before its rover comes out.
+  assert.ok(!at('chandrayaan3', 9).say.shown && at('chandrayaan3', 12).say.shown && !at('chandrayaan3', 15).say.shown);
   // Lunokhod speaks once it is on the ground and driving, and its bubble goes along.
   assert.ok(!at('lunokhod1', 15).say.shown && at('lunokhod1', 18).say.shown && !at('lunokhod1', 21.5).say.shown);
   assert.ok(at('lunokhod1', 19).say.x > at('lunokhod1', 17).say.x);

@@ -758,8 +758,8 @@ export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
         const spaces = [...words].map((c, i) => (c === ' ' ? i : -1)).filter((i) => i > 0);
         // (Before an aside in brackets, if there is one.)
         const aside = words.indexOf(' (');
-        // (Or where a sentence ends, if one does; else at any space.)
-        const ends = spaces.filter((i) => '.?!,。？！、'.includes(words[i - 1]));
+        // (Or where a sentence ends, if one does near the middle; else at any space.)
+        const ends = spaces.filter((i) => '.?!,。？！、'.includes(words[i - 1]) && Math.abs(i - half) <= 0.3 * words.length);
         const cut = aside > 0 ? aside : nearest(ends.length ? ends : spaces);
         two = [words.slice(0, cut), words.slice(cut + 1)];
       } else if (words.length > 3) {
@@ -1011,6 +1011,7 @@ const MOON_STAGES = {
     pieces: {
       lander: deckLander(scene, `${name}Lander`, mats, {}),
       rover: rover(scene, `${name}Rover`, mats, { power: 'wings' }),
+      say: sayBubble(scene, `${name}Say`, t('인도여, 나는 목적지에 닿았고 그대도 그러하다')),
     },
     flames: { lander: [0, 0.12, 0, 0.34, 0.2] },
   }),

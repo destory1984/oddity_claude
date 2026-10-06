@@ -438,7 +438,9 @@ export const CRAFT_SCENES = {
     day: t('2023년 7월 1일'),
     seconds: 38,
     downAt: 29.5,
-    sounds: [[7, 'shutter'], [14.5, 'shutter'], [22, 'shutter'], [29.5, 'stood']],
+    // A shutter for every square as it comes (the user, 2026-10-06: "조각이 나올 떄마다
+    // 찰칵해줘"): fifteen, a second and a half apart.
+    sounds: [...Array.from({ length: 15 }, (_, k) => [7 + 1.5 * k, 'shutter']), [29.5, 'stood']],
     lines: [
       { at: 0, text: t('2023년 7월 1일 유럽의 유클리드가 떠났습니다. 한 달 뒤 지구에서 150만km 떨어진 제자리에 닿았습니다.') },
       { at: 7, text: t('지름 1.2m 거울로 하늘을 한 조각씩 찍어 이어 붙입니다. 한 번에 보름달 두 개 반 넓이가 담깁니다.') },

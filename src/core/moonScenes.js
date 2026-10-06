@@ -83,7 +83,8 @@ export const APOLLO11 = {
     { at: 44, text: t('달의 중력은 지구의 6분의 1입니다. 둘은 캥거루처럼 통통 뛰는 것이 가장 편하다는 것을 알아냅니다.') },
     { at: 51, text: t('2시간 31분 동안 돌과 흙 21.5kg을 모으고 돌아갔습니다. 발자국은 지금도 그대로 남아 있습니다.') },
   ],
-  stage(t) {
+  // Where each piece is, about the lander's own place (x = 0).
+  places(t) {
     // The hopping about: twelve seconds from 44, each ending on the ground.
     const s = Math.min(Math.max(t, 44), 56) - 44;
     const p = s / 12;
@@ -98,7 +99,7 @@ export const APOLLO11 = {
     if (t < 42.5) buzz = { x: 0.5 + 0.28 * ease(t, 40, 42.5), y: hop(t - 40, 0.5, 0.04), z: 0.3 * ease(t, 40, 42.5) };
     // Out along the ground and back, swinging to either side.
     else buzz = { x: 0.78 + 0.75 * Math.sin(Math.PI * p), y: hop(s, 0.75, 0.12), z: 0.3 + 0.4 * Math.sin(turn) };
-    return {
+    const pieces = {
       // It flies on over the crater the computer had chosen, then straight down.
       lander: { x: -1.0 * (1 - ease(t, 4, 14)), y: comeDown(t, 17, 2), burn: t < 17 },
       // Each came down backwards, facing the lander with both hands on the ladder (the
@@ -122,6 +123,15 @@ export const APOLLO11 = {
       sayDesolation: said(t, 40.6, 44, 0.95, 0.7),
       sayHops: said(t, 46, 52.5, Math.min(0.95, buzz.x + 0.34), 0.74),
     };
+    return pieces;
+  },
+  // The whole of it stands a little to the left, so that what is said to the right of
+  // the two is not cut off on a narrow phone (the user, 2026-10-06: "말풍선이 잘리네.
+  // 착륙선을 조금만 왼쪽으로"): over as the lander comes in, and back in the last
+  // seconds, to where the place's own lander stands.
+  stage(t) {
+    const aside = -0.32 * ease(t, 0, 4) * (1 - ease(t, 55, 58));
+    return Object.fromEntries(Object.entries(APOLLO11.places(t)).map(([name, piece]) => [name, { ...piece, x: (piece.x ?? 0) + aside }]));
   },
 };
 

@@ -246,7 +246,9 @@ test('every scene is heard: an engine over the last seconds, wind past a parachu
 test('Apollo 11: Eagle lands, Armstrong comes down the ladder and says his sentence, Aldrin follows, the flag goes up and the two hop about', async () => {
   const { APOLLO11 } = await import('../src/core/moonScenes.js');
   assert.equal(REPLAYS.apollo11, APOLLO11);
-  const at = (t) => APOLLO11.stage(t);
+  // (`places`: where each piece is about the lander's own place; `stage` shows them all 0.32 to the left.)
+  const at = (t) => APOLLO11.places(t);
+  assert.ok(Math.abs(APOLLO11.stage(30).lander.x + 0.32) < 1e-9 && APOLLO11.stage(0).lander.x === at(0).lander.x && Math.abs(APOLLO11.stage(58).lander.x) < 1e-9);
   const names = Object.keys(at(0));
   assert.deepEqual(names, ['lander', 'neilLadder', 'neil', 'buzzLadder', 'buzz', 'flag', 'sayLanded', 'sayStep', 'sayDesolation', 'sayHops']);
   let lastY = Infinity;

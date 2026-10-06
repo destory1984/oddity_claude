@@ -314,7 +314,8 @@ export const CRAFT_SCENES = {
       { at: 28, text: t('목성의 달 유로파를 49번 스쳐 지나며 얼음 밑 바다를 살핍니다. 지구의 바다를 다 합친 것의 두 배쯤 되는 물입니다.') },
     ],
     unfold(t) {
-      return { pass: clamp((t - 2) / 31) };
+      // say: its bubble ("화성아. 구멍 났어?") is up, from a second and a half before the shutter.
+      return { pass: clamp((t - 2) / 31), say: ease(t, 12.3, 12.7) * (1 - ease(t, 15.6, 16)) };
     },
   },
   lucy: {

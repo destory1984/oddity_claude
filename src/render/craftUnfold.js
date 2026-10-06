@@ -431,6 +431,21 @@ function gaze(scene, name, parent, from, toward, length, wide, hex = '#fff3d0') 
   return (looking) => beam.setEnabled(looking > 0.5);
 }
 
+// What a craft says before its shutter (the user, 2026-10-06, of Pioneer 10: "중간에
+// \"목성아. 스마일~\"하고 셔터 소리 내줘", and of Europa Clipper: "화성아. 구멍 났어?"): a
+// bubble up to the watcher's right of it (the craft's -x), turned half round so that
+// its words face them. It is up while `say` is.
+function says(scene, name, root, words, at = [-0.27, 0.36, 0.35]) {
+  const bubble = sayBubble(scene, `${name}Bubble`, words);
+  bubble.parent = root;
+  bubble.position.set(at[0], at[1], at[2]);
+  bubble.rotation.y = Math.PI;
+  return ({ say = 0 }) => {
+    bubble.setEnabled(say > 0.01);
+    bubble.scaling.setAll(Math.max(0.01, 0.5 * say));
+  };
+}
+
 // Voyager 2 at Neptune: the blue planet with its dark storm, and Triton after it.
 const neptuneGoesBy = goesBy('voyager2', (scene, name, world) => {
   ball(scene, `${name}Neptune`, world, tint(scene, `${name}NeptunePaint`, '#3f66d8'), 1.3);
@@ -444,17 +459,7 @@ const jupiterGoesBy = goesBy('pioneer10', (scene, name, world, mats, root) => {
   ball(scene, `${name}Jupiter`, world, tint(scene, `${name}JupiterPaint`, '#d8b890'), 1.7);
   for (const [y, hex] of [[0.5, '#a9744a'], [0.2, '#b98558'], [-0.22, '#a9744a'], [-0.55, '#b98558']]) belt(scene, `${name}Belt${y}`, world, tint(scene, `${name}BeltPaint${y}`, hex), 1.7, y, 0.1);
   ball(scene, `${name}RedSpot`, world, tint(scene, `${name}RedSpotPaint`, '#c2553a'), 0.3, [0.3, -0.36, 0.7], [1.4, 0.8, 0.3]);
-  // What it says before the shutter (the user, 2026-10-06: "중간에 \"목성아. 스마일~\"하고
-  // 셔터 소리 내줘"): a bubble up to the watcher's right of it (the craft's -x), turned
-  // half round so that its words face them.
-  const bubble = sayBubble(scene, `${name}Bubble`, t('목성아. 스마일~'));
-  bubble.parent = root;
-  bubble.position.set(-0.27, 0.36, 0.35);
-  bubble.rotation.y = Math.PI;
-  return ({ say = 0 }) => {
-    bubble.setEnabled(say > 0.01);
-    bubble.scaling.setAll(Math.max(0.01, 0.5 * say));
-  };
+  return says(scene, name, root, t('목성아. 스마일~'));
 }, { from: [-2.4, -0.3, -1.5], to: [2.4, 0.2, -1.5] });
 
 // Pioneer 11 at Saturn: the ball and its rings, tipped toward the watcher.
@@ -474,10 +479,11 @@ const arrokothGoesBy = goesBy('newHorizons', (scene, name, world) => {
 }, { from: [-1.9, -0.35, -1.0], to: [1.9, 0.3, -1.0], turn: 1.2 });
 
 // Europa Clipper at Mars: the red planet with a white cap.
-const marsGoesBy = goesBy('europaClipper', (scene, name, world) => {
+const marsGoesBy = goesBy('europaClipper', (scene, name, world, mats, root) => {
   ball(scene, `${name}Mars`, world, tint(scene, `${name}MarsPaint`, '#b9573a'), 1.6);
   ball(scene, `${name}Cap`, world, tint(scene, `${name}CapPaint`, '#f2ece4'), 0.5, [0, 0.66, 0.1], [1, 0.45, 1]);
   ball(scene, `${name}Dark`, world, tint(scene, `${name}DarkPaint`, '#7a3a2a'), 0.6, [-0.2, 0.05, 0.56], [1.3, 0.6, 0.3]);
+  return says(scene, name, root, t('화성아. 구멍 났어?'), [-0.27, 0.42, 0.35]);
 }, { from: [-2.4, -0.4, -1.5], to: [2.4, 0.1, -1.5] });
 
 // Lucy at Dinkinesh: the small asteroid, and from behind it a moon that turns out to be

@@ -1677,12 +1677,14 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   flex:1 1 auto;
 }
 
+#journalNotes b,
 #journalSky b {
   flex:none;
   color:#7a5a36;
 }
 
 /* Folded: one line, the first piece of news cut short, and a press unfolds them all. */
+#journal #journalNotes #noteFold,
 #journal #journalSky #skyFold {
   display:flex;
   align-items:center;
@@ -1695,6 +1697,12 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   text-align:left;
 }
 
+/* (The note buttons under it are 36px tall by a later rule; the fold is the sky's 30px.) */
+#journal #journalNotes #noteFold {
+  height:auto;
+}
+
+#journalNotes #noteFold span,
 #journalSky #skyFold span {
   flex:1 1 0;
   min-width:0;

@@ -125,6 +125,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     }));
   }
 
+  let notesOpen = false;
   let lastProgress = null;
   let lastPosition = null;
   let lastBodies = bodies;
@@ -139,8 +140,21 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     const read = notes.filter((n) => (progress.notes ?? []).includes(n.id));
     const noteRow = $('journalNotes');
     noteRow.hidden = !read.length || !onNote;
-    noteRow.replaceChildren(t('할머니의 쪽지'));
-    for (const note of read) {
+    // Folded to one line until pressed (the user, 2026-10-06, over a picture of five of
+    // them in three rows: "단추가 너무 많아져서 화면을 많이 차지하고 있음. 단추를 줄여").
+    const fold = document.createElement('button');
+    fold.id = 'noteFold';
+    fold.setAttribute('aria-expanded', String(notesOpen));
+    const head = document.createElement('b');
+    head.textContent = `${t('할머니의 쪽지')} ${read.length}`;
+    fold.append(head, document.createElement('span'), notesOpen ? t('접기') : t('펼치기'));
+    fold.addEventListener('click', () => {
+      notesOpen = !notesOpen;
+      render();
+      $('noteFold').focus();
+    });
+    noteRow.replaceChildren(fold);
+    for (const note of notesOpen ? read : []) {
       const again = document.createElement('button');
       again.textContent = note.title;
       again.setAttribute('aria-label', t`쪽지 ${note.title} 다시 읽기`);

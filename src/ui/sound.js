@@ -121,7 +121,9 @@ export function createSound() {
     return ctx;
   }
 
-  function tone({ freq, to = freq, type = 'sine', start = 0, length = 0.2, volume = 0.2, out = sfx, attack = 0.01 }) {
+  // hold: seconds from its start that it keeps its full level before dying away (0: it
+  // begins to die away as soon as it has swelled, a plucked note).
+  function tone({ freq, to = freq, type = 'sine', start = 0, length = 0.2, volume = 0.2, out = sfx, attack = 0.01, hold = 0 }) {
     const t = ctx.currentTime + start;
     const osc = ctx.createOscillator();
     const env = ctx.createGain();
@@ -130,6 +132,7 @@ export function createSound() {
     if (to !== freq) osc.frequency.exponentialRampToValueAtTime(to, t + length);
     env.gain.setValueAtTime(0.0001, t);
     env.gain.exponentialRampToValueAtTime(volume, t + attack);
+    if (hold > attack) env.gain.setValueAtTime(volume, t + hold);
     env.gain.exponentialRampToValueAtTime(0.0001, t + length);
     osc.connect(env).connect(out);
     osc.start(t);
@@ -178,7 +181,7 @@ export function createSound() {
 
   // attack: seconds to swell from silence. 0 starts at full volume, which is a hard
   // tick at the front of the sound.
-  function noise({ start = 0, length = 0.1, volume = 0.2, type = 'highpass', freq = 2000, to = freq, attack = 0, out = sfx }) {
+  function noise({ start = 0, length = 0.1, volume = 0.2, type = 'highpass', freq = 2000, to = freq, attack = 0, hold = 0, out = sfx }) {
     const t = ctx.currentTime + start;
     const src = ctx.createBufferSource();
     src.buffer = noiseBuffer;
@@ -195,6 +198,7 @@ export function createSound() {
     } else {
       env.gain.setValueAtTime(volume, t);
     }
+    if (hold > attack) env.gain.setValueAtTime(volume, t + hold);
     env.gain.exponentialRampToValueAtTime(0.0001, t + length);
     src.connect(filter).connect(env).connect(out);
     src.start(t);
@@ -248,18 +252,25 @@ export function createSound() {
       noise({ length: 0.3, volume: 0.16, type: 'lowpass', freq: 420, to: 140, attack: 0.03 });
       tone({ freq: 174, to: 131, length: 0.55, volume: 0.13 });
     },
-    // A camera's "찰-칵" (the user, 2026-10-06: "찰칵 소리를 조금 더 찰칵스럽게 (일반적으로
-    // 많이 쓰이는 그 소리)"; it was two soft puffs of noise): the mirror goes up with a
-    // bright tick over a small thump, the works whirr for a tenth of a second, and the
-    // shutter closes with a sharper tick.
+    // A camera taking a picture: "삐빅" as it finds its focus, then "찰칵" (the user,
+    // 2026-10-06: "찰칵 소리를 조금 더 찰칵스럽게 (일반적으로 많이 쓰이는 그 소리)", and then
+    // a recording to go by, "초점음+써터음 1회" of pgtd.tistory.com/283). Made here after
+    // measuring that recording, which is not in the game: two beeps of 3,886 Hz, 45 ms
+    // each and 15 ms apart; nothing for a fifth of a second; then 0.2 s of hiss about
+    // 5 kHz in three bursts, two quick ones 40 ms apart and the loudest 0.11 s after the
+    // first, dying away over 60 ms. (Before it: two soft puffs of noise, then two ticks.)
     shutter: () => {
-      noise({ length: 0.012, volume: 0.4, type: 'highpass', freq: 3200 });
-      noise({ length: 0.045, volume: 0.26, type: 'bandpass', freq: 950, to: 700 });
-      tone({ freq: 170, to: 95, type: 'triangle', length: 0.05, volume: 0.12 });
-      noise({ start: 0.03, length: 0.1, volume: 0.045, type: 'bandpass', freq: 2300, to: 1500, attack: 0.02 });
-      noise({ start: 0.14, length: 0.01, volume: 0.46, type: 'highpass', freq: 4600 });
-      noise({ start: 0.14, length: 0.055, volume: 0.26, type: 'bandpass', freq: 1900, to: 1200 });
-      tone({ freq: 240, to: 120, type: 'triangle', start: 0.14, length: 0.045, volume: 0.1 });
+      for (const at of [0, 0.06]) {
+        tone({ freq: 3886, type: 'square', start: at, length: 0.056, volume: 0.022, attack: 0.004, hold: 0.042 });
+        tone({ freq: 3886, start: at, length: 0.056, volume: 0.04, attack: 0.004, hold: 0.042 });
+      }
+      const at = 0.35;
+      noise({ start: at, length: 0.085, volume: 0.24, type: 'highpass', freq: 2200, attack: 0.025, hold: 0.045 });
+      noise({ start: at, length: 0.085, volume: 0.12, type: 'bandpass', freq: 3500, attack: 0.025, hold: 0.045 });
+      noise({ start: at + 0.055, length: 0.07, volume: 0.2, type: 'highpass', freq: 3000, attack: 0.012, hold: 0.035 });
+      noise({ start: at + 0.055, length: 0.07, volume: 0.2, type: 'bandpass', freq: 1100, attack: 0.012, hold: 0.035 });
+      noise({ start: at + 0.095, length: 0.2, volume: 0.3, type: 'highpass', freq: 2000, attack: 0.04, hold: 0.06 });
+      noise({ start: at + 0.095, length: 0.26, volume: 0.2, type: 'bandpass', freq: 3600, to: 1900, attack: 0.04, hold: 0.1 });
     },
     mission: () => [784, 988, 784, 1175, 1568].forEach((f, i) => bell(f, i * 0.12)),
     complete: () => [523, 659, 784, 1047, 988, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.16, 0.12)),

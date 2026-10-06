@@ -2509,6 +2509,8 @@ ${STORY_MORE[target.id]}` : told };
     place(position, toward) {
       state = createState(position, lookAtDirection(toward.map((n, i) => n - position[i])));
     },
+    // One of the sounds by its name (ui/sound.js cues), to be heard while it is being made.
+    cue: (name) => sound.cue(name),
   };
 }
 

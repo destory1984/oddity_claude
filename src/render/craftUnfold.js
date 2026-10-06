@@ -245,28 +245,89 @@ function hubbleService(scene, name, mats) {
   return { root, pose, face: true, fit: 0.7, lift: 0.2 };
 }
 
-// The station built up: its eight groups, each coming in from its own side and joining.
-const ISS_GROUPS = [
-  ['zarya', [0, 0, -1.3]], ['unity', [0, 0, 1.3]], ['zvezda', [0, 0, -1.3]], ['destiny', [0, 1.1, 0.7]],
-  ['port', [-1.3, 0, 0]], ['starboard', [1.3, 0, 0]], ['labs', [0, 0, 1.3]], ['rooms', [0, -1.2, 0]],
-];
-function issAssembly(scene, name, mats) {
-  const root = new TransformNode(name, scene);
-  const stage = Object.fromEntries(ISS_GROUPS.map(([key]) => [key, group(scene, `${name}_${key}`, root)]));
-  CRAFT_BUILD.iss(scene, `${name}Parts`, mats, stage).dispose();
-  for (const node of Object.values(stage)) fuse(scene, node);
-
-  function pose({ built }) {
-    ISS_GROUPS.forEach(([key, from], i) => {
-      const come = clamp(built - i);
-      stage[key].setEnabled(come > 0);
-      const left = 1 - smooth(come);
-      stage[key].position.set(from[0] * left, from[1] * left, from[2] * left);
-    });
-  }
-  pose({ built: 0 });
-  return { root, pose };
+// The year a piece was sent up, on a small plate that rides beside it as it comes in
+// and stays a little after it has joined (the user, 2026-10-06, of the station: "이거 도킹
+// 연도가 다들 다르지?", "조각 곁에 연도 표,로 해보자"). It always faces the eye: these two
+// scenes do not turn to the watcher.
+function yearPlate(scene, name, parent, words) {
+  const texture = new DynamicTexture(`${name}Texture`, { width: 384, height: 112 }, scene, true);
+  texture.hasAlpha = true;
+  const ctx = texture.getContext();
+  ctx.clearRect(0, 0, 384, 112);
+  const long = words.length > 5;
+  const [w, x] = long ? [372, 6] : [200, 92];
+  ctx.fillStyle = '#0d1a3a';
+  ctx.strokeStyle = '#f6b951';
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.roundRect(x, 8, w, 96, 26);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = '700 60px "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif';
+  ctx.fillText(words, 192, 59);
+  texture.update();
+  const material = new StandardMaterial(`${name}Material`, scene);
+  material.disableLighting = true;
+  material.emissiveTexture = texture;
+  material.opacityTexture = texture;
+  material.diffuseColor = new Color3(0, 0, 0);
+  material.specularColor = new Color3(0, 0, 0);
+  material.backFaceCulling = false;
+  const plane = CreatePlane(name, { width: 0.36, height: 0.105 }, scene);
+  plane.parent = parent;
+  plane.material = material;
+  plane.billboardMode = Mesh.BILLBOARDMODE_ALL;
+  plane.isPickable = false;
+  // Over the craft's own parts, whichever is nearer the eye.
+  plane.renderingGroupId = 1;
+  return plane;
 }
+// A craft built up of groups that come in one after another: [key, where it comes
+// from, the year(s) on its plate, where the plate stands once it has joined].
+// built: how many have joined; the part after the point is how far the next has come.
+function assembly(id, groups) {
+  return (scene, name, mats) => {
+    const root = new TransformNode(name, scene);
+    const stage = Object.fromEntries(groups.map(([key]) => [key, group(scene, `${name}_${key}`, root)]));
+    CRAFT_BUILD[id](scene, `${name}Parts`, mats, stage).dispose();
+    for (const node of Object.values(stage)) fuse(scene, node);
+    const plates = groups.map(([key, , years], i) => yearPlate(scene, `${name}Year${i}`, root, years));
+
+    function pose({ built }) {
+      groups.forEach(([key, from, , at], i) => {
+        const come = clamp(built - i);
+        stage[key].setEnabled(come > 0);
+        const left = 1 - smooth(come);
+        stage[key].position.set(from[0] * left, from[1] * left, from[2] * left);
+        // The plate: up as its piece starts in, gone a third of a piece's time after it joined.
+        const shown = come > 0 && built < i + 1.35;
+        plates[i].setEnabled(shown);
+        plates[i].position.set(at[0] + from[0] * left, at[1] + from[1] * left, at[2] + from[2] * left);
+        plates[i].scaling.setAll(Math.max(0.01, smooth(come * 6) * (1 - smooth((built - i - 1.2) / 0.15))));
+      });
+    }
+    pose({ built: 0 });
+    return { root, pose };
+  };
+}
+// The station built up: its eight groups, each coming in from its own side and joining.
+// (Years: when its parts were launched. Zarya and Unity 1998, Zvezda 2000, Destiny 2001,
+// the port truss from P6 in 2000 to P3/P4 in 2006, the starboard one from S1 in 2002 to
+// S6 in 2009, Harmony 2007 with Columbus and Kibo in 2008, the airlock 2001 and
+// Tranquility with its cupola 2010.)
+const issAssembly = assembly('iss', [
+  ['zarya', [0, 0, -1.3], '1998', [0, 0.12, -0.11]],
+  ['unity', [0, 0, 1.3], '1998', [0, 0.12, 0.02]],
+  ['zvezda', [0, 0, -1.3], '2000', [0, 0.12, -0.3]],
+  ['destiny', [0, 1.1, 0.7], '2001', [0, 0.16, 0.14]],
+  ['port', [-1.3, 0, 0], '2000 → 2006', [-0.4, 0.1, 0.15]],
+  ['starboard', [1.3, 0, 0], '2002 → 2009', [0.4, 0.1, 0.15]],
+  ['labs', [0, 0, 1.3], '2007 → 2008', [0, 0.14, 0.3]],
+  ['rooms', [0, -1.2, 0], '2001 → 2010', [0, -0.2, 0.025]],
+]);
 
 // Sputnik 1 leaving its rocket: the nose cone's two halves go, the rocket falls behind,
 // the four whips spring back, and each beep goes out as a shell of light.
@@ -720,24 +781,12 @@ function euclidMosaic(scene, name, mats) {
 }
 
 // Tiangong built up: the core, the first crew's ship, and the two labs from either side.
-const TIANGONG_GROUPS = [['core', [0, 0, -1.4]], ['crew', [0, 0, 1.4]], ['wentian', [-1.4, 0, 0]], ['mengtian', [1.4, 0, 0]]];
-function tiangongAssembly(scene, name, mats) {
-  const root = new TransformNode(name, scene);
-  const stage = Object.fromEntries(TIANGONG_GROUPS.map(([key]) => [key, group(scene, `${name}_${key}`, root)]));
-  CRAFT_BUILD.tiangong(scene, `${name}Parts`, mats, stage).dispose();
-  for (const node of Object.values(stage)) fuse(scene, node);
-
-  function pose({ built = 0 }) {
-    TIANGONG_GROUPS.forEach(([key, from], i) => {
-      const come = clamp(built - i);
-      stage[key].setEnabled(come > 0);
-      const left = 1 - smooth(come);
-      stage[key].position.set(from[0] * left, from[1] * left, from[2] * left);
-    });
-  }
-  pose({});
-  return { root, pose };
-}
+const tiangongAssembly = assembly('tiangong', [
+  ['core', [0, 0, -1.4], '2021', [0, 0.16, -0.12]],
+  ['crew', [0, 0, 1.4], '2021', [0, 0.14, 0.3]],
+  ['wentian', [-1.4, 0, 0], '2022', [-0.24, 0.15, 0.19]],
+  ['mengtian', [1.4, 0, 0], '2022', [0.24, 0.15, 0.19]],
+]);
 
 export const CRAFT_UNFOLD_ALL = {
   ...CRAFT_UNFOLD,

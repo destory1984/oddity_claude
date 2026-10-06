@@ -482,9 +482,11 @@ const arrokothGoesBy = goesBy('newHorizons', (scene, name, world) => {
 const marsGoesBy = goesBy('europaClipper', (scene, name, world, mats, root) => {
   ball(scene, `${name}Mars`, world, tint(scene, `${name}MarsPaint`, '#b9573a'), 1.6);
   ball(scene, `${name}Cap`, world, tint(scene, `${name}CapPaint`, '#f2ece4'), 0.5, [0, 0.66, 0.1], [1, 0.45, 1]);
-  ball(scene, `${name}Dark`, world, tint(scene, `${name}DarkPaint`, '#7a3a2a'), 0.6, [-0.2, 0.05, 0.56], [1.3, 0.6, 0.3]);
+  ball(scene, `${name}Dark`, world, tint(scene, `${name}DarkPaint`, '#5a2a20'), 0.5, [0.15, -0.25, 0.7], [1, 1, 0.35]);
   return says(scene, name, root, t('화성아. 구멍 났어?'), [-0.27, 0.42, 0.35]);
-}, { from: [-2.4, -0.4, -1.5], to: [2.4, 0.1, -1.5] });
+// (It goes by higher than the craft, so that its dark hollow is not behind the wings:
+// the user, 2026-10-06, "지나가면서 화성 구멍이 잘 보이니까, 시점을 조금 위로".)
+}, { from: [-2.4, 0.3, -1.5], to: [2.4, 0.62, -1.5] });
 
 // Lucy at Dinkinesh: the small asteroid, and from behind it a moon that turns out to be
 // two lumps joined. moon: it has come out; pair: its second lump is seen.

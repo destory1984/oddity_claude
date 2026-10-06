@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { clearOfPanels, keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody, nearestBodies, nearbyMoons, NEARBY_KM, lostInGlare, GLARE_FAR_KM, settleAbove } from '../src/core/markers.js';
+import { clearOfPanels, keepMarker, spreadArrows, crowdedMoons, nearCentre, overlapped, behindBody, skyBehind, nearestBodies, nearbyMoons, NEARBY_KM, lostInGlare, GLARE_FAR_KM, settleAbove } from '../src/core/markers.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 
 test('on-screen bodies always keep their label', () => {
@@ -226,4 +226,18 @@ test('an arrow is lifted above the keys at the foot, and those over it move up i
   // Nothing at the foot: nothing moves.
   const free = [{ x: 300, y: 560, half: 60 }, { x: 310, y: 300, half: 60 }];
   assert.deepEqual(settleAbove(free, [], 30).map((a) => a.y), [560, 300]);
+});
+
+test('a name in the sky is behind a body when the line of sight meets its ball', () => {
+  const earth = { id: 'earth', radiusKm: 6371, position: [0, 0, 0] };
+  // Standing 13 km over the ground at +x: straight down is the ground, straight up is sky,
+  // and so is the way along the ground a little above the horizon.
+  const here = [6384, 0, 0];
+  assert.equal(skyBehind([-1, 0, 0], here, [earth]), true);
+  assert.equal(skyBehind([1, 0, 0], here, [earth]), false);
+  assert.equal(skyBehind([0, 1, 0], here, [earth]), false);
+  // Ten degrees under the level: the sea.
+  assert.equal(skyBehind([-Math.sin(0.17), Math.cos(0.17), 0], here, [earth]), true);
+  // A body behind the eye hides nothing.
+  assert.equal(skyBehind([1, 0, 0], [20000, 0, 0], [earth]), false);
 });

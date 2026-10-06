@@ -135,7 +135,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
     // are, and off screen they keep an edge arrow, on a phone too.
     // moonIds: the moons of the planet she is near (nearbyMoons): they keep an arrow and
     // say how far they are, without the nearest one's mint line.
-    update({ view, local, nearestIds = [local.body.id], moonIds = [], selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [], knownIds = null }) {
+    update({ view, local, nearestIds = [local.body.id], moonIds = [], selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [], knownIds = null, skyHidden = null }) {
       $('altitudeLabel').textContent = local.label;
       $('altitude').textContent = fmt(local.altitude);
       const backward = speed > 0.01 && motionSign < 0;
@@ -310,7 +310,8 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         // It lets go once the view has turned half a screen past it.
         const kept = touched?.id === id && z > 0.2 && Math.abs(px) < innerWidth && Math.abs(py) < innerHeight;
         // The plate stands in for its name.
-        el.hidden = kept || z <= 0.2 || off;
+        // (And a name behind a planet or a moon is not written over it.)
+        el.hidden = kept || z <= 0.2 || off || Boolean(skyHidden?.(direction));
         if (kept) touchedSpot = { x: innerWidth / 2 + px, y: innerHeight / 2 + py };
         if (el.hidden) continue;
         el.style.left = `${innerWidth / 2 + px}px`;

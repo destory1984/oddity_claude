@@ -23,7 +23,7 @@ import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } f
 import { isLocalHost } from './core/count.js';
 import { pickSpot, fromSpot, toSpot, NEAR_EARTH_ONLY } from './core/startSpots.js';
 import { teleportSpot } from './core/teleport.js';
-import { behindBody, lostInGlare, nearestBodies, nearbyMoons } from './core/markers.js';
+import { behindBody, skyBehind, lostInGlare, nearestBodies, nearbyMoons } from './core/markers.js';
 import { FACTS } from './core/facts.js';
 import { eventMessage, limitText, dateText, withParticle, objectParticle, distanceText } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
@@ -2454,6 +2454,8 @@ ${STORY_MORE[target.id]}` : told };
       goalId: goalNow()?.targetId ?? null,
       // A place on the far side of its body, or seen from far away, gets no label.
       knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...progress.stories, ...exo.seen, ...(exo.been ? [EXO_STAR.id] : []), ...(eventPlace ? [eventPlace.id] : [])]),
+      // A name in the sky that a planet or a moon stands before is not written.
+      skyHidden: (direction) => skyBehind(direction, state.position, bodies),
       hiddenIds: [
         // The other star is named only from there, and home is one name from there: the Sun.
         ...(away ? homeIds : EXO_IDS),

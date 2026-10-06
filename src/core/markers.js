@@ -190,6 +190,20 @@ export function lostInGlare(target, position, sun) {
 // craft; km): the straight line to the target's nearest point passes through that body.
 // Such a thing cannot be seen, so it gets no label. Places on a surface are not asked
 // here: core/stories.js siteHidden answers for them.
+// Whether something in the fixed sky (a constellation's name, a galaxy's) in the unit
+// `direction` is behind a body as seen from `position`: the line of sight meets its ball.
+// (The user, 2026-10-06, standing at Dokdo with a name written over the sea: "별자리 이름이
+// 지구를 통과해서 보이고 있음".)
+export function skyBehind(direction, position, bodies) {
+  return bodies.some((body) => {
+    const to = body.position.map((n, i) => n - position[i]);
+    const along = to[0] * direction[0] + to[1] * direction[1] + to[2] * direction[2];
+    if (along <= 0) return false;
+    const off = to[0] * to[0] + to[1] * to[1] + to[2] * to[2] - along * along;
+    return off < body.radiusKm * body.radiusKm;
+  });
+}
+
 export function behindBody(target, position, bodies) {
   const to = target.position.map((n, i) => n - position[i]);
   const distance = Math.hypot(...to);

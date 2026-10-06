@@ -370,7 +370,18 @@ function sputnikLeaves(scene, name, mats) {
     shell.mesh = ball(scene, `${name}Beep${k}`, root, shell.material, 0.32);
   });
 
-  function pose({ fairing, sep, whips: sprung, beeps }) {
+  // What it says as its beeps begin (the user, 2026-10-06, picked the first of five
+  // offered). The scene is seen from the side: the eye is on the stage's -x, and the
+  // watcher's right is its -z; the bubble stands up to the right of the ball, turned a
+  // quarter round to face them.
+  const bubble = sayBubble(scene, `${name}Bubble`, t('삐. 삐. 삐. (할 줄 아는 말이 이것뿐)'));
+  bubble.parent = root;
+  bubble.position.set(-0.3, 0.42, -0.3);
+  bubble.rotation.y = Math.PI / 2;
+
+  function pose({ fairing, sep, whips: sprung, beeps, say = 0 }) {
+    bubble.setEnabled(say > 0.01);
+    bubble.scaling.setAll(Math.max(0.01, 0.8 * say));
     halves.forEach((half, k) => {
       const s = k ? -1 : 1;
       half.setEnabled(fairing < 0.99);
@@ -390,7 +401,7 @@ function sputnikLeaves(scene, name, mats) {
       shell.material.alpha = 0.22 * (1 - u);
     });
   }
-  pose({ fairing: 0, sep: 0, whips: 0, beeps: 0 });
+  pose({ fairing: 0, sep: 0, whips: 0, beeps: 0, say: 0 });
   return { root: top, pose, face: 'side', fit: 0.6 };
 }
 

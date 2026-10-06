@@ -732,13 +732,28 @@ export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
     ctx.fillStyle = '#1b2440';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    // Smaller letters for longer words (the other languages).
-    let size = 84;
-    do {
-      ctx.font = `700 ${size}px "Gaegu", "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif`;
-      size -= 6;
-    } while (ctx.measureText(words).width > w - 80 && size > 30);
-    ctx.fillText(words, w / 2, up ? h - 104 : 104);
+    // Smaller letters for longer words (the other languages), and two rows when one row
+    // would need letters under 46px: broken at the space nearest the middle.
+    const fit = (rows, from, least) => {
+      let size = from;
+      for (;;) {
+        ctx.font = `700 ${size}px "Gaegu", "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif`;
+        if (size <= least || rows.every((row) => ctx.measureText(row).width <= w - 80)) return size;
+        size -= 6;
+      }
+    };
+    let rows = [words];
+    let size = fit(rows, 78, 46);
+    if (ctx.measureText(words).width > w - 80 && words.includes(' ')) {
+      const spaces = [...words].map((c, i) => (c === ' ' ? i : -1)).filter((i) => i > 0);
+      // (Before an aside in brackets, if there is one.)
+      const aside = words.indexOf(' (');
+      const cut = aside > 0 ? aside : spaces.reduce((best, i) => (Math.abs(i - words.length / 2) < Math.abs(best - words.length / 2) ? i : best), spaces[0]);
+      rows = [words.slice(0, cut), words.slice(cut + 1)];
+      size = fit(rows, 60, 26);
+    }
+    const middle = up ? h - 104 : 104;
+    rows.forEach((row, k) => ctx.fillText(row, w / 2, middle + (k - (rows.length - 1) / 2) * (size + 8)));
   });
 }
 

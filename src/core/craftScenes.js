@@ -148,6 +148,8 @@ export const CRAFT_SCENES = {
         sep: ease(t, 8.5, 12),
         whips: ease(t, 11.5, 13),
         beeps: Math.max(0, Math.min(t, 34) - 14) / 0.6,
+        // Its bubble is up for the first seven seconds of them.
+        say: ease(t, 14.3, 14.7) * (1 - ease(t, 21, 21.5)),
       };
     },
   },

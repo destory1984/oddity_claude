@@ -192,7 +192,8 @@ export const CRAFT_SCENES = {
       { at: 22, text: t('2005년 1월 14일 타이탄의 안개 속으로 들어갔습니다. 카시니가 위를 지나며 신호를 받아 지구로 보냈습니다.') },
     ],
     unfold(t) {
-      return { away: 1 - (1 - clamp((t - 7) / 24)) ** 2, spin: Math.max(0, t - 7) * 2.5 };
+      // say: Cassini's bubble ("도착하면 꼭 연락해") is up as the probe draws away.
+      return { away: 1 - (1 - clamp((t - 7) / 24)) ** 2, spin: Math.max(0, t - 7) * 2.5, say: ease(t, 12, 12.4) * (1 - ease(t, 18, 18.5)) };
     },
   },
   // The Roadster shown to the sky. open: the fairing's two halves have swung away;

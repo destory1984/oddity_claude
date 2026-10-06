@@ -450,7 +450,11 @@ function huygensLeaves(scene, name, mats) {
   fuse(scene, probe);
   ball(scene, `${name}Titan`, root, tint(scene, `${name}TitanPaint`, '#d9a34a'), 0.2, [-0.62, -0.42, 0.2]);
 
-  function pose({ away, spin }) {
+  // (The user, 2026-10-06, picked the third of five lines offered: Cassini, watching it go.)
+  const say = says(scene, name, root, t('도착하면 꼭 연락해'), [-0.3, 0.42, 0.35]);
+
+  function pose({ away, spin, say: said = 0 }) {
+    say({ say: said });
     probe.position.set(-0.5 * away, -0.34 * away, 0.115 + 0.2 * away);
     probe.rotation.z = spin;
     probe.scaling.setAll(1 - 0.6 * away);

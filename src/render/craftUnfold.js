@@ -153,9 +153,10 @@ function hubbleService(scene, name, mats) {
     drum(scene, `${name}Pod${s}`, shuttle, mats.white, { height: 0.2, diameter: 0.085, tessellation: 12 }, [-0.5, 0.095, s * 0.072], along);
     drum(scene, `${name}PodNose${s}`, shuttle, mats.white, { height: 0.09, diameterTop: 0.02, diameterBottom: 0.085, tessellation: 12 }, [-0.355, 0.092, s * 0.072], along);
     drum(scene, `${name}PodBell${s}`, shuttle, mats.dark, { height: 0.05, diameterTop: 0.025, diameterBottom: 0.055, tessellation: 12 }, [-0.625, 0.095, s * 0.072], along);
-    // The bay's two doors stand open, their silver radiators inward.
-    box(scene, `${name}Door${s}`, shuttle, mats.white, [0.62, 0.008, 0.11], [-0.02, 0.125, s * 0.14], [s * 0.75, 0, 0]);
-    box(scene, `${name}Radiator${s}`, shuttle, mats.silver, [0.6, 0.004, 0.1], [-0.02, 0.127, s * 0.134], [s * 0.75, 0, 0]);
+    // The bay's two doors stand open. They are drawn silver, not white: in sunlight white
+    // doors and the white body were one mass.
+    box(scene, `${name}Door${s}`, shuttle, mats.silver, [0.62, 0.008, 0.11], [-0.02, 0.125, s * 0.14], [s * 0.75, 0, 0]);
+    box(scene, `${name}Radiator${s}`, shuttle, mats.grey, [0.6, 0.004, 0.1], [-0.02, 0.129, s * 0.137], [s * 0.75, 0, 0]);
   }
   // The swept fin.
   slab(scene, `${name}Fin`, shuttle, mats.white, [[-0.3, 0.09, -0.011], [-0.6, 0.42, -0.011], [-0.71, 0.42, -0.011], [-0.6, 0.09, -0.011]], [0, 0, 0.022]);

@@ -473,9 +473,15 @@ export function createCraft(scene, craftList) {
   // the one with loose parts is drawn in its place, posed as the scene says.
   // Which craft's scene is on and when it began (the turn to face the watcher).
   let began = { id: null, at: 0 };
+  // And the scene just ended: which craft's, when, and how it stood last (it turns back
+  // to its everyday self over the same second).
+  let left = { id: null, at: 0, unfold: null };
   const TURN_MS = 1000;
   function update(craft, position, sunPosition, jolt = null, hidden = [], replay = null) {
-    if (!replay?.unfold) began = { id: null, at: 0 };
+    if (!replay?.unfold) {
+      if (began.id && left.unfold) left = { ...left, id: began.id, at: performance.now() };
+      began = { id: null, at: 0 };
+    }
     for (const c of craft) {
       const node = nodes.get(c.id);
       const loose = unfolding.get(c.id);
@@ -498,15 +504,18 @@ export function createCraft(scene, craftList) {
         node.position.addInPlace(across.scale(reach)).addInPlace(away.scale(reach * 0.5));
         node.rotate(Vector3.Forward(), jolt.tilt);
       }
-      if (loose && replay?.id === c.id && replay.unfold) {
+      const playing = Boolean(loose && replay?.id === c.id && replay.unfold);
+      const leaving = Boolean(loose?.face && !playing && left.id === c.id && performance.now() - left.at < TURN_MS);
+      if (playing || leaving) {
         loose.root.setEnabled(true);
         // A scene with things round the craft (a shuttle under Hubble, Earth behind the
         // Roadster) is a stage: it faces whoever watches, stands smaller by `fit` and
         // higher by `lift` of its own size, so that all of it is in view from any side.
         // (face: true, its sunward side to the watcher; 'side', below.)
         // It turns to its place over the first second (it jumped round at a stroke).
-        if (began.id !== c.id) began = { id: c.id, at: performance.now() };
-        const u = Math.min(1, (performance.now() - began.at) / TURN_MS);
+        if (playing && began.id !== c.id) began = { id: c.id, at: performance.now() };
+        if (playing) left = { id: null, at: 0, unfold: replay.unfold };
+        const u = playing ? Math.min(1, (performance.now() - began.at) / TURN_MS) : 1 - (performance.now() - left.at) / TURN_MS;
         const eased = u * u * (3 - 2 * u);
         loose.root.scaling.copyFrom(node.scaling).scaleInPlace(1 + ((loose.fit ?? 1) - 1) * eased);
         loose.root.position.copyFrom(node.position);
@@ -524,7 +533,7 @@ export function createCraft(scene, craftList) {
             loose.root.rotationQuaternion = Quaternion.Slerp(node.absoluteRotationQuaternion, facing, eased);
           } else loose.root.rotationQuaternion = facing;
         } else loose.root.lookAt(new Vector3(...sunPosition.map((n, i) => (n - position[i]) / KM_PER_UNIT)));
-        loose.pose(replay.unfold);
+        loose.pose(playing ? replay.unfold : left.unfold);
         node.setEnabled(false);
       }
     }

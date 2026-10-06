@@ -386,8 +386,278 @@ function junoArrives(scene, name, mats) {
   return { root, pose };
 }
 
+// The thirteen that came last (the user, 2026-10-06: "도킹할 수 있는 모든 곳에는 애니
+// 넣어"). All but two face the watcher, with what they met behind them (the stage's -z).
+
+// A world going by behind a craft: `make(parent)` builds it (and may give a pose of its
+// own for what else moves), and it goes from `from` to `to` as `pass` goes 0 → 1,
+// growing from grow[0] to grow[1] and turning `turn` radians about the line of sight.
+function goesBy(id, make, { from, to, grow = [1, 1], turn = 0, fit = 0.8 }) {
+  return (scene, name, mats) => {
+    const { root } = based(scene, name, mats, id);
+    const world = group(scene, `${name}World`, root);
+    const more = make(scene, name, world, mats, root);
+    function pose(values) {
+      const u = values.pass ?? 0;
+      const at = mix(from, to, u);
+      world.position.set(at[0], at[1], at[2]);
+      world.scaling.setAll(grow[0] + (grow[1] - grow[0]) * u);
+      world.rotation.z = turn * u;
+      more?.(values);
+    }
+    pose({});
+    return { root, pose, face: true, fit };
+  };
+}
+// A belt or a band round a ball: a thin drum a little wider than the ball is there.
+const belt = (scene, name, parent, material, diameter, y, height) => drum(scene, name, parent, material, { height, diameter: Math.sqrt(Math.max(0.0001, diameter * diameter - 4 * y * y)) * 1.03, tessellation: 40 }, [0, y, 0]);
+// A picture that has just been taken: a black card with a white edge, which `fill`
+// draws on (its front is +z). It comes up from nothing as its value goes 0 → 1.
+function picture(scene, name, parent, mats, at, size, fill) {
+  const card = group(scene, name, parent, at);
+  box(scene, `${name}Frame`, card, mats.black, [size, size, 0.008]);
+  box(scene, `${name}Edge`, card, mats.white, [size + 0.014, size + 0.014, 0.004]);
+  fill(card);
+  return (shown) => {
+    card.setEnabled(shown > 0.01);
+    card.scaling.setAll(Math.max(0.01, smooth(shown)));
+  };
+}
+// What a camera looks along: a faint cone of light from `from`, `length` along `toward`.
+function gaze(scene, name, parent, from, toward, length, wide, hex = '#fff3d0') {
+  const d = Math.hypot(...toward);
+  const beam = drum(scene, name, parent, glow(scene, `${name}Light`, hex, 0.16), { height: length, diameterTop: wide, diameterBottom: 0.02, tessellation: 16, cap: 0 }, from.map((n, i) => n + (toward[i] / d) * (length / 2)), toward);
+  return (looking) => beam.setEnabled(looking > 0.5);
+}
+
+// Voyager 2 at Neptune: the blue planet with its dark storm, and Triton after it.
+const neptuneGoesBy = goesBy('voyager2', (scene, name, world) => {
+  ball(scene, `${name}Neptune`, world, tint(scene, `${name}NeptunePaint`, '#3f66d8'), 1.3);
+  ball(scene, `${name}Spot`, world, tint(scene, `${name}SpotPaint`, '#22367e'), 0.3, [-0.22, -0.12, 0.56], [1.5, 0.8, 0.3]);
+  for (const y of [0.3, -0.36]) belt(scene, `${name}Band${y}`, world, tint(scene, `${name}BandPaint${y}`, '#5b84ea'), 1.3, y, 0.05);
+  ball(scene, `${name}Triton`, world, tint(scene, `${name}TritonPaint`, '#d9c3b6'), 0.2, [-1.35, 0.3, 0.3]);
+}, { from: [-2.1, -0.35, -1.4], to: [2.3, 0.15, -1.4] });
+
+// Pioneer 10 at Jupiter: belts and the red spot.
+const jupiterGoesBy = goesBy('pioneer10', (scene, name, world) => {
+  ball(scene, `${name}Jupiter`, world, tint(scene, `${name}JupiterPaint`, '#d8b890'), 1.7);
+  for (const [y, hex] of [[0.5, '#a9744a'], [0.2, '#b98558'], [-0.22, '#a9744a'], [-0.55, '#b98558']]) belt(scene, `${name}Belt${y}`, world, tint(scene, `${name}BeltPaint${y}`, hex), 1.7, y, 0.1);
+  ball(scene, `${name}RedSpot`, world, tint(scene, `${name}RedSpotPaint`, '#c2553a'), 0.3, [0.3, -0.36, 0.7], [1.4, 0.8, 0.3]);
+}, { from: [-2.4, -0.3, -1.5], to: [2.4, 0.2, -1.5] });
+
+// Pioneer 11 at Saturn: the ball and its rings, tipped toward the watcher.
+const saturnGoesBy = goesBy('pioneer11', (scene, name, world) => {
+  const tipped = group(scene, `${name}Tipped`, world, [0, 0, 0], [0.42, 0, 0.2]);
+  ball(scene, `${name}Saturn`, tipped, tint(scene, `${name}SaturnPaint`, '#dcc48c'), 1.1, [0, 0, 0], [1, 0.9, 1]);
+  for (const y of [0.2, -0.2]) belt(scene, `${name}Band${y}`, tipped, tint(scene, `${name}BandPaint${y}`, '#c4a86e'), 1.1, y, 0.06);
+  for (const [k, d, hex] of [[0, 2.5, '#cbb98a'], [1, 2.0, '#8f7f5c'], [2, 1.9, '#d9c9a0'], [3, 1.45, '#2a2418']]) drum(scene, `${name}Ring${k}`, tipped, tint(scene, `${name}RingPaint${k}`, hex), { height: 0.004 + 0.002 * k, diameter: d, tessellation: 48 }, [0, 0, 0]);
+}, { from: [-2.6, -0.3, -1.5], to: [2.6, 0.2, -1.5] });
+
+// New Horizons at Arrokoth: two flat red lumps joined, turning slowly as it goes by.
+const arrokothGoesBy = goesBy('newHorizons', (scene, name, world) => {
+  const red = tint(scene, `${name}ArrokothPaint`, '#a8573d');
+  ball(scene, `${name}Wenu`, world, red, 0.56, [-0.2, 0, 0], [1, 0.95, 0.55]);
+  ball(scene, `${name}Weeyo`, world, red, 0.4, [0.25, 0.02, 0], [1, 0.95, 0.7]);
+  ball(scene, `${name}Neck`, world, tint(scene, `${name}NeckPaint`, '#d9a890'), 0.14, [0.07, 0.01, 0.03], [1, 1, 0.6]);
+}, { from: [-1.9, -0.35, -1.0], to: [1.9, 0.3, -1.0], turn: 1.2 });
+
+// Europa Clipper at Mars: the red planet with a white cap.
+const marsGoesBy = goesBy('europaClipper', (scene, name, world) => {
+  ball(scene, `${name}Mars`, world, tint(scene, `${name}MarsPaint`, '#b9573a'), 1.6);
+  ball(scene, `${name}Cap`, world, tint(scene, `${name}CapPaint`, '#f2ece4'), 0.5, [0, 0.66, 0.1], [1, 0.45, 1]);
+  ball(scene, `${name}Dark`, world, tint(scene, `${name}DarkPaint`, '#7a3a2a'), 0.6, [-0.2, 0.05, 0.56], [1.3, 0.6, 0.3]);
+}, { from: [-2.4, -0.4, -1.5], to: [2.4, 0.1, -1.5] });
+
+// Lucy at Dinkinesh: the small asteroid, and from behind it a moon that turns out to be
+// two lumps joined. moon: it has come out; pair: its second lump is seen.
+const dinkineshGoesBy = goesBy('lucy', (scene, name, world) => {
+  const rock = tint(scene, `${name}RockPaint`, '#8f867a');
+  ball(scene, `${name}Dinkinesh`, world, rock, 0.6, [0, 0, 0], [1, 0.88, 0.95]);
+  belt(scene, `${name}Ridge`, world, tint(scene, `${name}RidgePaint`, '#a39a8c'), 0.6 * 0.88, 0, 0.03).scaling.set(1.13, 1, 1.08);
+  const moon = group(scene, `${name}Selam`, world);
+  const lobes = [0, 1].map((k) => ball(scene, `${name}Lobe${k}`, moon, rock, 0.13 - 0.02 * k));
+  return ({ moon: out = 0, pair = 0 }) => {
+    const at = mix([0.05, 0.02, -0.3], [-0.42, 0.36, -0.05], out);
+    moon.position.set(at[0], at[1], at[2]);
+    lobes[1].position.set(0.11 * pair, 0.02 * pair, -0.05 * (1 - pair));
+  };
+}, { from: [-1.8, -0.3, -1.0], to: [1.4, 0.15, -1.0] });
+
+// A craft that looks down on the world it goes round and takes one picture: the ground
+// under it, the camera's cone of light, and the picture coming up beside it.
+function looksDown(id, hex, eye, fill) {
+  return (scene, name, mats) => {
+    const { root } = based(scene, name, mats, id);
+    ball(scene, `${name}Ground`, root, tint(scene, `${name}GroundPaint`, hex), 3.2, [0, -2.42, -0.2]);
+    const look = gaze(scene, `${name}Gaze`, root, eye, [0, -1, 0], 0.5, 0.2);
+    const show = picture(scene, `${name}Picture`, root, mats, [0.5, 0.52, 0.25], 0.42, (card) => fill(scene, name, card, mats));
+    function pose({ looking = 0, snap = 0 }) {
+      look(looking);
+      show(snap);
+    }
+    pose({});
+    return { root, pose, face: true, fit: 0.75 };
+  };
+}
+// MRO's picture: Curiosity under its parachute, with Mars far below.
+const mroParachute = looksDown('mro', '#b9573a', [0, -0.3, 0.03], (scene, name, card, mats) => {
+  box(scene, `${name}Sand`, card, tint(scene, `${name}SandPaint`, '#a8553c'), [0.4, 0.4, 0.002], [0, 0, 0.005]);
+  ball(scene, `${name}Canopy`, card, mats.white, 0.15, [-0.03, 0.07, 0.012], [1, 0.62, 0.2]);
+  ball(scene, `${name}Vent`, card, tint(scene, `${name}VentPaint`, '#c9a79a'), 0.03, [-0.03, 0.08, 0.026], [1, 0.62, 0.2]);
+  drum(scene, `${name}Shell`, card, mats.silver, { height: 0.035, diameterTop: 0.02, diameterBottom: 0.05, tessellation: 12 }, [0.05, -0.1, 0.012], [-0.5, 1, 0]);
+  for (const s of [-1, 1]) rod(scene, `${name}Line${s}`, card, mats.white, [-0.03 + s * 0.06, 0.04, 0.012], [0.045, -0.085, 0.012], 0.004, 3);
+});
+// LRO's picture: a lander's lower stage with its long shadow, and the paths walked from it.
+const lroFootpaths = looksDown('lro', '#9c9a96', [0, -0.33, 0.03], (scene, name, card, mats) => {
+  box(scene, `${name}Dust`, card, tint(scene, `${name}DustPaint`, '#8e8c88'), [0.4, 0.4, 0.002], [0, 0, 0.005]);
+  const dark = tint(scene, `${name}TrackPaint`, '#55534f');
+  for (const [k, x, y, d] of [[0, -0.12, 0.1, 0.07], [1, 0.13, -0.11, 0.05], [2, 0.1, 0.13, 0.04]]) drum(scene, `${name}Crater${k}`, card, dark, { height: 0.002, diameter: d, tessellation: 16 }, [x, y, 0.007], Z);
+  box(scene, `${name}Shadow`, card, mats.black, [0.12, 0.022, 0.002], [0.075, -0.012, 0.008], [0, 0, -0.15]);
+  box(scene, `${name}Stage`, card, mats.goldFoil, [0.03, 0.03, 0.01], [0, 0, 0.012], [0, 0, 0.78]);
+  // The paths: thin dark lines out to where they set their instruments.
+  let from = [0, 0];
+  for (const [k, x, y] of [[0, -0.05, -0.05], [1, -0.12, -0.06], [2, -0.15, -0.12]]) {
+    rod(scene, `${name}Path${k}`, card, dark, [from[0], from[1], 0.008], [x, y, 0.008], 0.006, 3);
+    from = [x, y];
+  }
+  rod(scene, `${name}PathB`, card, dark, [0, 0, 0.008], [-0.04, 0.09, 0.008], 0.005, 3);
+});
+
+// Danuri braking into orbit: its engines burn at its back. (It goes round the Moon in the
+// game, so the Moon itself is in the view.) flick: the time, for the flame's flicker.
+function danuriArrives(scene, name, mats) {
+  const { root } = based(scene, name, mats, 'danuri');
+  const flame = drum(scene, `${name}Flame`, root, glow(scene, `${name}FlameLight`, '#ffd28a', 0.5), { height: 0.6, diameterTop: 0.05, diameterBottom: 0.2, tessellation: 14 }, [0, 0, -0.45], Z);
+
+  function pose({ burn = 0, flick = 0 }) {
+    flame.setEnabled(burn > 0);
+    const f = 1 + 0.08 * Math.sin(flick * 23);
+    flame.scaling.set(f, 1, f);
+  }
+  pose({});
+  return { root, pose };
+}
+
+// Kepler watching one star: a planet goes round it and each time it crosses the line
+// from the star to the telescope the light dips, a dot lower on the row of dots that
+// grows beside it. planet: where it is across the line (-1 → 1), dots: how many are drawn.
+// (A dot for every half second from the scene's eighth, a crossing every five seconds:
+// core/craftScenes.js kepler.)
+function keplerTransit(scene, name, mats) {
+  const { root } = based(scene, name, mats, 'kepler');
+  const star = [0, 1.25, 0];
+  // A dark sheet behind it all: in the game Kepler is often seen before the Sun, where
+  // a pale star and its beam were lost.
+  box(scene, `${name}Night`, root, mats.black, [1.9, 1.15, 0.004], [-0.3, 0.98, -0.3]);
+  ball(scene, `${name}Star`, root, glow(scene, `${name}StarLight`, '#fff0c0', 1), 0.42, star);
+  ball(scene, `${name}Halo`, root, glow(scene, `${name}HaloLight`, '#ffe2a0', 0.2), 0.62, star);
+  const light = glow(scene, `${name}BeamLight`, '#fff0c0', 0.2);
+  drum(scene, `${name}Beam`, root, light, { height: 0.56, diameterTop: 0.12, diameterBottom: 0.3, tessellation: 16, cap: 0 }, [0, 0.8, 0]);
+  const planet = ball(scene, `${name}Planet`, root, mats.black, 0.13);
+  const DOTS = 30;
+  const lit = glow(scene, `${name}DotLight`, '#9fe0ff', 1);
+  const dots = Array.from({ length: DOTS }, (_, k) => {
+    const x = (((k * 0.5) % 5) / 5) * 2 - 1;
+    const dip = Math.abs(x) < 0.22 ? 0.07 : 0;
+    // (Facing the watcher, the craft's +x is to their left: the row grows to their right.)
+    return ball(scene, `${name}Dot${k}`, root, lit, 0.024, [-0.36 - 0.022 * k, 0.5 - dip, 0.1]);
+  });
+  box(scene, `${name}Axis`, root, mats.grey, [0.68, 0.004, 0.004], [-0.68, 0.38, 0.1]);
+
+  function pose({ planet: across = 9, dots: drawn = 0 }) {
+    planet.setEnabled(Math.abs(across) <= 1);
+    planet.position.set(0.62 * across, 0.86, 0.02);
+    light.alpha = Math.abs(across) < 0.22 ? 0.08 : 0.2;
+    dots.forEach((dot, k) => dot.setEnabled(k < drawn));
+  }
+  pose({});
+  return { root, pose, face: true, fit: 0.6, lift: -0.25 };
+}
+
+// Chandra's first picture: X-rays come down its tube, and the picture comes up: what
+// is left of a star that blew up, rings of colour round a point in the middle.
+function chandraFirstLight(scene, name, mats) {
+  const { root } = based(scene, name, mats, 'chandra');
+  const look = gaze(scene, `${name}Gaze`, root, [0, 0.46, 0], [0, 1, 0], 0.8, 0.26, '#c8b0ff');
+  const show = picture(scene, `${name}Picture`, root, mats, [0.55, 0.62, 0.3], 0.46, (card) => {
+    for (const [k, hex, d] of [[0, '#ff5a4a', 0.38], [1, '#58e08c', 0.32], [2, '#4a7cff', 0.26], [3, '#06060c', 0.18]]) drum(scene, `${name}Shell${k}`, card, glow(scene, `${name}ShellLight${k}`, hex, 1), { height: 0.002, diameter: d, tessellation: 22 + 3 * k }, [0.01 * k, 0.006 * k, 0.006 + 0.002 * k], Z);
+    ball(scene, `${name}Point`, card, glow(scene, `${name}PointLight`, '#ffffff', 1), 0.022, [0.012, 0.004, 0.016]);
+  });
+
+  function pose({ looking = 0, snap = 0 }) {
+    look(looking);
+    show(snap);
+  }
+  pose({});
+  return { root, pose, face: true, fit: 0.7, lift: -0.15 };
+}
+
+// Euclid's map of the sky: squares of sky, each with its few galaxies, come up one
+// after another over it and join into a sheet. tiles: how many have come.
+function euclidMosaic(scene, name, mats) {
+  const { root } = based(scene, name, mats, 'euclid');
+  const sky = tint(scene, `${name}SkyPaint`, '#0c1436');
+  const far = glow(scene, `${name}GalaxyLight`, '#ffe9c0', 1);
+  const blue = glow(scene, `${name}GalaxyBlue`, '#a8c8ff', 1);
+  const tiles = Array.from({ length: 15 }, (_, k) => {
+    const [col, row] = [k % 5, Math.floor(k / 5)];
+    // Back and forth, as a field is swept.
+    const x = (row % 2 ? 4 - col : col) * 0.2 - 0.4;
+    const tile = group(scene, `${name}Tile${k}`, root, [x, 0.72 + 0.2 * row, -0.05]);
+    box(scene, `${name}TileSky${k}`, tile, sky, [0.192, 0.192, 0.006]);
+    for (let j = 0; j < 4; j++) {
+      const a = k * 2.4 + j * 1.9;
+      ball(scene, `${name}Galaxy${k}${j}`, tile, j % 2 ? blue : far, 0.012 + 0.012 * ((k * 0.37 + j * 0.61) % 1), [0.07 * Math.cos(a), 0.07 * Math.sin(a * 1.3), 0.006], [1.6, 0.8, 0.3]);
+    }
+    return tile;
+  });
+
+  function pose({ tiles: come = 0 }) {
+    tiles.forEach((tile, k) => {
+      const shown = clamp((come - k) * 3);
+      tile.setEnabled(shown > 0);
+      tile.scaling.setAll(Math.max(0.01, smooth(shown)));
+    });
+  }
+  pose({});
+  return { root, pose, face: true, fit: 0.58, lift: -0.3 };
+}
+
+// Tiangong built up: the core, the first crew's ship, and the two labs from either side.
+const TIANGONG_GROUPS = [['core', [0, 0, -1.4]], ['crew', [0, 0, 1.4]], ['wentian', [-1.4, 0, 0]], ['mengtian', [1.4, 0, 0]]];
+function tiangongAssembly(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  const stage = Object.fromEntries(TIANGONG_GROUPS.map(([key]) => [key, group(scene, `${name}_${key}`, root)]));
+  CRAFT_BUILD.tiangong(scene, `${name}Parts`, mats, stage).dispose();
+  for (const node of Object.values(stage)) fuse(scene, node);
+
+  function pose({ built = 0 }) {
+    TIANGONG_GROUPS.forEach(([key, from], i) => {
+      const come = clamp(built - i);
+      stage[key].setEnabled(come > 0);
+      const left = 1 - smooth(come);
+      stage[key].position.set(from[0] * left, from[1] * left, from[2] * left);
+    });
+  }
+  pose({});
+  return { root, pose };
+}
+
 export const CRAFT_UNFOLD_ALL = {
   ...CRAFT_UNFOLD,
+  voyager2: neptuneGoesBy,
+  pioneer10: jupiterGoesBy,
+  pioneer11: saturnGoesBy,
+  newHorizons: arrokothGoesBy,
+  europaClipper: marsGoesBy,
+  lucy: dinkineshGoesBy,
+  mro: mroParachute,
+  lro: lroFootpaths,
+  danuri: danuriArrives,
+  kepler: keplerTransit,
+  chandra: chandraFirstLight,
+  euclid: euclidMosaic,
+  tiangong: tiangongAssembly,
   voyager1: voyagerPortrait,
   hubble: hubbleService,
   iss: issAssembly,

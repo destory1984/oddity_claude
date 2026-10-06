@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-06', text: t('도킹하는 탐사선 스물둘 모두에 그날로 장면이 생겼습니다. 해왕성, 아로코스, 톈궁 짓기 등 열셋이 새로 왔습니다.') },
   { day: '2026-10-06', text: t('독도에 내려서면 그날로 갑니다. 1954년 첫 등대에 불이 켜지고 빛줄기가 바다를 돕니다.') },
   { day: '2026-10-06', text: t('그날로 장면에 금빛 줄이 생겨 얼마나 남았는지 보이고, 끝나면 알려 줍니다.') },
   { day: '2026-10-06', text: t('목성 구름 위에 내려서면 그날로 갑니다. 슈메이커-레비 9 혜성이 떨어져 검은 멍이 듭니다.') },

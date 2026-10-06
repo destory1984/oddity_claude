@@ -434,26 +434,30 @@ function iss(scene, name, mats, stage = null) {
 // Tiangong: the core module with its docking hub, two lab modules to either side in a
 // T, a pair of long solar wings on each, a cargo ship aft, a crew ship at the hub and
 // the robot arm folded along the core.
-function tiangong(scene, name, mats) {
+// stage: for the scene of its building (render/craftUnfold.js), a map of group nodes
+// (core, crew, wentian, mengtian) that take its parts in place of the one fused model.
+function tiangong(scene, name, mats, stage = null) {
   const root = new TransformNode(name, scene);
-  module(scene, `${name}CoreWide`, root, mats, [0, 0, -0.34], [0, 0, -0.1], 0.13);
-  module(scene, `${name}CoreNarrow`, root, mats, [0, 0, -0.1], [0, 0, 0.12], 0.095);
-  sphere(scene, `${name}Hub`, root, mats.foil, 0.13, [0, 0, 0.19]);
+  const P = (key) => (stage ? stage[key] : root);
+  module(scene, `${name}CoreWide`, P('core'), mats, [0, 0, -0.34], [0, 0, -0.1], 0.13);
+  module(scene, `${name}CoreNarrow`, P('core'), mats, [0, 0, -0.1], [0, 0, 0.12], 0.095);
+  sphere(scene, `${name}Hub`, P('core'), mats.foil, 0.13, [0, 0, 0.19]);
   for (const s of [-1, 1]) {
-    module(scene, `${name}Lab${s}`, root, mats, [s * 0.06, 0, 0.19], [s * 0.4, 0, 0.19], 0.12);
+    const lab = P(s < 0 ? 'wentian' : 'mengtian');
+    module(scene, `${name}Lab${s}`, lab, mats, [s * 0.06, 0, 0.19], [s * 0.4, 0, 0.19], 0.12);
     // Each lab carries wings 27 m long at its far end, on a lattice arm.
-    truss(scene, `${name}LabArm${s}`, root, mats.grey, [s * 0.4, 0, 0.19], [s * 0.47, 0, 0.19], 0.03, 2);
-    for (const up of [-1, 1]) wing(scene, `${name}LabWing${s}${up}`, root, mats, { from: [s * 0.47, up * 0.02, 0.19], to: [s * 0.47, up * 0.4, 0.19], width: 0.09, panels: 5, face: [0, 0, 1], yoke: 0.08 });
-    wing(scene, `${name}CoreWing${s}`, root, mats, { from: [s * 0.05, 0, -0.02], to: [s * 0.3, 0, -0.02], width: 0.07, panels: 4, face: [0, 0, 1], yoke: 0.12 });
-    box(scene, `${name}Radiator${s}`, root, mats.white, [0.004, 0.07, 0.16], [s * 0.068, 0, -0.22]);
+    truss(scene, `${name}LabArm${s}`, lab, mats.grey, [s * 0.4, 0, 0.19], [s * 0.47, 0, 0.19], 0.03, 2);
+    for (const up of [-1, 1]) wing(scene, `${name}LabWing${s}${up}`, lab, mats, { from: [s * 0.47, up * 0.02, 0.19], to: [s * 0.47, up * 0.4, 0.19], width: 0.09, panels: 5, face: [0, 0, 1], yoke: 0.08 });
+    wing(scene, `${name}CoreWing${s}`, P('core'), mats, { from: [s * 0.05, 0, -0.02], to: [s * 0.3, 0, -0.02], width: 0.07, panels: 4, face: [0, 0, 1], yoke: 0.12 });
+    box(scene, `${name}Radiator${s}`, P('core'), mats.white, [0.004, 0.07, 0.16], [s * 0.068, 0, -0.22]);
   }
-  ship(scene, `${name}Tianzhou`, root, mats, [0, 0, -0.34], [0, 0, -1], 0.1);
-  ship(scene, `${name}Shenzhou`, root, mats, [0, 0, 0.255], [0, 0, 1], 0.075);
-  ship(scene, `${name}Shenzhou2`, root, mats, [0, -0.065, 0.19], [0, -1, 0], 0.075);
-  rod(scene, `${name}Arm0`, root, mats.white, [0.03, 0.05, 0.1], [0.05, 0.11, -0.08], 0.012, 6);
-  rod(scene, `${name}Arm1`, root, mats.white, [0.05, 0.11, -0.08], [0.03, 0.07, -0.22], 0.012, 6);
-  dish(scene, `${name}Relay`, root, mats, { at: [0, 0.09, -0.3], toward: [0, 1, -0.3], diameter: 0.07 });
-  return fuse(scene, root);
+  ship(scene, `${name}Tianzhou`, P('core'), mats, [0, 0, -0.34], [0, 0, -1], 0.1);
+  ship(scene, `${name}Shenzhou`, P('crew'), mats, [0, 0, 0.255], [0, 0, 1], 0.075);
+  ship(scene, `${name}Shenzhou2`, P('mengtian'), mats, [0, -0.065, 0.19], [0, -1, 0], 0.075);
+  rod(scene, `${name}Arm0`, P('core'), mats.white, [0.03, 0.05, 0.1], [0.05, 0.11, -0.08], 0.012, 6);
+  rod(scene, `${name}Arm1`, P('core'), mats.white, [0.05, 0.11, -0.08], [0.03, 0.07, -0.22], 0.012, 6);
+  dish(scene, `${name}Relay`, P('core'), mats, { at: [0, 0.09, -0.3], toward: [0, 1, -0.3], diameter: 0.07 });
+  return stage ? root : fuse(scene, root);
 }
 
 // Sputnik 1: a polished ball in two halves bolted at a seam, with four whip antennas

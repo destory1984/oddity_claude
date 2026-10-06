@@ -227,4 +227,241 @@ export const CRAFT_SCENES = {
       return { burn: t >= 9 && t < 30 ? 1 : 0, spin: 1.2 * t + 1.8 * (Math.max(0, t - 8) - Math.max(0, t - 33)) };
     },
   },
+  // The thirteen craft that had no day yet (the user, 2026-10-06: "도킹할 수 있는 모든
+  // 곳에는 애니 넣어"). Six meet a world that goes by behind them (pass: 0 → 1 across the
+  // view), two look down and take one picture (looking: the camera is at work; snap: the
+  // picture has come up), and the rest have values of their own.
+  voyager2: {
+    name: t('해왕성을 스치다'),
+    day: t('1989년 8월 25일'),
+    seconds: 36,
+    downAt: 14,
+    sounds: [[14, 'shutter'], [22, 'shutter'], [30, 'stood']],
+    lines: [
+      { at: 0, text: t('1989년 8월 25일. 떠난 지 12년, 보이저 2호가 해왕성에 다가갑니다. 이 행성에 온 탐사선은 지금까지 이것 하나뿐입니다.') },
+      { at: 7, text: t('해에서 45억km. 햇빛이 지구의 900분의 1이라, 사진이 흐려지지 않게 몸을 돌려 가며 오래 찍습니다.') },
+      { at: 14, text: t('구름 꼭대기 위 4,950km를 지나갑니다. 지구만 한 검은 폭풍과 시속 2,000km의 바람을 봤습니다.') },
+      { at: 22, text: t('다섯 시간 뒤 위성 트리톤을 지납니다. 영하 235도의 얼음 땅에서 검은 연기가 8km 높이로 솟고 있었습니다.') },
+      { at: 29, text: t('목성, 토성, 천왕성, 해왕성. 네 행성을 모두 들른 탐사선도 이것뿐입니다. 2018년에는 태양권 밖으로 나갔습니다.') },
+    ],
+    unfold(t) {
+      return { pass: clamp((t - 2) / 32) };
+    },
+  },
+  pioneer10: {
+    name: t('목성을 처음 만나다'),
+    day: t('1973년 12월 4일'),
+    seconds: 35,
+    downAt: 14,
+    sounds: [[14, 'shutter'], [28, 'stood']],
+    lines: [
+      { at: 0, text: t('1973년 12월 4일. 파이어니어 10호가 목성에 다가갑니다. 화성 너머로 간 탐사선은 이것이 처음입니다.') },
+      { at: 7, text: t('소행성대를 지나다 부서질 것이라고 걱정했습니다. 일곱 달 동안 지났지만 큰 탈은 없었습니다.') },
+      { at: 14, text: t('구름 꼭대기에서 13만km를 지나갑니다. 방사선이 사람이 죽는 양의 수백 배라 기계 몇이 탈이 났습니다.') },
+      { at: 21, text: t('목성 사진 500장쯤을 보냈습니다. 이 길이 열려 보이저가 뒤따를 수 있었습니다.') },
+      { at: 28, text: t('몸에는 사람 둘과 지구의 자리를 새긴 금빛 판이 붙어 있습니다. 2003년 1월 마지막 신호가 왔습니다.') },
+    ],
+    unfold(t) {
+      return { pass: clamp((t - 2) / 31) };
+    },
+  },
+  pioneer11: {
+    name: t('토성을 처음 만나다'),
+    day: t('1979년 9월 1일'),
+    seconds: 35,
+    downAt: 14,
+    sounds: [[14, 'shutter'], [28, 'stood']],
+    lines: [
+      { at: 0, text: t('1979년 9월 1일. 떠난 지 6년 반, 파이어니어 11호가 토성에 다가갑니다. 토성에 온 첫 탐사선입니다.') },
+      { at: 7, text: t('오는 길에 목성의 중력을 빌려 방향을 틀고, 태양계를 가로질러 날아왔습니다.') },
+      { at: 14, text: t('고리 바깥을 지나 구름 꼭대기 위 2만 1천km를 스칩니다. 고리 평면을 지날 때 모두 숨을 죽였습니다.') },
+      { at: 21, text: t('새 고리 F를 찾았고, 모르고 있던 작은 위성 곁을 수천km 차이로 스쳐 지나갔습니다.') },
+      { at: 28, text: t('뒤따르던 보이저 1호와 2호는 이 길이 안전한 것을 알고 왔습니다. 신호는 1995년 11월에 끊겼습니다.') },
+    ],
+    unfold(t) {
+      return { pass: clamp((t - 2) / 31) };
+    },
+  },
+  newHorizons: {
+    name: t('가장 먼 만남'),
+    day: t('2019년 1월 1일'),
+    seconds: 36,
+    downAt: 14,
+    sounds: [[14, 'shutter'], [16, 'shutter'], [29, 'stood']],
+    lines: [
+      { at: 0, text: t('2019년 1월 1일. 명왕성을 지난 지 3년 반, 뉴허라이즌스가 카이퍼 벨트의 작은 천체 아로코스에 다가갑니다.') },
+      { at: 7, text: t('해에서 65억km. 사람이 만든 것이 찾아간 가장 먼 천체입니다. 신호가 지구에 닿는 데 여섯 시간이 걸립니다.') },
+      { at: 14, text: t('3,500km 곁을 초속 14km로 지나갑니다. 길이 36km, 붉은 덩어리 둘이 붙은 눈사람 모양이었습니다.') },
+      { at: 22, text: t('둘은 아주 천천히 다가와 살며시 붙었습니다. 45억 년 전 행성이 만들어지던 때의 모습 그대로입니다.') },
+      { at: 29, text: t('아로코스는 포우하탄 말로 하늘이라는 뜻입니다. 뉴허라이즌스는 지금도 태양계 밖으로 날고 있습니다.') },
+    ],
+    unfold(t) {
+      return { pass: clamp((t - 2) / 32) };
+    },
+  },
+  europaClipper: {
+    name: t('화성의 힘을 빌리다'),
+    day: t('2025년 3월 1일'),
+    seconds: 35,
+    downAt: 14,
+    sounds: [[14, 'shutter'], [28, 'stood']],
+    lines: [
+      { at: 0, text: t('2024년 10월 14일 유로파 클리퍼가 떠났습니다. 날개를 펴면 30m가 넘는, NASA가 행성으로 보낸 가장 큰 탐사선입니다.') },
+      { at: 7, text: t('목성까지 곧장 갈 힘은 없습니다. 먼저 화성 곁을 지나며 그 중력으로 길을 바꿉니다.') },
+      { at: 14, text: t('2025년 3월 1일, 화성 위 884km를 지나갑니다. 지나는 김에 열화상 카메라와 레이더를 시험했습니다.') },
+      { at: 21, text: t('2026년 12월에는 지구 곁을 지나며 속도를 얻습니다. 29억km를 날아 2030년 4월 목성에 닿습니다.') },
+      { at: 28, text: t('목성의 달 유로파를 49번 스쳐 지나며 얼음 밑 바다를 살핍니다. 지구의 바다를 다 합친 것의 두 배쯤 되는 물입니다.') },
+    ],
+    unfold(t) {
+      return { pass: clamp((t - 2) / 31) };
+    },
+  },
+  lucy: {
+    name: t('소행성에 달이 있었다'),
+    day: t('2023년 11월 1일'),
+    seconds: 35,
+    downAt: 14,
+    sounds: [[14, 'shutter'], [15.5, 'discovered'], [21, 'shutter']],
+    lines: [
+      { at: 0, text: t('2023년 11월 1일. 목성 트로이 소행성으로 가던 루시가 연습 삼아 작은 소행성 딘키네시 곁을 지납니다.') },
+      { at: 7, text: t('초속 4.5km, 430km 거리. 카메라 받침대가 소행성을 놓치지 않고 따라 도는지 시험하는 날입니다.') },
+      { at: 14, text: t('너비 790m인 소행성 뒤에서 작은 달이 나타났습니다. 아무도 모르던 달입니다.') },
+      { at: 21, text: t('더 지나가서 보니 그 달은 덩어리 둘이 붙은 것이었습니다. 이런 달은 처음 봤습니다. 이름은 셀람입니다.') },
+      { at: 28, text: t('루시는 12년 동안 소행성 열한 곳을 찾아갑니다. 이름은 320만 년 전 사람 화석 루시에서 왔습니다.') },
+    ],
+    unfold(t) {
+      return { pass: clamp((t - 2) / 31), moon: ease(t, 14, 19), pair: ease(t, 21, 25) };
+    },
+  },
+  mro: {
+    name: t('낙하산을 찍다'),
+    day: t('2012년 8월 6일'),
+    seconds: 35,
+    downAt: 14,
+    sounds: [[14, 'shutter'], [15.2, 'discovered']],
+    lines: [
+      { at: 0, text: t('2012년 8월 6일. 화성 정찰 궤도선이 화성을 돕니다. 오늘은 땅이 아니라 하늘을 찍어야 합니다.') },
+      { at: 7, text: t('큐리오시티가 대기로 뛰어들었습니다. 낙하산에 매달려 있는 시간은 2분도 안 됩니다.') },
+      { at: 14, text: t('찰칵. 340km 떨어진 곳에서 낙하산과 그 아래 매달린 탐사차를 찍었습니다. 낙하산 지름은 16m입니다.') },
+      { at: 21, text: t('2008년 피닉스가 내려올 때도 이렇게 찍었습니다. 다른 행성에 내리는 모습을 찍은 것은 그때가 처음입니다.') },
+      { at: 28, text: t('2006년 3월에 도착해 지금껏 화성을 돕니다. 카메라는 300km 높이에서 책상만 한 것을 알아봅니다.') },
+    ],
+    unfold(t) {
+      return { looking: t >= 7 && t < 20 ? 1 : 0, snap: ease(t, 14.2, 15.2) };
+    },
+  },
+  lro: {
+    name: t('달에 남은 발자국'),
+    day: t('2009년 7월 17일'),
+    seconds: 35,
+    downAt: 14,
+    sounds: [[14, 'shutter'], [15.2, 'discovered']],
+    lines: [
+      { at: 0, text: t('2009년 6월 18일 떠난 달 정찰 궤도선이 나흘 반 만에 달에 닿았습니다. 달의 가장 자세한 지도를 만들러 왔습니다.') },
+      { at: 7, text: t('7월, 카메라를 시험하며 아폴로가 내렸던 자리 위를 지납니다. 40년 만에 다시 보는 곳입니다.') },
+      { at: 14, text: t('찰칵. 착륙선의 아랫단이 그대로 서 있고 긴 그림자가 졌습니다. 7월 17일에 사진을 내놓았습니다.') },
+      { at: 21, text: t('나중에 더 낮게 날며 찍은 사진에는 우주인들이 걸어 다닌 발자국 길과 월면차 바퀴 자국까지 보입니다.') },
+      { at: 28, text: t('달의 남극에서는 영하 238도인 그늘을 쟀습니다. 태양계에서 잰 가장 추운 곳에 듭니다.') },
+    ],
+    unfold(t) {
+      return { looking: t >= 7 && t < 20 ? 1 : 0, snap: ease(t, 14.2, 15.2) };
+    },
+  },
+  // burn: its engines are lit; flick: the time, for the flame's flicker.
+  danuri: {
+    name: t('다누리, 달에 닿다'),
+    day: t('2022년 12월 17일'),
+    seconds: 35,
+    downAt: 21,
+    sounds: [[14, 'burnLong'], [21, 'stood']],
+    lines: [
+      { at: 0, text: t('2022년 8월 5일 한국의 첫 달 탐사선 다누리가 떠났습니다. 연료를 아끼려고 넉 달 반을 돌아가는 길을 골랐습니다.') },
+      { at: 7, text: t('해 쪽으로 155만km까지 나갔다가 돌아옵니다. 가는 길에 지구와 달을 한 장에 담은 사진도 찍었습니다.') },
+      { at: 14, text: t('12월 17일 새벽, 엔진을 13분 동안 켜 속도를 줄입니다. 달의 중력에 붙잡혔습니다.') },
+      { at: 21, text: t('다섯 번에 나눠 줄일 계획이었지만 세 번 만에 해냈습니다. 12월 27일 달 위 100km 궤도에 들어섰습니다.') },
+      { at: 28, text: t('한국은 달에 탐사선을 보낸 일곱 번째 나라가 됐습니다. 싣고 간 카메라는 햇빛이 들지 않는 분화구 속을 찍습니다.') },
+    ],
+    unfold(t) {
+      return { burn: t >= 14 && t < 21 ? 1 : 0, flick: t };
+    },
+  },
+  // planet: where the planet is across the line from its star to the telescope (-1 → 1;
+  // a crossing every five seconds from the eighth, three in all); dots: how many
+  // measures have been drawn, one every half second (render/craftUnfold.js keplerTransit
+  // puts the dips in the row of dots by the same count).
+  kepler: {
+    name: t('별빛이 깜빡이다'),
+    day: t('2009년 3월 7일'),
+    seconds: 38,
+    downAt: 14,
+    sounds: [[10.5, 'click'], [15.5, 'click'], [20.5, 'click'], [22, 'discovered']],
+    lines: [
+      { at: 0, text: t('2009년 3월 7일 케플러가 떠났습니다. 백조자리와 거문고자리 사이, 하늘 한 조각만 4년 동안 바라봅니다.') },
+      { at: 7, text: t('별 15만 개의 밝기를 30분마다 잽니다. 행성이 별 앞을 지나면 별빛이 아주 조금 어두워집니다.') },
+      { at: 14, text: t('지구만 한 행성이 해만 한 별을 가리면 빛은 만분의 1쯤 줄어듭니다. 세 번 되풀이되면 행성으로 칩니다.') },
+      { at: 22, text: t('이렇게 행성 2,600개 넘게를 찾았습니다. 별에는 행성이 있는 것이 보통이라는 것을 알게 됐습니다.') },
+      { at: 30, text: t('2013년 자세를 잡는 바퀴가 고장 났지만 햇빛의 미는 힘으로 균형을 잡아 더 일했습니다. 2018년 연료가 다해 잠들었습니다.') },
+    ],
+    unfold(t) {
+      const s = t - 8;
+      return {
+        planet: s >= 0 && s < 15 ? ((s % 5) / 5) * 2 - 1 : 9,
+        dots: Math.max(0, Math.min(30, Math.floor(s / 0.5))),
+      };
+    },
+  },
+  chandra: {
+    name: t('엑스선의 첫 빛'),
+    day: t('1999년 8월 19일'),
+    seconds: 37,
+    downAt: 21,
+    sounds: [[14, 'clunk'], [21, 'shutter'], [22.4, 'discovered']],
+    lines: [
+      { at: 0, text: t('1999년 7월 23일 찬드라가 우주왕복선 컬럼비아에 실려 올라갑니다. 선장 아일린 콜린스는 왕복선을 지휘한 첫 여성입니다.') },
+      { at: 7, text: t('왕복선이 올린 것 가운데 가장 무거운 짐이었습니다. 엑스선은 공기에 막혀 땅에 닿지 않아 우주에서 봐야 합니다.') },
+      { at: 14, text: t('지구에서 달까지의 3분의 1 되는 곳까지 나가는 길쭉한 궤도를 돕니다. 8월 12일 덮개를 엽니다.') },
+      { at: 21, text: t('8월 19일, 첫 사진입니다. 320년쯤 전에 터진 별의 잔해 카시오페이아 A, 그 한가운데에 아무도 못 본 점이 있었습니다.') },
+      { at: 29, text: t('터지고 남은 중성자별이었습니다. 찬드라는 그 뒤로 블랙홀과 은하단을 25년 넘게 지켜보고 있습니다.') },
+    ],
+    unfold(t) {
+      return { looking: t >= 14 && t < 29 ? 1 : 0, snap: ease(t, 21.2, 22.4) };
+    },
+  },
+  // tiles: how many squares of sky have been taken (fifteen in all).
+  euclid: {
+    name: t('어두운 우주의 지도'),
+    day: t('2023년 7월 1일'),
+    seconds: 38,
+    downAt: 29.5,
+    sounds: [[7, 'shutter'], [14.5, 'shutter'], [22, 'shutter'], [29.5, 'stood']],
+    lines: [
+      { at: 0, text: t('2023년 7월 1일 유럽의 유클리드가 떠났습니다. 한 달 뒤 지구에서 150만km 떨어진 제자리에 닿았습니다.') },
+      { at: 7, text: t('지름 1.2m 거울로 하늘을 한 조각씩 찍어 이어 붙입니다. 한 번에 보름달 두 개 반 넓이가 담깁니다.') },
+      { at: 14, text: t('6년 동안 하늘의 3분의 1, 은하 수십억 개를 담습니다. 100억 년 전의 은하까지 봅니다.') },
+      { at: 22, text: t('은하의 모양이 조금씩 찌그러진 것을 재면, 보이지 않는 암흑 물질이 어디에 있는지 알 수 있습니다.') },
+      { at: 30, text: t('우주의 95%는 암흑 물질과 암흑 에너지입니다. 그것이 무엇인지는 아직 아무도 모릅니다.') },
+    ],
+    unfold(t) {
+      return { tiles: Math.max(0, Math.min(15, (t - 7) / 1.5)) };
+    },
+  },
+  // built: how many of its four groups have come and joined (the core, the first crew's
+  // ship, Wentian, Mengtian); the part after the point is how far the next one has come.
+  tiangong: {
+    name: t('하늘 궁전을 짓다'),
+    day: t('2021년 4월 29일'),
+    seconds: 40,
+    downAt: 28,
+    sounds: [[4, 'clunk'], [12, 'dock'], [20, 'clunk'], [28, 'clunk'], [28.6, 'stood']],
+    lines: [
+      { at: 0, text: t('2021년 4월 29일, 중국의 우주정거장 톈궁의 첫 조각 톈허가 올라갑니다. 길이 16.6m, 사람이 사는 방입니다.') },
+      { at: 8, text: t('6월 17일 선저우 12호가 첫 세 사람을 태우고 와 붙습니다. 셋은 석 달을 머물렀습니다.') },
+      { at: 16, text: t('2022년 7월 24일 실험실 원톈이 옵니다. 앞문에 붙은 뒤 옆문으로 옮겨 답니다.') },
+      { at: 24, text: t('10월 31일 두 번째 실험실 멍톈이 올라갑니다. 11월 3일 옆문으로 옮겨 달자 T자 모양이 됐습니다. 첫 조각을 올린 지 1년 반 만입니다.') },
+      { at: 32, text: t('무게는 국제우주정거장의 4분의 1쯤입니다. 세 사람이 여섯 달씩 번갈아 살고 있습니다.') },
+    ],
+    unfold(t) {
+      return { built: [0, 8, 16, 24].reduce((sum, from) => sum + clamp((t - from) / 4), 0) };
+    },
+  },
 };

@@ -345,6 +345,8 @@ test('on the Moon two go up, three land, two roll out, one falls on its nose, on
   }
   // Apollo 12 comes to rest at the place, Surveyor 1.2 to the side of it all along.
   assert.ok(Math.abs(at('apollo12', 14).lander.x) < 1e-9 && at('apollo12', 3).surveyor.x === 1.2);
+  // What Conrad said is up only once it is down, and gone before the scene ends.
+  assert.ok(!at('apollo12', 13).say.shown && at('apollo12', 16).say.shown && !at('apollo12', 21).say.shown);
   // The rovers ride down on the deck, take the ramp nose down and drive off level.
   for (const id of ['lunokhod1', 'chandrayaan3']) {
     const end = at(id, MOON_SCENES[id].seconds).rover;

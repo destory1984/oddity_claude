@@ -54,10 +54,11 @@ function downLadder(t, from, to) {
 }
 
 // A bubble that is up between two moments at (x, y), a little toward the watcher: it
-// swells in and shrinks away over 0.4 s.
-const said = (t, from, to, x, y) => {
+// swells in and shrinks away over 0.4 s. `full`: its size when up (larger in a scene seen
+// from farther off).
+const said = (t, from, to, x, y, full = 0.6) => {
   const size = ease(t, from, from + 0.4) * (1 - ease(t, to - 0.4, to));
-  return { x, y, z: -0.25, scale: Math.max(0.01, 0.6 * size), shown: size > 0.01 };
+  return { x, y, z: -0.25, scale: Math.max(0.01, full * size), shown: size > 0.01 };
 };
 
 // Apollo 11, the longest of them (the user, 2026-10-06: "착륙 -> 우주인이 사다리 타고
@@ -332,6 +333,9 @@ export const MOON_SCENES = {
       return {
         surveyor: { x: 1.2, y: 0 },
         lander: { x: -1.0 * (1 - ease(t, 0, 14)), y: comeDown(t, 14, 2.6), burn: t < 14 },
+        // Conrad's own first words on the Moon, said here as Intrepid sets down (the user,
+        // 2026-10-06, of five lines offered: "3"). He was the shortest of the astronauts.
+        say: said(t, 14.6, 20.4, 0.55, 1.3, 1.1),
       };
     },
   },

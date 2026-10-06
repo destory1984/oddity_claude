@@ -754,6 +754,14 @@ export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
       const cut = aside > 0 ? aside : nearest(ends.length ? ends : spaces);
       rows = [words.slice(0, cut), words.slice(cut + 1)];
       size = fit(rows, 60, 26);
+    } else if (ctx.measureText(words).width > w - 80) {
+      // (Japanese and Chinese have no spaces: after a mark if there is one, else in the
+      // middle.)
+      const marks = [...words].map((c, i) => ('、。！？，'.includes(c) ? i + 1 : -1)).filter((i) => i > 0 && i < words.length);
+      const half = words.length / 2;
+      const cut = marks.length ? marks.reduce((best, i) => (Math.abs(i - half) < Math.abs(best - half) ? i : best)) : Math.round(half);
+      rows = [words.slice(0, cut), words.slice(cut)];
+      size = fit(rows, 60, 26);
     }
     const middle = up ? h - 104 : 104;
     rows.forEach((row, k) => ctx.fillText(row, w / 2, middle + (k - (rows.length - 1) / 2) * (size + 8)));
@@ -1007,6 +1015,7 @@ const MOON_STAGES = {
     pieces: {
       surveyor: surveyor(scene, `${name}Surveyor`, mats),
       lander: apollo(scene, `${name}Lander`, mats, { withFlag: false }),
+      say: sayBubble(scene, `${name}Say`, t('야호! 닐에게는 작은 걸음, 나한테는 큰 걸음')),
     },
     flames: { lander: [0, 0.12, 0, 0.34, 0.2] },
   }),

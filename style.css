@@ -2923,6 +2923,30 @@ html.shell body {
   font-size:13px;
 }
 
+/* A day being played again: how much of it has gone by, a gold line under the title
+   that fills from the left (the user, 2026-10-06: "영상이 끝나는 시점을 잘 모르니까, 계속
+   기다리게 되네"). It shows with the sheet folded too. */
+#replayBar {
+  height:4px;
+  margin:0 16px 10px;
+  border-radius:2px;
+  background:#ffffff26;
+  overflow:hidden;
+}
+
+#replayBar[hidden] {
+  display:none;
+}
+
+#replayBar i {
+  display:block;
+  height:100%;
+  border-radius:2px;
+  background:var(--gold);
+  transform-origin:left center;
+  transform:scaleX(0);
+}
+
 #inspectBody {
   max-height:38vh;
   overflow-y:auto;

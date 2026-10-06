@@ -2214,6 +2214,8 @@ ${STORY_MORE[target.id]}` : told };
       if (!replayNow || replayNow.done) {
         // Left before its end: its long sounds (a rocket's roar) stop with it.
         if (!replayNow) sound.hushScene();
+        // Watched to its end: said so, since the view of a place stays up after it.
+        else toast.show(t('그날의 장면이 끝났습니다.'));
         replay = null;
         replayNow = null;
       } else {
@@ -2224,6 +2226,13 @@ ${STORY_MORE[target.id]}` : told };
           if (!replayNow.gone) sound.cue('landed');
         }
       }
+    }
+    // How much of the scene has gone by: the line under the sheet's title.
+    $('replayBar').hidden = !replay;
+    if (replay) {
+      const part = Math.min(1, (performance.now() - replay.startedAt) / 1000 / replayFor(replay.id).seconds);
+      $('replayBar').firstElementChild.style.transform = `scaleX(${part})`;
+      $('replayBar').setAttribute('aria-valuenow', String(Math.round(part * 100)));
     }
     if (scenePlace) {
       // It turns with its body. When its scene is over the close view closes too (there

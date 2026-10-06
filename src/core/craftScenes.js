@@ -437,11 +437,12 @@ export const CRAFT_SCENES = {
     name: t('어두운 우주의 지도'),
     day: t('2023년 7월 1일'),
     seconds: 38,
-    downAt: 19.4,
+    downAt: 12,
     // A click for every square as it comes (the user, 2026-10-06: "조각이 나올 떄마다
     // 찰칵해줘", then "찰칵만 하고, 각각이 올라오는 시간을 좀 빨리해줘... 반복되니까 지루하네"):
-    // fifteen, 0.8 s apart (they were a second and a half apart), with no beeps before them.
-    sounds: [...Array.from({ length: 15 }, (_, k) => [7 + 0.8 * k, 'snap']), [19.4, 'stood']],
+    // then "5초에 다 올라오게 해줘"): fifteen in five seconds, a third of a second apart (they
+    // were a second and a half apart), with no beeps before them.
+    sounds: [...Array.from({ length: 15 }, (_, k) => [7 + k / 3, 'snap']), [12, 'stood']],
     lines: [
       { at: 0, text: t('2023년 7월 1일 유럽의 유클리드가 떠났습니다. 한 달 뒤 지구에서 150만km 떨어진 제자리에 닿았습니다.') },
       { at: 7, text: t('지름 1.2m 거울로 하늘을 한 조각씩 찍어 이어 붙입니다. 한 번에 보름달 두 개 반 넓이가 담깁니다.') },
@@ -450,7 +451,7 @@ export const CRAFT_SCENES = {
       { at: 30, text: t('우주의 95%는 암흑 물질과 암흑 에너지입니다. 그것이 무엇인지는 아직 아무도 모릅니다.') },
     ],
     unfold(t) {
-      return { tiles: Math.max(0, Math.min(15, (t - 7) / 0.8)) };
+      return { tiles: Math.max(0, Math.min(15, (t - 7) * 3)) };
     },
   },
   // built: how many of its four groups have come and joined (the core, the first crew's

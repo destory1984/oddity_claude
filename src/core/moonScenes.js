@@ -163,6 +163,9 @@ export const MOON_SCENES = {
         ascent: { x: 0.05 * over * over, y, lean: -Math.min(0.7, 0.13 * over), burn: t >= 6, shown: y < 7 },
         // The foil thrown off as it goes: a ring of scraps that spreads and falls.
         scraps: { x: 0, y: 0.42 + 0.5 * s - 0.35 * s * s, scale: 0.2 + 1.5 * s, shown: t >= 6 && s < 1.6 },
+        // Its goodbye to the rabbit in the Moon as it leaves (the user's own line,
+        // 2026-10-06: "이번에는 \"토끼야. 빠이~\""): gone before the cabin climbs into it.
+        say: said(t, 3.8, 7.3, 0.55, 1.3, 1.1),
       };
     },
   },

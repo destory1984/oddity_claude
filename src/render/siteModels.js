@@ -951,6 +951,7 @@ const MOON_STAGES = {
       ascent: apollo(scene, `${name}Ascent`, mats, { stage: 'ascent', withFlag: false }),
       rover: lunarRover(scene, `${name}Rover`, mats),
       scraps: scraps(scene, `${name}Scraps`, mats, mats.goldFoil),
+      say: sayBubble(scene, `${name}Say`, t('토끼야. 빠이~')),
     },
     flames: { ascent: [0, 0.3, 0, 0.2, 0.14] },
   }),

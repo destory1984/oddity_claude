@@ -283,23 +283,23 @@ export function createSound() {
     click: () => pluck(1319, 0, 0.05, 0.2),
     // Docking: air rushing up as the approach begins, a tick for each count, then the
     // latch: a low clunk and two rising bells. Letting go plays the bells falling.
-    // The sounds of docking and the spoken count are at 70% of what they were (the user,
-    // 2026-10-06: "도킹 준비 중. 삼이일영하고 피식~하는 소리.. 너무 크거든.. 음량을 70%로 줄여").
+    // The sounds of docking and the spoken count are at 60% of what they were (the user,
+    // 2026-10-06: "도킹 준비 중. 삼이일영하고 피식~하는 소리.. 너무 크거든.. 음량을 70%로 줄여", then "60%").
     docking: () => {
-      noise({ length: 1.2, volume: 0.07, type: 'bandpass', freq: 500, to: 1700 });
-      pluck(392, 0, 0.07, 0.8);
+      noise({ length: 1.2, volume: 0.06, type: 'bandpass', freq: 500, to: 1700 });
+      pluck(392, 0, 0.06, 0.8);
     },
-    count: () => tone({ freq: 880, length: 0.09, volume: 0.049 }),
+    count: () => tone({ freq: 880, length: 0.09, volume: 0.042 }),
     // Contact: a low clunk and, with it, pshhh, the seal filling with air, bright at first
     // and sinking as it fades; two rising bells close it. (The craft jolts at the same
     // moment: core/dock.js latchJolt.)
     dock: () => {
-      noise({ length: 0.16, volume: 0.28, type: 'lowpass', freq: 700, to: 180 });
-      tone({ freq: 98, length: 0.4, volume: 0.154 });
-      noise({ start: 0.05, length: 1.6, volume: 0.224, type: 'highpass', freq: 4200, to: 1400 });
-      noise({ start: 0.05, length: 0.9, volume: 0.098, type: 'bandpass', freq: 2600, to: 900 });
-      bell(659, 0.9, 0.07);
-      bell(988, 1.08, 0.07);
+      noise({ length: 0.16, volume: 0.24, type: 'lowpass', freq: 700, to: 180 });
+      tone({ freq: 98, length: 0.4, volume: 0.132 });
+      noise({ start: 0.05, length: 1.6, volume: 0.192, type: 'highpass', freq: 4200, to: 1400 });
+      noise({ start: 0.05, length: 0.9, volume: 0.084, type: 'bandpass', freq: 2600, to: 900 });
+      bell(659, 0.9, 0.06);
+      bell(988, 1.08, 0.06);
     },
     // A jump, six seconds like the flash (ui/warp.js). All bells and clear tones, no low
     // noise: music-box notes climbing a five-note scale faster and faster for 2.6 s, a
@@ -541,7 +541,7 @@ export function createSound() {
       if (call.voice) words.voice = call.voice;
       words.rate = 1.2;
       // Half of what it was (0.9): the voice stood out over everything else.
-      words.volume = 0.315;
+      words.volume = 0.27;
       window.speechSynthesis.speak(words);
     },
     // Stop talking at once (the docking was called off).

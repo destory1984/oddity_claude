@@ -393,15 +393,27 @@ function junoArrives(scene, name, mats) {
 // A world going by behind a craft: `make(parent)` builds it (and may give a pose of its
 // own for what else moves), and it goes from `from` to `to` as `pass` goes 0 → 1,
 // growing from grow[0] to grow[1] and turning `turn` radians about the line of sight.
+// The craft stands a third of the way up the view and the world goes by two thirds of
+// the way up, so that neither is before the other (the user, 2026-10-06, over a picture
+// with arrows: "탐사선과 별이 같은 X 축에서 움직이니까, 겹쳐 보이거든", "탐사선은 화면의
+// 아랫쪽 1/3 지점, 별은 화면의 2/3 지점에서 움직이도록 해"). The view is 2.5 of the stage's
+// units tall (a craft is seen from 110 km through 30 degrees, drawn 30 km to a unit, at
+// `fit` 0.8): a sixth of it is 0.42. `from` and `to` are where the world is from side to
+// side and how far off ([x, z]); it climbs a little as it goes.
+const CRAFT_Y = -0.42;
+const WORLD_Y = 0.42;
 function goesBy(id, make, { from, to, grow = [1, 1], turn = 0, fit = 0.8 }) {
   return (scene, name, mats) => {
-    const { root } = based(scene, name, mats, id);
+    const { root, base } = based(scene, name, mats, id);
     const world = group(scene, `${name}World`, root);
     const more = make(scene, name, world, mats, root);
     function pose(values) {
       const u = values.pass ?? 0;
+      // It goes down to its place as the world comes in and back as the world leaves, so
+      // that nothing jumps when the scene ends and the everyday model stands there again.
+      base.position.y = CRAFT_Y * smooth(Math.min(u, 1 - u) / 0.05);
       const at = mix(from, to, u);
-      world.position.set(at[0], at[1], at[2]);
+      world.position.set(at[0], WORLD_Y - 0.08 + 0.16 * u, at[1]);
       world.scaling.setAll(grow[0] + (grow[1] - grow[0]) * u);
       world.rotation.z = turn * u;
       more?.(values);
@@ -435,7 +447,7 @@ function gaze(scene, name, parent, from, toward, length, wide, hex = '#fff3d0') 
 // \"목성아. 스마일~\"하고 셔터 소리 내줘", and of Europa Clipper: "화성아. 구멍 났어?"): a
 // bubble up to the watcher's right of it (the craft's -x), turned half round so that
 // its words face them. It is up while `say` is.
-function says(scene, name, root, words, at = [-0.27, 0.36, 0.35]) {
+function says(scene, name, root, words, at = [-0.27, 0.36 + CRAFT_Y, 0.35]) {
   const bubble = sayBubble(scene, `${name}Bubble`, words);
   bubble.parent = root;
   bubble.position.set(at[0], at[1], at[2]);
@@ -452,7 +464,7 @@ const neptuneGoesBy = goesBy('voyager2', (scene, name, world) => {
   ball(scene, `${name}Spot`, world, tint(scene, `${name}SpotPaint`, '#22367e'), 0.3, [-0.22, -0.12, 0.56], [1.5, 0.8, 0.3]);
   for (const y of [0.3, -0.36]) belt(scene, `${name}Band${y}`, world, tint(scene, `${name}BandPaint${y}`, '#5b84ea'), 1.3, y, 0.05);
   ball(scene, `${name}Triton`, world, tint(scene, `${name}TritonPaint`, '#d9c3b6'), 0.2, [-1.35, 0.3, 0.3]);
-}, { from: [-2.1, -0.35, -1.4], to: [2.3, 0.15, -1.4] });
+}, { from: [-2.1, -1.4], to: [2.3, -1.4] });
 
 // Pioneer 10 at Jupiter: belts and the red spot.
 const jupiterGoesBy = goesBy('pioneer10', (scene, name, world, mats, root) => {
@@ -460,7 +472,7 @@ const jupiterGoesBy = goesBy('pioneer10', (scene, name, world, mats, root) => {
   for (const [y, hex] of [[0.5, '#a9744a'], [0.2, '#b98558'], [-0.22, '#a9744a'], [-0.55, '#b98558']]) belt(scene, `${name}Belt${y}`, world, tint(scene, `${name}BeltPaint${y}`, hex), 1.7, y, 0.1);
   ball(scene, `${name}RedSpot`, world, tint(scene, `${name}RedSpotPaint`, '#c2553a'), 0.3, [0.3, -0.36, 0.7], [1.4, 0.8, 0.3]);
   return says(scene, name, root, t('목성아. 스마일~'));
-}, { from: [-2.4, -0.3, -1.5], to: [2.4, 0.2, -1.5] });
+}, { from: [-2.4, -1.5], to: [2.4, -1.5] });
 
 // Pioneer 11 at Saturn: the ball and its rings, tipped toward the watcher.
 const saturnGoesBy = goesBy('pioneer11', (scene, name, world) => {
@@ -468,7 +480,7 @@ const saturnGoesBy = goesBy('pioneer11', (scene, name, world) => {
   ball(scene, `${name}Saturn`, tipped, tint(scene, `${name}SaturnPaint`, '#dcc48c'), 1.1, [0, 0, 0], [1, 0.9, 1]);
   for (const y of [0.2, -0.2]) belt(scene, `${name}Band${y}`, tipped, tint(scene, `${name}BandPaint${y}`, '#c4a86e'), 1.1, y, 0.06);
   for (const [k, d, hex] of [[0, 2.5, '#cbb98a'], [1, 2.0, '#8f7f5c'], [2, 1.9, '#d9c9a0'], [3, 1.45, '#2a2418']]) drum(scene, `${name}Ring${k}`, tipped, tint(scene, `${name}RingPaint${k}`, hex), { height: 0.004 + 0.002 * k, diameter: d, tessellation: 48 }, [0, 0, 0]);
-}, { from: [-2.6, -0.3, -1.5], to: [2.6, 0.2, -1.5] });
+}, { from: [-2.6, -1.5], to: [2.6, -1.5] });
 
 // New Horizons at Arrokoth: two flat red lumps joined, turning slowly as it goes by.
 const arrokothGoesBy = goesBy('newHorizons', (scene, name, world) => {
@@ -476,17 +488,15 @@ const arrokothGoesBy = goesBy('newHorizons', (scene, name, world) => {
   ball(scene, `${name}Wenu`, world, red, 0.56, [-0.2, 0, 0], [1, 0.95, 0.55]);
   ball(scene, `${name}Weeyo`, world, red, 0.4, [0.25, 0.02, 0], [1, 0.95, 0.7]);
   ball(scene, `${name}Neck`, world, tint(scene, `${name}NeckPaint`, '#d9a890'), 0.14, [0.07, 0.01, 0.03], [1, 1, 0.6]);
-}, { from: [-1.9, -0.35, -1.0], to: [1.9, 0.3, -1.0], turn: 1.2 });
+}, { from: [-1.9, -1.0], to: [1.9, -1.0], turn: 1.2 });
 
 // Europa Clipper at Mars: the red planet with a white cap.
 const marsGoesBy = goesBy('europaClipper', (scene, name, world, mats, root) => {
   ball(scene, `${name}Mars`, world, tint(scene, `${name}MarsPaint`, '#b9573a'), 1.6);
   ball(scene, `${name}Cap`, world, tint(scene, `${name}CapPaint`, '#f2ece4'), 0.5, [0, 0.66, 0.1], [1, 0.45, 1]);
   ball(scene, `${name}Dark`, world, tint(scene, `${name}DarkPaint`, '#5a2a20'), 0.5, [0.15, -0.25, 0.7], [1, 1, 0.35]);
-  return says(scene, name, root, t('화성아. 구멍 났어?'), [-0.27, 0.42, 0.35]);
-// (It goes by higher than the craft, so that its dark hollow is not behind the wings:
-// the user, 2026-10-06, "지나가면서 화성 구멍이 잘 보이니까, 시점을 조금 위로".)
-}, { from: [-2.4, 0.3, -1.5], to: [2.4, 0.62, -1.5] });
+  return says(scene, name, root, t('화성아. 구멍 났어?'));
+}, { from: [-2.4, -1.5], to: [2.4, -1.5] });
 
 // Lucy at Dinkinesh: the small asteroid, and from behind it a moon that turns out to be
 // two lumps joined. moon: it has come out; pair: its second lump is seen.
@@ -506,7 +516,7 @@ const dinkineshGoesBy = goesBy('lucy', (scene, name, world, mats, root) => {
     lobes[1].position.set(0.11 * pair, 0.02 * pair, -0.05 * (1 - pair));
     say(values);
   };
-}, { from: [-1.8, -0.3, -1.0], to: [1.4, 0.15, -1.0] });
+}, { from: [-1.8, -1.0], to: [1.4, -1.0] });
 
 // A craft that looks down on the world it goes round and takes one picture: the ground
 // under it, the camera's cone of light, and the picture coming up beside it.

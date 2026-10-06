@@ -494,11 +494,13 @@ const saturnGoesBy = goesBy('pioneer11', (scene, name, world) => {
 }, { from: [-2.6, -1.5], to: [2.6, -1.5] });
 
 // New Horizons at Arrokoth: two flat red lumps joined, turning slowly as it goes by.
-const arrokothGoesBy = goesBy('newHorizons', (scene, name, world) => {
+const arrokothGoesBy = goesBy('newHorizons', (scene, name, world, mats, root) => {
   const red = tint(scene, `${name}ArrokothPaint`, '#a8573d');
   ball(scene, `${name}Wenu`, world, red, 0.56, [-0.2, 0, 0], [1, 0.95, 0.55]);
   ball(scene, `${name}Weeyo`, world, red, 0.4, [0.25, 0.02, 0], [1, 0.95, 0.7]);
   ball(scene, `${name}Neck`, world, tint(scene, `${name}NeckPaint`, '#d9a890'), 0.14, [0.07, 0.01, 0.03], [1, 1, 0.6]);
+  // (The user, 2026-10-06: "이번 대사는 \"눈사람이예요?\" 찰칵".)
+  return says(scene, name, root, t('눈사람이에요?'));
 }, { from: [-1.9, -1.0], to: [1.9, -1.0], turn: 1.2 });
 
 // Europa Clipper at Mars: the red planet with a white cap.

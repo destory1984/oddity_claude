@@ -289,7 +289,7 @@ export const CRAFT_SCENES = {
     day: t('2019년 1월 1일'),
     seconds: 36,
     downAt: 14,
-    sounds: [[14, 'shutter'], [16, 'shutter'], [29, 'stood']],
+    sounds: [[14, 'shutter'], [29, 'stood']],
     lines: [
       { at: 0, text: t('2019년 1월 1일. 명왕성을 지난 지 3년 반, 뉴허라이즌스가 카이퍼 벨트의 작은 천체 아로코스에 다가갑니다.') },
       { at: 7, text: t('해에서 65억km. 사람이 만든 것이 찾아간 가장 먼 천체입니다. 신호가 지구에 닿는 데 여섯 시간이 걸립니다.') },
@@ -298,7 +298,8 @@ export const CRAFT_SCENES = {
       { at: 29, text: t('아로코스는 포우하탄 말로 하늘이라는 뜻입니다. 뉴허라이즌스는 지금도 태양계 밖으로 날고 있습니다.') },
     ],
     unfold(t) {
-      return { pass: clamp((t - 2) / 32) };
+      // say: its bubble ("눈사람이에요?") is up, from a second and a half before the shutter.
+      return { pass: clamp((t - 2) / 32), say: ease(t, 12.3, 12.7) * (1 - ease(t, 15.6, 16)) };
     },
   },
   europaClipper: {

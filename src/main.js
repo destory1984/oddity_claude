@@ -274,6 +274,9 @@ let glowTellWait = SIGHT_START_S;
 // What she does at a sight just told of (core/sprite.js seeFor), and until when.
 let seeKind = null;
 let seeUntil = 0;
+// When a shutter last sounded in the close view (she takes a picture too: core/sprite.js 'see-snap').
+let snapAt = -Infinity;
+const SNAP_S = 1.6;
 let feelingTold = null;
 // The craft the traveler is docked with, and the glide toward it (core/dock.js startDocking).
 let docked = null;
@@ -1487,7 +1490,10 @@ ${STORY_MORE[target.id]}` : told };
   for (const type of ['pointerdown', 'keydown']) {
     document.addEventListener(type, () => sound.unlock(), { capture: true });
   }
-  $('capture').addEventListener('click', () => sound.cue('shutter'));
+  $('capture').addEventListener('click', () => {
+    sound.cue('shutter');
+    snapAt = performance.now();
+  });
   // Music has its own switch, in the top bar (and the same one in the help dialog).
   function showMusicButton() {
     const on = sound.musicOn();
@@ -2219,7 +2225,10 @@ ${STORY_MORE[target.id]}` : told };
         replay = null;
         replayNow = null;
       } else {
-        for (const name of replaySounds(replay.id, replay.heard ?? -1, into)) sound.cue(name);
+        for (const name of replaySounds(replay.id, replay.heard ?? -1, into)) {
+          sound.cue(name);
+          if (name === 'shutter' || name === 'snap') snapAt = performance.now();
+        }
         replay.heard = into;
         if (replayNow.down && !replay.down) {
           replay.down = true;
@@ -2318,6 +2327,7 @@ ${STORY_MORE[target.id]}` : told };
         cheer: performance.now() < cheerUntil,
         // Pointing at a sight just told of, and speaking while her bubble is up.
         see: performance.now() < seeUntil ? seeKind : null,
+        snap: performance.now() - snapAt < SNAP_S * 1000 ? (performance.now() - snapAt) / 1000 : null,
         talk: say.showing(),
         // The companion earned last (core/pal.js); drawn beside the sprite character only.
         pal: palFor({

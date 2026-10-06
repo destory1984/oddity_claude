@@ -20,9 +20,9 @@ const STILL = { speed: 0 };
 // In flight, showing her back, past the turn away from the camera.
 const flying = () => run(createSpriteState(), FLY, 1.2).state;
 
-test('73 sheets of four frames in use, and every drawing is in the assets folder', () => {
-  assert.equal(SHEETS.length, 73);
-  assert.equal(new Set(SHEETS).size, 73);
+test('74 sheets of four frames in use, and every drawing is in the assets folder', () => {
+  assert.equal(SHEETS.length, 74);
+  assert.equal(new Set(SHEETS).size, 74);
   assert.equal(FRAMES, 4);
   for (const sheet of SHEETS) {
     for (let frame = 0; frame < FRAMES; frame++) {
@@ -325,4 +325,15 @@ test('hovering, she points at a sight just told of and is drawn speaking while h
   assert.equal(seeFor('lightning:venus'), 'wow');
   assert.equal(seeFor('hexagon:saturn'), 'point');
   assert.ok(SEE_S >= 2);
+});
+
+test('in the close view she takes a picture too when a shutter has just sounded', () => {
+  const posed = stepSprite(createSpriteState(), { photo: true }, 0.016);
+  assert.equal(posed.sheet, 'photo-v2');
+  const lifting = stepSprite(posed, { photo: true, snap: 0.2 }, 0.016);
+  assert.equal(lifting.sheet, 'see-snap');
+  assert.equal(lifting.frame, 1);
+  // Held on its last drawing, and back to her V when it is over.
+  assert.equal(stepSprite(lifting, { photo: true, snap: 1.5 }, 0.016).frame, FRAMES - 1);
+  assert.equal(stepSprite(lifting, { photo: true, snap: null }, 0.016).sheet, 'photo-v2');
 });

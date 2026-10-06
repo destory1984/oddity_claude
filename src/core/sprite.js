@@ -60,6 +60,10 @@ export const SHEETS = [
   // switched off (the user: "소리 끄기 버튼을 누르면, 소라가 손가락을 입에 대고, 쉬잇~
   // 하는 움직임 넣어줘", "소리/음악 공통으로 해줘"). Shown as a sight is: see 'hush'.
   'see-hush',
+  // Drawn to order on 2026-10-06: a picture taken with a small camera (up to her eye, the
+  // button pressed, a smile), played in the close view when a shutter sounds: a craft's
+  // in a scene of its day, or the player's own ("사진 저장").
+  'see-snap',
 ];
 
 // Which of the three she does for a sight (the ids of core/glows.js, with 'meteor' and
@@ -271,6 +275,9 @@ export function stepSprite(state, input, dt) {
     // The game is paused in photo mode, so no time passes: she holds the finished pose,
     // two fingers up in a V. (Every other time it was a jump, 'photo-jump'; the drawings stay.)
     // Only the last of the four drawings is ever seen.
+    // A shutter has just sounded (`snap`: seconds since, by the real clock): she takes a
+    // picture too, once through at six drawings a second, and holds her smile.
+    if (input.snap !== null && input.snap !== undefined) return { ...next, sheet: 'see-snap', time: input.snap, frame: once(input.snap, 6), reverse: false };
     return { ...next, sheet: 'photo-v2', time: 0, frame: FRAMES - 1, reverse: false };
   }
   if (mode === 'read') {

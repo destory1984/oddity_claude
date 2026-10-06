@@ -482,7 +482,12 @@ function roadsterReveal(scene, name, mats) {
   });
   const earth = ball(scene, `${name}Earth`, root, tint(scene, `${name}EarthPaint`, '#3f78d8'), 1.1, [0.3, -0.35, -1.2]);
 
-  function pose({ open, gone }) {
+  // What stood on its dashboard, said as the fairing opens (the user, 2026-10-06, picked
+  // the first of five lines offered).
+  const say = says(scene, name, root, t('당황하지 마시오'), [-0.3, 0.4, 0.4]);
+
+  function pose({ open, gone, say: said = 0 }) {
+    say({ say: said });
     for (const half of halves) {
       half.setEnabled(open < 0.99);
       half.position.set(0, -0.5 * open * open, 1.0 * open);
@@ -547,6 +552,32 @@ function goesBy(id, make, { from, to, grow = [1, 1], turn = 0, fit = 0.8 }) {
     return { root, pose, face: true, fit };
   };
 }
+// A drawing on a flat sheet, lit by nothing, that faces the watcher of a scene that has
+// turned to them (the stage's +z is toward the eye): `file` under public/assets/replay/.
+function sheet(scene, name, parent, file, [width, height], at = [0, 0, 0], sharp = true) {
+  const texture = new Texture(`${import.meta.env.BASE_URL}assets/replay/${file}`, scene, true, true, sharp ? Texture.NEAREST_SAMPLINGMODE : Texture.BILINEAR_SAMPLINGMODE);
+  texture.hasAlpha = file.endsWith('.png');
+  texture.wrapU = Texture.CLAMP_ADDRESSMODE;
+  texture.wrapV = Texture.CLAMP_ADDRESSMODE;
+  const material = new StandardMaterial(`${name}Material`, scene);
+  material.disableLighting = true;
+  // (The colour is the emissive one alone: with the diffuse left white the drawing was
+  // added to itself and came out twice as bright, a grey rock orange.)
+  material.diffuseTexture = texture;
+  material.diffuseColor = new Color3(0, 0, 0);
+  material.emissiveTexture = texture;
+  material.useAlphaFromDiffuseTexture = texture.hasAlpha;
+  material.specularColor = new Color3(0, 0, 0);
+  material.backFaceCulling = false;
+  const plane = CreatePlane(name, { width, height }, scene);
+  plane.parent = parent;
+  plane.material = material;
+  plane.position.set(at[0], at[1], at[2]);
+  plane.rotation.y = Math.PI;
+  plane.isPickable = false;
+  return plane;
+}
+
 // A belt or a band round a ball: a thin drum a little wider than the ball is there.
 const belt = (scene, name, parent, material, diameter, y, height) => drum(scene, name, parent, material, { height, diameter: Math.sqrt(Math.max(0.0001, diameter * diameter - 4 * y * y)) * 1.03, tessellation: 40 }, [0, y, 0]);
 // A picture that has just been taken: a black card with a white edge, which `fill`
@@ -639,12 +670,10 @@ const saturnGoesBy = goesBy('pioneer11', (scene, name, world) => {
   };
 }, { from: [-2.6, -1.5], to: [2.6, -1.5] });
 
-// New Horizons at Arrokoth: two flat red lumps joined, turning slowly as it goes by.
+// New Horizons at Arrokoth: two red lumps joined, turning slowly as it goes by.
 const arrokothGoesBy = goesBy('newHorizons', (scene, name, world, mats, root) => {
-  const red = tint(scene, `${name}ArrokothPaint`, '#a8573d');
-  ball(scene, `${name}Wenu`, world, red, 0.56, [-0.2, 0, 0], [1, 0.95, 0.55]);
-  ball(scene, `${name}Weeyo`, world, red, 0.4, [0.25, 0.02, 0], [1, 0.95, 0.7]);
-  ball(scene, `${name}Neck`, world, tint(scene, `${name}NeckPaint`, '#d9a890'), 0.14, [0.07, 0.01, 0.03], [1, 1, 0.6]);
+  // (A drawing ordered on 2026-10-06, 192 by 100 pixels: two smooth balls stood there.)
+  sheet(scene, `${name}Arrokoth`, world, 'arrokoth.png', [0.92, 0.48]);
   // (The user, 2026-10-06: "이번 대사는 \"눈사람이예요?\" 찰칵".)
   return says(scene, name, root, t('눈사람이에요?'));
 }, { from: [-1.9, -1.0], to: [1.9, -1.0], turn: 1.2 });
@@ -660,19 +689,19 @@ const marsGoesBy = goesBy('europaClipper', (scene, name, world, mats, root) => {
 // Lucy at Dinkinesh: the small asteroid, and from behind it a moon that turns out to be
 // two lumps joined. moon: it has come out; pair: its second lump is seen.
 const dinkineshGoesBy = goesBy('lucy', (scene, name, world, mats, root) => {
-  const rock = tint(scene, `${name}RockPaint`, '#8f867a');
-  ball(scene, `${name}Dinkinesh`, world, rock, 0.6, [0, 0, 0], [1, 0.88, 0.95]);
-  belt(scene, `${name}Ridge`, world, tint(scene, `${name}RidgePaint`, '#a39a8c'), 0.6 * 0.88, 0, 0.03).scaling.set(1.13, 1, 1.08);
+  // (Drawings ordered on 2026-10-06, 192 by 153 and 64 by 41 pixels: balls stood there.)
+  sheet(scene, `${name}Dinkinesh`, world, 'dinkinesh.png', [0.74, 0.59]);
   const moon = group(scene, `${name}Selam`, world);
-  const lobes = [0, 1].map((k) => ball(scene, `${name}Lobe${k}`, moon, rock, 0.13 - 0.02 * k));
+  // Its two lumps are one drawing; until the second is made out it is seen end on, half as wide.
+  const selam = sheet(scene, `${name}SelamSheet`, moon, 'selam.png', [0.2, 0.128]);
   // Between its two pictures it asks the moon who it is (the user, 2026-10-06: "찰칵. 중간에
   // \"누구냐. 넌\" 그리고 찰칵 한 번 더").
   const say = says(scene, name, root, t('누구냐. 넌'));
   return (values) => {
     const { moon: out = 0, pair = 0 } = values;
-    const at = mix([0.05, 0.02, -0.3], [-0.42, 0.36, -0.05], out);
+    const at = mix([0.05, 0.02, -0.3], [-0.5, 0.24, -0.05], out);
     moon.position.set(at[0], at[1], at[2]);
-    lobes[1].position.set(0.11 * pair, 0.02 * pair, -0.05 * (1 - pair));
+    selam.scaling.x = 0.55 + 0.45 * pair;
     say(values);
   };
 }, { from: [-1.8, -1.0], to: [1.4, -1.0] });
@@ -693,28 +722,14 @@ function looksDown(id, hex, eye, fill) {
     return { root, pose, face: true, fit: 0.75 };
   };
 }
-// MRO's picture: Curiosity under its parachute, with Mars far below.
-const mroParachute = looksDown('mro', '#b9573a', [0, -0.3, 0.03], (scene, name, card, mats) => {
-  box(scene, `${name}Sand`, card, tint(scene, `${name}SandPaint`, '#a8553c'), [0.4, 0.4, 0.002], [0, 0, 0.005]);
-  ball(scene, `${name}Canopy`, card, mats.white, 0.15, [-0.03, 0.07, 0.012], [1, 0.62, 0.2]);
-  ball(scene, `${name}Vent`, card, tint(scene, `${name}VentPaint`, '#c9a79a'), 0.03, [-0.03, 0.08, 0.026], [1, 0.62, 0.2]);
-  drum(scene, `${name}Shell`, card, mats.silver, { height: 0.035, diameterTop: 0.02, diameterBottom: 0.05, tessellation: 12 }, [0.05, -0.1, 0.012], [-0.5, 1, 0]);
-  for (const s of [-1, 1]) rod(scene, `${name}Line${s}`, card, mats.white, [-0.03 + s * 0.06, 0.04, 0.012], [0.045, -0.085, 0.012], 0.004, 3);
+// MRO's picture: Curiosity under its parachute, with Mars far below. LRO's: a lander's
+// lower stage with its long shadow, and the paths walked from it. (Drawings ordered on
+// 2026-10-06, 256 pixels square: both were put together of balls and rods before.)
+const mroParachute = looksDown('mro', '#b9573a', [0, -0.3, 0.03], (scene, name, card) => {
+  sheet(scene, `${name}Photo`, card, 'photo-mro.jpg', [0.4, 0.4], [0, 0, 0.006], false);
 });
-// LRO's picture: a lander's lower stage with its long shadow, and the paths walked from it.
-const lroFootpaths = looksDown('lro', '#9c9a96', [0, -0.33, 0.03], (scene, name, card, mats) => {
-  box(scene, `${name}Dust`, card, tint(scene, `${name}DustPaint`, '#8e8c88'), [0.4, 0.4, 0.002], [0, 0, 0.005]);
-  const dark = tint(scene, `${name}TrackPaint`, '#55534f');
-  for (const [k, x, y, d] of [[0, -0.12, 0.1, 0.07], [1, 0.13, -0.11, 0.05], [2, 0.1, 0.13, 0.04]]) drum(scene, `${name}Crater${k}`, card, dark, { height: 0.002, diameter: d, tessellation: 16 }, [x, y, 0.007], Z);
-  box(scene, `${name}Shadow`, card, mats.black, [0.12, 0.022, 0.002], [0.075, -0.012, 0.008], [0, 0, -0.15]);
-  box(scene, `${name}Stage`, card, mats.goldFoil, [0.03, 0.03, 0.01], [0, 0, 0.012], [0, 0, 0.78]);
-  // The paths: thin dark lines out to where they set their instruments.
-  let from = [0, 0];
-  for (const [k, x, y] of [[0, -0.05, -0.05], [1, -0.12, -0.06], [2, -0.15, -0.12]]) {
-    rod(scene, `${name}Path${k}`, card, dark, [from[0], from[1], 0.008], [x, y, 0.008], 0.006, 3);
-    from = [x, y];
-  }
-  rod(scene, `${name}PathB`, card, dark, [0, 0, 0.008], [-0.04, 0.09, 0.008], 0.005, 3);
+const lroFootpaths = looksDown('lro', '#9c9a96', [0, -0.33, 0.03], (scene, name, card) => {
+  sheet(scene, `${name}Photo`, card, 'photo-lro.jpg', [0.4, 0.4], [0, 0, 0.006], false);
 });
 
 // Danuri braking into orbit: its engines burn at its back. (It goes round the Moon in the
@@ -774,8 +789,8 @@ function chandraFirstLight(scene, name, mats) {
   const { root } = based(scene, name, mats, 'chandra');
   const look = gaze(scene, `${name}Gaze`, root, [0, 0.46, 0], [0, 1, 0], 0.8, 0.26, '#c8b0ff');
   const show = picture(scene, `${name}Picture`, root, mats, [0.55, 0.62, 0.3], 0.46, (card) => {
-    for (const [k, hex, d] of [[0, '#ff5a4a', 0.38], [1, '#58e08c', 0.32], [2, '#4a7cff', 0.26], [3, '#06060c', 0.18]]) drum(scene, `${name}Shell${k}`, card, glow(scene, `${name}ShellLight${k}`, hex, 1), { height: 0.002, diameter: d, tessellation: 22 + 3 * k }, [0.01 * k, 0.006 * k, 0.006 + 0.002 * k], Z);
-    ball(scene, `${name}Point`, card, glow(scene, `${name}PointLight`, '#ffffff', 1), 0.022, [0.012, 0.004, 0.016]);
+    // (A drawing ordered on 2026-10-06: rings of plain colour stood there.)
+    sheet(scene, `${name}Photo`, card, 'photo-casa.jpg', [0.44, 0.44], [0, 0, 0.006], false);
   });
 
   function pose({ looking = 0, snap = 0 }) {

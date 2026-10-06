@@ -212,7 +212,8 @@ export const CRAFT_SCENES = {
       { at: 29, text: t('지금은 557일에 한 바퀴씩 해를 돕니다. 수천만 년 안에 지구나 금성에 떨어질 수 있다고 합니다.') },
     ],
     unfold(t) {
-      return { open: ease(t, 6, 12), gone: ease(t, 12, 34) };
+      // say: Starman's bubble ("당황하지 마시오") is up as the fairing has opened.
+      return { open: ease(t, 6, 12), gone: ease(t, 12, 34), say: ease(t, 9, 9.4) * (1 - ease(t, 14.5, 15)) };
     },
   },
   // Juno's one chance to be caught by Jupiter. burn: its main engine is lit; spin: how

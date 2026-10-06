@@ -212,9 +212,13 @@ export const MOON_SCENES = {
     ],
     stage(t) {
       const y = comeDown(t, 8, 2.4);
+      const rover = rollOut(t, { rollAt: 12, ramp: 3.5, drive: 8, to: 1.9, liftY: y, scale: 0.5 });
       return {
         lander: { x: 0, y, burn: t < 8 },
-        rover: rollOut(t, { rollAt: 12, ramp: 3.5, drive: 8, to: 1.9, liftY: y, scale: 0.5 }),
+        rover,
+        // The car as it drives off (the user, 2026-10-07, of five lines offered: "3"):
+        // the bubble stands up and to its left, its tail down toward it, and goes along.
+        say: said(t, 16.2, 20.4, Math.min(rover.x, 1.15) - 0.42, 0.95, 1.1),
       };
     },
   },

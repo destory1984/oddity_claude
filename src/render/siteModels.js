@@ -698,7 +698,8 @@ function plutoPhoto(scene, name) {
   });
 }
 // What it says, in a bubble with a tail toward the lower left; `tail` 'upRight': toward
-// the upper right (what speaks is above it and to the right).
+// the upper right (what speaks is above it and to the right); 'downRight': toward the
+// lower right (what speaks is going off to the right).
 export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
   const up = tail === 'upRight';
   return card(scene, name, [1.0, 0.5], [512, 256], (ctx, w, h) => {
@@ -711,6 +712,9 @@ export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
     if (up) {
       ctx.translate(w, h);
       ctx.scale(-1, -1);
+    } else if (tail === 'downRight') {
+      ctx.translate(w, 0);
+      ctx.scale(-1, 1);
     }
     ctx.beginPath();
     ctx.moveTo(60, 20);
@@ -977,6 +981,7 @@ const MOON_STAGES = {
     pieces: {
       lander: deckLander(scene, `${name}Lander`, mats, { skin: 'foil' }),
       rover: rover(scene, `${name}Rover`, mats, { power: 'lid' }),
+      say: sayBubble(scene, `${name}Say`, t('부릉부릉. 드라이브 가자~'), { tail: 'downRight' }),
     },
     flames: { lander: [0, 0.12, 0, 0.34, 0.2] },
   }),

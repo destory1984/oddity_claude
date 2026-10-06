@@ -280,7 +280,8 @@ export const CRAFT_SCENES = {
       { at: 28, text: t('뒤따르던 보이저 1호와 2호는 이 길이 안전한 것을 알고 왔습니다. 신호는 1995년 11월에 끊겼습니다.') },
     ],
     unfold(t) {
-      return { pass: clamp((t - 2) / 31) };
+      // say: Saturn's bubble ("첫 손님이네요") is up, from a second and a half before the shutter.
+      return { pass: clamp((t - 2) / 31), say: ease(t, 12.3, 12.7) * (1 - ease(t, 15.6, 16)) };
     },
   },
   newHorizons: {

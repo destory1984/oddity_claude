@@ -697,13 +697,21 @@ function plutoPhoto(scene, name) {
     ctx.fill();
   });
 }
-// What it says, in a bubble with a tail toward the lower left.
-export function sayBubble(scene, name, words) {
+// What it says, in a bubble with a tail toward the lower left; `tail` 'upRight': toward
+// the upper right (what speaks is above it and to the right).
+export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
+  const up = tail === 'upRight';
   return card(scene, name, [1.0, 0.5], [512, 256], (ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = '#ffffff';
     ctx.strokeStyle = '#1b2440';
     ctx.lineWidth = 8;
+    // (The same outline, turned over both ways.)
+    ctx.save();
+    if (up) {
+      ctx.translate(w, h);
+      ctx.scale(-1, -1);
+    }
     ctx.beginPath();
     ctx.moveTo(60, 20);
     ctx.lineTo(w - 60, 20);
@@ -720,6 +728,7 @@ export function sayBubble(scene, name, words) {
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
+    ctx.restore();
     ctx.fillStyle = '#1b2440';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -729,7 +738,7 @@ export function sayBubble(scene, name, words) {
       ctx.font = `700 ${size}px "Gaegu", "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif`;
       size -= 6;
     } while (ctx.measureText(words).width > w - 80 && size > 30);
-    ctx.fillText(words, w / 2, 104);
+    ctx.fillText(words, w / 2, up ? h - 104 : 104);
   });
 }
 

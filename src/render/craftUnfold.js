@@ -476,10 +476,21 @@ const jupiterGoesBy = goesBy('pioneer10', (scene, name, world, mats, root) => {
 
 // Pioneer 11 at Saturn: the ball and its rings, tipped toward the watcher.
 const saturnGoesBy = goesBy('pioneer11', (scene, name, world) => {
+  // This time the world speaks (the user, 2026-10-06: "이번에는 토성이 얘기한다. \"첫 손님이네요\"
+  // 그리고 찰칵"): a bubble under Saturn, to the watcher's left of it, that goes along with it,
+  // its tail up toward the planet.
+  const bubble = sayBubble(scene, `${name}Bubble`, t('첫 손님이네요'), { tail: 'upRight' });
+  bubble.parent = world;
+  bubble.position.set(0.4, -0.44, 1.9);
+  bubble.rotation.y = Math.PI;
   const tipped = group(scene, `${name}Tipped`, world, [0, 0, 0], [0.42, 0, 0.2]);
   ball(scene, `${name}Saturn`, tipped, tint(scene, `${name}SaturnPaint`, '#dcc48c'), 1.1, [0, 0, 0], [1, 0.9, 1]);
   for (const y of [0.2, -0.2]) belt(scene, `${name}Band${y}`, tipped, tint(scene, `${name}BandPaint${y}`, '#c4a86e'), 1.1, y, 0.06);
   for (const [k, d, hex] of [[0, 2.5, '#cbb98a'], [1, 2.0, '#8f7f5c'], [2, 1.9, '#d9c9a0'], [3, 1.45, '#2a2418']]) drum(scene, `${name}Ring${k}`, tipped, tint(scene, `${name}RingPaint${k}`, hex), { height: 0.004 + 0.002 * k, diameter: d, tessellation: 48 }, [0, 0, 0]);
+  return ({ say = 0 }) => {
+    bubble.setEnabled(say > 0.01);
+    bubble.scaling.setAll(Math.max(0.01, 0.5 * say));
+  };
 }, { from: [-2.6, -1.5], to: [2.6, -1.5] });
 
 // New Horizons at Arrokoth: two flat red lumps joined, turning slowly as it goes by.

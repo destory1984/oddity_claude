@@ -41,7 +41,7 @@ const nameOf = (bodies, id) => bodies.find((b) => b.id === id)?.name ?? id;
 export function eventMessage(event, bodies = []) {
   switch (event.type) {
     case 'surfaceReached':
-      return t('천체 표면에 도착했습니다. 내부로는 들어갈 수 없습니다.');
+      return t('천체 표면에 도착했습니다. 보이지 않지만, 작은 발자국을 남겼습니다.');
     case 'discovered': {
       // The fact goes on its own line (the toast keeps line breaks).
       const fact = FACTS[event.bodyId];

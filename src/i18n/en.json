@@ -753,7 +753,7 @@
  "이 길로 떠나기": "Set out on this road",
  " · 하는 중": " · in progress",
  "해 보기": "Try it",
- "천체 표면에 도착했습니다. 내부로는 들어갈 수 없습니다.": "You have reached the surface. You cannot go inside a body.",
+ "천체 표면에 도착했습니다. 보이지 않지만, 작은 발자국을 남겼습니다.": "You have reached the surface. It cannot be seen, but you left a small footprint.",
  "새 천체 발견: {}{}": "New body found: {0}{1}",
  "착지 기록: {}. 수첩에 남겼습니다.": "Landing recorded: {0}. It is in the notebook.",
  "사진 임무 달성: {}": "Photo mission done: {0}",

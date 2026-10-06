@@ -16,7 +16,7 @@ test('object particle follows the final consonant', () => {
 test('surface arrival message', () => {
   assert.equal(
     eventMessage({ type: 'surfaceReached', bodyId: 'earth' }),
-    '천체 표면에 도착했습니다. 내부로는 들어갈 수 없습니다.',
+    '천체 표면에 도착했습니다. 보이지 않지만, 작은 발자국을 남겼습니다.',
   );
   assert.equal(eventMessage({ type: 'unknown' }), null);
 });

@@ -52,7 +52,7 @@ export const CRAFT_SCENES = {
   // tells of the picture; this is the taking of it). looking: the cameras are at work;
   // sweep: how far they have turned across the planets; cards: how many of the six
   // pictures have come (Neptune, Uranus, Saturn, Jupiter, Earth, Venus); earth: Earth's
-  // picture brought forward, 0 → 1.
+  // picture brought forward, 0 → 1; sagan: Carl Sagan's photograph has come up beside it.
   voyager1: {
     name: t('태양계 가족사진'),
     day: t('1990년 2월 14일'),
@@ -73,6 +73,8 @@ export const CRAFT_SCENES = {
         sweep: clamp((t - 8) / 13),
         cards: Math.max(0, Math.min(6, (t - 9) / 2.2)),
         earth: ease(t, 24, 30),
+        // His photograph comes up as his words are told, and stays.
+        sagan: ease(t, 31, 32.5),
       };
     },
   },

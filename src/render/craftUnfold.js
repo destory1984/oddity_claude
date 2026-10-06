@@ -1,4 +1,4 @@
-import { TransformNode, CreateSphere, StandardMaterial, Color3, Mesh, VertexData } from './babylon.js';
+import { TransformNode, CreateSphere, CreatePlane, StandardMaterial, Color3, Mesh, VertexData, Texture, DynamicTexture } from './babylon.js';
 import { part, cyl, group, box, drum, rod, fuse } from './craftParts.js';
 import { CRAFT_BUILD, CRAFT_UNFOLD } from './craftModels.js';
 import { astronaut, sayBubble } from './siteModels.js';
@@ -68,7 +68,51 @@ function voyagerPortrait(scene, name, mats) {
     return card;
   });
 
-  function pose({ looking, sweep, cards: taken, earth }) {
+  // Carl Sagan, who asked for the picture for years and named the dot (the user,
+  // 2026-10-06: "칼 세이건 아저씨 얼굴 나오게 하면?", "이 게임에서 제일 중요한 이름이 칼
+  // 세이건이라.."): his photograph (NASA/JPL, 1980: THIRD-PARTY.md) in a white frame with
+  // his name and years under it, which comes up beside Earth's picture as his words are
+  // told. Lit by nothing; turned half round, since the stage's +z is toward the watcher.
+  const sagan = group(scene, `${name}Sagan`, root, [-0.4, 0.0, 0.62]);
+  {
+    const flat = (id, texture, size, at) => {
+      const material = new StandardMaterial(`${name}${id}Material`, scene);
+      material.disableLighting = true;
+      material.emissiveTexture = texture;
+      material.diffuseColor = new Color3(0, 0, 0);
+      material.specularColor = new Color3(0, 0, 0);
+      const plane = CreatePlane(`${name}${id}`, { width: size[0], height: size[1] }, scene);
+      plane.parent = sagan;
+      plane.material = material;
+      plane.position.set(at[0], at[1], at[2]);
+      plane.rotation.y = Math.PI;
+      plane.isPickable = false;
+    };
+    box(scene, `${name}SaganFrame`, sagan, glow(scene, `${name}SaganPaper`, '#f4f1e8', 1), [0.33, 0.56, 0.006], [0, -0.05, -0.006]);
+    flat('SaganPhoto', new Texture(`${import.meta.env.BASE_URL}assets/people/sagan.jpg`, scene), [0.3, 0.41], [0, 0.01, 0]);
+    const words = new DynamicTexture(`${name}SaganWords`, { width: 384, height: 140 }, scene, true);
+    const ctx = words.getContext();
+    ctx.fillStyle = '#f4f1e8';
+    ctx.fillRect(0, 0, 384, 140);
+    ctx.fillStyle = '#1b2440';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const label = t('칼 세이건');
+    let size = 64;
+    do {
+      ctx.font = `700 ${size}px "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif`;
+      size -= 4;
+    } while (ctx.measureText(label).width > 350 && size > 20);
+    ctx.fillText(label, 192, 48);
+    ctx.font = '500 36px "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif';
+    ctx.fillText('1934 → 1996', 192, 108);
+    words.update();
+    flat('SaganName', words, [0.3, 0.11], [0, -0.258, 0]);
+  }
+
+  function pose({ looking, sweep, cards: taken, earth, sagan: come = 0 }) {
+    sagan.setEnabled(come > 0.01);
+    sagan.scaling.setAll(Math.max(0.01, smooth(come)));
     pivot.setEnabled(looking > 0.01);
     pivot.scaling.setAll(Math.max(0.01, looking));
     pivot.rotation.y = -0.6 + 1.2 * sweep;
@@ -77,11 +121,12 @@ function voyagerPortrait(scene, name, mats) {
       card.setEnabled(shown > 0);
       const forward = i === 4 ? earth : 0;
       card.scaling.setAll(Math.max(0.01, shown) * (1 + 2.4 * forward));
-      const at = mix(slot(i), [0, 0.05, 0.6], forward);
+      // (It moves over to the watcher's left as Sagan's photograph comes up beside it.)
+      const at = mix(slot(i), [0.3 * smooth(come), 0.05, 0.6], forward);
       card.position.set(at[0], at[1], at[2]);
     });
   }
-  pose({ looking: 0, sweep: 0, cards: 0, earth: 0 });
+  pose({ looking: 0, sweep: 0, cards: 0, earth: 0, sagan: 0 });
   // The row of pictures faces the watcher (seen from the side or from above they were
   // thin slanted strips).
   return { root, pose, face: true, fit: 0.8 };

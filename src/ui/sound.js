@@ -248,9 +248,18 @@ export function createSound() {
       noise({ length: 0.3, volume: 0.16, type: 'lowpass', freq: 420, to: 140, attack: 0.03 });
       tone({ freq: 174, to: 131, length: 0.55, volume: 0.13 });
     },
+    // A camera's "찰-칵" (the user, 2026-10-06: "찰칵 소리를 조금 더 찰칵스럽게 (일반적으로
+    // 많이 쓰이는 그 소리)"; it was two soft puffs of noise): the mirror goes up with a
+    // bright tick over a small thump, the works whirr for a tenth of a second, and the
+    // shutter closes with a sharper tick.
     shutter: () => {
-      noise({ length: 0.03, volume: 0.3, type: 'bandpass', freq: 2500 });
-      noise({ start: 0.05, length: 0.06, volume: 0.22, type: 'bandpass', freq: 1400, to: 900 });
+      noise({ length: 0.012, volume: 0.4, type: 'highpass', freq: 3200 });
+      noise({ length: 0.045, volume: 0.26, type: 'bandpass', freq: 950, to: 700 });
+      tone({ freq: 170, to: 95, type: 'triangle', length: 0.05, volume: 0.12 });
+      noise({ start: 0.03, length: 0.1, volume: 0.045, type: 'bandpass', freq: 2300, to: 1500, attack: 0.02 });
+      noise({ start: 0.14, length: 0.01, volume: 0.46, type: 'highpass', freq: 4600 });
+      noise({ start: 0.14, length: 0.055, volume: 0.26, type: 'bandpass', freq: 1900, to: 1200 });
+      tone({ freq: 240, to: 120, type: 'triangle', start: 0.14, length: 0.045, volume: 0.1 });
     },
     mission: () => [784, 988, 784, 1175, 1568].forEach((f, i) => bell(f, i * 0.12)),
     complete: () => [523, 659, 784, 1047, 988, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.16, 0.12)),

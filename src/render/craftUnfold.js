@@ -641,21 +641,24 @@ function chandraFirstLight(scene, name, mats) {
 }
 
 // Euclid's map of the sky: squares of sky, each with its few galaxies, come up one
-// after another over it and join into a sheet. tiles: how many have come.
+// after another over it and join into a sheet. tiles: how many have come (six in all).
 function euclidMosaic(scene, name, mats) {
   const { root } = based(scene, name, mats, 'euclid');
   const sky = tint(scene, `${name}SkyPaint`, '#0c1436');
   const far = glow(scene, `${name}GalaxyLight`, '#ffe9c0', 1);
   const blue = glow(scene, `${name}GalaxyBlue`, '#a8c8ff', 1);
-  const tiles = Array.from({ length: 15 }, (_, k) => {
-    const [col, row] = [k % 5, Math.floor(k / 5)];
+  // Six large squares, three to a row (fifteen small ones came one after another too long:
+  // the user, 2026-10-06, "반복되니까 지루하네", "그림을 6개로 줄이는건?").
+  const tiles = Array.from({ length: 6 }, (_, k) => {
+    const [col, row] = [k % 3, Math.floor(k / 3)];
     // Back and forth, as a field is swept.
-    const x = (row % 2 ? 4 - col : col) * 0.2 - 0.4;
-    const tile = group(scene, `${name}Tile${k}`, root, [x, 0.72 + 0.2 * row, -0.05]);
-    box(scene, `${name}TileSky${k}`, tile, sky, [0.192, 0.192, 0.006]);
-    for (let j = 0; j < 4; j++) {
+    const x = (row % 2 ? 2 - col : col) * 0.32 - 0.32;
+    const tile = group(scene, `${name}Tile${k}`, root, [x, 0.76 + 0.32 * row, -0.05]);
+    box(scene, `${name}TileSky${k}`, tile, sky, [0.31, 0.31, 0.006]);
+    for (let j = 0; j < 7; j++) {
       const a = k * 2.4 + j * 1.9;
-      ball(scene, `${name}Galaxy${k}${j}`, tile, j % 2 ? blue : far, 0.012 + 0.012 * ((k * 0.37 + j * 0.61) % 1), [0.07 * Math.cos(a), 0.07 * Math.sin(a * 1.3), 0.006], [1.6, 0.8, 0.3]);
+      const r = 0.045 + 0.075 * ((k * 0.53 + j * 0.29) % 1);
+      ball(scene, `${name}Galaxy${k}${j}`, tile, j % 2 ? blue : far, 0.014 + 0.016 * ((k * 0.37 + j * 0.61) % 1), [r * Math.cos(a), r * Math.sin(a * 1.3), 0.006], [1.6, 0.8, 0.3]);
     }
     return tile;
   });

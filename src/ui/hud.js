@@ -92,6 +92,8 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
   $('inspectTarget').addEventListener('click', onInspect);
 
   // Returns the screen point and whether the body is off screen.
+  // A place this near is one she has come to see (a press on its name lands her there).
+  const NEAR_PLACE_KM = 2000;
   function placeMarker(el, direction, camera, label) {
     const x = dot(direction, camera.right);
     const y = dot(direction, camera.up);
@@ -173,7 +175,10 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         return { body, el, spot, keep, selected: selectedHere };
       });
       const crowded = crowdedMoons(placed.map(({ body, spot, selected: sel }) => ({
-        id: body.id, parent: ['moon', 'craft', 'site'].includes(body.kind) ? body.parent : null, x: spot.x, y: spot.y, outside: spot.outside, selected: sel || body.id === goalId,
+        id: body.id, parent: ['moon', 'craft', 'site'].includes(body.kind) ? body.parent : null, x: spot.x, y: spot.y, outside: spot.outside,
+        // (A place she is right over keeps its name: looking straight down at Apollo 17's
+        // from 120 km, the Moon's own name stood at the same point and the place had none.)
+        selected: sel || body.id === goalId || (body.kind === 'site' && view.distances[body.id] < NEAR_PLACE_KM),
       })));
       // An off-screen arrow that would stand on the readouts, the minimap or the target
       // panel is brought down under them (core/markers.js clearOfPanels). On a phone
@@ -211,11 +216,24 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
       // (the bubble is drawn over the labels and hid them).
       const bubble = $('heroSay');
       const saying = bubble?.classList.contains('on') ? [bubble.getBoundingClientRect()] : [];
+      // A place she is right over, whose name would lie on its own world's (looking straight
+      // down they stand at one point, and the world's would win): it stands one line under,
+      // and the arrows keep off it as off the chosen target's name.
+      const nearPlace = (body) => body.kind === 'site' && view.distances[body.id] < NEAR_PLACE_KM;
+      for (const { body, el, spot, keep } of placed) {
+        if (!keep || spot.outside || !nearPlace(body) || crowded.has(body.id) || hiddenIds.includes(body.id)) continue;
+        const world = markers.get(body.parent);
+        if (!world || world.hidden) continue;
+        el.hidden = false;
+        const a = el.getBoundingClientRect();
+        const b = world.getBoundingClientRect();
+        if (a.left < b.right && b.left < a.right && a.top < b.bottom + 6 && b.top < a.bottom + 6) el.style.top = `${b.bottom + 6 + a.height / 2}px`;
+      }
       // The chosen target's and the goal's own names, when they are in view: an arrow
       // keeps off them as off a panel (on a small phone two arrows lay on the target's
       // name, which is never hidden).
       const keptNames = placed
-        .filter(({ body, el, spot, keep, selected: sel }) => keep && !spot.outside && (sel || body.id === goalId) && !hiddenIds.includes(body.id) && !el.hidden)
+        .filter(({ body, el, spot, keep, selected: sel }) => keep && !spot.outside && (sel || body.id === goalId || nearPlace(body)) && !hiddenIds.includes(body.id) && !el.hidden)
         .map(({ el }) => el.getBoundingClientRect())
         .filter((box) => box.width)
         .map(({ left, top, right, bottom }) => ({ left, top, right, bottom }));
@@ -264,7 +282,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
         for (const { body, el, selected: sel } of inView) {
           if (el.hidden) continue;
           const name = el.getBoundingClientRect();
-          if (sel || body.id === goalId) continue;
+          if (sel || body.id === goalId || nearPlace(body)) continue;
           if (boxes.some((box) => hits(name, box))) el.hidden = true;
         }
       }

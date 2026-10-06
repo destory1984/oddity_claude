@@ -1,4 +1,4 @@
-import { TransformNode, CreateSphere, StandardMaterial, Color3 } from './babylon.js';
+import { TransformNode, CreateSphere, StandardMaterial, Color3, Mesh, VertexData } from './babylon.js';
 import { part, cyl, group, box, drum, rod, fuse } from './craftParts.js';
 import { CRAFT_BUILD, CRAFT_UNFOLD } from './craftModels.js';
 import { astronaut } from './siteModels.js';
@@ -86,6 +86,39 @@ function voyagerPortrait(scene, name, mats) {
   return { root, pose, face: true, fit: 0.8 };
 }
 
+// A flat plate: the outline (three or more corners in one plane, going round, bulging
+// nowhere inward) pushed `through` to give it thickness. Seen from both sides, and flat
+// shaded: every triangle has corners of its own.
+function slab(scene, name, parent, material, outline, through) {
+  const far = outline.map((p) => p.map((n, i) => n + through[i]));
+  const faces = [];
+  for (let i = 1; i < outline.length - 1; i++) faces.push([outline[0], outline[i], outline[i + 1]], [far[0], far[i], far[i + 1]]);
+  outline.forEach((p, i) => {
+    const j = (i + 1) % outline.length;
+    faces.push([p, outline[j], far[j]], [p, far[j], far[i]]);
+  });
+  const positions = [];
+  const indices = [];
+  for (const [a, b, c] of faces) {
+    for (const corners of [[a, b, c], [a, c, b]]) {
+      for (const corner of corners) {
+        indices.push(positions.length / 3);
+        positions.push(...corner);
+      }
+    }
+  }
+  const normals = [];
+  VertexData.ComputeNormals(positions, indices, normals);
+  const data = new VertexData();
+  data.positions = positions;
+  data.indices = indices;
+  data.normals = normals;
+  data.uvs = new Array((positions.length / 3) * 2).fill(0);
+  const mesh = new Mesh(name, scene);
+  data.applyToMesh(mesh);
+  return part(mesh, parent, material);
+}
+
 // Hubble being mended: the shuttle comes up under its aft end, two people float out to
 // the telescope, a box the size of a phone booth goes in, and the shuttle backs away.
 // (The shuttle is drawn at half its true size beside the telescope, to fit the view.)
@@ -93,20 +126,50 @@ function voyagerPortrait(scene, name, mats) {
 function hubbleService(scene, name, mats) {
   const { root } = based(scene, name, mats, 'hubble');
   const shuttle = group(scene, `${name}Shuttle`, root);
-  box(scene, `${name}Body`, shuttle, mats.white, [1.2, 0.18, 0.22]);
-  box(scene, `${name}Belly`, shuttle, mats.black, [1.2, 0.03, 0.225], [0, -0.1, 0]);
-  drum(scene, `${name}Nose`, shuttle, mats.white, { height: 0.2, diameterTop: 0.06, diameterBottom: 0.2, tessellation: 16 }, [0.7, -0.005, 0], [1, 0, 0]);
-  drum(scene, `${name}NoseTip`, shuttle, mats.black, { height: 0.05, diameterTop: 0.01, diameterBottom: 0.06, tessellation: 16 }, [0.825, -0.005, 0], [1, 0, 0]);
-  box(scene, `${name}Windows`, shuttle, mats.dark, [0.07, 0.04, 0.16], [0.56, 0.085, 0]);
-  box(scene, `${name}Fin`, shuttle, mats.white, [0.22, 0.26, 0.02], [-0.5, 0.2, 0], [0, 0, 0.35]);
-  box(scene, `${name}Wings`, shuttle, mats.white, [0.5, 0.02, 0.72], [-0.32, -0.08, 0]);
-  box(scene, `${name}WingsUnder`, shuttle, mats.black, [0.5, 0.012, 0.722], [-0.32, -0.095, 0]);
-  box(scene, `${name}Bay`, shuttle, mats.dark, [0.62, 0.012, 0.18], [-0.02, 0.092, 0]);
+  // Its nose to +x, its open bay up (+y) under the telescope. (Redrawn on 2026-10-06 with
+  // a round body, delta wings, a swept fin, engine pods and the arm: the user, of the
+  // first one made of six boxes, "엔데버.. 폴리곤 몇 개만 더 쓰자".)
+  const along = [1, 0, 0];
+  drum(scene, `${name}Body`, shuttle, mats.white, { height: 1.02, diameter: 0.2, tessellation: 18 }, [-0.07, 0, 0], along).scaling.set(1.08, 1, 1);
+  drum(scene, `${name}Cabin`, shuttle, mats.white, { height: 0.2, diameterTop: 0.135, diameterBottom: 0.2, tessellation: 18 }, [0.54, -0.006, 0], along);
+  drum(scene, `${name}Nose`, shuttle, mats.white, { height: 0.13, diameterTop: 0.05, diameterBottom: 0.135, tessellation: 18 }, [0.705, -0.012, 0], along);
+  part(CreateSphere(`${name}NoseCap`, { diameter: 0.056, segments: 10 }, scene), shuttle, mats.black, [0.768, -0.014, 0]);
+  // The black tiles of its underside, from nose to tail.
+  box(scene, `${name}Belly`, shuttle, mats.black, [1.1, 0.03, 0.17], [-0.05, -0.092, 0]);
+  box(scene, `${name}Chin`, shuttle, mats.black, [0.2, 0.026, 0.11], [0.56, -0.078, 0], [0, 0, 0.16]);
+  // The flight deck's windows, sloped back.
+  box(scene, `${name}Windows`, shuttle, mats.dark, [0.075, 0.03, 0.12], [0.555, 0.066, 0], [0, 0, -0.32]);
+  for (const s of [-1, 1]) box(scene, `${name}SideWindow${s}`, shuttle, mats.dark, [0.05, 0.028, 0.01], [0.5, 0.05, s * 0.088], [0, s * 0.2, 0]);
+  // Double-delta wings: white above, black beneath.
   for (const s of [-1, 1]) {
-    box(scene, `${name}Door${s}`, shuttle, mats.silver, [0.62, 0.008, 0.1], [-0.02, 0.12, s * 0.15], [s * 0.7, 0, 0]);
-    drum(scene, `${name}Pod${s}`, shuttle, mats.white, { height: 0.18, diameter: 0.07, tessellation: 12 }, [-0.56, 0.1, s * 0.07], [1, 0, 0]);
+    const glove = [[0.36, 0.085], [0.04, 0.17], [0.04, 0.085]];
+    const main = [[0.04, 0.085], [0.04, 0.17], [-0.27, 0.37], [-0.43, 0.37], [-0.52, 0.085]];
+    for (const [key, outline] of [['Glove', glove], ['Main', main]]) {
+      const flat = outline.map(([x, z]) => [x, s * z]);
+      slab(scene, `${name}Wing${key}${s}`, shuttle, mats.white, flat.map(([x, z]) => [x, -0.086, z]), [0, 0.018, 0]);
+      slab(scene, `${name}WingUnder${key}${s}`, shuttle, mats.black, flat.map(([x, z]) => [x, -0.1, z]), [0, 0.014, 0]);
+    }
+    // The engine pods either side of the fin, and their small bells.
+    drum(scene, `${name}Pod${s}`, shuttle, mats.white, { height: 0.2, diameter: 0.085, tessellation: 12 }, [-0.5, 0.095, s * 0.072], along);
+    drum(scene, `${name}PodNose${s}`, shuttle, mats.white, { height: 0.09, diameterTop: 0.02, diameterBottom: 0.085, tessellation: 12 }, [-0.355, 0.092, s * 0.072], along);
+    drum(scene, `${name}PodBell${s}`, shuttle, mats.dark, { height: 0.05, diameterTop: 0.025, diameterBottom: 0.055, tessellation: 12 }, [-0.625, 0.095, s * 0.072], along);
+    // The bay's two doors stand open, their silver radiators inward.
+    box(scene, `${name}Door${s}`, shuttle, mats.white, [0.62, 0.008, 0.11], [-0.02, 0.125, s * 0.14], [s * 0.75, 0, 0]);
+    box(scene, `${name}Radiator${s}`, shuttle, mats.silver, [0.6, 0.004, 0.1], [-0.02, 0.127, s * 0.134], [s * 0.75, 0, 0]);
   }
-  for (const [y, z] of [[0.04, 0], [-0.04, 0.05], [-0.04, -0.05]]) drum(scene, `${name}Bell${y}${z}`, shuttle, mats.dark, { height: 0.07, diameterTop: 0.04, diameterBottom: 0.08, tessellation: 12 }, [-0.635, y, z], [1, 0, 0]);
+  // The swept fin.
+  slab(scene, `${name}Fin`, shuttle, mats.white, [[-0.3, 0.09, -0.011], [-0.6, 0.42, -0.011], [-0.71, 0.42, -0.011], [-0.6, 0.09, -0.011]], [0, 0, 0.022]);
+  // The open bay, and the ring the telescope stands on.
+  box(scene, `${name}Bay`, shuttle, mats.dark, [0.62, 0.014, 0.17], [-0.02, 0.094, 0]);
+  drum(scene, `${name}Cradle`, shuttle, mats.grey, { height: 0.03, diameter: 0.2, tessellation: 20 }, [0, 0.112, 0]);
+  // The arm that caught the telescope: shoulder at the bay's front, elbow, hand.
+  rod(scene, `${name}ArmUpper`, shuttle, mats.white, [0.26, 0.1, 0.075], [0.3, 0.3, 0.13], 0.014, 8);
+  rod(scene, `${name}ArmLower`, shuttle, mats.white, [0.3, 0.3, 0.13], [0.1, 0.33, 0.1], 0.012, 8);
+  part(CreateSphere(`${name}Elbow`, { diameter: 0.024, segments: 8 }, scene), shuttle, mats.grey, [0.3, 0.3, 0.13]);
+  drum(scene, `${name}Hand`, shuttle, mats.grey, { height: 0.03, diameter: 0.024, tessellation: 10 }, [0.092, 0.33, 0.1], along);
+  // Three main engines and the flap beneath them.
+  for (const [y, z] of [[0.045, 0], [-0.035, 0.05], [-0.035, -0.05]]) drum(scene, `${name}Bell${y}${z}`, shuttle, mats.dark, { height: 0.08, diameterTop: 0.04, diameterBottom: 0.085, tessellation: 14 }, [-0.625, y, z], along);
+  box(scene, `${name}Flap`, shuttle, mats.black, [0.09, 0.014, 0.17], [-0.635, -0.1, 0]);
   fuse(scene, shuttle);
   const people = [-1, 1].map((s) => {
     const person = astronaut(scene, `${name}Person${s}`, mats);

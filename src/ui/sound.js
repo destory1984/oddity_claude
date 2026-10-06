@@ -244,6 +244,16 @@ export function createSound() {
     tone({ freq: 70, to: 62, type: 'triangle', length: seconds, volume: 0.04, attack: seconds * 0.5, out });
   }
 
+  // The shutter's "찰칵", `at` seconds from now (the cue `shutter` below tells how it was made).
+  function snap(at) {
+    noise({ start: at, length: 0.085, volume: 0.24, type: 'highpass', freq: 2200, attack: 0.025, hold: 0.045 });
+    noise({ start: at, length: 0.085, volume: 0.12, type: 'bandpass', freq: 3500, attack: 0.025, hold: 0.045 });
+    noise({ start: at + 0.055, length: 0.07, volume: 0.2, type: 'highpass', freq: 3000, attack: 0.012, hold: 0.035 });
+    noise({ start: at + 0.055, length: 0.07, volume: 0.2, type: 'bandpass', freq: 1100, attack: 0.012, hold: 0.035 });
+    noise({ start: at + 0.095, length: 0.2, volume: 0.3, type: 'highpass', freq: 2000, attack: 0.04, hold: 0.06 });
+    noise({ start: at + 0.095, length: 0.26, volume: 0.2, type: 'bandpass', freq: 3600, to: 1900, attack: 0.04, hold: 0.1 });
+  }
+
   const CUES = {
     discovered: () => [523, 659, 784, 880, 1047].forEach((f, i) => pluck(f, i * 0.1, 0.14)),
     // Touching down: a soft low thump, no tick. (It was a burst of noise at full volume
@@ -264,14 +274,11 @@ export function createSound() {
         tone({ freq: 3886, type: 'square', start: at, length: 0.056, volume: 0.022, attack: 0.004, hold: 0.042 });
         tone({ freq: 3886, start: at, length: 0.056, volume: 0.04, attack: 0.004, hold: 0.042 });
       }
-      const at = 0.35;
-      noise({ start: at, length: 0.085, volume: 0.24, type: 'highpass', freq: 2200, attack: 0.025, hold: 0.045 });
-      noise({ start: at, length: 0.085, volume: 0.12, type: 'bandpass', freq: 3500, attack: 0.025, hold: 0.045 });
-      noise({ start: at + 0.055, length: 0.07, volume: 0.2, type: 'highpass', freq: 3000, attack: 0.012, hold: 0.035 });
-      noise({ start: at + 0.055, length: 0.07, volume: 0.2, type: 'bandpass', freq: 1100, attack: 0.012, hold: 0.035 });
-      noise({ start: at + 0.095, length: 0.2, volume: 0.3, type: 'highpass', freq: 2000, attack: 0.04, hold: 0.06 });
-      noise({ start: at + 0.095, length: 0.26, volume: 0.2, type: 'bandpass', freq: 3600, to: 1900, attack: 0.04, hold: 0.1 });
+      snap(0.35);
     },
+    // The "찰칵" alone, with no "삐빅" before it: for pictures taken one after another
+    // (Euclid's fifteen squares of sky; the user, 2026-10-06: "찰칵만 하고").
+    snap: () => snap(0),
     mission: () => [784, 988, 784, 1175, 1568].forEach((f, i) => bell(f, i * 0.12)),
     complete: () => [523, 659, 784, 1047, 988, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.16, 0.12)),
     // Stopping: "puk", like sinking into a cushion: muffled low noise only, no note.

@@ -1439,12 +1439,27 @@ ${STORY_MORE[target.id]}` : told };
 
   // For testing the opening: wipe the log, the album, the daily record and the first-visit
   // guide (the settings stay) and start again from the first page. Only the maker sees the
-  // button: on the dev server, not on the public site or in the store app.
-  $('testReset').hidden = !isLocalHost(location.hostname);
+  // buttons: on the dev server, not on the public site or in the store app.
+  $('testBar').hidden = !isLocalHost(location.hostname);
   $('testReset').addEventListener('click', () => {
     for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1', 'oddity.told.v1', 'oddity.exo.v1', 'oddity.eclipse.v1']) {
       try { localStorage.removeItem(key); } catch { /* storage shut: nothing to wipe */ }
     }
+    location.reload();
+  });
+  // And its opposite, for testing what comes after: every body found and landed on, every
+  // craft met, every story place been to, every photo mission, note and tour done (the
+  // user, 2026-10-06: "시험용 버튼 옆에 모든 임무 완료 버튼 만들어줘"). The save as it
+  // was is kept under one more key, to be put back by hand if wanted.
+  $('testAll').addEventListener('click', () => {
+    const ids = (list) => list.map((x) => x.id);
+    try {
+      localStorage.setItem('oddity.progress.before-all', localStorage.getItem('oddity.progress.v1') ?? '');
+    } catch { /* storage shut: nothing to keep */ }
+    // (Into the log in hand as well: it is written out again as the page leaves.)
+    progress = { ...progress, discovered: ids(BODIES), landed: ids(BODIES), photos: ids(MISSIONS), stories: ids(STORIES), craft: ids(CRAFT), notes: ids(NOTES), tours: ids(TOURS), tour: null };
+    saveProgress(progress);
+    saveGuideDone();
     location.reload();
   });
 
@@ -1538,7 +1553,7 @@ ${STORY_MORE[target.id]}` : told };
   const gazePieces = () => {
     // The target panel is a name and bare keys (on a wide screen too since v0.1.186).
     const panel = '#targetPanel > *';
-    const all = `#hud header nav button, #hud header .brand, #hud .telemetry, #minimap, #reticle, #markers > *, ${panel}, #hud footer .speedBox, #hud footer .throttle, #hud footer button:not(#gazeButton), #hint, #guide, #toast, #heroSay, #skyTold, #testReset`;
+    const all = `#hud header nav button, #hud header .brand, #hud .telemetry, #minimap, #reticle, #markers > *, ${panel}, #hud footer .speedBox, #hud footer .throttle, #hud footer button:not(#gazeButton), #hint, #guide, #toast, #heroSay, #skyTold, #testBar button`;
     return [...document.querySelectorAll(all)].filter((el) => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden' && Number(getComputedStyle(el).opacity) > 0.02);
   };
   const gazeInk = (pieces, moon, lasts) => {

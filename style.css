@@ -2830,17 +2830,26 @@ html.shell body {
   display:none;
 }
 
-/* TEMPORARY: the test button that wipes every record, in the strip above the top buttons. */
-#testReset[hidden] {
+/* TEMPORARY: the test buttons (wipe every record; mark everything done), side by side in
+   the strip above the top buttons. */
+#testBar[hidden] {
   display:none;
 }
 
-#testReset {
+#testBar {
   position:fixed;
   top:0;
   left:50%;
   transform:translateX(-50%);
   z-index:7;
+  display:flex;
+  gap:8px;
+  pointer-events:none;
+}
+
+#testBar button {
+  flex:none;
+  white-space:nowrap;
   min-height:0;
   height:15px;
   padding:0 10px;
@@ -4550,7 +4559,7 @@ html.gaze #guide,
 html.gaze #toast,
 html.gaze #heroSay,
 html.gaze #skyTold,
-html.gaze #testReset {
+html.gaze #testBar {
   visibility:hidden !important;
 }
 

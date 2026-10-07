@@ -1158,6 +1158,10 @@ const LANDER_STAGE_BUILD = {
   apollo16: apolloCrew('apollo16', (scene, name, mats) => ({
     flag: flagAlone(scene, `${name}Flag`, mats),
     john: astronaut(scene, `${name}John`, mats),
+    // The photograph Duke took of that jump (NASA AS16-113-18339, public/assets/people/
+    // young.jpg): it comes up as a print (the user, 2026-10-07: "그 폴짝 실제 사진을 여기에서
+    // 보여주는건?").
+    photo: printOf(scene, `${name}Photo`, 'people/young.jpg', 0.6),
   })),
   surveyor1: (scene, name, mats) => ({
     pieces: {

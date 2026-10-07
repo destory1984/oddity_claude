@@ -60,6 +60,9 @@ test('what happens after the landing: a golf ball flies, a car drives off, a jum
   // What an astronaut says stands over him, to the right of the lander, not over the lander.
   assert.ok(s('apollo14', 21).say.x > s('apollo14', 21).al.x && s('apollo14', 21).lander.x < -0.5);
   assert.ok(s('apollo16', 20).say.x > s('apollo16', 20).john.x);
+  // The photograph of the jump comes up at its top, over the lander, and stays.
+  assert.ok(!s('apollo16', 18.2).photo.shown && s('apollo16', 20).photo.shown && s('apollo16', 26).photo.scale === 1);
+  assert.ok(s('apollo16', 20).photo.x < 0 && s('apollo16', 20).photo.y + 0.65 <= 1.5);
   assert.ok(s('apollo15', 24).rover.x > s('apollo15', 16).rover.x + 1);
   assert.ok(s('apollo16', 18.25).john.y > 0.3 && s('apollo16', 19.3).john.y === 0 && s('apollo16', 20.35).john.y > 0.3);
   for (const id of ['lunokhod2', 'change3', 'change4', 'zhurong']) {

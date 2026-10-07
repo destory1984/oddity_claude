@@ -92,12 +92,14 @@ export const LANDER_STAGES = {
   // Apollo 16: Orion in the Descartes highlands, and Young's jump with a salute to the flag.
   apollo16: scene('apollo16', {
     seconds: 26, downAt: 10, viewKm: 56, at: [0, 6, 12, 20],
-    sounds: [[6.3, 'landingBurn'], [10, 'landed'], [17.5, 'bounce'], [19.6, 'bounce']],
+    sounds: [[6.3, 'landingBurn'], [10, 'landed'], [17.5, 'bounce'], [18.25, 'shutter'], [19.6, 'bounce']],
     stage(t) {
       return {
         ...apolloLands(t, { downAt: 10, outAt: 11.5 }),
         flag: { x: 0.12, y: 0, shown: t >= 14.5 },
         john: { x: 0.48, y: jump(t, 17.5, 19, 0.32) + jump(t, 19.6, 21.1, 0.32), turn: Math.PI, scale: 1.5, shown: t >= 14 },
+        // Duke's photograph of the jump, taken at its top, comes up over the lander.
+        photo: { x: APOLLO_X - 0.05, y: 0.84, z: -0.2, scale: Math.max(0.01, ease(t, 18.3, 19.1)), shown: t >= 18.3 },
         // Over Young's head (it does not jump with him).
         say: saidBy(t, 17.7, 22.8, 0.48, 0.1, 0.9),
       };

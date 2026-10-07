@@ -29,6 +29,7 @@
 | `public/assets/planets/pluto.jpg` | USGS Astrogeology, Pluto New Horizons 전체 지도(300m/픽셀, 2017년 7월)를 2048×1024로 줄임. 뉴허라이즌스가 찍지 못한 남쪽은 가장자리의 색을 흐리게 이어 붙여 채웠다(`build/fill-map.py`, 실제 지형이 아니다). https://planetarymaps.usgs.gov/mosaic/Pluto_NewHorizons_Global_Mosaic_300m_Jul2017_8bit.tif | 미국 정부 저작물, 저작권 없음 |
 | `public/assets/planets/charon.jpg` | USGS Astrogeology, Charon New Horizons 전체 지도(300m/픽셀, 2017년 7월)를 2048×1024로 줄임. 찍지 못한 남쪽은 가장자리의 색을 흐리게 이어 붙여 채웠다(`build/fill-map.py`, 실제 지형이 아니다). https://planetarymaps.usgs.gov/mosaic/Charon_NewHorizons_Global_Mosaic_300m_Jul2017_8bit.tif | 미국 정부 저작물, 저작권 없음 |
 | `public/assets/people/sagan.jpg` | NASA/JPL, 칼 세이건(1980년, 행성협회를 세우던 날의 사진에서 세이건만 잘라낸 것, 328×448). https://commons.wikimedia.org/wiki/File:Carl_Sagan_Planetary_Society.JPG | 미국 정부 저작물, 저작권 없음 (위키미디어 공용의 표시에 따름). 인물의 초상에 관한 권리는 별개다 |
+| `public/assets/people/young.jpg` | NASA, 아폴로 16호의 존 영이 뛰어오르며 깃발에 경례하는 사진(AS16-113-18339, 1972년 4월 21일, 찰스 듀크 촬영)을 560×560으로 줄임. https://commons.wikimedia.org/wiki/File:John_W._Young_on_the_Moon.jpg | 미국 정부 저작물, 저작권 없음(Public domain). NASA의 사용 지침에 따라 NASA가 이 게임을 보증하는 것처럼 쓰지 않는다. |
 | `src/core/constellations.js` | d3-celestial의 별자리 선과 이름 자료(constellations.lines.json, constellations.json)를 게임용으로 줄인 것. https://github.com/ofrohn/d3-celestial | BSD 3-Clause, Copyright (c) 2015 Olaf Frohn |
 | `@babylonjs/core` (npm) | https://github.com/BabylonJS/Babylon.js | Apache-2.0 |
 

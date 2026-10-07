@@ -1,6 +1,7 @@
 import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, Texture, StandardMaterial, Color3 } from './babylon.js';
 import { t } from '../core/i18n.js';
 import { CRAFT_BUILD } from './craftModels.js';
+import { LANDMARKS } from '../core/landmarkScenes.js';
 import {
   QUARTER, part, cyl, group, aim, box, drum, rod, dish, wing, rtg, nozzle, truss, fuse,
 } from './craftParts.js';
@@ -733,6 +734,11 @@ function card(scene, name, [width, height], [w, h], draw) {
   texture.hasAlpha = true;
   draw(texture.getContext(), w, h);
   texture.update();
+  // (Drawn again when a font it wants has come: redraw below.)
+  root.redraw = () => {
+    draw(texture.getContext(), w, h);
+    texture.update();
+  };
   const material = new StandardMaterial(`${name}Material`, scene);
   material.disableLighting = true;
   material.emissiveTexture = texture;
@@ -783,9 +789,14 @@ function plutoPhoto(scene, name) {
 // What it says, in a bubble with a tail toward the lower left; `tail` 'upRight': toward
 // the upper right (what speaks is above it and to the right); 'downRight': toward the
 // lower right (what speaks is going off to the right).
+// The letters are the game's plain bold ones, not the handwriting of Sora's own bubble:
+// the web fonts come in pieces as they are wanted, and a bubble drawn before its piece
+// had come was in another face than one drawn after (some at the start, the landmarks'
+// when first played). So each bubble is drawn again once its letters' font is in.
+const BUBBLE_FACE = '"Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif';
 export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
   const up = tail === 'upRight';
-  return card(scene, name, [1.0, 0.5], [512, 256], (ctx, w, h) => {
+  const bubble = card(scene, name, [1.0, 0.5], [512, 256], (ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = '#ffffff';
     ctx.strokeStyle = '#1b2440';
@@ -824,7 +835,7 @@ export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
     const fit = (rows, from, least) => {
       let size = from;
       for (;;) {
-        ctx.font = `700 ${size}px "Gaegu", "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif`;
+        ctx.font = `700 ${size}px ${BUBBLE_FACE}`;
         if (size <= least || rows.every((row) => ctx.measureText(row).width <= w - 80)) return size;
         size -= 6;
       }
@@ -863,6 +874,8 @@ export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
     const middle = up ? h - 104 : 104;
     rows.forEach((row, k) => ctx.fillText(row, w / 2, middle + (k - (rows.length - 1) / 2) * (size + 8)));
   });
+  globalThis.document?.fonts?.load(`700 60px ${BUBBLE_FACE}`, words).then(() => bubble.redraw()).catch(() => {});
+  return bubble;
 }
 
 // Nuri in the pieces that go their own ways (core/moonScenes.js PLACE_STAGES.naro), each
@@ -975,7 +988,84 @@ function dokdoPieces(scene, name) {
   };
 }
 
+// A picture that stands in a stage, as `drawing` above, but white-framed like a print and
+// fetched only when it is first shown (forty of them at the start would be 2 MB).
+function printOf(scene, name, file, size) {
+  const root = new TransformNode(name, scene);
+  const material = new StandardMaterial(`${name}Material`, scene);
+  material.disableLighting = true;
+  material.diffuseColor = new Color3(0, 0, 0);
+  material.specularColor = new Color3(0, 0, 0);
+  material.emissiveColor = new Color3(0.12, 0.13, 0.18);
+  material.backFaceCulling = false;
+  const paper = new StandardMaterial(`${name}Paper`, scene);
+  paper.disableLighting = true;
+  paper.diffuseColor = new Color3(0, 0, 0);
+  paper.specularColor = new Color3(0, 0, 0);
+  paper.emissiveColor = new Color3(0.96, 0.95, 0.9);
+  paper.backFaceCulling = false;
+  const sheet = CreatePlane(`${name}Sheet`, { width: size * 1.08, height: size * 1.08 }, scene);
+  sheet.parent = root;
+  sheet.material = paper;
+  sheet.position.set(0, size * 0.54, 0.004);
+  sheet.isPickable = false;
+  const plane = CreatePlane(`${name}Plane`, { width: size, height: size }, scene);
+  plane.parent = root;
+  plane.material = material;
+  plane.position.y = size * 0.54;
+  plane.isPickable = false;
+  root.onEnabledStateChangedObservable.add((on) => {
+    if (!on || material.emissiveTexture) return;
+    const texture = new Texture(`${import.meta.env.BASE_URL}assets/${file}`, scene, true, true);
+    texture.wrapU = Texture.CLAMP_ADDRESSMODE;
+    texture.wrapV = Texture.CLAMP_ADDRESSMODE;
+    material.emissiveTexture = texture;
+    material.emissiveColor = new Color3(0, 0, 0);
+  });
+  return root;
+}
+// Which model stands for the craft that took a landmark's picture: its own where the
+// game has one, else the orbiter of that world, else a Voyager. (Lunar Orbiter 2 is
+// drawn as the Lunar Reconnaissance Orbiter: a small craft far off, told by its name.)
+function probeFor(by, body) {
+  const known = [['Voyager', 'voyager1'], ['Cassini', 'cassini'], ['New Horizons', 'newHorizons'], ['Juno', 'juno'], ['Reconnaissance', body === 'mars' ? 'mro' : 'lro'], ['Danuri', 'danuri']];
+  const own = known.find(([word]) => by.includes(word));
+  if (own) return own[1];
+  return body === 'moon' ? 'lro' : body === 'mars' ? 'mro' : 'voyager1';
+}
+// The pieces of a landmark's scene (core/landmarkStages.js): what flies or falls, the
+// flash, the picture, and what is said. `lazy`: built when the scene is first played.
+const landmarkPieces = (id, { kind, by, body, say }) => {
+  const build = (scene, name, mats) => {
+    const pieces = { photo: printOf(scene, `${name}Photo`, `stories/${id}.jpg`, 1.05) };
+    if (kind !== 'look') {
+      const flash = new TransformNode(`${name}Flash`, scene);
+      part(CreateSphere(`${name}FlashBall`, { diameter: 1, segments: 14 }, scene), flash, mats.white, [0, 0, 0]);
+      pieces.flash = flash;
+    }
+    if (kind === 'photo') pieces.probe = CRAFT_BUILD[probeFor(by, body)](scene, `${name}Probe`, mats);
+    if (kind === 'impact') {
+      const rock = new TransformNode(`${name}Rock`, scene);
+      if (by) {
+        // A craft that hit: a foil box with its panels.
+        box(scene, `${name}RockBody`, rock, mats.goldFoil, [0.2, 0.2, 0.2], [0, 0.1, 0]);
+        for (const s of [-1, 1]) box(scene, `${name}RockWing${s}`, rock, mats.cells, [0.3, 0.012, 0.14], [s * 0.26, 0.1, 0]);
+      } else {
+        sphere(scene, `${name}RockBall`, rock, mats.dark, 0.4, [0, 0.2, 0], [1, 0.82, 0.9]);
+        sphere(scene, `${name}RockLump`, rock, mats.grey, 0.22, [0.1, 0.3, 0.05]);
+      }
+      pieces.rock = fuse(scene, rock);
+      pieces.scraps = scraps(scene, `${name}Scraps`, mats, mats.grey);
+    }
+    if (say) pieces.bubble = sayBubble(scene, `${name}Bubble`, say);
+    return { pieces, flames: {}, lit: pieces.flash ? ['flash'] : [] };
+  };
+  build.lazy = true;
+  return build;
+};
+
 const MOON_STAGES = {
+  ...Object.fromEntries(Object.entries(LANDMARKS).map(([id, def]) => [id, landmarkPieces(id, def)])),
   naro: nuriPieces,
   tanegashima: rocketPieces('h2a'),
   wenchang: rocketPieces('cz5'),

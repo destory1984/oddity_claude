@@ -170,23 +170,37 @@ export function createSiteModels(scene, siteList) {
     }
     return say;
   };
+  // A stage: pieces under one root, which is placed and sized as any model is; the scene
+  // says where each stands at each moment (core/moonScenes.js). A piece that burns has a
+  // flame under it.
+  const stageOf = (id, build, options) => {
+    const root = new TransformNode(`then_${id}`, scene);
+    root.rotationQuaternion = new Quaternion();
+    const parts = build(scene, `then_${id}`, mats, options);
+    const flames = {};
+    for (const [name, piece] of Object.entries(parts.pieces)) {
+      piece.parent = root;
+      const spec = parts.flames?.[name];
+      if (spec) flames[name] = drum(scene, `then_${id}_${name}_flame`, piece, flameMaterial, { height: spec[3], diameterTop: spec[4] * 0.25, diameterBottom: spec[4], tessellation: 12 }, [spec[0], spec[1] - spec[3] / 2, spec[2]]);
+    }
+    for (const name of parts.lit ?? []) for (const mesh of parts.pieces[name].getChildMeshes()) mesh.material = flashMaterial;
+    root.setEnabled(false);
+    return { node: root, flame: null, cords: null, stage: { pieces: parts.pieces, flames } };
+  };
+  // Stages built only when their scene is first played (the landmarks': forty-one of
+  // them, each with a bubble's canvas, would weigh on a phone for nothing).
+  const waiting = new Map();
+  const thenOf = (id) => {
+    if (!then.has(id) && waiting.has(id)) {
+      then.set(id, waiting.get(id)());
+      waiting.delete(id);
+    }
+    return then.get(id);
+  };
   for (const [id, [build, options, coming = 'flame', flameY = -0.06]] of Object.entries(SITE_REPLAY_BUILD)) {
     if (coming === 'stage') {
-      // Pieces under one root, which is placed and sized as any model is; the scene
-      // says where each stands at each moment (core/moonScenes.js). A piece that burns
-      // has a flame under it.
-      const root = new TransformNode(`then_${id}`, scene);
-      root.rotationQuaternion = new Quaternion();
-      const parts = build(scene, `then_${id}`, mats, options);
-      const flames = {};
-      for (const [name, piece] of Object.entries(parts.pieces)) {
-        piece.parent = root;
-        const spec = parts.flames?.[name];
-        if (spec) flames[name] = drum(scene, `then_${id}_${name}_flame`, piece, flameMaterial, { height: spec[3], diameterTop: spec[4] * 0.25, diameterBottom: spec[4], tessellation: 12 }, [spec[0], spec[1] - spec[3] / 2, spec[2]]);
-      }
-      for (const name of parts.lit ?? []) for (const mesh of parts.pieces[name].getChildMeshes()) mesh.material = flashMaterial;
-      root.setEnabled(false);
-      then.set(id, { node: root, flame: null, cords: null, stage: { pieces: parts.pieces, flames } });
+      if (build.lazy) waiting.set(id, () => stageOf(id, build, options));
+      else then.set(id, stageOf(id, build, options));
       continue;
     }
     if (coming === 'launch') {
@@ -372,13 +386,13 @@ export function createSiteModels(scene, siteList) {
       const card = cards.get(site.id);
       // (A drawn place whose day is being played: the stage has the drawing as one of
       // its pieces, and the card waits.)
-      if (card && replay?.id === site.id && then.has(site.id)) card.hide();
+      if (card && replay?.id === site.id && (then.has(site.id) || waiting.has(site.id))) card.hide();
       else if (card) {
         card.update(site, bodies.find((b) => b.id === site.parent), bodies.find((b) => b.kind === 'star'), position);
         continue;
       }
       const now = nodes.get(site.id);
-      const old = replay?.id === site.id && !replay.open ? then.get(site.id) : null;
+      const old = replay?.id === site.id && !replay.open ? thenOf(site.id) : null;
       if (!now && !old) continue;
       if (old && now) now.setEnabled(false);
       const node = old ? old.node : now;

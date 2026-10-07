@@ -1,5 +1,6 @@
 import { t } from './i18n.js';
 import { MOON_SCENES, APOLLO11, PLACE_STAGES } from './moonScenes.js';
+import { LANDMARK_SCENES } from './landmarkScenes.js';
 import { CRAFT_SCENES } from './craftScenes.js';
 // "그날로": at a story place, the day it is known for is played again in the close
 // view. The model that stands there comes down as it did, and a few lines tell what
@@ -232,6 +233,8 @@ export const REPLAYS = {
   },
   // Stages that are not on the Moon: Pluto's heart, Nuri leaving Naro.
   ...PLACE_STAGES,
+  // The landmarks: a picture taken, a look through a telescope, or what made the place.
+  ...LANDMARK_SCENES,
   // Eight on the Moon, each a stage of pieces (core/moonScenes.js).
   ...MOON_SCENES,
   // At a craft, while docked with it: its parts unfold (core/craftScenes.js).

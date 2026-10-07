@@ -26,8 +26,8 @@ test('every scene belongs to a story place on a surface and tells its lines in o
 });
 
 test('a place with no scene has none', () => {
-  assert.equal(replayFor('tycho'), null);
-  assert.equal(replayFrame('tycho', 3), null);
+  assert.equal(replayFor('hexagon'), null);
+  assert.equal(replayFrame('hexagon', 3), null);
   assert.equal(replayFor('apollo11').day, '1969년 7월 20일');
 });
 
@@ -101,7 +101,7 @@ test('Curiosity has a scene of its own day, told in four lines', () => {
   assert.equal(replayFor('curiosity').day, '2012년 8월 6일');
   assert.equal(replayFor('curiosity').lines.length, 4);
   assert.match(replayFrame('curiosity', 17).text, /게일 분화구/);
-  assert.equal(Object.keys(REPLAYS).length, 47);
+  assert.equal(Object.keys(REPLAYS).length, 88);
   assert.equal(replayFor('viking1').day, '1976년 7월 20일');
   assert.match(replayFrame('viking1', 17).text, /25초/);
 });

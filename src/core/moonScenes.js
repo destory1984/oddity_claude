@@ -602,6 +602,7 @@ export const PLACE_STAGES = {
         fairingLeft: { ...half(-1), x: 0.16 + half(-1).x, y: 0.2 + half(-1).y },
         fairingRight: { ...half(1), x: 0.16 + half(1).x, y: 0.2 + half(1).y },
         satellite: { x: 0.16 + top.x + 0.05 * free, y: 0.2 + top.y + 0.02 * free, lean: top.lean, shown: s >= 12 },
+        say: said(t, 33.5, 38.5, 0.6, 1.25, 1.3),
       };
     },
   },

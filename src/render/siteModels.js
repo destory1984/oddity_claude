@@ -914,6 +914,10 @@ function nuriPieces(scene, name, mats) {
       fairingLeft: halves[0],
       fairingRight: halves[1],
       satellite: fuse(scene, satellite),
+      // The satellite's first call, to the station in Antarctica that heard it first (the
+      // user, 2026-10-07, of five lines offered: "5"). It has left the view by then: the
+      // bubble's tail points up after it.
+      say: sayBubble(scene, `${name}Say`, t('세종기지야. 내 목소리 들려?'), { tail: 'upRight' }),
     },
     flames: { first: [0, -0.04, 0, 0.42, 0.12], second: [0, -0.02, 0, 0.3, 0.1], third: [0, -0.01, 0, 0.18, 0.06] },
   };

@@ -206,8 +206,18 @@ export const GANYMEDE_AURORA_VIEW = {
   forward: [-0.6346, -0.6074, -0.478],
   up: [-0.3721, 0.7821, -0.4998],
 };
+// Mars's: where the user stood (2026-10-08, sent to the place in its southern ring:
+// "여기"): on the equator's side of the ring (52 degrees south) at 46.2 degrees south,
+// 98 km over the ground, 48 degrees round from midnight, looking toward the pole: the
+// green rays stand before her, the Milky Way and a red nebula over them.
+export const MARS_AURORA_VIEW = {
+  body: 'mars',
+  position: [-0.4779, -0.7422, -0.5288],
+  forward: [0.0005, -0.8444, 0.5357],
+  up: [-0.4482, -0.4791, -0.7547],
+};
 // (The places the user or I stood at or chose are kept as they are.)
-export const AURORA_VIEWS = { ...drawn, earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW, uranus: URANUS_AURORA_VIEW, neptune: NEPTUNE_AURORA_VIEW, ganymede: GANYMEDE_AURORA_VIEW };
+export const AURORA_VIEWS = { ...drawn, earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW, uranus: URANUS_AURORA_VIEW, neptune: NEPTUNE_AURORA_VIEW, ganymede: GANYMEDE_AURORA_VIEW, mars: MARS_AURORA_VIEW };
 
 // Where that is now: { position, up, facing }, as homeSpot gives.
 export function auroraSpot(body, sunPosition, view = AURORA_VIEW) {

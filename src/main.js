@@ -81,7 +81,7 @@ import { replayFor, replayFrame, replaySounds, replayOn, replayBeside } from './
 import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from './core/visit.js';
-import { HOME, homeSpot, startHome, homeStep, homeArrived } from './core/home.js';
+import { HOME, homeSpot, auroraSpot, startHome, homeStep, homeArrived } from './core/home.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -1044,6 +1044,14 @@ ${STORY_MORE[target.id]}` : told };
   // What is left unnamed while she is at the other star: everything at home but the Sun.
   const homeIds = [...BODIES.filter((b) => b.kind !== 'star').map((b) => b.id), ...craft.map((c) => c.id), ...sites.map((s) => s.id)];
 
+  function goHome(aurora) {
+    if (photo.active() || warp.busy() || paused || (docked && !isDocked(docked)) || (visit && !hasArrived(visit))) return;
+    if (docked) undock();
+    visit = null;
+    const earth = here(HOME.body);
+    home = { ...startHome(state, earth, aurora ? auroraSpot(earth, here('sun').position) : homeSpot(earth, simTime)), aurora };
+    input.clear();
+  }
   const hud = createHud([...BODIES, ...exoBodiesAt(0), ...craft, ...sites, ...(eventPlace ? [eventPlace] : [])], {
     skyLabels: skyLabels(),
     onSelect: selectBody,
@@ -1051,12 +1059,11 @@ ${STORY_MORE[target.id]}` : told };
     // The key on Earth's name plate: from wherever she is, round the globe to the place
     // over Korea (core/home.js).
     onHome() {
-      if (photo.active() || warp.busy() || paused || (docked && !isDocked(docked)) || (visit && !hasArrived(visit))) return;
-      if (docked) undock();
-      visit = null;
-      const earth = here(HOME.body);
-      home = startHome(state, earth, homeSpot(earth, simTime));
-      input.clear();
+      goHome(false);
+    },
+    // The key before it: to the place in the aurora, on the night side.
+    onAurora() {
+      goHome(true);
     },
     onInspect() {
       const body = here(selectedId);
@@ -1938,13 +1945,16 @@ ${STORY_MORE[target.id]}` : told };
       if (!paused && wantsToLeave(intent)) home = null;
       else if (dt > 0) {
         const earth = here(HOME.body);
+        // (The place in the aurora does not turn with the ground: there she is let go
+        // on getting there.)
         const went = homeStep(state, home, dt, {
-          spot: homeSpot(earth, simTime),
+          spot: home.aurora ? auroraSpot(earth, here('sun').position) : homeSpot(earth, simTime),
           body: earth,
-          spun: spinOf(HOME.body, simTime) - spinOf(HOME.body, simTime - dt * TIME_SCALE),
+          spun: home.aurora ? 0 : spinOf(HOME.body, simTime) - spinOf(HOME.body, simTime - dt * TIME_SCALE),
         });
         ({ state, home } = went);
-        if (went.arrived) toast.show(t('한국이 내려다보이는 자리입니다. 움직이면 풀려납니다.'));
+        if (went.arrived) toast.show(home.aurora ? t('오로라 속입니다. 빛줄기 뒤로 별이 보입니다.') : t('한국이 내려다보이는 자리입니다. 움직이면 풀려납니다.'));
+        if (went.arrived && home.aurora) home = null;
       }
     }
     const slowPoints = craft.map((c) => c.position);
@@ -2460,7 +2470,7 @@ ${STORY_MORE[target.id]}` : told };
     else if (docked) flightLabel = t`${here(docked.id).name}${withParticle(here(docked.id).name)} 함께 비행`;
     else if (visit && !hasArrived(visit)) flightLabel = t`${here(visit.id).name}에 착륙 중`;
     else if (visit) flightLabel = t`${here(visit.id).name} 곁`;
-    else if (home) flightLabel = homeArrived(home) ? t('한국 하늘 위') : t('한국 하늘로 가는 중');
+    else if (home) flightLabel = home.aurora ? t('오로라 자리로 가는 중') : homeArrived(home) ? t('한국 하늘 위') : t('한국 하늘로 가는 중');
     else if (state.restingOn) flightLabel = t`${bodyById(state.restingOn).name} 표면`;
     else if (shownSpeed() < 0.01) flightLabel = t('정지 비행');
     else if (!driving) flightLabel = t('관성 비행');

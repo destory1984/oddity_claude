@@ -94,3 +94,33 @@ export function homeStep(state, home, dt, { spot, body, spun }) {
   const orientation = arrived ? spot.facing : multiply(turnAboutY(spun), state.orientation);
   return { state: { ...stopNow(state), restingOn: null, position: spot.position, orientation }, home: next, arrived };
 }
+
+// The aurora key, beside the home key: to the place the user flew to and said "누르면
+// 지금 위치로 오게 해줘" of (2026-10-07). She stands inside the northern curtain on the
+// night side, 235 km up at 67 degrees north, and looks along it with the rays standing
+// tall to her right and the stars behind (that evening Perseus and the Pleiades). The
+// Sun is behind her and out of the view. Kept as she stood to the Sun, not to the
+// ground or the stars: the aurora shows on the night side only, and the night side goes
+// round the year. Each of the three is [toward the Sun along the equator's plane, north,
+// the third way (north x Sun)], the place in Earth radii from the centre.
+export const AURORA_VIEW = {
+  body: 'earth',
+  position: [-0.2387, 0.9547, -0.3265],
+  forward: [-0.5564, 0.1373, 0.8195],
+  up: [-0.2116, 0.9303, -0.2995],
+};
+
+// Where that is now: { position, up, facing }, as homeSpot gives.
+export function auroraSpot(body, sunPosition, view = AURORA_VIEW) {
+  const toSun = sub(sunPosition, body.position);
+  const flat = Math.hypot(toSun[0], toSun[2]) || 1;
+  const s = [toSun[0] / flat, 0, toSun[2] / flat];
+  const e = [s[2], 0, -s[0]];
+  const world = ([a, b, c]) => [a * s[0] + c * e[0], b, a * s[2] + c * e[2]];
+  const out = world(view.position);
+  return {
+    position: body.position.map((n, i) => n + out[i] * body.radiusKm),
+    up: unit(out),
+    facing: orientationFrom(world(view.forward), world(view.up)),
+  };
+}

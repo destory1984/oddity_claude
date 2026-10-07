@@ -5224,7 +5224,8 @@ html.gaze #gazeButton {
 
 /* The way home: a small key at the right end of Earth's name plate (the user, 2026-10-07,
    with a ring drawn there: "지구일 때에는 저 위치에 home 버튼"). */
-#hud #targetPanel #targetName #homeButton {
+#hud #targetPanel #targetName #homeButton,
+#hud #targetPanel #targetName #auroraButton {
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -5243,4 +5244,14 @@ html.gaze #gazeButton {
   font-size:0;
   vertical-align:middle;
   cursor:pointer;
+}
+
+/* Two keys now, the aurora's and home's (the user, 2026-10-07: "지구 버튼과 홈 아이콘 사이에
+   오로라 아이콘"): the first is pushed to the right end, the second follows it. */
+#hud #targetPanel #targetName #auroraButton {
+  margin:0 0 0 auto;
+}
+
+#hud #targetPanel #targetName #homeButton {
+  margin:0 -4px 0 0;
 }

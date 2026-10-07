@@ -30,7 +30,7 @@ function fitName() {
   plate.style.width = `${count * step - (step - key)}px`;
 }
 
-export function createHud(bodies, { onSelect, onFace, onInspect, onHome, skyLabels = [] }) {
+export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAurora, skyLabels = [] }) {
   // The way home (core/home.js): a key that stands at the end of the name plate while
   // Earth is the one chosen. Writing another name into the plate takes it out again.
   const homeKey = $('homeButton');
@@ -39,6 +39,14 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, skyLabe
   homeKey.addEventListener('click', (event) => {
     event.stopPropagation();
     onHome?.();
+  });
+  // ...and before it the key to the place in the aurora.
+  const auroraKey = $('auroraButton');
+  auroraKey.hidden = false;
+  auroraKey.remove();
+  auroraKey.addEventListener('click', (event) => {
+    event.stopPropagation();
+    onAurora?.();
   });
   window.addEventListener('resize', fitName);
   document.fonts?.ready.then(fitName);
@@ -132,7 +140,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, skyLabe
   return {
     showSelection(body) {
       $('targetName').innerHTML = `${body.name} <small>${body.nameEn}</small>`;
-      if (body.id === 'earth') $('targetName').append(homeKey);
+      if (body.id === 'earth') $('targetName').append(auroraKey, homeKey);
       fitName();
       $('faceTarget').textContent = t`${body.name} 바라보기`;
       // The button shows a picture only: its words are its name and its tip.

@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-07', text: t('배경 음악이 스무 곡으로 늘었습니다. 눈송이, 등불, 달빛 왈츠 같은 아홉 곡이 새로 흐릅니다.') },
   { day: '2026-10-07', text: t('지구 오로라 곁에 스티브, 자개구름, 맥동 오로라가 생겼고, 짙은 밤에는 꼭대기가 붉어집니다.') },
   { day: '2026-10-07', text: t('소행성이나 탐사선이 떨어지는 장면에서, 말하는 것이 화면에 보일 때 말풍선이 뜹니다.') },
   { day: '2026-10-07', text: t('지도에서 고르기 화면이 남색과 금빛으로 바뀌었습니다. 둘레에 별이 반짝이고 혜성이 지나갑니다.') },

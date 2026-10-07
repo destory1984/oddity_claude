@@ -1,7 +1,7 @@
 import { t } from './i18n.js';
 // Background music, decided here and played by ui/sound.js. No sound files: a slow pad
 // of three notes per bar under a few bell notes, different every bar but always the
-// same for a given bar number. Eleven tunes take turns, each with its own four chords,
+// same for a given bar number. Twenty tunes take turns, each with its own four chords,
 // five-note scale, beat and bell.
 
 export const BAR_S = 8;
@@ -126,6 +126,86 @@ export const TUNES = [
     slots: [0, 1.33, 2.67, 4, 5.33, 6.67], busy: 0.62,
     bell: { length: 1.1, overtone: 2, overtoneVolume: 0.22 },
     motif: [0, 2, 4, 1, 3, 5, 2, 4, 6, 4, 2, 1],
+  },
+  // The nine below made it twenty (the user, 2026-10-07: "BGM 더 넣자. 20개 채워").
+  {
+    // A major, high and thin, with gaps: snow coming down.
+    id: 'snow', name: t('눈송이'),
+    chords: [chord('A2', 'A3', 'C#4', 'E4'), chord('F#2', 'F#3', 'A3', 'C#4'), chord('D2', 'A3', 'D4', 'F#4'), chord('E2', 'G#3', 'B3', 'E4')],
+    melody: scale('A4 B4 C#5 E5 F#5 A5 B5 C#6'),
+    slots: [0, 1, 2.5, 4, 5, 6.5], busy: 0.42,
+    bell: { length: 1.5, overtone: 4, overtoneVolume: 0.1 },
+  },
+  {
+    // E dorian, low and warm, a small figure that turns back on itself.
+    id: 'lantern', name: t('등불'),
+    chords: [chord('E2', 'G3', 'B3', 'E4'), chord('A2', 'A3', 'C#4', 'E4'), chord('D2', 'A3', 'D4', 'F#4'), chord('B2', 'F#3', 'B3', 'D4')],
+    melody: scale('E4 F#4 A4 B4 D5 E5 F#5 A5'),
+    slots: [0, 2, 3, 4, 6, 7], busy: 0.55,
+    bell: { length: 2.0, overtone: 2, overtoneVolume: 0.22 },
+    motif: [0, 3, 2, 4, 3, 5, 4, 2],
+  },
+  {
+    // G minor in threes: a slow waltz.
+    id: 'waltz', name: t('달빛 왈츠'),
+    chords: [chord('G2', 'G3', 'Bb3', 'D4'), chord('Eb2', 'G3', 'Bb3', 'Eb4'), chord('Bb2', 'Bb3', 'D4', 'F4'), chord('D2', 'A3', 'D4', 'F#4')],
+    melody: scale('G4 Bb4 C5 D5 F5 G5 Bb5 C6'),
+    slots: [0, 1.33, 2.67, 4, 5.33, 6.67], busy: 0.55,
+    bell: { length: 1.4, overtone: 3, overtoneVolume: 0.15 },
+    motif: [4, 3, 1, 2, 4, 5, 7, 5, 4, 2, 3, 1],
+  },
+  {
+    // F major, plucked and quick: a walk across a field.
+    id: 'meadow', name: t('풀밭'),
+    chords: [chord('F2', 'A3', 'C4', 'F4'), chord('C3', 'G3', 'C4', 'E4'), chord('D2', 'A3', 'D4', 'F4'), chord('Bb2', 'Bb3', 'D4', 'F4')],
+    melody: scale('F4 G4 A4 C5 D5 F5 G5 A5'),
+    slots: [0, 0.5, 1, 2, 3, 4, 4.5, 5, 6, 7], busy: 0.4,
+    bell: { length: 0.9, overtone: 2, overtoneVolume: 0.25, wave: 'triangle' },
+    motif: [0, 2, 4, 3, 2, 4, 5, 7, 5, 4, 2, 1],
+  },
+  {
+    // A minor: all the way up the scale and all the way down, as the tide comes in.
+    id: 'tide', name: t('밀물'),
+    chords: [chord('A2', 'A3', 'C4', 'E4'), chord('E2', 'G3', 'B3', 'E4'), chord('F2', 'A3', 'C4', 'F4'), chord('G2', 'G3', 'B3', 'D4')],
+    melody: scale('E4 G4 A4 C5 D5 E5 G5 A5'),
+    slots: [0, 1, 2, 3, 4, 5, 6, 7], busy: 0.5,
+    bell: { length: 2.2, overtone: 2, overtoneVolume: 0.15 },
+    motif: [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1],
+  },
+  {
+    // C major, a short bright bell on every beat, always coming back to the same note.
+    id: 'clock', name: t('시계탑'),
+    chords: [chord('C3', 'G3', 'C4', 'E4'), chord('G2', 'G3', 'B3', 'D4'), chord('A2', 'A3', 'C4', 'E4'), chord('F2', 'A3', 'C4', 'F4')],
+    melody: scale('G4 A4 C5 D5 E5 G5 A5 C6'),
+    slots: [0, 1, 2, 3, 4, 5, 6, 7], busy: 0.6,
+    bell: { length: 0.8, overtone: 5, overtoneVolume: 0.12 },
+    motif: [2, 4, 2, 5, 2, 6, 3, 0],
+  },
+  {
+    // E minor, plucked, in pairs with a gap: sparks from a fire.
+    id: 'campfire', name: t('모닥불'),
+    chords: [chord('E2', 'G3', 'B3', 'E4'), chord('D2', 'A3', 'D4', 'F#4'), chord('C3', 'G3', 'C4', 'E4'), chord('B2', 'F#3', 'B3', 'D4')],
+    melody: scale('B4 D5 E5 F#5 G5 B5 D6 E6'),
+    slots: [0, 1.5, 2, 3.5, 4, 5.5, 6, 7], busy: 0.45,
+    bell: { length: 1.2, overtone: 3, overtoneVolume: 0.18, wave: 'triangle' },
+    motif: [1, 2, 4, 2, 1, 0, 2, 4, 5, 4, 2, 0],
+  },
+  {
+    // E flat major, long notes far apart, the longest ring of all.
+    id: 'galaxy', name: t('은하수'),
+    chords: [chord('Eb2', 'G3', 'Bb3', 'Eb4'), chord('C3', 'G3', 'C4', 'Eb4'), chord('Ab2', 'Ab3', 'C4', 'Eb4'), chord('Bb2', 'Bb3', 'D4', 'F4')],
+    melody: scale('Bb4 C5 Eb5 F5 G5 Bb5 C6 Eb6'),
+    slots: [0, 1, 3, 4, 5, 7], busy: 0.5,
+    bell: { length: 2.8, overtone: 2, overtoneVolume: 0.12 },
+  },
+  {
+    // F sharp minor, high: two quick notes and a wait, lights going on and off.
+    id: 'firefly', name: t('반딧불'),
+    chords: [chord('F#2', 'F#3', 'A3', 'C#4'), chord('D2', 'A3', 'D4', 'F#4'), chord('A2', 'A3', 'C#4', 'E4'), chord('E2', 'G#3', 'B3', 'E4')],
+    melody: scale('C#5 E5 F#5 A5 B5 C#6 E6 F#6'),
+    slots: [0, 0.3, 1.5, 3, 3.3, 4.5, 6, 6.3], busy: 0.38,
+    bell: { length: 0.8, overtone: 3, overtoneVolume: 0.2 },
+    motif: [5, 4, 2, 4, 5, 7, 6, 4, 2, 1, 2, 4],
   },
 ];
 

@@ -16,17 +16,20 @@ test('a bar lasts eight seconds and the four chords come round in order', () => 
   assert.deepEqual(MELODY, [440, 523.25, 587.33, 659.26, 783.99, 880, 1046.5, 1174.66]);
 });
 
-test('eleven tunes take turns, sixteen bars each, and come round again', () => {
-  assert.equal(TUNES.length, 11);
+test('twenty tunes take turns, sixteen bars each, and come round again', () => {
+  assert.equal(TUNES.length, 20);
   assert.equal(BARS_PER_TUNE, 16);
-  assert.deepEqual(TUNES.map((t) => t.name), ['오르골', '새벽', '먼 바다', '자장가', '별무리', '깊은 밤', '유영', '빗방울', '가야금', '오로라', '회전목마']);
-  assert.equal(new Set(TUNES.map((t) => t.id)).size, 11);
+  assert.deepEqual(TUNES.map((t) => t.name), ['오르골', '새벽', '먼 바다', '자장가', '별무리', '깊은 밤', '유영', '빗방울', '가야금', '오로라', '회전목마',
+    '눈송이', '등불', '달빛 왈츠', '풀밭', '밀물', '시계탑', '모닥불', '은하수', '반딧불']);
+  assert.equal(new Set(TUNES.map((t) => t.id)).size, 20);
   assert.equal(tuneFor(0).id, 'box');
   assert.equal(tuneFor(15).id, 'box');
   assert.equal(tuneFor(16).id, 'dawn');
   assert.equal(tuneFor(6 * 16 - 1).id, 'night');
   assert.equal(tuneFor(6 * 16).id, 'drift');
-  assert.equal(tuneFor(BARS - 1).id, 'carousel');
+  assert.equal(tuneFor(10 * 16).id, 'carousel');
+  assert.equal(tuneFor(11 * 16).id, 'snow');
+  assert.equal(tuneFor(BARS - 1).id, 'firefly');
   assert.equal(tuneFor(BARS).id, 'box');
   // Skipping ahead lands on the first bar of the following tune.
   assert.equal(nextTuneBar(0), 16);
@@ -57,7 +60,7 @@ test('every tune has four chords, eight melody notes of its own and a bell', () 
 
 test('a tune with a figure walks along it; the notes of a bar are not all the same', () => {
   const withFigure = TUNES.filter((t) => t.motif);
-  assert.deepEqual(withFigure.map((t) => t.id), ['drift', 'gayageum', 'aurora', 'carousel']);
+  assert.deepEqual(withFigure.map((t) => t.id), ['drift', 'gayageum', 'aurora', 'carousel', 'lantern', 'waltz', 'meadow', 'tide', 'clock', 'campfire', 'firefly']);
   for (const tune of withFigure) {
     assert.ok(tune.motif.length >= 8 && tune.motif.every((n) => Number.isInteger(n) && n >= 0 && n < 8), tune.id);
     // Neighbours in the figure are never the same note twice.
@@ -131,7 +134,7 @@ test('each sitting the tunes go round in a chance order, every tune once a round
   for (let k = 0; k < 200; k++) firsts.add(tuneOrder()[0]);
   assert.ok(firsts.size >= 8, `${firsts.size}`);
 
-  const order = [3, 0, 10, 1, 2, 4, 5, 6, 7, 8, 9];
+  const order = [3, 0, 10, 1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19];
   assert.equal(tuneFor(barInOrder(0, order)).id, TUNES[3].id);
   assert.equal(tuneFor(barInOrder(15, order)).id, TUNES[3].id);
   assert.equal(tuneFor(barInOrder(16, order)).id, TUNES[0].id);

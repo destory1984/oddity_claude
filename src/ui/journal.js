@@ -34,7 +34,7 @@ function picture(file, alt, className = '') {
 const CLIPPING = t('1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.');
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, sky = null, exo = null }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, views = null, sky = null, exo = null }) {
   const dialog = $('journal');
 
   $('journalButton').addEventListener('click', () => open());
@@ -528,6 +528,38 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     }
   }
 
+  // Picture postcards and the round of the auroras (core/viewCards.js).
+  // views: { cards(): [{ id, name, file, got }], round(): { stood, of, done, stamp, names } }.
+  function renderViews() {
+    const list = $('journalViews');
+    const line = $('journalRound');
+    list.replaceChildren();
+    line.replaceChildren();
+    if (!views) return;
+    const round = views.round();
+    const words = document.createElement('span');
+    words.textContent = t`오로라 순례 ${round.stood}/${round.of}: ${round.names.map((n) => `${n.stood ? '✓' : '○'} ${n.name}`).join('  ')}`;
+    line.append(words);
+    if (round.done) line.append(picture(round.stamp, t('오로라 순례 도장'), 'stamp'));
+    line.classList.toggle('done', round.done);
+    const cards = views.cards();
+    $('journalViewsCount').textContent = `${cards.filter((card) => card.got).length}/${cards.length}`;
+    for (const card of cards) {
+      const li = document.createElement('li');
+      li.className = card.got ? 'got' : '';
+      const name = document.createElement('span');
+      name.textContent = card.name;
+      if (card.got) li.append(picture(card.file, card.name), name);
+      else {
+        const blank = document.createElement('i');
+        blank.textContent = '?';
+        blank.setAttribute('aria-label', t('아직 얻지 못한 엽서'));
+        li.append(blank, name);
+      }
+      list.append(li);
+    }
+  }
+
   function open() {
     if (dialog.open) return;
     onOpen();
@@ -539,6 +571,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     renderCraft();
     renderTours();
     renderStunts();
+    renderViews();
     renderAlbum();
     dialog.showModal();
     showTab(tab);

@@ -33,7 +33,7 @@ import {
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
-  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, saveResume, takeResume, loadStunts, saveStunts, loadFeel, saveFeel, loadExo, saveExo, loadEclipses, saveEclipses,
+  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, saveResume, takeResume, loadStunts, saveStunts, loadViews, saveViews, loadFeel, saveFeel, loadExo, saveExo, loadEclipses, saveEclipses,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
@@ -83,6 +83,7 @@ import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from './core/visit.js';
 import { HOME, homeSpot, auroraSpot, AURORA_VIEWS, startHome, homeStep, homeArrived } from './core/home.js';
 import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
+import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -378,6 +379,8 @@ let daily = loadDaily();
 // Stunt flights (core/stunts.js): the best of each, the one under way, and whether a
 // jump happened since the last frame (a jump starts a stunt over).
 let stuntRecords = loadStunts();
+// The picture postcards got and the auroras stood in (core/viewCards.js).
+let views = loadViews();
 let stunt = null;
 let stuntJumped = false;
 // A ring plane crossed last frame ({ body, t }), for the stunt through the gap.
@@ -1277,6 +1280,29 @@ ${STORY_MORE[target.id]}` : told };
       jump: true,
     };
   }
+  // She has come to the place of a name plate's key: a picture postcard the first time,
+  // and in an aurora her hands go together; the eighth aurora ends the round with its
+  // stamp (core/viewCards.js).
+  function reachedKey(kind, bodyId) {
+    if (kind === 'aurora') {
+      seeKind = 'aurora';
+      seeUntil = performance.now() + SEE_S * 2000;
+    }
+    const got = arriveAt(views, kind, bodyId);
+    if (!got.cards.length && got.views.auroras.length === views.auroras.length) return;
+    views = got.views;
+    saveViews(views);
+    for (const card of got.cards) toast.show(t`그림엽서를 얻었습니다: ${card.name}\n수첩의 "코스" 갈래 맨 아래에 꽂아 두었습니다.`);
+    if (got.round) {
+      toast.show(t('오로라가 뜨는 여덟 곳에 모두 서 보았습니다. 수첩에 오로라 순례 도장이 찍혔습니다.'));
+      stampDown(AURORA_STAMP);
+      sound.cue('discovered');
+      say.show(t('오로라 여덟 군데, 다 봤다!'));
+    } else if (kind === 'aurora' && !got.cards.length) {
+      toast.show(t`오로라 순례 ${views.auroras.length}/${AURORA_ROUND.length}`);
+    }
+  }
+
   // A stunt flight: taken up from the journal, given up from the goal line.
   function beginStunt(id) {
     if (guide.step !== null) {
@@ -1462,6 +1488,10 @@ ${STORY_MORE[target.id]}` : told };
       start: beginStunt,
       quit: quitStunt,
     },
+    views: {
+      cards: () => VIEW_CARDS.map((card) => ({ ...card, file: cardFile(card.id), got: views.cards.includes(card.id) })),
+      round: () => ({ stood: views.auroras.length, of: AURORA_ROUND.length, done: roundDone(views), stamp: AURORA_STAMP, names: AURORA_ROUND.map((id) => ({ name: bodyById(id, BODIES).name, stood: views.auroras.includes(id) })) }),
+    },
     lastSlot: LAST_SLOT,
     lastShut: () => !lastOpen(),
     onNote(id) {
@@ -1527,7 +1557,7 @@ ${STORY_MORE[target.id]}` : told };
   // buttons: on the dev server, not on the public site or in the store app.
   $('testBar').hidden = !isLocalHost(location.hostname);
   $('testReset').addEventListener('click', () => {
-    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1', 'oddity.told.v1', 'oddity.exo.v1', 'oddity.eclipse.v1']) {
+    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1', 'oddity.views.v1', 'oddity.told.v1', 'oddity.exo.v1', 'oddity.eclipse.v1']) {
       try { localStorage.removeItem(key); } catch { /* storage shut: nothing to wipe */ }
     }
     location.reload();
@@ -2000,6 +2030,7 @@ ${STORY_MORE[target.id]}` : told };
         });
         ({ state, home } = went);
         if (went.arrived) toast.show(home.told);
+        if (went.arrived) reachedKey(home.kind, home.bodyId);
         if (went.arrived && !home.hold) home = null;
       }
     }

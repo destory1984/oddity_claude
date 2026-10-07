@@ -68,6 +68,10 @@ export const SHEETS = [
   // button pressed, a smile), played in the close view when a shutter sounds: a craft's
   // in a scene of its day, or the player's own ("사진 저장").
   'see-snap',
+  // Drawn to order on 2026-10-08: her hands together, gazing, when she comes to the
+  // place in an aurora by its key (core/home.js AURORA_VIEWS). Shown as a sight is: see
+  // 'aurora'.
+  'see-aurora',
 ];
 
 // Which of the three she does for a sight (the ids of core/glows.js, with 'meteor' and

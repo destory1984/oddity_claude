@@ -5,6 +5,7 @@ import { createProgress, sanitizeProgress } from '../core/progress.js';
 import { sanitizeAlbum } from '../core/album.js';
 import { createDaily, sanitizeDaily } from '../core/daily.js';
 import { sanitizeStunts } from '../core/stunts.js';
+import { sanitizeViews } from '../core/viewCards.js';
 
 const KEY = 'oddity.progress.v1';
 
@@ -143,6 +144,25 @@ export function saveStunts(records) {
     localStorage.setItem(STUNT_KEY, JSON.stringify(records));
   } catch {
     // The record lasts only for this page.
+  }
+}
+
+const VIEWS_KEY = 'oddity.views.v1';
+
+// The picture postcards got and the auroras stood in (core/viewCards.js).
+export function loadViews() {
+  try {
+    return sanitizeViews(JSON.parse(localStorage.getItem(VIEWS_KEY)));
+  } catch {
+    return sanitizeViews(null);
+  }
+}
+
+export function saveViews(views) {
+  try {
+    localStorage.setItem(VIEWS_KEY, JSON.stringify(views));
+  } catch {
+    // They last only for this page.
   }
 }
 

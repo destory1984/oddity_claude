@@ -5284,3 +5284,73 @@ html.gaze #gazeButton {
 #hud #targetPanel #targetName #auroraButton:last-child {
   margin-right:-4px;
 }
+
+/* Picture postcards and the round of the auroras, under the stunt flights (core/viewCards.js):
+   two cards in a row, the ones not yet got a dashed blank with their names. */
+#journalRound {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:8px 0;
+  font-size:.92em;
+  line-height:1.5;
+}
+
+#journalRound .stamp {
+  flex:none;
+  width:48px;
+  height:48px;
+  image-rendering:pixelated;
+}
+
+#journalViews {
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+  margin:8px 0 0;
+  padding:0;
+  list-style:none;
+}
+
+#journalViews li {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  font-size:.86em;
+  line-height:1.3;
+  text-align:center;
+}
+
+#journalViews li img,
+#journalViews li i {
+  display:block;
+  width:100%;
+  aspect-ratio:16 / 9;
+  border-radius:4px;
+  box-sizing:border-box;
+}
+
+#journalViews li img {
+  image-rendering:pixelated;
+  border:3px solid #fff;
+  box-shadow:0 1px 3px #0006;
+}
+
+#journalViews li i {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px dashed currentColor;
+  font-style:normal;
+  font-size:1.6em;
+  opacity:.45;
+}
+
+#journalViews li:not(.got) span {
+  opacity:.6;
+}
+
+#journalViewsCount {
+  font-weight:normal;
+  opacity:.7;
+}

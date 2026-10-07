@@ -164,12 +164,28 @@ export function auroraViewOf(aurora, radiusKm, asideDeg = 0) {
     up: turn(angle < 1e-6 ? AURORA_VIEW.up : tip(AURORA_VIEW.up)),
   };
 }
-// Inside the pale, tall curtains of Uranus and Neptune the whole view was washed white:
-// there she stands a few degrees on the pole's side, the curtain at her right.
-const ASIDE_DEG = { uranus: -4, neptune: -3 };
+// Inside the pale, tall curtain of Neptune the whole view was washed white: there she
+// stands a few degrees on the pole's side, the curtain at her right. (Uranus has a
+// place of its own, below.)
+const ASIDE_DEG = { neptune: -3 };
 const drawn = Object.fromEntries(AURORAS.map((aurora) => [aurora.body, auroraViewOf(aurora, BODIES.find((b) => b.id === aurora.body).radiusKm, ASIDE_DEG[aurora.body] ?? 0)]));
-// (The three places the user or I stood at are kept as they are.)
-export const AURORA_VIEWS = { ...drawn, earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW };
+// Uranus's (the user, 2026-10-08: "천왕성 코로나도 보면서 은하수도 볼 수 있는 위치
+// 추천해줘", then "넣어"): on the pole's side of the northern ring at 64 degrees north,
+// 900 km over the clouds, 40 degrees round from midnight, looking along the curtain with
+// her head level: the rays stand at her left and the Milky Way's bright side (40 degrees
+// from the galaxy's centre) lies 24 degrees up behind them. The centre itself is 25
+// degrees from the Sun as seen from Uranus now, on the day side. Reckoned for the
+// planets as they stand today ("오늘의 하늘"); Uranus goes round in 84 years, so it holds
+// for years. With the planets laid out the other way the stand is the same and the
+// Milky Way is elsewhere.
+export const URANUS_AURORA_VIEW = {
+  body: 'uranus',
+  position: [-0.3477, 0.9307, -0.2918],
+  forward: [0.7521, 0.2761, -0.5984],
+  up: [-0.4656, 0.8652, -0.186],
+};
+// (The places the user or I stood at or chose are kept as they are.)
+export const AURORA_VIEWS = { ...drawn, earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW, uranus: URANUS_AURORA_VIEW };
 
 // Where that is now: { position, up, facing }, as homeSpot gives.
 export function auroraSpot(body, sunPosition, view = AURORA_VIEW) {

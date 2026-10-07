@@ -1143,6 +1143,30 @@ ${STORY_MORE[target.id]}` : told };
     },
   });
   hud.showSelection(named(selectedId));
+  // A way to the places in the auroras kept out of sight: pressing "우주토끼" among the
+  // makers on the settings' About page shows a row of keys, one for each world that has
+  // an aurora (the user, 2026-10-08: "설정 -> about -> 우주토끼 누르면, 오로라 이동 메뉴
+  // 띄워주고, 거기에 버튼들 나열해줘"). A key shuts the settings, chooses that world and
+  // takes her to the place in its aurora, as the key on its name plate does: once the
+  // settings have shut, for the game stands still while they are open.
+  $('rabbitKey').addEventListener('click', () => {
+    const show = $('auroraKeys').hidden;
+    for (const el of document.querySelectorAll('#settings .auroraMenu')) el.hidden = !show;
+    $('rabbitKey').setAttribute('aria-expanded', String(show));
+  });
+  for (const id of AURORA_ROUND) {
+    const key = document.createElement('button');
+    key.textContent = named(id).name;
+    key.addEventListener('click', () => {
+      $('settings').addEventListener('close', () => {
+        selectedId = id;
+        hud.showSelection(named(id));
+        goHome('aurora');
+      }, { once: true });
+      $('settings').close();
+    });
+    $('auroraKeys').append(key);
+  }
   function unlock() {
     locked = false;
     toast.show(t('목표 고정을 풀었습니다.'));

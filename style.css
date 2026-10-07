@@ -5354,3 +5354,39 @@ html.gaze #gazeButton {
   font-weight:normal;
   opacity:.7;
 }
+
+/* "우주토끼" among the makers is a key that looks like the words beside it; it shows the
+   row of eight keys to the places in the auroras: four in a row, two rows. */
+#settings dd button#rabbitKey {
+  display:inline;
+  min-width:0;
+  min-height:0;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:none;
+  box-shadow:none;
+  color:inherit;
+  font:inherit;
+  cursor:pointer;
+}
+
+#settings dd.auroraRow {
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+}
+
+#settings dd.auroraRow[hidden] {
+  display:none;
+}
+
+#settings dd.auroraRow button {
+  flex:1 1 22%;
+  min-width:0;
+  margin-right:0;
+  padding:6px 0;
+  font-size:12px;
+  white-space:nowrap;
+}

@@ -220,6 +220,8 @@ export const REPLAYS = {
     seconds: 24,
     downAt: 17,
     fromKm: 14,
+    // Once it is down it listens: from, to.
+    say: [17.8, 22.8],
     sounds: [[0, 'chute']],
     lines: [
       { at: 0, text: t('1982년 3월 1일. 베네라 13호가 금성으로 내려옵니다. 공기가 워낙 짙어 낙하산은 중간에 버립니다.') },

@@ -1076,6 +1076,8 @@ export const SITE_SAYS = {
   curiosity: () => t('태워 줘서 고마워. 잘 가~'),
   // (Of five offered for Venera 7: "1": as it comes down through 475 degrees.)
   venera7: () => t('앗 뜨거. 사우나보다 더워~'),
+  // (Of five offered for Venera 13: "4": it sent the first sound from another planet.)
+  venera13: () => t('쉿. 금성의 바람 소리야'),
 };
 
 // For "그날로" (core/replay.js): what came down that day, as it was then.

@@ -26,6 +26,9 @@ uniform float storm;
 uniform float flip;
 // STEVE: the angle round the ring where the middle of its arc stands.
 uniform float arcAt;
+// 1 for Jupiter's aurora: bright sparks run round the ring (its flares and dawn storms;
+// the user, 2026-10-07, of sparks for it: "2").
+uniform float flare;
 varying float vFace;
 // A number between 0 and 1 for each whole step along x, joined smoothly; it comes round
 // to where it began after `period` steps, so a ring of it closes.
@@ -88,6 +91,19 @@ void main(){
     wave = rays * mix(.1, 1.7, smoothstep(.25, .7, stretch)) * (.55 + .45 * sway);
     // On a strong night the tall rays end in red (oxygen above 200 km).
     red = storm * smoothstep(.45, 1., tint);
+    if (flare > .5) {
+      // Three of them, each at its own pace and one the other way, flickering.
+      float d1 = a - time * .33;
+      float d2 = a + time * .21 + 2.1;
+      float d3 = a - time * .47 + 4.4;
+      d1 = atan(sin(d1), cos(d1));
+      d2 = atan(sin(d2), cos(d2));
+      d3 = atan(sin(d3), cos(d3));
+      float sparks = exp(-d1 * d1 / .014) * (.6 + .4 * sin(time * 3.1))
+        + exp(-d2 * d2 / .02) * (.6 + .4 * sin(time * 2.3 + 1.))
+        + exp(-d3 * d3 / .009) * (.6 + .4 * sin(time * 4.2 + 2.));
+      wave += sparks * 2.4 * (.45 + .55 * fine);
+    }
   }
   // STEVE: a thin mauve ribbon standing by itself on the equator's side of the aurora,
   // an arc of it only, smooth where the aurora is rayed; under it the green stripes of

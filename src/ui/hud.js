@@ -30,7 +30,7 @@ function fitName() {
   plate.style.width = `${count * step - (step - key)}px`;
 }
 
-export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAurora, skyLabels = [] }) {
+export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAurora, onVista, vistas = [], skyLabels = [] }) {
   // The way home (core/home.js): a key that stands at the end of the name plate while
   // Earth is the one chosen. Writing another name into the plate takes it out again.
   const homeKey = $('homeButton');
@@ -47,6 +47,14 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
   auroraKey.addEventListener('click', (event) => {
     event.stopPropagation();
     onAurora?.();
+  });
+  // The worlds that have one best view (core/vista.js) show one key for it.
+  const vistaKey = $('vistaButton');
+  vistaKey.hidden = false;
+  vistaKey.remove();
+  vistaKey.addEventListener('click', (event) => {
+    event.stopPropagation();
+    onVista?.();
   });
   window.addEventListener('resize', fitName);
   document.fonts?.ready.then(fitName);
@@ -141,6 +149,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
     showSelection(body) {
       $('targetName').innerHTML = `${body.name} <small>${body.nameEn}</small>`;
       if (body.id === 'earth') $('targetName').append(auroraKey, homeKey);
+      else if (vistas.includes(body.id)) $('targetName').append(vistaKey);
       fitName();
       $('faceTarget').textContent = t`${body.name} 바라보기`;
       // The button shows a picture only: its words are its name and its tip.

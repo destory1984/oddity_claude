@@ -220,6 +220,9 @@ export async function createWorld(canvas, bodies = BODIES) {
     // Whether something is drawn standing at a story place.
     hasSiteModel: (id) => siteModels.has(id),
     // The direction square to a body's rings ([x, y, z]), or null when it has none.
+    // The picture's own clock: seconds drawn since the game opened (the clouds of
+    // Jupiter slide by it, core/vista.js).
+    elapsed: () => elapsed,
     ringNormal(id) {
       return rendered.find((item) => item.body.id === id)?.rings?.normal ?? null;
     },

@@ -5225,6 +5225,7 @@ html.gaze #gazeButton {
 /* The way home: a small key at the right end of Earth's name plate (the user, 2026-10-07,
    with a ring drawn there: "지구일 때에는 저 위치에 home 버튼"). */
 #hud #targetPanel #targetName #homeButton,
+#hud #targetPanel #targetName #vistaButton,
 #hud #targetPanel #targetName #auroraButton {
   display:inline-flex;
   align-items:center;
@@ -5254,4 +5255,9 @@ html.gaze #gazeButton {
 
 #hud #targetPanel #targetName #homeButton {
   margin:0 -4px 0 0;
+}
+
+/* The one key of the Moon, Jupiter and Saturn stands where home's does. */
+#hud #targetPanel #targetName #vistaButton {
+  margin:0 -4px 0 auto;
 }

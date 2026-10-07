@@ -228,7 +228,7 @@ function veilMaterial(scene, name, { low, high, ripple, nightOnly, dark = false,
   Effect.ShadersStore.veilFragmentShader = veilFrag;
   const material = new ShaderMaterial(name, scene, { vertex: 'veil', fragment: 'veil' }, {
     attributes: ['position'],
-    uniforms: ['worldViewProjection', 'world', 'centre', 'colorLow', 'colorHigh', 'strength', 'time', 'ripple', 'nightOnly', 'sunDir', 'dark', 'soft', 'devil', 'sway', 'storm', 'flip', 'arcAt'],
+    uniforms: ['worldViewProjection', 'world', 'centre', 'colorLow', 'colorHigh', 'strength', 'time', 'ripple', 'nightOnly', 'sunDir', 'dark', 'soft', 'devil', 'sway', 'storm', 'flip', 'arcAt', 'flare'],
   });
   // Smoke covers what is behind it; light is added to it.
   material.alphaMode = dark || devil ? Constants.ALPHA_COMBINE : Constants.ALPHA_ADD;
@@ -238,6 +238,7 @@ function veilMaterial(scene, name, { low, high, ripple, nightOnly, dark = false,
   material.setFloat('storm', 0);
   material.setFloat('flip', 1);
   material.setFloat('arcAt', 0);
+  material.setFloat('flare', 0);
   material.setFloat('soft', soft ? 1 : 0);
   material.needAlphaBlending = () => true;
   material.disableDepthWrite = true;
@@ -295,6 +296,7 @@ export function createGlows(scene, bodies) {
     const material = veilMaterial(scene, `aurora_${aurora.body}_${north}`, { low: aurora.low, high: aurora.high, ripple: 14, nightOnly: true });
     const mesh = band(scene, `aurora_${aurora.body}_${north}`, foot.radiusKm / KM_PER_UNIT, top.radiusKm / KM_PER_UNIT, 96);
     mesh.material = material;
+    if (aurora.body === 'jupiter') material.setFloat('flare', 1);
     // Earth's two rings mirror each other: the same folds over the same longitude.
     if (aurora.body === 'earth') material.setFloat('flip', north ? 1 : -1);
     // The southern one is the same band upside down.

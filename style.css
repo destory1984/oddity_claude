@@ -5268,3 +5268,14 @@ html.gaze #gazeButton {
 #hud #targetPanel #targetName #auroraButton + #vistaButton {
   margin-left:0;
 }
+
+/* With a key at its end the name stands in the middle of the room left of the key, as a
+   name without one stands in the middle of the plate (the user, 2026-10-08, with the
+   name ringed at the left end: "글자는 가운데 정렬"). An empty piece before the name takes
+   half the spare room; its margin takes back the gap that follows it and the 5px by
+   which the room on the left (padding and line) is wider than the gap before the key. */
+#hud #targetPanel > #targetName:has(button)::before {
+  content:"";
+  flex:none;
+  margin:0 auto 0 -13px;
+}

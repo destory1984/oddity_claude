@@ -154,7 +154,7 @@ export const LANDER_STAGES = {
         lander: { x: 0, y, burn: t < 8 },
         // Thirty metres off it turns round to take the lander's picture.
         rover: { ...rover, turn: Math.PI * ease(t, 21, 23) },
-        say: said(t, 15.6, 20.4, Math.min(rover.x, 1.15) - 0.42, 0.95, 1.1),
+        say: said(t, 21.4, 25.6, Math.min(rover.x, 1.15) - 0.42, 0.95, 1.1),
       };
     },
   }),

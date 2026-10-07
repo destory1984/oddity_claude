@@ -83,7 +83,8 @@ export const LANDER_TEXTS = {
       t('둘레를 먼저 찍고, 30m쯤 가서는 돌아서서 저를 태워 온 착륙선을 찍었습니다.'),
       t('넉 달 동안 39km를 달리며 텔레비전 사진 8만여 장과 파노라마 86장을 지구로 보냈습니다.'),
     ],
-    say: t('형보다 멀리 갈 거야'),
+    // (Of five offered, 2026-10-07: "4": to the lander, once it has turned back to it.)
+    say: t('태워 줘서 고마워'),
   },
   change3: {
     name: t('창어 3호의 착륙'),

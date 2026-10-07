@@ -277,6 +277,8 @@ export const MOON_SCENES = {
     stage(t) {
       return {
         lander: { x: -1.2 * (1 - clamp(t / 11)) - 0.12 * (1 - ease(t, 11, 12.2)), y: comeDown(t, 11, 2.6), lean: -0.55 * ease(t, 11.4, 14), burn: t < 11 },
+        // Once it has stopped leaning over (the user's own word, 2026-10-07: "아슬아슬했다").
+        say: said(t, 14.3, 18.6, 0.72, 1.2, 1.0),
       };
     },
   },

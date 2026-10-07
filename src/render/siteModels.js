@@ -1005,7 +1005,10 @@ const MOON_STAGES = {
     };
   },
   odysseus: (scene, name, mats) => ({
-    pieces: { lander: odysseus(scene, `${name}Lander`, mats, { upright: true }) },
+    pieces: {
+      lander: odysseus(scene, `${name}Lander`, mats, { upright: true }),
+      say: sayBubble(scene, `${name}Say`, t('아슬아슬했다')),
+    },
     flames: { lander: [0, 0.06, 0, 0.32, 0.18] },
   }),
   chandrayaan3: (scene, name, mats) => ({

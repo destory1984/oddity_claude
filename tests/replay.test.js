@@ -340,6 +340,8 @@ test('on the Moon two go up, three land, two roll out, one falls on its nose, on
     assert.equal(at(id, MOON_SCENES[id].seconds)[piece].shown, false, id);
   }
   assert.deepEqual(at('apollo17', 20).descent, { x: 0, y: 0 });
+  // Odysseus speaks once it has come to rest leaning.
+  assert.ok(!at('odysseus', 14).say.shown && at('odysseus', 16).say.shown && !at('odysseus', 19).say.shown);
   // SLIM cries out as it goes over, not before.
   assert.ok(!at('slim', 11).say.shown && at('slim', 13).say.shown && !at('slim', 16).say.shown);
   // Vikram speaks once it is down, and has done before its rover comes out.

@@ -4182,13 +4182,31 @@ footer .throttle .rangeLabels {
 }
 
 /* In memory of Carl Sagan, a quiet line at the foot of the About sheet. */
-#aboutMemory {
+#aboutSagan {
   margin:18px 0 0;
   text-align:center;
+}
+
+/* His photograph (NASA/JPL, 1980), small, over the line. */
+#aboutSagan img {
+  display:block;
+  width:88px;
+  height:auto;
+  margin:0 auto 8px;
+  border-radius:10px;
+  border:1px solid #ffffff2e;
+}
+
+/* The line is a link to his page on Wikipedia in the player's language (ui/settings.js). */
+#aboutMemory {
+  display:inline-block;
+  padding:6px 4px;
   font-size:13px;
   color:#b6c4e6;
   letter-spacing:.02em;
   word-break:keep-all;
+  text-decoration:underline;
+  text-underline-offset:3px;
 }
 
 #aboutTitle span {

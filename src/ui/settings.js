@@ -13,6 +13,14 @@ const $ = (id) => document.getElementById(id);
 // today: () => 'YYYY-MM-DD', the device's own day.
 // onLanguage: called just before the game starts again in the language chosen.
 // reopen: the settings open at once (the game has just started again from them).
+// (Each written out in full: the titles differ by language.)
+export const SAGAN_PAGES = {
+  ko: 'https://ko.wikipedia.org/wiki/%EC%B9%BC_%EC%84%B8%EC%9D%B4%EA%B1%B4',
+  en: 'https://en.wikipedia.org/wiki/Carl_Sagan',
+  ja: 'https://ja.wikipedia.org/wiki/%E3%82%AB%E3%83%BC%E3%83%AB%E3%83%BB%E3%82%BB%E3%83%BC%E3%82%AC%E3%83%B3',
+  zh: 'https://zh.wikipedia.org/wiki/%E5%8D%A1%E5%B0%94%C2%B7%E8%90%A8%E6%A0%B9',
+};
+
 export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, reopen = false }) {
   const dialog = $('settings');
 
@@ -78,6 +86,8 @@ export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, 
   }
   // The policy page holds the four languages one under another: the link opens it at hers.
   if (language() !== 'ko') $('privacyLink').href = `./privacy.html#${language()}`;
+  // Carl Sagan's page on Wikipedia in the language in use (the user, 2026-10-07).
+  $('aboutMemory').href = SAGAN_PAGES[language()] ?? SAGAN_PAGES.en;
   dialog.addEventListener('close', () => onClose());
 
   if (reopen) $('settingsButton').click();

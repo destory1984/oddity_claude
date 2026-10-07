@@ -42,6 +42,7 @@ import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
+import { createMapSky } from './ui/mapSky.js';
 import { skyNews, newsLine } from './core/forecast.js';
 import { createSettings } from './ui/settings.js';
 import { createLookBack } from './ui/lookBack.js';
@@ -1103,6 +1104,7 @@ ${STORY_MORE[target.id]}` : told };
     for (const chip of $('bigMapList').children) chip.setAttribute('aria-pressed', String(chip.dataset.id === id));
   }
   const bigMap = createMinimap($('bigMapCanvas'), { big: true, onPick: pickOnMap });
+  const mapSky = createMapSky($('bigMapSky'), $('bigMapCanvas'));
   function openBigMap() {
     if (photo.active() || $('bigMap').open) return;
     const prior = paused;
@@ -1120,7 +1122,8 @@ ${STORY_MORE[target.id]}` : told };
       return chip;
     }));
     $('bigMap').showModal();
-    $('bigMap').addEventListener('close', () => setPaused(prior), { once: true });
+    mapSky.start();
+    $('bigMap').addEventListener('close', () => { mapSky.stop(); setPaused(prior); }, { once: true });
   }
   $('bigMapClose').addEventListener('click', () => $('bigMap').close());
   $('bigMapGo').addEventListener('click', () => {

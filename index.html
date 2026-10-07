@@ -256,7 +256,10 @@
 
   <dialog id="bigMap" aria-labelledby="bigMapTitle">
     <h1 id="bigMapTitle">지도에서 고르기</h1>
-    <canvas id="bigMapCanvas" aria-label="태양계 지도. 갈 곳을 누릅니다."></canvas>
+    <div id="bigMapStage">
+      <canvas id="bigMapSky" aria-hidden="true"></canvas>
+      <canvas id="bigMapCanvas" aria-label="태양계 지도. 갈 곳을 누릅니다."></canvas>
+    </div>
     <div id="bigMapList" role="group" aria-label="갈 곳"></div>
     <p id="bigMapInfo" class="muted">갈 곳을 지도나 이름에서 고르세요.</p>
     <div id="bigMapActions">

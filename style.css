@@ -3969,8 +3969,24 @@ footer .throttle .rangeLabels {
   flex:none;
 }
 
+/* The map stands on a strip of sky as wide as the sheet (ui/mapSky.js): stars twinkle and
+   a comet goes by outside the map's circle. */
+#bigMapStage {
+  position:relative;
+  margin:0 -18px;
+}
+
+#bigMapSky {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+
 #bigMapCanvas {
   --side:min(300px, 78vw, 100vh - 390px);
+  position:relative;
   display:block;
   width:var(--side);
   height:var(--side);
@@ -5135,4 +5151,48 @@ html.gaze #gazeButton {
   justify-content:center;
   border:1px solid var(--glass-line, #9fb4ff66);
   white-space:nowrap;
+}
+
+/* The map sheet in night blue and gold, like a brass star dial (the user, 2026-10-07, with
+   a picture of one: "전체 색을 이걸로 하고, 이런 느낌으로 해줘"). The map inside its circle is
+   as it was; the rim, the stars and the comet round it are drawn by ui/mapSky.js. */
+#bigMap {
+  --brass:#e9c46a;
+  --brass-pale:#fbe7ae;
+  background:radial-gradient(120% 80% at 50% 18%, #1a2270 0%, #10164c 46%, #080b2a 100%);
+  border:1.5px solid var(--brass);
+  box-shadow:0 0 0 1px #5b4718 inset, 0 0 22px #e9c46a33, 0 30px 100px #000a;
+  color:var(--brass-pale);
+}
+
+#bigMap h1 {
+  color:var(--brass-pale);
+  text-shadow:0 0 12px #e9c46a55;
+}
+
+#bigMap #bigMapInfo {
+  color:#d9c88f;
+}
+
+#bigMap button {
+  background:#0c1142cc;
+  border:1px solid #b99a4c;
+  color:var(--brass-pale);
+}
+
+#bigMap #bigMapList button[aria-pressed="true"] {
+  background:linear-gradient(#f3d27a, #d9a93f);
+  border-color:#fff1c4;
+  color:#1a1640;
+}
+
+#bigMap button:disabled {
+  border-color:#6a5b33;
+  color:#8f8459;
+}
+
+#bigMap #bigMapJump:not(:disabled) {
+  background:linear-gradient(#f3d27a, #d9a93f);
+  border-color:#fff1c4;
+  color:#1a1640;
 }

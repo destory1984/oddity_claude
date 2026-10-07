@@ -115,11 +115,14 @@ export const AURORA_VIEW = {
 // Saturn's (the user, 2026-10-07: "토성도 오로라 있으니까, 오로라 버튼 넣어주고"): the
 // same stand, at the latitude of its ring of light (75 degrees; core/glows.js AURORAS)
 // and a tenth of the way up its curtain (500 → 4,100 km), as Earth's place is in Earth's.
+// Her head as the user set it there (2026-10-08: "토성 코로나 위치는 여기로 수정", "각도가
+// 달라"): the same place and the same way ahead, turned about it by some seven degrees
+// so that Saturn's ground lies level (with Earth's head-line it sloped).
 export const SATURN_AURORA_VIEW = {
   body: 'saturn',
   position: [-0.155, 0.9802, -0.212],
-  forward: [-0.5564, 0.1373, 0.8195],
-  up: [-0.2116, 0.9303, -0.2995],
+  forward: [-0.5565, 0.1373, 0.8194],
+  up: [-0.1047, 0.9668, -0.2331],
 };
 // Jupiter's: where the user stood and said "목성의 코로나 위치는 여기로 해" (2026-10-08;
 // the aurora was meant): on the night side at 70.5 degrees north, 4,376 km over the

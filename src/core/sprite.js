@@ -39,6 +39,10 @@ export const REST_ACTIONS = [
   { sheet: 'rest-yoyo', times: 3 }, { sheet: 'rest-comb', times: 1 }, { sheet: 'rest-juggle', times: 3 },
   { sheet: 'rest-umbrella', times: 1 }, { sheet: 'rest-count', times: 1 }, { sheet: 'rest-string', times: 1 },
   { sheet: 'rest-clap', times: 2 },
+  // Three more on 2026-10-07, by the user's own word after all ("소라 휴식 시 행동은 3개
+  // 더 만들어서 50개 채우자"): a skipping rope, a pinwheel blown round, a sprout
+  // watered until it flowers. Forty.
+  { sheet: 'rest-rope', times: 3 }, { sheet: 'rest-pinwheel', times: 1 }, { sheet: 'rest-water', times: 1 },
 ];
 export const SHEETS = [
   ...FLIGHT_SHEETS, 'brake', 'idle', ...REST_ACTIONS.map((a) => a.sheet), 'rest-sleep',

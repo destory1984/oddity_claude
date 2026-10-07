@@ -20,9 +20,9 @@ const STILL = { speed: 0 };
 // In flight, showing her back, past the turn away from the camera.
 const flying = () => run(createSpriteState(), FLY, 1.2).state;
 
-test('74 sheets of four frames in use, and every drawing is in the assets folder', () => {
-  assert.equal(SHEETS.length, 74);
-  assert.equal(new Set(SHEETS).size, 74);
+test('77 sheets of four frames in use, and every drawing is in the assets folder', () => {
+  assert.equal(SHEETS.length, 77);
+  assert.equal(new Set(SHEETS).size, 77);
   assert.equal(FRAMES, 4);
   for (const sheet of SHEETS) {
     for (let frame = 0; frame < FRAMES; frame++) {
@@ -138,7 +138,7 @@ test('a mouse drag arrives in bursts, and the drawing does not flicker with it',
 test('hovering is mostly stillness with a blink, and a rest action now and then', () => {
   assert.equal(FIRST_REST_S, 3);
   assert.deepEqual(REST_GAP_S, [8, 15]);
-  assert.equal(REST_ACTIONS.length, 37);
+  assert.equal(REST_ACTIONS.length, 40);
   const { seen } = run(createSpriteState(), STILL, 55, 1 / 30);
   const idle = seen.filter((s) => s.sheet === 'idle');
   assert.ok(idle.length / seen.length > 0.75, `${idle.length / seen.length}`);

@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-07', text: t('소라가 쉴 때 줄넘기를 하고, 바람개비를 불고, 화분에 물을 주어 꽃을 피웁니다.') },
   { day: '2026-10-06', text: t('그날로 장면에서 탐사선과 우주인이 말풍선으로 한마디씩 합니다. "토끼야. 빠이~"') },
   { day: '2026-10-06', text: t('셔터 소리가 날 때 소라도 사진기를 들어 찍습니다. 장면에서는 영웅 표시를 켜면 보입니다.') },
   { day: '2026-10-06', text: t('독도의 1954년 모습, 아로코스, 딘키네시와 셀람, 궤도선이 찍은 사진이 그림으로 들어갔습니다.') },

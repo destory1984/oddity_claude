@@ -454,7 +454,7 @@ export function createSiteModels(scene, siteList) {
           old.tumble.position.y = old.shape.centre + (old.shape.radius - old.shape.centre) * full;
         }
       }
-      for (const [bubble, size] of [[old?.say, replay.say ?? 0], [old?.say2, replay.say2 ?? 0]]) {
+      for (const [bubble, size] of [[old?.say, replay?.say ?? 0], [old?.say2, replay?.say2 ?? 0]]) {
         if (!bubble) continue;
         bubble.setEnabled(size > 0.01);
         if (bubble.isEnabled()) {

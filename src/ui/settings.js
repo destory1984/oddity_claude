@@ -21,7 +21,8 @@ export const SAGAN_PAGES = {
   zh: 'https://zh.wikipedia.org/wiki/%E5%8D%A1%E5%B0%94%C2%B7%E8%90%A8%E6%A0%B9',
 };
 
-export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, reopen = false }) {
+// onLeave: called when a link out of the game is pressed (it may open in this window).
+export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, onLeave = () => {}, reopen = false }) {
   const dialog = $('settings');
 
   function showTab(name) {
@@ -88,6 +89,8 @@ export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, 
   if (language() !== 'ko') $('privacyLink').href = `./privacy.html#${language()}`;
   // Carl Sagan's page on Wikipedia in the language in use (the user, 2026-10-07).
   $('aboutMemory').href = SAGAN_PAGES[language()] ?? SAGAN_PAGES.en;
+  // A link out may open in this same window: the place is kept for the way back.
+  for (const id of ['aboutMemory', 'privacyLink']) $(id).addEventListener('click', () => onLeave());
   dialog.addEventListener('close', () => onClose());
 
   if (reopen) $('settingsButton').click();

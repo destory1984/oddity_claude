@@ -1730,6 +1730,8 @@ ${STORY_MORE[target.id]}` : told };
     today: () => dayOf(new Date()),
     // The game starts again in the other language, from this very place and moment.
     onLanguage: () => saveResume({ position: [...state.position], orientation: [...state.orientation], simTime, selectedId }),
+    // A link out (About): the same, kept for half an hour.
+    onLeave: () => saveResume({ position: [...state.position], orientation: [...state.orientation], simTime, selectedId, until: Date.now() + 30 * 60 * 1000 }),
     reopen: Boolean(resume),
   });
   // Switching the layout moves every planet, so the game starts over (the log is kept).

@@ -258,6 +258,11 @@ export function saveLanguage(choice) {
 // Where she was when the language was changed: the game starts again in the other
 // language (its sentences are made as the code loads) and carries on from this place.
 // Kept for the tab only, and taken once.
+// Also kept when a link out of the game is pressed (About: Carl Sagan's page, the privacy
+// page): where such a link opens in the same window, coming back loads the game anew
+// (the user, 2026-10-07: "백버튼 누르면, 게임이 완전히 새로 시작하네"). `until` (ms): after
+// that moment the place is forgotten, so that a link that opened a new window does not
+// decide where a much later reload begins.
 const RESUME_KEY = 'oddity.resume';
 
 export function saveResume(place) {
@@ -274,6 +279,7 @@ export function takeResume() {
     sessionStorage.removeItem(RESUME_KEY);
     const place = raw ? JSON.parse(raw) : null;
     const numbers = (list, n) => Array.isArray(list) && list.length === n && list.every(Number.isFinite);
+    if (place && Number.isFinite(place.until) && Date.now() > place.until) return null;
     if (!place || !numbers(place.position, 3) || !Array.isArray(place.orientation) || !place.orientation.every(Number.isFinite)) return null;
     return { position: place.position, orientation: place.orientation, simTime: Number.isFinite(place.simTime) ? place.simTime : 0, selectedId: typeof place.selectedId === 'string' ? place.selectedId : null };
   } catch {

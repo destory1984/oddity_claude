@@ -51,6 +51,8 @@ export const REPLAYS = {
     seconds: 24,
     downAt: 17,
     fromKm: 14,
+    // It thanks the stage as that flies off: from, to.
+    say: [17.8, 22.8],
     // The cords are cut and the stage flies off.
     sounds: [[13.3, 'landingBurn'], [17.2, 'clunk'], [17.5, 'ascent']],
     lines: [

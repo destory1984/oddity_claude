@@ -441,7 +441,7 @@ export function createSiteModels(scene, siteList) {
           const eye = scene.activeCamera;
           // (Lower beside it when it is high, or the bubble would leave the view's top.)
           const high = Math.min(1, replay.liftKm / (2 * Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT))));
-          const off = eye.getDirection(Vector3.Right()).scale(0.72 + 0.3 * high).add(eye.getDirection(Vector3.Up()).scale(1.05 - 1.0 * high));
+          const off = eye.getDirection(Vector3.Right()).scale(0.64 + 0.38 * high).add(eye.getDirection(Vector3.Up()).scale(1.05 - 1.0 * high));
           off.rotateByQuaternionToRef(Quaternion.Inverse(node.rotationQuaternion), old.say.position);
           old.say.scaling.setAll(Math.max(0.01, size));
         }

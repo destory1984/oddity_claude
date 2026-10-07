@@ -796,7 +796,9 @@ function plutoPhoto(scene, name) {
 // had come was in another face than one drawn after (some at the start, the landmarks'
 // when first played). So each bubble is drawn again once its letters' font is in.
 const BUBBLE_FACE = '"Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif';
-export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
+// by: whose words they are, written small on a dark tag at the bubble's upper left (where
+// the speaker cannot be pointed at: Saturn, seen from its own clouds).
+export function sayBubble(scene, name, words, { tail = 'downLeft', by = null } = {}) {
   const up = tail === 'upRight';
   const bubble = card(scene, name, [1.0, 0.5], [512, 256], (ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
@@ -842,8 +844,10 @@ export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
         size -= 6;
       }
     };
+    // (Under a name tag the words have less room: smaller letters.)
+    const [one, pair] = by ? [60, 46] : [78, 60];
     let rows = [words];
-    let size = fit(rows, 78, 46);
+    let size = fit(rows, one, 46);
     // Two rows when one does not fit, or when two can be written larger than one.
     const over = ctx.measureText(words).width > w - 80;
     if (over || size < 60) {
@@ -866,14 +870,28 @@ export function sayBubble(scene, name, words, { tail = 'downLeft' } = {}) {
         two = [words.slice(0, cut), words.slice(cut)];
       }
       if (two) {
-        const twoSize = fit(two, 60, 26);
+        const twoSize = fit(two, pair, 26);
         if (over || twoSize > size) {
           rows = two;
           size = twoSize;
-        } else size = fit(rows, 78, 46);
+        } else size = fit(rows, one, 46);
       }
     }
-    const middle = up ? h - 104 : 104;
+    const middle = (up ? h - 104 : 104) + (by ? 26 : 0);
+    if (by) {
+      // The tag sits on the bubble's upper edge, at its left.
+      const top = up ? h - 184 : 20;
+      ctx.font = `700 44px ${BUBBLE_FACE}`;
+      const wide = ctx.measureText(by).width + 44;
+      ctx.fillStyle = '#1b2440';
+      ctx.beginPath();
+      ctx.roundRect(36, top - 16, wide, 60, 30);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(by, 36 + wide / 2, top + 16);
+      ctx.fillStyle = '#1b2440';
+      ctx.font = `700 ${size}px ${BUBBLE_FACE}`;
+    }
     rows.forEach((row, k) => ctx.fillText(row, w / 2, middle + (k - (rows.length - 1) / 2) * (size + 8)));
   });
   globalThis.document?.fonts?.load(`700 60px ${BUBBLE_FACE}`, words).then(() => bubble.redraw()).catch(() => {});
@@ -1382,6 +1400,11 @@ export const SITE_SAYS = {
   // The five of core/landerScenes.js that are not stages (core/landerTexts.js).
   ...Object.fromEntries(['mars3', 'beagle2', 'spirit', 'opportunity', 'perseverance'].map((id) => [id, () => LANDER_TEXTS[id].say])),
 };
+
+// Whose first bubble carries the speaker's name on a tag: Saturn, in Cassini's plunge (the
+// user, 2026-10-07: "토성이 너무 크니까, 말하는게 토성인지 뭔지 알 수가 없네", then of
+// three ways offered: "1").
+export const SAYS_BY = { cassiniPlunge: () => t('토성') };
 
 // Whose first bubble stands to its LEFT, the tail down to the right: Philae is at the
 // right edge of a narrow phone's view while it floats.

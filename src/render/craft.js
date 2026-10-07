@@ -4,7 +4,7 @@ import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
 import { CRAFT_BUILD } from './craftModels.js';
 import { CRAFT_UNFOLD_ALL as CRAFT_UNFOLD } from './craftUnfold.js';
-import { SITE_BUILD, SITE_REPLAY_BUILD, SITE_SAYS, SECOND_SAYS, BOOSTER_SAYS, SAYS_ON_LEFT, sayBubble } from './siteModels.js';
+import { SITE_BUILD, SITE_REPLAY_BUILD, SITE_SAYS, SECOND_SAYS, BOOSTER_SAYS, SAYS_ON_LEFT, SAYS_BY, sayBubble } from './siteModels.js';
 import { drum, rod, group, box } from './craftParts.js';
 
 // Spacecraft and landers. The models are in craftModels.js (in orbit) and
@@ -163,7 +163,7 @@ export function createSiteModels(scene, siteList) {
   const bubbleFor = (id, parent, says = SITE_SAYS, tag = 'say') => {
     if (!says[id]) return null;
     const left = says === SITE_SAYS && SAYS_ON_LEFT.has(id);
-    const say = sayBubble(scene, `then_${id}_${tag}`, says[id](), left ? { tail: 'downRight' } : {});
+    const say = sayBubble(scene, `then_${id}_${tag}`, says[id](), { ...(left ? { tail: 'downRight' } : {}), by: says === SITE_SAYS && SAYS_BY[id] ? SAYS_BY[id]() : null });
     // (Cassini is drawn small in its plunge: what Saturn says there is drawn more than twice as large.)
     say.metadata = { left, big: id === 'cassiniPlunge' ? 2.4 : 1 };
     say.parent = parent;

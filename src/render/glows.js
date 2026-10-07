@@ -14,7 +14,7 @@ import {
   AURORAS, auroraBand, STORMS, LIGHTNING_LIFE_S, lightningGap, lightningGlow, TYPHOON, typhoonUp, typhoonStrike,
   PLUMES, PLUME_DAY_S, PLUME_RANGE_RADII, plumeUp,
   IMPACT_RANGE_KM, IMPACT_LIFE_S, IMPACT_SIZE_KM, impactGap, impactGlow,
-  NIGHT_CLOUDS, sheetBand, FOOTPRINT, footprintUp, SODIUM_TAIL, JETS, jetDirections, SPRITE, spriteGlow, E_RING,
+  NIGHT_CLOUDS, sheetBand, FOOTPRINT, footprintUp, SODIUM_TAIL, JETS, jetDirections, SPRITE, spriteGlow, ELVES, elvesRing, BLUE_JET, blueJetGlow, E_RING,
 } from '../core/glows.js';
 
 const FLASHES = 8;
@@ -80,6 +80,66 @@ function boltTexture(scene, n) {
   };
   const start = rand() * Math.PI * 2;
   crooked(size * (0.5 - Math.cos(start) * 0.22), size * (0.5 - Math.sin(start) * 0.22), start, size * 0.46, 2.2, 2);
+  texture.update();
+  return texture;
+}
+
+// ELVES seen from above: a red ring, soft on both sides, empty in the middle. On black.
+function elvesTexture(scene) {
+  const size = 128;
+  const texture = new DynamicTexture('elves', { width: size, height: size }, scene, true);
+  const ctx = texture.getContext();
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, size, size);
+  const ring = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  ring.addColorStop(0, 'rgba(255,60,50,0.06)');
+  ring.addColorStop(0.55, 'rgba(255,60,50,0.12)');
+  ring.addColorStop(0.8, 'rgba(255,80,60,0.85)');
+  ring.addColorStop(0.9, 'rgba(255,120,90,0.5)');
+  ring.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = ring;
+  ctx.fillRect(0, 0, size, size);
+  texture.update();
+  return texture;
+}
+
+// A blue jet seen from the side: a narrow stem from the foot that opens into a fan of
+// strands, blue below and paler violet at the top. On black.
+function blueJetTexture(scene) {
+  const size = 128;
+  const texture = new DynamicTexture('blueJet', { width: size, height: size }, scene, true);
+  const ctx = texture.getContext();
+  const rand = seeded(9173);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, size, size);
+  ctx.globalCompositeOperation = 'lighter';
+  const glow = ctx.createLinearGradient(0, size, 0, 0);
+  glow.addColorStop(0, 'rgba(120,170,255,1)');
+  glow.addColorStop(0.6, 'rgba(80,120,255,0.8)');
+  glow.addColorStop(1, 'rgba(150,120,255,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.moveTo(size * 0.47, size);
+  ctx.lineTo(size * 0.53, size);
+  ctx.lineTo(size * 0.74, size * 0.04);
+  ctx.lineTo(size * 0.26, size * 0.04);
+  ctx.closePath();
+  ctx.fill();
+  for (let k = 0; k < 9; k++) {
+    let x = size * 0.5;
+    let y = size;
+    const lean = (rand() - 0.5) * 0.5;
+    ctx.strokeStyle = 'rgba(160,195,255,0.8)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    while (y > size * (0.05 + rand() * 0.2)) {
+      x += lean * 6 + (rand() - 0.5) * 3;
+      y -= 6 + rand() * 4;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
   texture.update();
   return texture;
 }
@@ -353,6 +413,20 @@ export function createGlows(scene, bodies) {
     return { ...card, up: null, age: 0, sizeKm: 0 };
   });
 
+  // ELVES (rings lying flat, high over the storm) and blue jets (standing up from it).
+  const elvesPicture = elvesTexture(scene);
+  const elves = [0, 1].map((i) => {
+    const card = lightCard(scene, `elves${i}`, elvesPicture);
+    card.mesh.rotationQuaternion = new Quaternion();
+    return { ...card, up: null, age: 0, sizeKm: 0 };
+  });
+  const blueJetPicture = blueJetTexture(scene);
+  const blueJets = [0, 1].map((i) => {
+    const card = lightCard(scene, `blueJet${i}`, blueJetPicture);
+    card.mesh.rotationQuaternion = new Quaternion();
+    return { ...card, up: null, age: 0, sizeKm: 0 };
+  });
+
   const bolts = Array.from({ length: BOLTS }, (_, n) => boltTexture(scene, n));
   // One set of flashes for each world with thunderstorms (core/glows.js STORMS).
   const storms = STORMS.map((storm) => {
@@ -421,7 +495,7 @@ export function createGlows(scene, bodies) {
 
   // now: this frame's bodies (km); position: the traveler (km); elapsed: seconds of
   // play (the bodies' spin runs off the same clock). Returns what flashed in this frame
-  // ('lightning', 'lightning:earth', 'sprite', 'impact'), else null.
+  // ('lightning', 'lightning:earth', 'sprite', 'elves', 'bluejet', 'impact'), else null.
   function update(dt, elapsed, now, sunPosition, position) {
     const find = (id) => now.find((b) => b.id === id);
     const sunFrom = (body) => new Vector3(...sunPosition.map((n, i) => n - body.position[i])).normalize();
@@ -563,6 +637,8 @@ export function createGlows(scene, bodies) {
     // Lightning: patches of night-side cloud lighting up, on Jupiter and on Earth.
     let lit = null;
     let sprited = false;
+    let ringed = false;
+    let jetted = false;
     for (const set of storms) {
       const { storm, flashes } = set;
       const world = find(storm.body);
@@ -585,6 +661,25 @@ export function createGlows(scene, bodies) {
             card.sizeKm = SPRITE.heightKm[0] + Math.random() * (SPRITE.heightKm[1] - SPRITE.heightKm[0]);
             card.material.emissiveTexture = spritePictures[Math.floor(Math.random() * spritePictures.length)];
             sprited = true;
+          }
+        } else if (storm.body === ELVES.body && Math.random() < ELVES.chance) {
+          // Or a red ring spreads high over it,
+          const card = elves.find((s) => !s.up);
+          if (card) {
+            card.up = up;
+            card.age = 0;
+            card.sizeKm = ELVES.sizeKm[0] + Math.random() * (ELVES.sizeKm[1] - ELVES.sizeKm[0]);
+            Quaternion.FromUnitVectorsToRef(Vector3.Forward(), new Vector3(...up), card.mesh.rotationQuaternion);
+            ringed = true;
+          }
+        } else if (storm.body === BLUE_JET.body && Math.random() < BLUE_JET.chance) {
+          // or a blue jet shoots up from the cloud top.
+          const card = blueJets.find((s) => !s.up);
+          if (card) {
+            card.up = up;
+            card.age = 0;
+            card.sizeKm = BLUE_JET.heightKm[0] + Math.random() * (BLUE_JET.heightKm[1] - BLUE_JET.heightKm[0]);
+            jetted = true;
           }
         }
         // Lying flat on the cloud tops, turned any way round.
@@ -671,6 +766,43 @@ export function createGlows(scene, bodies) {
       sprite.mesh.scaling.setAll(sprite.sizeKm / KM_PER_UNIT);
       sprite.material.alpha = 0.99 * spriteGlow(sprite.age);
     }
+    // ELVES: flat over the storm, spreading as they fade.
+    for (const ring of elves) {
+      if (!ring.up) continue;
+      ring.age += dt;
+      const now = elvesRing(ring.age);
+      if (ring.age >= ELVES.lifeS) {
+        ring.up = null;
+        ring.mesh.setEnabled(false);
+        continue;
+      }
+      const at = rel(earth.position.map((n, i) => n + ring.up[i] * (earth.radiusKm + ELVES.liftKm)), position);
+      ring.mesh.setEnabled(true);
+      ring.mesh.position.set(at[0], at[1], at[2]);
+      ring.mesh.scaling.setAll((ring.sizeKm * now.spread) / KM_PER_UNIT);
+      ring.material.alpha = 0.99 * now.light;
+    }
+    // Blue jets: standing up from the cloud top, turned to face the traveler, shooting up.
+    for (const jet of blueJets) {
+      if (!jet.up) continue;
+      jet.age += dt;
+      const now = blueJetGlow(jet.age);
+      if (jet.age >= BLUE_JET.lifeS) {
+        jet.up = null;
+        jet.mesh.setEnabled(false);
+        continue;
+      }
+      const tall = jet.sizeKm * now.rise;
+      const at = rel(earth.position.map((n, i) => n + jet.up[i] * (earth.radiusKm + BLUE_JET.liftKm + tall / 2)), position);
+      const up = new Vector3(...jet.up);
+      const toEye = new Vector3(-at[0], -at[1], -at[2]);
+      const level = toEye.subtract(up.scale(Vector3.Dot(toEye, up)));
+      if (level.lengthSquared() > 1e-9) Quaternion.FromLookDirectionLHToRef(level.normalize(), up, jet.mesh.rotationQuaternion);
+      jet.mesh.setEnabled(true);
+      jet.mesh.position.set(at[0], at[1], at[2]);
+      jet.mesh.scaling.set((jet.sizeKm * 0.5) / KM_PER_UNIT, tall / KM_PER_UNIT, 1);
+      jet.material.alpha = 0.99 * now.light;
+    }
     // Impact flashes on the Moon's night side.
     const moon = find('moon');
     const fromMoon = position.map((n, i) => n - moon.position[i]);
@@ -709,6 +841,8 @@ export function createGlows(scene, bodies) {
       impact.material.alpha = 0.99 * impactGlow(impact.age);
     }
     if (sprited) return 'sprite';
+    if (ringed) return 'elves';
+    if (jetted) return 'bluejet';
     if (lit) return lit;
     return hit ? 'impact' : null;
   }

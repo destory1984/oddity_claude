@@ -95,6 +95,30 @@ export function spriteGlow(age, sprite = SPRITE) {
   return (1 - t / (sprite.lifeS - 0.05)) ** 1.5;
 }
 
+// ELVES: a red ring that spreads over a thunderstorm at 90 km up, 300 km and more across
+// and gone in a thousandth of a second: the stroke's radio pulse lighting the foot of the
+// ionosphere. And a blue jet: a narrow cone of blue shot up from the cloud top to 40 km
+// or so. Both follow some of Earth's strokes (a stroke with a sprite has neither); drawn
+// larger and held far longer than life, as the sprites are.
+export const ELVES = { body: 'earth', chance: 0.22, liftKm: 130, sizeKm: [600, 1200], lifeS: 0.6 };
+export const BLUE_JET = { body: 'earth', chance: 0.18, liftKm: 45, heightKm: [450, 750], lifeS: 0.7 };
+
+// The ring `age` seconds after its stroke: how far it has spread (a share of its full
+// width) and how bright it is. It opens fast and slows, fading as it goes.
+export function elvesRing(age, elves = ELVES) {
+  if (age < 0 || age >= elves.lifeS) return { spread: 1, light: 0 };
+  const u = age / elves.lifeS;
+  return { spread: 0.25 + 0.75 * u ** 0.6, light: (1 - u) ** 1.5 };
+}
+
+// The jet `age` seconds after its stroke: how far up it has shot (a share of its full
+// height, all of it in under a fifth of a second) and how bright it is.
+export function blueJetGlow(age, jet = BLUE_JET) {
+  if (age < 0 || age >= jet.lifeS) return { rise: 1, light: 0 };
+  const fade = Math.max(0, age - 0.25) / (jet.lifeS - 0.25);
+  return { rise: Math.min(1, 0.2 + age / 0.18), light: (1 - fade) ** 1.5 };
+}
+
 // The curtain as a cone-shaped band about the spin axis (y): radius and height above
 // the equator plane at its foot and at its top, in km. north: true for the north pole.
 export function auroraBand(aurora, radiusKm, north = true) {
@@ -236,7 +260,7 @@ export function plumeUp(plume, spinRad) {
 // flashes are told when one lights.) Several may be in reach at once (near Jupiter: its
 // aurora and Io's footprint); the game tells them one at a time.
 // (Saturn is looked at from nine radii off, to take in its rings: the spokes are told from there.)
-export const TELL_RADII = { aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, backlit: 12, haze: 8, shine: 4, rings: 6, geyser: 3, ashen: 4, horizon: 4, ering: 40, flare: 3, flow: 5, tracks: 0.2, rain: 4, lava: 4, devils: 0.25, methane: 4, hood: 5, thread: 10, typhoon: 2.5, boats: 1.5, ash: 1.5 };
+export const TELL_RADII = { aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, backlit: 12, haze: 8, shine: 4, rings: 6, geyser: 3, ashen: 4, horizon: 4, ering: 40, flare: 3, flow: 5, tracks: 0.2, rain: 4, lava: 4, devils: 0.25, methane: 4, hood: 5, thread: 10, typhoon: 2.5, boats: 1.5, ash: 1.5, street: 1, shiptracks: 1, honeycomb: 1, anvils: 2, glory: 2 };
 // A comet's tail is told from within this far of its nucleus, while it is within this
 // many AU of the Sun (farther out it has no tail to speak of).
 export const TELL_TAIL_KM = 300000;
@@ -318,6 +342,14 @@ export function glowsNear(bodies, position) {
   if (near('earth', TELL_RADII.typhoon) && sun && side('earth', sun.position) > 0.2) found.push('typhoon:earth');
   if (near('earth', TELL_RADII.ash) && sun && side('earth', sun.position) > 0.2) found.push('ash:earth');
   if (near('earth', TELL_RADII.boats) && sun && side('earth', sun.position) < -0.2) found.push('boats:earth');
+  // Five of Earth's weather (v0.2.36): the vortex street behind Jeju, ship tracks and
+  // honeycomb cloud from low over the day side; the thunderheads lit orange from over
+  // the edge of day; the glory from between the Sun and Earth, looking straight down.
+  if (sun && side('earth', sun.position) > 0.2) {
+    for (const sight of ['street', 'shiptracks', 'honeycomb']) if (near('earth', TELL_RADII[sight])) found.push(`${sight}:earth`);
+  }
+  if (near('earth', TELL_RADII.anvils) && sun && Math.abs(side('earth', sun.position)) < 0.3) found.push('anvils:earth');
+  if (near('earth', TELL_RADII.glory) && sun && side('earth', sun.position) > 0.8) found.push('glory:earth');
   // The dark jets of Mars's south polar cap, from over the south.
   const mars = bodies.find((b) => b.id === 'mars');
   if (mars && near('mars', TELL_RADII.geyser) && side('mars', mars.position.map((n, i) => n - (i === 1 ? 1 : 0))) > 0.4) found.push('geyser:mars');

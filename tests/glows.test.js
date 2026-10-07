@@ -6,6 +6,7 @@ import {
   PLUMES, PLUME_DAY_S, plumeUp, glowNear, glowsNear, TELL_RADII, TELL_JETS_KM, COUNTERGLOW_FROM_KM,
   IMPACT_GAP_S, IMPACT_LIFE_S, impactGap, impactGlow,
   NIGHT_CLOUDS, sheetBand, FOOTPRINT, footprintUp, SODIUM_TAIL, JETS, jetDirections, SPRITE, spriteGlow, SPOKES,
+  ELVES, elvesRing, BLUE_JET, blueJetGlow,
 } from '../src/core/glows.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 import { eventMessage } from '../src/ui/messages.js';
@@ -102,7 +103,8 @@ test('where several sights are in reach they are all listed, the nearest thing f
     const b = bodyById(id);
     return [b.position[0], b.position[1] + b.radiusKm * (1 + radii), b.position[2]];
   };
-  assert.deepEqual(glowsNear(BODIES, above('earth', 1)), ['aurora:earth', 'clouds:earth', 'flare:sun']);
+  // (Over the pole she stands over the edge of day: the thunderheads' last light is told.)
+  assert.deepEqual(glowsNear(BODIES, above('earth', 1)), ['aurora:earth', 'clouds:earth', 'flare:sun', 'anvils:earth']);
   assert.deepEqual(glowsNear(BODIES, above('earth', 2.5)), ['aurora:earth', 'flare:sun']);
   assert.deepEqual(glowsNear(BODIES, above('jupiter', 1)), ['aurora:jupiter', 'footprint:io', 'flow:jupiter']);
   assert.deepEqual(glowsNear(BODIES, above('saturn', 1)), ['aurora:saturn', 'spokes:saturn', 'hexagon:saturn', 'rain:saturn']);
@@ -166,6 +168,37 @@ test("a comet's jets leave the day side, each its own way, none toward the night
   }
   assert.equal(JETS.body, 'halley');
   assert.ok(JETS.heightKm > 0 && JETS.widthKm > 0);
+});
+
+test('the weather of Earth: three sights from low over the day side, the glory from straight down-Sun, the anvils from the edge of day', () => {
+  const earth = BODIES.find((b) => b.id === 'earth');
+  const sun = BODIES.find((b) => b.kind === 'star');
+  const toSun = sun.position.map((n, i) => n - earth.position[i]);
+  const far = Math.hypot(...toSun);
+  const from = (share, radii) => earth.position.map((n, i) => n + (toSun[i] / far) * share * earth.radiusKm * (1 + radii));
+  const day = glowsNear(BODIES, from(1, 0.8));
+  for (const id of ['street:earth', 'shiptracks:earth', 'honeycomb:earth', 'glory:earth']) assert.ok(day.includes(id), id);
+  assert.ok(!day.includes('anvils:earth'));
+  // Farther off than two radii the glory is not told, nor the three in the cloud.
+  const off = glowsNear(BODIES, from(1, 2.2));
+  for (const id of ['street:earth', 'shiptracks:earth', 'honeycomb:earth', 'glory:earth']) assert.ok(!off.includes(id), id);
+  // From the night side none of them.
+  const night = glowsNear(BODIES, from(-1, 0.8));
+  for (const id of ['street:earth', 'shiptracks:earth', 'honeycomb:earth', 'glory:earth', 'anvils:earth']) assert.ok(!night.includes(id), id);
+  for (const id of ['street:earth', 'shiptracks:earth', 'honeycomb:earth', 'glory:earth', 'anvils:earth', 'elves', 'bluejet']) {
+    assert.ok(eventMessage({ type: 'glow', id }).length > 20, id);
+  }
+});
+
+test('ELVES spread as they fade and a blue jet shoots up at once; both are gone in under a second', () => {
+  assert.ok(elvesRing(0).spread < elvesRing(0.3).spread && elvesRing(0.3).spread < 1);
+  assert.ok(elvesRing(0).light === 1 && elvesRing(0.3).light < 0.5);
+  assert.equal(elvesRing(ELVES.lifeS).light, 0);
+  assert.ok(blueJetGlow(0).rise < 0.3 && blueJetGlow(0.18).rise === 1);
+  assert.equal(blueJetGlow(0.2).light, 1);
+  assert.ok(blueJetGlow(0.5).light < 1);
+  assert.equal(blueJetGlow(BLUE_JET.lifeS).light, 0);
+  assert.ok(ELVES.lifeS < 1 && BLUE_JET.lifeS < 1 && ELVES.chance + BLUE_JET.chance < 0.6);
 });
 
 test('a sprite lights a moment after its stroke and is gone in under half a second', () => {

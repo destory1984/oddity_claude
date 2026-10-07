@@ -74,7 +74,7 @@ export const SHEETS = [
 // 'belt'): she looks up at what is in the sky, is startled by what flashes or happens
 // of a sudden, and points at the rest.
 const SEE_UP = ['aurora', 'counterglow', 'meteor', 'clouds', 'airglow', 'flare', 'shine'];
-const SEE_WOW = ['lightning', 'sprite', 'impact', 'transit', 'tailcut', 'plume', 'jets', 'geyser'];
+const SEE_WOW = ['lightning', 'sprite', 'elves', 'bluejet', 'impact', 'transit', 'tailcut', 'plume', 'jets', 'geyser'];
 export function seeFor(sight) {
   const kind = String(sight).split(':')[0];
   if (SEE_UP.includes(kind)) return 'up';

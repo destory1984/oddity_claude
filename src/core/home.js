@@ -216,8 +216,18 @@ export const MARS_AURORA_VIEW = {
   forward: [0.0005, -0.8444, 0.5357],
   up: [-0.4482, -0.4791, -0.7547],
 };
-// (The places the user or I stood at or chose are kept as they are.)
-export const AURORA_VIEWS = { ...drawn, earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW, uranus: URANUS_AURORA_VIEW, neptune: NEPTUNE_AURORA_VIEW, ganymede: GANYMEDE_AURORA_VIEW, mars: MARS_AURORA_VIEW };
+// Venus's: where the user stood (2026-10-08: "여기"): on the equator's side of the
+// northern band (40 degrees) at 34.3 degrees north, 369 km over the clouds, 50 degrees
+// round from midnight, looking toward the pole: the dim green glow lies low along the
+// edge of the globe under her, the stars over it.
+export const VENUS_AURORA_VIEW = {
+  body: 'venus',
+  position: [-0.5616, 0.5983, -0.6727],
+  forward: [0.5007, 0.8294, 0.248],
+  up: [-0.535, 0.5217, -0.6646],
+};
+// (All eight are now places the user stood at or chose; `drawn` would give a ninth its own.)
+export const AURORA_VIEWS = { ...drawn, earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW, uranus: URANUS_AURORA_VIEW, neptune: NEPTUNE_AURORA_VIEW, ganymede: GANYMEDE_AURORA_VIEW, mars: MARS_AURORA_VIEW, venus: VENUS_AURORA_VIEW };
 
 // Where that is now: { position, up, facing }, as homeSpot gives.
 export function auroraSpot(body, sunPosition, view = AURORA_VIEW) {

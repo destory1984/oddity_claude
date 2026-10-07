@@ -80,6 +80,10 @@ test('five come down in the older ways: Mars 3 under a parachute, three inside a
     assert.equal(replayFrame(id, 0).bag, 1, id);
     assert.ok(replayFrame(id, LANDER_REPLAYS[id].downAt).liftKm < 1e-9, id);
     assert.ok(replayFrame(id, LANDER_REPLAYS[id].seconds).bag === 0, id);
+    // Shut inside the bags; once they are down it opens (the place's own model stands there).
+    assert.ok(!replayFrame(id, LANDER_REPLAYS[id].downAt).open && replayFrame(id, LANDER_REPLAYS[id].seconds - 1).open, id);
+    // (Its bubble is gone, or nearly, before it opens: the bubble goes with what came down.)
+    assert.ok(id === 'beagle2' || LANDER_REPLAYS[id].say[1] <= LANDER_REPLAYS[id].openAt, id);
   }
   for (const id of ['mars3', 'perseverance']) {
     assert.equal(replayFrame(id, 0).liftKm, 14, id);

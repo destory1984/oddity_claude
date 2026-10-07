@@ -3497,14 +3497,14 @@
  "로켓이 땅 위 10→15m에서 떨어지는 속도를 0으로 만들고, 공기 주머니째 땅으로 떨어뜨립니다.": "Rockets bring its falling speed to 0 at 10→15 m above the ground, and drop it, air bags and all, to the ground.",
  "스물여덟 번을 튀었습니다. 작은 분화구에 한 번 빠졌다 나오기도 하며 굴러가 멈췄습니다.": "It bounced twenty-eight times. It rolled on, once falling into a small crater and coming out again, and stopped.",
  "꽃잎을 열고 선 곳은 컬럼비아 기념 기지라 부릅니다. 그 안에 185kg의 탐사차가 타고 있었습니다.": "The place where it opened its petals and stood is called the Columbia Memorial Station. Inside rode a rover of 185 kg.",
- "통통통. 스물여덟 번!": "Boing, boing. Twenty-eight!",
+ "통통통. 스물여덟 번!": "Boing! Twenty-eight!",
  "오퍼튜니티의 착륙": "Opportunity's landing",
  "2004년 1월 25일": "January 25, 2004",
  "2004년 1월 25일. 스피릿의 쌍둥이 오퍼튜니티가 낙하산에 매달려 메리디아니 평원으로 내려옵니다.": "January 25, 2004. Opportunity, Spirit's twin, comes down toward Meridiani Planum, hanging under a parachute.",
  "낙하산과 로켓으로 속도를 줄인 뒤, 공기 주머니에 싸인 채 떨어져 스물여섯 번을 튀고 굴렀습니다.": "After slowing with its parachute and rockets it fell wrapped in air bags, and bounced and rolled twenty-six times.",
  "멈춘 곳은 지름 22m의 작은 분화구 안이었습니다. 겨눈 것이 아니라 우연이어서 '홀인원'이라 불렀습니다.": "It stopped inside a small crater 22 m across. It was not aimed but chance, so it was called \"a hole in one\".",
  "스피릿이 내린 지 3주 만입니다. 쌍둥이 탐사차 둘이 화성의 서로 반대편에 섰습니다.": "It is 3 weeks since Spirit landed. The two twin rovers stood on opposite sides of Mars.",
- "데굴데굴. 홀인원!": "Roly-poly. A hole in one!",
+ "데굴데굴. 홀인원!": "A hole in one!",
  "주룽의 착륙": "Zhurong's landing",
  "2021년 5월 15일": "May 15, 2021",
  "2021년 5월 15일. 석 달 동안 화성을 돌던 톈원 1호에서 착륙선이 떨어져 나와 유토피아 평원으로 내려옵니다.": "May 15, 2021. A lander separates from Tianwen-1, which has circled Mars for three months, and comes down toward Utopia Planitia.",
@@ -3542,5 +3542,9 @@
  "아이쿠": "Oops",
  "어~ 어~ 어~": "Whoa~ whoa~ whoa~",
  "잘 왔어. 이제 쉬어": "Welcome. Rest now",
- "쿵~": "Thud~"
+ "쿵~": "Thud~",
+ "오퍼튜니티": "Opportunity",
+ "큐리오시티": "Curiosity",
+ "보이저 2호": "Voyager 2",
+ "루시": "Lucy"
 }

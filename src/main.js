@@ -1731,8 +1731,8 @@ ${STORY_MORE[target.id]}` : told };
     // The game starts again in the other language, from this very place and moment.
     onLanguage: () => saveResume({ position: [...state.position], orientation: [...state.orientation], simTime, selectedId }),
     // A link out (About): the same, kept for half an hour.
-    onLeave: () => saveResume({ position: [...state.position], orientation: [...state.orientation], simTime, selectedId, until: Date.now() + 30 * 60 * 1000 }),
-    reopen: Boolean(resume),
+    onLeave: () => saveResume({ position: [...state.position], orientation: [...state.orientation], simTime, selectedId, tab: 'about', until: Date.now() + 30 * 60 * 1000 }),
+    reopen: resume ? resume.tab ?? true : false,
   });
   // Switching the layout moves every planet, so the game starts over (the log is kept).
   $('layoutNow').textContent = layout === 'today' ? t('지금: 오늘의 하늘(오늘 날짜의 실제 위치).') : t('지금: 여행 배치(행성을 태양 둘레에 고루 흩어 놓음).');

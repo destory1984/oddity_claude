@@ -281,7 +281,7 @@ export function takeResume() {
     const numbers = (list, n) => Array.isArray(list) && list.length === n && list.every(Number.isFinite);
     if (place && Number.isFinite(place.until) && Date.now() > place.until) return null;
     if (!place || !numbers(place.position, 3) || !Array.isArray(place.orientation) || !place.orientation.every(Number.isFinite)) return null;
-    return { position: place.position, orientation: place.orientation, simTime: Number.isFinite(place.simTime) ? place.simTime : 0, selectedId: typeof place.selectedId === 'string' ? place.selectedId : null };
+    return { position: place.position, orientation: place.orientation, simTime: Number.isFinite(place.simTime) ? place.simTime : 0, selectedId: typeof place.selectedId === 'string' ? place.selectedId : null, tab: typeof place.tab === 'string' ? place.tab : null };
   } catch {
     return null;
   }

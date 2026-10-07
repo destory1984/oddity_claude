@@ -387,7 +387,12 @@ export function createSiteModels(scene, siteList) {
   // from) and sizeKm (drawn that wide whatever the distance: Philae on its small comet).
   function update(sites, bodies, position, replay = null) {
     if (!replay) playing = null;
-    for (const [id, old] of then) if (replay?.id !== id || replay.open) old.node.setEnabled(false);
+    for (const [id, old] of then) {
+      if (replay?.id !== id || replay.open) old.node.setEnabled(false);
+      // (A bubble may hang on the place's own model once the scene's has opened: put away
+      // with the scene.)
+      if (replay?.id !== id) for (const bubble of [old.say, old.say2]) bubble?.setEnabled(false);
+    }
     for (const site of sites) {
       const card = cards.get(site.id);
       // (A drawn place whose day is being played: the stage has the drawing as one of
@@ -402,6 +407,11 @@ export function createSiteModels(scene, siteList) {
       if (!now && !old) continue;
       if (old && now) now.setEnabled(false);
       const node = old ? old.node : now;
+      // What speaks: the scene's model, or once that has opened (core/replay.js `open`) the
+      // place's own model, which then carries the scene's bubbles (Beagle 2 says its line
+      // after it has opened).
+      const speaker = old ?? (now && replay?.id === site.id && replay.open ? then.get(site.id) ?? null : null);
+      if (speaker && !speaker.fire) for (const bubble of [speaker.say, speaker.say2]) if (bubble && bubble.parent !== node) bubble.parent = node;
       const rel = site.position.map((n, i) => (n - position[i]) / KM_PER_UNIT);
       const distanceKm = Math.hypot(...rel) * KM_PER_UNIT;
       node.setEnabled(distanceKm < SITE_VISIBLE_KM && !(old && replay.gone && !old.body));
@@ -454,9 +464,9 @@ export function createSiteModels(scene, siteList) {
           old.tumble.position.y = old.shape.centre + (old.shape.radius - old.shape.centre) * full;
         }
       }
-      for (const [bubble, size] of [[old?.say, replay?.say ?? 0], [old?.say2, replay?.say2 ?? 0]]) {
+      for (const [bubble, size] of [[speaker?.say, replay?.say ?? 0], [speaker?.say2, replay?.say2 ?? 0]]) {
         // (A streak's bubbles stand where it ends, not beside it: placed below.)
-        if (!bubble || old.fire) continue;
+        if (!bubble || speaker.fire) continue;
         bubble.setEnabled(size > 0.01);
         if (bubble.isEnabled()) {
           // Up and to the right of it as the eye sees it, so that its tail points at it.

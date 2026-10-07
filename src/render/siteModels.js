@@ -419,9 +419,15 @@ function odysseus(scene, name, mats, { upright = false } = {}) {
 
 // Beagle 2: a pocket watch that opened its lid and unfolded four round solar panels;
 // two of them never opened, which is why it was never heard from.
-function beagle(scene, name, mats) {
+// stowed: as it came down, shut like a pocket watch, the lid on the base.
+function beagle(scene, name, mats, { stowed = false } = {}) {
   const root = new TransformNode(name, scene);
   drum(scene, `${name}Base`, root, mats.goldFoil, { height: 0.08, diameterTop: 0.36, diameterBottom: 0.26, tessellation: 20 }, [0, 0.04, 0]);
+  if (stowed) {
+    drum(scene, `${name}LidShut`, root, mats.goldFoil, { height: 0.05, diameterTop: 0.26, diameterBottom: 0.36, tessellation: 20 }, [0, 0.105, 0]);
+    drum(scene, `${name}Seam`, root, mats.dark, { height: 0.008, diameter: 0.365, tessellation: 20 }, [0, 0.08, 0]);
+    return fuse(scene, root);
+  }
   drum(scene, `${name}Lid`, root, mats.goldFoil, { height: 0.03, diameter: 0.36, tessellation: 20 }, [0.36, 0.02, 0]);
   for (const [k, x, z, y] of [[0, 0.3, 0.3, 0.04], [1, 0.3, -0.3, 0.04], [2, 0.36, 0, 0.07]]) {
     drum(scene, `${name}Panel${k}`, root, mats.cells, { height: 0.008, diameter: 0.3, tessellation: 5 }, [x, y, z]);
@@ -1138,7 +1144,17 @@ const LANDER_STAGE_BUILD = {
     ed: astronaut(scene, `${name}Ed`, mats),
     ball: lump(scene, `${name}Ball`, mats.white, 0.035),
   })),
-  apollo15: apolloCrew('apollo15', (scene, name, mats) => ({ rover: lunarRover(scene, `${name}Rover`, mats) })),
+  // (The car with the two aboard, side by side, as it drives off.)
+  apollo15: apolloCrew('apollo15', (scene, name, mats) => {
+    const car = new TransformNode(`${name}Car`, scene);
+    lunarRover(scene, `${name}Rover`, mats).parent = car;
+    for (const side of [-1, 1]) {
+      const rider = astronaut(scene, `${name}Rider${side}`, mats);
+      rider.parent = car;
+      rider.position.set(-0.02, 0.12, side * 0.07);
+    }
+    return { rover: car };
+  }),
   apollo16: apolloCrew('apollo16', (scene, name, mats) => ({
     flag: flagAlone(scene, `${name}Flag`, mats),
     john: astronaut(scene, `${name}John`, mats),
@@ -1409,7 +1425,7 @@ export const SAYS_BY = { cassiniPlunge: () => t('토성') };
 // right edge of a narrow phone's view while it floats.
 // (And Saturn's in Cassini's plunge: Cassini comes in from the right, across where a
 // bubble on the right would stand.)
-export const SAYS_ON_LEFT = new Set(['philaeLanding', 'cassiniPlunge']);
+export const SAYS_ON_LEFT = new Set(['philaeLanding', 'cassiniPlunge', 'spirit', 'opportunity']);
 
 // A second thing one of them says later in its scene (core/replay.js `say2`).
 export const SECOND_SAYS = {
@@ -1446,7 +1462,7 @@ export const SITE_REPLAY_BUILD = {
   // Spirit and Opportunity came down as Pathfinder did, each folded on its lander's base.
   spirit: [pathfinder, { stowed: true }, 'bag', { radius: 0.66, centre: 0.2, lobes: 4 }],
   opportunity: [pathfinder, { stowed: true }, 'bag', { radius: 0.66, centre: 0.2, lobes: 4 }],
-  beagle2: [beagle, {}, 'bag', { radius: 0.34, centre: 0.06, lobes: 3 }],
+  beagle2: [beagle, { stowed: true }, 'bag', { radius: 0.34, centre: 0.06, lobes: 3 }],
   // Not a story place of its own: played on the comet (core/replay.js philaeLanding).
   philaeLanding: [philae, {}, 'bare'],
   // 'launch': it goes up, in pieces (falconLaunch above; render/craft.js moves them).

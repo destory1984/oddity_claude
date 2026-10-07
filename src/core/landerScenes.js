@@ -266,9 +266,11 @@ export const LANDER_REPLAYS = {
   // Mars 3: the first thing to land whole on Mars, heard for twenty seconds.
   mars3: scene('mars3', { seconds: 24, downAt: 17, fromKm: 14, at: [0, 6, 12, 18], say: [18.2, 23], sounds: [[0, 'chute']] }),
   // Beagle 2: nothing was heard; this is how it was meant to go, and it did land.
-  beagle2: scene('beagle2', { ...BOUNCES, hops: BOUNCES.hops.slice(0, 3).map((hop, i) => ({ ...hop, until: [9, 12.5, 16][i] })), turns: 3, at: [0, 5, 11, 17], say: [18.6, 24], sounds: [[0, 'chuteShort'], [5, 'bounce'], [9, 'bounce'], [12.5, 'bounce']] }),
-  spirit: scene('spirit', { ...BOUNCES, at: [0, 5, 11, 17], say: [13, 18.6] }),
-  opportunity: scene('opportunity', { ...BOUNCES, at: [0, 5, 13, 19], say: [13.4, 18.8] }),
+  beagle2: scene('beagle2', { ...BOUNCES, hops: BOUNCES.hops.slice(0, 3).map((hop, i) => ({ ...hop, until: [9, 12.5, 16][i] })), turns: 3, openAt: 18.4, at: [0, 5, 11, 17], say: [18.6, 24], sounds: [[0, 'chuteShort'], [5, 'bounce'], [9, 'bounce'], [12.5, 'bounce']] }),
+  // (Once the bags are down the petals open: from `openAt` the place's own model stands
+  // there, the rover for these two, Beagle 2 with its panels half out.)
+  spirit: scene('spirit', { ...BOUNCES, openAt: 19.4, at: [0, 5, 11, 17], say: [11.4, 16.2] }),
+  opportunity: scene('opportunity', { ...BOUNCES, openAt: 19.6, at: [0, 5, 13, 19], say: [11.6, 16.2] }),
   // Perseverance, let down on cords as Curiosity was.
   perseverance: scene('perseverance', { seconds: 24, downAt: 17, fromKm: 14, at: [0, 6, 12, 18], say: [17.8, 22.8], sounds: [[13.3, 'landingBurn'], [17.2, 'clunk'], [17.5, 'ascent']] }),
 };

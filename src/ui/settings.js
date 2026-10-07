@@ -12,7 +12,8 @@ const $ = (id) => document.getElementById(id);
 // onOpen, onClose: the game is held while the settings are open.
 // today: () => 'YYYY-MM-DD', the device's own day.
 // onLanguage: called just before the game starts again in the language chosen.
-// reopen: the settings open at once (the game has just started again from them).
+// reopen: the settings open at once (the game has just started again from them); a tab's
+// name opens them at that tab (back from a link on the About tab).
 // (Each written out in full: the titles differ by language.)
 export const SAGAN_PAGES = {
   ko: 'https://ko.wikipedia.org/wiki/%EC%B9%BC_%EC%84%B8%EC%9D%B4%EA%B1%B4',
@@ -93,7 +94,10 @@ export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, 
   for (const id of ['aboutMemory', 'privacyLink']) $(id).addEventListener('click', () => onLeave());
   dialog.addEventListener('close', () => onClose());
 
-  if (reopen) $('settingsButton').click();
+  if (reopen) {
+    $('settingsButton').click();
+    if (typeof reopen === 'string' && dialog.querySelector(`section[data-tab="${reopen}"]`)) showTab(reopen);
+  }
 
   return { isOpen: () => dialog.open };
 }

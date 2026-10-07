@@ -212,3 +212,16 @@ export function milestoneLine(before, after) {
   const hit = Object.keys(MILESTONES).map(Number).find((n) => before < n && after >= n);
   return hit ? MILESTONES[hit] : null;
 }
+
+// Earth's weather she explains herself (the user, 2026-10-07: "지구의 기상현상을 근거리에서
+// 보면, 하루에 한 번은 소라가 설명해주는 것도 넣어", then of three ways offered: "2"): after
+// her own word (SIGHTS) come these two lines, one after the other, in place of the notice.
+export const SIGHT_TELLS = {
+  'street:earth': [t('한라산이 바람을 둘로 갈라서 그래.'), t('섬 뒤에서 왼쪽 오른쪽 번갈아 말려.')],
+  'anvils:earth': [t('높이 솟은 번개 구름의 머리야.'), t('땅은 저물어도 저기는 아직 해가 닿아.')],
+  'shiptracks:earth': [t('배가 지나간 자국이야.'), t('배 연기에 물방울이 맺혀 더 하얘진대.')],
+  'honeycomb:earth': [t('찬 바다 위에서 공기가 오르내려서 그래.'), t('오르는 데는 구름, 내리는 데는 맑아.')],
+  'glory:earth': [t('해를 등지고 구름을 보면 생겨.'), t('비행기 창밖으로도 볼 수 있대.')],
+  elves: [t('번개 한참 위 하늘에서 퍼진 빛이야.'), t('눈 깜짝할 새보다 빨리 사라져.')],
+  bluejet: [t('번개가 하늘 쪽으로 친 거야.'), t('구름 위로 40km까지 올라간대.')],
+};

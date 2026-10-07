@@ -4,16 +4,19 @@
 // first was gone before it could be read.
 const MIN_S = 2.5;
 // No more than this many wait; an older waiting line gives way.
-const WAITING = 2;
+const WAITING = 3;
 
 export function createSay(el) {
   let timer = null;
   let nextTimer = null;
   let shownAt = -Infinity;
+  // How long the line now up is kept before the next may take its place.
+  let hold = MIN_S;
   const queue = [];
 
-  function display(text, seconds) {
+  function display(text, seconds, keep) {
     shownAt = performance.now();
+    hold = keep;
     el.textContent = text;
     el.classList.add('on');
     clearTimeout(timer);
@@ -24,21 +27,23 @@ export function createSay(el) {
     nextTimer = null;
     const line = queue.shift();
     if (!line) return;
-    display(line.text, line.seconds);
-    if (queue.length) nextTimer = setTimeout(next, MIN_S * 1000);
+    display(line.text, line.seconds, line.keep);
+    if (queue.length) nextTimer = setTimeout(next, hold * 1000);
   }
 
   return {
-    show(text, seconds = 5) {
+    // keep: how long it stays before a line that follows may replace it (a line that
+    // explains something takes longer to read).
+    show(text, seconds = 5, keep = MIN_S) {
       const since = (performance.now() - shownAt) / 1000;
-      if (!queue.length && (since >= MIN_S || !el.classList.contains('on'))) {
-        display(text, seconds);
+      if (!queue.length && (since >= hold || !el.classList.contains('on'))) {
+        display(text, seconds, keep);
         return;
       }
       if (el.textContent === text || queue.some((line) => line.text === text)) return;
-      queue.push({ text, seconds });
+      queue.push({ text, seconds, keep });
       if (queue.length > WAITING) queue.shift();
-      if (!nextTimer) nextTimer = setTimeout(next, Math.max(0, MIN_S - since) * 1000);
+      if (!nextTimer) nextTimer = setTimeout(next, Math.max(0, hold - since) * 1000);
     },
     // Whether a line is up now (she is drawn speaking while it is).
     showing: () => el.classList.contains('on'),

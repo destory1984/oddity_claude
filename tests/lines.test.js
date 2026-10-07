@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   LANDED, IDLE, AGAIN, MILESTONES, freshLine, milestoneLine,
-  NEAR, DEEP, REAR, PHOTO, JUMP, DOCK, FAST, SIGHTS, fastLine,
+  NEAR, DEEP, REAR, PHOTO, JUMP, DOCK, FAST, SIGHTS, SIGHT_TELLS, fastLine,
 } from '../src/core/lines.js';
 import { MEMOS } from '../src/core/story.js';
 import { BODIES } from '../src/core/bodies.js';
@@ -52,7 +52,7 @@ test('a milestone line comes when the count crosses 80, 120 or 160', () => {
 test('her lines about the world she is near, what she does and what she sees: all short, none said twice', () => {
   const all = [
     ...IDLE, ...AGAIN, ...Object.values(MILESTONES), ...Object.values(LANDED), ...Object.values(NEAR).flat(),
-    ...DEEP, ...REAR, ...PHOTO, ...JUMP, ...DOCK, ...Object.values(FAST), ...Object.values(SIGHTS),
+    ...DEEP, ...REAR, ...PHOTO, ...JUMP, ...DOCK, ...Object.values(FAST), ...Object.values(SIGHTS), ...Object.values(SIGHT_TELLS).flat(),
   ];
   all.forEach((line, i) => short(line, `${i} ${line}`));
   assert.equal(new Set(all).size, all.length);
@@ -67,4 +67,12 @@ test('a speed line comes when she first passes one, ten and fifty times the spee
   assert.equal(fastLine(9, 12), FAST[10]);
   assert.equal(fastLine(40, 60), FAST[50]);
   assert.equal(fastLine(60, 40), null);
+});
+
+test('Earth\'s weather she explains herself: two lines for each sight that has her word', () => {
+  assert.equal(Object.keys(SIGHT_TELLS).length, 7);
+  for (const [id, tells] of Object.entries(SIGHT_TELLS)) {
+    assert.ok(SIGHTS[id], id);
+    assert.equal(tells.length, 2, id);
+  }
 });

@@ -55,7 +55,7 @@ import { palFor } from './core/pal.js';
 import { seeFor, SEE_S } from './core/sprite.js';
 import {
   LANDED, IDLE, AGAIN, IDLE_AFTER_S, IDLE_GAP_S, freshLine, milestoneLine,
-  NEAR, NEAR_RADII, DEEP, DEEP_FROM_KM, REAR, PHOTO, JUMP, DOCK, SIGHTS, fastLine,
+  NEAR, NEAR_RADII, DEEP, DEEP_FROM_KM, REAR, PHOTO, JUMP, DOCK, SIGHTS, SIGHT_TELLS, fastLine,
 } from './core/lines.js';
 import {
   TOURS, tourById, stopName, stopTarget, currentStop, startTour, quitTour, stopReached, stopHint, advanceTour, allToursDone, stampFile, CRANE_FILE,
@@ -2393,10 +2393,14 @@ ${STORY_MORE[target.id]}` : told };
       markTold(sight);
       glowTellWait = SIGHT_GAP_S;
       // Her own word under the notice that explains it, and a gesture toward it.
-      if (SIGHTS[sight]) say.show(SIGHTS[sight]);
+      // Earth's weather she explains herself, in two lines after her word; every other
+      // sight has the notice.
+      const tells = SIGHT_TELLS[sight];
+      if (SIGHTS[sight]) say.show(SIGHTS[sight], 5, tells ? 3 : undefined);
       seeKind = seeFor(sight);
       seeUntil = performance.now() + SEE_S * 1000;
-      toast.show(eventMessage({ type: 'glow', id: sight }), null, SIGHT_S);
+      if (tells) for (const line of tells) say.show(line, 6, 4.5);
+      else toast.show(eventMessage({ type: 'glow', id: sight }), null, SIGHT_S);
     }
     if (view.inBelt && !beltSeen && !replay) {
       beltSeen = true;

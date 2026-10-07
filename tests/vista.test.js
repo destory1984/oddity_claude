@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, HEART_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, NEPTUNE_RISE, vistaSpot, warpSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
+import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, HEART_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, NEPTUNE_RISE, DARK_SPOT, DARK_SPOT_VIEW, vistaSpot, warpSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
 import { forward, up } from '../src/core/orientation.js';
 
 const dot = (a, b) => a.reduce((sum, n, i) => sum + n * b[i], 0);
@@ -10,7 +10,7 @@ const sun = { position: [0, 0, 0] };
 // A Sun straight over where the view of a world stands at timeS (so its place is lit).
 function noon(id, body, timeS) {
   for (const position of [[9e9, 0, 0], [-9e9, 0, 0], [0, 0, 9e9], [0, 0, -9e9]]) {
-    const spot = vistaSpot(id, { body, sun: { position }, earth: { position: [0, 0, 0] }, timeS });
+    const spot = vistaSpot(id, { body, sun: { position }, earth: { position: [0, 0, 0] }, timeS, of: () => ({ position: [1e5, 0, 0], radiusKm: 1000 }) });
     if (!spot.free) return { position: body.position.map((n, i) => n + spot.up[i] * 1e9) };
   }
   throw new Error('no lit side');
@@ -145,10 +145,18 @@ test('the view of Uranus: off the sunlit face of its rings, though they face the
   }
 });
 
-test('the view of Neptune: low over Triton\'s ground, Neptune above the level before her; the trip goes round Neptune', () => {
+test('the view of Neptune: over its dark spot by day; by night low over Triton\'s ground, Neptune above the level', () => {
   const neptune = { position: [4.4e9, 0, 3e8], radiusKm: 24622 };
   const triton = { position: [4.4e9 + 50000, 4000, 3e8 - 30000], radiusKm: 1353.4 };
-  const spot = vistaSpot('neptune', { body: neptune, sun, earth: sun, of: () => triton });
+  const day = noon('neptune', neptune, 0);
+  const over = vistaSpot('neptune', { body: neptune, sun: day, earth: sun, of: () => triton });
+  assert.ok(!over.free && VISTA_HELD.includes('neptune'));
+  assert.ok(Math.abs(Math.asin(over.up[1]) * 180 / Math.PI - DARK_SPOT_VIEW.latDeg) < 1e-6);
+  assert.ok(DARK_SPOT_VIEW.latDeg < DARK_SPOT.latDeg && DARK_SPOT_VIEW.lonDeg === DARK_SPOT.lonDeg);
+  assert.ok(dot(forward(over.facing), over.up) < -0.99);
+  const night = { position: neptune.position.map((n, i) => 2 * n - day.position[i]) };
+  const spot = vistaSpot('neptune', { body: neptune, sun: night, earth: sun, of: () => triton });
+  assert.equal(spot.free, true);
   assert.ok(Math.abs(Math.hypot(...sub(spot.position, triton.position)) - triton.radiusKm - NEPTUNE_RISE.heightKm) < 1e-6);
   const ground = unit(sub(spot.position, triton.position));
   const toNeptune = unit(sub(neptune.position, spot.position));

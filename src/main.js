@@ -1070,10 +1070,12 @@ ${STORY_MORE[target.id]}` : told };
     enceladus: t('얼음 분수 곁으로 토성이 보이는 자리입니다.'),
     pluto: t('명왕성의 하트가 내려다보이는 자리입니다. 움직이면 풀려납니다.'),
     uranus: t('천왕성의 고리가 한눈에 들어오는 자리입니다.'),
-    neptune: t('해왕성이 트리톤 지평선 위에 떠 있는 자리입니다.'),
+    neptune: t('대흑점이 내려다보이는 자리입니다. 움직이면 풀려납니다.'),
   };
   // What the flight line says while she is held over one.
-  const VISTA_OVER = { jupiter: t('대적점 위'), mars: t('마리너 계곡 위'), pluto: t('명왕성의 하트 위') };
+  const VISTA_OVER = { jupiter: t('대적점 위'), mars: t('마리너 계곡 위'), pluto: t('명왕성의 하트 위'), neptune: t('해왕성 대흑점 위') };
+  // What is said on arrival where the view over a place gave way to another (its place in the night).
+  const VISTA_FREE_TOLD = { pluto: t('명왕성의 낮 쪽입니다. 하트는 지금 밤 쪽에 있습니다.'), neptune: t('대흑점은 지금 밤 쪽에 있습니다. 트리톤 지평선 위로 해왕성이 보이는 자리입니다.') };
   function goHome(kind) {
     if (photo.active() || warp.busy() || paused || (docked && !isDocked(docked)) || (visit && !hasArrived(visit))) return;
     const bodyId = kind === 'vista' || (kind === 'aurora' && AURORA_VIEWS[selectedId]) ? selectedId : HOME.body;
@@ -1089,7 +1091,7 @@ ${STORY_MORE[target.id]}` : told };
       kind, bodyId, spot,
       // (free: a view that is not over a place of the ground this time: Pluto's by night.)
       hold: kind === 'home' || (kind === 'vista' && VISTA_HELD.includes(bodyId) && !first.free),
-      told: kind === 'home' ? t('한국이 내려다보이는 자리입니다. 움직이면 풀려납니다.') : kind === 'aurora' ? t('오로라 속입니다. 빛줄기 뒤로 별이 보입니다.') : first.free ? t('명왕성의 낮 쪽입니다. 하트는 지금 밤 쪽에 있습니다.') : VISTA_TOLD[bodyId],
+      told: kind === 'home' ? t('한국이 내려다보이는 자리입니다. 움직이면 풀려납니다.') : kind === 'aurora' ? t('오로라 속입니다. 빛줄기 뒤로 별이 보입니다.') : first.free ? VISTA_FREE_TOLD[bodyId] : VISTA_TOLD[bodyId],
     };
     input.clear();
   }

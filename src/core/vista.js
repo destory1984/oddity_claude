@@ -10,15 +10,16 @@
 //   Enceladus: off its far side from Saturn, the ice jets under it and Saturn behind;
 //   Pluto: over its heart (by the turning ground);
 //   Uranus: off the sunlit face of its rings, the bull's eye open (by the rings and the Sun).
-//   Neptune (2026-10-08, of four shown: "1로 가보자"): low over Triton's ground, Neptune
-//   filling the sky above its horizon (by where Triton and Neptune are).
+//   Neptune (2026-10-08, of four shown: "1로 가보자", then "2번으로 가보자"): over its
+//   Great Dark Spot (by the turning globe); with the spot in the night, low over Triton's
+//   ground, Neptune filling the sky above its horizon (the first one chosen).
 import { surfaceDirection, spinOf } from './surface.js';
 import { orientationFrom } from './orientation.js';
 import { auroraSpot } from './home.js';
 
 export const VISTAS = ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus', 'neptune'];
 // The views over a place of a turning globe: once there she is held and turns with it.
-export const VISTA_HELD = ['jupiter', 'mars', 'pluto'];
+export const VISTA_HELD = ['jupiter', 'mars', 'pluto', 'neptune'];
 
 const RAD = Math.PI / 180;
 const sub = (a, b) => a.map((n, i) => n - b[i]);
@@ -83,6 +84,11 @@ export const JET_VIEW = { radii: 7, roundDeg: 22, southDeg: 12, lookDown: 0.12, 
 // the globe is some 49 degrees across and fills the sky). With Triton on Neptune's night
 // side the dark globe has its aurora along the edge; on the day side it is blue.
 export const NEPTUNE_RISE = { heightKm: 60, upDeg: 12, lookDown: 0.2 };
+// Neptune's Great Dark Spot (18 S; on the map at 14 E, as core/stories.js has it), how
+// high the Sun must stand over it (its sine) for the view of it, and the view: south of
+// the spot, so that it lies over her head among its white clouds.
+export const DARK_SPOT = { latDeg: -18, lonDeg: 14, sunAbove: 0.2 };
+export const DARK_SPOT_VIEW = { latDeg: -32, lonDeg: 14, heightRadii: 1 };
 // Uranus: as RING_VIEW; its rings stand nearly upright and face the Sun.
 export const BULLSEYE_VIEW = { radii: 6.4, overDeg: 50, roundDeg: 30, lookDown: 0.05 };
 
@@ -162,9 +168,12 @@ export function vistaSpot(id, { body, sun, earth, timeS = 0, elapsedS = 0, ringN
     return offSpot(body, out, [0, 1, 0], IO_VIEW);
   }
   if (id === 'neptune') {
+    const spin = spinOf('neptune', timeS);
+    const toSun = unit(sub(sun.position, body.position));
+    if (dot(surfaceDirection(DARK_SPOT.latDeg, DARK_SPOT.lonDeg, spin), toSun) >= DARK_SPOT.sunAbove) return overSpot(body, DARK_SPOT_VIEW, spin);
     // (up: the way from Neptune's centre, which the trip goes round: core/home.js homeStep.)
     const spot = riseSpot(of('triton'), body, NEPTUNE_RISE);
-    return { ...spot, up: unit(sub(spot.position, body.position)) };
+    return { ...spot, up: unit(sub(spot.position, body.position)), free: true };
   }
   if (id === 'mars') return overSpot(body, MARINER_VIEW, spinOf('mars', timeS));
   if (id === 'pluto') {

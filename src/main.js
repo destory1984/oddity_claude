@@ -485,6 +485,7 @@ async function init() {
     onPress: () => hud.pressSky(),
     onBrake: brake,
     onTogglePhoto: () => photo.toggle(),
+    onGaze: () => $('gazeButton').click(),
     onJournal: () => journal.open(),
     onMute: () => toggleSound(),
     onMusic: () => toggleMusic(),

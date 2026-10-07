@@ -9,7 +9,7 @@ const TAP_PIXELS = 8;
 // The keys that fly or turn her: pressing one while paused takes the game off pause (onMove).
 const MOVE_KEYS = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
-export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal, onMute, onMusic = () => {}, onRear = () => {}, onMove = () => {}, onTap = () => {}, onPress = () => {}, onEscape, onWheel, isBlocked }) {
+export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onGaze, onJournal, onMute, onMusic = () => {}, onRear = () => {}, onMove = () => {}, onTap = () => {}, onPress = () => {}, onEscape, onWheel, isBlocked }) {
   const held = new Set();
   let flyingButton = false;
   let reversingButton = false;
@@ -60,6 +60,13 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onJournal,
     if (MOVE_KEYS.includes(e.code) && !e.repeat && tracksKey(e)) onMove();
     if (e.code === 'Space' && !e.repeat) onBrake();
     else if (e.code === 'KeyP' && !e.repeat) onTogglePhoto();
+    // Tab: just looking ("우주멍"), as its button in the corner (the user, 2026-10-08:
+    // "키보드로 할 때에는 탭 = 우주멍 버튼"). It no longer walks the focus over the buttons
+    // of the game (inside an open card it still does: isBlocked above).
+    else if (e.code === 'Tab' && tracksKey(e)) {
+      e.preventDefault();
+      if (!e.repeat) onGaze?.();
+    }
     else if (e.code === 'KeyJ' && !e.repeat && tracksKey(e)) onJournal();
     else if (e.code === 'KeyM' && !e.repeat && tracksKey(e)) onMute();
     else if (e.code === 'KeyB' && !e.repeat && tracksKey(e)) onMusic();

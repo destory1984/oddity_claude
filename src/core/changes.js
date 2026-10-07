@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-08', text: t('키보드의 Tab 키로 우주멍을 켜고 끕니다.') },
   { day: '2026-10-08', text: t('해왕성, 화성, 금성, 가니메데에도 오로라가 뜹니다. 오로라가 있는 천체마다 오로라 단추가 있습니다.') },
   { day: '2026-10-08', text: t('토성의 명당은 토성 뒤, 고리 너머로 해가 비치는 자리로 바뀌었습니다.') },
   { day: '2026-10-08', text: t('목성 이름 칸에도 오로라 단추가 생겼습니다. 밤 쪽 오로라 곁으로 날아갑니다.') },

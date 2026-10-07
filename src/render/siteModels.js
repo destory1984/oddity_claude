@@ -1373,8 +1373,20 @@ export const SITE_SAYS = {
   // (Of five offered for pad 39A: "1": Doug Hurley's own words before lift-off, "Let's
   // light this candle", which were Alan Shepard's in 1961.)
   lc39a: () => t('이 불을 켜 봅시다'),
+  // (Philae: the user's own two, 2026-10-07, in place of the five offered: 첫번째
+  // "어~ 어~ 어~", 두번째 "아이쿠". The second is in SECOND_SAYS below.)
+  philaeLanding: () => t('어~ 어~ 어~'),
   // The five of core/landerScenes.js that are not stages (core/landerTexts.js).
   ...Object.fromEntries(['mars3', 'beagle2', 'spirit', 'opportunity', 'perseverance'].map((id) => [id, () => LANDER_TEXTS[id].say])),
+};
+
+// Whose first bubble stands to its LEFT, the tail down to the right: Philae is at the
+// right edge of a narrow phone's view while it floats.
+export const SAYS_ON_LEFT = new Set(['philaeLanding']);
+
+// A second thing one of them says later in its scene (core/replay.js `say2`).
+export const SECOND_SAYS = {
+  philaeLanding: () => t('아이쿠'),
 };
 
 // What a rocket's first stage says as it parts and turns back (core/replay.js sayBooster;

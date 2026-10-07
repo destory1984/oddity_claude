@@ -1002,6 +1002,7 @@ ${STORY_MORE[target.id]}` : told };
       turn: frame.turn ?? 0, tilt: frame.tilt ?? 0, bag: frame.bag ?? 0, open: Boolean(frame.open), sizeKm: frame.sizeKm ?? null,
       say: frame.say ?? 0,
       sayBooster: frame.sayBooster ?? 0,
+      say2: frame.say2 ?? 0,
       launch: frame.launch ?? null,
       stage: frame.stage ?? null,
       unfold: frame.unfold ?? null,

@@ -170,6 +170,10 @@ export const REPLAYS = {
     acrossKm: 0.6,
     rollFrom: 'touch',
     tiltRad: 1.05,
+    // As it bounces off and floats up, and again as it comes down the second time and
+    // tips over (render/siteModels.js SITE_SAYS, SECOND_SAYS): from, to.
+    say: [7.2, 10.4],
+    say2: [16.6, 21.2],
     sounds: [[7, 'bounce'], [16.5, 'bounce']],
     lines: [
       { at: 0, text: t('2014년 11월 12일. 로제타에서 떨어져 나온 필레가 일곱 시간에 걸쳐 혜성으로 내려옵니다.') },
@@ -416,6 +420,7 @@ function hopFrame(scene, t) {
     open: scene.openAt !== undefined && t >= scene.openAt,
     // How large its bubble is (0 → 1): it swells in and shrinks away over 0.4 s.
     say: saySize(scene, t),
+    say2: saySize(scene, t, scene.say2),
     sizeKm: scene.sizeKm ?? null,
     glow: 0,
     slope: 0,

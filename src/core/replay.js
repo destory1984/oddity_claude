@@ -74,10 +74,11 @@ export const REPLAYS = {
     name: t('카시니의 마지막 돌입'),
     day: t('2017년 9월 15일'),
     on: 'saturn',
-    // Saturn's word once it is gone and its trail has faded (render/siteModels.js
-    // SITE_SAYS): from, to. (At first from 15.5 s, while the trail still burned; the user,
-    // 2026-10-07: "카시니가 다 떨어지기 전에 토성이 얘기를 해".)
-    say: [17.4, 21.8],
+    // Saturn's word BEFORE it falls, then the fall, then a thud as it is gone (the user,
+    // 2026-10-07: "떨어지기 전에 토성이 얘기하고, 카시니가 떨어지기 시작한다. 쿵~"): from, to
+    // (render/siteModels.js SITE_SAYS, SECOND_SAYS). Both stand where it ends.
+    say: [0.8, 5.4],
+    say2: [15.1, 19.6],
     streak: true,
     seconds: 22,
     downAt: 15,
@@ -88,7 +89,7 @@ export const REPLAYS = {
     toKm: 20,
     acrossKm: 130,
     // It begins to glow a third of the way in and is gone at downAt.
-    sounds: [[5, 'burnUp']],
+    sounds: [[5, 'burnUp'], [15, 'landed']],
     lines: [
       { at: 0, text: t('2017년 9월 15일. 13년 동안 토성을 돈 카시니가 연료를 거의 다 쓰고 토성으로 뛰어듭니다.') },
       { at: 5, text: t('엔셀라두스와 타이탄의 바다를 지구의 미생물로 더럽히지 않으려고 고른 끝이었습니다.') },
@@ -346,6 +347,9 @@ export function replayFrame(id, t) {
     flame: !scene.streak && t < scene.downAt,
     down: t >= scene.downAt,
     say: saySize(scene, t),
+    say2: saySize(scene, t, scene.say2),
+    // (A streak: how high it ends, where what is said about it stands.)
+    endKm: scene.streak ? scene.toKm : null,
     // Seconds since it came down (what let it down may then leave).
     after: Math.max(0, t - scene.downAt),
     line,

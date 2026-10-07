@@ -1390,6 +1390,9 @@ export const SAYS_ON_LEFT = new Set(['philaeLanding']);
 // A second thing one of them says later in its scene (core/replay.js `say2`).
 export const SECOND_SAYS = {
   philaeLanding: () => t('아이쿠'),
+  // (Cassini's plunge, the user, 2026-10-07: "떨어지기 전에 토성이 얘기하고, 카시니가
+  // 떨어지기 시작한다. 쿵~".)
+  cassiniPlunge: () => t('쿵~'),
 };
 
 // What a rocket's first stage says as it parts and turns back (core/replay.js sayBooster;

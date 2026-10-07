@@ -1003,6 +1003,7 @@ ${STORY_MORE[target.id]}` : told };
       say: frame.say ?? 0,
       sayBooster: frame.sayBooster ?? 0,
       say2: frame.say2 ?? 0,
+      endKm: frame.endKm ?? null,
       launch: frame.launch ?? null,
       stage: frame.stage ?? null,
       unfold: frame.unfold ?? null,

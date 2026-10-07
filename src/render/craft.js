@@ -367,7 +367,7 @@ export function createSiteModels(scene, siteList) {
     // What Saturn says when it is gone: the bubble stays where the craft was, so the
     // craft's own parts (`body`) are hidden then and not the whole node.
     const body = node.getChildren();
-    then.set('cassiniPlunge', { node, flame: null, fire, fireMaterial, body, say: bubbleFor('cassiniPlunge', node) });
+    then.set('cassiniPlunge', { node, flame: null, fire, fireMaterial, body, say: bubbleFor('cassiniPlunge', node), say2: bubbleFor('cassiniPlunge', node, SECOND_SAYS, 'say2') });
   }
 
   // A stage of pieces is turned to face whoever watches as it begins: its +x across the
@@ -455,7 +455,8 @@ export function createSiteModels(scene, siteList) {
         }
       }
       for (const [bubble, size] of [[old?.say, replay?.say ?? 0], [old?.say2, replay?.say2 ?? 0]]) {
-        if (!bubble) continue;
+        // (A streak's bubbles stand where it ends, not beside it: placed below.)
+        if (!bubble || old.fire) continue;
         bubble.setEnabled(size > 0.01);
         if (bubble.isEnabled()) {
           // Up and to the right of it as the eye sees it, so that its tail points at it.
@@ -515,7 +516,24 @@ export function createSiteModels(scene, siteList) {
         old.fireMaterial.alpha = replay.glow;
         old.fire.setEnabled(replay.glow > 0);
       }
-      node.scaling.setAll((old && replay.sizeKm ? replay.sizeKm : Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT))) / KM_PER_UNIT);
+      const sized = (old && replay.sizeKm ? replay.sizeKm : Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT))) / KM_PER_UNIT;
+      if (old?.fire) {
+        // What is said of it stands up and to the right of the spot where it ends, in the
+        // eye's own right and up, wherever the craft is on its way and however it is turned.
+        const eye = scene.activeCamera;
+        const back = up.scale(-(replay.liftKm - (replay.endKm ?? replay.liftKm)) / KM_PER_UNIT).subtract(new Vector3(...replay.across).scale(1 / KM_PER_UNIT));
+        const turned = Quaternion.Inverse(node.rotationQuaternion);
+        for (const [bubble, size] of [[old.say, replay.say ?? 0], [old.say2, replay.say2 ?? 0]]) {
+          if (!bubble) continue;
+          bubble.setEnabled(size > 0.01);
+          if (!bubble.isEnabled()) continue;
+          const big = bubble.metadata?.big ?? 1;
+          const off = eye.getDirection(Vector3.Right()).scale(0.5 * big).add(eye.getDirection(Vector3.Up()).scale(0.6 * big)).add(back.scale(1 / sized));
+          off.rotateByQuaternionToRef(turned, bubble.position);
+          bubble.scaling.setAll(Math.max(0.01, size) * big);
+        }
+      }
+      node.scaling.setAll(sized);
       node.position.set(rel[0], rel[1], rel[2]);
     }
   }

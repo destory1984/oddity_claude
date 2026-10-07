@@ -18,6 +18,14 @@ uniform float soft;
 // (as a cone of added light it looked like a torch's beam, or a falling meteor: the
 // user, 2026-10-06, "이건 뭐야", "나는 유성 떨어지는건 줄 알았어").
 uniform float devil;
+// Earth's aurora on a strong night (0 to 1): the tops of its rays turn red. For STEVE:
+// how much of it shows.
+uniform float storm;
+// -1 for the southern ring of a pair that mirror each other (Earth's): both rings then
+// show the same folds over the same longitude, as the real ones do.
+uniform float flip;
+// STEVE: the angle round the ring where the middle of its arc stands.
+uniform float arcAt;
 varying float vFace;
 // A number between 0 and 1 for each whole step along x, joined smoothly; it comes round
 // to where it began after `period` steps, so a ring of it closes.
@@ -32,10 +40,11 @@ float ringNoise(float x, float period){
 // a cone band one unit tall, so vPos.y + .5 runs 0 at the foot to 1 at the top.
 void main(){
   float h = vPos.y + .5;
-  float a = atan(vPos.z, vPos.x);
+  float a = atan(vPos.z * flip, vPos.x);
   float fade = smoothstep(0., .05, h) * pow(1. - h, 1.5);
   // How far up its own height this bit is: the colour runs from the foot's to the top's.
   float tint = h;
+  float red = 0.;
   // Folds drifting round the ring (ripple is a whole number, so the ring closes).
   float folds = .5 + .5 * sin(a * ripple + time * .7 + 2.5 * sin(a * 5. - time * .4));
   float wave = mix(1., (.3 + .7 * folds) * (.7 + .3 * sin(a * 3. + time * .23)), step(.5, ripple));
@@ -43,11 +52,14 @@ void main(){
   // night-shining clouds show only along the edge of night, where the ground is dark
   // and their height is still in sunlight (2).
   float lit = dot(vDir, sunDir);
-  float night = nightOnly < .5 ? 1.
-    : nightOnly < 1.5 ? smoothstep(.1, -.15, lit)
-    : smoothstep(.1, -.02, lit) * smoothstep(-.45, -.12, lit);
+  // (3 STEVE and 5 the pulsating patches: the night side, as the aurora; 4 the
+  // mother-of-pearl clouds: the edge of night, as the night-shining clouds.)
+  float deep = smoothstep(.1, -.15, lit);
+  float dusk = smoothstep(.1, -.02, lit) * smoothstep(-.45, -.12, lit);
+  float night = nightOnly < .5 ? 1. : nightOnly < 1.5 ? deep : nightOnly < 2.5 ? dusk
+    : nightOnly < 3.5 ? deep : nightOnly < 4.5 ? dusk : deep;
   // The clouds are a sheet, not a curtain: even across, with fine ripples in it.
-  if (nightOnly > 1.5) {
+  if (nightOnly > 1.5 && nightOnly < 2.5) {
     fade = smoothstep(0., .12, h) * smoothstep(1., .75, h);
     wave = (.5 + .5 * (.5 + .5 * sin(a * ripple * 9. + h * 70. + time * .2 + 3. * sin(a * 13. + h * 11.))))
       * (.55 + .45 * sin(a * 5. + h * 7. + 1.7 * sin(a * 3. - time * .05)));
@@ -68,6 +80,53 @@ void main(){
     tint = clamp(h / top * 1.3, 0., 1.);
     float rays = .25 + .75 * fine * fine * (.5 + .5 * mid);
     wave = rays * mix(.1, 1.7, smoothstep(.25, .7, stretch)) * (.75 + .25 * folds);
+    // On a strong night the tall rays end in red (oxygen above 200 km).
+    red = storm * smoothstep(.45, 1., tint);
+  }
+  // STEVE: a thin mauve ribbon standing by itself on the equator's side of the aurora,
+  // an arc of it only, smooth where the aurora is rayed; under it the green stripes of
+  // the "picket fence".
+  if (nightOnly > 2.5 && nightOnly < 3.5) {
+    float d = a - arcAt;
+    d = atan(sin(d), cos(d));
+    float arc = 1. - smoothstep(.45, .8, abs(d));
+    float ribbon = smoothstep(.3, .45, h) * (1. - smoothstep(.6, 1., h)) * (.8 + .2 * sin(a * 9. - time * .15));
+    float fence = smoothstep(0., .04, h) * (1. - smoothstep(.16, .3, h)) * smoothstep(.5, .8, .5 + .5 * sin(a * 260. + time * .3));
+    fade = 1.;
+    tint = ribbon / (ribbon + fence + .0001);
+    wave = (ribbon + .7 * fence) * arc * storm;
+  }
+  // Mother-of-pearl clouds: lens-shaped patches of a sheet, each running through the
+  // colours of a shell's inside.
+  if (nightOnly > 3.5 && nightOnly < 4.5) {
+    float u = a / 6.2831853 + .5;
+    float patches = smoothstep(.45, .8, ringNoise(u * 18. + time * .004, 18.))
+      * smoothstep(.35, .7, .6 * ringNoise(u * 52. + h * 5., 52.) + .4 * (.5 + .5 * sin(h * 11. + a * 6.)));
+    float edge = smoothstep(0., .2, h) * (1. - smoothstep(.75, 1., h));
+    // Pale, as a shell is: white with the colours running through it slowly. (With
+    // strong colours in close bands it was a rainbow target round the pole.)
+    float hue = a * 8. + h * 12. + 2. * sin(a * 5. + h * 3.) + time * .05;
+    vec3 pearl = mix(vec3(1.), .5 + .5 * cos(hue + vec3(0., 2.1, 4.2)), .5);
+    gl_FragColor = vec4(pearl * edge * patches * night * strength, 1.);
+    return;
+  }
+  // Pulsating aurora: patches lying side by side round the ring, about half of them
+  // lit, each switching on and off in its own time.
+  if (nightOnly > 4.5) {
+    float u = a / 6.2831853 + .5;
+    float cell = floor(u * 60.);
+    float across = fract(u * 60.) - .5;
+    // A soft blob in each cell, off its middle and of its own size. (Filled cells
+    // with hard edges were a ring of green tiles.)
+    float cx = .25 * (hash1(cell + 5.) - .5);
+    float cy = .25 + .5 * hash1(cell + 7.);
+    float size = .5 + .5 * hash1(cell + 9.);
+    float shape = exp(-((across - cx) * (across - cx) / (.035 * size) + (h - cy) * (h - cy) / (.05 * size)));
+    float lit1 = step(.45, hash1(cell + 3.));
+    float period = 4. + 6. * hash1(cell + 11.);
+    float beat = smoothstep(.2, .6, .5 + .5 * sin(time * 6.2831853 / period + 40. * hash1(cell)));
+    gl_FragColor = vec4(colorLow * shape * lit1 * beat * night * strength, 1.);
+    return;
   }
   if (dark > .5) {
     // Smoke: densest in the column, thinning into the cloud and gone by the top. Above
@@ -93,5 +152,5 @@ void main(){
     return;
   }
   float stream = mix(1., smoothstep(0., .75, vFace), soft);
-  gl_FragColor = vec4(mix(colorLow, colorHigh, tint) * fade * wave * night * strength * stream, 1.);
+  gl_FragColor = vec4(mix(mix(colorLow, colorHigh, tint), vec3(1., .16, .2), red) * fade * wave * night * strength * stream, 1.);
 }

@@ -36,6 +36,33 @@ export const AURORAS = [
 // is so it clears the air's own glow. Shown from within rangeRadii of the surface.
 export const NIGHT_CLOUDS = { body: 'earth', latDeg: [58, 80], heightKm: 140, low: [0.45, 0.75, 1], high: [0.85, 0.95, 1], rangeRadii: 4 };
 
+// A strong night on Earth: a cloud of the Sun's particles has arrived, the curtains
+// brighten and the tops of the tall rays turn red (oxygen above 200 km), and STEVE
+// shows. One comes round every everyS seconds, begins fromS into it, lasts lastS, and
+// swells and dies away over rampS at either end. 0 on a quiet night, 1 at its height.
+export const AURORA_STORM = { everyS: 150, fromS: 30, lastS: 60, rampS: 10 };
+export function auroraStorm(elapsedS, storm = AURORA_STORM) {
+  const s = (((elapsedS % storm.everyS) + storm.everyS) % storm.everyS) - storm.fromS;
+  if (s <= 0 || s >= storm.lastS) return 0;
+  return Math.min(1, s / storm.rampS, (storm.lastS - s) / storm.rampS);
+}
+
+// STEVE: a thin mauve ribbon that stands by itself on the equator's side of the
+// aurora, with green stripes (the "picket fence") under it. Named in 2016 by aurora
+// photographers in Alberta. A curtain as the aurora's is (auroraBand), ten degrees
+// nearer the equator, drawn only as an arc on the evening side, on strong nights.
+export const STEVE = { body: 'earth', latDeg: 57, baseKm: 150, heightKm: 700, low: [0.3, 1, 0.5], high: [0.78, 0.5, 1], rangeRadii: 6 };
+
+// Mother-of-pearl (polar stratospheric) clouds: ice at 15 to 25 km in the polar winter,
+// below -78 C, shining in a shell's colours along the edge of night. Drawn over the
+// south polar cap (the north has the night-shining clouds), higher than they are so
+// that they clear the air's glow. A sheet (sheetBand).
+export const PEARL_CLOUDS = { body: 'earth', latDeg: [-80, -63], heightKm: 70, low: [1, 1, 1], high: [1, 1, 1], rangeRadii: 4 };
+
+// Pulsating aurora: patches tens to hundreds of km across on the equator's side of
+// the ring, each switching on and off every few seconds. A sheet round either pole.
+export const PULSE = { body: 'earth', latDeg: [59, 65], heightKm: 110, low: [0.35, 1, 0.55], high: [0.35, 1, 0.55], rangeRadii: 4 };
+
 // The sheet as a cone-shaped band about the spin axis: its edge toward the equator
 // (foot) and its edge toward the pole (top), both at the sheet's height.
 export function sheetBand(sheet, radiusKm) {
@@ -280,7 +307,9 @@ export const TRANSIT_SEEN = 0.005;
 // The counterglow is told this far from every world's ground, or farther.
 export const COUNTERGLOW_FROM_KM = 2e6;
 export const TELL_JETS_KM = 3000;
-export function glowsNear(bodies, position) {
+// elapsedS: the time the strong nights are counted by (auroraStorm); without it none
+// of what shows only on a strong night is told.
+export function glowsNear(bodies, position, elapsedS = null) {
   const surfaceKm = (id) => {
     const body = bodies.find((b) => b.id === id);
     return body ? Math.hypot(...position.map((n, i) => n - body.position[i])) - body.radiusKm : Infinity;
@@ -308,6 +337,17 @@ export function glowsNear(bodies, position) {
   const behind = (id, radii) => Boolean(sun) && near(id, radii) && side(id, sun.position) < -BEHIND;
   // The green line of airglow along Earth's night limb.
   if (near('earth', TELL_RADII.airglow) && sun && side('earth', sun.position) < -0.2) found.push('airglow:earth');
+  // Round Earth's aurora, from the night side: the red tops and STEVE on a strong night,
+  // the pulsating patches on any; the mother-of-pearl clouds from under the south.
+  if (sun && side('earth', sun.position) < -0.2) {
+    if (near('earth', TELL_RADII.aurora) && elapsedS != null && auroraStorm(elapsedS) > 0.5) found.push('storm:earth', 'steve:earth');
+    if (near('earth', TELL_RADII.sheet)) found.push('pulse:earth');
+  }
+  {
+    const earth = bodies.find((b) => b.id === 'earth');
+    const out = earth ? position.map((n, i) => n - earth.position[i]) : null;
+    if (out && near('earth', TELL_RADII.sheet) && out[1] < -0.3 * Math.hypot(...out)) found.push('pearl:earth');
+  }
   // Saturn's hexagon, from over its north pole (the globe's pole is +y).
   const saturn = bodies.find((b) => b.id === 'saturn');
   if (saturn && near('saturn', TELL_RADII.hexagon) && side('saturn', saturn.position.map((n, i) => n + (i === 1 ? 1 : 0))) > 0.5) found.push('hexagon:saturn');

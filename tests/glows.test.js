@@ -287,3 +287,33 @@ test('the typhoon keeps its place on the drifting clouds and its lightning falls
   }
   assert.ok(TYPHOON.sizeKm[1] < TYPHOON.radiusKm, 'a stroke lights a patch, not the whole storm');
 });
+
+import { auroraStorm, AURORA_STORM, STEVE, PEARL_CLOUDS, PULSE } from '../src/core/glows.js';
+
+test('round Earth\'s aurora: strong nights come and go, and what shows only then is told only then', () => {
+  const { everyS, fromS, lastS, rampS } = AURORA_STORM;
+  assert.equal(auroraStorm(0), 0);
+  assert.equal(auroraStorm(fromS + lastS / 2), 1);
+  assert.equal(auroraStorm(everyS + fromS + lastS / 2), 1);
+  assert.ok(Math.abs(auroraStorm(fromS + rampS / 2) - 0.5) < 1e-9);
+  assert.equal(auroraStorm(fromS + lastS + 1), 0);
+  for (let s = 0; s < 2 * everyS; s += 0.7) assert.ok(auroraStorm(s) >= 0 && auroraStorm(s) <= 1);
+  // STEVE stands nearer the equator than the aurora; the pearl clouds are over the south.
+  assert.ok(STEVE.latDeg < AURORAS.find((a) => a.body === 'earth').latDeg);
+  assert.ok(PEARL_CLOUDS.latDeg.every((lat) => lat < 0) && PULSE.latDeg[1] < 67);
+  const earth = bodyById('earth');
+  const sun = BODIES.find((b) => b.kind === 'star');
+  const toSun = sun.position.map((n, i) => n - earth.position[i]);
+  const far = Math.hypot(...toSun);
+  const at = (sign, south = 0) => earth.position.map((n, i) => n + (sign * toSun[i] / far + (i === 1 ? south : 0)) * earth.radiusKm * 2);
+  const strong = fromS + lastS / 2;
+  const night = glowsNear(BODIES, at(-1), strong);
+  for (const id of ['storm:earth', 'steve:earth', 'pulse:earth']) assert.ok(night.includes(id), id);
+  assert.ok(!glowsNear(BODIES, at(-1), 0).includes('steve:earth'));
+  assert.ok(!glowsNear(BODIES, at(-1)).includes('storm:earth'));
+  assert.ok(glowsNear(BODIES, at(-1), 0).includes('pulse:earth'));
+  assert.ok(!glowsNear(BODIES, at(1), strong).some((id) => ['storm:earth', 'steve:earth', 'pulse:earth'].includes(id)));
+  assert.ok(glowsNear(BODIES, at(-0.3, -1)).includes('pearl:earth'));
+  assert.ok(!glowsNear(BODIES, at(-1)).includes('pearl:earth'));
+  for (const id of ['storm:earth', 'steve:earth', 'pearl:earth', 'pulse:earth']) assert.ok(eventMessage({ type: 'glow', id }).length > 20, id);
+});

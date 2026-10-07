@@ -11,7 +11,7 @@ import { SPIN_DAY_S, EARTH_START_SPIN, spinAngle, cloudSpin } from '../core/surf
 import { cometActivity } from '../core/comet.js';
 import { meteorSpot } from '../core/meteors.js';
 import {
-  AURORAS, auroraBand, STORMS, LIGHTNING_LIFE_S, lightningGap, lightningGlow, TYPHOON, typhoonUp, typhoonStrike,
+  AURORAS, auroraBand, auroraStorm, STEVE, PEARL_CLOUDS, PULSE, STORMS, LIGHTNING_LIFE_S, lightningGap, lightningGlow, TYPHOON, typhoonUp, typhoonStrike,
   PLUMES, PLUME_DAY_S, PLUME_RANGE_RADII, plumeUp,
   IMPACT_RANGE_KM, IMPACT_LIFE_S, IMPACT_SIZE_KM, impactGap, impactGlow,
   NIGHT_CLOUDS, sheetBand, FOOTPRINT, footprintUp, SODIUM_TAIL, JETS, jetDirections, SPRITE, spriteGlow, ELVES, elvesRing, BLUE_JET, blueJetGlow, E_RING,
@@ -228,13 +228,16 @@ function veilMaterial(scene, name, { low, high, ripple, nightOnly, dark = false,
   Effect.ShadersStore.veilFragmentShader = veilFrag;
   const material = new ShaderMaterial(name, scene, { vertex: 'veil', fragment: 'veil' }, {
     attributes: ['position'],
-    uniforms: ['worldViewProjection', 'world', 'centre', 'colorLow', 'colorHigh', 'strength', 'time', 'ripple', 'nightOnly', 'sunDir', 'dark', 'soft', 'devil', 'sway'],
+    uniforms: ['worldViewProjection', 'world', 'centre', 'colorLow', 'colorHigh', 'strength', 'time', 'ripple', 'nightOnly', 'sunDir', 'dark', 'soft', 'devil', 'sway', 'storm', 'flip', 'arcAt'],
   });
   // Smoke covers what is behind it; light is added to it.
   material.alphaMode = dark || devil ? Constants.ALPHA_COMBINE : Constants.ALPHA_ADD;
   material.setFloat('dark', dark ? 1 : 0);
   material.setFloat('devil', devil ? 1 : 0);
   material.setFloat('sway', 0);
+  material.setFloat('storm', 0);
+  material.setFloat('flip', 1);
+  material.setFloat('arcAt', 0);
   material.setFloat('soft', soft ? 1 : 0);
   material.needAlphaBlending = () => true;
   material.disableDepthWrite = true;
@@ -292,6 +295,8 @@ export function createGlows(scene, bodies) {
     const material = veilMaterial(scene, `aurora_${aurora.body}_${north}`, { low: aurora.low, high: aurora.high, ripple: 14, nightOnly: true });
     const mesh = band(scene, `aurora_${aurora.body}_${north}`, foot.radiusKm / KM_PER_UNIT, top.radiusKm / KM_PER_UNIT, 96);
     mesh.material = material;
+    // Earth's two rings mirror each other: the same folds over the same longitude.
+    if (aurora.body === 'earth') material.setFloat('flip', north ? 1 : -1);
     // The southern one is the same band upside down.
     if (!north) Quaternion.RotationAxisToRef(Vector3.Right(), Math.PI, mesh.rotationQuaternion);
     mesh.scaling.y = Math.abs(top.yKm - foot.yKm) / KM_PER_UNIT;
@@ -346,6 +351,28 @@ export function createGlows(scene, bodies) {
   cloudMesh.material = cloudMaterial;
   cloudMesh.scaling.y = (cloudBand.top.yKm - cloudBand.foot.yKm) / KM_PER_UNIT;
   const cloudYKm = (cloudBand.foot.yKm + cloudBand.top.yKm) / 2;
+
+  // Round Earth's aurora (core/glows.js): STEVE's ribbon on the equator's side of the
+  // northern ring, the mother-of-pearl clouds over the south polar cap, and the
+  // pulsating patches inside either ring's reach.
+  const steveBand = auroraBand(STEVE, radiusOf(STEVE.body));
+  const steveMaterial = veilMaterial(scene, 'steve', { low: STEVE.low, high: STEVE.high, ripple: 0, nightOnly: 3 });
+  const steveMesh = band(scene, 'steve', steveBand.foot.radiusKm / KM_PER_UNIT, steveBand.top.radiusKm / KM_PER_UNIT, 96);
+  steveMesh.material = steveMaterial;
+  steveMesh.scaling.y = (steveBand.top.yKm - steveBand.foot.yKm) / KM_PER_UNIT;
+  const steveYKm = (steveBand.foot.yKm + steveBand.top.yKm) / 2;
+  const polarSheets = [
+    { sheet: PEARL_CLOUDS, mode: 4, strength: 0.6 },
+    { sheet: PULSE, mode: 5, strength: 0.45 },
+    { sheet: { ...PULSE, latDeg: [-PULSE.latDeg[1], -PULSE.latDeg[0]] }, mode: 5, strength: 0.45 },
+  ].map(({ sheet, mode, strength }, i) => {
+    const { foot, top } = sheetBand(sheet, radiusOf(sheet.body));
+    const material = veilMaterial(scene, `polarSheet${i}`, { low: sheet.low, high: sheet.high, ripple: 0, nightOnly: mode });
+    const mesh = band(scene, `polarSheet${i}`, foot.radiusKm / KM_PER_UNIT, top.radiusKm / KM_PER_UNIT, 96);
+    mesh.material = material;
+    mesh.scaling.y = (top.yKm - foot.yKm) / KM_PER_UNIT;
+    return { sheet, mesh, material, strength, yKm: (foot.yKm + top.yKm) / 2 };
+  });
 
   // Io's footprint: a point of light in each hemisphere of Jupiter.
   const footTexture = spotTexture(scene, 'footprint', [150, 190, 255]);
@@ -510,7 +537,11 @@ export function createGlows(scene, bodies) {
       material.setVector3('centre', new Vector3(...centre));
       material.setVector3('sunDir', sunFrom(body));
       material.setFloat('time', elapsed);
-      material.setFloat('strength', 1.7);
+      // A strong night (core/glows.js auroraStorm): Earth's curtains brighten and their
+      // tops redden.
+      const storm = aurora.body === 'earth' ? auroraStorm(elapsed) : 0;
+      material.setFloat('storm', storm);
+      material.setFloat('strength', 1.7 * (1 + 0.5 * storm));
     }
 
     {
@@ -524,6 +555,36 @@ export function createGlows(scene, bodies) {
         cloudMaterial.setVector3('sunDir', sunFrom(body));
         cloudMaterial.setFloat('time', elapsed);
         cloudMaterial.setFloat('strength', 0.5);
+      }
+    }
+
+    {
+      const body = find(STEVE.body);
+      const high = height(body, position);
+      const centre = rel(body.position, position);
+      const toSun = sunFrom(body);
+      const storm = auroraStorm(elapsed);
+      const steveOn = storm > 0 && high <= STEVE.rangeRadii * body.radiusKm;
+      steveMesh.setEnabled(steveOn);
+      if (steveOn) {
+        steveMesh.position.set(centre[0], centre[1] + steveYKm / KM_PER_UNIT, centre[2]);
+        steveMaterial.setVector3('centre', new Vector3(...centre));
+        steveMaterial.setVector3('sunDir', toSun);
+        steveMaterial.setFloat('time', elapsed);
+        steveMaterial.setFloat('storm', storm);
+        // Its arc stands on the evening side of midnight.
+        steveMaterial.setFloat('arcAt', Math.atan2(-toSun.z, -toSun.x) + 0.6);
+        steveMaterial.setFloat('strength', 1.2);
+      }
+      for (const { sheet, mesh, material, strength, yKm } of polarSheets) {
+        const on = high <= sheet.rangeRadii * body.radiusKm;
+        mesh.setEnabled(on);
+        if (!on) continue;
+        mesh.position.set(centre[0], centre[1] + yKm / KM_PER_UNIT, centre[2]);
+        material.setVector3('centre', new Vector3(...centre));
+        material.setVector3('sunDir', toSun);
+        material.setFloat('time', elapsed);
+        material.setFloat('strength', strength);
       }
     }
 

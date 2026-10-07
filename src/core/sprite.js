@@ -73,7 +73,7 @@ export const SHEETS = [
 // Which of the three she does for a sight (the ids of core/glows.js, with 'meteor' and
 // 'belt'): she looks up at what is in the sky, is startled by what flashes or happens
 // of a sudden, and points at the rest.
-const SEE_UP = ['aurora', 'counterglow', 'meteor', 'clouds', 'airglow', 'flare', 'shine'];
+const SEE_UP = ['aurora', 'counterglow', 'meteor', 'clouds', 'airglow', 'flare', 'shine', 'storm', 'steve', 'pulse', 'pearl'];
 const SEE_WOW = ['lightning', 'sprite', 'elves', 'bluejet', 'impact', 'transit', 'tailcut', 'plume', 'jets', 'geyser'];
 export function seeFor(sight) {
   const kind = String(sight).split(':')[0];

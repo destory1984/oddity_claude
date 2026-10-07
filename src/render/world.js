@@ -198,7 +198,7 @@ export async function createWorld(canvas, bodies = BODIES) {
       // A flash (lightning, a sprite, an impact on the Moon) in the frame it happens.
       glow: flashed,
       // Everything of that kind within reach, the nearest thing first (core/glows.js).
-      glowsNear: [...glowsNear(now, traveler), ...shadowsNear(now, traveler)],
+      glowsNear: [...glowsNear(now, traveler, elapsed), ...shadowsNear(now, traveler)],
       // The sprite character's drawing; the paper model has none.
       heroSheet: hero.sheet ? hero.sheet() : null,
       // Where her drawing is on screen: { file, height, up, shape } (render/spriteHero.js).

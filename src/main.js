@@ -1055,7 +1055,7 @@ ${STORY_MORE[target.id]}` : told };
       if (docked) undock();
       visit = null;
       const earth = here(HOME.body);
-      home = startHome(state, earth, homeSpot(earth, simTime, innerWidth / innerHeight < 0.75));
+      home = startHome(state, earth, homeSpot(earth, simTime));
       input.clear();
     },
     onInspect() {
@@ -1939,7 +1939,7 @@ ${STORY_MORE[target.id]}` : told };
       else if (dt > 0) {
         const earth = here(HOME.body);
         const went = homeStep(state, home, dt, {
-          spot: homeSpot(earth, simTime, innerWidth / innerHeight < 0.75),
+          spot: homeSpot(earth, simTime),
           body: earth,
           spun: spinOf(HOME.body, simTime) - spinOf(HOME.body, simTime - dt * TIME_SCALE),
         });

@@ -8,20 +8,20 @@
 // thrust lets go.
 import { stopNow } from './game.js';
 import { surfaceDirection, spinOf } from './surface.js';
-import { orientationFrom, rotateLocal, blend, multiply, turnAboutY } from './orientation.js';
+import { orientationFrom, blend, multiply, turnAboutY } from './orientation.js';
 
-// Over the middle of the peninsula, high enough that all of it, Jeju too, is in view.
-export const HOME = { body: 'earth', latDeg: 36.3, lonDeg: 127.8, heightKm: 3400 };
+// Where the user stood when they said "여기로 해줘" (2026-10-07; it was 3,400 km right
+// over the peninsula before): at Korea's latitude, some nine degrees west of it and
+// 7,000 km up, looking straight down with north up. She stands in the middle of the
+// view, so from there Korea (127.8 E) lies just to her right with the sea and Japan
+// beyond it, and China to her left.
+export const HOME = { body: 'earth', latDeg: 36.3, lonDeg: 118.5, heightKm: 7000 };
 // The trip takes this long from right over Korea, and this much more from the far
 // side of the globe; a little more again from far out.
 export const HOME_NEAR_S = 3;
 export const HOME_ROUND_S = 4;
 export const HOME_FAR_S = 2;
 const FAR_RADII = 10;
-// She stands in the middle of the view: turned a little, Korea is beside her and not
-// behind her. A tall narrow screen shows 15 degrees to each side, so less there.
-const ASIDE_YAW = 0.3;
-const NARROW_YAW = 0.13;
 
 const sub = (a, b) => a.map((n, i) => n - b[i]);
 const unit = (v) => {
@@ -46,13 +46,12 @@ export function slerp(a, b, t) {
 
 // Where she ends up at game time timeS: { position, up, facing }. Fixed to the ground,
 // so it turns with Earth.
-export function homeSpot(body, timeS, narrow = false, home = HOME) {
+export function homeSpot(body, timeS, home = HOME) {
   const up = surfaceDirection(home.latDeg, home.lonDeg, spinOf(home.body, timeS));
   const position = body.position.map((n, i) => n + up[i] * (body.radiusKm + home.heightKm));
   // North along the ground under her: the top of the view.
   const north = unit(sub([0, 1, 0], up.map((n) => n * up[1])));
-  const down = orientationFrom(up.map((n) => -n), north);
-  return { position, up, facing: rotateLocal(down, narrow ? NARROW_YAW : ASIDE_YAW, 0) };
+  return { position, up, facing: orientationFrom(up.map((n) => -n), north) };
 }
 
 // A trip under way: where she was from Earth's centre, how she faced, how long it has

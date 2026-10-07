@@ -1140,7 +1140,6 @@ const LANDER_STAGE_BUILD = {
   })),
   apollo15: apolloCrew('apollo15', (scene, name, mats) => ({ rover: lunarRover(scene, `${name}Rover`, mats) })),
   apollo16: apolloCrew('apollo16', (scene, name, mats) => ({
-    rover: lunarRover(scene, `${name}Rover`, mats),
     flag: flagAlone(scene, `${name}Flag`, mats),
     john: astronaut(scene, `${name}John`, mats),
   })),

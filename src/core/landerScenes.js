@@ -20,13 +20,18 @@ const jump = (t, from, to, high) => {
 };
 
 // An Apollo lunar module comes down by `downAt` and settles leaning `lean` (radians); one
-// of the two climbs down the ladder between `outAt` and `outAt + 2.5`.
+// of the two climbs down the ladder between `outAt` and `outAt + 2.5`. It stands to the
+// left (APOLLO_X), so that the two and what they say have the right of a phone's view
+// (the user, 2026-10-07, of Apollo 14: "말풍선이 사람 위에 없고, 착륙선이 말하는 것처럼 보임").
+const APOLLO_X = -0.55;
+// A bubble whose tail points at the head of one who stands at x (and y up), `full` large.
+const saidBy = (t, from, to, x, y = 0, full = 1) => said(t, from, to, x + 0.03 + 0.36 * full, y + 0.36 + 0.22 * full, full);
 const apolloLands = (t, { downAt, lean = 0, outAt }) => {
   const climbing = t >= outAt && t < outAt + 2.5;
   return {
-    lander: { x: -0.8 * (1 - ease(t, 0, downAt)), y: comeDown(t, downAt, 2.6), lean: lean * ease(t, downAt - 0.3, downAt + 0.5), burn: t < downAt },
+    lander: { x: APOLLO_X - 0.8 * (1 - ease(t, 0, downAt)), y: comeDown(t, downAt, 2.6), lean: lean * ease(t, downAt - 0.3, downAt + 0.5), burn: t < downAt },
     // (Drawn half as large again as they were, as Apollo 11's two are.)
-    ladder: { ...downLadder(t, outAt, outAt + 2.5), turn: Math.PI, scale: 1.5, shown: climbing },
+    ladder: { ...downLadder(t, outAt, outAt + 2.5), x: APOLLO_X + downLadder(t, outAt, outAt + 2.5).x, turn: Math.PI, scale: 1.5, shown: climbing },
   };
 };
 
@@ -63,10 +68,11 @@ export const LANDER_STAGES = {
       const fly = Math.max(0, t - 19.3);
       return {
         ...apolloLands(t, { downAt: 10, lean: 0.14, outAt: 11.5 }),
-        al: { x: 0.75, y: 0, scale: 1.5, lean: -0.5 * Math.sin(Math.PI * clamp((t - 18.9) / 0.8)), shown: t >= 14 },
-        ed: { x: 1.15, y: 0, scale: 1.5, turn: Math.PI, shown: t >= 15.5 },
-        ball: { x: 0.85 + 0.9 * fly, y: 0.04 + 0.5 * fly - 0.04 * fly * fly, shown: t >= 19.3 && fly < 4.5 },
-        say: said(t, 19.8, 24.6, 0.3, 1.05, 1.1),
+        al: { x: 0.25, y: 0, scale: 1.5, lean: -0.5 * Math.sin(Math.PI * clamp((t - 18.9) / 0.8)), shown: t >= 14 },
+        ed: { x: -0.02, y: 0, scale: 1.5, shown: t >= 15.5 },
+        ball: { x: 0.35 + 0.9 * fly, y: 0.04 + 0.5 * fly - 0.04 * fly * fly, shown: t >= 19.3 && fly < 4.5 },
+        // Shepard's own words, over his head.
+        say: saidBy(t, 19.8, 24.6, 0.25),
       };
     },
   }),
@@ -77,9 +83,9 @@ export const LANDER_STAGES = {
     stage(t) {
       return {
         ...apolloLands(t, { downAt: 10, lean: 0.15, outAt: 11.5 }),
-        rover: { x: 0.8 + 1.5 * ease(t, 16.5, 24), y: 0, shown: t >= 14 },
+        rover: { x: 0.3 + 1.6 * ease(t, 16.5, 24), y: 0, shown: t >= 14 },
         // Scott's own words as it set down.
-        say: said(t, 10.4, 15.6, 0.5, 1.35, 1.5),
+        say: said(t, 10.4, 15.6, APOLLO_X + 0.75, 1.35, 1.5),
       };
     },
   }),
@@ -90,10 +96,10 @@ export const LANDER_STAGES = {
     stage(t) {
       return {
         ...apolloLands(t, { downAt: 10, outAt: 11.5 }),
-        rover: { x: -1.35, y: 0, shown: t >= 14 },
-        flag: { x: 0.7, y: 0, shown: t >= 14.5 },
-        john: { x: 1.05, y: jump(t, 17.5, 19, 0.32) + jump(t, 19.6, 21.1, 0.32), turn: Math.PI, scale: 1.5, shown: t >= 14 },
-        say: said(t, 17.7, 22.8, 0.4, 1.15, 1.1),
+        flag: { x: 0.12, y: 0, shown: t >= 14.5 },
+        john: { x: 0.48, y: jump(t, 17.5, 19, 0.32) + jump(t, 19.6, 21.1, 0.32), turn: Math.PI, scale: 1.5, shown: t >= 14 },
+        // Over Young's head (it does not jump with him).
+        say: saidBy(t, 17.7, 22.8, 0.48, 0.1, 0.9),
       };
     },
   }),

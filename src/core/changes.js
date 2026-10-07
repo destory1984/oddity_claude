@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-07', text: t('일본 다네가시마와 중국 원창 우주센터가 생겼습니다. 그날의 발사를 다시 봅니다. 수첩은 192칸입니다.') },
   { day: '2026-10-07', text: t('지구의 구름에 볼거리 넷이 생겼습니다. 제주 남쪽 소용돌이 줄, 배 자국, 벌집 구름, 무지개 고리.') },
   { day: '2026-10-07', text: t('낮과 밤의 경계에서 모루구름이 주황빛으로 빛나고, 번개 위로 붉은 고리와 파란 불기둥이 솟습니다.') },
   { day: '2026-10-07', text: t('소라가 쉴 때 줄넘기를 하고, 바람개비를 불고, 화분에 물을 주어 꽃을 피웁니다.') },

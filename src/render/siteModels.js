@@ -468,7 +468,75 @@ function huygens(scene, name, mats) {
 //     black bands, five engines, the spacecraft and its escape tower; a red tower.
 //   nuri: Nuri at Naro: a slim white rocket of one width with the flag on its side; a
 //     blue tower.
-function launchPad(scene, name, mats, { rocket = 'saturn' } = {}) {
+// Two rockets more, each in the parts that go their own ways when it flies
+// (core/moonScenes.js ROCKET_SIZES has the same heights): core [tall, wide, paint],
+// upper stage [tall, wide], fairing [tall, wide], boosters round the core's foot.
+// h2a: Japan's H-IIA (the 202 kind): an orange core (its insulation), a white upper
+// stage and fairing, two white solid boosters. cz5: China's Long March 5: a wide white
+// core and four boosters with pointed noses.
+const ROCKETS = {
+  h2a: { core: [0.6, 0.11, 'orange'], upper: [0.16, 0.11], fairing: [0.22, 0.125], boosters: { count: 2, tall: 0.3, wide: 0.065 } },
+  cz5: { core: [0.56, 0.16, 'white'], upper: [0.18, 0.16], fairing: [0.24, 0.165], boosters: { count: 4, tall: 0.46, wide: 0.095 } },
+};
+// Its parts, each with its foot at its own y = 0 and none fused yet: the core, the upper
+// stage, the boosters in two groups (those to the left, those to the right), the
+// fairing's two halves and what it carries.
+function rocketParts(scene, name, mats, look) {
+  const { core: [coreTall, coreWide, coreTint], upper: [upperTall, upperWide], fairing: [fairingTall, fairingWide], boosters } = ROCKETS[look];
+  const core = new TransformNode(`${name}Core`, scene);
+  for (const [x, z] of look === 'cz5' ? round(2, 0.04) : [[0, 0]]) nozzle(scene, `${name}CoreEngine${x}${z}`, core, mats.dark, [x, 0, z], [0, -1, 0], 0.06, 0.06);
+  drum(scene, `${name}CoreBody`, core, mats[coreTint], { height: coreTall - 0.02, diameter: coreWide }, [0, coreTall / 2 - 0.01, 0]);
+  drum(scene, `${name}CoreBand`, core, mats.black, { height: 0.02, diameter: coreWide * 1.01 }, [0, coreTall - 0.01, 0]);
+  const upper = new TransformNode(`${name}Upper`, scene);
+  nozzle(scene, `${name}UpperEngine`, upper, mats.dark, [0, 0.04, 0], [0, -1, 0], 0.06, 0.06);
+  drum(scene, `${name}UpperBody`, upper, mats.white, { height: upperTall - 0.04, diameter: upperWide }, [0, 0.04 + (upperTall - 0.04) / 2, 0]);
+  const out = coreWide / 2 + boosters.wide / 2;
+  const groups = [-1, 1].map((way) => {
+    const group = new TransformNode(`${name}Boosters${way}`, scene);
+    const spots = boosters.count === 2 ? [[way, 0]] : [[way * 0.707, 0.707], [way * 0.707, -0.707]];
+    spots.forEach(([sx, sz], k) => {
+      const x = sx * out;
+      const z = sz * out;
+      nozzle(scene, `${name}BoosterEngine${way}${k}`, group, mats.dark, [x, 0, z], [0, -1, 0], 0.05, 0.05);
+      drum(scene, `${name}Booster${way}${k}`, group, mats.white, { height: boosters.tall * 0.8, diameter: boosters.wide }, [x, boosters.tall * 0.4, z]);
+      drum(scene, `${name}BoosterNose${way}${k}`, group, mats.white, { height: boosters.tall * 0.2, diameterTop: 0.01, diameterBottom: boosters.wide }, [x, boosters.tall * 0.9, z]);
+    });
+    return group;
+  });
+  const halves = [0, 1].map((k) => {
+    const half = new TransformNode(`${name}Fairing${k}`, scene);
+    const shell = part(cyl(scene, `${name}FairingShell${k}`, { height: fairingTall, diameterTop: 0.03, diameterBottom: fairingWide, tessellation: 20, arc: 0.5 }), half, mats.white, [0, fairingTall / 2, 0]);
+    // A half ring about the upright: one toward -x, the other toward +x.
+    shell.rotation.y = k ? -Math.PI / 2 : Math.PI / 2;
+    return half;
+  });
+  const payload = new TransformNode(`${name}Payload`, scene);
+  box(scene, `${name}PayloadBody`, payload, mats.goldFoil, [0.06, 0.08, 0.06], [0, 0.05, 0]);
+  for (const s of [-1, 1]) box(scene, `${name}PayloadWing${s}`, payload, mats.cells, [0.004, 0.05, 0.1], [0, 0.05, s * 0.085]);
+  return { core, upper, groups, halves, payload, coreTall, upperTall, out: boosters.count === 2 ? out : out * 0.707 };
+}
+// The same for a stage (core/moonScenes.js rocketLaunch): the bare pad and the parts.
+const rocketPieces = (look) => (scene, name, mats) => {
+  const parts = rocketParts(scene, name, mats, look);
+  return {
+    pieces: {
+      pad: launchPad(scene, `${name}Pad`, mats, { rocket: 'none', tower: look }),
+      boostersLeft: fuse(scene, parts.groups[0]),
+      boostersRight: fuse(scene, parts.groups[1]),
+      core: fuse(scene, parts.core),
+      upper: fuse(scene, parts.upper),
+      fairingLeft: parts.halves[0],
+      fairingRight: parts.halves[1],
+      payload: fuse(scene, parts.payload),
+    },
+    flames: {
+      core: [0, -0.04, 0, 0.42, 0.12], upper: [0, -0.02, 0, 0.26, 0.09],
+      boostersLeft: [-parts.out, -0.04, 0, 0.36, 0.09], boostersRight: [parts.out, -0.04, 0, 0.36, 0.09],
+    },
+  };
+};
+
+function launchPad(scene, name, mats, { rocket = 'saturn', tower = rocket } = {}) {
   const root = new TransformNode(name, scene);
   const saturn = rocket === 'saturn';
   // 'none': the pad alone, for a scene whose rocket leaves it (falconLaunch below).
@@ -480,7 +548,9 @@ function launchPad(scene, name, mats, { rocket = 'saturn' } = {}) {
   // The tower beside the rocket, a crane on its top, arms reaching across.
   const towerX = -0.2;
   const top = saturn ? 1.5 : 1.2;
-  truss(scene, `${name}Tower`, root, bare ? mats.dark : saturn ? mats.red : mats.solar, [towerX, 0.14, 0], [towerX, top, 0], 0.16, saturn ? 9 : 7, 0.014);
+  // (Tanegashima's towers are red and white, Wenchang's grey.)
+  const towerPaint = tower === 'h2a' ? mats.red : tower === 'cz5' ? mats.grey : bare ? mats.dark : saturn ? mats.red : mats.solar;
+  truss(scene, `${name}Tower`, root, towerPaint, [towerX, 0.14, 0], [towerX, top, 0], 0.16, saturn ? 9 : 7, 0.014);
   box(scene, `${name}TowerBase`, root, mats.dark, [0.2, 0.06, 0.2], [towerX, 0.17, 0]);
   rod(scene, `${name}Crane`, root, mats.grey, [towerX - 0.14, top + 0.03, 0], [towerX + 0.3, top + 0.03, 0], 0.02, 5);
   rod(scene, `${name}Mast`, root, mats.grey, [towerX, top, 0], [towerX, top + 0.14, 0], 0.012, 5);
@@ -491,6 +561,19 @@ function launchPad(scene, name, mats, { rocket = 'saturn' } = {}) {
   if (bare) {
     // One arm high up: the walkway the crew went along.
     arms = [1.0];
+  } else if (ROCKETS[rocket]) {
+    // It stands whole on the pad: the parts of its flight, put together.
+    const parts = rocketParts(scene, name, mats, rocket);
+    const stand = (node, y) => {
+      node.parent = root;
+      node.position.set(rocketX, base + y, 0);
+    };
+    stand(parts.core, 0);
+    stand(parts.upper, parts.coreTall);
+    for (const group of parts.groups) stand(group, 0);
+    for (const half of parts.halves) stand(half, parts.coreTall + parts.upperTall - 0.02);
+    parts.payload.dispose();
+    arms = [0.45, 0.75];
   } else if (saturn) {
     // First stage and its five engines.
     for (const [x, z] of [[0, 0], ...round(4, 0.055, 0.785)]) nozzle(scene, `${name}F1${x}${z}`, root, mats.dark, [rocketX + x, base, z], [0, -1, 0], 0.07, 0.07);
@@ -894,6 +977,8 @@ function dokdoPieces(scene, name) {
 
 const MOON_STAGES = {
   naro: nuriPieces,
+  tanegashima: rocketPieces('h2a'),
+  wenchang: rocketPieces('cz5'),
   dokdo: dokdoPieces,
   // Shoemaker-Levy 9: four pieces of the comet (a bright head and its tail, light
   // itself), the ball of fire, and four bruises on the cloud tops.
@@ -1063,6 +1148,7 @@ export const SITE_BUILD = {
   phoenix: [fanLander, {}], insight: [fanLander, { insight: true }],
   huygens: [huygens, {}],
   lc39a: [launchPad, { rocket: 'saturn' }], naro: [launchPad, { rocket: 'nuri' }],
+  tanegashima: [launchPad, { rocket: 'h2a' }], wenchang: [launchPad, { rocket: 'cz5' }],
   messenger: [messenger, {}], venera7: [capsule, {}], venera13: [capsule, {}],
 };
 

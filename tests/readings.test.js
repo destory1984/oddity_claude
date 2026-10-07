@@ -47,7 +47,7 @@ test("a body's numbers come from the table the game flies by", () => {
 });
 
 test('every story place has a second paragraph to read, which does not repeat its card', () => {
-  assert.equal(STORIES.length, 100);
+  assert.equal(STORIES.length, 102);
   assert.deepEqual(Object.keys(STORY_MORE).sort(), STORIES.map((s) => s.id).sort());
   for (const story of STORIES) {
     const more = STORY_MORE[story.id];

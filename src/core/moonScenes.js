@@ -364,6 +364,51 @@ export const MOON_SCENES = {
   },
 };
 
+// A rocket with boosters leaving its pad (Tanegashima, Wenchang below), as Nuri leaves
+// Naro: the stack stands 0.16 to the side of the pad's middle, 0.2 up on its deck; each
+// piece has its foot at its own y = 0. Lift-off at 3 s of the scene; the boosters fall
+// away to either side at 10 s, the fairing parts at 15 s, the core is left behind at
+// 18 s, the upper stage burns to 27 s and lets go what it carries. (Real minutes drawn
+// as seconds, real heights as what fits the view.)
+// core, upper: how tall those two are (render/siteModels.js ROCKETS has the same).
+export const ROCKET_SIZES = { h2a: { core: 0.6, upper: 0.16 }, cz5: { core: 0.56, upper: 0.18 } };
+export function rocketLaunch({ core: coreTall, upper: upperTall }) {
+  return (t) => {
+    // Where the foot of the stack is, and how far it leans, s seconds after lift-off.
+    const fly = (s) => {
+      if (s <= 8) return { x: 0, y: 0.7 * (Math.max(0, s) / 8) ** 2, lean: 0 };
+      const u = s - 8;
+      return { x: 0.006 * u * u, y: 0.7 + 0.12 * u - 0.004 * u * u, lean: -Math.min(1.2, 0.08 * u) };
+    };
+    const s = t - 3;
+    const now = fly(s);
+    const stack = (up) => ({ x: now.x - up * Math.sin(now.lean), y: now.y + up * Math.cos(now.lean), lean: now.lean });
+    // A piece left behind at `at`, `up` above the foot: it coasts on a little, falls
+    // back and tumbles, drifting `way` to the side; gone when it is back at the ground.
+    const left = (at, up, way) => {
+      if (s < at) return stack(up);
+      const from = fly(at);
+      const u = s - at;
+      const y = from.y + up + 0.12 * u - 0.05 * u * u;
+      return { x: from.x + way * 0.11 * u, y: Math.max(0, y), lean: from.lean + (way || -1) * 0.55 * u, shown: y > 0 };
+    };
+    const onPad = (p) => ({ ...p, x: 0.16 + p.x, y: 0.2 + p.y });
+    const top = stack(coreTall + upperTall);
+    const free = Math.max(0, t - 27);
+    const upper = stack(coreTall);
+    return {
+      pad: { x: 0, y: 0 },
+      boostersLeft: { ...onPad(left(7, 0, -1)), burn: t >= 2 && s < 7 },
+      boostersRight: { ...onPad(left(7, 0, 1)), burn: t >= 2 && s < 7 },
+      core: { ...onPad(left(15, 0, -0.25)), burn: t >= 2 && s < 15 },
+      upper: { x: 0.16 + upper.x - 0.02 * free, y: 0.2 + upper.y - 0.015 * free, lean: upper.lean, burn: s >= 15.6 && s < 24 },
+      fairingLeft: onPad(left(12, coreTall + upperTall - 0.02, -1)),
+      fairingRight: onPad(left(12, coreTall + upperTall - 0.02, 1)),
+      payload: { x: 0.16 + top.x + 0.05 * free, y: 0.2 + top.y + 0.02 * free, lean: top.lean, shown: s >= 12 },
+    };
+  };
+}
+
 // Two more stages that are not on the Moon (the user, 2026-10-06: "톰보 지역도 애니메이션
 // 이벤트 넣어줘.. 탐사선이 사진 찍고, 앗. 하트네 하는 말풍선 넣어주고", "나로우주센터도
 // 애니 이벤트 넣고").
@@ -559,5 +604,41 @@ export const PLACE_STAGES = {
         satellite: { x: 0.16 + top.x + 0.05 * free, y: 0.2 + top.y + 0.02 * free, lean: top.lean, shown: s >= 12 },
       };
     },
+  },
+  // H-IIA Flight 47 leaves Tanegashima with XRISM and SLIM (the times and sizes were checked on the web, 2026-10-07).
+  tanegashima: {
+    name: t('슬림을 실은 H-IIA의 발사'),
+    day: t('2023년 9월 7일'),
+    seconds: 40,
+    downAt: 27,
+    viewKm: 70,
+    sounds: [[2, 'liftoff'], [10, 'staging'], [15, 'toss'], [18, 'staging'], [27, 'toss'], [27.5, 'stood']],
+    lines: [
+      { at: 0, text: t('2023년 9월 7일 아침 8시 42분. 다네가시마에서 H-IIA 47호기가 떠납니다. 달 착륙선 슬림과 엑스선 망원경 크리즘을 실었습니다.') },
+      { at: 6, text: t('높이 53m. 주황색은 몸통을 감싼 단열재의 빛깔입니다. 양옆의 흰 보조 로켓 둘이 처음을 밀어 줍니다.') },
+      { at: 10, text: t('2분 가까이 지나 다 탄 보조 로켓이 떨어져 나갑니다. 이어 덮개가 갈라지고 1단도 떨어집니다.') },
+      { at: 19, text: t('2단 엔진이 켜집니다. 14분 뒤 크리즘을 먼저 내려놓고, 다시 엔진을 켜 더 멀리 갑니다.') },
+      { at: 27, text: t('47분 뒤 슬림이 떨어져 나갑니다. 연료를 아끼려고 넉 달을 돌아서 달로 갔습니다.') },
+      { at: 33, text: t('2024년 1월 20일 슬림은 달에 내렸습니다. 일본은 달에 내린 다섯 번째 나라가 됐습니다.') },
+    ],
+    stage: rocketLaunch(ROCKET_SIZES.h2a),
+  },
+  // Long March 5 leaves Wenchang with Chang'e 5 (its early event times are not given: no official timetable was found).
+  wenchang: {
+    name: t('창어 5호를 실은 창정 5호의 발사'),
+    day: t('2020년 11월 24일'),
+    seconds: 40,
+    downAt: 27,
+    viewKm: 70,
+    sounds: [[2, 'liftoff'], [10, 'staging'], [15, 'toss'], [18, 'staging'], [27, 'toss'], [27.5, 'stood']],
+    lines: [
+      { at: 0, text: t('2020년 11월 24일 새벽 4시 30분. 하이난섬 원창에서 창정 5호가 떠납니다. 달의 흙을 가지러 가는 창어 5호를 실었습니다.') },
+      { at: 6, text: t('높이 57m, 무게 870톤. 중국에서 가장 힘센 로켓입니다. 굵은 몸통 둘레에 보조 로켓 넷이 붙어 있습니다.') },
+      { at: 10, text: t('다 탄 보조 로켓 넷이 먼저 떨어져 나갑니다. 이어 덮개가 갈라지고 1단도 떨어집니다.') },
+      { at: 19, text: t('2단 엔진이 두 번 나누어 탑니다. 무게 8.2톤의 창어 5호를 달로 가는 길에 올려놓습니다.') },
+      { at: 27, text: t('약 36분 뒤 창어 5호가 떨어져 나갑니다. 이레 뒤인 12월 1일 달 폭풍의 대양에 내렸습니다.') },
+      { at: 33, text: t('12월 17일, 달의 흙 1,731g이 지구에 닿았습니다. 달의 흙을 가져온 것은 44년 만입니다.') },
+    ],
+    stage: rocketLaunch(ROCKET_SIZES.cz5),
   },
 };

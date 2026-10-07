@@ -311,6 +311,23 @@ STORIES.push(
     text: t('경북 영천 보현산 꼭대기에 한국에서 가장 큰 지름 1.8m 광학 망원경이 있습니다. 1996년에 문을 열었습니다.'),
   },
 );
+// Two launch sites more (the user, 2026-10-07: "일본이나 중국은 우주센터 없어?", then "일본/중국
+// 센터 넣어"): where SLIM left for the Moon and where Chang'e 5 did. Each has a scene
+// of that launch (core/moonScenes.js PLACE_STAGES).
+STORIES.push(
+  {
+    id: 'tanegashima', name: t('다네가시마 우주센터'), nameEn: 'Tanegashima Space Center', year: 2023, type: 'surface', body: 'earth',
+    latDeg: 30.4, lonDeg: 130.97, withinKm: 40, landmark: false,
+    hint: t('지구 일본 가고시마현의 다네가시마 우주센터(북위 30.4도, 동경 131.0도) 40km 안에 내려앉기'),
+    text: t('2023년 9월 7일 이곳에서 H-IIA 로켓이 달 착륙선 슬림을 싣고 떠났습니다. 일본에서 가장 큰 발사장입니다.'),
+  },
+  {
+    id: 'wenchang', name: t('원창 우주발사장'), nameEn: 'Wenchang Space Launch Site', year: 2020, type: 'surface', body: 'earth',
+    latDeg: 19.61, lonDeg: 110.95, withinKm: 40, landmark: false,
+    hint: t('지구 중국 하이난섬의 원창 우주발사장(북위 19.6도, 동경 111.0도) 40km 안에 내려앉기'),
+    text: t('2020년 11월 24일 이곳에서 창정 5호 로켓이 창어 5호를 싣고 떠났습니다. 달의 흙을 가져온 탐사선입니다.'),
+  },
+);
 named(STORIES);
 
 // A place's label shows only from within this many of its body's radii above the

@@ -2564,6 +2564,8 @@ ${STORY_MORE[target.id]}` : told };
     // Where she stands now, as a line for core/startSpots.js (a place the game may open at).
     spot: (bodyId = null) => toSpot(state, (bodyId && bodyById(bodyId, bodies)) || nearestSurface(state.position, bodies).body, bodyById('sun', bodies)),
     place(position, toward) {
+      // (Held over Korea she would be brought straight back.)
+      home = null;
       state = createState(position, lookAtDirection(toward.map((n, i) => n - position[i])));
     },
     // One of the sounds by its name (ui/sound.js cues), to be heard while it is being made.

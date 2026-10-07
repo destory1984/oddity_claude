@@ -169,20 +169,22 @@ export function auroraViewOf(aurora, radiusKm, asideDeg = 0) {
 // place of its own, below.)
 const ASIDE_DEG = { neptune: -3 };
 const drawn = Object.fromEntries(AURORAS.map((aurora) => [aurora.body, auroraViewOf(aurora, BODIES.find((b) => b.id === aurora.body).radiusKm, ASIDE_DEG[aurora.body] ?? 0)]));
-// Uranus's (the user, 2026-10-08: "천왕성 코로나도 보면서 은하수도 볼 수 있는 위치
-// 추천해줘", then "넣어"): on the pole's side of the northern ring at 64 degrees north,
-// 900 km over the clouds, 40 degrees round from midnight, looking along the curtain with
-// her head level: the rays stand at her left and the Milky Way's bright side (40 degrees
-// from the galaxy's centre) lies 24 degrees up behind them. The centre itself is 25
-// degrees from the Sun as seen from Uranus now, on the day side. Reckoned for the
-// planets as they stand today ("오늘의 하늘"); Uranus goes round in 84 years, so it holds
-// for years. With the planets laid out the other way the stand is the same and the
-// Milky Way is elsewhere.
+// Uranus's: where the user stood (2026-10-08: "여기로 해", said of Neptune by a slip: they
+// were at Uranus). They had asked for a place that shows the aurora and the Milky Way
+// together ("천왕성 코로나도 보면서 은하수도 볼 수 있는 위치 추천해줘"); I reckoned one (64
+// degrees north, 900 km up, 40 degrees round from midnight, where the Milky Way's
+// bright side, 40 degrees from the galaxy's centre, lies 24 degrees up: the centre
+// itself is 25 degrees from the Sun as seen from Uranus now, on the day side), and from
+// it they went into the curtain itself: 62 degrees north, 1,916 km over the clouds, 43
+// degrees round from midnight, the rays at her left and the Milky Way before her.
+// Reckoned for the planets as they stand today ("오늘의 하늘"); Uranus goes round in 84
+// years, so it holds for years. With the planets laid out the other way the stand is
+// the same and the Milky Way is elsewhere.
 export const URANUS_AURORA_VIEW = {
   body: 'uranus',
-  position: [-0.3477, 0.9307, -0.2918],
-  forward: [0.7521, 0.2761, -0.5984],
-  up: [-0.4656, 0.8652, -0.186],
+  position: [-0.3698, 0.9498, -0.3433],
+  forward: [0.8658, -0.1237, -0.4849],
+  up: [-0.1222, 0.8874, -0.4445],
 };
 // (The places the user or I stood at or chose are kept as they are.)
 export const AURORA_VIEWS = { ...drawn, earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW, uranus: URANUS_AURORA_VIEW };

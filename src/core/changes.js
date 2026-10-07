@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-07', text: t('목표를 고정한 채 다른 천체의 이름표를 누르면, 이제 그 천체를 바로 바라보고 고정합니다.') },
   { day: '2026-10-07', text: t('달, 목성, 토성의 이름 칸에 명당 단추가 생겼습니다. 목성 오로라에는 불꽃이 달립니다.') },
   { day: '2026-10-07', text: t('지구 이름 칸에 오로라 단추가 생겼습니다. 누르면 오로라 속 밤하늘 자리로 날아갑니다.') },
   { day: '2026-10-07', text: t('오로라가 두 배쯤 빨리 일렁입니다. 목성 오로라도 이제 움직이는 것이 보입니다.') },

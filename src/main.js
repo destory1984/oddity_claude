@@ -231,6 +231,11 @@ let locked = false;
 // head, they dragged it back to where they liked it, and the first slide threw it down
 // again). Out of sight when she locks on, the target is brought to AIM_LINE.
 let lockAim = null;
+// The target lockAim was set for. Another target chosen while locked (its name tag, a
+// jump, a tour): the lock goes over to it and frames it anew (the user, 2026-10-07:
+// "목표물에 고정시켜놓고, 다른 행성을 보려고 하면, 안 먹히고 엉뚱한 방향을 보게 되네":
+// the new one was swung to where the old one had been held in her view).
+let lockFor = null;
 // The target's direction in her own frame as she stands and looks now.
 function aimNow() {
   const toward = here(selectedId).position.map((n, i) => n - state.position[i]);
@@ -1981,6 +1986,11 @@ ${STORY_MORE[target.id]}` : told };
     const slowPoints = craft.map((c) => c.position);
     // (How far the locked target is before this step: sliding round it keeps that.)
     if (aimedId !== selectedId) aimedId = null;
+    if (locked && lockFor !== selectedId) {
+      const seen = aimNow();
+      lockAim = Math.acos(Math.max(-1, Math.min(1, seen[2]))) <= LOCK_KEEP_VIEW ? seen : AIM_LINE;
+    }
+    lockFor = locked ? selectedId : null;
     const guided = locked || aimedId !== null;
     const lockRange = guided ? Math.hypot(...here(selectedId).position.map((n, i) => n - state.position[i])) : 0;
     const lockFrom = guided ? state.position : null;

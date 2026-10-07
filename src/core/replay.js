@@ -34,6 +34,8 @@ export const REPLAYS = {
     seconds: 24,
     downAt: 17,
     fromKm: 14,
+    // It greets the planet once it is down (render/siteModels.js SITE_SAYS): from, to.
+    say: [17.4, 22.6],
     sounds: [[13.3, 'landingBurn']],
     lines: [
       { at: 0, text: t('1976년 7월 20일. 바이킹 1호 착륙선이 궤도선에서 떨어져 나와 크리세 평원으로 내려옵니다.') },
@@ -247,6 +249,14 @@ export function replaySounds(id, before, after) {
 
 // The scene t seconds in: how high the model is (it slows as it nears the ground),
 // whether its engine burns, which line is told, and whether the scene is over.
+// How large a scene's bubble is at a moment (0 → 1): it swells in and shrinks away over
+// 0.4 s between the two moments of the scene's `say`.
+function saySize(scene, t) {
+  if (!scene.say) return 0;
+  const part = (n) => Math.max(0, Math.min(1, n));
+  return part((t - scene.say[0]) / 0.4) * part((scene.say[1] - t) / 0.4);
+}
+
 export function replayFrame(id, t) {
   const scene = REPLAYS[id];
   if (!scene) return null;
@@ -292,6 +302,7 @@ export function replayFrame(id, t) {
     gone: Boolean(scene.streak) && t >= scene.downAt,
     flame: !scene.streak && t < scene.downAt,
     down: t >= scene.downAt,
+    say: saySize(scene, t),
     // Seconds since it came down (what let it down may then leave).
     after: Math.max(0, t - scene.downAt),
     line,
@@ -368,7 +379,7 @@ function hopFrame(scene, t) {
     bag: scene.bagSeconds ? (down ? clamp(1 - (t - scene.downAt) / scene.bagSeconds) : 1) : 0,
     open: scene.openAt !== undefined && t >= scene.openAt,
     // How large its bubble is (0 → 1): it swells in and shrinks away over 0.4 s.
-    say: scene.say ? clamp((t - scene.say[0]) / 0.4) * clamp((scene.say[1] - t) / 0.4) : 0,
+    say: saySize(scene, t),
     sizeKm: scene.sizeKm ?? null,
     glow: 0,
     slope: 0,

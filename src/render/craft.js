@@ -158,6 +158,18 @@ export function createSiteModels(scene, siteList) {
   flashMaterial.disableLighting = true;
   flashMaterial.emissiveColor = new Color3(1, 0.96, 0.86);
   flashMaterial.alpha = 0.85;
+  // What one of them says in its scene, if it says anything (siteModels.js SITE_SAYS): a
+  // bubble that goes along with it and always faces the eye.
+  const bubbleFor = (id, parent) => {
+    if (!SITE_SAYS[id]) return null;
+    const say = sayBubble(scene, `then_${id}_say`, SITE_SAYS[id]());
+    say.parent = parent;
+    for (const mesh of say.getChildMeshes()) {
+      mesh.billboardMode = Mesh.BILLBOARDMODE_ALL;
+      mesh.renderingGroupId = 1;
+    }
+    return say;
+  };
   for (const [id, [build, options, coming = 'flame', flameY = -0.06]] of Object.entries(SITE_REPLAY_BUILD)) {
     if (coming === 'stage') {
       // Pieces under one root, which is placed and sized as any model is; the scene
@@ -235,17 +247,8 @@ export function createSiteModels(scene, siteList) {
           });
         }
       }
-      // What it says as it goes: a bubble that goes along with it (not with its
-      // rolling) and always faces the eye.
-      let say = null;
-      if (SITE_SAYS[id]) {
-        say = sayBubble(scene, `then_${id}_say`, SITE_SAYS[id]());
-        say.parent = root;
-        for (const mesh of say.getChildMeshes()) {
-          mesh.billboardMode = Mesh.BILLBOARDMODE_ALL;
-          mesh.renderingGroupId = 1;
-        }
-      }
+      // (Its bubble goes along with it, not with its rolling.)
+      const say = bubbleFor(id, root);
       root.setEnabled(false);
       then.set(id, { node: root, flame: null, cords: null, tumble, bag, shape, say });
       continue;
@@ -290,7 +293,7 @@ export function createSiteModels(scene, siteList) {
       flame = drum(scene, `then_${id}_flame`, node, flameMaterial, { height: 0.34, diameterTop: 0.05, diameterBottom: 0.2, tessellation: 12 }, [0, flameY, 0]);
     }
     node.setEnabled(false);
-    then.set(id, { node, flame, cords });
+    then.set(id, { node, flame, cords, say: bubbleFor(id, node) });
   }
   // Cassini's plunge into Saturn: the craft itself, and round it the glow of the air it
   // heats, drawn out behind it (the model's -x is the way it has come).
@@ -429,18 +432,18 @@ export function createSiteModels(scene, siteList) {
           old.bag.scaling.setAll(Math.max(0.03, full));
           old.tumble.position.y = old.shape.centre + (old.shape.radius - old.shape.centre) * full;
         }
-        if (old.say) {
-          const size = replay.say ?? 0;
-          old.say.setEnabled(size > 0.01);
-          if (old.say.isEnabled()) {
-            // Up and to the right of it as the eye sees it, so that its tail points at it.
-            const eye = scene.activeCamera;
-            // (Lower beside it when it is high, or the bubble would leave the view's top.)
-            const high = Math.min(1, replay.liftKm / (2 * Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT))));
-            const off = eye.getDirection(Vector3.Right()).scale(0.72 + 0.3 * high).add(eye.getDirection(Vector3.Up()).scale(1.05 - 1.0 * high));
-            off.rotateByQuaternionToRef(Quaternion.Inverse(node.rotationQuaternion), old.say.position);
-            old.say.scaling.setAll(Math.max(0.01, size));
-          }
+      }
+      if (old?.say) {
+        const size = replay.say ?? 0;
+        old.say.setEnabled(size > 0.01);
+        if (old.say.isEnabled()) {
+          // Up and to the right of it as the eye sees it, so that its tail points at it.
+          const eye = scene.activeCamera;
+          // (Lower beside it when it is high, or the bubble would leave the view's top.)
+          const high = Math.min(1, replay.liftKm / (2 * Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT))));
+          const off = eye.getDirection(Vector3.Right()).scale(0.72 + 0.3 * high).add(eye.getDirection(Vector3.Up()).scale(1.05 - 1.0 * high));
+          off.rotateByQuaternionToRef(Quaternion.Inverse(node.rotationQuaternion), old.say.position);
+          old.say.scaling.setAll(Math.max(0.01, size));
         }
       }
       if (old?.launch && replay.launch) {

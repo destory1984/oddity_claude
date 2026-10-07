@@ -1066,10 +1066,12 @@ export const SITE_BUILD = {
   messenger: [messenger, {}], venera7: [capsule, {}], venera13: [capsule, {}],
 };
 
-// What one that bounces says as it goes (core/replay.js `say`; the user, 2026-10-06, of
+// What one that bounces or comes straight down says (core/replay.js `say`; the user, 2026-10-06, of
 // five lines offered for Luna 9: "1").
 export const SITE_SAYS = {
   luna9: () => t('통. 통. 통. 어지러워~'),
+  // (Of five lines offered for Viking 1, 2026-10-07: "2".)
+  viking1: () => t('화성아. 안녕? 처음 뵙겠습니다'),
 };
 
 // For "그날로" (core/replay.js): what came down that day, as it was then.

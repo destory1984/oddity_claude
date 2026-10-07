@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, MARINER_VIEW, HEART_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, vistaSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
+import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, HEART_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, vistaSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
 import { forward, up } from '../src/core/orientation.js';
 
 const dot = (a, b) => a.reduce((sum, n, i) => sum + n * b[i], 0);
@@ -49,20 +49,17 @@ test('Jupiter\'s view: over the red spot\'s latitude, a little west of it, where
   assert.ok(Math.hypot(...sub(a.position, c.position)) > 1000);
 });
 
-test('Saturn\'s view: off the rings\' sunlit face, far enough to take them all in, looking at the globe', () => {
+test('Saturn\'s view: where the user stood, behind the globe and under the rings, looking to the Sun', () => {
   const saturn = { position: [1.4e9, 0, 2e8], radiusKm: 58232 };
-  for (const normal of [[0.2, 0.9, 0.1], [-0.2, -0.9, -0.1]]) {
-    const spot = vistaSpot('saturn', { body: saturn, sun, earth: sun, ringNormal: normal });
-    const out = sub(spot.position, saturn.position);
-    assert.ok(Math.abs(Math.hypot(...out) / saturn.radiusKm - RING_VIEW.radii) < 1e-9);
-    // On the same side of the rings as the Sun, and not edge on.
-    const n = unit(normal);
-    const toSun = unit(sub(sun.position, saturn.position));
-    assert.ok(dot(out, n) * dot(toSun, n) > 0);
-    const over = Math.asin(Math.abs(dot(unit(out), n))) * 180 / Math.PI;
-    assert.ok(Math.abs(over - RING_VIEW.overDeg) < 1e-6);
-    assert.ok(dot(forward(spot.facing), unit(out).map((x) => -x)) > 0.98);
-  }
+  const spot = vistaSpot('saturn', { body: saturn, sun, earth: sun, ringNormal: [0.2, 0.9, 0.1] });
+  const out = sub(spot.position, saturn.position);
+  assert.ok(Math.abs(Math.hypot(...out) / saturn.radiusKm - Math.hypot(...SATURN_VIEW.position)) < 1e-6);
+  const toSun = unit(sub(sun.position, saturn.position));
+  assert.ok(dot(unit(out), toSun) < -0.5);
+  assert.ok(out[1] < 0);
+  assert.ok(dot(forward(spot.facing), toSun) > 0.8);
+  assert.ok(up(spot.facing)[1] < -0.8);
+  assert.ok(RING_VIEW.radii > 0);
   assert.deepEqual(VISTAS, ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus']);
   assert.equal(vistaSpot('venus', { body: saturn, sun, earth: sun }), null);
 });

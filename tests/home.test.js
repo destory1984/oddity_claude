@@ -77,3 +77,19 @@ test('the place in the aurora: on the night side at the ring\'s latitude, the Su
     assert.ok(up(spot.facing)[1] > 0.9);
   }
 });
+
+test('every ring of light has a place in it: at its latitude, low in its curtain, in the hemisphere it stands in', async () => {
+  const { AURORA_VIEWS, auroraViewOf } = await import('../src/core/home.js');
+  const { AURORAS } = await import('../src/core/glows.js');
+  assert.deepEqual(Object.keys(AURORA_VIEWS).sort(), AURORAS.map((a) => a.body).sort());
+  for (const aurora of AURORAS) {
+    const view = auroraViewOf(aurora, 10000);
+    const far = Math.hypot(...view.position);
+    assert.ok(Math.abs(far - 1 - (aurora.baseKm + 0.1 * aurora.heightKm) / 10000) < 1e-9);
+    const lat = Math.asin(view.position[1] / far) * 180 / Math.PI;
+    assert.ok(Math.abs(lat - (aurora.only === 'south' ? -1 : 1) * aurora.latDeg) < 1e-6);
+    // On the night side (the first number is toward the Sun), her head away from the globe.
+    assert.ok(view.position[0] < 0);
+    assert.ok(view.up.reduce((sum, n, i) => sum + n * view.position[i], 0) > 0.7);
+  }
+});

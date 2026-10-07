@@ -14,7 +14,7 @@ import { eventMessage } from '../src/ui/messages.js';
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 
 test('aurora curtains ring both poles of Earth, Jupiter and Saturn, standing straight up from the air', () => {
-  assert.deepEqual(AURORAS.map((a) => a.body), ['earth', 'jupiter', 'saturn', 'uranus']);
+  assert.deepEqual(AURORAS.map((a) => a.body), ['earth', 'jupiter', 'saturn', 'uranus', 'neptune', 'mars', 'venus', 'ganymede']);
   // Saturn's is red at the foot and purple at the top, as Cassini saw it.
   const saturn = AURORAS[2];
   assert.ok(saturn.low[0] > saturn.low[2] && saturn.high[2] > saturn.high[0]);
@@ -108,9 +108,9 @@ test('where several sights are in reach they are all listed, the nearest thing f
   assert.deepEqual(glowsNear(BODIES, above('earth', 2.5)), ['aurora:earth', 'flare:sun']);
   assert.deepEqual(glowsNear(BODIES, above('jupiter', 1)), ['aurora:jupiter', 'footprint:io', 'flow:jupiter']);
   assert.deepEqual(glowsNear(BODIES, above('saturn', 1)), ['aurora:saturn', 'spokes:saturn', 'hexagon:saturn', 'rain:saturn']);
-  assert.deepEqual(glowsNear(BODIES, above('neptune', 1)), ['spot:neptune']);
+  assert.deepEqual(glowsNear(BODIES, above('neptune', 1)), ['aurora:neptune', 'spot:neptune']);
   // Triton is within three radii of Neptune.
-  assert.deepEqual(glowsNear(BODIES, above('triton', 5)), ['plume:triton', 'spot:neptune']);
+  assert.deepEqual(glowsNear(BODIES, above('triton', 5)), ['plume:triton', 'aurora:neptune', 'spot:neptune']);
   // From where Saturn is looked at with its rings, nine radii off: the spokes, not yet the aurora.
   assert.deepEqual(glowsNear(BODIES, above('saturn', 8)), ['spokes:saturn']);
   assert.deepEqual(glowsNear(BODIES, above('mercury', 20)), ['tail:mercury', 'flare:sun']);

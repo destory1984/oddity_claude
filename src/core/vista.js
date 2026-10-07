@@ -3,7 +3,7 @@
 // worlds: "1"). Each is kept by what makes the view, not by a fixed place:
 //   the Moon: low over its ground where Earth hangs above the horizon (by where Earth is);
 //   Jupiter: over the Great Red Spot (by where the spot is on the turning, sliding clouds);
-//   Saturn: off the sunlit face of the rings, all of them in view (by the rings and the Sun).
+//   Saturn: where the user stood (2026-10-08): behind it, the Sun shining through the rings.
 // Five more (the user, 2026-10-07: "넣어"):
 //   Mars: over the Mariner valley, the Tharsis volcanoes beside it (by the turning ground);
 //   Io: off its sunlit side away from Jupiter, the moon before the giant's clouds;
@@ -12,6 +12,7 @@
 //   Uranus: off the sunlit face of its rings, the bull's eye open (by the rings and the Sun).
 import { surfaceDirection, spinOf } from './surface.js';
 import { orientationFrom } from './orientation.js';
+import { auroraSpot } from './home.js';
 
 export const VISTAS = ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus'];
 // The views over a place of a turning globe: once there she is held and turns with it.
@@ -40,6 +41,19 @@ export const RED_SPOT = { latDeg: -21, lonDeg: -46.8, belt: 8, flow: 0.0016, hei
 // Saturn: this far from its centre, this high over the rings' sunlit face and this far
 // round from the Sun's side (so the globe's shadow on the rings is seen).
 export const RING_VIEW = { radii: 8.2, overDeg: 20, roundDeg: 40, lookDown: 0.13 };
+// Saturn's view since 2026-10-08, where the user stood and said "토성의 명당 위치는 여기로
+// 해줘": behind the globe and under the rings, 3.4 radii from its centre, head down to
+// the planets' plane, so that the dark globe stands at her left, the rings sweep across
+// under her lit from behind, and the Sun shines over them. Kept as she stood to the
+// Sun, as the places in the auroras are (core/home.js auroraSpot: [toward the Sun,
+// north, north x Sun], in radii). RING_VIEW was Saturn's before, and is the pattern of
+// Uranus's.
+export const SATURN_VIEW = {
+  body: 'saturn',
+  position: [-2.3825, -1.7615, -1.6741],
+  forward: [0.8921, 0.4341, 0.1254],
+  up: [0.4317, -0.9008, 0.047],
+};
 
 // Mars: south of the Mariner valley (13.9 S, 59.2 W), so that the canyon runs across the
 // view above her head, with the three Tharsis volcanoes at its western end.
@@ -154,6 +168,6 @@ export function vistaSpot(id, { body, sun, earth, timeS = 0, elapsedS = 0, ringN
     const position = body.position.map((n, i) => n + up[i] * body.radiusKm * (1 + RED_SPOT.heightRadii));
     return { position, up, facing: orientationFrom(up.map((n) => -n), squareTo([0, 1, 0], up)) };
   }
-  if (id === 'saturn') return ringSpot(body, sun, ringNormal, RING_VIEW);
+  if (id === 'saturn') return auroraSpot(body, sun.position, SATURN_VIEW);
   return null;
 }

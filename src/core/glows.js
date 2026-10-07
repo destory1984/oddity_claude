@@ -27,6 +27,21 @@ export const AURORAS = [
   // from its spin axis, so the ovals stand far from the poles of its spin: here they
   // are drawn about the globe's own axis, which lies nowhere near its rings' axis.
   { body: 'uranus', latDeg: 62, baseKm: 400, heightKm: 5200, low: [0.55, 0.78, 1], high: [0.8, 0.62, 1], rangeRadii: 6 },
+  // The rest of the worlds that have one (the user, 2026-10-08: "오로라가 있는 별들은 다
+  // 넣고"). only: the one hemisphere it stands in; light: how bright beside the others.
+  // Neptune's, photographed by the Webb telescope in 2023: its magnetic axis leans 47
+  // degrees, so it stands at middle latitudes, not round the poles.
+  { body: 'neptune', latDeg: 50, baseKm: 400, heightKm: 5000, low: [0.35, 0.95, 0.9], high: [0.5, 0.7, 1], rangeRadii: 6 },
+  // Mars has no field round the whole globe: its aurora stands over the old magnetism
+  // left in the rocks of the southern highlands. Green (oxygen), as Perseverance
+  // photographed it from the ground in 2024.
+  { body: 'mars', latDeg: 52, baseKm: 80, heightKm: 600, low: [0.3, 1, 0.4], high: [0.6, 1, 0.5], rangeRadii: 6, only: 'south', light: 0.8 },
+  // Venus has no field at all: when a storm from the Sun reaches it the oxygen high in
+  // its air glows green over the whole night side, faintly. Drawn as a dim, low band.
+  { body: 'venus', latDeg: 40, baseKm: 150, heightKm: 700, low: [0.35, 1, 0.45], high: [0.5, 0.9, 0.5], rangeRadii: 6, light: 0.45 },
+  // Ganymede, the one moon with a magnetic field of its own: two belts of oxygen's
+  // light. Hubble measured how they rock and so found the sea under its ice (2015).
+  { body: 'ganymede', latDeg: 40, baseKm: 30, heightKm: 450, low: [1, 0.42, 0.35], high: [0.55, 1, 0.6], rangeRadii: 6, light: 0.8 },
 ];
 
 // Night-shining (noctilucent) clouds: the highest clouds there are, ice at about 83 km,

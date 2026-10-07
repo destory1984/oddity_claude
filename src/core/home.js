@@ -9,6 +9,8 @@
 import { stopNow } from './game.js';
 import { surfaceDirection, spinOf } from './surface.js';
 import { orientationFrom, blend, multiply, turnAboutY } from './orientation.js';
+import { AURORAS } from './glows.js';
+import { BODIES } from './bodies.js';
 
 // Where the user stood when they said "여기로 해줘" (2026-10-07; it was 3,400 km right
 // over the peninsula before): at Korea's latitude, some nine degrees west of it and
@@ -128,7 +130,43 @@ export const JUPITER_AURORA_VIEW = {
   forward: [0.7867, 0.1441, -0.6003],
   up: [-0.2004, 0.9793, -0.0276],
 };
-export const AURORA_VIEWS = { earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW };
+// The same stand in any other ring of light (core/glows.js AURORAS): at its latitude, a
+// tenth of the way up its curtain, as far round from midnight as Earth's place is, and
+// facing as Earth's place faces, tipped along the meridian by the difference in latitude
+// (left as it was, the level ground of a ring at 40 degrees stood 27 degrees askew). In
+// a southern ring it is that place upside down.
+// asideDeg: this far on the equator's side of the ring (the pole's side when negative).
+export function auroraViewOf(aurora, radiusKm, asideDeg = 0) {
+  const sign = aurora.only === 'south' ? -1 : 1;
+  const lat = ((aurora.latDeg - asideDeg) * Math.PI) / 180;
+  const far = 1 + (aurora.baseKm + 0.1 * aurora.heightKm) / radiusKm;
+  const from = unit(AURORA_VIEW.position);
+  const flat = Math.hypot(from[0], from[2]);
+  const to = [(from[0] / flat) * Math.cos(lat), Math.sin(lat), (from[2] / flat) * Math.cos(lat)];
+  // The turn that takes Earth's place to this one: about the level line across the meridian.
+  const axis = unit([from[1] * to[2] - from[2] * to[1], from[2] * to[0] - from[0] * to[2], from[0] * to[1] - from[1] * to[0]]);
+  const angle = Math.acos(Math.max(-1, Math.min(1, dot(from, to))));
+  const tip = (v) => {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const k = dot(axis, v) * (1 - c);
+    const x = [axis[1] * v[2] - axis[2] * v[1], axis[2] * v[0] - axis[0] * v[2], axis[0] * v[1] - axis[1] * v[0]];
+    return v.map((n, i) => n * c + x[i] * s + axis[i] * k);
+  };
+  const turn = ([x, y, z]) => [x, sign * y, z];
+  return {
+    body: aurora.body,
+    position: turn(to.map((n) => n * far)),
+    forward: turn(angle < 1e-6 ? AURORA_VIEW.forward : tip(AURORA_VIEW.forward)),
+    up: turn(angle < 1e-6 ? AURORA_VIEW.up : tip(AURORA_VIEW.up)),
+  };
+}
+// Inside the pale, tall curtains of Uranus and Neptune the whole view was washed white:
+// there she stands a few degrees on the pole's side, the curtain at her right.
+const ASIDE_DEG = { uranus: -4, neptune: -3 };
+const drawn = Object.fromEntries(AURORAS.map((aurora) => [aurora.body, auroraViewOf(aurora, BODIES.find((b) => b.id === aurora.body).radiusKm, ASIDE_DEG[aurora.body] ?? 0)]));
+// (The three places the user or I stood at are kept as they are.)
+export const AURORA_VIEWS = { ...drawn, earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW };
 
 // Where that is now: { position, up, facing }, as homeSpot gives.
 export function auroraSpot(body, sunPosition, view = AURORA_VIEW) {

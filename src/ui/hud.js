@@ -151,6 +151,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
       if (body.id === 'earth') $('targetName').append(auroraKey, homeKey);
       else if (auroras.includes(body.id) && vistas.includes(body.id)) $('targetName').append(auroraKey, vistaKey);
       else if (vistas.includes(body.id)) $('targetName').append(vistaKey);
+      else if (auroras.includes(body.id)) $('targetName').append(auroraKey);
       fitName();
       $('faceTarget').textContent = t`${body.name} 바라보기`;
       // The button shows a picture only: its words are its name and its tip.

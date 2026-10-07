@@ -5279,3 +5279,8 @@ html.gaze #gazeButton {
   flex:none;
   margin:0 auto 0 -13px;
 }
+
+/* The aurora key alone (Neptune, Venus, Ganymede) stands where home's does. */
+#hud #targetPanel #targetName #auroraButton:last-child {
+  margin-right:-4px;
+}

@@ -81,6 +81,11 @@ test('Cassini comes in from the side, glows from a third of the way and is gone 
   assert.equal(at(15).acrossKm, 0);
   assert.equal(at(15).liftKm, 20);
   assert.match(at(15).text, /신호가 끊겼습니다/);
+  // Its trail fades in two seconds, and only then does Saturn speak.
+  assert.ok(at(16).glow > 0.4 && at(16).glow < 0.6);
+  assert.equal(at(17).glow, 0);
+  assert.equal(at(17.2).say, 0);
+  assert.equal(at(19).say, 1);
   assert.ok(at(22).done);
   // The landing never goes sideways, glows or vanishes.
   assert.deepEqual([replayFrame('apollo11', 8).acrossKm, replayFrame('apollo11', 8).glow, replayFrame('apollo11', 20).gone], [0, 0, false]);

@@ -74,8 +74,10 @@ export const REPLAYS = {
     name: t('카시니의 마지막 돌입'),
     day: t('2017년 9월 15일'),
     on: 'saturn',
-    // Saturn's word once it is gone (render/siteModels.js SITE_SAYS): from, to.
-    say: [15.5, 20.5],
+    // Saturn's word once it is gone and its trail has faded (render/siteModels.js
+    // SITE_SAYS): from, to. (At first from 15.5 s, while the trail still burned; the user,
+    // 2026-10-07: "카시니가 다 떨어지기 전에 토성이 얘기를 해".)
+    say: [17.4, 21.8],
     streak: true,
     seconds: 22,
     downAt: 15,
@@ -336,7 +338,8 @@ export function replayFrame(id, t) {
     // A streak: how far to the side it still is, how hot it glows (from a third of the
     // way in), and whether it has burnt away.
     acrossKm: scene.streak ? scene.acrossKm * (1 - u) : 0,
-    glow: scene.streak ? Math.max(0, Math.min(1, (u - 0.33) / 0.4)) : 0,
+    // (Once it is gone its trail fades over two seconds.)
+    glow: scene.streak ? Math.max(0, Math.min(1, (u - 0.33) / 0.4)) * Math.max(0, 1 - Math.max(0, t - scene.downAt) / 2) : 0,
     // How steeply it comes down: km lost for each km it comes nearer.
     slope: scene.streak ? (scene.fromKm - scene.toKm) / scene.acrossKm : 0,
     gone: Boolean(scene.streak) && t >= scene.downAt,

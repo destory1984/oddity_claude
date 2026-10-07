@@ -1364,6 +1364,8 @@ export const SITE_SAYS = {
   venera7: () => t('앗 뜨거. 사우나보다 더워~'),
   // (Of five offered for Venera 13: "4": it sent the first sound from another planet.)
   venera13: () => t('쉿. 금성의 바람 소리야'),
+  // (Of five offered for Huygens, 2026-10-07: "2": the ground it met was like wet sand.)
+  huygens: () => t('푹. 어라, 젖은 모래 같네'),
   // The five of core/landerScenes.js that are not stages (core/landerTexts.js).
   ...Object.fromEntries(['mars3', 'beagle2', 'spirit', 'opportunity', 'perseverance'].map((id) => [id, () => LANDER_TEXTS[id].say])),
 };

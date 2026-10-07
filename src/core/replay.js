@@ -21,6 +21,8 @@ export const REPLAYS = {
     seconds: 24,
     downAt: 17,
     fromKm: 14,
+    // What it says as it touches (render/siteModels.js SITE_SAYS): from, to.
+    say: [17.5, 22.5],
     // Titan has air: the wind past its parachute, all the way down.
     sounds: [[0, 'chute']],
     lines: [

@@ -459,3 +459,12 @@ test('four pieces of the comet hit Jupiter in turn and each leaves a bruise that
   assert.ok(!end.flash.shown);
   assert.deepEqual(replaySounds('levyImpact', 0, 34), ['impact', 'impact', 'impact', 'impact']);
 });
+
+test('the comet\'s scene is offered from beside it too, within six of its radii; no other body\'s is', async () => {
+  const { replayBeside } = await import('../src/core/replay.js');
+  const bodies = [{ id: 'churyumov', position: [100, 0, 0], radiusKm: 2 }, { id: 'saturn', position: [0, 0, 0], radiusKm: 58232 }];
+  assert.equal(replayBeside([110, 0, 0], bodies), 'churyumov');
+  assert.equal(replayBeside([100, 12, 0], bodies), 'churyumov');
+  assert.equal(replayBeside([100, 12.1, 0], bodies), null);
+  assert.equal(replayBeside([0, 60000, 0], bodies), null);
+});

@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-07', text: t('추류모프-게라시멘코 혜성은 곁에 가기만 해도 필레가 내리던 날을 볼 수 있게 고쳤습니다.') },
   { day: '2026-10-07', text: t('달과 화성의 착륙지 스물한 곳에 그날로 장면이 생겼습니다. 골프공이 날고, 탐사차가 굴러 내립니다.') },
   { day: '2026-10-07', text: t('지구의 구름 볼거리에 다가가면 소라가 왜 그런지 두 마디로 설명해 줍니다.') },
   { day: '2026-10-07', text: t('맞혀 보렴 문제 쉰아홉을 바꿨습니다. 숫자와 이름 대신 무엇이었는지, 왜 그랬는지를 묻습니다.') },

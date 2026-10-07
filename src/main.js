@@ -76,7 +76,7 @@ import { readingQuizFor, readingKey } from './core/readingQuiz.js';
 import { STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, recordText, valueText, stuntById } from './core/stunts.js';
 import { STORY_DETAILS } from './core/storyDetails.js';
 import { STORY_MORE } from './core/storyMore.js';
-import { replayFor, replayFrame, replaySounds, replayOn } from './core/replay.js';
+import { replayFor, replayFrame, replaySounds, replayOn, replayBeside } from './core/replay.js';
 import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from './core/visit.js';
@@ -319,6 +319,9 @@ let showNow = null;
 // direction from the body's middle and `level` the way the view looks along the ground.
 let scenePlace = null;
 const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null) ?? (eventPlace?.id === id ? eventPlace : null);
+// The body whose own scene may be played now: the one she rests on if it has one (Saturn,
+// Jupiter, the comet), else one she is close beside (the comet: core/replay.js besideRadii).
+const sceneBody = () => (state.restingOn && replayOn(state.restingOn) ? state.restingOn : replayBeside(state.position, bodies));
 const named = (id) => bodyById(id) ?? craftById(id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null) ?? (eventPlace?.id === id ? eventPlace : null);
 
 const toast = createToast($('toast'));
@@ -921,11 +924,12 @@ ${STORY_MORE[target.id]}` : told };
       replay = { id, startedAt: performance.now(), down: false };
       return;
     }
-    const onBody = !visit && state.restingOn ? replayOn(state.restingOn) : null;
+    const sceneOn = sceneBody();
+    const onBody = !visit && sceneOn ? replayOn(sceneOn) : null;
     if (onBody) {
       // Where she rests, seen along the ground from 15 degrees above it; what comes in
       // crosses the view from one side.
-      const ground = here(state.restingOn);
+      const ground = here(sceneOn);
       const out = state.position.map((n, i) => n - ground.position[i]);
       const far = Math.hypot(...out);
       const up = out.map((n) => n / far);
@@ -2431,7 +2435,7 @@ ${STORY_MORE[target.id]}` : told };
     const offer = docked || onGround() ? null : dockable(state.position, craft);
     $('dockTarget').hidden = !docked && !offer;
     // Standing at a place that has a scene of its day.
-    const thenHere = visit ? (hasArrived(visit) ? replayFor(visit.id) : null) : docked ? (isDocked(docked) ? replayFor(docked.id) : null) : (state.restingOn ? replayFor(replayOn(state.restingOn)) : null);
+    const thenHere = visit ? (hasArrived(visit) ? replayFor(visit.id) : null) : docked ? (isDocked(docked) ? replayFor(docked.id) : null) : (sceneBody() ? replayFor(replayOn(sceneBody())) : null);
     // The week of a real eclipse: near its place the same button plays it, and from
     // elsewhere another jumps there.
     if (landAtEclipse && !warp.busy()) {

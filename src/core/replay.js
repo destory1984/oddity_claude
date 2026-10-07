@@ -156,6 +156,10 @@ export const REPLAYS = {
     name: t('필레의 착륙'),
     day: t('2014년 11월 12일'),
     on: 'churyumov',
+    // The comet is 4 km across: the scene is offered from beside it too, within this many
+    // of its radii of its middle (a jump to it ends five radii off; the user, 2026-10-07,
+    // arrived so and found no button: "여긴 애니 보는 버튼이 없네").
+    besideRadii: 6,
     seconds: 26,
     downAt: 19,
     viewKm: 4.2,
@@ -254,6 +258,17 @@ export const REPLAYS = {
 // The scene played by resting on this body, if there is one.
 export function replayOn(bodyId) {
   return Object.keys(REPLAYS).find((id) => REPLAYS[id].on === bodyId) ?? null;
+}
+
+// The body whose scene is offered from beside it (`besideRadii`) to one at `position`,
+// or null. bodies: [{ id, position, radiusKm }].
+export function replayBeside(position, bodies) {
+  for (const scene of Object.values(REPLAYS)) {
+    if (!scene.besideRadii) continue;
+    const body = bodies.find((b) => b.id === scene.on);
+    if (body && Math.hypot(...position.map((n, i) => n - body.position[i])) <= scene.besideRadii * body.radiusKm) return body.id;
+  }
+  return null;
 }
 
 export function replayFor(id) {

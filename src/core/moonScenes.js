@@ -14,20 +14,20 @@ import { t } from './i18n.js';
 // downAt is the scene's own moment (it leaves, it lands, it hits); sounds: what is
 // heard and when (ui/sound.js cues).
 
-const clamp = (n) => Math.max(0, Math.min(1, n));
+export const clamp = (n) => Math.max(0, Math.min(1, n));
 // 0 → 1 between two moments, gently at both ends.
-const ease = (t, from, to) => {
+export const ease = (t, from, to) => {
   const u = clamp((t - from) / (to - from));
   return u * u * (3 - 2 * u);
 };
 // A lander coming down from `high` to the ground by `downAt`, slower and slower.
-const comeDown = (t, downAt, high) => high * (1 - clamp(t / downAt)) ** 2;
+export const comeDown = (t, downAt, high) => high * (1 - clamp(t / downAt)) ** 2;
 
 // A small rover that rides on a lander's deck, rolls down its ramp and drives off:
 // on the deck until `rollAt`, at the ramp's foot `ramp` seconds later, then `drive`
 // seconds along the ground to x = `to`. liftY: how high the lander is (it rides down).
 // The ramp runs from (0.2, 0.4) to (0.62, 0.02) on every lander that has one.
-function rollOut(t, { rollAt, ramp, drive, to, liftY = 0, scale }) {
+export function rollOut(t, { rollAt, ramp, drive, to, liftY = 0, scale }) {
   const slope = Math.atan2(0.38, 0.42);
   if (t < rollAt) return { x: 0.2 * ease(t, rollAt - 1.2, rollAt), y: 0.41 + liftY, lean: 0, scale };
   if (t < rollAt + ramp) {
@@ -46,7 +46,7 @@ const hop = (s, period, high) => {
 };
 // Down the ladder on the front leg (its top at the porch, x 0.25, y 0.41; its foot on the
 // ground at x 0.5) between two moments, a rung at a time.
-function downLadder(t, from, to) {
+export function downLadder(t, from, to) {
   const u = clamp((t - from) / (to - from));
   const rung = Math.min(9, Math.floor(u * 9));
   const v = (rung + ease(u * 9 - rung, 0.2, 0.8)) / 9;
@@ -56,7 +56,7 @@ function downLadder(t, from, to) {
 // A bubble that is up between two moments at (x, y), a little toward the watcher: it
 // swells in and shrinks away over 0.4 s. `full`: its size when up (larger in a scene seen
 // from farther off).
-const said = (t, from, to, x, y, full = 0.6) => {
+export const said = (t, from, to, x, y, full = 0.6) => {
   const size = ease(t, from, from + 0.4) * (1 - ease(t, to - 0.4, to));
   return { x, y, z: -0.25, scale: Math.max(0.01, full * size), shown: size > 0.01 };
 };

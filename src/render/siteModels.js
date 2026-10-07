@@ -2,6 +2,7 @@ import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, Texture, Stan
 import { t } from '../core/i18n.js';
 import { CRAFT_BUILD } from './craftModels.js';
 import { LANDMARKS } from '../core/landmarkScenes.js';
+import { LANDER_TEXTS } from '../core/landerTexts.js';
 import {
   QUARTER, part, cyl, group, aim, box, drum, rod, dish, wing, rtg, nozzle, truss, fuse,
 } from './craftParts.js';
@@ -107,7 +108,8 @@ function surveyor(scene, name, mats) {
 
 // A boxy modern lander on four legs with solar panels folded out from its top deck, a
 // dish, and a ramp for the rover it carried (Chang'e 3 and 4, Chandrayaan-3, Blue Ghost).
-// ascender: the sample-return ones (Chang'e 5 and 6) carry a small rocket on top instead.
+// ascender: the sample-return ones (Chang'e 5 and 6) carry a small rocket on top instead
+// ('gone': the deck it stood on, bare, for the scene in which it leaves).
 function deckLander(scene, name, mats, { ascender = false, skin = 'goldFoil', ramp = true } = {}) {
   const root = new TransformNode(name, scene);
   drum(scene, `${name}Body`, root, mats[skin], { height: 0.2, diameter: 0.5, tessellation: 8 }, [0, 0.3, 0]).rotation.y = Math.PI / 8;
@@ -116,8 +118,8 @@ function deckLander(scene, name, mats, { ascender = false, skin = 'goldFoil', ra
   legs(scene, `${name}Gear`, root, mats, 4, { top: 0.22, foot: 0.45, height: 0.34 });
   for (const [x, z] of round(4, 0.2, 0)) sphere(scene, `${name}Tank${x}${z}`, root, mats.white, 0.09, [x, 0.3, z]);
   if (ascender) {
-    drum(scene, `${name}Ascender`, root, mats.plate, { height: 0.18, diameter: 0.2, tessellation: 8 }, [0, 0.5, 0]);
-    drum(scene, `${name}AscenderTop`, root, mats.goldFoil, { height: 0.04, diameterTop: 0.1, diameterBottom: 0.2, tessellation: 8 }, [0, 0.61, 0]);
+    if (ascender !== 'gone') drum(scene, `${name}Ascender`, root, mats.plate, { height: 0.18, diameter: 0.2, tessellation: 8 }, [0, 0.5, 0]);
+    if (ascender !== 'gone') drum(scene, `${name}AscenderTop`, root, mats.goldFoil, { height: 0.04, diameterTop: 0.1, diameterBottom: 0.2, tessellation: 8 }, [0, 0.61, 0]);
     // The sampling arm that scooped the ground.
     rod(scene, `${name}Arm0`, root, mats.chrome, [0.17, 0.41, 0.1], [0.34, 0.5, 0.2], 0.012, 5);
     rod(scene, `${name}Arm1`, root, mats.chrome, [0.34, 0.5, 0.2], [0.46, 0.1, 0.28], 0.012, 5);
@@ -1064,7 +1066,115 @@ const landmarkPieces = (id, { kind, by, body, say }) => {
   return build;
 };
 
+// The pieces of the twenty-one landing scenes of core/landerScenes.js.
+const landerSay = (scene, name, id, tail) => sayBubble(scene, `${name}Say`, LANDER_TEXTS[id].say, tail ? { tail } : {});
+const LANDER_FLAME = [0, 0.12, 0, 0.34, 0.2];
+// Chang'e 5 and 6's ascender alone, standing where it stands on the deck.
+function ascenderAlone(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  drum(scene, `${name}Body`, root, mats.plate, { height: 0.18, diameter: 0.2, tessellation: 8 }, [0, 0.5, 0]);
+  drum(scene, `${name}Top`, root, mats.goldFoil, { height: 0.04, diameterTop: 0.1, diameterBottom: 0.2, tessellation: 8 }, [0, 0.61, 0]);
+  nozzle(scene, `${name}Engine`, root, mats.dark, [0, 0.42, 0], [0, -1, 0], 0.05, 0.07);
+  return fuse(scene, root);
+}
+// A small red flag on a short staff held out sideways.
+function redFlag(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  rod(scene, `${name}Staff`, root, mats.grey, [0, 0, 0], [-0.16, 0.16, 0], 0.008, 4);
+  box(scene, `${name}Cloth`, root, mats.red, [0.16, 0.1, 0.005], [-0.24, 0.2, 0]);
+  return fuse(scene, root);
+}
+function lump(scene, name, material, size, squash = 1) {
+  const root = new TransformNode(name, scene);
+  sphere(scene, `${name}Ball`, root, material, size, [0, (size * squash) / 2, 0], [1, squash, 1]);
+  return fuse(scene, root);
+}
+const apolloCrew = (id, more) => (scene, name, mats) => ({
+  pieces: {
+    lander: apollo(scene, `${name}Lander`, mats, { withFlag: false }),
+    ladder: astronaut(scene, `${name}Ladder`, mats, { climbing: true }),
+    ...more(scene, name, mats),
+    say: landerSay(scene, name, id),
+  },
+  flames: { lander: LANDER_FLAME },
+});
+const withRover = (id, lander, power) => (scene, name, mats) => ({
+  pieces: {
+    lander: deckLander(scene, `${name}Lander`, mats, lander),
+    rover: rover(scene, `${name}Rover`, mats, { power }),
+    say: landerSay(scene, name, id, id === 'change4' ? null : 'downRight'),
+  },
+  flames: { lander: LANDER_FLAME },
+});
+const alone = (id, build, options, flame) => (scene, name, mats) => ({
+  pieces: { lander: build(scene, `${name}Lander`, mats, options), say: landerSay(scene, name, id) },
+  flames: { lander: flame },
+});
+const LANDER_STAGE_BUILD = {
+  apollo14: apolloCrew('apollo14', (scene, name, mats) => ({
+    al: astronaut(scene, `${name}Al`, mats),
+    ed: astronaut(scene, `${name}Ed`, mats),
+    ball: lump(scene, `${name}Ball`, mats.white, 0.035),
+  })),
+  apollo15: apolloCrew('apollo15', (scene, name, mats) => ({ rover: lunarRover(scene, `${name}Rover`, mats) })),
+  apollo16: apolloCrew('apollo16', (scene, name, mats) => ({
+    rover: lunarRover(scene, `${name}Rover`, mats),
+    flag: flagAlone(scene, `${name}Flag`, mats),
+    john: astronaut(scene, `${name}John`, mats),
+  })),
+  surveyor1: (scene, name, mats) => ({
+    pieces: {
+      lander: surveyor(scene, `${name}Lander`, mats),
+      retro: lump(scene, `${name}Retro`, mats.dark, 0.2),
+      say: landerSay(scene, name, 'surveyor1'),
+    },
+    flames: { lander: [0, 0.14, 0, 0.3, 0.16] },
+  }),
+  surveyor7: alone('surveyor7', surveyor, undefined, [0, 0.14, 0, 0.3, 0.16]),
+  luna24: (scene, name, mats) => ({
+    pieces: {
+      lander: lunaReturn(scene, `${name}Lander`, mats, { stage: 'lander' }),
+      rocket: lunaReturn(scene, `${name}Rocket`, mats, { stage: 'rocket' }),
+      say: landerSay(scene, name, 'luna24'),
+    },
+    flames: { lander: LANDER_FLAME, rocket: [0, 0.24, 0, 0.26, 0.13] },
+  }),
+  lunokhod2: (scene, name, mats) => ({
+    pieces: {
+      lander: deckLander(scene, `${name}Lander`, mats, { skin: 'foil' }),
+      rover: rover(scene, `${name}Rover`, mats, { power: 'lid' }),
+      say: landerSay(scene, name, 'lunokhod2', 'downRight'),
+    },
+    flames: { lander: LANDER_FLAME },
+  }),
+  change3: withRover('change3', {}, 'wings'),
+  change4: withRover('change4', {}, 'wings'),
+  ...Object.fromEntries(['change5', 'change6'].map((id) => [id, (scene, name, mats) => ({
+    pieces: {
+      lander: deckLander(scene, `${name}Lander`, mats, { ascender: 'gone', ramp: false }),
+      rocket: ascenderAlone(scene, `${name}Rocket`, mats),
+      flag: redFlag(scene, `${name}Flag`, mats),
+      say: landerSay(scene, name, id),
+    },
+    flames: { lander: LANDER_FLAME, rocket: [0, 0.4, 0, 0.22, 0.1] },
+  })])),
+  blueGhost: alone('blueGhost', deckLander, { ramp: false, skin: 'plate' }, LANDER_FLAME),
+  viking2: (scene, name, mats) => ({
+    pieces: {
+      lander: viking(scene, `${name}Lander`, mats),
+      // The rock one of its feet came down on.
+      rock: lump(scene, `${name}Rock`, mats.grey, 0.1, 0.6),
+      say: landerSay(scene, name, 'viking2'),
+    },
+    flames: { lander: [0, 0.1, 0, 0.34, 0.2] },
+  }),
+  zhurong: withRover('zhurong', {}, 'butterfly'),
+  phoenix: alone('phoenix', fanLander, {}, [0, 0.1, 0, 0.3, 0.16]),
+  insight: alone('insight', fanLander, {}, [0, 0.1, 0, 0.3, 0.16]),
+};
+
 const MOON_STAGES = {
+  ...LANDER_STAGE_BUILD,
   ...Object.fromEntries(Object.entries(LANDMARKS).map(([id, def]) => [id, landmarkPieces(id, def)])),
   naro: nuriPieces,
   tanegashima: rocketPieces('h2a'),
@@ -1254,6 +1364,8 @@ export const SITE_SAYS = {
   venera7: () => t('앗 뜨거. 사우나보다 더워~'),
   // (Of five offered for Venera 13: "4": it sent the first sound from another planet.)
   venera13: () => t('쉿. 금성의 바람 소리야'),
+  // The five of core/landerScenes.js that are not stages (core/landerTexts.js).
+  ...Object.fromEntries(['mars3', 'beagle2', 'spirit', 'opportunity', 'perseverance'].map((id) => [id, () => LANDER_TEXTS[id].say])),
 };
 
 // For "그날로" (core/replay.js): what came down that day, as it was then.
@@ -1266,12 +1378,18 @@ export const SITE_REPLAY_BUILD = {
   huygens: [huygens, {}, 'chute'],
   // Venus: both came down under a parachute through the thick air.
   venera7: [capsule, {}, 'chute'], venera13: [capsule, {}, 'chute'],
-  curiosity: [rover, { power: 'rtg' }, 'crane'],
+  curiosity: [rover, { power: 'rtg' }, 'crane'], perseverance: [rover, { power: 'rtg' }, 'crane'],
+  // Mars 3 under its parachute (its last rocket is not drawn).
+  mars3: [capsule, {}, 'chute'],
   // Those that bounced. 'bag': it comes down inside air bags (the fourth item: the
   // ball's radius, how high the model's middle is, and how many lobes: Luna 9's two
   // halves, Pathfinder's cluster), which go down when it stops. 'bare': nothing round it.
   luna9: [capsule, { closed: true }, 'bag', { radius: 0.37, centre: 0.22, lobes: 2 }],
   pathfinder: [pathfinder, { stowed: true }, 'bag', { radius: 0.66, centre: 0.2, lobes: 4 }],
+  // Spirit and Opportunity came down as Pathfinder did, each folded on its lander's base.
+  spirit: [pathfinder, { stowed: true }, 'bag', { radius: 0.66, centre: 0.2, lobes: 4 }],
+  opportunity: [pathfinder, { stowed: true }, 'bag', { radius: 0.66, centre: 0.2, lobes: 4 }],
+  beagle2: [beagle, {}, 'bag', { radius: 0.34, centre: 0.06, lobes: 3 }],
   // Not a story place of its own: played on the comet (core/replay.js philaeLanding).
   philaeLanding: [philae, {}, 'bare'],
   // 'launch': it goes up, in pieces (falconLaunch above; render/craft.js moves them).

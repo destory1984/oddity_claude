@@ -2,6 +2,7 @@ import { t } from './i18n.js';
 import { MOON_SCENES, APOLLO11, PLACE_STAGES } from './moonScenes.js';
 import { LANDMARK_SCENES } from './landmarkScenes.js';
 import { CRAFT_SCENES } from './craftScenes.js';
+import { LANDER_STAGES, LANDER_REPLAYS } from './landerScenes.js';
 // "그날로": at a story place, the day it is known for is played again in the close
 // view. The model that stands there comes down as it did, and a few lines tell what
 // happened, each at its moment: Apollo 11's landing and first steps, Huygens's on Titan, Viking 1's and Curiosity's on Mars, and (not at a
@@ -237,6 +238,9 @@ export const REPLAYS = {
   ...LANDMARK_SCENES,
   // Eight on the Moon, each a stage of pieces (core/moonScenes.js).
   ...MOON_SCENES,
+  // Twenty-one more landings, on the Moon and Mars (core/landerScenes.js).
+  ...LANDER_STAGES,
+  ...LANDER_REPLAYS,
   // At a craft, while docked with it: its parts unfold (core/craftScenes.js).
   ...CRAFT_SCENES,
 };

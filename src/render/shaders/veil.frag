@@ -71,15 +71,19 @@ void main(){
   // sharp and the top fades. They drift slowly round.
   if (nightOnly > .5 && nightOnly < 1.5) {
     float u = a / 6.2831853 + .5;
-    float fine = ringNoise(u * 520. + time * .22, 520.);
-    float mid = ringNoise(u * 130. - time * .09, 130.);
-    float stretch = ringNoise(u * 22. + time * .02, 22.);
+    // (The rays ran round at a third of this pace and the folds swayed by a quarter: on
+    // Jupiter, seen from afar, the ring stood still. The user, 2026-10-07: "목성 오로라는
+    // 안 움직여?")
+    float fine = ringNoise(u * 520. + time * .8, 520.);
+    float mid = ringNoise(u * 130. - time * .32, 130.);
+    float stretch = ringNoise(u * 22. + time * .07, 22.);
     float top = .3 + .7 * mid * (.55 + .45 * fine);
     fade = smoothstep(0., .03, h) * pow(max(0., 1. - h / top), 1.1);
     // Each ray turns to the top's colour by its own top, short or tall.
     tint = clamp(h / top * 1.3, 0., 1.);
     float rays = .25 + .75 * fine * fine * (.5 + .5 * mid);
-    wave = rays * mix(.1, 1.7, smoothstep(.25, .7, stretch)) * (.75 + .25 * folds);
+    float sway = .5 + .5 * sin(a * ripple + time * 2.2 + 2.5 * sin(a * 5. - time * 1.3));
+    wave = rays * mix(.1, 1.7, smoothstep(.25, .7, stretch)) * (.55 + .45 * sway);
     // On a strong night the tall rays end in red (oxygen above 200 km).
     red = storm * smoothstep(.45, 1., tint);
   }

@@ -128,7 +128,6 @@ export const SIGHTS = {
   'aurora:saturn': t('토성에도 오로라가 있구나.'),
   'plume:triton': t('검은 연기가 옆으로 누웠어.'),
   sprite: t('방금 빨간 거 봤어?'),
-  'street:earth': t('구름이 줄지어 뱅글뱅글 돌아.'),
   'anvils:earth': t('구름 꼭대기만 노을빛이야.'),
   'shiptracks:earth': t('구름에 누가 줄을 그었네.'),
   'honeycomb:earth': t('구름이 벌집 같아.'),
@@ -221,7 +220,6 @@ export function milestoneLine(before, after) {
 // 보면, 하루에 한 번은 소라가 설명해주는 것도 넣어", then of three ways offered: "2"): after
 // her own word (SIGHTS) come these two lines, one after the other, in place of the notice.
 export const SIGHT_TELLS = {
-  'street:earth': [t('한라산이 바람을 둘로 갈라서 그래.'), t('섬 뒤에서 왼쪽 오른쪽 번갈아 말려.')],
   'anvils:earth': [t('높이 솟은 번개 구름의 머리야.'), t('땅은 저물어도 저기는 아직 해가 닿아.')],
   'shiptracks:earth': [t('배가 지나간 자국이야.'), t('배 연기에 물방울이 맺혀 더 하얘진대.')],
   'honeycomb:earth': [t('찬 바다 위에서 공기가 오르내려서 그래.'), t('오르는 데는 구름, 내리는 데는 맑아.')],

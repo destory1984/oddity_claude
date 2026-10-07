@@ -105,41 +105,9 @@ void main(){
     float lava=exp(-pow(off/.0009,2.))*smoothstep(0.,.002,down)*smoothstep(.015,.006,down);
     col+=vec3(1.,.28,.05)*lava*(.22+.78*(1.-daySide))*(.7+.3*sin(time*2.3+down*700.));
   }
-  // A Karman vortex street behind Jeju (33.4 north, 126.5 east; the user, 2026-10-07, of
-  // ten sights of the weather offered: "1, 2, 4, 6,9,10"): a north-west wind lays a deck
-  // of low cloud over the sea, the island's mountain parts it, and behind the island the
-  // cloud curls into whirls that are shed to one side and the other by turns and ride
-  // off downwind, some 900 km of them. Drawn about twice its size. along, aside:
-  // downwind and to the right of it, in radians of arc.
-  float street=0.;
-  vec2 isle=vec2((vUV.x-.8514)*6.28318*.835,(vUV.y-.3144)*3.14159);
-  float downwind=isle.x*.33+isle.y*.944;
-  float beside=isle.x*.944-isle.y*.33;
-  if(downwind>-.03&&downwind<.2&&abs(beside)<.09){
-    // (Its edges are ragged, and it widens as it goes.)
-    float ragged=(cellNoise(vec2(downwind*85.,beside*85.))-.5)*.03;
-    float half2=.028+.2*max(downwind,0.);
-    float deck=smoothstep(-.02,.012,downwind+ragged)*(1.-smoothstep(.12,.19,downwind+ragged))*(1.-smoothstep(half2*.6,half2,abs(beside)+ragged));
-    // Rolls of cloud lying along the wind.
-    float rolls=.6*cellNoise(vec2(beside*330.,downwind*95.-time*.04))+.4*cellNoise(vec2(beside*140.+3.,downwind*150.));
-    // The whirls: one every 0.024 radians (150 km), on this side and that by turns,
-    // carried off downwind; each winds the cloud round a clear middle.
-    float phase=downwind/.024-time*.025;
-    float which=floor(phase);
-    float turnWay=mod(which,2.)<1.?1.:-1.;
-    vec2 whirl=vec2((fract(phase)-.5)*.024,beside-turnWay*.0085);
-    float out2=length(whirl)/.0115;
-    float wound=.5+.5*sin(turnWay*atan(whirl.y,whirl.x)*2.+7.*log(out2+.06)-time*.3);
-    // (Each whirl works within its own stretch of the street and fades at its ends.)
-    float inWake=(1.-smoothstep(.014,.026,abs(beside)))*smoothstep(.004,.03,downwind)*(1.-smoothstep(.3,.5,abs(fract(phase)-.5)));
-    float carved=1.-inWake*exp(-out2*out2*1.3)*(.25+.75*wound);
-    carved*=mix(1.,smoothstep(.1,.32,out2),inWake);
-    street=clamp(deck*(.5+.5*rolls)*carved,0.,1.);
-    // (The island itself stands clear of the cloud.)
-    street*=smoothstep(.004,.009,length(isle));
-    col=mix(col,vec3(.8,.86,.97)*(.06+max(0.,light)*1.1),street*.82);
-  }
-  float water=clamp((tex.b-tex.r)*4.,0.,1.)*(1.-street);
+  // (A Karman vortex street stood in the cloud behind Jeju from v0.2.36 to v0.2.75. The
+  // user, 2026-10-07, with a ring drawn round it: "이건 없애자.. 안 예뻐".)
+  float water=clamp((tex.b-tex.r)*4.,0.,1.);
   vec3 H=normalize(sun+V);
   col+=vec3(1.,.84,.61)*pow(max(dot(N,H),0.),95.)*water*daySide*.6;
   float rim=pow(1.-max(dot(N,V),0.),3.5);

@@ -177,15 +177,15 @@ test('the weather of Earth: three sights from low over the day side, the glory f
   const far = Math.hypot(...toSun);
   const from = (share, radii) => earth.position.map((n, i) => n + (toSun[i] / far) * share * earth.radiusKm * (1 + radii));
   const day = glowsNear(BODIES, from(1, 0.8));
-  for (const id of ['street:earth', 'shiptracks:earth', 'honeycomb:earth', 'glory:earth']) assert.ok(day.includes(id), id);
+  for (const id of ['shiptracks:earth', 'honeycomb:earth', 'glory:earth']) assert.ok(day.includes(id), id);
   assert.ok(!day.includes('anvils:earth'));
   // Farther off than two radii the glory is not told, nor the three in the cloud.
   const off = glowsNear(BODIES, from(1, 2.2));
-  for (const id of ['street:earth', 'shiptracks:earth', 'honeycomb:earth', 'glory:earth']) assert.ok(!off.includes(id), id);
+  for (const id of ['shiptracks:earth', 'honeycomb:earth', 'glory:earth']) assert.ok(!off.includes(id), id);
   // From the night side none of them.
   const night = glowsNear(BODIES, from(-1, 0.8));
-  for (const id of ['street:earth', 'shiptracks:earth', 'honeycomb:earth', 'glory:earth', 'anvils:earth']) assert.ok(!night.includes(id), id);
-  for (const id of ['street:earth', 'shiptracks:earth', 'honeycomb:earth', 'glory:earth', 'anvils:earth', 'elves', 'bluejet']) {
+  for (const id of ['shiptracks:earth', 'honeycomb:earth', 'glory:earth', 'anvils:earth']) assert.ok(!night.includes(id), id);
+  for (const id of ['shiptracks:earth', 'honeycomb:earth', 'glory:earth', 'anvils:earth', 'elves', 'bluejet']) {
     assert.ok(eventMessage({ type: 'glow', id }).length > 20, id);
   }
 });

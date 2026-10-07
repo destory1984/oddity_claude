@@ -70,7 +70,7 @@ test('a speed line comes when she first passes one, ten and fifty times the spee
 });
 
 test('Earth\'s weather she explains herself: two lines for each sight that has her word', () => {
-  assert.equal(Object.keys(SIGHT_TELLS).length, 7);
+  assert.equal(Object.keys(SIGHT_TELLS).length, 6);
   for (const [id, tells] of Object.entries(SIGHT_TELLS)) {
     assert.ok(SIGHTS[id], id);
     assert.equal(tells.length, 2, id);

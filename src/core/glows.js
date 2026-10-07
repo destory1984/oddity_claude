@@ -382,11 +382,11 @@ export function glowsNear(bodies, position, elapsedS = null) {
   if (near('earth', TELL_RADII.typhoon) && sun && side('earth', sun.position) > 0.2) found.push('typhoon:earth');
   if (near('earth', TELL_RADII.ash) && sun && side('earth', sun.position) > 0.2) found.push('ash:earth');
   if (near('earth', TELL_RADII.boats) && sun && side('earth', sun.position) < -0.2) found.push('boats:earth');
-  // Five of Earth's weather (v0.2.36): the vortex street behind Jeju, ship tracks and
+  // Earth's weather (v0.2.36; the vortex street behind Jeju was taken out in v0.2.76): ship tracks and
   // honeycomb cloud from low over the day side; the thunderheads lit orange from over
   // the edge of day; the glory from between the Sun and Earth, looking straight down.
   if (sun && side('earth', sun.position) > 0.2) {
-    for (const sight of ['street', 'shiptracks', 'honeycomb']) if (near('earth', TELL_RADII[sight])) found.push(`${sight}:earth`);
+    for (const sight of ['shiptracks', 'honeycomb']) if (near('earth', TELL_RADII[sight])) found.push(`${sight}:earth`);
   }
   if (near('earth', TELL_RADII.anvils) && sun && Math.abs(side('earth', sun.position)) < 0.3) found.push('anvils:earth');
   if (near('earth', TELL_RADII.glory) && sun && side('earth', sun.position) > 0.8) found.push('glory:earth');

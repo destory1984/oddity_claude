@@ -1366,8 +1366,17 @@ export const SITE_SAYS = {
   venera13: () => t('쉿. 금성의 바람 소리야'),
   // (Of five offered for Huygens, 2026-10-07: "2": the ground it met was like wet sand.)
   huygens: () => t('푹. 어라, 젖은 모래 같네'),
+  // (Of five offered for pad 39A: "1": Doug Hurley's own words before lift-off, "Let's
+  // light this candle", which were Alan Shepard's in 1961.)
+  lc39a: () => t('이 불을 켜 봅시다'),
   // The five of core/landerScenes.js that are not stages (core/landerTexts.js).
   ...Object.fromEntries(['mars3', 'beagle2', 'spirit', 'opportunity', 'perseverance'].map((id) => [id, () => LANDER_TEXTS[id].say])),
+};
+
+// What a rocket's first stage says as it parts and turns back (core/replay.js sayBooster;
+// the user, 2026-10-07, after choosing "1": "3도 추가").
+export const BOOSTER_SAYS = {
+  lc39a: () => t('나는 집에 갈게. 잘 가~'),
 };
 
 // For "그날로" (core/replay.js): what came down that day, as it was then.

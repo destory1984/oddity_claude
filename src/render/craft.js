@@ -4,7 +4,7 @@ import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
 import { CRAFT_BUILD } from './craftModels.js';
 import { CRAFT_UNFOLD_ALL as CRAFT_UNFOLD } from './craftUnfold.js';
-import { SITE_BUILD, SITE_REPLAY_BUILD, SITE_SAYS, sayBubble } from './siteModels.js';
+import { SITE_BUILD, SITE_REPLAY_BUILD, SITE_SAYS, BOOSTER_SAYS, sayBubble } from './siteModels.js';
 import { drum, rod, group, box } from './craftParts.js';
 
 // Spacecraft and landers. The models are in craftModels.js (in orbit) and
@@ -160,9 +160,9 @@ export function createSiteModels(scene, siteList) {
   flashMaterial.alpha = 0.85;
   // What one of them says in its scene, if it says anything (siteModels.js SITE_SAYS): a
   // bubble that goes along with it and always faces the eye.
-  const bubbleFor = (id, parent) => {
-    if (!SITE_SAYS[id]) return null;
-    const say = sayBubble(scene, `then_${id}_say`, SITE_SAYS[id]());
+  const bubbleFor = (id, parent, says = SITE_SAYS, tag = 'say') => {
+    if (!says[id]) return null;
+    const say = sayBubble(scene, `then_${id}_${tag}`, says[id]());
     say.parent = parent;
     for (const mesh of say.getChildMeshes()) {
       mesh.billboardMode = Mesh.BILLBOARDMODE_ALL;
@@ -216,7 +216,7 @@ export function createSiteModels(scene, siteList) {
       const boosterFlame = drum(scene, `then_${id}_flame1`, parts.booster, flameMaterial, { height: 0.5, diameterTop: 0.05, diameterBottom: 0.17, tessellation: 12 }, [0, -0.27, 0]);
       const upperFlame = drum(scene, `then_${id}_flame2`, parts.upper, flameMaterial, { height: 0.3, diameterTop: 0.04, diameterBottom: 0.13, tessellation: 12 }, [0, -0.16, 0]);
       root.setEnabled(false);
-      then.set(id, { node: root, flame: null, cords: null, launch: { ...parts, boosterFlame, upperFlame } });
+      then.set(id, { node: root, flame: null, cords: null, launch: { ...parts, boosterFlame, upperFlame }, say: bubbleFor(id, root), sayBooster: bubbleFor(id, root, BOOSTER_SAYS, 'sayBooster') });
       continue;
     }
     if (coming === 'bag' || coming === 'bare') {
@@ -467,6 +467,18 @@ export function createSiteModels(scene, siteList) {
         const parts = old.launch;
         parts.booster.position.set(0.16 + booster.x, 0.2 + booster.y - 0.14 * Math.min(1, booster.x / 0.6), 0);
         parts.booster.rotation.z = booster.lean;
+        // The first stage's own bubble goes along with it, to the right of it, a little under its foot (it is high in the view then).
+        if (old.sayBooster) {
+          const size = replay.sayBooster ?? 0;
+          old.sayBooster.setEnabled(size > 0.01);
+          if (old.sayBooster.isEnabled()) {
+            const eye = scene.activeCamera;
+            const off = eye.getDirection(Vector3.Right()).scale(0.55).add(eye.getDirection(Vector3.Up()).scale(-0.1));
+            off.rotateByQuaternionToRef(Quaternion.Inverse(node.rotationQuaternion), old.sayBooster.position);
+            old.sayBooster.position.addInPlace(parts.booster.position);
+            old.sayBooster.scaling.setAll(Math.max(0.01, size));
+          }
+        }
         parts.legs.setEnabled(booster.legs);
         parts.boosterFlame.setEnabled(booster.burn);
         parts.upper.position.set(0.16 + upper.x, 0.75 + upper.y, 0);

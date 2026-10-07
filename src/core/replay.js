@@ -189,6 +189,10 @@ export const REPLAYS = {
     fromKm: 0,
     viewKm: 70,
     launch: { igniteAt: 2, liftAt: 3, partAt: 12, partUnits: 1.6, shipUnits: 1.7 },
+    // The commander's words just before it lifts (render/siteModels.js SITE_SAYS): from, to.
+    say: [0.5, 4.2],
+    // The first stage's goodbye as it parts (render/siteModels.js BOOSTER_SAYS): from, to.
+    sayBooster: [15, 19.6],
     // What is heard and when (ui/sound.js cues): the engines light, the stages part,
     // the first stage lights again (when its `burn` begins, 0.7 of its way down) and
     // it stands on the ship.
@@ -266,10 +270,10 @@ export function replaySounds(id, before, after) {
 // whether its engine burns, which line is told, and whether the scene is over.
 // How large a scene's bubble is at a moment (0 → 1): it swells in and shrinks away over
 // 0.4 s between the two moments of the scene's `say`.
-function saySize(scene, t) {
-  if (!scene.say) return 0;
+function saySize(scene, t, span = scene.say) {
+  if (!span) return 0;
   const part = (n) => Math.max(0, Math.min(1, n));
-  return part((t - scene.say[0]) / 0.4) * part((scene.say[1] - t) / 0.4);
+  return part((t - span[0]) / 0.4) * part((span[1] - t) / 0.4);
 }
 
 export function replayFrame(id, t) {
@@ -357,6 +361,8 @@ function launchFrame(scene, t) {
   return {
     launch: { upper, booster },
     liftKm: 0, acrossKm: 0, glow: 0, slope: 0, gone: false, flame: false,
+    say: saySize(scene, t),
+    sayBooster: saySize(scene, t, scene.sayBooster),
     down,
     after: Math.max(0, t - scene.downAt),
   };

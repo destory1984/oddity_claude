@@ -30,7 +30,7 @@ function fitName() {
   plate.style.width = `${count * step - (step - key)}px`;
 }
 
-export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAurora, onVista, vistas = [], skyLabels = [] }) {
+export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAurora, onVista, vistas = [], auroras = ['earth'], skyLabels = [] }) {
   // The way home (core/home.js): a key that stands at the end of the name plate while
   // Earth is the one chosen. Writing another name into the plate takes it out again.
   const homeKey = $('homeButton');
@@ -149,6 +149,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
     showSelection(body) {
       $('targetName').innerHTML = `${body.name} <small>${body.nameEn}</small>`;
       if (body.id === 'earth') $('targetName').append(auroraKey, homeKey);
+      else if (auroras.includes(body.id) && vistas.includes(body.id)) $('targetName').append(auroraKey, vistaKey);
       else if (vistas.includes(body.id)) $('targetName').append(vistaKey);
       fitName();
       $('faceTarget').textContent = t`${body.name} 바라보기`;

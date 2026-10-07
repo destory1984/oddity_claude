@@ -110,6 +110,17 @@ export const AURORA_VIEW = {
   up: [-0.2116, 0.9303, -0.2995],
 };
 
+// Saturn's (the user, 2026-10-07: "토성도 오로라 있으니까, 오로라 버튼 넣어주고"): the
+// same stand, at the latitude of its ring of light (75 degrees; core/glows.js AURORAS)
+// and a tenth of the way up its curtain (500 → 4,100 km), as Earth's place is in Earth's.
+export const SATURN_AURORA_VIEW = {
+  body: 'saturn',
+  position: [-0.155, 0.9802, -0.212],
+  forward: [-0.5564, 0.1373, 0.8195],
+  up: [-0.2116, 0.9303, -0.2995],
+};
+export const AURORA_VIEWS = { earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW };
+
 // Where that is now: { position, up, facing }, as homeSpot gives.
 export function auroraSpot(body, sunPosition, view = AURORA_VIEW) {
   const toSun = sub(sunPosition, body.position);

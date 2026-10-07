@@ -81,8 +81,8 @@ import { replayFor, replayFrame, replaySounds, replayOn, replayBeside } from './
 import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from './core/visit.js';
-import { HOME, homeSpot, auroraSpot, startHome, homeStep, homeArrived } from './core/home.js';
-import { VISTAS, vistaSpot } from './core/vista.js';
+import { HOME, homeSpot, auroraSpot, AURORA_VIEWS, startHome, homeStep, homeArrived } from './core/home.js';
+import { VISTAS, VISTA_HELD, vistaSpot } from './core/vista.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -93,6 +93,8 @@ const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
 // After a jump to a body the view is turned this far (radians) off it.
 const VISTA_YAW = 0.3;
+// The worlds a warp arrives at the best view of (core/vista.js).
+const WARP_TO_VISTA = ['saturn'];
 // Turned to face a target (바라보기, 목표 고정, the big map), the view is tipped down by
 // this much, 15 degrees, so the target stands over her head: square on, it sat in the
 // very middle of the view, behind her ("소라의 머리가 그걸 막게 되어서 움직이기 불편해").
@@ -708,6 +710,13 @@ async function init() {
       // so a body sits beside them, not behind them.
       const aside = target.kind !== 'craft' && target.kind !== 'site' && innerWidth / innerHeight >= 1;
       state = createState(spot, aside ? rotateLocal(facing, VISTA_YAW, 0) : facing);
+      // Saturn: she arrives where its best-view key takes her, all the rings in view (the
+      // user, 2026-10-07, standing there: "지금 저 위치는 왜 토성 워프 위치로 안 넣었어?").
+      // Not on a tour's jump to see a moon's shadow on it (toward): that has its own side.
+      if (WARP_TO_VISTA.includes(target.id) && !toward) {
+        const best = vistaSpot(target.id, { body: target, sun: here('sun'), earth: here('earth'), timeS: simTime, elapsedS: world.elapsed(), ringNormal: world.ringNormal(target.id), of: here });
+        state = createState(best.position, best.facing);
+      }
       // On arrival, say what this is. A craft about to be docked with shows its card instead.
       const docking = target.kind === 'craft';
       // On a tour, a stop the jump alone does not reach says what is left to do.
@@ -1058,21 +1067,30 @@ ${STORY_MORE[target.id]}` : told };
     moon: t('지구가 달 지평선 위에 떠 있는 자리입니다.'),
     jupiter: t('대적점이 내려다보이는 자리입니다. 움직이면 풀려납니다.'),
     saturn: t('토성의 고리가 한눈에 들어오는 자리입니다.'),
+    mars: t('마리너 계곡이 내려다보이는 자리입니다. 움직이면 풀려납니다.'),
+    io: t('이오 뒤로 목성의 구름이 가득한 자리입니다.'),
+    enceladus: t('얼음 분수 곁으로 토성이 보이는 자리입니다.'),
+    pluto: t('명왕성의 하트가 내려다보이는 자리입니다. 움직이면 풀려납니다.'),
+    uranus: t('천왕성의 고리가 한눈에 들어오는 자리입니다.'),
   };
+  // What the flight line says while she is held over one.
+  const VISTA_OVER = { jupiter: t('대적점 위'), mars: t('마리너 계곡 위'), pluto: t('명왕성의 하트 위') };
   function goHome(kind) {
     if (photo.active() || warp.busy() || paused || (docked && !isDocked(docked)) || (visit && !hasArrived(visit))) return;
-    const bodyId = kind === 'vista' ? selectedId : HOME.body;
+    const bodyId = kind === 'vista' || (kind === 'aurora' && AURORA_VIEWS[selectedId]) ? selectedId : HOME.body;
     if (kind === 'vista' && !VISTAS.includes(bodyId)) return;
     const spot = kind === 'home' ? () => homeSpot(here(bodyId), simTime)
-      : kind === 'aurora' ? () => auroraSpot(here(bodyId), here('sun').position)
-        : () => vistaSpot(bodyId, { body: here(bodyId), sun: here('sun'), earth: here('earth'), timeS: simTime, elapsedS: world.elapsed(), ringNormal: world.ringNormal(bodyId) });
+      : kind === 'aurora' ? () => auroraSpot(here(bodyId), here('sun').position, AURORA_VIEWS[bodyId])
+        : () => vistaSpot(bodyId, { body: here(bodyId), sun: here('sun'), earth: here('earth'), timeS: simTime, elapsedS: world.elapsed(), ringNormal: world.ringNormal(bodyId), of: here });
     if (docked) undock();
     visit = null;
+    const first = spot();
     home = {
-      ...startHome(state, here(bodyId), spot()),
+      ...startHome(state, here(bodyId), first),
       kind, bodyId, spot,
-      hold: kind === 'home' || bodyId === 'jupiter',
-      told: kind === 'home' ? t('한국이 내려다보이는 자리입니다. 움직이면 풀려납니다.') : kind === 'aurora' ? t('오로라 속입니다. 빛줄기 뒤로 별이 보입니다.') : VISTA_TOLD[bodyId],
+      // (free: a view that is not over a place of the ground this time: Pluto's by night.)
+      hold: kind === 'home' || (kind === 'vista' && VISTA_HELD.includes(bodyId) && !first.free),
+      told: kind === 'home' ? t('한국이 내려다보이는 자리입니다. 움직이면 풀려납니다.') : kind === 'aurora' ? t('오로라 속입니다. 빛줄기 뒤로 별이 보입니다.') : first.free ? t('명왕성의 낮 쪽입니다. 하트는 지금 밤 쪽에 있습니다.') : VISTA_TOLD[bodyId],
     };
     input.clear();
   }
@@ -1094,6 +1112,7 @@ ${STORY_MORE[target.id]}` : told };
       goHome('vista');
     },
     vistas: VISTAS,
+    auroras: Object.keys(AURORA_VIEWS),
     onInspect() {
       const body = here(selectedId);
       // The view goes close and circles the target; she herself stays where she is, so
@@ -2501,7 +2520,7 @@ ${STORY_MORE[target.id]}` : told };
     else if (docked) flightLabel = t`${here(docked.id).name}${withParticle(here(docked.id).name)} 함께 비행`;
     else if (visit && !hasArrived(visit)) flightLabel = t`${here(visit.id).name}에 착륙 중`;
     else if (visit) flightLabel = t`${here(visit.id).name} 곁`;
-    else if (home && homeArrived(home)) flightLabel = home.kind === 'home' ? t('한국 하늘 위') : t('대적점 위');
+    else if (home && homeArrived(home)) flightLabel = home.kind === 'home' ? t('한국 하늘 위') : VISTA_OVER[home.bodyId];
     else if (home) flightLabel = home.kind === 'home' ? t('한국 하늘로 가는 중') : home.kind === 'aurora' ? t('오로라 자리로 가는 중') : t('명당으로 가는 중');
     else if (state.restingOn) flightLabel = t`${bodyById(state.restingOn).name} 표면`;
     else if (shownSpeed() < 0.01) flightLabel = t('정지 비행');

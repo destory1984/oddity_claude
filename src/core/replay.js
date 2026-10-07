@@ -74,6 +74,8 @@ export const REPLAYS = {
     name: t('카시니의 마지막 돌입'),
     day: t('2017년 9월 15일'),
     on: 'saturn',
+    // Saturn's word once it is gone (render/siteModels.js SITE_SAYS): from, to.
+    say: [15.5, 20.5],
     streak: true,
     seconds: 22,
     downAt: 15,

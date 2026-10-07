@@ -1373,6 +1373,9 @@ export const SITE_SAYS = {
   // (Of five offered for pad 39A: "1": Doug Hurley's own words before lift-off, "Let's
   // light this candle", which were Alan Shepard's in 1961.)
   lc39a: () => t('이 불을 켜 봅시다'),
+  // (Of five offered for Cassini's plunge: "5": Saturn itself, once Cassini is gone; a
+  // pair to its "첫 손님이네요" in Voyager 2's scene.)
+  cassiniPlunge: () => t('잘 왔어. 이제 쉬어'),
   // (Philae: the user's own two, 2026-10-07, in place of the five offered: 첫번째
   // "어~ 어~ 어~", 두번째 "아이쿠". The second is in SECOND_SAYS below.)
   philaeLanding: () => t('어~ 어~ 어~'),

@@ -164,7 +164,8 @@ export function createSiteModels(scene, siteList) {
     if (!says[id]) return null;
     const left = says === SITE_SAYS && SAYS_ON_LEFT.has(id);
     const say = sayBubble(scene, `then_${id}_${tag}`, says[id](), left ? { tail: 'downRight' } : {});
-    say.metadata = { left };
+    // (Cassini is drawn small in its plunge: what Saturn says there is drawn more than twice as large.)
+    say.metadata = { left, big: id === 'cassiniPlunge' ? 2.4 : 1 };
     say.parent = parent;
     for (const mesh of say.getChildMeshes()) {
       mesh.billboardMode = Mesh.BILLBOARDMODE_ALL;
@@ -363,7 +364,10 @@ export function createSiteModels(scene, siteList) {
       sheet.rotation.x = (k * Math.PI) / 3;
     }
     node.setEnabled(false);
-    then.set('cassiniPlunge', { node, flame: null, fire, fireMaterial });
+    // What Saturn says when it is gone: the bubble stays where the craft was, so the
+    // craft's own parts (`body`) are hidden then and not the whole node.
+    const body = node.getChildren();
+    then.set('cassiniPlunge', { node, flame: null, fire, fireMaterial, body, say: bubbleFor('cassiniPlunge', node) });
   }
 
   // A stage of pieces is turned to face whoever watches as it begins: its +x across the
@@ -400,7 +404,8 @@ export function createSiteModels(scene, siteList) {
       const node = old ? old.node : now;
       const rel = site.position.map((n, i) => (n - position[i]) / KM_PER_UNIT);
       const distanceKm = Math.hypot(...rel) * KM_PER_UNIT;
-      node.setEnabled(distanceKm < SITE_VISIBLE_KM && !(old && replay.gone));
+      node.setEnabled(distanceKm < SITE_VISIBLE_KM && !(old && replay.gone && !old.body));
+      if (old?.body) for (const piece of old.body) piece.setEnabled(!replay.gone);
       if (!node.isEnabled()) continue;
       const body = bodies.find((b) => b.id === site.parent);
       const up = new Vector3(...site.position.map((n, i) => n - body.position[i])).normalize();
@@ -459,7 +464,7 @@ export function createSiteModels(scene, siteList) {
           const high = Math.min(1, replay.liftKm / (2 * Math.min(SITE_MAX_KM, Math.max(SITE_MIN_KM, distanceKm * APPARENT))));
           const off = eye.getDirection(Vector3.Right()).scale((bubble.metadata?.left ? -1 : 1) * (0.64 + 0.25 * high)).add(eye.getDirection(Vector3.Up()).scale(1.05 - 1.25 * high));
           off.rotateByQuaternionToRef(Quaternion.Inverse(node.rotationQuaternion), bubble.position);
-          bubble.scaling.setAll(Math.max(0.01, size));
+          bubble.scaling.setAll(Math.max(0.01, size) * (bubble.metadata?.big ?? 1));
         }
       }
       if (old?.launch && replay.launch) {

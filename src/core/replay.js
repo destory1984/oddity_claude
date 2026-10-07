@@ -77,7 +77,7 @@ export const REPLAYS = {
     // Saturn's word BEFORE it falls, then the fall, then a thud as it is gone (the user,
     // 2026-10-07: "떨어지기 전에 토성이 얘기하고, 카시니가 떨어지기 시작한다. 쿵~"): from, to
     // (render/siteModels.js SITE_SAYS, SECOND_SAYS). Both stand where it ends.
-    say: [0.8, 5.4],
+    say: [0.8, 14.7],
     say2: [15.1, 19.6],
     streak: true,
     seconds: 22,

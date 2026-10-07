@@ -1408,7 +1408,9 @@ export const SAYS_BY = { cassiniPlunge: () => t('토성') };
 
 // Whose first bubble stands to its LEFT, the tail down to the right: Philae is at the
 // right edge of a narrow phone's view while it floats.
-export const SAYS_ON_LEFT = new Set(['philaeLanding']);
+// (And Saturn's in Cassini's plunge: Cassini comes in from the right, across where a
+// bubble on the right would stand.)
+export const SAYS_ON_LEFT = new Set(['philaeLanding', 'cassiniPlunge']);
 
 // A second thing one of them says later in its scene (core/replay.js `say2`).
 export const SECOND_SAYS = {

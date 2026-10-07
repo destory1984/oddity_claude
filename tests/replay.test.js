@@ -86,7 +86,8 @@ test('Cassini comes in from the side, glows from a third of the way and is gone 
   assert.equal(at(17).glow, 0);
   // Saturn speaks before it falls, and there is a thud once it is gone.
   assert.equal(at(3).say, 1);
-  assert.equal(at(6).say, 0);
+  assert.equal(at(10).say, 1);
+  assert.equal(at(14.8).say, 0);
   assert.equal(at(14).say2, 0);
   assert.equal(at(17).say2, 1);
   assert.equal(at(3).endKm, 20);

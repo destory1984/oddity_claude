@@ -528,7 +528,7 @@ export function createSiteModels(scene, siteList) {
           bubble.setEnabled(size > 0.01);
           if (!bubble.isEnabled()) continue;
           const big = bubble.metadata?.big ?? 1;
-          const off = eye.getDirection(Vector3.Right()).scale(0.5 * big).add(eye.getDirection(Vector3.Up()).scale(0.6 * big)).add(back.scale(1 / sized));
+          const off = eye.getDirection(Vector3.Right()).scale((bubble.metadata?.left ? -0.55 : 0.5) * big).add(eye.getDirection(Vector3.Up()).scale(0.6 * big)).add(back.scale(1 / sized));
           off.rotateByQuaternionToRef(turned, bubble.position);
           bubble.scaling.setAll(Math.max(0.01, size) * big);
         }

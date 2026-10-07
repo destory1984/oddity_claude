@@ -52,8 +52,8 @@ export const MISSIONS = [
   },
   {
     id: 'heroSelfie',
-    name: t('영웅 셀카'),
-    hint: t('영웅을 보이게 두고, 행성이나 달이 화면 높이의 30% 이상'),
+    name: t('소라 셀카'),
+    hint: t('소라를 보이게 두고, 행성이나 달이 화면 높이의 30% 이상'),
     check: (s) => s.heroVisible && s.frames.some((f) => f.body.kind !== 'star' && f.visible && !f.hidden && f.fill >= 0.3),
   },
   {

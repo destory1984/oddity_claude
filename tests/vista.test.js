@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, HEART_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, vistaSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
+import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, HEART_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, vistaSpot, warpSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
 import { forward, up } from '../src/core/orientation.js';
 
 const dot = (a, b) => a.reduce((sum, n, i) => sum + n * b[i], 0);
@@ -59,7 +59,17 @@ test('Saturn\'s view: where the user stood, behind the globe and under the rings
   assert.ok(out[1] < 0);
   assert.ok(dot(forward(spot.facing), toSun) > 0.8);
   assert.ok(up(spot.facing)[1] < -0.8);
-  assert.ok(RING_VIEW.radii > 0);
+  // A warp arrives elsewhere: off the rings' sunlit face, far enough to take them all in.
+  for (const normal of [[0.2, 0.9, 0.1], [-0.2, -0.9, -0.1]]) {
+    const warp = warpSpot('saturn', { body: saturn, sun, ringNormal: normal });
+    const off = sub(warp.position, saturn.position);
+    assert.ok(Math.abs(Math.hypot(...off) / saturn.radiusKm - RING_VIEW.radii) < 1e-9);
+    const n = unit(normal);
+    assert.ok(dot(off, n) * dot(toSun, n) > 0);
+    assert.ok(Math.abs(Math.asin(Math.abs(dot(unit(off), n))) * 180 / Math.PI - RING_VIEW.overDeg) < 1e-6);
+    assert.ok(dot(forward(warp.facing), unit(off).map((x) => -x)) > 0.98);
+  }
+  assert.equal(warpSpot('mars', { body: saturn, sun }), null);
   assert.deepEqual(VISTAS, ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus']);
   assert.equal(vistaSpot('venus', { body: saturn, sun, earth: sun }), null);
 });

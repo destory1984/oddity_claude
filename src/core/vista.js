@@ -46,8 +46,8 @@ export const RING_VIEW = { radii: 8.2, overDeg: 20, roundDeg: 40, lookDown: 0.13
 // the planets' plane, so that the dark globe stands at her left, the rings sweep across
 // under her lit from behind, and the Sun shines over them. Kept as she stood to the
 // Sun, as the places in the auroras are (core/home.js auroraSpot: [toward the Sun,
-// north, north x Sun], in radii). RING_VIEW was Saturn's before, and is the pattern of
-// Uranus's.
+// north, north x Sun], in radii). RING_VIEW was Saturn's before: a warp still arrives
+// there (warpSpot), and it is the pattern of Uranus's.
 export const SATURN_VIEW = {
   body: 'saturn',
   position: [-2.3825, -1.7615, -1.6741],
@@ -134,6 +134,15 @@ function ringSpot(body, sun, ringNormal, view) {
   const head = squareTo(normal, out);
   const position = body.position.map((n, i) => n + out[i] * body.radiusKm * view.radii);
   return { position, up: out, facing: orientationFrom(unit(mix([-1, out], [-view.lookDown, head])), head) };
+}
+
+// Where a warp to world `id` arrives, for the worlds that have a place of their own for
+// it; null for the rest (core/teleport.js bodyVista places those). Saturn: off the
+// sunlit face of the rings, all of them in view (RING_VIEW). It was Saturn's best view
+// until the user chose another, and they kept it for the warp (2026-10-08: "명당 자리와
+// 워프 자리를 헷갈렸구나.. 워프 자리는 이전 것이 맞아").
+export function warpSpot(id, { body, sun, ringNormal = null }) {
+  return id === 'saturn' ? ringSpot(body, sun, ringNormal, RING_VIEW) : null;
 }
 
 // of: the body with an id, as it is now (Io's view needs Jupiter, Enceladus's Saturn).

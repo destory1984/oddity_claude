@@ -82,7 +82,7 @@ import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordE
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from './core/visit.js';
 import { HOME, homeSpot, auroraSpot, AURORA_VIEWS, startHome, homeStep, homeArrived } from './core/home.js';
-import { VISTAS, VISTA_HELD, vistaSpot } from './core/vista.js';
+import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -93,8 +93,6 @@ const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
 // After a jump to a body the view is turned this far (radians) off it.
 const VISTA_YAW = 0.3;
-// The worlds a warp arrives at the best view of (core/vista.js).
-const WARP_TO_VISTA = ['saturn'];
 // Turned to face a target (바라보기, 목표 고정, the big map), the view is tipped down by
 // this much, 15 degrees, so the target stands over her head: square on, it sat in the
 // very middle of the view, behind her ("소라의 머리가 그걸 막게 되어서 움직이기 불편해").
@@ -710,13 +708,12 @@ async function init() {
       // so a body sits beside them, not behind them.
       const aside = target.kind !== 'craft' && target.kind !== 'site' && innerWidth / innerHeight >= 1;
       state = createState(spot, aside ? rotateLocal(facing, VISTA_YAW, 0) : facing);
-      // Saturn: she arrives where its best-view key takes her, all the rings in view (the
-      // user, 2026-10-07, standing there: "지금 저 위치는 왜 토성 워프 위치로 안 넣었어?").
-      // Not on a tour's jump to see a moon's shadow on it (toward): that has its own side.
-      if (WARP_TO_VISTA.includes(target.id) && !toward) {
-        const best = vistaSpot(target.id, { body: target, sun: here('sun'), earth: here('earth'), timeS: simTime, elapsedS: world.elapsed(), ringNormal: world.ringNormal(target.id), of: here });
-        state = createState(best.position, best.facing);
-      }
+      // Saturn: she arrives off the sunlit face of its rings, all of them in view
+      // (core/vista.js warpSpot; the user, 2026-10-07, standing there: "지금 저 위치는 왜
+      // 토성 워프 위치로 안 넣었어?"). Not on a tour's jump to see a moon's shadow on it
+      // (toward): that has its own side.
+      const own = toward ? null : warpSpot(target.id, { body: target, sun: here('sun'), ringNormal: world.ringNormal(target.id) });
+      if (own) state = createState(own.position, own.facing);
       // On arrival, say what this is. A craft about to be docked with shows its card instead.
       const docking = target.kind === 'craft';
       // On a tour, a stop the jump alone does not reach says what is left to do.

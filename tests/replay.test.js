@@ -168,6 +168,10 @@ test('Luna 9 opens its petals after its bags are off; Pathfinder is shown open a
   // Curiosity thanks its sky crane after the cords are cut.
   assert.equal(replayFrame('curiosity', 17).say, 0);
   assert.equal(replayFrame('curiosity', 20).say, 1);
+  // Venera 7 speaks on the way down, and Venera 13 says nothing.
+  assert.equal(replayFrame('venera7', 11).say, 1);
+  assert.equal(replayFrame('venera7', 14).say, 0);
+  assert.equal(replayFrame('venera13', 9).say, 0);
   assert.ok(!replayFrame('pathfinder', 25).open);
 });
 

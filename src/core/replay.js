@@ -204,6 +204,8 @@ export const REPLAYS = {
     seconds: 24,
     downAt: 17,
     fromKm: 14,
+    // It feels the heat on the way down: from, to.
+    say: [8.8, 13.6],
     sounds: [[0, 'chute']],
     lines: [
       { at: 0, text: t('1970년 12월 15일. 소련의 베네라 7호가 금성의 두꺼운 구름을 뚫고 낙하산으로 내려옵니다.') },

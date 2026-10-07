@@ -1074,6 +1074,8 @@ export const SITE_SAYS = {
   viking1: () => t('화성아. 안녕? 처음 뵙겠습니다'),
   // (Of five offered for Curiosity: "4": to the stage that let it down, as that flies off.)
   curiosity: () => t('태워 줘서 고마워. 잘 가~'),
+  // (Of five offered for Venera 7: "1": as it comes down through 475 degrees.)
+  venera7: () => t('앗 뜨거. 사우나보다 더워~'),
 };
 
 // For "그날로" (core/replay.js): what came down that day, as it was then.

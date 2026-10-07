@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, HEART_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, vistaSpot, warpSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
+import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, HEART_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, NEPTUNE_RISE, vistaSpot, warpSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
 import { forward, up } from '../src/core/orientation.js';
 
 const dot = (a, b) => a.reduce((sum, n, i) => sum + n * b[i], 0);
@@ -70,7 +70,7 @@ test('Saturn\'s view: where the user stood, behind the globe and under the rings
     assert.ok(dot(forward(warp.facing), unit(off).map((x) => -x)) > 0.98);
   }
   assert.equal(warpSpot('mars', { body: saturn, sun }), null);
-  assert.deepEqual(VISTAS, ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus']);
+  assert.deepEqual(VISTAS, ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus', 'neptune']);
   assert.equal(vistaSpot('venus', { body: saturn, sun, earth: sun }), null);
 });
 
@@ -143,4 +143,19 @@ test('the view of Uranus: off the sunlit face of its rings, though they face the
     assert.ok(dot(out, unit(normal)) * dot(toSun, unit(normal)) > 0);
     assert.ok(dot(forward(spot.facing), unit(out).map((x) => -x)) > 0.98);
   }
+});
+
+test('the view of Neptune: low over Triton\'s ground, Neptune above the level before her; the trip goes round Neptune', () => {
+  const neptune = { position: [4.4e9, 0, 3e8], radiusKm: 24622 };
+  const triton = { position: [4.4e9 + 50000, 4000, 3e8 - 30000], radiusKm: 1353.4 };
+  const spot = vistaSpot('neptune', { body: neptune, sun, earth: sun, of: () => triton });
+  assert.ok(Math.abs(Math.hypot(...sub(spot.position, triton.position)) - triton.radiusKm - NEPTUNE_RISE.heightKm) < 1e-6);
+  const ground = unit(sub(spot.position, triton.position));
+  const toNeptune = unit(sub(neptune.position, spot.position));
+  const lift = Math.asin(dot(toNeptune, ground)) * 180 / Math.PI;
+  assert.ok(lift > 5 && lift < 20, String(lift));
+  assert.ok(dot(forward(spot.facing), toNeptune) > 0.9);
+  assert.ok(dot(up(spot.facing), ground) > 0.9);
+  // `up` is the way from Neptune's centre to the place.
+  assert.ok(Math.hypot(...sub(spot.up, unit(sub(spot.position, neptune.position)))) < 1e-9);
 });

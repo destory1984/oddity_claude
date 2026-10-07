@@ -1070,6 +1070,7 @@ ${STORY_MORE[target.id]}` : told };
     enceladus: t('얼음 분수 곁으로 토성이 보이는 자리입니다.'),
     pluto: t('명왕성의 하트가 내려다보이는 자리입니다. 움직이면 풀려납니다.'),
     uranus: t('천왕성의 고리가 한눈에 들어오는 자리입니다.'),
+    neptune: t('해왕성이 트리톤 지평선 위에 떠 있는 자리입니다.'),
   };
   // What the flight line says while she is held over one.
   const VISTA_OVER = { jupiter: t('대적점 위'), mars: t('마리너 계곡 위'), pluto: t('명왕성의 하트 위') };

@@ -10,11 +10,13 @@
 //   Enceladus: off its far side from Saturn, the ice jets under it and Saturn behind;
 //   Pluto: over its heart (by the turning ground);
 //   Uranus: off the sunlit face of its rings, the bull's eye open (by the rings and the Sun).
+//   Neptune (2026-10-08, of four shown: "1로 가보자"): low over Triton's ground, Neptune
+//   filling the sky above its horizon (by where Triton and Neptune are).
 import { surfaceDirection, spinOf } from './surface.js';
 import { orientationFrom } from './orientation.js';
 import { auroraSpot } from './home.js';
 
-export const VISTAS = ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus'];
+export const VISTAS = ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus', 'neptune'];
 // The views over a place of a turning globe: once there she is held and turns with it.
 export const VISTA_HELD = ['jupiter', 'mars', 'pluto'];
 
@@ -76,6 +78,11 @@ export const IO_VIEW = { radii: 5, sunLean: 0.8, lookDown: 0.28, lookAside: 0 };
 // its equator; she looks to one side of the moon and a little under it, so that it
 // stands beside her with the jets of the south pole falling clear of her.
 export const JET_VIEW = { radii: 7, roundDeg: 22, southDeg: 12, lookDown: 0.12, lookAside: 0.13 };
+// Neptune, seen from its moon Triton: this high over Triton's ground, Neptune's middle
+// this far above the level (Triton goes round 2.4 radii from Neptune's centre here, so
+// the globe is some 49 degrees across and fills the sky). With Triton on Neptune's night
+// side the dark globe has its aurora along the edge; on the day side it is blue.
+export const NEPTUNE_RISE = { heightKm: 60, upDeg: 12, lookDown: 0.2 };
 // Uranus: as RING_VIEW; its rings stand nearly upright and face the Sun.
 export const BULLSEYE_VIEW = { radii: 6.4, overDeg: 50, roundDeg: 30, lookDown: 0.05 };
 
@@ -153,6 +160,11 @@ export function vistaSpot(id, { body, sun, earth, timeS = 0, elapsedS = 0, ringN
     const toSun = unit(sub(sun.position, body.position));
     const out = unit(mix([-1, toJupiter], [IO_VIEW.sunLean, toSun]));
     return offSpot(body, out, [0, 1, 0], IO_VIEW);
+  }
+  if (id === 'neptune') {
+    // (up: the way from Neptune's centre, which the trip goes round: core/home.js homeStep.)
+    const spot = riseSpot(of('triton'), body, NEPTUNE_RISE);
+    return { ...spot, up: unit(sub(spot.position, body.position)) };
   }
   if (id === 'mars') return overSpot(body, MARINER_VIEW, spinOf('mars', timeS));
   if (id === 'pluto') {

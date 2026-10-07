@@ -81,6 +81,7 @@ import { replayFor, replayFrame, replaySounds, replayOn, replayBeside } from './
 import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from './core/visit.js';
+import { HOME, homeSpot, startHome, homeStep, homeArrived } from './core/home.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -290,6 +291,8 @@ let rideDrift = [0, 0, 0];
 // fast the glide is carrying her.
 let visit = null;
 let visitKmS = 0;
+// On the way to the place over Korea, or held there (core/home.js).
+let home = null;
 const shownSpeed = () => (docked ? rideKmS : visit ? visitKmS : totalSpeed(state));
 // Where a body is right now (BODIES is only the starting layout).
 // Spacecraft and telescopes: found and selected like bodies, but they are not in the
@@ -659,6 +662,7 @@ async function init() {
   function goDownTo(place) {
     visit = startVisit(state, place.id, standBeside(place.id));
     visitKmS = 0;
+    home = null;
     input.clear();
     announce({ type: 'visiting', name: place.name }, MOMENT_S);
     sound.say('Landing in progress.');
@@ -691,6 +695,7 @@ async function init() {
       if (visit && !hasArrived(visit)) sound.hush();
       visit = null;
       stuntJumped = true;
+      home = null;
       input.clear();
       const facing = lookAtDirection(target.position.map((n, i) => n - spot[i]));
       // The traveler stands in the middle of the view: on a wide screen turn a little
@@ -1043,6 +1048,16 @@ ${STORY_MORE[target.id]}` : told };
     skyLabels: skyLabels(),
     onSelect: selectBody,
     onFace: () => facePicked(),
+    // The key on Earth's name plate: from wherever she is, round the globe to the place
+    // over Korea (core/home.js).
+    onHome() {
+      if (photo.active() || warp.busy() || paused || (docked && !isDocked(docked)) || (visit && !hasArrived(visit))) return;
+      if (docked) undock();
+      visit = null;
+      const earth = here(HOME.body);
+      home = startHome(state, earth, homeSpot(earth, simTime, innerWidth / innerHeight < 0.75));
+      input.clear();
+    },
     onInspect() {
       const body = here(selectedId);
       // The view goes close and circles the target; she herself stays where she is, so
@@ -1918,6 +1933,20 @@ ${STORY_MORE[target.id]}` : told };
         }
       }
     }
+    if (home && (docked || visit)) home = null;
+    if (home) {
+      if (!paused && wantsToLeave(intent)) home = null;
+      else if (dt > 0) {
+        const earth = here(HOME.body);
+        const went = homeStep(state, home, dt, {
+          spot: homeSpot(earth, simTime, innerWidth / innerHeight < 0.75),
+          body: earth,
+          spun: spinOf(HOME.body, simTime) - spinOf(HOME.body, simTime - dt * TIME_SCALE),
+        });
+        ({ state, home } = went);
+        if (went.arrived) toast.show(t('한국이 내려다보이는 자리입니다. 움직이면 풀려납니다.'));
+      }
+    }
     const slowPoints = craft.map((c) => c.position);
     // (How far the locked target is before this step: sliding round it keeps that.)
     if (aimedId !== selectedId) aimedId = null;
@@ -1934,7 +1963,7 @@ ${STORY_MORE[target.id]}` : told };
     // on the target itself it waits.
     // (Only faced, not locked: the view is left alone and sliding is a plain slide, but
     // forward and back still go straight to the target and away.)
-    if (guided && dt > 0 && !docked && !visit && !rear && !photo.active()) {
+    if (guided && dt > 0 && !docked && !visit && !home && !rear && !photo.active()) {
       if (intent.turnX !== 0 || intent.turnY !== 0 || intent.roll !== 0) {
         if (locked) lockAim = aimNow();
         aimedId = null;
@@ -1974,7 +2003,7 @@ ${STORY_MORE[target.id]}` : told };
     // 지구에 고정이 안 되잖아": the ground slid away under her, 12.5 degrees a minute at
     // Earth). Not from farther than LOCK_CARRY_RADII of its centre: from the Moon's
     // distance that would sweep her 84,000 km a minute.
-    if (locked && dt > 0 && !docked && !visit && !photo.active()) {
+    if (locked && dt > 0 && !docked && !visit && !home && !photo.active()) {
       const aim = here(selectedId);
       const ground = sites.some((s) => s.id === aim.id) ? here(aim.parent) : bodyById(aim.id, bodies);
       if (ground && state.restingOn !== ground.id) {
@@ -2431,6 +2460,7 @@ ${STORY_MORE[target.id]}` : told };
     else if (docked) flightLabel = t`${here(docked.id).name}${withParticle(here(docked.id).name)} 함께 비행`;
     else if (visit && !hasArrived(visit)) flightLabel = t`${here(visit.id).name}에 착륙 중`;
     else if (visit) flightLabel = t`${here(visit.id).name} 곁`;
+    else if (home) flightLabel = homeArrived(home) ? t('한국 하늘 위') : t('한국 하늘로 가는 중');
     else if (state.restingOn) flightLabel = t`${bodyById(state.restingOn).name} 표면`;
     else if (shownSpeed() < 0.01) flightLabel = t('정지 비행');
     else if (!driving) flightLabel = t('관성 비행');

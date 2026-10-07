@@ -30,7 +30,16 @@ function fitName() {
   plate.style.width = `${count * step - (step - key)}px`;
 }
 
-export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] }) {
+export function createHud(bodies, { onSelect, onFace, onInspect, onHome, skyLabels = [] }) {
+  // The way home (core/home.js): a key that stands at the end of the name plate while
+  // Earth is the one chosen. Writing another name into the plate takes it out again.
+  const homeKey = $('homeButton');
+  homeKey.hidden = false;
+  homeKey.remove();
+  homeKey.addEventListener('click', (event) => {
+    event.stopPropagation();
+    onHome?.();
+  });
   window.addEventListener('resize', fitName);
   document.fonts?.ready.then(fitName);
   const markers = new Map();
@@ -123,6 +132,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, skyLabels = [] 
   return {
     showSelection(body) {
       $('targetName').innerHTML = `${body.name} <small>${body.nameEn}</small>`;
+      if (body.id === 'earth') $('targetName').append(homeKey);
       fitName();
       $('faceTarget').textContent = t`${body.name} 바라보기`;
       // The button shows a picture only: its words are its name and its tip.

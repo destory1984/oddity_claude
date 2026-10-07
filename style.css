@@ -5261,3 +5261,10 @@ html.gaze #gazeButton {
 #hud #targetPanel #targetName #vistaButton {
   margin:0 -4px 0 auto;
 }
+
+/* After the aurora key (Jupiter, Saturn) it follows it, as home's does on Earth: with
+   both pushed right, the aurora key stood in the middle of the gap (the user,
+   2026-10-08: "목성 코로나 아이콘.. 오른쪽으로 붙여줘"). */
+#hud #targetPanel #targetName #auroraButton + #vistaButton {
+  margin-left:0;
+}

@@ -47,7 +47,8 @@ export const LANDER_TEXTS = {
       t('작은 엔진들로 천천히 내려오다 3.4m 위에서 끄고 그대로 떨어져, 초속 3m쯤으로 달에 닿았습니다.'),
       t('미국이 처음 해 본 달 연착륙이 한 번에 됐습니다. 그 뒤 사진 1만 1천여 장을 지구로 보냈습니다.'),
     ],
-    say: t('어라. 안 빠지네. 단단해'),
+    // (The user's own line, 2026-10-07, in place of five offered a second time.)
+    say: t('토끼야 안녕~'),
   },
   surveyor7: {
     name: t('서베이어 7호의 착륙'),

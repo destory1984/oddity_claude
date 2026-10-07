@@ -164,10 +164,10 @@ export function auroraViewOf(aurora, radiusKm, asideDeg = 0) {
     up: turn(angle < 1e-6 ? AURORA_VIEW.up : tip(AURORA_VIEW.up)),
   };
 }
-// Inside the pale, tall curtain of Neptune the whole view was washed white: there she
-// stands a few degrees on the pole's side, the curtain at her right. (Uranus has a
-// place of its own, below.)
-const ASIDE_DEG = { neptune: -3 };
+// (Inside the pale, tall curtains of Uranus and Neptune the whole view was washed white,
+// and she stood a few degrees aside: both now have places of their own, below. The
+// list is kept for another such ring.)
+const ASIDE_DEG = {};
 const drawn = Object.fromEntries(AURORAS.map((aurora) => [aurora.body, auroraViewOf(aurora, BODIES.find((b) => b.id === aurora.body).radiusKm, ASIDE_DEG[aurora.body] ?? 0)]));
 // Uranus's: where the user stood (2026-10-08: "여기로 해", said of Neptune by a slip: they
 // were at Uranus). They had asked for a place that shows the aurora and the Milky Way
@@ -186,8 +186,18 @@ export const URANUS_AURORA_VIEW = {
   forward: [0.8658, -0.1237, -0.4849],
   up: [-0.1222, 0.8874, -0.4445],
 };
+// Neptune's: where the user stood (2026-10-08, at Neptune: "코로나 위치는 여기로"): on the
+// pole's side of the northern ring (50 degrees) at 56.6 degrees north, 450 km over the
+// clouds, 82 degrees round from midnight, looking back across the curtain and a little
+// down: the wall of light stands before her with the Milky Way and a red nebula over it.
+export const NEPTUNE_AURORA_VIEW = {
+  body: 'neptune',
+  position: [-0.0812, 0.8498, -0.555],
+  forward: [-0.125, -0.3909, -0.9119],
+  up: [-0.0338, 0.9203, -0.3899],
+};
 // (The places the user or I stood at or chose are kept as they are.)
-export const AURORA_VIEWS = { ...drawn, earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW, uranus: URANUS_AURORA_VIEW };
+export const AURORA_VIEWS = { ...drawn, earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW, uranus: URANUS_AURORA_VIEW, neptune: NEPTUNE_AURORA_VIEW };
 
 // Where that is now: { position, up, facing }, as homeSpot gives.
 export function auroraSpot(body, sunPosition, view = AURORA_VIEW) {

@@ -89,10 +89,13 @@ void main(){
     a=max(a,min(1.,deck*.8+lines*under));
   }
   // Honeycomb clouds, off Chile (22 south, 84 west): a deck of low cloud broken into
-  // cells 90 km across. To the west the cells are closed (cloud in each, clear lanes
-  // between); to the east open (clear in each, cloud along the rims).
+  // cells 90 km across: a soft white puff in each, the sea showing thinly between. (No
+  // hard rims and no dark lanes: drawn so at first, it read as cracked glass. The user,
+  // 2026-10-07: "이건 호불호가 있겠는데?")
   vec2 comb=fromPlace(.2667,.6222,.927);
-  float combFar=length(comb)/.18;
+  // How much of what is drawn here is a puff of the honeycomb (drawn white, below).
+  float puffs=0.;
+  float combFar=length(comb)/.12;
   if(combFar<1.4){
     vec2 g=comb/.011+.9*vec2(vnoise(comb*40.),vnoise(comb*40.+5.));
     vec2 gi=floor(g),gf=fract(g);
@@ -104,11 +107,12 @@ void main(){
       if(dd<d1){d2=d1;d1=dd;tone=hash1(gi+o+3.7);}else if(dd<d2)d2=dd;
     }
     float edge=sqrt(d2)-sqrt(d1);
-    float closed=smoothstep(.03,.3,edge)*(.62+.38*tone);
-    float open=(1.-smoothstep(.02,.24,edge))*(.7+.3*tone);
-    float cells=mix(closed,open,smoothstep(-.35,.35,comb.x/.18))*(.8+.2*vnoise(comb*260.));
-    float spread=exp(-combFar*combFar*1.7);
-    a=mix(a,cells*.92,min(1.,spread*1.2));
+    // Bright at the heart of a cell, thinning toward its neighbours.
+    float puff=(1.-smoothstep(.25,.75,sqrt(d1)))*(.55+.45*smoothstep(0.,.35,edge));
+    float cells=puff*(.7+.3*tone)*(.75+.25*vnoise(comb*260.));
+    float spread=exp(-combFar*combFar*2.4);
+    a=mix(a,max(.1,cells),spread);
+    puffs=cells*spread;
   }
   float facing=dot(normalize(n),sun);
   // Thunderheads, and the long shadows they throw when the Sun is low: the shadow of an
@@ -134,6 +138,8 @@ void main(){
   // warm in the low light. Its shadow is dark.
   vec3 high=mix(vec3(1.,.5,.26)*2.6,vec3(.75,.86,1.),smoothstep(.04,.3,facing))*(.03+max(facing+.12,0.)*1.25);
   lit=mix(lit,high,top);
+  // (The layer is bluish and darkens the white cloud map under it: a puff is white.)
+  lit=mix(lit,vec3(.96,.98,1.)*(.03+l*1.7),puffs);
   lit*=1.-.9*shadow;
   // A glory: rings of colour round the spot straight down-Sun of the traveler, where
   // the light comes back out of the cloud drops the way it went in. Only on cloud. Drawn

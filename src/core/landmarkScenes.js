@@ -91,7 +91,7 @@ export const LANDMARKS = {
       t('찰칵. 10m까지 가려내는 카메라가 처음으로 바닥을 찍었습니다. 드러난 얼음은 보이지 않았습니다.'),
       t('바닥은 영하 183도 아래로 어림됐습니다. 2023년에는 다누리의 섀도캠이 더 또렷이 찍었습니다.'),
     ],
-    say: t('어두워도 다 보여'),
+    say: t('그늘 속에 얼음 있니?'),
   },
   apennines: {
     kind: 'photo', by: 'Apollo 15', body: 'moon', sayBy: 'craft',
@@ -235,7 +235,7 @@ export const LANDMARKS = {
       t('찰칵. 무지개의 만이 발아래로 지나갑니다. 1.3m 크기까지 가려내는 사진에 돌과 구덩이가 찍혔습니다.'),
       t('사진은 11월 8일에 공개됐습니다. 3년 뒤 창어 3호는 이 만의 동쪽, 비의 바다 북쪽에 내렸습니다.'),
     ],
-    say: t('여기 내리면 되겠다'),
+    say: t('동생 내릴 자리 봐 줄게'),
   },
   reinerGamma: {
     kind: 'photo', by: 'Lunar Orbiter 2', body: 'moon', sayBy: 'place',
@@ -391,7 +391,7 @@ export const LANDMARKS = {
       t('와디럼은 자연과 문화의 값을 함께 인정받는 복합유산으로 세계유산 목록에 올랐습니다.'),
       t('바위에는 그림 25,000점과 글 20,000점이 남아 있습니다. 사람이 12,000년을 살아온 자취입니다.'),
     ],
-    say: t('바위에 낙서한 지 만이천 년'),
+    say: t('화성 같지? 지구야'),
   },
   chicxulub: {
     kind: 'impact', by: '', body: 'earth', sayBy: 'craft',

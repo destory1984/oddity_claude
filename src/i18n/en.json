@@ -2604,7 +2604,7 @@
  "해는 가장자리 안쪽 벽의 윗부분만 비춥니다. 그 벽에서 되비친 희미한 빛이 바닥까지 닿습니다.": "The Sun lights only the upper part of the inner wall of the rim. Faint light thrown back from that wall reaches the floor.",
  "찰칵. 10m까지 가려내는 카메라가 처음으로 바닥을 찍었습니다. 드러난 얼음은 보이지 않았습니다.": "Click. A camera that can make out things 10 m across photographed the floor for the first time. No bare ice was seen.",
  "바닥은 영하 183도 아래로 어림됐습니다. 2023년에는 다누리의 섀도캠이 더 또렷이 찍었습니다.": "The floor was reckoned to be below minus 183 degrees. In 2023 Danuri's ShadowCam photographed it more sharply.",
- "어두워도 다 보여": "I can see in the dark",
+ "그늘 속에 얼음 있니?": "Any ice in the shadow?",
  "아폴로 15호가 산맥을 넘다": "Apollo 15 crosses the mountains",
  "1971년 7월 30일": "July 30, 1971",
  "1971년 7월 30일. 아폴로 15호의 착륙선 팰컨이 아펜니노 산맥을 넘어 내려갑니다.": "July 30, 1971. Falcon, the lander of Apollo 15, crosses the Apennine Mountains on its way down.",
@@ -2688,7 +2688,7 @@
  "10월 1일에 떠나 9일부터 높이 100km에서 달을 돌았습니다. 이제 가장 낮은 곳은 15km입니다.": "It left on October 1 and from the 9th went round the Moon at a height of 100 km. Now its lowest point is 15 km.",
  "찰칵. 무지개의 만이 발아래로 지나갑니다. 1.3m 크기까지 가려내는 사진에 돌과 구덩이가 찍혔습니다.": "Click. The Bay of Rainbows passes beneath it. Rocks and pits were caught in pictures that make out things as small as 1.3 m.",
  "사진은 11월 8일에 공개됐습니다. 3년 뒤 창어 3호는 이 만의 동쪽, 비의 바다 북쪽에 내렸습니다.": "The pictures were released on November 8. Three years later Chang'e 3 landed east of this bay, in the north of the Sea of Rains.",
- "여기 내리면 되겠다": "This is a good spot to land",
+ "동생 내릴 자리 봐 줄게": "A landing spot for my little sibling",
  "루나 오비터 2호가 본 소용돌이": "The swirl Lunar Orbiter 2 saw",
  "1966년 11월": "November 1966",
  "1966년 11월. 미국의 루나 오비터 2호가 달을 돌며 사진을 찍습니다. 사람이 내릴 곳을 찾는 일입니다.": "November 1966. America's Lunar Orbiter 2 is circling the Moon and taking photographs. Its work is to find places where people can land.",
@@ -2778,7 +2778,7 @@
  "넓이 74,000헥타르. 사암 바위산 사이로 좁은 골짜기와 돌 아치, 높은 절벽이 이어집니다.": "Its area is 74,000 hectares. Between sandstone mountains run narrow gorges, stone arches and high cliffs.",
  "와디럼은 자연과 문화의 값을 함께 인정받는 복합유산으로 세계유산 목록에 올랐습니다.": "Wadi Rum went onto the World Heritage List as a mixed site, recognised for both its natural and its cultural worth.",
  "바위에는 그림 25,000점과 글 20,000점이 남아 있습니다. 사람이 12,000년을 살아온 자취입니다.": "On the rocks remain 25,000 pictures and 20,000 inscriptions. They are the traces of 12,000 years of people living here.",
- "바위에 낙서한 지 만이천 년": "Twelve millennia of doodles",
+ "화성 같지? 지구야": "Looks like Mars? It's Earth",
  "칙술루브 소행성 충돌": "The Chicxulub asteroid impact",
  "6,600만 년 전": "66 million years ago",
  "6,600만 년 전. 지름 10km쯤의 소행성이 지금의 유카탄반도 북쪽 끝으로 떨어집니다.": "66 million years ago. An asteroid about 10 km across falls toward the northern tip of what is now the Yucatán Peninsula.",
@@ -3547,5 +3547,6 @@
  "분화구 이름이 티코래": "They call this crater Tycho",
  "잘 가. 난 여기 남을게": "Goodbye. I'll stay here",
  "태워 줘서 고마워": "Thanks for the ride",
- "지도에서 고르기 화면이 남색과 금빛으로 바뀌었습니다. 둘레에 별이 반짝이고 혜성이 지나갑니다.": "The map sheet is night blue and gold now: stars twinkle round it and a comet goes by."
+ "소행성이나 탐사선이 떨어지는 장면에서, 말하는 것이 화면에 보일 때 말풍선이 뜹니다.": "In scenes where an asteroid or a probe falls, its bubble now shows while it is in view.",
+  "지도에서 고르기 화면이 남색과 금빛으로 바뀌었습니다. 둘레에 별이 반짝이고 혜성이 지나갑니다.": "The map sheet is night blue and gold now: stars twinkle round it and a comet goes by."
 }

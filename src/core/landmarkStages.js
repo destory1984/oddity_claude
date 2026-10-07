@@ -58,8 +58,11 @@ export function landmarkStage(kind, sayBy = 'craft') {
     const u = clamp(t / 9);
     const s = t - 9;
     const flash = s < 0 ? 0 : s < 0.25 ? (s / 0.25) * 2.4 : 2.4 * Math.max(0, 1 - (s - 0.25) / 1.6);
-    const said = sayBy === 'craft' ? up(t, 3.5, 8.6) : up(t, 13.6, 19);
-    const rock = { x: -5.6 * (1 - u), y: 0.1 + 4.8 * (1 - u) };
+    // It comes in from the upper left slowly enough to be in a phone's view from about
+    // 4 s (it was a fast streak seen only for the last 2 s, and its bubble hung alone
+    // in the sky before it: the user's sheet, 2026-10-07). The bubble waits for it.
+    const said = sayBy === 'craft' ? up(t, 4.4, 8.8) : up(t, 13.6, 19);
+    const rock = { x: -2.6 * (1 - u), y: 0.1 + 2.23 * (1 - u) };
     return {
       rock: { ...rock, lean: -3 * t, shown: t < 9 },
       flash: { x: 0, y: 0.15, scale: Math.max(0.01, flash), shown: flash > 0 },

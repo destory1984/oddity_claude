@@ -999,6 +999,7 @@ const MOON_STAGES = {
         nozzle: fuse(scene, nozzleRoot),
         lev1: bit('Lev1', mats.goldFoil, 0.09),
         lev2: bit('Lev2', mats.chrome, 0.07),
+        say: sayBubble(scene, `${name}Say`, t('아이쿠~')),
       },
       flames: { slim: [0, -0.25, 0, 0.3, 0.16] },
     };

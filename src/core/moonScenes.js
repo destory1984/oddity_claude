@@ -255,6 +255,8 @@ export const MOON_SCENES = {
         nozzle: { x: -0.6 - 0.1 * drop, y: Math.max(0.03, 0.72 - 0.9 * drop * drop), lean: 2 * drop, shown: t >= 6 },
         lev1: thrown(1),
         lev2: thrown(-1),
+        // As it goes over onto its nose (the user's own word, 2026-10-07: "아이쿠~").
+        say: said(t, 11.5, 15.5, 0.55, 1.0, 1.1),
       };
     },
   },

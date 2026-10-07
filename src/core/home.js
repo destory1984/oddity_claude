@@ -196,8 +196,18 @@ export const NEPTUNE_AURORA_VIEW = {
   forward: [-0.125, -0.3909, -0.9119],
   up: [-0.0338, 0.9203, -0.3899],
 };
+// Ganymede's: where the user stood (2026-10-08: "가니메데 코로나 위치는 여기로 해"): on
+// the pole's side of the northern belt (40 degrees) at 51.2 degrees north, 175 km over
+// the ground, 53 degrees round from midnight, looking back over the belt and down: the
+// red and green curtain runs across before her, the Orion nebula over it.
+export const GANYMEDE_AURORA_VIEW = {
+  body: 'ganymede',
+  position: [-0.4059, 0.8312, -0.5306],
+  forward: [-0.6346, -0.6074, -0.478],
+  up: [-0.3721, 0.7821, -0.4998],
+};
 // (The places the user or I stood at or chose are kept as they are.)
-export const AURORA_VIEWS = { ...drawn, earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW, uranus: URANUS_AURORA_VIEW, neptune: NEPTUNE_AURORA_VIEW };
+export const AURORA_VIEWS = { ...drawn, earth: AURORA_VIEW, saturn: SATURN_AURORA_VIEW, jupiter: JUPITER_AURORA_VIEW, uranus: URANUS_AURORA_VIEW, neptune: NEPTUNE_AURORA_VIEW, ganymede: GANYMEDE_AURORA_VIEW };
 
 // Where that is now: { position, up, facing }, as homeSpot gives.
 export function auroraSpot(body, sunPosition, view = AURORA_VIEW) {

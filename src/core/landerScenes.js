@@ -138,7 +138,8 @@ export const LANDER_STAGES = {
     stage(t) {
       return {
         ...takesSoil(t, { downAt: 7, leaveAt: 15 }),
-        say: said(t, 10.2, 14.6, 0.65, 1.3, 1.1),
+        // The lander that is left, once the rocket is well up.
+        say: said(t, 17, 22, 0.65, 1.15, 1.1),
       };
     },
   }),

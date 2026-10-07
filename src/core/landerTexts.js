@@ -71,7 +71,8 @@ export const LANDER_TEXTS = {
       t('이튿날, 내린 지 23시간 만에 흙 170g을 담은 캡슐을 실은 로켓이 착륙선을 딛고 떠납니다.'),
       t('8월 22일 캡슐이 시베리아에 내렸습니다. 그 뒤 2013년까지 37년 동안 달에 내려앉은 것은 없습니다.'),
     ],
-    say: t('깊이 팠지? 이제 집에 가자'),
+    // (Of five offered, 2026-10-07: "3": the lander, once the rocket has left.)
+    say: t('잘 가. 난 여기 남을게'),
   },
   lunokhod2: {
     name: t('루노호트 2호가 내려서다'),

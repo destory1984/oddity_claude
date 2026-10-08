@@ -56,13 +56,14 @@ export function meteorGap(rand) {
   return METEOR_GAP_S[0] + rand() * (METEOR_GAP_S[1] - METEOR_GAP_S[0]);
 }
 
-// A shower: every SHOWER_EVERY_S seconds spent near Earth, for SHOWER_S seconds, they
+// A shower: once every SHOWER_EVERY_S seconds spent near Earth, for SHOWER_S seconds, they
 // come fifteen times as thick and all run away from one point of the sky, the radiant, as
 // the meteors of a real shower seem to. (Earth is crossing the trail a comet left; the
 // crumbs fly side by side, and that they spread from a point is how side-by-side lines
 // look from below.) near: seconds spent in range so far.
-// (It was 200 and 30 until 2026-10-06: the user waited over three minutes for one.)
-export const SHOWER_EVERY_S = 120;
+// (It was 200 and 30 until 2026-10-06: the user waited over three minutes for one. Then
+// 120 until 2026-10-08, the user: "1분에 한 번 꼴로 늘려".)
+export const SHOWER_EVERY_S = 60;
 export const SHOWER_S = 35;
 export const SHOWER_GAP_S = [0.025, 0.08];
 export function inShower(near) {

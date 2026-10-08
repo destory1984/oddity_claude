@@ -95,7 +95,7 @@ test('both new comets go round the same way as the planets; Halley goes backward
 
 test('a shower comes every 120 seconds near Earth, lasts 35, and its meteors run away from one point', async () => {
   const { inShower, showerGap, showerRadiant, showerSpot, SHOWER_EVERY_S, SHOWER_S } = await import('../src/core/meteors.js');
-  assert.deepEqual([SHOWER_EVERY_S, SHOWER_S], [120, 35]);
+  assert.deepEqual([SHOWER_EVERY_S, SHOWER_S], [60, 35]);
   assert.ok(!inShower(0) && !inShower(SHOWER_EVERY_S - SHOWER_S - 1));
   assert.ok(inShower(SHOWER_EVERY_S - SHOWER_S) && inShower(SHOWER_EVERY_S - 0.1) && !inShower(SHOWER_EVERY_S));
   assert.ok(showerGap(() => 0.5) < 0.25);

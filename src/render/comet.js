@@ -6,7 +6,7 @@ import comaFrag from './shaders/coma.frag?raw';
 import tailFrag from './shaders/tail.frag?raw';
 import dustFrag from './shaders/dust.frag?raw';
 import { AU_KM, KM_PER_UNIT } from '../core/bodies.js';
-import { cometActivity, tailLengthKm, COMA_KM } from '../core/comet.js';
+import { cometActivity, tailLengthKm, tailShown, COMA_KM, TAIL_END_ON } from '../core/comet.js';
 
 // From closer than this the glow thins out, or standing on the nucleus would be a
 // white-out with nothing to see or photograph.
@@ -73,6 +73,12 @@ export function createComet(scene) {
     const angle = Math.acos(Math.max(-1, Math.min(1, Vector3.Dot(up, direction))));
     node.rotationQuaternion = axis.lengthSquared() < 1e-12 ? Quaternion.Identity() : Quaternion.RotationAxis(axis.normalize(), angle);
   };
+  // How far off a tail's line she is: the sine of the angle between `direction` and the
+  // way from the nucleus to her.
+  const offLine = (direction, eye) => {
+    const along = Vector3.Dot(eye, direction);
+    return Math.sqrt(Math.max(0, 1 - along * along));
+  };
   // Where the comet was last frame, to know which way it is going.
   let last = null;
   let lag = null;
@@ -97,7 +103,9 @@ export function createComet(scene) {
     tail.scaling.set(length * TAIL_SPREAD, length, length * TAIL_SPREAD);
     // The gas tail is blown straight away from the Sun by the solar wind.
     aim(tail, away);
-    tailMaterial.setFloat('strength', (0.35 + 0.45 * activity) * near);
+    // (Seen along its length a tail is four wedges: it fades as she comes onto its line.)
+    const eye = new Vector3(-rel[0], -rel[1], -rel[2]).normalize();
+    tailMaterial.setFloat('strength', (0.35 + 0.45 * activity) * near * tailShown(offLine(away, eye), TAIL_END_ON.gas));
     tailMaterial.setFloat('time', performance.now() / 1000);
 
     // The dust is heavier: it falls behind along the orbit, so its tail leans back the
@@ -113,8 +121,9 @@ export function createComet(scene) {
     const dustLength = length * DUST_LENGTH;
     dust.position.set(rel[0], rel[1], rel[2]);
     dust.scaling.set(dustLength * DUST_SPREAD, dustLength, dustLength * DUST_SPREAD);
-    aim(dust, away.add(lean.scale(DUST_LAG)).normalize());
-    dustMaterial.setFloat('strength', (0.3 + 0.5 * activity) * near);
+    const dustWay = away.add(lean.scale(DUST_LAG)).normalize();
+    aim(dust, dustWay);
+    dustMaterial.setFloat('strength', (0.3 + 0.5 * activity) * near * tailShown(offLine(dustWay, eye), TAIL_END_ON.dust));
   }
 
   return { update };

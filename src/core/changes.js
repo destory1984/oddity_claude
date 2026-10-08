@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-08', text: t('혜성 꼬리를 끝에서 보면 네 조각으로 갈라져 보이던 것을 고쳤습니다.') },
   { day: '2026-10-08', text: t('수성 뒤에서 보면 밤 쪽이 네 조각으로 다른 색이던 것을 고쳤습니다.') },
   { day: '2026-10-08', text: t('타이탄 이름 칸에 명당 단추가 생겼습니다. 그림엽서는 열세 장이 되었습니다.') },
   { day: '2026-10-08', text: t('그림엽서 열두 장을 다 모으면 도장이 찍히고 소라가 기뻐합니다.') },

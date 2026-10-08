@@ -2,8 +2,8 @@
 // 2026-10-08, of three things offered: "모두 추가해"). A card is got by going to a place
 // with the key on a name plate (core/vista.js, core/home.js): one for each best view,
 // one for Korea's sky, one for Earth's aurora place. Standing in all the eight auroras
-// by their keys is the round: it leaves a rubber stamp in the journal and the twelfth
-// card. Like the stunt flights they are not journal slots and nothing is lost by
+// by their keys is the round: it leaves a rubber stamp in the journal and a card of
+// its own (thirteen cards since Titan's view, 2026-10-08). Like the stunt flights they are not journal slots and nothing is lost by
 // leaving them; they are kept in the browser.
 import { VISTAS } from './vista.js';
 import { AURORA_VIEWS } from './home.js';
@@ -21,6 +21,7 @@ export const VIEW_CARDS = [
   { id: 'pluto', by: ['vista', 'pluto'], name: t('명왕성의 하트') },
   { id: 'uranus', by: ['vista', 'uranus'], name: t('천왕성의 고리') },
   { id: 'neptune', by: ['vista', 'neptune'], name: t('해왕성의 대흑점') },
+  { id: 'titan', by: ['vista', 'titan'], name: t('주황빛 안개의 타이탄') },
   { id: 'korea', by: ['home', 'earth'], name: t('한국 하늘') },
   { id: 'auroraEarth', by: ['aurora', 'earth'], name: t('지구의 오로라') },
   { id: 'auroraRound', by: ['round', null], name: t('오로라 순례') },
@@ -31,7 +32,7 @@ export const cardFile = (id) => `notebook/view-${id}.png`;
 // The worlds of the round, and its rubber stamp.
 export const AURORA_ROUND = Object.keys(AURORA_VIEWS);
 export const AURORA_STAMP = 'notebook/stamp-aurora.png';
-// The stamp of all the twelve cards got (the user, 2026-10-08, of a reward offered
+// The stamp of all the cards got (the user, 2026-10-08, of a reward offered
 // for the whole set: "그래").
 export const VIEWS_STAMP = 'notebook/stamp-views.png';
 
@@ -53,7 +54,7 @@ export const allCards = (views) => VIEW_CARDS.every((card) => views.cards.includ
 // She has just come to the place of a key: kind 'vista', 'home' or 'aurora' on the world
 // bodyId. Returns { views, cards, round, all }: the record after it, the cards got by it
 // (new ones only), whether the round was finished by it and whether the last of the
-// twelve cards was got by it.
+// cards was got by it.
 export function arriveAt(views, kind, bodyId) {
   const before = sanitizeViews(views);
   const auroras = kind === 'aurora' && AURORA_ROUND.includes(bodyId) && !before.auroras.includes(bodyId) ? [...before.auroras, bodyId] : before.auroras;

@@ -13,11 +13,13 @@
 //   Neptune (2026-10-08, of four shown: "1로 가보자", then "2번으로 가보자"): over its
 //   Great Dark Spot (by the turning globe); with the spot in the night, low over Triton's
 //   ground, Neptune filling the sky above its horizon (the first one chosen).
+//   Titan (2026-10-08, sent there to see the moon itself: "여기"): off its sunlit side, the
+//   whole orange globe before her (by where the Sun is).
 import { surfaceDirection, spinOf } from './surface.js';
 import { orientationFrom } from './orientation.js';
 import { auroraSpot } from './home.js';
 
-export const VISTAS = ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus', 'neptune'];
+export const VISTAS = ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus', 'neptune', 'titan'];
 // The views over a place of a turning globe: once there she is held and turns with it.
 export const VISTA_HELD = ['jupiter', 'mars', 'pluto', 'neptune'];
 
@@ -100,6 +102,18 @@ export const DARK_SPOT = { latDeg: -18, lonDeg: 14, sunAbove: 0.2 };
 export const DARK_SPOT_VIEW = { latDeg: -32, lonDeg: 14, heightRadii: 1 };
 // Uranus: as RING_VIEW; its rings stand nearly upright and face the Sun.
 export const BULLSEYE_VIEW = { radii: 6.4, overDeg: 50, roundDeg: 30, lookDown: 0.05 };
+
+// Titan: where the user said "여기" (2026-10-08), having asked to see Titan itself and not
+// Saturn from it: 4.5 radii from its centre, 30 degrees round from the Sun's side and a
+// little north, north at the top, the whole globe in the middle of the view (26 degrees
+// across) with its night edge at the right. Kept to the Sun as Saturn's is (core/home.js
+// auroraSpot: [toward the Sun, north, north x Sun], in radii); Saturn is out of view.
+export const TITAN_VIEW = {
+  body: 'titan',
+  position: [3.8214, 0.8825, 2.2063],
+  forward: [-0.8492, -0.1961, -0.4903],
+  up: [-0.1698, 0.9806, -0.098],
+};
 
 // textured.frag's beltSpeed: a steady number in -0.5..0.5 for each belt.
 export function beltSpeed(belt) {
@@ -222,5 +236,6 @@ export function vistaSpot(id, { body, sun, earth, timeS = 0, elapsedS = 0, ringN
     return { position, up, facing: orientationFrom(up.map((n) => -n), squareTo([0, 1, 0], up)) };
   }
   if (id === 'saturn') return auroraSpot(body, sun.position, SATURN_VIEW);
+  if (id === 'titan') return auroraSpot(body, sun.position, TITAN_VIEW);
   return null;
 }

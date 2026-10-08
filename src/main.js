@@ -1326,12 +1326,12 @@ ${STORY_MORE[target.id]}` : told };
       toast.show(t`오로라 순례 ${views.auroras.length}/${AURORA_ROUND.length}`);
     }
     if (got.all) {
-      toast.show(t('그림엽서 열두 장을 모두 모았습니다. 수첩에 그림엽서 도장이 찍혔습니다.'));
+      toast.show(t('그림엽서 열세 장을 모두 모았습니다. 수첩에 그림엽서 도장이 찍혔습니다.'));
       // After the round's stamp, when the round's card was the last one.
       setTimeout(() => stampDown(VIEWS_STAMP), got.round ? 2600 : 0);
       cheerUntil = performance.now() + 6000;
       sound.cue('complete');
-      say.show(t('엽서 열두 장, 다 모았다!'));
+      say.show(t('엽서 열세 장, 다 모았다!'));
     }
   }
 
@@ -2688,10 +2688,12 @@ ${STORY_MORE[target.id]}` : told };
     sites: () => sites.map((x) => ({ id: x.id, parent: x.parent, position: [...x.position] })),
     // Where she stands now, as a line for core/startSpots.js (a place the game may open at).
     spot: (bodyId = null) => toSpot(state, (bodyId && bodyById(bodyId, bodies)) || nearestSurface(state.position, bodies).body, bodyById('sun', bodies)),
-    place(position, toward) {
+    // (`up`: the way that is to be the top of the view, for ground that is not under north.)
+    place(position, toward, up = null) {
       // (Held over Korea she would be brought straight back.)
       home = null;
-      state = createState(position, lookAtDirection(toward.map((n, i) => n - position[i])));
+      const ahead = toward.map((n, i) => n - position[i]);
+      state = createState(position, up ? orientationFrom(ahead, up) : lookAtDirection(ahead));
     },
     // One of the sounds by its name (ui/sound.js cues), to be heard while it is being made.
     cue: (name) => sound.cue(name),

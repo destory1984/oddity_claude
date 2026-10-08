@@ -4,9 +4,9 @@ import { existsSync } from 'node:fs';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, cardById, sanitizeViews, roundDone, allCards, arriveAt, cardless } from '../src/core/viewCards.js';
 import { AURORAS } from '../src/core/glows.js';
 
-test('twelve cards: one for every best view, Korea\'s sky, Earth\'s aurora and the round; each has its picture', () => {
-  assert.equal(VIEW_CARDS.length, 12);
-  assert.equal(new Set(VIEW_CARDS.map((card) => card.id)).size, 12);
+test('thirteen cards: one for every best view, Korea\'s sky, Earth\'s aurora and the round; each has its picture', () => {
+  assert.equal(VIEW_CARDS.length, 13);
+  assert.equal(new Set(VIEW_CARDS.map((card) => card.id)).size, 13);
   assert.deepEqual(cardless(), []);
   for (const card of VIEW_CARDS) assert.ok(existsSync(`public/assets/${cardFile(card.id)}`), card.id);
   assert.ok(existsSync(`public/assets/${AURORA_STAMP}`));

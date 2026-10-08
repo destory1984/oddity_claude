@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, PLUTO_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, NEPTUNE_RISE, DARK_SPOT, DARK_SPOT_VIEW, vistaSpot, warpSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
+import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, PLUTO_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, NEPTUNE_RISE, DARK_SPOT, DARK_SPOT_VIEW, TITAN_VIEW, vistaSpot, warpSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
 import { forward, up } from '../src/core/orientation.js';
 
 const dot = (a, b) => a.reduce((sum, n, i) => sum + n * b[i], 0);
@@ -70,7 +70,7 @@ test('Saturn\'s view: where the user stood, behind the globe and under the rings
     assert.ok(dot(forward(warp.facing), unit(off).map((x) => -x)) > 0.98);
   }
   assert.equal(warpSpot('mars', { body: saturn, sun }), null);
-  assert.deepEqual(VISTAS, ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus', 'neptune']);
+  assert.deepEqual(VISTAS, ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus', 'neptune', 'titan']);
   assert.equal(vistaSpot('venus', { body: saturn, sun, earth: sun }), null);
 });
 
@@ -180,4 +180,19 @@ test('the view of Neptune: over its dark spot by day; by night low over Triton\'
   assert.ok(dot(up(spot.facing), ground) > 0.9);
   // `up` is the way from Neptune's centre to the place.
   assert.ok(Math.hypot(...sub(spot.up, unit(sub(spot.position, neptune.position)))) < 1e-9);
+});
+
+test('Titan\'s view: where the user said so, off the sunlit side with the whole globe in the middle', () => {
+  const titan = { position: [1.4e9, 3e5, 2e8], radiusKm: 2574.7 };
+  const spot = vistaSpot('titan', { body: titan, sun, earth: sun });
+  const out = sub(spot.position, titan.position);
+  assert.ok(Math.abs(Math.hypot(...out) / titan.radiusKm - 4.5) < 1e-3);
+  const toSun = unit(sub(sun.position, titan.position));
+  assert.ok(Math.abs(Math.acos(dot(unit(out), toSun)) * 180 / Math.PI - 32) < 3);
+  // She looks at its middle, north at the top; the globe (26 degrees) fits a phone's 33.
+  assert.ok(dot(forward(spot.facing), unit(out).map((x) => -x)) > 0.9999);
+  assert.ok(up(spot.facing)[1] > 0.97);
+  assert.ok(2 * Math.asin(1 / 4.5) * 180 / Math.PI < 33);
+  assert.ok(!VISTA_HELD.includes('titan') && !spot.free);
+  assert.ok(Math.abs(Math.hypot(...TITAN_VIEW.forward) - 1) < 1e-3 && Math.abs(dot(TITAN_VIEW.forward, TITAN_VIEW.up)) < 1e-3);
 });

@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, HEART_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, NEPTUNE_RISE, DARK_SPOT, DARK_SPOT_VIEW, vistaSpot, warpSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
+import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, PLUTO_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, NEPTUNE_RISE, DARK_SPOT, DARK_SPOT_VIEW, vistaSpot, warpSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
 import { forward, up } from '../src/core/orientation.js';
 
 const dot = (a, b) => a.reduce((sum, n, i) => sum + n * b[i], 0);
@@ -74,19 +74,33 @@ test('Saturn\'s view: where the user stood, behind the globe and under the rings
   assert.equal(vistaSpot('venus', { body: saturn, sun, earth: sun }), null);
 });
 
-test('the views of Mars and Pluto: over a place of the ground, turning with it, looking down with north up', () => {
-  for (const [id, view, radiusKm] of [['mars', MARINER_VIEW, 3389.5], ['pluto', HEART_VIEW, 1188.3]]) {
-    const body = { position: [2e8, 5, -3e7], radiusKm };
-    // (The Sun stood where it lights the place: Pluto's view is another by night.)
-    const a = vistaSpot(id, { body, sun: noon(id, body, 0), earth: sun, timeS: 0 });
-    assert.ok(Math.abs(Math.asin(a.up[1]) * 180 / Math.PI - view.latDeg) < 1e-6);
-    assert.ok(Math.abs(Math.hypot(...sub(a.position, body.position)) / radiusKm - 1 - view.heightRadii) < 1e-9);
-    assert.ok(dot(forward(a.facing), a.up) < -0.99);
-    assert.ok(up(a.facing)[1] > 0.8);
-    const b = vistaSpot(id, { body, sun: noon(id, body, 6000), earth: sun, timeS: 6000 });
-    assert.ok(Math.hypot(...sub(a.position, b.position)) > 10);
-    assert.ok(VISTA_HELD.includes(id) && !a.free);
-  }
+test('the view of Mars: over a place of the ground, turning with it, looking down with north up', () => {
+  const body = { position: [2e8, 5, -3e7], radiusKm: 3389.5 };
+  const a = vistaSpot('mars', { body, sun: noon('mars', body, 0), earth: sun, timeS: 0 });
+  assert.ok(Math.abs(Math.asin(a.up[1]) * 180 / Math.PI - MARINER_VIEW.latDeg) < 1e-6);
+  assert.ok(Math.abs(Math.hypot(...sub(a.position, body.position)) / body.radiusKm - 1 - MARINER_VIEW.heightRadii) < 1e-9);
+  assert.ok(dot(forward(a.facing), a.up) < -0.99);
+  assert.ok(up(a.facing)[1] > 0.8);
+  const b = vistaSpot('mars', { body, sun: noon('mars', body, 6000), earth: sun, timeS: 6000 });
+  assert.ok(Math.hypot(...sub(a.position, b.position)) > 10);
+  assert.ok(VISTA_HELD.includes('mars') && !a.free);
+});
+
+test('the view of Pluto: where the user stood, the whole globe before her with the heart in it, turning with the globe', () => {
+  const body = { position: [2e8, 5, -3e7], radiusKm: 1188.3 };
+  const a = vistaSpot('pluto', { body, sun: noon('pluto', body, 0), earth: sun, timeS: 0 });
+  const out = sub(a.position, body.position);
+  assert.ok(Math.abs(Math.hypot(...out) / body.radiusKm - Math.hypot(...PLUTO_VIEW.position)) < 1e-6);
+  // She looks at the globe (a little under its middle), her head to its north.
+  assert.ok(dot(forward(a.facing), unit(out).map((n) => -n)) > 0.9);
+  assert.ok(up(a.facing)[1] > 0.9);
+  // The heart is on her side of the globe.
+  const heart = [-Math.cos(HEART.latDeg * Math.PI / 180) * Math.cos(HEART.lonDeg * Math.PI / 180), Math.sin(HEART.latDeg * Math.PI / 180), -Math.cos(HEART.latDeg * Math.PI / 180) * Math.sin(HEART.lonDeg * Math.PI / 180)];
+  assert.ok(dot(unit(PLUTO_VIEW.position), heart) > 0.85);
+  const b = vistaSpot('pluto', { body, sun: noon('pluto', body, 60000), earth: sun, timeS: 60000 });
+  assert.ok(Math.hypot(...sub(a.position, b.position)) > 10);
+  assert.ok(Math.abs(Math.hypot(...sub(b.position, body.position)) - Math.hypot(...out)) < 1e-6);
+  assert.ok(VISTA_HELD.includes('pluto') && !a.free);
 });
 
 test('the view of Pluto with its heart in the night: off the day side, the lit globe over her head, not held', () => {

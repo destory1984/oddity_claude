@@ -61,9 +61,18 @@ export const SATURN_VIEW = {
 // Mars: south of the Mariner valley (13.9 S, 59.2 W), so that the canyon runs across the
 // view above her head, with the three Tharsis volcanoes at its western end.
 export const MARINER_VIEW = { latDeg: -22, lonDeg: -68, heightRadii: 1.1 };
-// Pluto: south of the heart (Tombaugh Regio, 18 N; on the map it lies at 2 W, as
-// core/stories.js has it), the heart over her head.
-export const HEART_VIEW = { latDeg: -4, lonDeg: -2, heightRadii: 1.3 };
+// Pluto: where the user stood (2026-10-08: "명왕성 명당 자리는 여기"): 4.44 radii from its
+// centre over 3.8 S, 7 E of the map, the whole globe over her head with the heart
+// (Tombaugh Regio, 18 N; on the map at 2 W, as core/stories.js has it) in the middle of
+// it and Charon looking out from behind its edge. The three are in the frame that turns
+// with the globe (x, y, z before the spin is put on, in radii): Charon keeps one face
+// of Pluto under it, so it too stays where it was. (Before: 1.3 radii up over 4 S, 2 W,
+// looking straight down.)
+export const PLUTO_VIEW = {
+  position: [-4.399, -0.2951, -0.5511],
+  forward: [0.9791, -0.1564, 0.1299],
+  up: [0.1587, 0.9873, -0.0078],
+};
 // The heart itself, and how high the Sun must stand over it (its sine) for that view.
 // Pluto turns once in 6.4 days (some three hours of play): with the heart in the night
 // she is taken off the day side, the lit globe over her head, and is not held.
@@ -124,6 +133,20 @@ function overSpot(body, { latDeg, lonDeg, heightRadii }, spin) {
   return { position, up, facing: orientationFrom(up.map((n) => -n), squareTo([0, 1, 0], up)) };
 }
 
+// A place and a way of looking kept in the frame that turns with the globe (as
+// core/surface.js surfaceDirection turns a place of the ground).
+function turningSpot(body, view, spin) {
+  const c = Math.cos(spin);
+  const s = Math.sin(spin);
+  const turn = ([x, y, z]) => [x * c + z * s, y, -x * s + z * c];
+  const out = turn(view.position);
+  return {
+    position: body.position.map((n, i) => n + out[i] * body.radiusKm),
+    up: unit(out),
+    facing: orientationFrom(turn(view.forward), turn(view.up)),
+  };
+}
+
 // Off a world along `out`, north at the top, looking at it and a little aside and under.
 function offSpot(body, out, north, { radii, lookDown, lookAside }) {
   const head = squareTo(north, out);
@@ -179,7 +202,7 @@ export function vistaSpot(id, { body, sun, earth, timeS = 0, elapsedS = 0, ringN
   if (id === 'pluto') {
     const spin = spinOf('pluto', timeS);
     const toSun = unit(sub(sun.position, body.position));
-    if (dot(surfaceDirection(HEART.latDeg, HEART.lonDeg, spin), toSun) >= HEART.sunAbove) return overSpot(body, HEART_VIEW, spin);
+    if (dot(surfaceDirection(HEART.latDeg, HEART.lonDeg, spin), toSun) >= HEART.sunAbove) return turningSpot(body, PLUTO_VIEW, spin);
     return { ...offSpot(body, toSun, [0, 1, 0], PLUTO_DAY_VIEW), free: true };
   }
   if (id === 'uranus') return ringSpot(body, sun, ringNormal, BULLSEYE_VIEW);

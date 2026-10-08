@@ -18,6 +18,8 @@
 import { surfaceDirection, spinOf } from './surface.js';
 import { orientationFrom } from './orientation.js';
 import { auroraSpot } from './home.js';
+import { cometActivity } from './comet.js';
+import { AU_KM } from './bodies.js';
 
 export const VISTAS = ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus', 'neptune', 'titan'];
 // The views over a place of a turning globe: once there she is held and turns with it.
@@ -191,8 +193,36 @@ function ringSpot(body, sun, ringNormal, view) {
 // sunlit face of the rings, all of them in view (RING_VIEW). It was Saturn's best view
 // until the user chose another, and they kept it for the warp (2026-10-08: "명당 자리와
 // 워프 자리를 헷갈렸구나.. 워프 자리는 이전 것이 맞아").
-export function warpSpot(id, { body, sun, ringNormal = null }) {
-  return id === 'saturn' ? ringSpot(body, sun, ringNormal, RING_VIEW) : null;
+// A comet with a tail: off to its side, the head beside her and both tails going up
+// across the view. The usual place, 120 km from the nucleus, showed a dark rock and no
+// comet (the glow is thinned from near by; the user, 2026-10-08, having warped there:
+// "혜성 안 보임", and of this place, where they had turned the view: "워프하면 대충 이 정도
+// 느낌 나는 곳으로 이동시켜줘... 저 모양을 유지시켜줘"). `moved`: which way the comet is
+// going, since the dust tail leans back along its path and the place is kept to that.
+// One asleep, far from the Sun, has no tail to show: null, the usual place.
+export function warpSpot(id, { body, sun, ringNormal = null, moved = null }) {
+  if (id === 'saturn') return ringSpot(body, sun, ringNormal, RING_VIEW);
+  if (body.kind === 'comet' && cometActivity((body.sunKm ?? Infinity) / AU_KM) > 0) return cometSpot(body, sun, moved);
+  return null;
+}
+
+// The place by a comet where the user stood, 45,000 km from the nucleus (within
+// game.js CARRY_KM, so she is carried along with it), in the frame [away from the Sun,
+// back along its path, the third].
+export const COMET_VIEW = { km: 45000, position: [0.002, -0.8874, 0.461], forward: [0.1753, 0.941, -0.2896], up: [0.7781, -0.3126, -0.5448] };
+
+function cometSpot(body, sun, moved) {
+  const away = unit(sub(body.position, sun.position));
+  const across = moved ? sub(moved, away.map((n) => n * dot(moved, away))) : [0, 0, 0];
+  const back = Math.hypot(...across) > 1e-9 ? unit(across.map((n) => -n)) : squareTo([0, 1, 0], away);
+  const third = cross(away, back);
+  const world = ([a, b, c]) => mix([a, away], [b, back], [c, third]);
+  const out = world(COMET_VIEW.position);
+  return {
+    position: body.position.map((n, i) => n + out[i] * COMET_VIEW.km),
+    up: unit(out),
+    facing: orientationFrom(world(COMET_VIEW.forward), world(COMET_VIEW.up)),
+  };
 }
 
 // of: the body with an id, as it is now (Io's view needs Jupiter, Enceladus's Saturn).

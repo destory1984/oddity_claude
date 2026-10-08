@@ -716,7 +716,10 @@ async function init() {
       // (core/vista.js warpSpot; the user, 2026-10-07, standing there: "지금 저 위치는 왜
       // 토성 워프 위치로 안 넣었어?"). Not on a tour's jump to see a moon's shadow on it
       // (toward): that has its own side.
-      const own = toward ? null : warpSpot(target.id, { body: target, sun: here('sun'), ringNormal: world.ringNormal(target.id) });
+      // A comet with a tail: off to its side, the tails across the view (the same).
+      const next = target.kind === 'comet' ? bodyById(target.id, bodiesAt(simTime + 1)) : null;
+      const moved = next ? next.position.map((n, i) => n - target.position[i]) : null;
+      const own = toward ? null : warpSpot(target.id, { body: target, sun: here('sun'), ringNormal: world.ringNormal(target.id), moved });
       if (own) state = createState(own.position, own.facing);
       // On arrival, say what this is. A craft about to be docked with shows its card instead.
       const docking = target.kind === 'craft';

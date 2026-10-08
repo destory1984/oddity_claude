@@ -1,7 +1,8 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, PLUTO_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, NEPTUNE_RISE, DARK_SPOT, DARK_SPOT_VIEW, TITAN_VIEW, vistaSpot, warpSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
+import { HEART, PLUTO_DAY_VIEW, VISTAS, VISTA_HELD, EARTHRISE, RED_SPOT, RING_VIEW, SATURN_VIEW, MARINER_VIEW, PLUTO_VIEW, IO_VIEW, JET_VIEW, BULLSEYE_VIEW, NEPTUNE_RISE, DARK_SPOT, DARK_SPOT_VIEW, TITAN_VIEW, COMET_VIEW, vistaSpot, warpSpot, beltSpeed, redSpotLonDeg } from '../src/core/vista.js';
 import { forward, up } from '../src/core/orientation.js';
+import { CARRY_KM } from '../src/core/game.js';
 
 const dot = (a, b) => a.reduce((sum, n, i) => sum + n * b[i], 0);
 const sub = (a, b) => a.map((n, i) => n - b[i]);
@@ -70,6 +71,21 @@ test('Saturn\'s view: where the user stood, behind the globe and under the rings
     assert.ok(dot(forward(warp.facing), unit(off).map((x) => -x)) > 0.98);
   }
   assert.equal(warpSpot('mars', { body: saturn, sun }), null);
+  // A comet with a tail: 45,000 km off, where she is still carried with it, the same
+  // place by its tails whichever way it goes; one asleep has the usual place.
+  const comet = { id: 'haleBopp', kind: 'comet', radiusKm: 30, position: [2e6, 1e5, -3e5], sunKm: 1.4 * 149597870.7 };
+  for (const moved of [[10, 3, -20], [-4, 25, 6]]) {
+    const warp = warpSpot('haleBopp', { body: comet, sun, moved });
+    const off = sub(warp.position, comet.position);
+    assert.ok(Math.abs(Math.hypot(...off) - COMET_VIEW.km) < 1 && COMET_VIEW.km < CARRY_KM);
+    const away = unit(sub(comet.position, sun.position));
+    assert.ok(Math.abs(dot(unit(off), away)) < 0.01, 'beside the head, not up the tail');
+    assert.ok(dot(off, moved) > 0, 'on the side it is going to, the dust tail leaning away');
+    assert.ok(dot(forward(warp.facing), unit(off).map((x) => -x)) > 0.9);
+    assert.ok(dot(up(warp.facing), away) > 0.7, 'the tails go up the view');
+  }
+  assert.ok(warpSpot('haleBopp', { body: comet, sun }), 'a place even before it is seen to move');
+  assert.equal(warpSpot('halley', { body: { ...comet, sunKm: 35 * 149597870.7 }, sun, moved: [1, 0, 0] }), null);
   assert.deepEqual(VISTAS, ['moon', 'jupiter', 'saturn', 'mars', 'io', 'enceladus', 'pluto', 'uranus', 'neptune', 'titan']);
   assert.equal(vistaSpot('venus', { body: saturn, sun, earth: sun }), null);
 });

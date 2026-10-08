@@ -394,7 +394,7 @@ export function createGlows(scene, bodies) {
   sodiumMaterial.needAlphaBlending = () => true;
   sodiumMaterial.disableDepthWrite = true;
   sodiumMaterial.backFaceCulling = false;
-  sodiumMaterial.setFloat('strength', 0.2);
+  sodiumMaterial.setFloat('strength', SODIUM_TAIL.light);
   const sodium = new TransformNode('sodiumTail', scene);
   sodium.rotationQuaternion = new Quaternion();
   for (const turn of [0, Math.PI / 2]) {
@@ -635,6 +635,14 @@ export function createGlows(scene, bodies) {
       const away = new Vector3(...body.position.map((n, i) => n - sunPosition[i])).normalize();
       sodium.position.set(at[0], at[1], at[2]);
       Quaternion.FromUnitVectorsToRef(Vector3.Up(), away, sodium.rotationQuaternion);
+      // Seen along its length the two planes lie edge-on through the eye and each half
+      // fills a wedge of the view (the user, 2026-10-08, behind Mercury: "수성은 농구공이야?
+      // 4면이 다른 색이네"): it fades out as she comes onto its line.
+      const eye = new Vector3(...position.map((n, i) => n - body.position[i])).normalize();
+      const along = Vector3.Dot(eye, away);
+      const off = Math.sqrt(Math.max(0, 1 - along * along));
+      const k = Math.min(1, Math.max(0, (off - SODIUM_TAIL.endOn[0]) / (SODIUM_TAIL.endOn[1] - SODIUM_TAIL.endOn[0])));
+      sodiumMaterial.setFloat('strength', SODIUM_TAIL.light * k * k * (3 - 2 * k));
     }
 
     {

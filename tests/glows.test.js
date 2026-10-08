@@ -215,6 +215,7 @@ test('a sprite lights a moment after its stroke and is gone in under half a seco
 test("Mercury's tail and the ring spokes have their sizes", () => {
   assert.equal(SODIUM_TAIL.body, 'mercury');
   assert.equal(Math.round(SODIUM_TAIL.lengthKm / bodyById('mercury').radiusKm), 100);
+  assert.ok(SODIUM_TAIL.light > 0 && SODIUM_TAIL.endOn[0] > 0 && SODIUM_TAIL.endOn[0] < SODIUM_TAIL.endOn[1] && SODIUM_TAIL.endOn[1] < 1);
   assert.ok(SPOKES.ring[0] > 0.29 && SPOKES.ring[1] < 0.685, 'within the B ring');
   assert.ok(SPOKES.count > 0 && SPOKES.dark > 0 && SPOKES.dark < 0.5);
 });

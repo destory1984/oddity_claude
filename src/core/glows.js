@@ -101,7 +101,9 @@ export function footprintUp(toMoon, north = true, footprint = FOOTPRINT) {
 // Mercury's sodium tail: sunlight pushes sodium atoms off Mercury's thin outer air into
 // a tail straight away from the Sun, glowing yellow-orange. The real one is millions of
 // km long; here 100 radii, like everything between the worlds a hundredth of that.
-export const SODIUM_TAIL = { body: 'mercury', lengthKm: 243970, spread: 0.09 };
+// light: how bright; endOn: the sine of the angle between its line and the way from
+// Mercury to her at which it is out and at which it is whole (render/glows.js).
+export const SODIUM_TAIL = { body: 'mercury', lengthKm: 243970, spread: 0.09, light: 0.2, endOn: [0.12, 0.45] };
 
 // Jets from a comet's nucleus: gas and dust break out where the Sun warms the ground,
 // in a few narrow streams on the day side (Giotto photographed Halley's in 1986). Each

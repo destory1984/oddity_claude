@@ -544,6 +544,8 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     line.classList.toggle('done', round.done);
     const cards = views.cards();
     $('journalViewsCount').textContent = `${cards.filter((card) => card.got).length}/${cards.length}`;
+    // All twelve got: a slip with their stamp, as the paper crane's over the tours.
+    $('journalViewsAll').hidden = !cards.every((card) => card.got);
     for (const card of cards) {
       const li = document.createElement('li');
       li.className = card.got ? 'got' : '';

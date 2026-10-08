@@ -83,7 +83,7 @@ import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from './core/visit.js';
 import { HOME, homeSpot, auroraSpot, AURORA_VIEWS, startHome, homeStep, homeArrived } from './core/home.js';
 import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
-import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
+import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -1306,7 +1306,7 @@ ${STORY_MORE[target.id]}` : told };
   }
   // She has come to the place of a name plate's key: a picture postcard the first time,
   // and in an aurora her hands go together; the eighth aurora ends the round with its
-  // stamp (core/viewCards.js).
+  // stamp, and the twelfth card the set with its own (core/viewCards.js).
   function reachedKey(kind, bodyId) {
     if (kind === 'aurora') {
       seeKind = 'aurora';
@@ -1321,9 +1321,17 @@ ${STORY_MORE[target.id]}` : told };
       toast.show(t('오로라가 뜨는 여덟 곳에 모두 서 보았습니다. 수첩에 오로라 순례 도장이 찍혔습니다.'));
       stampDown(AURORA_STAMP);
       sound.cue('discovered');
-      say.show(t('오로라 여덟 군데, 다 봤다!'));
+      if (!got.all) say.show(t('오로라 여덟 군데, 다 봤다!'));
     } else if (kind === 'aurora' && !got.cards.length) {
       toast.show(t`오로라 순례 ${views.auroras.length}/${AURORA_ROUND.length}`);
+    }
+    if (got.all) {
+      toast.show(t('그림엽서 열두 장을 모두 모았습니다. 수첩에 그림엽서 도장이 찍혔습니다.'));
+      // After the round's stamp, when the round's card was the last one.
+      setTimeout(() => stampDown(VIEWS_STAMP), got.round ? 2600 : 0);
+      cheerUntil = performance.now() + 6000;
+      sound.cue('complete');
+      say.show(t('엽서 열두 장, 다 모았다!'));
     }
   }
 

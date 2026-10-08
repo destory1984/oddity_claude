@@ -1786,7 +1786,8 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   padding-right:64px;
 }
 
-#journalCrane {
+#journalCrane,
+#journalViewsAll {
   display:flex;
   align-items:center;
   gap:10px;
@@ -1799,11 +1800,13 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   font-family:var(--hand);
 }
 
-#journalCrane[hidden] {
+#journalCrane[hidden],
+#journalViewsAll[hidden] {
   display:none;
 }
 
-#journalCrane img {
+#journalCrane img,
+#journalViewsAll img {
   width:48px;
   height:48px;
   image-rendering:pixelated;
@@ -2509,6 +2512,7 @@ input[type=range] {
 /* Slips laid on the page: a shade lighter than the page, with a thin edge. */
 #journalDaily,
 #journalCrane,
+#journalViewsAll,
 #journalAlbum .reply {
   background:#fffaf0;
   border:1px solid #b79a6a;
@@ -2563,6 +2567,7 @@ html.shell body {
 #journalStunts .memo,
 #journal li.clipping span,
 #journalCrane,
+#journalViewsAll,
 #dailyText {
   font-size:19px;
   line-height:1.25;

@@ -31,6 +31,9 @@ export const cardFile = (id) => `notebook/view-${id}.png`;
 // The worlds of the round, and its rubber stamp.
 export const AURORA_ROUND = Object.keys(AURORA_VIEWS);
 export const AURORA_STAMP = 'notebook/stamp-aurora.png';
+// The stamp of all the twelve cards got (the user, 2026-10-08, of a reward offered
+// for the whole set: "그래").
+export const VIEWS_STAMP = 'notebook/stamp-views.png';
 
 export const cardById = (id) => VIEW_CARDS.find((card) => card.id === id) ?? null;
 
@@ -45,17 +48,20 @@ export function sanitizeViews(raw) {
 }
 
 export const roundDone = (views) => AURORA_ROUND.every((id) => views.auroras.includes(id));
+export const allCards = (views) => VIEW_CARDS.every((card) => views.cards.includes(card.id));
 
 // She has just come to the place of a key: kind 'vista', 'home' or 'aurora' on the world
-// bodyId. Returns { views, cards, round }: the record after it, the cards got by it
-// (new ones only) and whether the round was finished by it.
+// bodyId. Returns { views, cards, round, all }: the record after it, the cards got by it
+// (new ones only), whether the round was finished by it and whether the last of the
+// twelve cards was got by it.
 export function arriveAt(views, kind, bodyId) {
   const before = sanitizeViews(views);
   const auroras = kind === 'aurora' && AURORA_ROUND.includes(bodyId) && !before.auroras.includes(bodyId) ? [...before.auroras, bodyId] : before.auroras;
   const round = !roundDone(before) && roundDone({ auroras });
   const got = VIEW_CARDS.filter((card) => (card.by[0] === kind && card.by[1] === bodyId) || (card.by[0] === 'round' && round))
     .filter((card) => !before.cards.includes(card.id));
-  return { views: { cards: [...before.cards, ...got.map((card) => card.id)], auroras }, cards: got, round };
+  const after = { cards: [...before.cards, ...got.map((card) => card.id)], auroras };
+  return { views: after, cards: got, round, all: !allCards(before) && allCards(after) };
 }
 
 // Every best view has its card.

@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
-import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, cardFile, cardById, sanitizeViews, roundDone, arriveAt, cardless } from '../src/core/viewCards.js';
+import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, cardById, sanitizeViews, roundDone, allCards, arriveAt, cardless } from '../src/core/viewCards.js';
 import { AURORAS } from '../src/core/glows.js';
 
 test('twelve cards: one for every best view, Korea\'s sky, Earth\'s aurora and the round; each has its picture', () => {
@@ -10,6 +10,7 @@ test('twelve cards: one for every best view, Korea\'s sky, Earth\'s aurora and t
   assert.deepEqual(cardless(), []);
   for (const card of VIEW_CARDS) assert.ok(existsSync(`public/assets/${cardFile(card.id)}`), card.id);
   assert.ok(existsSync(`public/assets/${AURORA_STAMP}`));
+  assert.ok(existsSync(`public/assets/${VIEWS_STAMP}`));
   assert.equal(cardById('pluto').by[1], 'pluto');
   assert.equal(cardById('nowhere'), null);
 });
@@ -44,6 +45,27 @@ test('the round of the auroras: all eight worlds that have one, the stamp and th
   assert.ok(roundDone(views) && views.cards.includes('auroraRound'));
   // Standing in one again does not finish it a second time.
   assert.equal(arriveAt(views, 'aurora', 'earth').round, false);
+});
+
+test('the twelfth card, whichever it is, ends the set once', () => {
+  let views = sanitizeViews(null);
+  const alls = [];
+  const go = (kind, id) => {
+    const step = arriveAt(views, kind, id);
+    views = step.views;
+    alls.push(step.all);
+  };
+  for (const id of AURORA_ROUND) go('aurora', id);
+  for (const card of VIEW_CARDS.filter((c) => c.by[0] === 'vista')) go('vista', card.by[1]);
+  assert.ok(alls.every((all) => !all) && !allCards(views));
+  go('home', 'earth');
+  assert.ok(alls.at(-1) && allCards(views));
+  go('home', 'earth');
+  assert.equal(alls.at(-1), false);
+  // The round's card can be the last one too.
+  const butRound = { cards: VIEW_CARDS.map((c) => c.id).filter((id) => id !== 'auroraRound'), auroras: AURORA_ROUND.slice(1) };
+  const last = arriveAt(butRound, 'aurora', AURORA_ROUND[0]);
+  assert.ok(last.round && last.all);
 });
 
 test('a saved record keeps only what is known', () => {

@@ -5360,8 +5360,9 @@ html.gaze #gazeButton {
   opacity:.7;
 }
 
-/* "우주토끼" among the makers is a key that looks like the words beside it; it shows the
-   row of eight keys to the places in the auroras: four in a row, two rows. */
+/* The makers' names are one key that looks like plain words (first "우주토끼" alone; the
+   user, 2026-10-08: "우주한량, 우주토끼"를 누르면 오로라 이동 버튼들 나오게 해줘); it
+   shows the row of keys to the places in the auroras, four in a row, and to a comet. */
 #settings dd button#rabbitKey {
   display:inline;
   min-width:0;
@@ -5381,6 +5382,11 @@ html.gaze #gazeButton {
   display:flex;
   flex-wrap:wrap;
   gap:4px;
+}
+
+/* (A key alone on the last row is as wide as the others, not the whole row.) */
+#settings dd.auroraRow button.alone {
+  flex:0 1 calc(25% - 3px);
 }
 
 #settings dd.auroraRow[hidden] {

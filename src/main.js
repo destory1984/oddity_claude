@@ -1146,8 +1146,8 @@ ${STORY_MORE[target.id]}` : told };
     },
   });
   hud.showSelection(named(selectedId));
-  // A way to the places in the auroras kept out of sight: pressing "우주토끼" among the
-  // makers on the settings' About page shows a row of keys, one for each world that has
+  // A way to the places in the auroras kept out of sight: pressing the makers' names
+  // ("우주한량, 우주토끼"; at first "우주토끼" alone) on the settings' About page shows a row of keys, one for each world that has
   // an aurora (the user, 2026-10-08: "설정 -> about -> 우주토끼 누르면, 오로라 이동 메뉴
   // 띄워주고, 거기에 버튼들 나열해줘"). A key shuts the settings, chooses that world and
   // takes her to the place in its aurora, as the key on its name plate does: once the
@@ -1165,6 +1165,24 @@ ${STORY_MORE[target.id]}` : told };
         selectedId = id;
         hud.showSelection(named(id));
         goHome('aurora');
+      }, { once: true });
+      $('settings').close();
+    });
+    $('auroraKeys').append(key);
+  }
+  // A ninth key, to the comet with the longest tail now, at the place a jump to it
+  // arrives (core/vista.js COMET_VIEW; the user, 2026-10-08: "헤일-밥 위성도 about 코로나
+  // 버튼에 추가시켜줘", and of its name, the whole one being too long for a key:
+  // "헤일 위성"이라고만 해). It may be jumped to though she has not been there.
+  {
+    const key = document.createElement('button');
+    key.className = 'alone';
+    key.textContent = t('헤일 혜성');
+    key.addEventListener('click', () => {
+      $('settings').addEventListener('close', () => {
+        selectedId = 'haleBopp';
+        hud.showSelection(named('haleBopp'));
+        teleport('haleBopp', true, false, null, true);
       }, { once: true });
       $('settings').close();
     });

@@ -11,6 +11,7 @@ import { surfaceDirection, spinOf } from './surface.js';
 import { orientationFrom, blend, multiply, turnAboutY } from './orientation.js';
 import { AURORAS } from './glows.js';
 import { BODIES } from './bodies.js';
+import { fromSpot } from './startSpots.js';
 
 // Where the user stood when they said "여기로 해줘" (2026-10-07; it was 3,400 km right
 // over the peninsula before): at Korea's latitude, some nine degrees west of it and
@@ -124,6 +125,26 @@ export const SATURN_AURORA_VIEW = {
   forward: [-0.5565, 0.1373, 0.8194],
   up: [-0.1047, 0.9668, -0.2331],
 };
+// Where the shooting stars over Earth are best seen: where the user stood and said
+// "여기가 좋겠어. 여기를 about에 \"유성우\"라고 버튼 만들어서 연결해줘" (2026-10-08):
+// over the middle of the night side, 9,396 km up, the dark globe filling the view's
+// width and the Sun hidden behind it. A shower's radiant is there (core/meteors.js
+// showerRadiant), so its meteors run outward from the middle of what she sees. Kept
+// to the Sun, but to where the Sun truly is, not to its place along the equator as an
+// aurora's is: with the planets laid out as today's sky the Sun stands some degrees off
+// the equator, and the night's middle with it. In km from Earth's centre, each of the
+// three [toward the Sun, the way above it, aside] (core/startSpots.js sunFrame).
+export const METEOR_VIEW = {
+  body: 'earth',
+  at: [-15764.1, -256, -146.4],
+  ahead: [0.9988, -0.0494, -0.001],
+  above: [0.0494, 0.9987, 0.0091],
+};
+// Where that is now: { position, up, facing }, as homeSpot gives.
+export function meteorSpot(body, sun) {
+  const { position, orientation } = fromSpot(METEOR_VIEW, body, sun);
+  return { position, up: unit(sub(position, body.position)), facing: orientation };
+}
 // Jupiter's: where the user stood and said "목성의 코로나 위치는 여기로 해" (2026-10-08;
 // the aurora was meant): on the night side at 70.5 degrees north, 4,376 km over the
 // clouds, the curtain standing to her left and the stars before her.

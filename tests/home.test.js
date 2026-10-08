@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { HOME, HOME_NEAR_S, HOME_ROUND_S, AURORA_VIEW, auroraSpot, homeSpot, startHome, homeStep, homeArrived, slerp } from '../src/core/home.js';
+import { HOME, HOME_NEAR_S, HOME_ROUND_S, AURORA_VIEW, meteorSpot, auroraSpot, homeSpot, startHome, homeStep, homeArrived, slerp } from '../src/core/home.js';
 import { forward, up } from '../src/core/orientation.js';
 
 const earth = { id: 'earth', position: [1000, 2000, 3000], radiusKm: 6371 };
@@ -57,6 +57,23 @@ test('slerp keeps to the unit sphere, also straight across it', () => {
     for (const t of [0, 0.25, 0.5, 0.75, 1]) assert.ok(Math.abs(Math.hypot(...slerp(a, b, t)) - 1) < 1e-6);
   }
   assert.ok(Math.hypot(...slerp([1, 0, 0], [0, 1, 0], 1).map((n, i) => n - [0, 1, 0][i])) < 1e-9);
+});
+
+test('the place for the shooting stars: over the middle of the night side, within their range, looking at Earth', () => {
+  // (The Sun off the equator too, as in today's sky: the night's middle goes with it.)
+  for (const [angle, tilt] of [[0, 0], [2.5, 0.12], [5.5, -0.4]]) {
+    const toSun = [Math.cos(angle) * Math.cos(tilt), Math.sin(tilt), Math.sin(angle) * Math.cos(tilt)];
+    const sun = { position: earth.position.map((n, i) => n + toSun[i] * 1.5e8) };
+    const spot = meteorSpot(earth, sun);
+    const out = from(spot.position);
+    const far = Math.hypot(...out);
+    // (The user stood 9,396 km up; they show from within METEOR_RANGE_KM, 30,000.)
+    assert.ok(Math.abs(far - earth.radiusKm - 9396) < 5, String(far));
+    assert.ok(out.reduce((sum, n, i) => sum + n * toSun[i], 0) / far < -0.99);
+    const ahead = forward(spot.facing);
+    assert.ok(ahead.reduce((sum, n, i) => sum - n * out[i] / far, 0) > 0.99);
+    assert.ok(up(spot.facing)[1] > 0.9);
+  }
 });
 
 test('the place in the aurora: on the night side at the ring\'s latitude, the Sun behind her, wherever the Sun is', () => {

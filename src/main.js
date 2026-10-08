@@ -81,7 +81,7 @@ import { replayFor, replayFrame, replaySounds, replayOn, replayBeside } from './
 import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from './core/visit.js';
-import { HOME, homeSpot, auroraSpot, AURORA_VIEWS, startHome, homeStep, homeArrived } from './core/home.js';
+import { HOME, homeSpot, auroraSpot, AURORA_VIEWS, meteorSpot, startHome, homeStep, homeArrived } from './core/home.js';
 import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
@@ -1088,6 +1088,7 @@ ${STORY_MORE[target.id]}` : told };
     if (kind === 'vista' && !VISTAS.includes(bodyId)) return;
     const spot = kind === 'home' ? () => homeSpot(here(bodyId), simTime)
       : kind === 'aurora' ? () => auroraSpot(here(bodyId), here('sun').position, AURORA_VIEWS[bodyId])
+      : kind === 'meteors' ? () => meteorSpot(here(bodyId), here('sun'))
         : () => vistaSpot(bodyId, { body: here(bodyId), sun: here('sun'), earth: here('earth'), timeS: simTime, elapsedS: world.elapsed(), ringNormal: world.ringNormal(bodyId), of: here });
     if (docked) undock();
     visit = null;
@@ -1097,7 +1098,7 @@ ${STORY_MORE[target.id]}` : told };
       kind, bodyId, spot,
       // (free: a view that is not over a place of the ground this time: Pluto's by night.)
       hold: kind === 'home' || (kind === 'vista' && VISTA_HELD.includes(bodyId) && !first.free),
-      told: kind === 'home' ? t('한국이 내려다보이는 자리입니다. 움직이면 풀려납니다.') : kind === 'aurora' ? t('오로라 속입니다. 빛줄기 뒤로 별이 보입니다.') : first.free ? VISTA_FREE_TOLD[bodyId] : VISTA_TOLD[bodyId],
+      told: kind === 'home' ? t('한국이 내려다보이는 자리입니다. 움직이면 풀려납니다.') : kind === 'aurora' ? t('오로라 속입니다. 빛줄기 뒤로 별이 보입니다.') : kind === 'meteors' ? t('지구의 밤 쪽 한가운데입니다. 유성우는 1분에 한 번 내립니다.') : first.free ? VISTA_FREE_TOLD[bodyId] : VISTA_TOLD[bodyId],
     };
     input.clear();
   }
@@ -1183,6 +1184,23 @@ ${STORY_MORE[target.id]}` : told };
         selectedId = 'haleBopp';
         hud.showSelection(named('haleBopp'));
         teleport('haleBopp', true, false, null, true);
+      }, { once: true });
+      $('settings').close();
+    });
+    $('auroraKeys').append(key);
+  }
+  // A tenth, to the place over Earth's night side where the shooting stars are best
+  // seen (core/home.js METEOR_VIEW; the user, 2026-10-08: "여기를 about에 \"유성우\"라고
+  // 버튼 만들어서 연결해줘"). She goes round the globe to it, as to an aurora.
+  {
+    const key = document.createElement('button');
+    key.className = 'alone';
+    key.textContent = t('유성우');
+    key.addEventListener('click', () => {
+      $('settings').addEventListener('close', () => {
+        selectedId = 'earth';
+        hud.showSelection(named('earth'));
+        goHome('meteors');
       }, { once: true });
       $('settings').close();
     });
@@ -2606,7 +2624,7 @@ ${STORY_MORE[target.id]}` : told };
     else if (visit && !hasArrived(visit)) flightLabel = t`${here(visit.id).name}에 착륙 중`;
     else if (visit) flightLabel = t`${here(visit.id).name} 곁`;
     else if (home && homeArrived(home)) flightLabel = home.kind === 'home' ? t('한국 하늘 위') : VISTA_OVER[home.bodyId];
-    else if (home) flightLabel = home.kind === 'home' ? t('한국 하늘로 가는 중') : home.kind === 'aurora' ? t('오로라 자리로 가는 중') : t('명당으로 가는 중');
+    else if (home) flightLabel = home.kind === 'home' ? t('한국 하늘로 가는 중') : home.kind === 'aurora' ? t('오로라 자리로 가는 중') : home.kind === 'meteors' ? t('유성우 자리로 가는 중') : t('명당으로 가는 중');
     else if (state.restingOn) flightLabel = t`${bodyById(state.restingOn).name} 표면`;
     else if (shownSpeed() < 0.01) flightLabel = t('정지 비행');
     else if (!driving) flightLabel = t('관성 비행');

@@ -5410,3 +5410,22 @@ html.gaze #gazeButton {
   z-index:4;
   pointer-events:none;
 }
+
+/* A note longer than the screen: its button stays at the foot of the sheet and the
+   writing goes by under it, fading out just above (on a phone three of the opening's
+   five pages had the button below the fold, and in English and Japanese no page of
+   the letter fits even without its picture). A sheet that fits looks as it did: the
+   same 20px over and under the button. */
+#noteCard .journalActions {
+  position:sticky;
+  bottom:0;
+  z-index:1;
+  margin:8px -20px 0;
+  padding:12px 20px 20px;
+  background:linear-gradient(#09162700, #091627 12px);
+}
+
+/* (The space under the button is the row's own, so that the row reaches the sheet's foot.) */
+#noteCard {
+  padding-bottom:0;
+}

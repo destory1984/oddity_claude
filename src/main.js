@@ -2694,6 +2694,10 @@ ${STORY_MORE[target.id]}` : told };
           .map((b) => b.id),
       ],
     });
+    // The first guide's last step asks for the Moon and Earth in one picture, and in
+    // photo mode no name shows: Earth's alone stays, to say which way to turn (a
+    // newcomer, landed looking at the ground, could not find it).
+    hud.photoGoal(view, photo.active() && guide.step === 'photo' ? here('earth') : null);
     minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId, away });
     if ($('bigMap').open) bigMap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId: mapPick ?? selectedId, away });
     $('lockTarget').setAttribute('aria-pressed', String(locked));

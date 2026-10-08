@@ -5401,3 +5401,12 @@ html.gaze #gazeButton {
   font-size:12px;
   white-space:nowrap;
 }
+
+/* Photo mode hides every name; this one stays while the first guide asks for the Moon
+   and Earth in one picture, to say which way Earth is. It is not in the saved picture
+   (that is the canvas alone) and a drag goes through it. */
+#photoGoal {
+  position:fixed;
+  z-index:4;
+  pointer-events:none;
+}

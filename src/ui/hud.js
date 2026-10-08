@@ -146,6 +146,17 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
   }
 
   return {
+    // In photo mode, where the names are put away: the one name the first guide's last
+    // step needs (Earth's), in view or as an arrow at the edge, kept above the photo
+    // tools. body: null to put it away.
+    photoGoal(view, body) {
+      const el = $('photoGoal');
+      el.hidden = !body;
+      if (!body) return;
+      const spot = placeMarker(el, view.directions[body.id], view.camera, body.name);
+      const top = $('photoTools').getBoundingClientRect().top - el.offsetHeight / 2 - 8;
+      if (spot.y > top) el.style.top = `${top}px`;
+    },
     showSelection(body) {
       $('targetName').innerHTML = `${body.name} <small>${body.nameEn}</small>`;
       if (body.id === 'earth') $('targetName').append(auroraKey, homeKey);

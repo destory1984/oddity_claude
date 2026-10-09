@@ -226,6 +226,14 @@ let paused = false;
 let practice = null;
 // Which way a turn of two fingers rolls her, so that the picture goes round with them.
 const TWIST_ROLL = 1;
+// The flight practice says "not that way": the line turns red and shakes for a moment
+// and says what to do instead, with a low tick (once for one drag, not at every move of it).
+const WRONG_MS = 2200;
+function practiceWrong() {
+  const now = performance.now();
+  if (now - (practice.wrongAt ?? -Infinity) > 500) sound.cue('brake');
+  practice.wrongAt = now;
+}
 // The target she is coming round to face (facePicked), or null.
 let faceTurn = null;
 let selectedId = START_NEAR ? START_NEAR.id : resume?.selectedId && BODIES.some((b) => b.id === resume.selectedId) ? resume.selectedId : resume ? 'earth' : startSpot.target ?? 'earth';
@@ -481,6 +489,11 @@ async function init() {
     onDrag(dx, dy) {
       if (photo.active()) photo.rotate(dx, dy);
       else if (!paused) {
+        // The lesson of sliding is not done by turning the view: a drag there is refused
+        // and said to be wrong (the user, 2026-10-10: "이 화면에서는 방향 전환을 하면,
+        // 틀렸다는 표시를 해볼까?"). Turned to face the ring she would have it before her
+        // without having slid, and sliding from there took it away again.
+        if (practice?.run.step === 'slide') return practiceWrong();
         aimedId = null;
         faceTurn = null;
         if (practice) practice.turning = false;
@@ -499,6 +512,7 @@ async function init() {
     // the fingers. As a roll by the keys does, it lets go of a target only faced.
     onTwist(turned) {
       if (paused || photo.active()) return;
+      if (practice?.run.step === 'slide') return practiceWrong();
       state = { ...state, orientation: rotateLocal(state.orientation, 0, 0, (rear ? -1 : 1) * TWIST_ROLL * turned) };
       aimedId = null;
       faceTurn = null;
@@ -2098,7 +2112,7 @@ ${STORY_MORE[target.id]}` : told };
     practice = null;
     input.clear();
     dragTurn = [0, 0];
-    document.body.classList.remove('practicing');
+    document.body.classList.remove('practicing', 'practiceWrong');
     practiceView.show(null);
     world.setFov((feelFov * Math.PI) / 180);
     guideView.show(goalNow());
@@ -2213,7 +2227,9 @@ ${STORY_MORE[target.id]}` : told };
     if (!goal) return endPractice(true);
     // (Begun by a newcomer's offer its button skips it; begun by hand it gives it up. It
     // says what it leaves: the bare "그만두기" did not, and the user, 2026-10-10, asked.)
-    guideView.show({ ...goal, leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
+    const wrong = performance.now() - (practice.wrongAt ?? -Infinity) < WRONG_MS && practice.run.step === 'slide';
+    document.body.classList.toggle('practiceWrong', wrong);
+    guideView.show({ ...goal, ...(wrong ? { text: t('방향은 돌리지 않아요. 화살표 버튼으로 옆으로 움직이세요') } : {}), leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
     const away = Math.hypot(...practice.run.ring.map((n, i) => n - state.position[i]));
     // The speed box as in the game (the user, 2026-10-10: "화면 아래에 본게임과 같은
     // 속도계 붙여줘"): how fast she goes, and the limit the ring sets as she nears it.

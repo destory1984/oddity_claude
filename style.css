@@ -5540,3 +5540,24 @@ body.practicing #guide {
 body.practicing #guideText {
   flex:1;
 }
+
+/* The flight practice says "not that way" (main.js practiceWrong): the line at the top
+   goes red and shakes once. */
+@keyframes wrongShake {
+  0%, 100% { transform:translateX(0); }
+  20% { transform:translateX(-7px); }
+  40% { transform:translateX(7px); }
+  60% { transform:translateX(-5px); }
+  80% { transform:translateX(5px); }
+}
+body.practiceWrong #guide {
+  border-color:#ff8f8f;
+  background:#4a1420e6;
+  animation:wrongShake .4s ease-in-out 1;
+}
+body.practiceWrong #guideCount {
+  color:#ffb0b0;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.practiceWrong #guide { animation:none; }
+}

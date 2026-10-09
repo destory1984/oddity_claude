@@ -206,10 +206,11 @@ export function warpSpot(id, { body, sun, ringNormal = null, moved = null }) {
   return null;
 }
 
-// The place by a comet where the user stood, 45,000 km from the nucleus (within
+// The place by a comet where the user stood, 31,000 km from the nucleus (within
 // game.js CARRY_KM, so she is carried along with it), in the frame [away from the Sun,
-// back along its path, the third].
-export const COMET_VIEW = { km: 45000, position: [0.002, -0.8874, 0.461], forward: [0.1753, 0.941, -0.2896], up: [0.7781, -0.3126, -0.5448] };
+// back along its path, the third]. (45,000 km at first; the user, 2026-10-09, standing
+// nearer by Hale-Bopp: "혜성 위치... 여기로 바꿔줘".)
+export const COMET_VIEW = { km: 31000, position: [0.0883, -0.8314, 0.5486], forward: [0.0853, 0.8734, -0.4795], up: [0.7744, -0.3609, -0.5197] };
 
 function cometSpot(body, sun, moved) {
   const away = unit(sub(body.position, sun.position));

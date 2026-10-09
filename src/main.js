@@ -38,7 +38,7 @@ import {
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
 import { createGuideView } from './ui/guide.js';
-import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, previousLesson, RING_KM, JUMP_TO_KM, ROLL_START } from './core/practice.js';
+import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, previousLesson, RING_KM, JUMP_TO_KM, ROLL_START, TOP_SPEED } from './core/practice.js';
 import { createPracticeView } from './ui/practice.js';
 import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
@@ -2191,7 +2191,7 @@ ${STORY_MORE[target.id]}` : told };
   const practiceFrame = (elapsed) => {
     const dt = paused || elapsed > MAX_FRAME_GAP_S ? 0 : elapsed;
     const intent = input.intent();
-    if (dt > 0) state = step(state, intent, dt, [], [practice.run.ring]).state;
+    if (dt > 0) state = step(state, intent, dt, [], [practice.run.ring], TOP_SPEED).state;
     // Turning to the ring whose name tag was pressed: most of what is left of the turn
     // each moment, so it begins briskly and settles; over once she is within a degree.
     if (practice.turning && dt > 0) {
@@ -2281,7 +2281,7 @@ ${STORY_MORE[target.id]}` : told };
     // The speed box as in the game (the user, 2026-10-10: "화면 아래에 본게임과 같은
     // 속도계 붙여줘"): how fast she goes, and the limit the ring sets as she nears it.
     if (frame++ % HUD_EVERY_N_FRAMES === 0) {
-      hud.speed({ speed: totalSpeed(state), motionSign: state.speed > 0.01 ? state.motionSign : 1, limitLabel: limitText(speedLimit(away) / C), C });
+      hud.speed({ speed: totalSpeed(state), motionSign: state.speed > 0.01 ? state.motionSign : 1, limitLabel: limitText(Math.min(TOP_SPEED, speedLimit(away)) / C), C });
     }
     practiceView.show(goal, tagSpot(practice.run.ring, state.position, view.camera, innerWidth, innerHeight), away, slideSide(practice.run, pose));
   };

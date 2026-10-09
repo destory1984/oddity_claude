@@ -12,6 +12,10 @@ export const PRACTICE_STEPS = ['look', 'fly', 'stop', 'slide', 'roll', 'find', '
 // each a few seconds of flight.
 export const RING_KM = 6000;
 export const FAR_KM = 80000;
+// The most speed allowed in here, km/s (the user, 2026-10-10: "테스트 비행에서는
+// 속도제한 걸자"): what the ring allows one flight off. Without it the limit grew with
+// the distance from the ring, and the far ring of the jump could be flown to in seconds.
+export const TOP_SPEED = FAR_KM * 0.5;
 // Left this far behind, the ring is put before her again: nobody is lost in here.
 const LOST_KM = FAR_KM * 1.8;
 // Looking at the ring: within this of the middle of the view (the ring itself is 4.3

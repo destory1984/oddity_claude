@@ -150,7 +150,8 @@ function limitAt(position, bodies, slowPoints) {
   return speedLimit(km);
 }
 
-export function step(state, input, dt, bodies = BODIES, slowPoints = []) {
+// topSpeed: the most ever allowed (the flight practice sets its own).
+export function step(state, input, dt, bodies = BODIES, slowPoints = [], topSpeed = MAX_SPEED) {
   const events = [];
   if (!(dt > 0)) return { state, events };
 
@@ -168,7 +169,7 @@ export function step(state, input, dt, bodies = BODIES, slowPoints = []) {
   );
 
   const lift = boostLift(state);
-  const lifted = (at) => Math.min(MAX_SPEED, limitAt(at, bodies, slowPoints) * lift);
+  const lifted = (at) => Math.min(topSpeed, limitAt(at, bodies, slowPoints) * lift);
   const limit = lifted(state.position);
   let boost = state.boost ?? null;
   if (boost) boost = boost.seconds > dt ? { ...boost, seconds: boost.seconds - dt } : null;

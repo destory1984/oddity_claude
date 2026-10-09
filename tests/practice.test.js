@@ -1,8 +1,10 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, JUMP_TO_KM, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, tiltOf, previousLesson, ROLL_START,
+  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, JUMP_TO_KM, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, tiltOf, previousLesson, ROLL_START, TOP_SPEED,
 } from '../src/core/practice.js';
+import { step, createState, totalSpeed } from '../src/core/game.js';
+import { lookAtDirection } from '../src/core/orientation.js';
 
 const sub = (a, b) => a.map((n, i) => n - b[i]);
 const unit = (v) => v.map((n) => n / Math.hypot(...v));
@@ -229,4 +231,18 @@ test('a lesson can be gone back from to the one before, begun again from where s
   back = previousLesson(back, at);
   assert.equal(back.step, 'look');
   assert.equal(practiceGoal(back).back, false);
+});
+
+test('the practice holds the speed down however far the ring is', () => {
+  const ring = [0, 0, FAR_KM * 55];
+  let state = createState([0, 0, 0], lookAtDirection([0, 0, 1]));
+  for (let i = 0; i < 600; i += 1) state = step(state, { drive: 1 }, 1 / 60, [], [ring], TOP_SPEED).state;
+  assert.equal(totalSpeed(state), TOP_SPEED);
+  // (Without it she is going many times faster within two seconds.)
+  let free = createState([0, 0, 0], lookAtDirection([0, 0, 1]));
+  for (let i = 0; i < 120; i += 1) free = step(free, { drive: 1 }, 1 / 60, [], [ring]).state;
+  assert.ok(totalSpeed(free) > TOP_SPEED * 10);
+  // Near the ring its own limit is the lower one, as before.
+  const near = step({ ...state, position: [0, 0, FAR_KM * 55 - RING_KM * 2] }, { drive: 1 }, 1 / 60, [], [ring], TOP_SPEED).state;
+  assert.ok(totalSpeed(near) <= RING_KM + 1);
 });

@@ -96,6 +96,9 @@ export function createComet(scene) {
     coma.position.set(rel[0], rel[1], rel[2]);
     coma.scaling.setAll(comaSize);
     comaMaterial.setFloat('strength', (0.5 + 0.5 * activity) * near);
+    // (The glows move a little: the head breathes, the gas streams away, the dust creeps.)
+    const now = performance.now() / 1000;
+    comaMaterial.setFloat('time', now);
 
     const length = tailLengthKm(body.sunKm / AU_KM) / KM_PER_UNIT;
     const away = new Vector3(...body.position.map((n, i) => n - sunPositionKm[i])).normalize();
@@ -106,7 +109,7 @@ export function createComet(scene) {
     // (Seen along its length a tail is four wedges: it fades as she comes onto its line.)
     const eye = new Vector3(-rel[0], -rel[1], -rel[2]).normalize();
     tailMaterial.setFloat('strength', (0.35 + 0.45 * activity) * near * tailShown(offLine(away, eye), TAIL_END_ON.gas));
-    tailMaterial.setFloat('time', performance.now() / 1000);
+    tailMaterial.setFloat('time', now);
 
     // The dust is heavier: it falls behind along the orbit, so its tail leans back the
     // way the comet came. Until the comet has been seen to move, lean it in the
@@ -124,6 +127,7 @@ export function createComet(scene) {
     const dustWay = away.add(lean.scale(DUST_LAG)).normalize();
     aim(dust, dustWay);
     dustMaterial.setFloat('strength', (0.3 + 0.5 * activity) * near * tailShown(offLine(dustWay, eye), TAIL_END_ON.dust));
+    dustMaterial.setFloat('time', now);
   }
 
   return { update };

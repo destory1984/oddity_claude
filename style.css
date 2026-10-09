@@ -5527,6 +5527,21 @@ dialog .checkRow {
   }
 }
 
+/* It stands out from the keys beside it (the user, 2026-10-10: "비행 연습 버튼은
+   강조해"): a gold rim, and a soft glow that swells and fades. */
+#hud nav #practiceButton {
+  border-color:#ffd98a;
+  background-color:#3a2f1ccc;
+  animation:practiceGlow 1.8s ease-in-out infinite;
+}
+@keyframes practiceGlow {
+  0%, 100% { box-shadow:0 0 0 1px #ffd98a, 0 0 6px 1px #ffd98a55; }
+  50% { box-shadow:0 0 0 1px #ffd98a, 0 0 14px 5px #ffd98aaa; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #hud nav #practiceButton { animation:none; box-shadow:0 0 0 1px #ffd98a, 0 0 10px 3px #ffd98a88; }
+}
+
 /* While practising the line at the top has the whole width (in the game it keeps to the
    right of the map, and a lesson's line beside the longer "연습 비행 그만두기" was cut
    off after two rows). */

@@ -478,6 +478,7 @@ async function init() {
       if (photo.active()) photo.rotate(dx, dy);
       else if (!paused) {
         aimedId = null;
+        if (practice) practice.turning = false;
         state = { ...state, orientation: rotateLocal(state.orientation, ...(rear ? rearTurn(dx, dy) : [dx, dy])) };
         // Locked: the lock holds, and the target is kept where this drag leaves it.
         if (locked && !rear) lockAim = aimNow();
@@ -2034,6 +2035,9 @@ ${STORY_MORE[target.id]}` : told };
   // the top between the map and the notebook until the player puts it away (at the end
   // of a practice, or in the settings, where it can also be begun).
   const PRACTICE_AT = [0, 150e6, 0];
+  // How fast she comes round to a ring whose name tag was pressed (a share of the turn
+  // left, per second: nine tenths of it in half a second).
+  const PRACTICE_TURN_RATE = 4.5;
   let practiceKept = loadPractice();
   // Someone already past the first guide is no newcomer: never offered.
   if (guide.step === null && !practiceKept.asked) practiceKept = savePractice({ ...practiceKept, asked: true });
@@ -2082,9 +2086,11 @@ ${STORY_MORE[target.id]}` : told };
   }
   const practiceView = createPracticeView({
     // Her ring's name tag turns her to it, as "바라보기" does to a body (square on: in
-    // here she then flies straight into it).
+    // here she then flies straight into it). She comes round to it over half a second
+    // or so, not at a blow (the user, 2026-10-10: "한번에 휙~ 돌리지말고, 스무스하게
+    // 방향전환해줘"): practiceFrame makes the turn, and a drag takes over from it.
     onTag() {
-      if (practice && !paused) state = { ...state, orientation: lookAtDirection(practice.run.ring.map((n, i) => n - state.position[i])) };
+      if (practice && !paused) practice.turning = true;
     },
     onOffer(yes) {
       if (yes) startPractice(true);
@@ -2111,6 +2117,15 @@ ${STORY_MORE[target.id]}` : told };
     const dt = paused || elapsed > MAX_FRAME_GAP_S ? 0 : elapsed;
     const intent = input.intent();
     if (dt > 0) state = step(state, intent, dt, [], [practice.run.ring]).state;
+    // Turning to the ring whose name tag was pressed: most of what is left of the turn
+    // each moment, so it begins briskly and settles; over once she is within a degree.
+    if (practice.turning && dt > 0) {
+      const toRing = practice.run.ring.map((n, i) => n - state.position[i]);
+      state = { ...state, orientation: swingToward(state.orientation, [0, 0, 1], toRing, 1 - Math.exp(-dt * PRACTICE_TURN_RATE)) };
+      const ahead = forward(state.orientation);
+      const cosine = toRing.reduce((sum, n, i) => sum + n * ahead[i], 0) / Math.hypot(...toRing);
+      if (cosine > Math.cos(Math.PI / 180)) practice.turning = false;
+    }
     const pose = { ...poseNow(), speed: totalSpeed(state), sliding: intent.strafe !== 0 || intent.rise !== 0 };
     if (dt > 0) {
       practice.run = updatePractice(practice.run, pose);

@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, JUMP_TO_KM, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped,
+  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, JUMP_TO_KM, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, tiltOf, ROLL_START,
 } from '../src/core/practice.js';
 
 const sub = (a, b) => a.map((n, i) => n - b[i]);
@@ -15,12 +15,12 @@ const pose = (position, forward = [0, 0, 1], more = {}) => {
 };
 const facing = (practice, position) => pose(position, sub(practice.ring, position));
 
-test('the seven lessons come in order, each with a line and the control it teaches', () => {
-  assert.deepEqual(PRACTICE_STEPS, ['look', 'fly', 'stop', 'slide', 'find', 'warp', 'free']);
+test('the eight lessons come in order, each with a line and the control it teaches', () => {
+  assert.deepEqual(PRACTICE_STEPS, ['look', 'fly', 'stop', 'slide', 'roll', 'find', 'warp', 'free']);
   const start = pose([0, 0, 0]);
   let practice = createPractice(start);
   assert.equal(practice.step, 'look');
-  assert.equal(practiceGoal(practice).count, '1/7');
+  assert.equal(practiceGoal(practice).count, '1/8');
   assert.equal(practiceGoal(practice).teach, null);
   assert.ok(Math.abs(Math.hypot(...practice.ring) - FAR_KM) < FAR_KM * 0.01, 'the first ring is one flight off');
 
@@ -66,6 +66,21 @@ test('the seven lessons come in order, each with a line and the control it teach
   const acrossKm = practice.ring.map((n, i) => n - from[i]).reduce((s, n, i) => s + n * through.right[i], 0);
   const beside = from.map((n, i) => n + through.right[i] * acrossKm);
   practice = updatePractice(practice, { ...through, position: beside, sliding: true });
+  assert.equal(practice.step, 'roll');
+
+  // 5. Tipped over, she rights herself: the place's up back at the top of her view,
+  // by her own turning (level without having turned does not count).
+  const level = { ...through, position: beside };
+  const tipped = (by) => ({ ...level, right: level.right.map((n, i) => n * Math.cos(by) + level.up[i] * Math.sin(by)), up: level.up.map((n, i) => n * Math.cos(by) - level.right[i] * Math.sin(by)) });
+  assert.ok(Math.abs(tiltOf(level)) < 1e-9);
+  assert.ok(Math.abs(Math.abs(tiltOf(tipped(ROLL_START))) - ROLL_START) < 1e-9);
+  assert.match(practiceGoal(practice).text, /두 손가락/);
+  assert.equal(practiceGoal(practice).teach, null);
+  practice = updatePractice(practice, level);
+  assert.equal(practice.step, 'roll');
+  practice = updatePractice(practice, { ...tipped(0.5), twist: 0.4 });
+  assert.equal(practice.step, 'roll');
+  practice = updatePractice(practice, { ...tipped(0.05), twist: 0.45 });
   assert.equal(practice.step, 'find');
   assert.equal(practiceGoal(practice).tag, true);
   // (The name tag blinks until she faces the ring, then the forward key.)
@@ -74,13 +89,13 @@ test('the seven lessons come in order, each with a line and the control it teach
   assert.equal(aimedAt(practice, { ...through, position: beside }), false);
   assert.equal(aimedAt(practice, facing(practice, beside)), true);
 
-  // 5. The ring behind her, reached.
+  // 6. The ring behind her, reached.
   const at = { ...through, position: beside };
   assert.ok(sub(practice.ring, beside).reduce((s, n, i) => s + n * at.forward[i], 0) < 0, 'behind her');
   practice = updatePractice(practice, pose(practice.ring));
   assert.equal(practice.step, 'warp');
 
-  // 6. A ring far too far to fly to: its tag, its tag again, the jump, and through it.
+  // 7. A ring far too far to fly to: its tag, its tag again, the jump, and through it.
   const farFrom = practice.last;
   assert.ok(Math.hypot(...sub(practice.ring, farFrom)) > FAR_KM * 50);
   assert.match(practiceGoal(practice).text, /아주 먼 고리/);
@@ -101,7 +116,7 @@ test('the seven lessons come in order, each with a line and the control it teach
   assert.equal(practice.left, FREE_RINGS);
   assert.match(practiceGoal(practice).text, new RegExp(`${FREE_RINGS}개`));
 
-  // 7. Three rings one after another, then it is over.
+  // 8. Three rings one after another, then it is over.
   for (let n = FREE_RINGS; n > 1; n--) {
     practice = updatePractice(practice, pose(practice.ring));
     assert.equal(practice.step, 'free');

@@ -3,7 +3,7 @@ import {
 } from './core/bodies.js';
 import { C, speedLimit } from './core/flight.js';
 import {
-  createState, step, stopNow, totalSpeed, carryAlong, boostLift, velocity, TURN_RATE, START_YAW, keepRange, slideCap,
+  createState, step, stopNow, totalSpeed, carryAlong, boostLift, velocity, TURN_RATE, ROLL_RATE, START_YAW, keepRange, slideCap,
 } from './core/game.js';
 import {
   rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, right, swingToward, turnToward,
@@ -38,7 +38,7 @@ import {
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
 import { createGuideView } from './ui/guide.js';
-import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, RING_KM, JUMP_TO_KM } from './core/practice.js';
+import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, RING_KM, JUMP_TO_KM, ROLL_START } from './core/practice.js';
 import { createPracticeView } from './ui/practice.js';
 import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
@@ -224,6 +224,8 @@ let paused = false;
 // Flight practice (core/practice.js): while it runs, `state` is her flight in the empty
 // place and this holds the lesson and the flight she left ({ run, back, first }).
 let practice = null;
+// Which way a turn of two fingers rolls her, so that the picture goes round with them.
+const TWIST_ROLL = 1;
 // The target she is coming round to face (facePicked), or null.
 let faceTurn = null;
 let selectedId = START_NEAR ? START_NEAR.id : resume?.selectedId && BODIES.some((b) => b.id === resume.selectedId) ? resume.selectedId : resume ? 'earth' : startSpot.target ?? 'earth';
@@ -492,6 +494,19 @@ async function init() {
     // A short touch on a constellation, a galaxy or a cluster: it tells its lines.
     onTap(x, y) {
       if (!photo.active() && !paused && !practice) hud.touchSky(x, y);
+    },
+    // Two fingers turned on the view roll her (ui/input.js): the picture goes round with
+    // the fingers. As a roll by the keys does, it lets go of a target only faced.
+    onTwist(turned) {
+      if (paused || photo.active()) return;
+      state = { ...state, orientation: rotateLocal(state.orientation, 0, 0, (rear ? -1 : 1) * TWIST_ROLL * turned) };
+      aimedId = null;
+      faceTurn = null;
+      if (locked && !rear) lockAim = aimNow();
+      if (practice) {
+        practice.turning = false;
+        practice.twisted += Math.abs(turned);
+      }
     },
     // Any press on the view puts away what the last touch was telling.
     onPress: () => hud.pressSky(),
@@ -2035,7 +2050,7 @@ ${STORY_MORE[target.id]}` : told };
   // Flight practice (core/practice.js; the user, 2026-10-10: "처음으로 게임하는 사람들이
   // 비행이 어렵데, 비행을 도와줄 수 있는 훈련하는 화면을 만들고, 처음 시작할 때에 띄워줘
   // (물론 스킵 버튼도 있어야)"). An empty place far above the Sun with nothing but the
-  // stars, one glowing ring to go to and the keys that fly her: seven short lessons. It is
+  // stars, one glowing ring to go to and the keys that fly her: eight short lessons. It is
   // flown by the game's own rules of flight (core/game.js step) with no bodies and the
   // ring as a slow point, so what the hand learns there is what the game asks. While it
   // runs the game's own frame does not (the planets, the clock and her journey wait),
@@ -2071,7 +2086,7 @@ ${STORY_MORE[target.id]}` : told };
     input.clear();
     const back = state;
     state = createState(PRACTICE_AT, lookAtDirection([0, 0, 1]));
-    practice = { run: createPractice(poseNow()), back, first };
+    practice = { run: createPractice(poseNow()), back, first, twisted: 0, tip: 0 };
     setPaused(false);
     document.body.classList.add('practicing');
     previous = null;
@@ -2151,9 +2166,19 @@ ${STORY_MORE[target.id]}` : told };
       const cosine = toRing.reduce((sum, n, i) => sum + n * ahead[i], 0) / Math.hypot(...toRing);
       if (cosine > Math.cos(Math.PI / 180)) practice.turning = false;
     }
-    const pose = { ...poseNow(), speed: totalSpeed(state), sliding: intent.strafe !== 0 || intent.rise !== 0 };
+    // Tipped over as the rolling lesson begins, over a moment, for her to right herself.
+    if (practice.tip > 0 && dt > 0) {
+      const part = Math.min(practice.tip, dt * 1.8);
+      practice.tip -= part;
+      state = { ...state, orientation: rotateLocal(state.orientation, 0, 0, part) };
+    }
+    // (How far she rolled herself this frame: by two fingers, or by the Q and E keys.)
+    const pose = { ...poseNow(), speed: totalSpeed(state), sliding: intent.strafe !== 0 || intent.rise !== 0, twist: practice.tip > 0 ? 0 : practice.twisted + Math.abs(intent.roll) * ROLL_RATE * dt };
+    practice.twisted = 0;
     if (dt > 0) {
+      const before = practice.run.step;
       practice.run = updatePractice(practice.run, pose);
+      if (practice.run.step === 'roll' && before !== 'roll') practice.tip = ROLL_START;
       if (practice.run.events.length) {
         sound.cue('discovered');
         cheerUntil = performance.now() + 1500;

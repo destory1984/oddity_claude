@@ -9,11 +9,13 @@ const TAP_PIXELS = 8;
 // The keys that fly or turn her: pressing one while paused takes the game off pause (onMove).
 const MOVE_KEYS = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
-export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onGaze, onJournal, onMute, onMusic = () => {}, onRear = () => {}, onMove = () => {}, onTap = () => {}, onPress = () => {}, onEscape, onWheel, isBlocked }) {
+export function createInput({ canvas, onDrag, onTwist = () => {}, onBrake, onTogglePhoto, onGaze, onJournal, onMute, onMusic = () => {}, onRear = () => {}, onMove = () => {}, onTap = () => {}, onPress = () => {}, onEscape, onWheel, isBlocked }) {
   const held = new Set();
   let flyingButton = false;
   let reversingButton = false;
   let drag = null;
+  // The angle of the line between two fingers on the view, while two are down.
+  let twist = null;
   let throttle = 1;
 
   function clear() {
@@ -21,6 +23,7 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onGaze, on
     flyingButton = false;
     reversingButton = false;
     drag = null;
+    twist = null;
     for (const id of Object.keys(slide)) slide[id] = false;
   }
 
@@ -89,23 +92,55 @@ export function createInput({ canvas, onDrag, onBrake, onTogglePhoto, onGaze, on
     if (e.target.closest?.('#hud button')) canvas.focus({ preventScroll: true });
   });
 
+  // Two fingers on the view, turned about each other, roll her as the Q and E keys do
+  // (the user, 2026-10-10, wanting those keys on a phone with no room left for buttons:
+  // "3번으로 해보자"): the picture turns with the fingers. While two are down nothing is
+  // dragged, and a finger left on the view after the other lifts drags nothing until it
+  // is put down again.
+  const fingers = new Map();
+  const fingerAngle = () => {
+    const [a, b] = [...fingers.values()];
+    return Math.atan2(b.y - a.y, b.x - a.x);
+  };
   canvas.addEventListener('pointerdown', (e) => {
     canvas.focus();
     onPress();
-    canvas.setPointerCapture(e.pointerId);
+    try { canvas.setPointerCapture(e.pointerId); } catch { /* a pointer the browser does not know: no capture */ }
+    fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (fingers.size === 2) {
+      drag = null;
+      twist = fingerAngle();
+      return;
+    }
+    if (fingers.size > 2) return;
     drag = { id: e.pointerId, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, at: performance.now(), far: e.button !== 0 };
   });
   canvas.addEventListener('pointerup', (e) => {
     if (drag?.id === e.pointerId && !drag.far && performance.now() - drag.at <= TAP_MS) onTap(e.clientX, e.clientY);
   });
   canvas.addEventListener('pointermove', (e) => {
+    if (fingers.has(e.pointerId)) fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (twist !== null && fingers.size === 2) {
+      const now = fingerAngle();
+      // (The short way round, when the angle passes from one half turn to the other.)
+      const turned = Math.atan2(Math.sin(now - twist), Math.cos(now - twist));
+      twist = now;
+      if (turned !== 0) onTwist(turned);
+      return;
+    }
     if (drag?.id !== e.pointerId) return;
     if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > TAP_PIXELS) drag.far = true;
     onDrag((e.clientX - drag.x) * DRAG_RATE, (e.clientY - drag.y) * DRAG_RATE);
     drag.x = e.clientX;
     drag.y = e.clientY;
   });
-  for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) canvas.addEventListener(ev, () => { drag = null; });
+  for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+    canvas.addEventListener(ev, (e) => {
+      drag = null;
+      fingers.delete(e.pointerId);
+      twist = null;
+    });
+  }
   canvas.addEventListener('wheel', (e) => { e.preventDefault(); onWheel(e.deltaY); }, { passive: false });
 
   return {

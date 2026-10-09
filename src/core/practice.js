@@ -28,7 +28,13 @@ const NEAR_KM = RING_KM * 2.5;
 // Counted as flying, as stopped (km/s), and as having slid (km).
 const FLYING = 2000;
 const STOPPED = 1;
-const SLID_KM = 12000;
+// (Only to tell a slide from none: the ring begins 12 degrees off and the view does not
+// turn in that lesson, so nothing but a slide brings it before her. It was 12,000 km,
+// counted only while a key was held: short presses let her coast through the middle
+// uncounted, the ring went over to her other side and the lit arrow changed sides, again
+// and again. The user, 2026-10-10: "4번이 너무 애매한데? 조금만 눌러도 오른쪽 왼쪽
+// 깜박이가 왔다갔다 해".)
+const SLID_KM = 3000;
 // The jump (the user, 2026-10-10: "워프 연습 추가"): a ring far too far to fly to in a
 // moment, reached as a far body is in the game: its name tag turns her to it, and pressed
 // again while she looks at it, jumps her to this far before it (main.js makes the jump).
@@ -61,8 +67,10 @@ const RING_AT = {
   // (Flying goes to the ring she has just found.)
   fly: null,
   stop: [1.3, 0, 0],
-  // A little to the right, in view: a slide brings it before her.
-  slide: [0.9, 0.2, 0.06],
+  // A little to the right, in view: a slide brings it before her. (Hardly above her: the
+  // arrows lit are left and right only, and at 0.06 its height alone took 3.8 of the 5
+  // degrees that count as before her.)
+  slide: [0.9, 0.2, 0.02],
   // Before her and a little up, its horn in plain view.
   roll: [1, 0, 0.16],
   // Behind her and to one side.

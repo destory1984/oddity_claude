@@ -2241,8 +2241,9 @@ ${STORY_MORE[target.id]}` : told };
       practice.tip -= part;
       state = { ...state, orientation: rotateLocal(state.orientation, 0, 0, part) };
     }
-    // (How far she rolled herself this frame: by two fingers, or by the Q and E keys.)
-    const pose = { ...poseNow(), speed: totalSpeed(state), sliding: intent.strafe !== 0 || intent.rise !== 0, twist: practice.tip > 0 ? 0 : practice.twisted + Math.abs(intent.roll) * ROLL_RATE * dt };
+    // (Sliding: a slide key is held, or she coasts sideways from one let go of. How far
+    // she rolled herself this frame: by two fingers, or by the Q and E keys.)
+    const pose = { ...poseNow(), speed: totalSpeed(state), sliding: intent.strafe !== 0 || intent.rise !== 0 || (state.sideSpeed ?? 0) > 0.01 || (state.riseSpeed ?? 0) > 0.01, twist: practice.tip > 0 ? 0 : practice.twisted + Math.abs(intent.roll) * ROLL_RATE * dt };
     practice.twisted = 0;
     if (dt > 0) {
       const before = practice.run.step;

@@ -246,3 +246,14 @@ test('the practice holds the speed down however far the ring is', () => {
   const near = step({ ...state, position: [0, 0, FAR_KM * 55 - RING_KM * 2] }, { drive: 1 }, 1 / 60, [], [ring], TOP_SPEED).state;
   assert.ok(totalSpeed(near) <= RING_KM + 1);
 });
+
+test('a short slide that brings the ring before her is enough', () => {
+  let practice = { ...createPractice(pose([0, 0, 0])), step: 'slide', ring: [FAR_KM * 0.2, FAR_KM * 0.02, FAR_KM * 0.9] };
+  // Coasting sideways after a short press: part of the way, not yet before her.
+  practice = updatePractice(practice, pose([FAR_KM * 0.05, 0, 0], [0, 0, 1], { sliding: true }));
+  assert.equal(practice.lined, false);
+  // Just inside the five degrees, well before the ring is in the very middle.
+  practice = updatePractice(practice, pose([FAR_KM * 0.13, 0, 0], [0, 0, 1], { sliding: true }));
+  assert.equal(practice.lined, true);
+  assert.deepEqual(practice.events, ['part']);
+});

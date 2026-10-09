@@ -5508,6 +5508,43 @@ dialog .checkRow {
   margin-top:10px;
 }
 
+/* The offer: the whole sheet is pressed to begin, so it shows a hand; "연습하기" stands
+   out in gold as the practice's key at the top does, and "건너뛰기" is small and quiet
+   under it (the user, 2026-10-10: "건너뛰기 버튼은 작게", "연습하기 버튼은 강조"). */
+#practiceOffer,
+#practiceOffer::backdrop {
+  cursor:pointer;
+}
+#practiceOffer .journalActions {
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+}
+#practiceGo {
+  margin-top:0;
+  padding:12px 24px;
+  font-size:17px;
+  font-weight:700;
+  color:#ffe9bd;
+  border-color:#ffd98a;
+  background-color:#3a2f1ccc;
+  animation:practiceGlow 1.8s ease-in-out infinite;
+}
+#practicePass {
+  width:auto;
+  margin-top:0;
+  padding:4px 10px;
+  font-size:12px;
+  color:#aab6d8;
+  border-color:transparent;
+  background:none;
+  box-shadow:none;
+  text-decoration:underline;
+}
+@media (prefers-reduced-motion: reduce) {
+  #practiceGo { animation:none; box-shadow:0 0 0 1px #ffd98a, 0 0 10px 3px #ffd98a88; }
+}
+
 /* (The sheets' headings take the focus as they open, not a button: a flight key still
    held when the practice ends pressed "그대로 두기" at once.) */
 #practiceOffer h1:focus,

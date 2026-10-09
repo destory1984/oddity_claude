@@ -19,6 +19,8 @@ const TEACH = {
 // the goal line, ui/guide.js): the ring's name tag, the key being taught lit, and its
 // two sheets (the offer to a newcomer, the end).
 // onTag: the tag was pressed (she turns to the ring). onOffer(yes), onDone(hide).
+const OFFER_WAIT_MS = 500;
+
 export function createPracticeView({ onTag, onOffer, onDone }) {
   $('practiceTag').addEventListener('click', () => onTag());
   let answered = false;
@@ -27,7 +29,15 @@ export function createPracticeView({ onTag, onOffer, onDone }) {
     $(dialog).close();
     fn(value);
   };
-  $('practiceGo').addEventListener('click', () => answer('practiceOffer', onOffer, true));
+  // The offer: a press anywhere on it (or beside it) begins the practice; only the small
+  // key to skip does not (the user, 2026-10-10: "사용자가 클릭하면 비행 연습 화면으로
+  // 넘어가게 해"). Not in its first moment: a finger already tapping the game as the
+  // sheet came up would begin it unread.
+  let offeredAt = 0;
+  $('practiceOffer').addEventListener('click', (event) => {
+    if (answered || event.target.closest('#practicePass') || performance.now() - offeredAt < OFFER_WAIT_MS) return;
+    answer('practiceOffer', onOffer, true);
+  });
   $('practicePass').addEventListener('click', () => answer('practiceOffer', onOffer, false));
   $('practiceKeep').addEventListener('click', () => answer('practiceDone', onDone, false));
   $('practiceHide').addEventListener('click', () => answer('practiceDone', onDone, true));
@@ -61,6 +71,7 @@ export function createPracticeView({ onTag, onOffer, onDone }) {
     },
     offer() {
       answered = false;
+      offeredAt = performance.now();
       $('practiceOffer').showModal();
     },
     // ask: whether to ask about putting the button away (it is on the screen now).

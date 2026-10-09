@@ -15,6 +15,7 @@ export function createGuideView({ onSkip, onJump = () => {}, onBack = () => {} }
     // button says, when it is neither of its two usual words. jump: a tour's stop. quit:
     // the button gives it up (a tour, a stunt) and does not skip a guide. lead: words
     // before the text that a phone leaves out (a tour's name before its next place).
+    // stacked: the count's words stand one over the other (the practice's second part).
     show(goal) {
       const text = goal ? `${goal.count} ${goal.lead ?? ''}${goal.text}${goal.back ? ' <' : ''}` : null;
       if (text === shown) return;
@@ -22,6 +23,7 @@ export function createGuideView({ onSkip, onJump = () => {}, onBack = () => {} }
       $('guide').hidden = !goal;
       if (!goal) return;
       $('guideCount').textContent = goal.count;
+      $('guideCount').classList.toggle('stacked', Boolean(goal.stacked));
       $('guideText').textContent = goal.text;
       // (A new line comes in softly where the page asks it to: style.css `.fresh`.)
       $('guideText').classList.remove('fresh');

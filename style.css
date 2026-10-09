@@ -5650,3 +5650,12 @@ body.practicing #guideText.fresh {
   body.practicePass #guide,
   body.practicing #guideText.fresh { animation:none; }
 }
+
+/* The count of the flight practice's second part ("2단계 1/5"): one word over the other,
+   to leave the line its room beside the map. */
+#guideCount.stacked {
+  width:min-content;
+  word-break:keep-all;
+  text-align:center;
+  line-height:1.25;
+}

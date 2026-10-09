@@ -308,21 +308,22 @@ export function takeResume() {
 }
 
 // The flight practice (core/practice.js): asked: a newcomer has been offered it once;
-// button: its button is kept at the top of the screen (the player may put it away).
+// button: its button is kept at the top of the screen (put away when the whole practice
+// is done, or by the player); moon: its second part, the steps to the Moon, is under way.
 const PRACTICE_KEY = 'oddity.practice.v1';
 
 export function loadPractice() {
   try {
     const kept = JSON.parse(localStorage.getItem(PRACTICE_KEY));
-    return { asked: Boolean(kept?.asked), button: kept?.button !== false };
+    return { asked: Boolean(kept?.asked), button: kept?.button !== false, moon: Boolean(kept?.moon) };
   } catch {
-    return { asked: false, button: true };
+    return { asked: false, button: true, moon: false };
   }
 }
 
 export function savePractice(value) {
   try {
-    localStorage.setItem(PRACTICE_KEY, JSON.stringify({ asked: Boolean(value.asked), button: value.button !== false }));
+    localStorage.setItem(PRACTICE_KEY, JSON.stringify({ asked: Boolean(value.asked), button: value.button !== false, moon: Boolean(value.moon) }));
   } catch {
     // It is then offered again at the next opening.
   }

@@ -273,8 +273,15 @@ let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT, NOTES, TOURS);
 // Small copies of saved photos, shown in the journal (core/album.js).
 let album = loadAlbum(MISSIONS);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
-// The first-visit guide assumes the opening view above Earth.
-let guide = createGuide(progress, loadGuideDone() || Boolean(START_NEAR));
+// The five steps to the Moon and a picture of Earth from it (core/guide.js). They were
+// put before every newcomer until 2026-10-10; now they are the second part of the flight
+// practice (the user: "이것도 비행연습에 넣어", "비행연습 2단계..라고 붙여서") and begin
+// when its first part is done (endPractice). Under way when the game was last shut, they
+// go on.
+let guide = createGuide(progress, !loadPractice().moon || Boolean(START_NEAR));
+// A newcomer: nobody has been welcomed on this device yet (they are offered the flight
+// practice once; the guide's old mark in the storage is the mark of having been).
+let newcomer = !(loadGuideDone() || Boolean(START_NEAR) || progress.landed.includes('moon'));
 let simTime = resume?.simTime ?? 0;
 // The note on entering the asteroid belt shows once per visit to the game.
 // Lights and plumes already told about (core/glows.js), with 'belt', 'meteor' and
@@ -1422,7 +1429,7 @@ ${STORY_MORE[target.id]}` : told };
   // A stunt flight: taken up from the journal, given up from the goal line.
   function beginStunt(id) {
     if (guide.step !== null) {
-      toast.show(t('첫 안내를 마치거나 건너뛴 뒤에 할 수 있습니다.'));
+      toast.show(t('비행 연습을 마치거나 그만둔 뒤에 할 수 있습니다.'));
       return;
     }
     if (currentStop(progress)) {
@@ -1451,11 +1458,8 @@ ${STORY_MORE[target.id]}` : told };
   const stuntGoal = () => ({ count: t('묘기'), text: stuntStatus(stunt), quit: true });
   function beginTour(id) {
     stunt = null;
-    // A tour takes over from the first-visit guide.
-    if (guide.step !== null) {
-      guide = skipGuide(guide);
-      saveGuideDone();
-    }
+    // A tour takes over from the practice's steps to the Moon.
+    if (guide.step !== null) leaveMoonTrip();
     progress = startTour(progress, id);
     saveProgress(progress);
     aimAtStop();
@@ -2040,14 +2044,13 @@ ${STORY_MORE[target.id]}` : told };
     onSkip() {
       // While practising it leaves the practice.
       if (practice) return endPractice(false);
-      // The same button ends a stunt or a tour once the first-visit guide is over.
+      // The same button ends a stunt or a tour when the practice's second part is not on.
       if (guide.step === null) {
         if (stunt) quitStunt();
         else endTour();
         return;
       }
-      guide = skipGuide(guide);
-      saveGuideDone();
+      leaveMoonTrip();
       guideView.show(null);
       toast.show(t`${journalHow}으로 탐험 목표를 확인하세요.`);
     },
@@ -2067,8 +2070,15 @@ ${STORY_MORE[target.id]}` : told };
       sound.cue('click');
     },
   });
-  // What the goal line points at: the guide's Moon, or a tour's next stop.
-  const goalNow = () => (guide.step !== null ? guideGoal(guide, touch) : stunt ? stuntGoal() : tourGoal());
+  // What the goal line points at: the Moon of the practice's second part, or a tour's
+  // next stop.
+  const moonGoal = () => {
+    const goal = guideGoal(guide, touch);
+    // (Its count stands in two rows and its key is the short word: beside the map a
+    // phone has 254px for the line, and with more the last word of a step was cut off.)
+    return { ...goal, count: t`2단계 ${goal.count}`, stacked: true, quit: true };
+  };
+  const goalNow = () => (guide.step !== null ? moonGoal() : stunt ? stuntGoal() : tourGoal());
   guideView.show(goalNow());
   if (guide.step === null) aimAtStop();
 
@@ -2088,10 +2098,24 @@ ${STORY_MORE[target.id]}` : told };
   // left, per second: nine tenths of it in half a second).
   const PRACTICE_TURN_RATE = 4.5;
   let practiceKept = loadPractice();
-  // Someone already past the first guide is no newcomer: never offered.
-  if (guide.step === null && !practiceKept.asked) practiceKept = savePractice({ ...practiceKept, asked: true });
+  // Someone who is no newcomer is never offered it.
+  if (!newcomer && !practiceKept.asked) practiceKept = savePractice({ ...practiceKept, asked: true });
   // A newcomer who has not been offered it yet.
-  const practiceDue = () => !practiceKept.asked && guide.step !== null;
+  const practiceDue = () => !practiceKept.asked && newcomer;
+  // The second part (the steps to the Moon) given up, or taken over by a tour.
+  function leaveMoonTrip() {
+    guide = skipGuide(guide);
+    practiceKept = savePractice({ ...practiceKept, moon: false });
+  }
+  // The whole practice done: its key at the top is put away (the user, 2026-10-10: "이
+  // 버튼은 비행연습을 다 끝낸 사람들에게는 안 보이게 하고, 그 이후에는 설정 -> 비행연습
+  // 버튼으로 들어갈 수 있게"), and the sheet says so once nothing else is open.
+  let practiceDoneDue = false;
+  function practiceAllDone() {
+    practiceKept = savePractice({ ...practiceKept, moon: false, button: false });
+    showPracticeButton();
+    practiceDoneDue = true;
+  }
   // What she says to herself before the offer, each line up this long (s), and when
   // she began (ms).
   const PRACTICE_TALK = [t('수첩을 채우려면 달까지, 더 멀리까지도 가야 해.'), t('혼자 나는 건 처음인데… 연습부터 해 볼까?')];
@@ -2128,10 +2152,19 @@ ${STORY_MORE[target.id]}` : told };
     world.setFov((feelFov * Math.PI) / 180);
     guideView.show(goalNow());
     previous = null;
-    if (finished) {
-      sound.cue('mission');
-      practiceView.done(practiceKept.button);
+    if (!finished) return;
+    sound.cue('mission');
+    // The second part is on already (the first was flown again meanwhile).
+    if (guide.step !== null) return;
+    // The second part, for whoever has not stood on the Moon yet; else that is all.
+    guide = createGuide(progress, false);
+    if (guide.step === null) {
+      practiceAllDone();
+      return;
     }
+    practiceKept = savePractice({ ...practiceKept, moon: true });
+    toast.show(t('비행 연습 2단계: 이번에는 진짜 우주에서 달까지 가 봅니다.'));
+    guideView.show(goalNow());
   }
   const practiceView = createPracticeView({
     // Her ring's name tag turns her to it, as "바라보기" does to a body (square on: in
@@ -2159,6 +2192,7 @@ ${STORY_MORE[target.id]}` : told };
     },
     onOffer(yes) {
       if (yes) startPractice(true);
+      else toast.show(t`${journalHow}으로 탐험 목표를 확인하세요.`);
     },
     onDone(hide) {
       if (!hide) return;
@@ -2276,7 +2310,7 @@ ${STORY_MORE[target.id]}` : told };
     const passed = !wrong && performance.now() - (practice.passAt ?? -Infinity) < PASS_MS;
     document.body.classList.toggle('practiceWrong', wrong);
     document.body.classList.toggle('practicePass', passed);
-    guideView.show({ ...goal, ...(wrong ? { text: t('방향은 돌리지 않아요. 화살표 버튼으로 옆으로 움직이세요') } : passed ? { count: '✓', text: t('잘했어요!') } : {}), leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
+    guideView.show({ ...goal, count: t`1단계 ${goal.count}`, ...(wrong ? { text: t('방향은 돌리지 않아요. 화살표 버튼으로 옆으로 움직이세요') } : passed ? { count: '✓', text: t('잘했어요!') } : {}), leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
     const away = Math.hypot(...practice.run.ring.map((n, i) => n - state.position[i]));
     // The speed box as in the game (the user, 2026-10-10: "화면 아래에 본게임과 같은
     // 속도계 붙여줘"): how fast she goes, and the limit the ring sets as she nears it.
@@ -2675,13 +2709,15 @@ ${STORY_MORE[target.id]}` : told };
     // been read and put away, before the steps to the Moon are taken up.
     // She talks herself into it first (the user, 2026-10-10: "수첩 -> 비행 연습이 너무
     // 갑작스럽다. 중간에 왜 비행연습을 해야하는지 혼잣말로 얘기해"): two lines over her
-    // head, then the sheet. The steps to the Moon are not shown until it is answered.
+    // head, then the sheet. Nothing else is put before them until it is answered.
     if (practiceDue() && settled && !note && (progress.notes ?? []).length > 0) {
       if (practiceTalkAt === null) {
         practiceTalkAt = performance.now();
         for (const line of PRACTICE_TALK) say.show(line, PRACTICE_LINE_S + 1, PRACTICE_LINE_S);
       } else if (performance.now() - practiceTalkAt >= (PRACTICE_TALK.length * PRACTICE_LINE_S + 1) * 1000) {
         practiceKept = savePractice({ ...practiceKept, asked: true });
+        newcomer = false;
+        saveGuideDone();
         practiceView.offer();
       }
     }
@@ -2694,10 +2730,15 @@ ${STORY_MORE[target.id]}` : told };
       });
       if (guide.finished) {
         saveGuideDone();
+        practiceAllDone();
         toast.show(t`첫 탐험을 마쳤습니다. ${journalHow}을 열고 코스 갈래에서 "${tourById('firstSteps').name}"을 골라 보세요.`);
       }
     }
     guideView.show(practiceDue() ? null : goalNow());
+    if (practiceDoneDue && settled && !noteCard.isOpen() && !photo.active()) {
+      practiceDoneDue = false;
+      practiceView.done(false);
+    }
 
     const turn = dt > 0
       // Sliding sideways leans the character like a gentle turn; sliding up or down (the

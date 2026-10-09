@@ -1,6 +1,6 @@
 import { t } from './i18n.js';
-// The newcomer's first goal: five steps from the opening view to an Earthrise photo
-// taken from the Moon. Pure state; ui/guide.js draws it.
+// The second part of the flight practice (until 2026-10-10 every newcomer's first goal):
+// five steps from where she is to an Earthrise photo taken from the Moon. Pure state; ui/guide.js draws it.
 
 export const GUIDE_STEPS = ['look', 'face', 'fly', 'land', 'photo'];
 

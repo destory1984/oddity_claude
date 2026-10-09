@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-10', text: t('비행 연습이 두 단계가 되었습니다. 2단계는 달에 가서 지구를 찍습니다(전의 첫 안내).') },
   { day: '2026-10-10', text: t('두 손가락으로 화면을 돌리면 몸이 기울어집니다. 비행 연습에서 익힐 수 있습니다.') },
   { day: '2026-10-10', text: t('비행 연습이 생겼습니다. 처음 시작할 때 권하고, 설정에서도 할 수 있습니다.') },
   { day: '2026-10-09', text: t('우주멍 단추를 한 번 더 누르면 소라도 사라지고 풍경만 남습니다.') },

@@ -3100,13 +3100,16 @@ button,
   font-size:0;
 }
 
+/* (27px, as are the rear and gaze keys' and with the slide keys' 18px: at 24 and 14 the
+   bottom pad looked lighter than the top rows; the user, 2026-10-09: "아래쪽 아이콘이 살짝
+   작지?", and of three sizes shown: "2".) */
 #reverseButton::before,
 #flyButton::before,
 #brake::before {
   content:"";
   flex:none;
-  width:24px;
-  height:24px;
+  width:27px;
+  height:27px;
   background:center / contain no-repeat;
 }
 
@@ -3143,8 +3146,8 @@ button,
 #rearButton::before {
   content:"";
   flex:none;
-  width:24px;
-  height:24px;
+  width:27px;
+  height:27px;
   background:url("/assets/ui/icon-rear.svg") center / contain no-repeat;
 }
 
@@ -3308,8 +3311,8 @@ body.rear.touch #reticle span {
 
 #slidePad button::before {
   content:"";
-  width:14px;
-  height:14px;
+  width:18px;
+  height:18px;
   background:currentColor;
   clip-path:polygon(50% 12%, 96% 88%, 4% 88%);
 }
@@ -4616,8 +4619,8 @@ html[lang="zh-Hans"] * {
 #gazeButton::before {
   content:"";
   flex:none;
-  width:24px;
-  height:24px;
+  width:27px;
+  height:27px;
   background:url("/assets/ui/icon-gaze.svg") center / contain no-repeat;
 }
 

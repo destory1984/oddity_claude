@@ -4221,6 +4221,17 @@ footer .throttle .rangeLabels {
   border:1px solid #ffffff2e;
 }
 
+/* The photograph is a link to the same page as the line under it (the user, 2026-10-09:
+   "사진을 눌러도 위키로 보내줘"): the link is the size of the picture, no wider. */
+#aboutPhoto {
+  display:block;
+  width:88px;
+  margin:0 auto 8px;
+}
+#aboutPhoto img {
+  margin:0;
+}
+
 /* The line is a link to his page on Wikipedia in the player's language (ui/settings.js). */
 #aboutMemory {
   display:inline-block;

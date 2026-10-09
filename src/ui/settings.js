@@ -89,9 +89,10 @@ export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, 
   // The policy page holds the four languages one under another: the link opens it at hers.
   if (language() !== 'ko') $('privacyLink').href = `./privacy.html#${language()}`;
   // Carl Sagan's page on Wikipedia in the language in use (the user, 2026-10-07).
-  $('aboutMemory').href = SAGAN_PAGES[language()] ?? SAGAN_PAGES.en;
+  // (His photograph over the line goes there too.)
+  for (const id of ['aboutMemory', 'aboutPhoto']) $(id).href = SAGAN_PAGES[language()] ?? SAGAN_PAGES.en;
   // A link out may open in this same window: the place is kept for the way back.
-  for (const id of ['aboutMemory', 'privacyLink']) $(id).addEventListener('click', () => onLeave());
+  for (const id of ['aboutMemory', 'aboutPhoto', 'privacyLink']) $(id).addEventListener('click', () => onLeave());
   dialog.addEventListener('close', () => onClose());
 
   if (reopen) {

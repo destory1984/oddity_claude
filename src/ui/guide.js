@@ -23,6 +23,10 @@ export function createGuideView({ onSkip, onJump = () => {}, onBack = () => {} }
       if (!goal) return;
       $('guideCount').textContent = goal.count;
       $('guideText').textContent = goal.text;
+      // (A new line comes in softly where the page asks it to: style.css `.fresh`.)
+      $('guideText').classList.remove('fresh');
+      void $('guideText').offsetWidth;
+      $('guideText').classList.add('fresh');
       if (goal.lead) {
         const lead = document.createElement('span');
         lead.className = 'lead';

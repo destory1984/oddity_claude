@@ -27,21 +27,44 @@ export function createPracticeRing(scene) {
   card.material = material;
   card.isPickable = false;
   card.setEnabled(false);
-
-  // ring: { position (km), radiusKm } or null.
-  function update(ring, travelerKm) {
-    card.setEnabled(Boolean(ring));
-    if (!ring) return;
-    const rel = ring.position.map((n, i) => (n - travelerKm[i]) / KM_PER_UNIT);
-    card.position.set(rel[0], rel[1], rel[2]);
-    // Facing along her line of sight to it, its top toward the place's up (seen from
-    // straight above or below, toward the place's forward).
+  // The ring just done, for a moment: it swells and thins away where it stood while the
+  // next one comes up (a card and a material of its own, to have its own strength).
+  const gone = material.clone('practiceRingGone');
+  gone.alphaMode = Constants.ALPHA_ADD;
+  gone.needAlphaBlending = () => true;
+  gone.disableDepthWrite = true;
+  gone.backFaceCulling = false;
+  const burst = CreatePlane('practiceRingGone', { size: 1 }, scene);
+  burst.material = gone;
+  burst.isPickable = false;
+  burst.setEnabled(false);
+  const place = (mesh, at, radiusKm, travelerKm, grown = 1) => {
+    const rel = at.map((n, i) => (n - travelerKm[i]) / KM_PER_UNIT);
+    mesh.position.set(rel[0], rel[1], rel[2]);
     const along = new Vector3(rel[0], rel[1], rel[2]).normalize();
     const top = Math.abs(along.y) > 0.999 ? new Vector3(0, 0, 1) : Vector3.Up();
-    card.rotationQuaternion = Quaternion.FromLookDirectionLH(along, top);
-    card.scaling.setAll((2 * ring.radiusKm) / RING_AT / KM_PER_UNIT);
-    material.setFloat('strength', 1);
-    material.setFloat('time', performance.now() / 1000);
+    mesh.rotationQuaternion = Quaternion.FromLookDirectionLH(along, top);
+    mesh.scaling.setAll(((2 * radiusKm) / RING_AT / KM_PER_UNIT) * grown);
+  };
+
+  // ring: { position (km), radiusKm, strength (0..1, 1 when left out), burst: { position,
+  // age (0..1) } or null } or null.
+  function update(ring, travelerKm) {
+    card.setEnabled(Boolean(ring));
+    burst.setEnabled(Boolean(ring?.burst));
+    if (!ring) return;
+    // Facing along her line of sight to it, its top toward the place's up (seen from
+    // straight above or below, toward the place's forward).
+    place(card, ring.position, ring.radiusKm, travelerKm);
+    const now = performance.now() / 1000;
+    material.setFloat('strength', ring.strength ?? 1);
+    material.setFloat('time', now);
+    if (ring.burst) {
+      const age = Math.max(0, Math.min(1, ring.burst.age));
+      place(burst, ring.burst.position, ring.radiusKm, travelerKm, 1 + 1.5 * age);
+      gone.setFloat('strength', (1 - age) * (1 - age));
+      gone.setFloat('time', now);
+    }
   }
 
   return { update };

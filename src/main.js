@@ -2059,6 +2059,8 @@ ${STORY_MORE[target.id]}` : told };
     onBack() {
       if (!practice || warp.busy()) return;
       practice.run = previousLesson(practice.run, poseNow());
+      practice.bornAt = performance.now();
+      practice.passAt = undefined;
       practice.turning = false;
       practice.wrongAt = undefined;
       practice.tip = practice.run.step === 'roll' ? ROLL_START : 0;
@@ -2109,7 +2111,7 @@ ${STORY_MORE[target.id]}` : told };
     input.clear();
     const back = state;
     state = createState(PRACTICE_AT, lookAtDirection([0, 0, 1]));
-    practice = { run: createPractice(poseNow()), back, first, twisted: 0, tip: 0 };
+    practice = { run: createPractice(poseNow()), back, first, twisted: 0, tip: 0, bornAt: performance.now() };
     setPaused(false);
     document.body.classList.add('practicing');
     previous = null;
@@ -2121,7 +2123,7 @@ ${STORY_MORE[target.id]}` : told };
     practice = null;
     input.clear();
     dragTurn = [0, 0];
-    document.body.classList.remove('practicing', 'practiceWrong');
+    document.body.classList.remove('practicing', 'practiceWrong', 'practicePass');
     practiceView.show(null);
     world.setFov((feelFov * Math.PI) / 180);
     guideView.show(goalNow());
@@ -2175,6 +2177,16 @@ ${STORY_MORE[target.id]}` : told };
     showPracticeButton();
   });
   showPracticeButton();
+  // How long the line says well done, how long the ring just done takes to go, and how
+  // the next comes up: nothing for a moment, then in over RING_IN_MS.
+  const PASS_MS = 1200;
+  const RING_GONE_MS = 650;
+  const RING_WAIT_MS = 200;
+  const RING_IN_MS = 600;
+  const ringShown = () => {
+    const part = Math.max(0, Math.min(1, (performance.now() - (practice.bornAt ?? -Infinity) - RING_WAIT_MS) / RING_IN_MS));
+    return part * part * (3 - 2 * part);
+  };
   // One frame of the practice, in place of the game's own.
   const practiceFrame = (elapsed) => {
     const dt = paused || elapsed > MAX_FRAME_GAP_S ? 0 : elapsed;
@@ -2200,7 +2212,17 @@ ${STORY_MORE[target.id]}` : told };
     practice.twisted = 0;
     if (dt > 0) {
       const before = practice.run.step;
+      const ringBefore = practice.run.ring;
       practice.run = updatePractice(practice.run, pose);
+      // From one lesson to the next, softly (the user, 2026-10-10: "스텝이 끝나고, 다음
+      // 스텝으로 넘어갈 떄에 뭔가 이펙트 추가. 부드럽게 전환"): the line says well done in
+      // gold for a moment, the ring just done swells and thins away where it stood, and
+      // the next comes up out of nothing.
+      if (practice.run.events.includes('step') && practice.run.step !== null) practice.passAt = performance.now();
+      if (practice.run.ring !== ringBefore) {
+        practice.burst = { position: ringBefore, at: performance.now() };
+        practice.bornAt = performance.now();
+      }
       if (practice.run.step === 'roll' && before !== 'roll') practice.tip = ROLL_START;
       if (practice.run.events.length) {
         sound.cue('discovered');
@@ -2224,7 +2246,14 @@ ${STORY_MORE[target.id]}` : told };
       photoOrientation: null,
       heroVisible: true,
       turn,
-      ring: goal ? { position: practice.run.ring, radiusKm: RING_KM } : null,
+      ring: goal ? {
+        position: practice.run.ring,
+        radiusKm: RING_KM,
+        strength: ringShown(),
+        burst: practice.burst && performance.now() - practice.burst.at < RING_GONE_MS
+          ? { position: practice.burst.position, age: (performance.now() - practice.burst.at) / RING_GONE_MS }
+          : null,
+      } : null,
       move: {
         drive: state.speed > 0.01 ? state.motionSign : 0,
         strafe: (state.sideSpeed ?? 0) > 0.01 ? state.sideSign : 0,
@@ -2237,8 +2266,10 @@ ${STORY_MORE[target.id]}` : told };
     // (Begun by a newcomer's offer its button skips it; begun by hand it gives it up. It
     // says what it leaves: the bare "그만두기" did not, and the user, 2026-10-10, asked.)
     const wrong = performance.now() - (practice.wrongAt ?? -Infinity) < WRONG_MS && practice.run.step === 'slide';
+    const passed = !wrong && performance.now() - (practice.passAt ?? -Infinity) < PASS_MS;
     document.body.classList.toggle('practiceWrong', wrong);
-    guideView.show({ ...goal, ...(wrong ? { text: t('방향은 돌리지 않아요. 화살표 버튼으로 옆으로 움직이세요') } : {}), leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
+    document.body.classList.toggle('practicePass', passed);
+    guideView.show({ ...goal, ...(wrong ? { text: t('방향은 돌리지 않아요. 화살표 버튼으로 옆으로 움직이세요') } : passed ? { count: '✓', text: t('잘했어요!') } : {}), leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
     const away = Math.hypot(...practice.run.ring.map((n, i) => n - state.position[i]));
     // The speed box as in the game (the user, 2026-10-10: "화면 아래에 본게임과 같은
     // 속도계 붙여줘"): how fast she goes, and the limit the ring sets as she nears it.

@@ -5570,3 +5570,31 @@ body.practiceWrong #guideCount {
   margin-right:-4px;
 }
 #guide #guideBack[hidden] { display:none; }
+
+/* From one lesson of the flight practice to the next: the line says well done in gold
+   with a small swell, and each new line comes up softly. */
+@keyframes passPop {
+  0% { transform:scale(.97); }
+  45% { transform:scale(1.03); }
+  100% { transform:scale(1); }
+}
+body.practicePass #guide {
+  border-color:#ffe9a8;
+  box-shadow:0 0 18px 2px #ffd98a88;
+  animation:passPop .45s ease-out 1;
+}
+body.practicePass #guideCount,
+body.practicePass #guideText {
+  color:#ffe9a8;
+}
+@keyframes lineIn {
+  from { opacity:0; transform:translateY(5px); }
+  to { opacity:1; transform:none; }
+}
+body.practicing #guideText.fresh {
+  animation:lineIn .4s ease-out 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.practicePass #guide,
+  body.practicing #guideText.fresh { animation:none; }
+}

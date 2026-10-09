@@ -175,14 +175,18 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
     // are, and off screen they keep an edge arrow, on a phone too.
     // moonIds: the moons of the planet she is near (nearbyMoons): they keep an arrow and
     // say how far they are, without the nearest one's mint line.
-    update({ view, local, nearestIds = [local.body.id], moonIds = [], selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [], knownIds = null, skyHidden = null }) {
-      $('altitudeLabel').textContent = local.label;
-      $('altitude').textContent = fmt(local.altitude);
+    // The speed box alone (the flight practice shows it and nothing else of the HUD).
+    speed({ speed, motionSign, limitLabel, C }) {
       const backward = speed > 0.01 && motionSign < 0;
       $('speed').innerHTML = `${backward ? t('후진 ') : ''}${fmt(speed)} <small>km/s</small>`;
       $('lightSpeed').textContent = `${backward ? '-' : ''}${(speed / C).toFixed(6)} c`;
-      $('throttleValue').textContent = `${Math.round(throttle * 100)}%`;
       $('speedLimit').textContent = t`현재 제한 ${limitLabel}`;
+    },
+    update({ view, local, nearestIds = [local.body.id], moonIds = [], selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [], knownIds = null, skyHidden = null }) {
+      $('altitudeLabel').textContent = local.label;
+      $('altitude').textContent = fmt(local.altitude);
+      this.speed({ speed, motionSign, limitLabel, C });
+      $('throttleValue').textContent = `${Math.round(throttle * 100)}%`;
       $('flightState').textContent = flightLabel;
       const compact = innerWidth <= COMPACT_WIDTH;
       lastCamera = view.camera;

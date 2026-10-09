@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, createPractice, updatePractice, practiceGoal, slideSide, tagSpot,
+  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt,
 } from '../src/core/practice.js';
 
 const sub = (a, b) => a.map((n, i) => n - b[i]);
@@ -33,6 +33,8 @@ test('the six lessons come in order, each with a line and the control it teaches
   assert.equal(practiceGoal(practice).teach, 'fly');
   // (The line names the key on the screen: the game is played on phones.)
   assert.match(practiceGoal(practice).text, /전진 버튼/);
+  // (Under way, it says what holding the key does.)
+  assert.match(practiceGoal(practice, false, true).text, /점점 빨라집니다/);
 
   // 2. Flying into the ring she found.
   const ring = practice.ring;
@@ -48,7 +50,10 @@ test('the six lessons come in order, each with a line and the control it teaches
   // 3. Standing still does not count as stopping: she must have flown first.
   practice = updatePractice(practice, { ...through, speed: 0 });
   assert.equal(practice.step, 'stop');
+  // (The key that blinks is the one to press now: forward, then stop.)
+  assert.equal(practiceGoal({ ...practice, flew: false }).teach, 'fly');
   practice = updatePractice(practice, { ...through, speed: 9000 });
+  assert.equal(practiceGoal(practice).teach, 'brake');
   practice = updatePractice(practice, { ...through, speed: 0 });
   assert.equal(practice.step, 'slide');
   assert.equal(practiceGoal(practice).teach, 'slide');
@@ -63,6 +68,11 @@ test('the six lessons come in order, each with a line and the control it teaches
   practice = updatePractice(practice, { ...through, position: beside, sliding: true });
   assert.equal(practice.step, 'find');
   assert.equal(practiceGoal(practice).tag, true);
+  // (The name tag blinks until she faces the ring, then the forward key.)
+  assert.equal(practiceGoal(practice).teach, 'tag');
+  assert.equal(practiceGoal(practice, true).teach, 'fly');
+  assert.equal(aimedAt(practice, { ...through, position: beside }), false);
+  assert.equal(aimedAt(practice, facing(practice, beside)), true);
 
   // 5. The ring behind her, reached.
   const at = { ...through, position: beside };

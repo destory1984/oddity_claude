@@ -9,7 +9,8 @@ export function createGuideView({ onSkip, onJump = () => {} }) {
   $('guideJump').addEventListener('click', onJump);
   let shown = null;
   return {
-    // goal: { count, text, jump, quit, lead } or null to hide. jump: a tour's stop. quit:
+    // goal: { count, text, jump, quit, lead, leave } or null to hide. leave: what the
+    // button says, when it is neither of its two usual words. jump: a tour's stop. quit:
     // the button gives it up (a tour, a stunt) and does not skip a guide. lead: words
     // before the text that a phone leaves out (a tour's name before its next place).
     show(goal) {
@@ -27,7 +28,7 @@ export function createGuideView({ onSkip, onJump = () => {} }) {
         $('guideText').prepend(lead);
       }
       $('guideJump').hidden = !goal.jump;
-      $('guideSkip').textContent = goal.jump || goal.quit ? t('그만두기') : t('건너뛰기');
+      $('guideSkip').textContent = goal.leave ?? (goal.jump || goal.quit ? t('그만두기') : t('건너뛰기'));
     },
   };
 }

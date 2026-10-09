@@ -131,23 +131,35 @@ export function updatePractice(practice, pose) {
 const TEXT = {
   // (Short: the line holds two rows of a phone's width, and a longer one was cut off.)
   look: () => t('화면을 드래그해 고리를 가운데로 가져오세요'),
-  fly: () => t('전진 버튼을 꾹 누르면 고리로 날아갑니다'),
+  // (Once she is under way the line tells what holding the key does. The user,
+  // 2026-10-10: "앞으로 버튼을 누르면 속도가 점점 빨라집니다.,라는 멘트도 추가".)
+  fly: (left, moving) => (moving ? t('전진 버튼을 누르고 있으면 속도가 점점 빨라집니다') : t('전진 버튼을 꾹 누르면 고리로 날아갑니다')),
   stop: () => t('날다가 정지 버튼으로 멈춰 보세요'),
   slide: () => t('화살표 버튼을 눌러 고리가 정면에 오게 하세요'),
   find: () => t('고리가 등 뒤에 있어요. 이름표를 누르고 날아가세요'),
   free: (left) => t`혼자서 해 보세요. 남은 고리 ${left}개`,
 };
 
-// What the line at the top says, and which control it is teaching.
-export function practiceGoal(practice) {
+// What the line at the top says, and which key is to be pressed now (it blinks).
+// aimed: she is looking at the ring. moving: she is under way.
+export function practiceGoal(practice, aimed = false, moving = false) {
   if (practice.step === null) return null;
   return {
     count: `${PRACTICE_STEPS.indexOf(practice.step) + 1}/${PRACTICE_STEPS.length}`,
-    text: TEXT[practice.step](practice.left),
-    teach: { look: null, fly: 'fly', stop: 'brake', slide: 'slide', find: 'tag', free: null }[practice.step],
+    text: TEXT[practice.step](practice.left, moving),
+    // Stopping: the forward key until she has flown, then the stop key. Finding: the
+    // name tag until she faces the ring, then the forward key.
+    teach: {
+      look: null, fly: 'fly', stop: practice.flew ? 'brake' : 'fly', slide: 'slide', find: aimed ? 'fly' : 'tag', free: null,
+    }[practice.step],
     // The ring's name tag is shown where the real game would show one.
     tag: practice.step === 'find' || practice.step === 'free',
   };
+}
+
+// Whether she is looking at the ring (as the first lesson asks).
+export function aimedAt(practice, pose) {
+  return angleBetween(pose.forward, sub(practice.ring, pose.position)) <= FACING;
 }
 
 // Which way the slide lesson's ring lies, for the key to light: 1 right, -1 left.

@@ -38,7 +38,7 @@ import {
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
 import { createGuideView } from './ui/guide.js';
-import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, RING_KM } from './core/practice.js';
+import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, RING_KM } from './core/practice.js';
 import { createPracticeView } from './ui/practice.js';
 import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
@@ -2124,7 +2124,7 @@ ${STORY_MORE[target.id]}` : told };
       : [0, 0];
     dragTurn = [0, 0];
     world.setFov((BASE_FOV_DEG * Math.PI) / 180);
-    const goal = practiceGoal(practice.run);
+    const goal = practiceGoal(practice.run, aimedAt(practice.run, pose), pose.speed > 100);
     const view = world.update({
       bodies,
       craft,
@@ -2145,9 +2145,15 @@ ${STORY_MORE[target.id]}` : told };
     });
     world.render();
     if (!goal) return endPractice(true);
-    // (Begun by a newcomer's offer its button skips it; begun by hand it gives it up.)
-    guideView.show({ ...goal, quit: !practice.first });
+    // (Begun by a newcomer's offer its button skips it; begun by hand it gives it up. It
+    // says what it leaves: the bare "그만두기" did not, and the user, 2026-10-10, asked.)
+    guideView.show({ ...goal, leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
     const away = Math.hypot(...practice.run.ring.map((n, i) => n - state.position[i]));
+    // The speed box as in the game (the user, 2026-10-10: "화면 아래에 본게임과 같은
+    // 속도계 붙여줘"): how fast she goes, and the limit the ring sets as she nears it.
+    if (frame++ % HUD_EVERY_N_FRAMES === 0) {
+      hud.speed({ speed: totalSpeed(state), motionSign: state.speed > 0.01 ? state.motionSign : 1, limitLabel: limitText(speedLimit(away) / C), C });
+    }
     practiceView.show(goal, tagSpot(practice.run.ring, state.position, view.camera, innerWidth, innerHeight), away, slideSide(practice.run, pose));
   };
 

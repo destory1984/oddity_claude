@@ -5450,14 +5450,13 @@ html.gaze #gazeButton {
 #hud nav #practiceButton::before { background-image:url("/assets/ui/icon-practice.svg"); }
 
 /* While practising there is only the flight: the stars, the ring, her, the keys that
-   fly her and the line that says what to do. (Hidden, not taken out: the keys that
+   fly her, the speed and the line that says what to do. (Hidden, not taken out: the keys that
    stay keep their places.) */
 body.practicing #hud header,
 body.practicing #hud .telemetry,
 body.practicing #minimap,
 body.practicing #markers,
 body.practicing #targetPanel,
-body.practicing #hud footer .speedBox,
 body.practicing #hud footer .throttle,
 body.practicing #rearButton,
 body.practicing #gazeButton,
@@ -5480,16 +5479,20 @@ body.practicing #testBar {
 }
 #practiceTag[hidden] { display:none; }
 
-/* The key being taught: a slow gold pulse round it. */
-@keyframes teachPulse {
-  0%, 100% { box-shadow:0 0 0 0 #ffd98a00, 0 0 0 2px #ffd98a; }
-  50% { box-shadow:0 0 0 9px #ffd98a33, 0 0 0 2px #ffd98a; }
+/* The key to press now blinks gold (a slow pulse of its edge at first; the user,
+   2026-10-10: "눌러야하는 버튼을 깜박깜박 표시해줘"): lit and unlit by turns, about
+   three times in two seconds. */
+@keyframes teachBlink {
+  0%, 49% { box-shadow:0 0 0 2px #ffd98a, 0 0 16px 5px #ffd98aaa; background-color:#ffd98a55; }
+  50%, 100% { box-shadow:0 0 0 1px #ffd98a44; background-color:#182a5c99; }
 }
-.teach {
-  animation:teachPulse 1.3s ease-in-out infinite;
+#hud footer button.teach,
+#practiceTag.teach {
+  animation:teachBlink .7s linear infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .teach { animation:none; box-shadow:0 0 0 2px #ffd98a; }
+  #hud footer button.teach,
+  #practiceTag.teach { animation:none; box-shadow:0 0 0 2px #ffd98a, 0 0 16px 5px #ffd98aaa; }
 }
 
 #practiceOffer,
@@ -5522,4 +5525,18 @@ dialog .checkRow {
   #hud nav #practiceButton {
     left:calc(var(--top-key) + var(--gap));
   }
+}
+
+/* While practising the line at the top has the whole width (in the game it keeps to the
+   right of the map, and a lesson's line beside the longer "연습 비행 그만두기" was cut
+   off after two rows). */
+body.practicing #guide {
+  left:8px !important;
+  right:8px !important;
+  width:auto !important;
+  max-width:none !important;
+  margin:0 !important;
+}
+body.practicing #guideText {
+  flex:1;
 }

@@ -1731,6 +1731,10 @@ ${STORY_MORE[target.id]}` : told };
   // one canvas laid under the words (`gazeInk`), which takes itself away when the last
   // ring has faded.
   let gazing = false;
+  // A second press while just looking takes Sora away too, the scenery alone left; a
+  // third brings everything back (the user, 2026-10-09: "한 번 누르면, 지금처럼 / 한 번 더
+  // 누르면, 소라도 없앤다. / 한 번 누르면 처음으로 돌아온다").
+  let gazeBare = false;
   let gazeMoves = [];
   let gazeInkStop = () => {};
   const GAZE_TAIL_MS = 280; // how far back in time a tail reaches
@@ -1872,12 +1876,17 @@ ${STORY_MORE[target.id]}` : told };
     for (const move of gazeMoves) move.cancel();
     gazeMoves = [];
   };
-  const setGaze = (on) => {
-    gazing = on;
-    const words = on ? t('우주멍 끝내기: 글자와 단추 보이기') : t('우주멍: 글자와 단추 숨기기');
-    $('gazeButton').setAttribute('aria-pressed', String(on));
+  // What the next press does, said on the button.
+  const gazeWords = () => {
+    const words = !gazing ? t('우주멍: 글자와 단추 숨기기') : gazeBare ? t('우주멍 끝내기: 모두 다시 보이기') : t('우주멍: 소라도 숨기기');
     $('gazeButton').setAttribute('aria-label', words);
     $('gazeButton').title = words;
+  };
+  const setGaze = (on) => {
+    gazing = on;
+    gazeBare = false;
+    $('gazeButton').setAttribute('aria-pressed', String(on));
+    gazeWords();
     if (on) {
       // Put away only once they have gone down (and only if she has not changed her mind).
       gazeFlight(true).then((whole) => {
@@ -1890,7 +1899,12 @@ ${STORY_MORE[target.id]}` : told };
       gazeFlight(false).then((whole) => { if (whole && !gazing) gazeClear(); });
     }
   };
-  $('gazeButton').addEventListener('click', () => setGaze(!gazing));
+  $('gazeButton').addEventListener('click', () => {
+    if (!gazing) return setGaze(true);
+    if (gazeBare) return setGaze(false);
+    gazeBare = true;
+    gazeWords();
+  });
   $('pauseButton').addEventListener('click', () => setPaused(!paused));
   $('photoButton').addEventListener('click', () => photo.toggle());
   // The settings hold the game while they are open. (The help is their second page: it
@@ -2515,7 +2529,7 @@ ${STORY_MORE[target.id]}` : told };
       photoOrientation: photo.orientation() ?? (rear ? REAR_VIEW : null),
       seen: orbitEye(),
       lamp: orbitLamp(),
-      heroVisible: photo.heroVisible(),
+      heroVisible: photo.heroVisible() && !gazeBare,
       turn,
       // For the sprite character: which way she is thrusting. Docked, she rides ahead.
       move: {

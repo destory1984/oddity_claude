@@ -46,6 +46,7 @@
     <header>
       <div class="brand"><strong><img class="titleArt" src="/assets/ui/title.png" alt="Space Oddity" width="609" height="146"></strong><span>할머니의 수첩</span></div>
       <nav>
+        <button id="practiceButton" title="비행 연습" aria-label="비행 연습">비행 연습</button>
         <button id="journalButton">수첩</button>
         <button id="photoButton" title="사진 모드 (P)">사진 모드</button>
         <button id="soundButton" aria-label="효과음 끄기">🔊</button>
@@ -150,6 +151,9 @@
     <button id="guideJump" hidden>근처로</button>
     <button id="guideSkip">건너뛰기</button>
   </div>
+
+  <!-- Flight practice (core/practice.js): the name tag of its ring, as a body has one. -->
+  <div id="practiceLayer" hidden><button id="practiceTag" class="marker goal" hidden></button></div>
 
   <div id="warp" aria-hidden="true"></div>
   <!-- For testing the opening: wipes every record and starts over. Shown only on the maker's own machine or home network (core/count.js isLocalHost). -->
@@ -301,6 +305,26 @@
     <button id="closePair">닫기</button>
   </dialog>
 
+  <dialog id="practiceOffer" aria-labelledby="practiceOfferTitle">
+    <h1 id="practiceOfferTitle" tabindex="-1" autofocus>비행 연습</h1>
+    <p>별만 있는 빈 곳에서 빛나는 고리를 따라가며 조종을 익힙니다. 여섯 가지이고 2분쯤 걸립니다.</p>
+    <p class="muted">건너뛰어도 설정에서 언제든 다시 할 수 있습니다.</p>
+    <div class="journalActions">
+      <button id="practiceGo">연습하기</button>
+      <button id="practicePass">건너뛰기</button>
+    </div>
+  </dialog>
+
+  <dialog id="practiceDone" aria-labelledby="practiceDoneTitle">
+    <h1 id="practiceDoneTitle" tabindex="-1" autofocus>연습을 마쳤습니다</h1>
+    <p>이제 같은 조종으로 진짜 우주를 날아 보세요. 연습은 설정에서 언제든 다시 할 수 있습니다.</p>
+    <p id="practiceDoneAsk">화면 위의 비행 연습 버튼을 치울까요?</p>
+    <div class="journalActions">
+      <button id="practiceKeep">그대로 두기</button>
+      <button id="practiceHide">버튼 치우기</button>
+    </div>
+  </dialog>
+
   <dialog id="settings" aria-labelledby="settingsTitle">
     <div class="sheetHead"><h1 id="settingsTitle">설정</h1><small id="appVersion">{{version}} · {{updated}}</small><div class="textSize" role="group" aria-label="글자 크기"><button data-way="-1" aria-label="글자 작게" title="글자 작게">가<span aria-hidden="true">−</span></button><button data-way="1" aria-label="글자 크게" title="글자 크게">가<span aria-hidden="true">+</span></button></div></div>
     <div id="settingsTabs" role="tablist" aria-label="설정의 갈래">
@@ -317,6 +341,7 @@
     <section data-tab="options">
       <dl>
       <dt>언어 · Language</dt><dd class="langRow"><button id="langKo" lang="ko">한국어</button><button id="langEn" lang="en">English</button><button id="langJa" lang="ja">日本語</button><button id="langZh" lang="zh-Hans">中文</button></dd>
+      <dt>비행 연습</dt><dd>별만 있는 빈 곳에서 고리를 따라가며 조종을 익힙니다. 2분쯤 걸리고, 하던 자리로 그대로 돌아옵니다.<br><button id="practiceStart">연습하기</button><label class="checkRow"><input type="checkbox" id="practiceShow"> 화면 위에 비행 연습 버튼 두기</label></dd>
       <dt class="installRow">앱으로 설치</dt><dd class="installRow">안드로이드 크롬: 메뉴 ⋮ → 앱 설치. 아이폰 사파리: 공유 → 홈 화면에 추가. 설치하면 인터넷 없이도 열립니다. <button id="installButton" hidden>지금 설치</button></dd>
       <dt id="screenTerm" hidden>화면 비율</dt><dd id="screenRow" hidden><span id="screenNow"></span> 바꾸면 게임이 처음 자리에서 다시 시작합니다(수첩은 그대로).<br><button id="screenButton"></button></dd>
       <dt>행성 배치</dt><dd><span id="layoutNow"></span> 오늘의 하늘에서는 행성과 달이 오늘 날짜의 실제 방향에 놓이고, 거기서부터 게임 시계(50배)로 움직입니다. 바꾸면 게임이 처음 자리에서 다시 시작합니다(수첩은 그대로).<br><button id="layoutButton"></button></dd>

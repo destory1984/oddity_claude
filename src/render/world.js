@@ -13,6 +13,7 @@ import { createSpriteHero } from './spriteHero.js';
 import { createCraft, createSiteModels } from './craft.js';
 import { storySitesAt } from '../core/stories.js';
 import { createComet } from './comet.js';
+import { createPracticeRing } from './practiceRing.js';
 import { createMeteors } from './meteors.js';
 import { createGlows } from './glows.js';
 import { glowsNear } from '../core/glows.js';
@@ -63,6 +64,8 @@ export async function createWorld(canvas, bodies = BODIES) {
   // A glow and a tail for each comet.
   const comets = bodies.filter((b) => b.kind === 'comet').map((b) => ({ id: b.id, glow: createComet(scene) }));
   const meteors = createMeteors(scene);
+  // The ring of the flight practice (core/practice.js), there only while practising.
+  const practiceRing = createPracticeRing(scene);
   const glows = createGlows(scene, bodies);
 
   // The character (the pixel-art drawings) is drawn in the camera's own space.
@@ -77,7 +80,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   // now: where every body is this frame (they orbit); defaults to the starting layout.
   // seen: { position, orientation } when the view is from somewhere other than where
   // the traveler is (looking round a target, ui/photo.js); she herself stays put.
-  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, heroAlpha = 1, turn, move = {}, seen = null, lamp = null, trail = null, replay = null, eclipsed = null }) {
+  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, heroAlpha = 1, ring = null, turn, move = {}, seen = null, lamp = null, trail = null, replay = null, eclipsed = null }) {
     elapsed += dt;
     // Draw from a point just above the ground when standing on it, and pull the near
     // plane in as the ground gets close; otherwise the planet under the feet is cut away
@@ -143,6 +146,7 @@ export async function createWorld(canvas, bodies = BODIES) {
     siteModels.update(sites, now, position, replay);
     craftSun.direction = new Vector3(...normalize(sunRel)).scale(-1);
     for (const { id, glow } of comets) glow.update(now.find((b) => b.id === id), position, sunNow.position);
+    practiceRing.update(ring, position);
     const meteorLit = meteors.update(dt, now.find((b) => b.id === 'earth'), sunNow.position, position);
     const flashed = glows.update(dt, elapsed, now, sunNow.position, position);
     belt.update(position, sunNow.position, directions[sunNow.id]);

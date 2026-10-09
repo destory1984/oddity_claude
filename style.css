@@ -5443,3 +5443,83 @@ html.gaze #gazeButton {
 #noteCard {
   padding-bottom:0;
 }
+
+/* Flight practice (core/practice.js; the user, 2026-10-10). Its button stands at the top
+   between the map and the notebook, where they marked it; it can be put away in the
+   settings or at the end of a practice. */
+#hud nav #practiceButton::before { background-image:url("/assets/ui/icon-practice.svg"); }
+
+/* While practising there is only the flight: the stars, the ring, her, the keys that
+   fly her and the line that says what to do. (Hidden, not taken out: the keys that
+   stay keep their places.) */
+body.practicing #hud header,
+body.practicing #hud .telemetry,
+body.practicing #minimap,
+body.practicing #markers,
+body.practicing #targetPanel,
+body.practicing #hud footer .speedBox,
+body.practicing #hud footer .throttle,
+body.practicing #rearButton,
+body.practicing #gazeButton,
+body.practicing #hint,
+body.practicing #toast,
+body.practicing #heroSay,
+body.practicing #skyTold,
+body.practicing #testBar {
+  visibility:hidden;
+}
+
+#practiceLayer {
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+}
+#practiceLayer[hidden] { display:none; }
+#practiceTag {
+  pointer-events:auto;
+}
+#practiceTag[hidden] { display:none; }
+
+/* The key being taught: a slow gold pulse round it. */
+@keyframes teachPulse {
+  0%, 100% { box-shadow:0 0 0 0 #ffd98a00, 0 0 0 2px #ffd98a; }
+  50% { box-shadow:0 0 0 9px #ffd98a33, 0 0 0 2px #ffd98a; }
+}
+.teach {
+  animation:teachPulse 1.3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .teach { animation:none; box-shadow:0 0 0 2px #ffd98a; }
+}
+
+#practiceOffer,
+#practiceDone {
+  width:min(420px,90vw);
+}
+
+/* (In the settings: the box to keep the button, on a line of its own.) */
+dialog .checkRow {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:10px;
+}
+
+/* (The sheets' headings take the focus as they open, not a button: a flight key still
+   held when the practice ends pressed "그대로 두기" at once.) */
+#practiceOffer h1:focus,
+#practiceDone h1:focus {
+  outline:none;
+}
+
+/* (The notebook's key stands one place to the right of where it flows, and the camera's
+   a row down: the practice key takes the place the notebook's left, as they do.) */
+#hud nav #practiceButton {
+  position:relative;
+  left:52px;
+}
+@media (max-width: 480px) {
+  #hud nav #practiceButton {
+    left:calc(var(--top-key) + var(--gap));
+  }
+}

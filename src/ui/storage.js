@@ -306,3 +306,25 @@ export function takeResume() {
     return null;
   }
 }
+
+// The flight practice (core/practice.js): asked: a newcomer has been offered it once;
+// button: its button is kept at the top of the screen (the player may put it away).
+const PRACTICE_KEY = 'oddity.practice.v1';
+
+export function loadPractice() {
+  try {
+    const kept = JSON.parse(localStorage.getItem(PRACTICE_KEY));
+    return { asked: Boolean(kept?.asked), button: kept?.button !== false };
+  } catch {
+    return { asked: false, button: true };
+  }
+}
+
+export function savePractice(value) {
+  try {
+    localStorage.setItem(PRACTICE_KEY, JSON.stringify({ asked: Boolean(value.asked), button: value.button !== false }));
+  } catch {
+    // It is then offered again at the next opening.
+  }
+  return value;
+}

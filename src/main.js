@@ -33,11 +33,13 @@ import {
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
   loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
-  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, saveResume, takeResume, loadStunts, saveStunts, loadViews, saveViews, loadFeel, saveFeel, loadExo, saveExo, loadEclipses, saveEclipses,
+  loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, saveResume, takeResume, loadStunts, saveStunts, loadViews, saveViews, loadFeel, saveFeel, loadExo, saveExo, loadEclipses, saveEclipses, loadPractice, savePractice,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
 import { createGuideView } from './ui/guide.js';
+import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, RING_KM } from './core/practice.js';
+import { createPracticeView } from './ui/practice.js';
 import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
@@ -219,6 +221,9 @@ const startSpot = pickSpot(Math.random(), new URLSearchParams(location.search).g
 const resume = takeResume();
 let state = resume ? createState(resume.position, resume.orientation) : START_NEAR ? startNear(START_NEAR) : startAtSpot(startSpot);
 let paused = false;
+// Flight practice (core/practice.js): while it runs, `state` is her flight in the empty
+// place and this holds the lesson and the flight she left ({ run, back, first }).
+let practice = null;
 let selectedId = START_NEAR ? START_NEAR.id : resume?.selectedId && BODIES.some((b) => b.id === resume.selectedId) ? resume.selectedId : resume ? 'earth' : startSpot.target ?? 'earth';
 let dragTurn = [0, 0];
 // Target lock: the chosen target is held in the middle of the view; the slide buttons
@@ -450,7 +455,7 @@ function brake() {
   input.clear();
   if (totalSpeed(state) > 0) sound.cue('brake');
   state = stopNow(state);
-  toast.show(t('정지했습니다. 주변을 둘러보세요.'));
+  if (!practice) toast.show(t('정지했습니다. 주변을 둘러보세요.'));
 }
 
 let input;
@@ -482,17 +487,18 @@ async function init() {
     },
     // A short touch on a constellation, a galaxy or a cluster: it tells its lines.
     onTap(x, y) {
-      if (!photo.active() && !paused) hud.touchSky(x, y);
+      if (!photo.active() && !paused && !practice) hud.touchSky(x, y);
     },
     // Any press on the view puts away what the last touch was telling.
     onPress: () => hud.pressSky(),
     onBrake: brake,
-    onTogglePhoto: () => photo.toggle(),
-    onGaze: () => $('gazeButton').click(),
-    onJournal: () => journal.open(),
+    // (None of these while practising: there is only the flight.)
+    onTogglePhoto: () => { if (!practice) photo.toggle(); },
+    onGaze: () => { if (!practice) $('gazeButton').click(); },
+    onJournal: () => { if (!practice) journal.open(); },
     onMute: () => toggleSound(),
     onMusic: () => toggleMusic(),
-    onRear: (on) => { if (!on || !photo.active()) setRear(on); },
+    onRear: (on) => { if (!practice && (!on || !photo.active())) setRear(on); },
     // A flight key pressed while paused flies on at once (not in photo mode, which is
     // paused on purpose, nor behind a story card).
     onMove() {
@@ -508,7 +514,7 @@ async function init() {
       if (paused) toast.show(t('멈췄습니다. Esc나 비행 키를 누르면 이어집니다.'), 'pause', 4);
     },
     onWheel: (deltaY) => photo.zoom(deltaY),
-    isBlocked: () => $('settings').open || $('journal').open || $('noteCard').open || $('bigMap').open,
+    isBlocked: () => $('settings').open || $('journal').open || $('noteCard').open || $('bigMap').open || $('practiceOffer').open || $('practiceDone').open,
   });
   photo = createPhoto({
     world,
@@ -1628,7 +1634,7 @@ ${STORY_MORE[target.id]}` : told };
   // buttons: on the dev server, not on the public site or in the store app.
   $('testBar').hidden = !isLocalHost(location.hostname);
   $('testReset').addEventListener('click', () => {
-    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1', 'oddity.views.v1', 'oddity.told.v1', 'oddity.exo.v1', 'oddity.eclipse.v1']) {
+    for (const key of ['oddity.progress.v1', 'oddity.album.v1', 'oddity.daily.v1', 'oddity.guide.v1', 'oddity.stunts.v1', 'oddity.views.v1', 'oddity.told.v1', 'oddity.exo.v1', 'oddity.eclipse.v1', 'oddity.practice.v1']) {
       try { localStorage.removeItem(key); } catch { /* storage shut: nothing to wipe */ }
     }
     location.reload();
@@ -1993,6 +1999,8 @@ ${STORY_MORE[target.id]}` : told };
   const journalHow = touch ? t('수첩 버튼') : t('J 키나 수첩 버튼');
   const guideView = createGuideView({
     onSkip() {
+      // While practising it leaves the practice.
+      if (practice) return endPractice(false);
       // The same button ends a stunt or a tour once the first-visit guide is over.
       if (guide.step === null) {
         if (stunt) quitStunt();
@@ -2014,6 +2022,135 @@ ${STORY_MORE[target.id]}` : told };
   guideView.show(goalNow());
   if (guide.step === null) aimAtStop();
 
+  // Flight practice (core/practice.js; the user, 2026-10-10: "처음으로 게임하는 사람들이
+  // 비행이 어렵데, 비행을 도와줄 수 있는 훈련하는 화면을 만들고, 처음 시작할 때에 띄워줘
+  // (물론 스킵 버튼도 있어야)"). An empty place far above the Sun with nothing but the
+  // stars, one glowing ring to go to and the keys that fly her: six short lessons. It is
+  // flown by the game's own rules of flight (core/game.js step) with no bodies and the
+  // ring as a slow point, so what the hand learns there is what the game asks. While it
+  // runs the game's own frame does not (the planets, the clock and her journey wait),
+  // and at its end she is back where she was. Nothing done there is recorded.
+  // A newcomer is offered it once, after grandmother's first note; its button stands at
+  // the top between the map and the notebook until the player puts it away (at the end
+  // of a practice, or in the settings, where it can also be begun).
+  const PRACTICE_AT = [0, 150e6, 0];
+  let practiceKept = loadPractice();
+  // Someone already past the first guide is no newcomer: never offered.
+  if (guide.step === null && !practiceKept.asked) practiceKept = savePractice({ ...practiceKept, asked: true });
+  // A newcomer who has not been offered it yet.
+  const practiceDue = () => !practiceKept.asked && guide.step !== null;
+  // What she says to herself before the offer, each line up this long (s), and when
+  // she began (ms).
+  const PRACTICE_TALK = [t('수첩을 채우려면 달까지, 더 멀리까지도 가야 해.'), t('혼자 나는 건 처음인데… 연습부터 해 볼까?')];
+  const PRACTICE_LINE_S = 3.2;
+  let practiceTalkAt = null;
+  const showPracticeButton = () => {
+    $('practiceButton').hidden = !practiceKept.button;
+    $('practiceShow').checked = practiceKept.button;
+  };
+  const poseNow = () => ({
+    position: state.position, forward: forward(state.orientation), right: right(state.orientation), up: rotateVector(state.orientation, [0, 1, 0]),
+  });
+  function startPractice(first = false) {
+    if (practice || photo.active() || warp.busy() || replay) return;
+    if (gazing) setGaze(false);
+    if (rear) setRear(false);
+    input.clear();
+    const back = state;
+    state = createState(PRACTICE_AT, lookAtDirection([0, 0, 1]));
+    practice = { run: createPractice(poseNow()), back, first };
+    setPaused(false);
+    document.body.classList.add('practicing');
+    previous = null;
+  }
+  // finished: all six lessons were done (else it was left by its button).
+  function endPractice(finished) {
+    if (!practice) return;
+    state = practice.back;
+    practice = null;
+    input.clear();
+    dragTurn = [0, 0];
+    document.body.classList.remove('practicing');
+    practiceView.show(null);
+    world.setFov((feelFov * Math.PI) / 180);
+    guideView.show(goalNow());
+    previous = null;
+    if (finished) {
+      sound.cue('mission');
+      practiceView.done(practiceKept.button);
+    }
+  }
+  const practiceView = createPracticeView({
+    // Her ring's name tag turns her to it, as "바라보기" does to a body (square on: in
+    // here she then flies straight into it).
+    onTag() {
+      if (practice && !paused) state = { ...state, orientation: lookAtDirection(practice.run.ring.map((n, i) => n - state.position[i])) };
+    },
+    onOffer(yes) {
+      if (yes) startPractice(true);
+    },
+    onDone(hide) {
+      if (!hide) return;
+      practiceKept = savePractice({ ...practiceKept, button: false });
+      showPracticeButton();
+    },
+  });
+  $('practiceButton').addEventListener('click', () => startPractice());
+  // From the settings: once they have shut (the game is held while they are open).
+  $('practiceStart').addEventListener('click', () => {
+    $('settings').addEventListener('close', () => startPractice(), { once: true });
+    $('settings').close();
+  });
+  $('practiceShow').addEventListener('change', () => {
+    practiceKept = savePractice({ ...practiceKept, button: $('practiceShow').checked });
+    showPracticeButton();
+  });
+  showPracticeButton();
+  // One frame of the practice, in place of the game's own.
+  const practiceFrame = (elapsed) => {
+    const dt = paused || elapsed > MAX_FRAME_GAP_S ? 0 : elapsed;
+    const intent = input.intent();
+    if (dt > 0) state = step(state, intent, dt, [], [practice.run.ring]).state;
+    const pose = { ...poseNow(), speed: totalSpeed(state), sliding: intent.strafe !== 0 || intent.rise !== 0 };
+    if (dt > 0) {
+      practice.run = updatePractice(practice.run, pose);
+      if (practice.run.events.length) {
+        sound.cue('discovered');
+        cheerUntil = performance.now() + 1500;
+      }
+    }
+    const turn = dt > 0
+      ? [dragTurn[0] / dt + intent.strafe * 0.6, dragTurn[1] / dt - ((state.riseSpeed ?? 0) > 0.01 ? state.riseSign : 0) * 0.6]
+      : [0, 0];
+    dragTurn = [0, 0];
+    world.setFov((BASE_FOV_DEG * Math.PI) / 180);
+    const goal = practiceGoal(practice.run);
+    const view = world.update({
+      bodies,
+      craft,
+      sites,
+      position: state.position,
+      orientation: state.orientation,
+      dt,
+      speed: totalSpeed(state),
+      photoOrientation: null,
+      heroVisible: true,
+      turn,
+      ring: goal ? { position: practice.run.ring, radiusKm: RING_KM } : null,
+      move: {
+        drive: state.speed > 0.01 ? state.motionSign : 0,
+        strafe: (state.sideSpeed ?? 0) > 0.01 ? state.sideSign : 0,
+        cheer: performance.now() < cheerUntil,
+      },
+    });
+    world.render();
+    if (!goal) return endPractice(true);
+    // (Begun by a newcomer's offer its button skips it; begun by hand it gives it up.)
+    guideView.show({ ...goal, quit: !practice.first });
+    const away = Math.hypot(...practice.run.ring.map((n, i) => n - state.position[i]));
+    practiceView.show(goal, tagSpot(practice.run.ring, state.position, view.camera, innerWidth, innerHeight), away, slideSide(practice.run, pose));
+  };
+
   // The first frame uploads shaders and textures; count it as zero time so the
   // long-gap guard below does not pause the game before the player does anything.
   let previous = null;
@@ -2022,6 +2159,7 @@ ${STORY_MORE[target.id]}` : told };
     const now = performance.now();
     const elapsed = previous === null ? 0 : (now - previous) / 1000;
     previous = now;
+    if (practice) return practiceFrame(elapsed);
     // A suspended tab must never fast-forward the journey.
     // (That one long frame counts as no time; the flight goes on from the next.)
     const dt = paused || elapsed > MAX_FRAME_GAP_S ? 0 : elapsed;
@@ -2385,6 +2523,20 @@ ${STORY_MORE[target.id]}` : told };
     } else if (!note && calm && repliesDue.length) {
       openReplies();
     }
+    // A newcomer is offered the flight practice once, when grandmother's first note has
+    // been read and put away, before the steps to the Moon are taken up.
+    // She talks herself into it first (the user, 2026-10-10: "수첩 -> 비행 연습이 너무
+    // 갑작스럽다. 중간에 왜 비행연습을 해야하는지 혼잣말로 얘기해"): two lines over her
+    // head, then the sheet. The steps to the Moon are not shown until it is answered.
+    if (practiceDue() && settled && !note && (progress.notes ?? []).length > 0) {
+      if (practiceTalkAt === null) {
+        practiceTalkAt = performance.now();
+        for (const line of PRACTICE_TALK) say.show(line, PRACTICE_LINE_S + 1, PRACTICE_LINE_S);
+      } else if (performance.now() - practiceTalkAt >= (PRACTICE_TALK.length * PRACTICE_LINE_S + 1) * 1000) {
+        practiceKept = savePractice({ ...practiceKept, asked: true });
+        practiceView.offer();
+      }
+    }
 
     if (guide.step !== null) {
       guide = updateGuide(guide, {
@@ -2397,7 +2549,7 @@ ${STORY_MORE[target.id]}` : told };
         toast.show(t`첫 탐험을 마쳤습니다. ${journalHow}을 열고 코스 갈래에서 "${tourById('firstSteps').name}"을 골라 보세요.`);
       }
     }
-    guideView.show(goalNow());
+    guideView.show(practiceDue() ? null : goalNow());
 
     const turn = dt > 0
       // Sliding sideways leans the character like a gentle turn; sliding up or down (the
@@ -2734,6 +2886,8 @@ ${STORY_MORE[target.id]}` : told };
 
   // Read-only diagnostics for verification. No travel shortcuts.
   window.oddity = {
+    // The flight practice as it stands, or null.
+    practice: () => (practice ? { step: practice.run.step, ring: [...practice.run.ring], left: practice.run.left } : null),
     getState: () => ({
       position: [...state.position],
       orientation: [...state.orientation],

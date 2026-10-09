@@ -4,7 +4,8 @@ uniform float strength;
 // Seconds, for the break that now and then travels down the tail.
 uniform float time;
 // v = 0 at the nucleus, 1 at the far end. The tail fans out quickly, then slowly: a
-// bright narrow core inside a wide faint veil.
+// bright narrow white core inside a wide faint blue veil (the colours of 2026-10-09,
+// chosen by the user of four shown: "2").
 void main(){
   float along = vUV.y;
   float width = mix(.1, 1., sqrt(along));
@@ -21,5 +22,5 @@ void main(){
   float gap = exp(-pow((along - trip) / .045, 2.));
   float knot = exp(-pow((along - trip - .075) / .03, 2.)) * exp(-across * across * 3.);
   float cut = 1. - .9 * gap * has;
-  gl_FragColor = vec4(start * ((vec3(.7, .86, 1.) * core * .7 + vec3(.5, .7, 1.) * veil * .45) * cut + vec3(.6, .8, 1.) * knot * has * .35) * strength, 1.);
+  gl_FragColor = vec4(start * ((vec3(.92, .96, 1.) * core * .7 + vec3(.3, .6, 1.) * veil * .45) * cut + vec3(.6, .85, 1.) * knot * has * .35) * strength, 1.);
 }

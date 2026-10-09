@@ -2219,6 +2219,13 @@ ${STORY_MORE[target.id]}` : told };
       // gold for a moment, the ring just done swells and thins away where it stood, and
       // the next comes up out of nothing.
       if (practice.run.events.includes('step') && practice.run.step !== null) practice.passAt = performance.now();
+      // The ring lined up by sliding (the first half of that lesson): she is stopped
+      // there, and the slide key let go of, or she would coast on sideways out of line
+      // (letting go of a key keeps the speed reached) and fly past the ring's side.
+      if (practice.run.events.includes('part')) {
+        state = stopNow(state);
+        input.clear();
+      }
       if (practice.run.ring !== ringBefore) {
         practice.burst = { position: ringBefore, at: performance.now() };
         practice.bornAt = performance.now();

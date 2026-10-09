@@ -77,17 +77,18 @@ function ringFrom(pose, [ahead, side, up]) {
 // (In updatePractice also: speed, sliding, and twist: how far she rolled this frame.)
 export function createPractice(pose) {
   return {
-    step: 'look', ring: ringFrom(pose, RING_AT.look), flew: false, slid: 0, rolled: 0, jumped: false, left: FREE_RINGS, last: [...pose.position], far: Infinity, events: [],
+    step: 'look', ring: ringFrom(pose, RING_AT.look), flew: false, slid: 0, lined: false, rolled: 0, jumped: false, left: FREE_RINGS, last: [...pose.position], far: Infinity, events: [],
   };
 }
 
 function begin(step, pose, left = FREE_RINGS) {
   const at = step === 'free' ? FREE_AT[FREE_RINGS - left] : RING_AT[step];
-  return { step, flew: false, slid: 0, rolled: 0, jumped: false, left, ...(at ? { ring: ringFrom(pose, at), far: Infinity } : {}) };
+  return { step, flew: false, slid: 0, lined: false, rolled: 0, jumped: false, left, ...(at ? { ring: ringFrom(pose, at), far: Infinity } : {}) };
 }
 
 // One frame. pose as above, with speed (km/s) and sliding (a slide key is held).
-// events: 'ring' (a ring was reached), 'step' (a lesson was done), 'finished'.
+// events: 'ring' (a ring was reached), 'part' (the first half of a lesson was done),
+// 'step' (a lesson was done), 'finished'.
 // step is null once all six are done.
 export function updatePractice(practice, pose) {
   if (practice.step === null) return practice.events.length ? { ...practice, events: [] } : practice;
@@ -121,11 +122,20 @@ export function updatePractice(practice, pose) {
     if (next.flew && pose.speed < STOPPED) done();
     else if (reached) next = { ...next, ring: ringFrom(pose, RING_AT.stop), far: Infinity };
   } else if (next.step === 'slide') {
-    if (next.slid >= SLID_KM && angleBetween(pose.forward, toRing) <= FACING) done();
-    // Flown up to the ring or past it, she could never bring it before her by sliding
-    // (and the view does not turn in this lesson): the ring is put out again from where
-    // she is now. (The user, 2026-10-10: "4에서 고리 지나치니까 깰 수가 없게 되었는데?")
-    else if (dot(toRing, pose.forward) < FAR_KM * 0.35) next = { ...next, ...begin('slide', pose) };
+    // Two parts: slide until the ring is before her, then fly through it (it ended at
+    // the first until the user, 2026-10-10: "정면으로 가서 -> 고리 통과하는게 목적 아님?").
+    const ahead = dot(toRing, pose.forward);
+    if (next.lined && reached) {
+      events.push('ring');
+      done();
+    } else if (!next.lined && next.slid >= SLID_KM && angleBetween(pose.forward, toRing) <= FACING) {
+      next.lined = true;
+      events.push('part');
+    // Flown up to the ring without having lined it up, or past it, she could never bring
+    // it before her by sliding (and the view does not turn in this lesson): the ring is
+    // put out again from where she is now, and the lesson begins again. (The user,
+    // 2026-10-10: "4에서 고리 지나치니까 깰 수가 없게 되었는데?")
+    } else if (next.lined ? ahead < -NEAR_KM : ahead < FAR_KM * 0.35) next = { ...next, ...begin('slide', pose) };
   } else if (next.step === 'roll') {
     if (next.rolled >= ROLLED && Math.abs(tiltOf(pose)) <= ROLL_UP) done();
   } else if (next.step === 'find' || next.step === 'warp') {
@@ -158,7 +168,7 @@ const TEXT = {
   // 2026-10-10: "앞으로 버튼을 누르면 속도가 점점 빨라집니다.,라는 멘트도 추가".)
   fly: (left, moving) => (moving ? t('전진 버튼을 누르고 있으면 속도가 점점 빨라집니다') : t('전진 버튼을 꾹 누르면 고리로 날아갑니다')),
   stop: () => t('날다가 정지 버튼으로 멈춰 보세요'),
-  slide: () => t('화살표 버튼을 눌러 고리가 정면에 오게 하세요'),
+  slide: (left, moving, aimed, jumped, lined) => (lined ? t('정면에 왔어요. 전진 버튼으로 고리를 지나가세요') : t('화살표 버튼을 눌러 고리가 정면에 오게 하세요')),
   roll: () => t('두 손가락으로 화면을 돌려 고리의 뿔을 위로 세우세요'),
   find: () => t('고리가 등 뒤에 있어요. 이름표를 누르고 날아가세요'),
   warp: (left, moving, aimed, jumped) => (jumped ? t('도착했습니다. 전진 버튼으로 고리를 지나가세요') : aimed ? t('바라본 채 이름표를 한 번 더 누르면 순간 이동합니다') : t('아주 먼 고리입니다. 이름표를 눌러 바라보세요')),
@@ -183,11 +193,11 @@ export function practiceGoal(practice, aimed = false, moving = false) {
     count: `${PRACTICE_STEPS.indexOf(practice.step) + 1}/${PRACTICE_STEPS.length}`,
     // There is a lesson before this one to go back to.
     back: PRACTICE_STEPS.indexOf(practice.step) > 0,
-    text: TEXT[practice.step](practice.left, moving, aimed, practice.jumped),
+    text: TEXT[practice.step](practice.left, moving, aimed, practice.jumped, practice.lined),
     // Stopping: the forward key until she has flown, then the stop key. Finding: the
     // name tag until she faces the ring, then the forward key.
     teach: {
-      look: null, fly: 'fly', stop: practice.flew ? 'brake' : 'fly', slide: 'slide', roll: null, find: aimed ? 'fly' : 'tag', warp: practice.jumped ? 'fly' : 'tag', free: null,
+      look: null, fly: 'fly', stop: practice.flew ? 'brake' : 'fly', slide: practice.lined ? 'fly' : 'slide', roll: null, find: aimed ? 'fly' : 'tag', warp: practice.jumped ? 'fly' : 'tag', free: null,
     }[practice.step],
     // The ring's name tag is shown where the real game would show one.
     tag: practice.step === 'find' || practice.step === 'warp' || practice.step === 'free',

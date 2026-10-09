@@ -75,6 +75,18 @@ test('the eight lessons come in order, each with a line and the control it teach
   const acrossKm = practice.ring.map((n, i) => n - from[i]).reduce((s, n, i) => s + n * through.right[i], 0);
   const beside = from.map((n, i) => n + through.right[i] * acrossKm);
   practice = updatePractice(practice, { ...through, position: beside, sliding: true });
+  // (Lined up: the first half. Now through it by the forward key.)
+  assert.equal(practice.step, 'slide');
+  assert.equal(practice.lined, true);
+  assert.deepEqual(practice.events, ['part']);
+  assert.equal(practiceGoal(practice).teach, 'fly');
+  assert.match(practiceGoal(practice).text, /정면에 왔어요/);
+  // (Coming up to it does not put it out again, as it does before it is lined up.)
+  practice = updatePractice(practice, { ...through, position: practice.ring.map((n, i) => n - through.forward[i] * 20000) });
+  assert.equal(practice.step, 'slide');
+  assert.equal(practice.lined, true);
+  practice = updatePractice(practice, { ...through, position: practice.ring });
+  assert.deepEqual(practice.events, ['ring', 'step']);
   assert.equal(practice.step, 'roll');
 
   // 5. Tipped over, she rights herself: the place's up back at the top of her view,

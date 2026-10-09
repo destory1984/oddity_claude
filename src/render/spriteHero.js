@@ -84,7 +84,8 @@ export function createSpriteHero(engine) {
   let shownFile = null;
 
   // move: { drive, strafe } from the flight state; light: core/heroLight.js heroLighting().
-  function update({ dt, speed, turn, fov, photoOrientation, visible, aspect = 16 / 9, light = null, move = {} }) {
+  // alpha: how much of her shows, for going away softly (main.js gazeFade).
+  function update({ dt, speed, turn, fov, photoOrientation, visible, alpha = 1, aspect = 16 / 9, light = null, move = {} }) {
     elapsed += dt;
     state = stepSprite(state, { speed, turn, ...move }, dt);
     // A drawing still on its way keeps the last one up rather than a blank card; all
@@ -105,6 +106,8 @@ export function createSpriteHero(engine) {
     const afloat = state.mode === 'hover';
     card.position.y = CARD_AT[1] + (afloat ? Math.sin(elapsed * 1.5) * 0.04 : 0);
     card.setEnabled(visible);
+    material.alpha = alpha;
+    palMaterial.alpha = alpha;
     // The companion keeps its place by her shoulder and is hidden with her.
     const pal = move.pal ?? null;
     const palNow = pal ? palDrawing(pal, Math.floor(elapsed * PAL_FPS) % PAL_FRAMES) : null;

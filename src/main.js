@@ -1735,6 +1735,12 @@ ${STORY_MORE[target.id]}` : told };
   // third brings everything back (the user, 2026-10-09: "한 번 누르면, 지금처럼 / 한 번 더
   // 누르면, 소라도 없앤다. / 한 번 누르면 처음으로 돌아온다").
   let gazeBare = false;
+  // She goes and comes softly, not at a blow (the user, 2026-10-09: "소라 없애는 것도
+  // 스르륵 없애줘.. 그냥 팍~ 없애지 말고"): how much of her shows, eased over GAZE_FADE_MS
+  // by the clock, so it runs on while the game is held.
+  let gazeFade = 1;
+  let gazeFadeAt = performance.now();
+  const GAZE_FADE_MS = 900;
   let gazeMoves = [];
   let gazeInkStop = () => {};
   const GAZE_TAIL_MS = 280; // how far back in time a tail reaches
@@ -2510,6 +2516,10 @@ ${STORY_MORE[target.id]}` : told };
     const trail = feel && flying && !paused && goingKmS > 0
       ? { heading: going.map((n) => n / goingKmS), amount: streakAmount(goingKmS / C) }
       : null;
+    const fadeNow = performance.now();
+    const fadeStep = Math.min(1, (fadeNow - gazeFadeAt) / GAZE_FADE_MS);
+    gazeFadeAt = fadeNow;
+    gazeFade = gazeBare ? Math.max(0, gazeFade - fadeStep) : Math.min(1, gazeFade + fadeStep);
     const view = world.update({
       trail,
       replay: replayNow && replayForWorld(replayNow),
@@ -2529,7 +2539,8 @@ ${STORY_MORE[target.id]}` : told };
       photoOrientation: photo.orientation() ?? (rear ? REAR_VIEW : null),
       seen: orbitEye(),
       lamp: orbitLamp(),
-      heroVisible: photo.heroVisible() && !gazeBare,
+      heroVisible: photo.heroVisible() && gazeFade > 0.01,
+      heroAlpha: gazeFade * gazeFade * (3 - 2 * gazeFade),
       turn,
       // For the sprite character: which way she is thrusting. Docked, she rides ahead.
       move: {

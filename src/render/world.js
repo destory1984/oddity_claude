@@ -77,7 +77,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   // now: where every body is this frame (they orbit); defaults to the starting layout.
   // seen: { position, orientation } when the view is from somewhere other than where
   // the traveler is (looking round a target, ui/photo.js); she herself stays put.
-  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, turn, move = {}, seen = null, lamp = null, trail = null, replay = null, eclipsed = null }) {
+  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, heroAlpha = 1, turn, move = {}, seen = null, lamp = null, trail = null, replay = null, eclipsed = null }) {
     elapsed += dt;
     // Draw from a point just above the ground when standing on it, and pull the near
     // plane in as the ground gets close; otherwise the planet under the feet is cut away
@@ -163,7 +163,7 @@ export async function createWorld(canvas, bodies = BODIES) {
     camera.rotationQuaternion = new Quaternion(...(seen?.orientation ?? multiply(orientation, photoOrientation || [0, 0, 0, 1])));
     const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
     hero.update({
-      dt, speed, turn, fov: camera.fov, photoOrientation, visible: heroVisible, aspect, move,
+      dt, speed, turn, fov: camera.fov, photoOrientation, visible: heroVisible, alpha: heroAlpha, aspect, move,
       light: heroLighting({ position: traveler, orientation, bodies: now, sunVisibility: visibility }),
     });
     ice.update(dt);

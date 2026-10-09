@@ -38,7 +38,7 @@ import {
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
 import { createGuideView } from './ui/guide.js';
-import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, RING_KM } from './core/practice.js';
+import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, RING_KM, JUMP_TO_KM } from './core/practice.js';
 import { createPracticeView } from './ui/practice.js';
 import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
@@ -2035,7 +2035,7 @@ ${STORY_MORE[target.id]}` : told };
   // Flight practice (core/practice.js; the user, 2026-10-10: "처음으로 게임하는 사람들이
   // 비행이 어렵데, 비행을 도와줄 수 있는 훈련하는 화면을 만들고, 처음 시작할 때에 띄워줘
   // (물론 스킵 버튼도 있어야)"). An empty place far above the Sun with nothing but the
-  // stars, one glowing ring to go to and the keys that fly her: six short lessons. It is
+  // stars, one glowing ring to go to and the keys that fly her: seven short lessons. It is
   // flown by the game's own rules of flight (core/game.js step) with no bodies and the
   // ring as a slow point, so what the hand learns there is what the game asks. While it
   // runs the game's own frame does not (the planets, the clock and her journey wait),
@@ -2098,8 +2098,24 @@ ${STORY_MORE[target.id]}` : told };
     // here she then flies straight into it). She comes round to it over half a second
     // or so, not at a blow (the user, 2026-10-10: "한번에 휙~ 돌리지말고, 스무스하게
     // 방향전환해줘"): practiceFrame makes the turn, and a drag takes over from it.
+    // In the lesson of the jump, pressed again while she looks at the far ring, it
+    // jumps her to it with the game's own flash and sound.
     onTag() {
-      if (practice && !paused) practice.turning = true;
+      if (!practice || paused || warp.busy()) return;
+      const run = practice.run;
+      if (run.step === 'warp' && !run.jumped && aimedAt(run, poseNow())) {
+        sound.cue('warp');
+        warp.play(() => {
+          if (!practice || practice.run.step !== 'warp') return;
+          const to = practice.run.ring.map((n, i) => n - state.position[i]);
+          const far = Math.hypot(...to);
+          state = createState(practice.run.ring.map((n, i) => n - (to[i] / far) * JUMP_TO_KM), lookAtDirection(to));
+          practice.run = jumped(practice.run);
+          practice.turning = false;
+        });
+        return;
+      }
+      practice.turning = true;
     },
     onOffer(yes) {
       if (yes) startPractice(true);
@@ -2165,6 +2181,7 @@ ${STORY_MORE[target.id]}` : told };
         drive: state.speed > 0.01 ? state.motionSign : 0,
         strafe: (state.sideSpeed ?? 0) > 0.01 ? state.sideSign : 0,
         cheer: performance.now() < cheerUntil,
+        warp: warp.phase(),
       },
     });
     world.render();

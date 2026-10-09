@@ -1,11 +1,11 @@
 import { t } from './i18n.js';
-// Flight practice: six short lessons in an empty place with nothing but the stars and
+// Flight practice: seven short lessons in an empty place with nothing but the stars and
 // one glowing ring to go to (the user, 2026-10-10, of people playing for the first
 // time: "비행이 어렵데, 비행을 도와줄 수 있는 훈련하는 화면을 만들고"; what they found
 // hard was the controls themselves and getting to where they meant to go). Pure state;
 // ui/practice.js and main.js draw it and fly it by the game's own rules of flight.
 
-export const PRACTICE_STEPS = ['look', 'fly', 'stop', 'slide', 'find', 'free'];
+export const PRACTICE_STEPS = ['look', 'fly', 'stop', 'slide', 'find', 'warp', 'free'];
 
 // The ring: how big it is and how far off a new one is put. Near a ring the speed is
 // held down as near a spacecraft (core/game.js slow points), so these distances are
@@ -25,6 +25,10 @@ const NEAR_KM = RING_KM * 2.5;
 const FLYING = 2000;
 const STOPPED = 1;
 const SLID_KM = 12000;
+// The jump (the user, 2026-10-10: "워프 연습 추가"): a ring far too far to fly to in a
+// moment, reached as a far body is in the game: its name tag turns her to it, and pressed
+// again while she looks at it, jumps her to this far before it (main.js makes the jump).
+export const JUMP_TO_KM = FAR_KM * 0.9;
 // The rings of the last lesson.
 export const FREE_RINGS = 3;
 
@@ -51,6 +55,8 @@ const RING_AT = {
   slide: [0.9, 0.2, 0.06],
   // Behind her and to one side.
   find: [-0.9, -0.4, 0.15],
+  // Sixty flights off, to one side and up.
+  warp: [55, 20, 10],
 };
 // The last lesson's three, each from where the one before left her.
 const FREE_AT = [[0.3, 0.9, 0.2], [-0.8, -0.5, -0.2], [0.2, -0.6, 0.75]];
@@ -62,13 +68,13 @@ function ringFrom(pose, [ahead, side, up]) {
 // pose: { position, forward, right, up } (km and unit vectors).
 export function createPractice(pose) {
   return {
-    step: 'look', ring: ringFrom(pose, RING_AT.look), flew: false, slid: 0, left: FREE_RINGS, last: [...pose.position], far: Infinity, events: [],
+    step: 'look', ring: ringFrom(pose, RING_AT.look), flew: false, slid: 0, jumped: false, left: FREE_RINGS, last: [...pose.position], far: Infinity, events: [],
   };
 }
 
 function begin(step, pose, left = FREE_RINGS) {
   const at = step === 'free' ? FREE_AT[FREE_RINGS - left] : RING_AT[step];
-  return { step, flew: false, slid: 0, left, ...(at ? { ring: ringFrom(pose, at), far: Infinity } : {}) };
+  return { step, flew: false, slid: 0, jumped: false, left, ...(at ? { ring: ringFrom(pose, at), far: Infinity } : {}) };
 }
 
 // One frame. pose as above, with speed (km/s) and sliding (a slide key is held).
@@ -106,7 +112,7 @@ export function updatePractice(practice, pose) {
     else if (reached) next = { ...next, ring: ringFrom(pose, RING_AT.stop), far: Infinity };
   } else if (next.step === 'slide') {
     if (next.slid >= SLID_KM && angleBetween(pose.forward, toRing) <= FACING) done();
-  } else if (next.step === 'find') {
+  } else if (next.step === 'find' || next.step === 'warp') {
     if (reached) {
       events.push('ring');
       done();
@@ -118,8 +124,9 @@ export function updatePractice(practice, pose) {
       next = { ...next, step: null, left: 0 };
     } else next = { ...next, ...begin('free', pose, next.left - 1) };
   }
-  // Flown far past it: the ring comes round before her again.
-  if (next.step !== null && length(sub(next.ring, pose.position)) > LOST_KM) {
+  // Flown far past it: the ring comes round before her again. (Not the far ring of the
+  // jump, until she has jumped to it.)
+  if (next.step !== null && !(next.step === 'warp' && !next.jumped) && length(sub(next.ring, pose.position)) > LOST_KM) {
     next = { ...next, ring: ringFrom(pose, [1, 0, 0]), far: Infinity };
   }
   return next;
@@ -137,6 +144,7 @@ const TEXT = {
   stop: () => t('날다가 정지 버튼으로 멈춰 보세요'),
   slide: () => t('화살표 버튼을 눌러 고리가 정면에 오게 하세요'),
   find: () => t('고리가 등 뒤에 있어요. 이름표를 누르고 날아가세요'),
+  warp: (left, moving, aimed, jumped) => (jumped ? t('도착했습니다. 전진 버튼으로 고리를 지나가세요') : aimed ? t('바라본 채 이름표를 한 번 더 누르면 순간 이동합니다') : t('아주 먼 고리입니다. 이름표를 눌러 바라보세요')),
   free: (left) => t`혼자서 해 보세요. 남은 고리 ${left}개`,
 };
 
@@ -146,15 +154,20 @@ export function practiceGoal(practice, aimed = false, moving = false) {
   if (practice.step === null) return null;
   return {
     count: `${PRACTICE_STEPS.indexOf(practice.step) + 1}/${PRACTICE_STEPS.length}`,
-    text: TEXT[practice.step](practice.left, moving),
+    text: TEXT[practice.step](practice.left, moving, aimed, practice.jumped),
     // Stopping: the forward key until she has flown, then the stop key. Finding: the
     // name tag until she faces the ring, then the forward key.
     teach: {
-      look: null, fly: 'fly', stop: practice.flew ? 'brake' : 'fly', slide: 'slide', find: aimed ? 'fly' : 'tag', free: null,
+      look: null, fly: 'fly', stop: practice.flew ? 'brake' : 'fly', slide: 'slide', find: aimed ? 'fly' : 'tag', warp: practice.jumped ? 'fly' : 'tag', free: null,
     }[practice.step],
     // The ring's name tag is shown where the real game would show one.
-    tag: practice.step === 'find' || practice.step === 'free',
+    tag: practice.step === 'find' || practice.step === 'warp' || practice.step === 'free',
   };
+}
+
+// She has jumped to the far ring: it is JUMP_TO_KM before her now.
+export function jumped(practice) {
+  return { ...practice, jumped: true, far: Infinity };
 }
 
 // Whether she is looking at the ring (as the first lesson asks).

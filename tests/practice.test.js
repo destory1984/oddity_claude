@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt,
+  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, JUMP_TO_KM, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped,
 } from '../src/core/practice.js';
 
 const sub = (a, b) => a.map((n, i) => n - b[i]);
@@ -15,12 +15,12 @@ const pose = (position, forward = [0, 0, 1], more = {}) => {
 };
 const facing = (practice, position) => pose(position, sub(practice.ring, position));
 
-test('the six lessons come in order, each with a line and the control it teaches', () => {
-  assert.deepEqual(PRACTICE_STEPS, ['look', 'fly', 'stop', 'slide', 'find', 'free']);
+test('the seven lessons come in order, each with a line and the control it teaches', () => {
+  assert.deepEqual(PRACTICE_STEPS, ['look', 'fly', 'stop', 'slide', 'find', 'warp', 'free']);
   const start = pose([0, 0, 0]);
   let practice = createPractice(start);
   assert.equal(practice.step, 'look');
-  assert.equal(practiceGoal(practice).count, '1/6');
+  assert.equal(practiceGoal(practice).count, '1/7');
   assert.equal(practiceGoal(practice).teach, null);
   assert.ok(Math.abs(Math.hypot(...practice.ring) - FAR_KM) < FAR_KM * 0.01, 'the first ring is one flight off');
 
@@ -78,11 +78,30 @@ test('the six lessons come in order, each with a line and the control it teaches
   const at = { ...through, position: beside };
   assert.ok(sub(practice.ring, beside).reduce((s, n, i) => s + n * at.forward[i], 0) < 0, 'behind her');
   practice = updatePractice(practice, pose(practice.ring));
+  assert.equal(practice.step, 'warp');
+
+  // 6. A ring far too far to fly to: its tag, its tag again, the jump, and through it.
+  const farFrom = practice.last;
+  assert.ok(Math.hypot(...sub(practice.ring, farFrom)) > FAR_KM * 50);
+  assert.match(practiceGoal(practice).text, /아주 먼 고리/);
+  assert.match(practiceGoal(practice, false, false).text, /아주 먼 고리/);
+  assert.match(practiceGoal(practice, true).text, /한 번 더/);
+  assert.equal(practiceGoal(practice, true).teach, 'tag');
+  // (So far off, it is not brought round before her as a lost ring is.)
+  const kept = practice.ring;
+  practice = updatePractice(practice, pose(farFrom));
+  assert.deepEqual(practice.ring, kept);
+  practice = jumped(practice);
+  assert.match(practiceGoal(practice).text, /도착했습니다/);
+  assert.equal(practiceGoal(practice).teach, 'fly');
+  assert.ok(JUMP_TO_KM > RING_KM * 2.5 && JUMP_TO_KM < FAR_KM * 1.8, 'she lands short of it, and not lost');
+  practice = updatePractice(practice, pose(practice.ring));
+  assert.deepEqual(practice.events, ['ring', 'step']);
   assert.equal(practice.step, 'free');
   assert.equal(practice.left, FREE_RINGS);
   assert.match(practiceGoal(practice).text, new RegExp(`${FREE_RINGS}개`));
 
-  // 6. Three rings one after another, then it is over.
+  // 7. Three rings one after another, then it is over.
   for (let n = FREE_RINGS; n > 1; n--) {
     practice = updatePractice(practice, pose(practice.ring));
     assert.equal(practice.step, 'free');

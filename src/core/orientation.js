@@ -137,3 +137,20 @@ export const REAR_VIEW = [0, 1, 0, 0];
 export function rearTurn(yaw, pitch) {
   return [yaw, -pitch];
 }
+
+// Part of the way from orientation q to orientation goal, by the shortest turn (t: 0
+// stays, 1 arrives): for a view that comes round to where it is to look rather than
+// being put there at a blow.
+export function turnToward(q, goal, t = 1) {
+  let cosine = q[0] * goal[0] + q[1] * goal[1] + q[2] * goal[2] + q[3] * goal[3];
+  // (The same turning is written by a quaternion and by its negative: take the near one.)
+  const to = cosine < 0 ? goal.map((n) => -n) : goal;
+  cosine = Math.abs(cosine);
+  if (cosine > 0.999999) return [...goal];
+  const angle = Math.acos(Math.min(1, cosine));
+  const a = Math.sin((1 - t) * angle) / Math.sin(angle);
+  const b = Math.sin(t * angle) / Math.sin(angle);
+  const out = q.map((n, i) => n * a + to[i] * b);
+  const length = Math.hypot(...out);
+  return out.map((n) => n / length);
+}

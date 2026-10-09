@@ -99,3 +99,21 @@ test('going over the top of a target the view does not flip, as a view built fro
   // Built anew from world-up at each step, right becomes left as the top is passed.
   assert.ok(dot(right(lookAtDirection(ways[0])), right(lookAtDirection(ways[ways.length - 1]))) < -0.99);
 });
+
+test('a view comes round to another by the shortest turn, part of the way at a time', async () => {
+  const { turnToward } = await import('../src/core/orientation.js');
+  const from = lookAtDirection([0, 0, 1]);
+  const goal = lookAtDirection([1, 0, 0]);
+  // Half of a quarter turn: looking 45 degrees round.
+  near(forward(turnToward(from, goal, 0.5)), [Math.SQRT1_2, 0, Math.SQRT1_2]);
+  near(turnToward(from, goal, 1), goal);
+  near(turnToward(from, goal, 0), from);
+  // The same turning written with the other sign goes the same short way.
+  near(forward(turnToward(from, goal.map((n) => -n), 0.5)), [Math.SQRT1_2, 0, Math.SQRT1_2]);
+  // Closing in by a share of what is left each time, it arrives.
+  let q = from;
+  for (let n = 0; n < 60; n++) q = turnToward(q, goal, 0.2);
+  assert.ok(forward(q).reduce((sum, v, i) => sum + v * forward(goal)[i], 0) > 0.999999);
+  // (Level stays level: no roll comes into a turn between two level views.)
+  assert.ok(Math.abs(up(turnToward(from, goal, 0.5))[1] - 1) < 1e-9);
+});

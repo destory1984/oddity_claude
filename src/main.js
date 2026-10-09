@@ -6,7 +6,7 @@ import {
   createState, step, stopNow, totalSpeed, carryAlong, boostLift, velocity, TURN_RATE, START_YAW, keepRange, slideCap,
 } from './core/game.js';
 import {
-  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, right, swingToward,
+  rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, right, swingToward, turnToward,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/craft.js';
 import { skyLabels } from './core/sky.js';
@@ -224,6 +224,8 @@ let paused = false;
 // Flight practice (core/practice.js): while it runs, `state` is her flight in the empty
 // place and this holds the lesson and the flight she left ({ run, back, first }).
 let practice = null;
+// The target she is coming round to face (facePicked), or null.
+let faceTurn = null;
 let selectedId = START_NEAR ? START_NEAR.id : resume?.selectedId && BODIES.some((b) => b.id === resume.selectedId) ? resume.selectedId : resume ? 'earth' : startSpot.target ?? 'earth';
 let dragTurn = [0, 0];
 // Target lock: the chosen target is held in the middle of the view; the slide buttons
@@ -478,6 +480,7 @@ async function init() {
       if (photo.active()) photo.rotate(dx, dy);
       else if (!paused) {
         aimedId = null;
+        faceTurn = null;
         if (practice) practice.turning = false;
         state = { ...state, orientation: rotateLocal(state.orientation, ...(rear ? rearTurn(dx, dy) : [dx, dy])) };
         // Locked: the lock holds, and the target is kept where this drag leaves it.
@@ -847,13 +850,19 @@ ${STORY_MORE[target.id]}` : told };
   // Turn her to look at what is chosen (the "바라보기" key, and a body's name tag).
   function facePicked() {
     const body = here(selectedId);
-    const direction = body.position.map((n, i) => n - state.position[i]);
-    state = { ...state, orientation: faceToward(direction) };
+    // She comes round to it over half a second or so, not at a blow (the user,
+    // 2026-10-10, of the flight practice's ring and then of this: "한번에 휙~ 돌리지말고,
+    // 스무스하게 방향전환해줘"): the frame makes the turn (faceTurn), and a drag, a jump
+    // or another choice ends it.
+    faceTurn = selectedId;
     aimedId = selectedId;
     // Somewhere already known: say again what it is.
     const about = aboutKnown(body);
     toast.show(about ? `${hud.faceToast(body)}\n${about}` : hud.faceToast(body));
   }
+  // How fast she comes round to face a chosen target (faceTurn): a share of the turn
+  // left, per second (nine tenths of it in half a second).
+  const FACE_TURN_RATE = 4.5;
   // She counts as looking at a thing within this of the way the "바라보기" key turns her.
   const FACING_RAD = 0.05;
 
@@ -2216,6 +2225,19 @@ ${STORY_MORE[target.id]}` : told };
     // Photo mode has a view of its own, which starts looking ahead.
     if (rear && photo.active()) setRear(false);
     const intent = input.intent();
+    // Coming round to face a chosen target (facePicked): most of what is left of the
+    // turn each moment, and exactly there at the end, so that a second press of its
+    // name tag finds her looking at it. Given up when she is carried (docked, going
+    // down to a place or to a view), when the view is turned by the keys, or when
+    // something else is chosen.
+    if (faceTurn !== null && (faceTurn !== selectedId || docked || visit || home || warp.busy() || intent.turnX !== 0 || intent.turnY !== 0 || intent.roll !== 0)) faceTurn = null;
+    if (faceTurn !== null && dt > 0) {
+      const goal = faceToward(here(faceTurn).position.map((n, i) => n - state.position[i]));
+      const next = turnToward(state.orientation, goal, 1 - Math.exp(-dt * FACE_TURN_RATE));
+      const near = forward(next).reduce((sum, n, i) => sum + n * forward(goal)[i], 0) > Math.cos(0.004);
+      state = { ...state, orientation: near ? goal : next };
+      if (near) faceTurn = null;
+    }
     // Looking behind, up and down and the roll are the other way round for her body.
     if (rear) {
       intent.turnY = -intent.turnY;

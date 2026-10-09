@@ -165,12 +165,24 @@ const TEXT = {
   free: (left) => t`혼자서 해 보세요. 남은 고리 ${left}개`,
 };
 
+// The lesson before this one, begun again from where she is (the user, 2026-10-10:
+// "이전 비행 연습으로 가는 버튼 추가"). The first lesson has none before it.
+export function previousLesson(practice, pose) {
+  const at = PRACTICE_STEPS.indexOf(practice.step);
+  if (at <= 0) return practice;
+  const step = PRACTICE_STEPS[at - 1];
+  // (Flying goes to the ring that is there; with none placed for it, to one put ahead.)
+  return { ...practice, ...begin(step, pose), ...(step === 'fly' ? { ring: ringFrom(pose, [1, 0, 0.1]), far: Infinity } : {}), last: [...pose.position], events: [] };
+}
+
 // What the line at the top says, and which key is to be pressed now (it blinks).
 // aimed: she is looking at the ring. moving: she is under way.
 export function practiceGoal(practice, aimed = false, moving = false) {
   if (practice.step === null) return null;
   return {
     count: `${PRACTICE_STEPS.indexOf(practice.step) + 1}/${PRACTICE_STEPS.length}`,
+    // There is a lesson before this one to go back to.
+    back: PRACTICE_STEPS.indexOf(practice.step) > 0,
     text: TEXT[practice.step](practice.left, moving, aimed, practice.jumped),
     // Stopping: the forward key until she has flown, then the stop key. Finding: the
     // name tag until she faces the ring, then the forward key.

@@ -38,7 +38,7 @@ import {
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
 import { createGuideView } from './ui/guide.js';
-import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, RING_KM, JUMP_TO_KM, ROLL_START } from './core/practice.js';
+import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, previousLesson, RING_KM, JUMP_TO_KM, ROLL_START } from './core/practice.js';
 import { createPracticeView } from './ui/practice.js';
 import { createJournal } from './ui/journal.js';
 import { createStoryCard } from './ui/storyCard.js';
@@ -2054,6 +2054,15 @@ ${STORY_MORE[target.id]}` : told };
     onJump() {
       const goal = tourGoal();
       if (goal && !paused) teleport(goal.targetId, true, true);
+    },
+    // The flight practice's lesson before this one, begun again from where she is.
+    onBack() {
+      if (!practice || warp.busy()) return;
+      practice.run = previousLesson(practice.run, poseNow());
+      practice.turning = false;
+      practice.wrongAt = undefined;
+      practice.tip = practice.run.step === 'roll' ? ROLL_START : 0;
+      sound.cue('click');
     },
   });
   // What the goal line points at: the guide's Moon, or a tour's next stop.

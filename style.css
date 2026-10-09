@@ -5561,3 +5561,12 @@ body.practiceWrong #guideCount {
 @media (prefers-reduced-motion: reduce) {
   body.practiceWrong #guide { animation:none; }
 }
+
+/* The flight practice's key back to the lesson before: small, before the count. */
+#guide #guideBack {
+  flex:none;
+  min-width:30px;
+  padding:4px 7px;
+  margin-right:-4px;
+}
+#guide #guideBack[hidden] { display:none; }

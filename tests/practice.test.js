@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, JUMP_TO_KM, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, tiltOf, ROLL_START,
+  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, JUMP_TO_KM, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, tiltOf, previousLesson, ROLL_START,
 } from '../src/core/practice.js';
 
 const sub = (a, b) => a.map((n, i) => n - b[i]);
@@ -187,4 +187,34 @@ test('the ring\'s name tag sits on the ring in view and on the edge toward it ou
   // Dead astern: somewhere on the edge all the same.
   const astern = tagSpot([0, 0, -1000], [0, 0, 0], camera, w, h);
   assert.ok(astern.off && Number.isFinite(astern.x) && Number.isFinite(astern.y));
+});
+
+test('a lesson can be gone back from to the one before, begun again from where she is', () => {
+  const here = pose([5000, 0, 0]);
+  let practice = createPractice(here);
+  assert.equal(practiceGoal(practice).back, false);
+  assert.equal(previousLesson(practice, here), practice, 'none before the first');
+  // On to the second, the third, the fourth.
+  practice = updatePractice(practice, facing(practice, here.position));
+  practice = updatePractice(practice, pose(practice.ring, [0, 0, 1], { speed: 5000 }));
+  practice = updatePractice(practice, pose(practice.last, [0, 0, 1], { speed: 9000 }));
+  practice = updatePractice(practice, pose(practice.last, [0, 0, 1], { speed: 0 }));
+  assert.equal(practice.step, 'slide');
+  assert.equal(practiceGoal(practice).back, true);
+  const at = pose([9000, 100, -400]);
+  // Back to stopping: not yet flown, a ring ahead of where she is now.
+  let back = previousLesson({ ...practice, slid: 5000 }, at);
+  assert.equal(back.step, 'stop');
+  assert.equal(back.flew, false);
+  assert.equal(back.slid, 0);
+  assert.deepEqual(back.events, []);
+  assert.ok(sub(back.ring, at.position)[2] > FAR_KM);
+  // Back again to flying: a ring is there to fly to, one flight off.
+  back = previousLesson(back, at);
+  assert.equal(back.step, 'fly');
+  assert.ok(Math.abs(Math.hypot(...sub(back.ring, at.position)) - FAR_KM) < FAR_KM * 0.02);
+  // And to the first.
+  back = previousLesson(back, at);
+  assert.equal(back.step, 'look');
+  assert.equal(practiceGoal(back).back, false);
 });

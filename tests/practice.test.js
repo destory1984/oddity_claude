@@ -59,6 +59,15 @@ test('the eight lessons come in order, each with a line and the control it teach
   assert.equal(practiceGoal(practice).teach, 'slide');
 
   // 4. Turning to face the ring is not a slide; sliding until it is before her is.
+  // (Flown past the ring, it is put out again ahead of her: the lesson can still be done.)
+  {
+    const past = { ...through, position: practice.ring.map((n, i) => n + through.forward[i] * 30000) };
+    const again = updatePractice(practice, past);
+    assert.equal(again.step, 'slide');
+    const to = sub(again.ring, past.position);
+    assert.ok(to.reduce((sum, n, i) => sum + n * past.forward[i], 0) > FAR_KM * 0.8, 'ahead of her again');
+    assert.equal(again.slid, 0);
+  }
   const from = through.position;
   assert.equal(slideSide(practice, through), 1, 'the ring is put to her right');
   practice = updatePractice(practice, facing(practice, from));

@@ -122,6 +122,10 @@ export function updatePractice(practice, pose) {
     else if (reached) next = { ...next, ring: ringFrom(pose, RING_AT.stop), far: Infinity };
   } else if (next.step === 'slide') {
     if (next.slid >= SLID_KM && angleBetween(pose.forward, toRing) <= FACING) done();
+    // Flown up to the ring or past it, she could never bring it before her by sliding
+    // (and the view does not turn in this lesson): the ring is put out again from where
+    // she is now. (The user, 2026-10-10: "4에서 고리 지나치니까 깰 수가 없게 되었는데?")
+    else if (dot(toRing, pose.forward) < FAR_KM * 0.35) next = { ...next, ...begin('slide', pose) };
   } else if (next.step === 'roll') {
     if (next.rolled >= ROLLED && Math.abs(tiltOf(pose)) <= ROLL_UP) done();
   } else if (next.step === 'find' || next.step === 'warp') {

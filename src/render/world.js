@@ -27,6 +27,8 @@ import { sunFrame } from '../core/sunView.js';
 import { CRAFT } from '../core/craft.js';
 import { normalize } from './math.js';
 
+// The view is drawn no finer than this many points to one of the page's.
+const VIEW_FINEST = 1.6;
 // The character's sheet is drawn no finer than this many points to one of the page's.
 const HERO_FINEST = 4;
 
@@ -48,11 +50,15 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
       heroCanvas.hidden = true;
     }
   }
+  // The view is drawn as fine as the screen up to VIEW_FINEST points to one of the
+  // page's, and stretched beyond that (a phone has 3 or 4: all of them would be 3.5 to 6
+  // times the work). Until v0.2.140 this was upside down: a dense screen got FEWER
+  // points than the page (214 x 350 on an iPhone 402 x 658 wide) and all looked smeared.
   // Inside the phone-shaped frame of a wide window (src/shell.js) the page is scaled to
   // the window's height: the picture is drawn that much finer so it stays sharp.
   const sharpen = () => {
     const zoom = Math.max(1, Number(window.frameElement?.dataset.scale) || 1);
-    engine.setHardwareScalingLevel(Math.max(1, window.devicePixelRatio / 1.6) / zoom);
+    engine.setHardwareScalingLevel(1 / (Math.min(VIEW_FINEST, Math.max(1, window.devicePixelRatio || 1)) * zoom));
     heroEngine?.setHardwareScalingLevel(1 / Math.min(HERO_FINEST, (window.devicePixelRatio || 1) * zoom));
   };
   sharpen();

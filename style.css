@@ -29,6 +29,16 @@ html,body {
   font-family:"Pretendard Variable",Pretendard,"Segoe UI","Malgun Gothic",sans-serif;
 }
 
+/* Nothing on the page is chosen as text (there is no field to type in). On an iPhone a
+   long press, easy on the flight keys that are held down, chose the whole page: a blue
+   veil over everything and the "복사하기" strip (the user's capture, 2026-10-11). */
+html,
+body {
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+}
+
 /* Two quick taps do not enlarge the page (on an iPhone a double tap on a button zoomed
    the whole screen in: the user, 2026-10-05). Sheets still scroll and a pinch still
    works; the view and the flight keys keep their own touch-action:none. */

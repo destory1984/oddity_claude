@@ -869,6 +869,8 @@ body.touch #reticle span {
   width: min(620px, 94vw);
   height: 88vh;
   max-height: 88vh;
+  height: 88dvh;
+  max-height: 88dvh;
   padding: 0;
   overflow: hidden;
 }
@@ -1342,10 +1344,16 @@ body.touch #reverseButton,body.touch #flyButton,body.touch #brake {
   image-rendering:pixelated;
 }
 
-/* The card at a story place: a photograph and the longer telling. */
+/* The card at a story place: a photograph and the longer telling.
+   A sheet's height is a share of the window AS IT SHOWS NOW (dvh). In a phone's browser
+   "vh" is the window with the browser's bars put away, taller than what shows while
+   they are out: a sheet 90vh tall reached under the bars, top and bottom, and its last
+   button could not be pressed (the user's iPhone, 2026-10-11). The vh line stays for a
+   browser that does not know dvh. */
 #storyCard {
   width:min(600px,92vw);
   max-height:90vh;
+  max-height:90dvh;
   overflow-y:auto;
 }
 
@@ -1442,6 +1450,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 #noteCard {
   width:min(460px,92vw);
   max-height:90vh;
+  max-height:90dvh;
   overflow-y:auto;
 }
 
@@ -4093,6 +4102,7 @@ footer .throttle .rangeLabels {
 #settings {
   width:min(560px,calc(100vw - 24px));
   max-height:90vh;
+  max-height:90dvh;
   overflow-y:auto;
 }
 
@@ -4103,6 +4113,7 @@ footer .throttle .rangeLabels {
   display:flex;
   flex-direction:column;
   height:min(640px, 90vh);
+  height:min(640px, 90dvh);
 }
 
 #settings[open] > * {

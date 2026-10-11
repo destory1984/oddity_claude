@@ -1,4 +1,4 @@
-import { Vector3, Quaternion, Color3, CreatePlane, CreateSphere, StandardMaterial, Texture, TransformNode, DynamicTexture, Mesh } from './babylon.js';
+import { Vector3, Quaternion, Matrix, Color3, CreatePlane, CreateSphere, StandardMaterial, Texture, TransformNode, DynamicTexture, Mesh } from './babylon.js';
 import { KM_PER_UNIT } from '../core/bodies.js';
 import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
@@ -633,5 +633,34 @@ export function createCraft(scene, craftList) {
     }
   }
 
-  return { update };
+  // Which craft's model a press at (x, y) lands on, or null. x, y, width, height: in the
+  // page's points, of the view. The model's box, as it stands in the view, with a
+  // finger's margin; of two, the nearer one. (No ray is cast: a box is enough to press.)
+  const MARGIN = 10;
+  function at(x, y, width, height) {
+    const camera = scene.activeCamera;
+    const port = camera.viewport.toGlobal(width, height);
+    const seen = scene.getTransformMatrix();
+    let best = null;
+    for (const [id, node] of nodes) {
+      if (!node.isEnabled()) continue;
+      const { min, max } = node.getHierarchyBoundingVectors(true);
+      const box = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
+      let behind = false;
+      for (const cx of [min.x, max.x]) for (const cy of [min.y, max.y]) for (const cz of [min.z, max.z]) {
+        const spot = Vector3.Project(new Vector3(cx, cy, cz), Matrix.IdentityReadOnly, seen, port);
+        if (!(spot.z > 0 && spot.z < 1)) behind = true;
+        box.left = Math.min(box.left, spot.x);
+        box.right = Math.max(box.right, spot.x);
+        box.top = Math.min(box.top, spot.y);
+        box.bottom = Math.max(box.bottom, spot.y);
+      }
+      if (behind || x < box.left - MARGIN || x > box.right + MARGIN || y < box.top - MARGIN || y > box.bottom + MARGIN) continue;
+      const far = node.position.length();
+      if (!best || far < best.far) best = { id, far };
+    }
+    return best?.id ?? null;
+  }
+
+  return { update, at };
 }

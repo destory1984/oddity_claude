@@ -243,6 +243,8 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
   return {
     engine,
     update,
+    // The craft whose model a press at (x, y) of the view lands on (an id), or null.
+    craftAt: (x, y) => craftMeshes.at(x, y, canvas.clientWidth, canvas.clientHeight),
     // Whether something is drawn standing at a story place.
     hasSiteModel: (id) => siteModels.has(id),
     // The direction square to a body's rings ([x, y, z]), or null when it has none.

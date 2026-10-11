@@ -517,7 +517,19 @@ async function init() {
     },
     // A short touch on a constellation, a galaxy or a cluster: it tells its lines.
     onTap(x, y) {
-      if (!photo.active() && !paused && !practice) hud.touchSky(x, y);
+      if (photo.active() || paused || practice) return;
+      // A craft near enough to dock with: a press on the craft itself docks, as its
+      // button does (the user, 2026-10-12, with Chandra filling the view: "물체를 클릭해도
+      // 도킹하게 해줘").
+      if (!docked && !onGround() && !warp.busy()) {
+        const id = world.craftAt(x, y);
+        const target = id ? dockable(state.position, craft.filter((c) => c.id === id)) : null;
+        if (target) {
+          dock(target);
+          return;
+        }
+      }
+      hud.touchSky(x, y);
     },
     // Two fingers turned on the view roll her (ui/input.js): the picture goes round with
     // the fingers. As a roll by the keys does, it lets go of a target only faced.

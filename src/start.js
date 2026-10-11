@@ -13,6 +13,13 @@ const framed = !inFrame && loadScreen() !== 'wide' && phoneFrame({ width: innerW
 // In another language the page's Korean words are replaced as they appear (ui/translate.js).
 startTranslating();
 
+// A long press (or the right button) does not open the browser's own menu: on an Android
+// tablet holding a flight key brought up "뒤로 / 앞으로 / 새로고침" (the user, 2026-10-11).
+// Both pages, the outer one and the frame. A link keeps its menu (open in a new tab).
+addEventListener('contextmenu', (e) => {
+  if (!e.target.closest?.('a[href]')) e.preventDefault();
+});
+
 // One visit is counted per page opened (ui/count.js): by the outer page, never by the frame.
 countVisit();
 

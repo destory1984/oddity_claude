@@ -2379,7 +2379,12 @@ ${STORY_MORE[target.id]}` : told };
     // name tag finds her looking at it. Given up when she is carried (docked, going
     // down to a place or to a view), when the view is turned by the keys, or when
     // something else is chosen.
-    if (faceTurn !== null && (faceTurn !== selectedId || docked || visit || home || warp.busy() || intent.turnX !== 0 || intent.turnY !== 0 || intent.roll !== 0)) faceTurn = null;
+    // (Once she is there, latched to a craft, standing at a place or held over a spot, the
+    // view is hers again and the turn is made: flying with Hubble, Earth's tag said
+    // "지구를 바라봅니다" and nothing turned. The user, 2026-10-12: "화면에는 방향 전환할
+    // 것처럼 보이지만, 방향은 움직이지 않고".)
+    const heldFast = (docked && !isDocked(docked)) || (visit && !hasArrived(visit)) || (home && !homeArrived(home));
+    if (faceTurn !== null && (faceTurn !== selectedId || heldFast || warp.busy() || intent.turnX !== 0 || intent.turnY !== 0 || intent.roll !== 0)) faceTurn = null;
     if (faceTurn !== null && dt > 0) {
       const goal = faceToward(here(faceTurn).position.map((n, i) => n - state.position[i]));
       const next = turnToward(state.orientation, goal, 1 - Math.exp(-dt * FACE_TURN_RATE));

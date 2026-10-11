@@ -1337,6 +1337,7 @@
  "2단계 {}": "Part 2 {0}",
  "1단계 {}": "Part 1 · {0}",
  "비행 연습 2단계: 이번에는 진짜 우주에서 달까지 가 봅니다.": "Flight practice, part 2: now fly to the Moon in real space.",
+ "도킹 중이거나 장소에 서 있을 때에도 이름표와 바라보기 단추로 시점이 돌아갑니다.": "While docked or standing at a place, a name tag and the Face key now turn your view.",
  "멀리 있는 탐사선이나 장소의 이름표를 누르면 그쪽을 바라봅니다. 전에는 아무 일도 없었습니다.": "Pressing the name tag of a far craft or place now turns you to look at it. It did nothing before.",
  "\"그날로\"와 도킹 풀기가 이름 칸의 작은 단추가 되었습니다. 금빛 시계가 그날로입니다.": "“That day” and Undock are now small keys on the name plate. The gold clock is “That day”.",
  "화면을 길게 눌러도 브라우저의 메뉴(뒤로, 앞으로, 새로고침)가 뜨지 않습니다.": "A long press no longer opens the browser’s menu (back, forward, reload).",

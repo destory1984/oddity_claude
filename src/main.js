@@ -704,6 +704,10 @@ async function init() {
   function undock() {
     const { name } = here(docked.id);
     const latched = isDocked(docked);
+    // Let go, the name plate goes back to the world she is by, unless she chose something
+    // else meanwhile (the user, 2026-10-12, with the craft's name still on the plate:
+    // "도킹을 풀면, 다시 별로 돌아와").
+    if (selectedId === docked.id) selectedId = nearestLocalBody(state.position, bodies).body.id;
     docked = null;
     // Let go at the craft's speed, not at a standstill: the two fly on side by side.
     state = { ...state, drift: rideDrift };

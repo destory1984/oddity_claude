@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-12', text: t('장소를 떠나면 이름 칸이 곁에 있는 천체의 이름으로 돌아옵니다.') },
   { day: '2026-10-12', text: t('도킹을 풀면 이름 칸이 곁에 있는 천체의 이름으로 돌아옵니다.') },
   { day: '2026-10-12', text: t('도킹 중이거나 장소에 서 있는 동안 이름 칸은 그 탐사선과 장소의 이름을 지킵니다.') },
   { day: '2026-10-12', text: t('도킹 중이거나 장소에 서 있을 때에도 이름표와 바라보기 단추로 시점이 돌아갑니다.') },

@@ -238,6 +238,8 @@ function practiceWrong() {
 let faceTurn = null;
 // What the name plate was last written for: "<its id> <the chosen id>".
 let platedFor = null;
+// The craft or the place she was with a frame ago (an id), or null.
+let wasWith = null;
 let selectedId = START_NEAR ? START_NEAR.id : resume?.selectedId && BODIES.some((b) => b.id === resume.selectedId) ? resume.selectedId : resume ? 'earth' : startSpot.target ?? 'earth';
 let dragTurn = [0, 0];
 // Target lock: the chosen target is held in the middle of the view; the slide buttons
@@ -3050,6 +3052,13 @@ ${STORY_MORE[target.id]}` : told };
     // meanwhile, to look at it, shows by its own tag's gold line and the plate keeps its
     // name (the user, 2026-10-12, with Hubble and "지구" on the plate: "허블에 도킹한
     // 상태잖아. 그런데 왜 별 이름이?"). Otherwise it names what is chosen.
+    // Gone from it (let go of the craft, flown off from the place), a world is chosen
+    // again: the nearest, unless a world is chosen already. Not on a jump, which goes to
+    // what was chosen. (The user, 2026-10-12, away from a place with its name still on
+    // the plate: "또 그러는데".)
+    const withNow = docked?.id ?? visit?.id ?? null;
+    if (wasWith && !withNow && !warp.busy() && !bodyById(selectedId, bodies)) selectedId = nearestLocalBody(state.position, bodies).body.id;
+    wasWith = withNow;
     const plateId = docked ? docked.id : visit ? visit.id : selectedId;
     const plated = `${plateId} ${selectedId}`;
     if ((hud.plateId() !== plateId || platedFor !== plated) && named(plateId) && named(selectedId)) {

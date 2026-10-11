@@ -5276,7 +5276,9 @@ html.gaze #gazeButton {
    with a ring drawn there: "지구일 때에는 저 위치에 home 버튼"). */
 #hud #targetPanel #targetName #homeButton,
 #hud #targetPanel #targetName #vistaButton,
-#hud #targetPanel #targetName #auroraButton {
+#hud #targetPanel #targetName #auroraButton,
+#hud #targetPanel #targetName #thenKey,
+#hud #targetPanel #targetName #dockKey {
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -5333,6 +5335,34 @@ html.gaze #gazeButton {
 /* The aurora key alone (Neptune, Venus, Ganymede) stands where home's does. */
 #hud #targetPanel #targetName #auroraButton:last-child {
   margin-right:-4px;
+}
+
+/* The keys of the moment (the day of this place, letting go of a craft: ui/hud.js) come
+   after those, so any of the five may be first or last: the first key on the plate is
+   pushed to the right end, the rest follow it, the last reaches 4px into the padding. */
+#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #thenKey, #dockKey) {
+  margin:0;
+}
+
+#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #thenKey, #dockKey):first-of-type {
+  margin-left:auto;
+}
+
+#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #thenKey, #dockKey):last-of-type {
+  margin-right:-4px;
+}
+
+/* With them the plate says the name once: the small name in English makes room, so the
+   plate does not grow a key wider and reach onto the map. */
+#hud #targetPanel > #targetName:has(#thenKey, #dockKey) small {
+  display:none;
+}
+
+/* The day's key is gold, as the wide "그날로" button it stands for. */
+#hud #targetPanel #targetName #thenKey {
+  border-color:#fff1c4;
+  background:linear-gradient(#f3d27a, #d9a93f);
+  color:#1a1640;
 }
 
 /* Picture postcards and the round of the auroras, under the stunt flights (core/viewCards.js):

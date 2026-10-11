@@ -56,6 +56,24 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
     event.stopPropagation();
     onVista?.();
   });
+  // Keys of the moment at the end of the plate, after those: the day of the place she is
+  // at ("그날로") and letting go of the craft she flies with. Each presses the wide button
+  // it stands for, which is then put away (main.js): the two took two lines under the
+  // plate (the user, 2026-10-12, docked with Sputnik: "화면이 너무 복잡하네").
+  const momentKey = (id, picture, button) => {
+    const key = document.createElement('button');
+    key.id = id;
+    key.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${picture}</svg>`;
+    key.addEventListener('click', (event) => {
+      event.stopPropagation();
+      $(button).click();
+    });
+    return key;
+  };
+  // A clock's face with an arrow going back round it; two links of a chain come apart.
+  const thenKey = momentKey('thenKey', '<path d="M4.2 12a7.8 7.8 0 1 0 2.5-5.7"/><path d="M4.2 4.4v4.2h4.2"/><path d="M12 8v4.3l2.9 1.8"/>', 'replayButton');
+  const dockKey = momentKey('dockKey', '<path d="M9.2 8H7a4 4 0 0 0 0 8h2.2"/><path d="M14.8 8H17a4 4 0 0 1 0 8h-2.2"/><path d="M12 5v2.6M12 16.4V19"/>', 'dockTarget');
+  let plateNow = { undock: false, then: null };
   window.addEventListener('resize', fitName);
   document.fonts?.ready.then(fitName);
   const markers = new Map();
@@ -163,10 +181,29 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
       else if (auroras.includes(body.id) && vistas.includes(body.id)) $('targetName').append(auroraKey, vistaKey);
       else if (vistas.includes(body.id)) $('targetName').append(vistaKey);
       else if (auroras.includes(body.id)) $('targetName').append(auroraKey);
+      // (The keys of the moment went out with the old name: the next frame puts them back.)
+      plateNow = { undock: false, then: null };
       fitName();
       $('faceTarget').textContent = t`${body.name} 바라보기`;
       // The button shows a picture only: its words are its name and its tip.
       $('faceTarget').title = t`${body.name} 바라보기`;
+    },
+    // The keys of the moment on the name plate. then: what the day's key is called
+    // ("그날로 · 1957년 10월 4일") or null; undock: whether the key to let go stands there.
+    plateKeys({ undock = false, then = null }) {
+      if (undock === plateNow.undock && then === plateNow.then) return;
+      plateNow = { undock, then };
+      if (then) {
+        thenKey.title = then;
+        thenKey.setAttribute('aria-label', then);
+        $('targetName').append(thenKey);
+      } else thenKey.remove();
+      if (undock) {
+        dockKey.title = t('도킹 풀기');
+        dockKey.setAttribute('aria-label', t('도킹 풀기'));
+        $('targetName').append(dockKey);
+      } else dockKey.remove();
+      fitName();
     },
     // goalId: the body the first-visit guide points at; its label always shows and pulses.
     // knownIds: a Set of what is in the journal (bodies found, craft met, places logged).
@@ -308,6 +345,15 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
         };
       }));
       for (const { body, el } of inView) if (covered.has(body.id)) el.hidden = true;
+      // A name in view that lies under the name plate or under what Sora is saying is not
+      // written: its letters showed through the plate, and half of it stood out from
+      // behind the bubble. (The chosen target's and the goal's were brought down above.)
+      const over = [$('targetName').getBoundingClientRect(), ...saying].filter((box) => box.width);
+      for (const { body, el, selected: sel } of inView) {
+        if (el.hidden || sel || body.id === goalId) continue;
+        const a = el.getBoundingClientRect();
+        if (over.some((b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom)) el.hidden = true;
+      }
       // The keys and the readouts along the foot: no arrow's label lies on them (30: y is
       // the middle of a label some 28px tall, and a plate's ring reaches 8px past its box).
       const feet = ['footer .speedBox', 'footer .throttle', '#hint', '#slidePad', '#reverseButton', '#flyButton', '#rearButton', '#slideDown', '#craftCard']

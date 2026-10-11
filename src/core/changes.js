@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-12', text: t('"그날로"와 도킹 풀기가 이름 칸의 작은 단추가 되었습니다. 금빛 시계가 그날로입니다.') },
   { day: '2026-10-11', text: t('화면을 길게 눌러도 브라우저의 메뉴(뒤로, 앞으로, 새로고침)가 뜨지 않습니다.') },
   { day: '2026-10-11', text: t('폰 브라우저에서 이야기 카드와 쪽지의 맨 아래 단추가 가려지던 것을 고쳤습니다.') },
   { day: '2026-10-11', text: t('화면을 길게 눌러도 글자가 선택되거나 화면이 푸르게 덮이지 않습니다.') },

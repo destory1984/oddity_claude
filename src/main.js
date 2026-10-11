@@ -689,6 +689,10 @@ async function init() {
     visit = null;
     docked = { ...startDocking(state.position, target, bodies), facing: state.orientation };
     rideDrift = [0, 0, 0];
+    // The name plate names the craft she flies with, as it names a place she goes down
+    // to: the keys to its day and to let go stand on it (ui/hud.js plateKeys).
+    selectedId = target.id;
+    hud.showSelection(named(target.id));
     showCraftCard(target);
     input.clear();
     announce({ type: 'docking', name: target.name });
@@ -3024,6 +3028,14 @@ ${STORY_MORE[target.id]}` : told };
     $('exoJump').textContent = away ? t('태양계로 돌아가기') : t('케플러가 본 별로');
     if (docked) $('dockTarget').textContent = t('도킹 풀기');
     else if (offer) $('dockTarget').textContent = t`${offer.name}에 도킹`;
+    // While the name plate names the very thing they act on, the two are small keys on
+    // the plate (ui/hud.js plateKeys) and the wide buttons under it are put away.
+    const undockKey = Boolean(docked) && docked.id === selectedId;
+    const thenId = visit ? visit.id : docked ? docked.id : sceneBody();
+    const thenKey = thenHere && !watchable && thenId === selectedId ? t`그날로 · ${thenHere.day}` : null;
+    if (undockKey) $('dockTarget').hidden = true;
+    if (thenKey) $('replayButton').hidden = true;
+    hud.plateKeys({ undock: undockKey, then: thenKey });
     // In today's sky the game clock's date rides along with the flight state.
     if (layout === 'today') flightLabel += ` · ${dateText(new Date(openedAt.getTime() + simTime * 1000))}`;
     hud.update({
@@ -3045,6 +3057,9 @@ ${STORY_MORE[target.id]}` : told };
       // A name in the sky that a planet or a moon stands before is not written.
       skyHidden: (direction) => skyBehind(direction, state.position, bodies),
       hiddenIds: [
+        // Flying with a craft: its own name (the plate says it) and the Sun's are not
+        // written (the user, 2026-10-12: "도킹 중에는 태양도 없애자", "태양 표시만").
+        ...(docked && isDocked(docked) ? [docked.id, 'sun'].filter((id) => id !== goalNow()?.targetId) : []),
         // The other star is named only from there, and home is one name from there: the Sun.
         ...(away ? homeIds : EXO_IDS),
         ...sites.filter((s) => siteHidden(s, here(s.parent), state.position) || (s.id !== selectedId && siteFar(here(s.parent), state.position))).map((s) => s.id),

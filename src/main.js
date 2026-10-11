@@ -940,6 +940,9 @@ ${STORY_MORE[target.id]}` : told };
     if (target && !docked && dockable(state.position, [target])) dock(target);
     // Docked with it already: its name tag shows its card again.
     else if (target && docked?.id === id && isDocked(docked)) showCraftCard(target);
+    // Too far to dock with and never met (no jump): its tag turns her to look at it, as
+    // a body's does (the user, 2026-10-12, of Sputnik's arrow: "눌렀는데, 시점 이동 안 한다").
+    else if (target && docked?.id !== id) facePicked();
     const place = sites.find((s) => s.id === id) ?? (eventPlace?.id === id && eclipse.kind === 'solar' ? eventPlace : null);
     if (place && !docked && visit?.id !== id
       && !siteHidden(place, here(place.parent), state.position) && !siteFar(here(place.parent), state.position)) goDownTo(place);
@@ -947,6 +950,8 @@ ${STORY_MORE[target.id]}` : told };
     // 2026-10-06, at Mauna Kea: "착륙한 후에 다시 천문대를 누르면, 천문대 소개 글로
     // 돌아가게 해줘").
     else if (place && visit?.id === id && hasArrived(visit) && !photo.active() && progress.stories.includes(id) && STORIES.some((s) => s.id === id)) showStory(id);
+    // A place she cannot go down to from here (too far, or flying with a craft): the same.
+    else if (place && visit?.id !== id) facePicked();
   }
 
   const onGround = () => Boolean(state.restingOn || visit);

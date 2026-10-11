@@ -236,6 +236,8 @@ function practiceWrong() {
 }
 // The target she is coming round to face (facePicked), or null.
 let faceTurn = null;
+// What the name plate was last written for: "<its id> <the chosen id>".
+let platedFor = null;
 let selectedId = START_NEAR ? START_NEAR.id : resume?.selectedId && BODIES.some((b) => b.id === resume.selectedId) ? resume.selectedId : resume ? 'earth' : startSpot.target ?? 'earth';
 let dragTurn = [0, 0];
 // Target lock: the chosen target is held in the middle of the view; the slide buttons
@@ -3038,11 +3040,22 @@ ${STORY_MORE[target.id]}` : told };
     $('exoJump').textContent = away ? t('태양계로 돌아가기') : t('케플러가 본 별로');
     if (docked) $('dockTarget').textContent = t('도킹 풀기');
     else if (offer) $('dockTarget').textContent = t`${offer.name}에 도킹`;
-    // While the name plate names the very thing they act on, the two are small keys on
-    // the plate (ui/hud.js plateKeys) and the wide buttons under it are put away.
-    const undockKey = Boolean(docked) && docked.id === selectedId;
+    // The name plate names where she is while she is with something: the craft she flies
+    // with, the place she stands at (or is on her way to either). What she chooses
+    // meanwhile, to look at it, shows by its own tag's gold line and the plate keeps its
+    // name (the user, 2026-10-12, with Hubble and "지구" on the plate: "허블에 도킹한
+    // 상태잖아. 그런데 왜 별 이름이?"). Otherwise it names what is chosen.
+    const plateId = docked ? docked.id : visit ? visit.id : selectedId;
+    const plated = `${plateId} ${selectedId}`;
+    if ((hud.plateId() !== plateId || platedFor !== plated) && named(plateId) && named(selectedId)) {
+      hud.showSelection(named(plateId), named(selectedId));
+      platedFor = plated;
+    }
+    // While the plate names the very thing they act on, the two are small keys on it
+    // (ui/hud.js plateKeys) and the wide buttons under it are put away.
+    const undockKey = Boolean(docked);
     const thenId = visit ? visit.id : docked ? docked.id : sceneBody();
-    const thenKey = thenHere && !watchable && thenId === selectedId ? t`그날로 · ${thenHere.day}` : null;
+    const thenKey = thenHere && !watchable && thenId === plateId ? t`그날로 · ${thenHere.day}` : null;
     if (undockKey) $('dockTarget').hidden = true;
     if (thenKey) $('replayButton').hidden = true;
     hud.plateKeys({ undock: undockKey, then: thenKey });

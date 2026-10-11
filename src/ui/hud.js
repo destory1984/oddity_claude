@@ -74,6 +74,7 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
   const thenKey = momentKey('thenKey', '<path d="M4.2 12a7.8 7.8 0 1 0 2.5-5.7"/><path d="M4.2 4.4v4.2h4.2"/><path d="M12 8v4.3l2.9 1.8"/>', 'replayButton');
   const dockKey = momentKey('dockKey', '<path d="M9.2 8H7a4 4 0 0 0 0 8h2.2"/><path d="M14.8 8H17a4 4 0 0 1 0 8h-2.2"/><path d="M12 5v2.6M12 16.4V19"/>', 'dockTarget');
   let plateNow = { undock: false, then: null };
+  let plateId = null;
   window.addEventListener('resize', fitName);
   document.fonts?.ready.then(fitName);
   const markers = new Map();
@@ -175,7 +176,10 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
       const top = $('photoTools').getBoundingClientRect().top - el.offsetHeight / 2 - 8;
       if (spot.y > top) el.style.top = `${top}px`;
     },
-    showSelection(body) {
+    // body: what the plate names. faced: what the "바라보기" key turns her to, when that is
+    // another thing (flying with a craft the plate names the craft, main.js).
+    showSelection(body, faced = body) {
+      plateId = body.id;
       $('targetName').innerHTML = `${body.name} <small>${body.nameEn}</small>`;
       if (body.id === 'earth') $('targetName').append(auroraKey, homeKey);
       else if (auroras.includes(body.id) && vistas.includes(body.id)) $('targetName').append(auroraKey, vistaKey);
@@ -184,10 +188,12 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
       // (The keys of the moment went out with the old name: the next frame puts them back.)
       plateNow = { undock: false, then: null };
       fitName();
-      $('faceTarget').textContent = t`${body.name} 바라보기`;
+      $('faceTarget').textContent = t`${faced.name} 바라보기`;
       // The button shows a picture only: its words are its name and its tip.
-      $('faceTarget').title = t`${body.name} 바라보기`;
+      $('faceTarget').title = t`${faced.name} 바라보기`;
     },
+    // Whose name stands on the plate now (an id), or null before the first.
+    plateId: () => plateId,
     // The keys of the moment on the name plate. then: what the day's key is called
     // ("그날로 · 1957년 10월 4일") or null; undock: whether the key to let go stands there.
     plateKeys({ undock = false, then = null }) {

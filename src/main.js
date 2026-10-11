@@ -2551,6 +2551,15 @@ ${STORY_MORE[target.id]}` : told };
         if (spun && far <= ground.radiusKm * LOCK_CARRY_RADII) state = { ...state, ...carriedRound(state.position, state.orientation, ground.position, spun) };
       }
     }
+    // Come down on the ground by her own flying (not to a place, which holds her to
+    // itself), she turns with it too and stays on the same land: she hung still while
+    // Earth went on turning under her feet, 0.4 km a second by a launch pad (the user,
+    // 2026-10-12: "케네디 발사대에 착륙했는데, 지구는 계속 돌고있네").
+    if (state.restingOn && dt > 0 && !docked && !visit && !home && !photo.active()) {
+      const ground = bodyById(state.restingOn, bodies);
+      const spun = ground ? spinOf(ground.id, simTime) - spinOf(ground.id, simTime - dt * TIME_SCALE) : 0;
+      if (spun) state = { ...state, ...carriedRound(state.position, state.orientation, ground.position, spun) };
+    }
     // The journal is of the Solar System: another star's planets are kept apart (below).
     const logged = updateProgress(progress, EXO_IDS.includes(state.restingOn) ? { ...state, restingOn: null } : state, bodies.filter((b) => !b.exo));
     const away = inExo(state.position);

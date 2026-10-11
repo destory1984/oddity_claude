@@ -484,7 +484,7 @@ let world;
 
 async function init() {
   try {
-    world = await createWorld(canvas, bodies);
+    world = await createWorld(canvas, bodies, $('heroSheet'));
   } catch (e) {
     console.error(e);
     $('loadError').textContent = t`${e.message} 최신 Chrome이나 Edge에서 하드웨어 가속을 켜고 다시 열어 주세요.`;

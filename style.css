@@ -79,6 +79,16 @@ button:disabled {
   touch-action:none;
 }
 
+/* The character alone, on a sheet over the flight view: drawn point for point of the
+   screen, where the view itself is drawn coarser and stretched (render/world.js). */
+#heroSheet {
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+
 #hud {
   position:fixed;
   inset:0;

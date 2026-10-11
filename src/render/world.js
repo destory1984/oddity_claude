@@ -27,17 +27,33 @@ import { sunFrame } from '../core/sunView.js';
 import { CRAFT } from '../core/craft.js';
 import { normalize } from './math.js';
 
+// The character's sheet is drawn no finer than this many points to one of the page's.
+const HERO_FINEST = 4;
+
 // Floating origin: the player stays at the scene origin and every body is placed
 // relative to it, one scene unit per 1,000 km.
-export async function createWorld(canvas, bodies = BODIES) {
+// heroCanvas: a sheet over the view for the character alone. The view is drawn coarser
+// than a dense screen (a phone's) and stretched, which smears pixel art; she is drawn on
+// her own sheet, one drawn point to one point of the screen. Without it, or where a
+// second sheet cannot be had, she is drawn into the view as before.
+export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
   const engine = new Engine(canvas, true, {
     preserveDrawingBuffer: true, stencil: true, powerPreference: 'high-performance',
   });
+  let heroEngine = null;
+  if (heroCanvas) {
+    try {
+      heroEngine = new Engine(heroCanvas, false, { stencil: false });
+    } catch {
+      heroCanvas.hidden = true;
+    }
+  }
   // Inside the phone-shaped frame of a wide window (src/shell.js) the page is scaled to
   // the window's height: the picture is drawn that much finer so it stays sharp.
   const sharpen = () => {
-    const zoom = Number(window.frameElement?.dataset.scale) || 1;
-    engine.setHardwareScalingLevel(Math.max(1, window.devicePixelRatio / 1.6) / Math.max(1, zoom));
+    const zoom = Math.max(1, Number(window.frameElement?.dataset.scale) || 1);
+    engine.setHardwareScalingLevel(Math.max(1, window.devicePixelRatio / 1.6) / zoom);
+    heroEngine?.setHardwareScalingLevel(1 / Math.min(HERO_FINEST, (window.devicePixelRatio || 1) * zoom));
   };
   sharpen();
 
@@ -69,7 +85,7 @@ export async function createWorld(canvas, bodies = BODIES) {
   const glows = createGlows(scene, bodies);
 
   // The character (the pixel-art drawings) is drawn in the camera's own space.
-  const hero = createSpriteHero(engine);
+  const hero = createSpriteHero(heroEngine ?? engine, { own: Boolean(heroEngine) });
   const ice = createIce(hero.scene);
   // The traveler's place relative to each ringed planet last frame, to catch a crossing.
   const lastByRings = new Map();
@@ -232,11 +248,31 @@ export async function createWorld(canvas, bodies = BODIES) {
     },
     render() {
       scene.render();
+      if (!heroEngine) {
+        hero.scene.render();
+        return;
+      }
+      heroEngine.beginFrame();
       hero.scene.render();
+      heroEngine.endFrame();
+    },
+    // The view and the character on one picture, as large as the finer of the two: for
+    // a photograph. To be taken straight after render(), before the browser shows the frame.
+    picture() {
+      if (!heroEngine) return canvas;
+      const whole = document.createElement('canvas');
+      whole.width = Math.max(canvas.width, heroCanvas.width);
+      whole.height = Math.max(canvas.height, heroCanvas.height);
+      const pen = whole.getContext('2d');
+      pen.drawImage(canvas, 0, 0, whole.width, whole.height);
+      pen.imageSmoothingEnabled = false;
+      pen.drawImage(heroCanvas, 0, 0, whole.width, whole.height);
+      return whole;
     },
     resize() {
       sharpen();
       engine.resize();
+      heroEngine?.resize();
     },
     setFov(radians) {
       camera.fov = radians;

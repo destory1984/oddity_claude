@@ -61,19 +61,21 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
     };
     try {
       world.render();
+      // The view with the character laid on it (she is drawn on a sheet of her own).
+      const picture = world.picture();
       // A small copy for the album, taken from the same frame as the saved photo.
       try {
-        const { width, height } = thumbSize(canvas.width, canvas.height);
+        const { width, height } = thumbSize(picture.width, picture.height);
         const small = document.createElement('canvas');
         small.width = width;
         small.height = height;
-        small.getContext('2d').drawImage(canvas, 0, 0, width, height);
+        small.getContext('2d').drawImage(picture, 0, 0, width, height);
         shot.thumb = small.toDataURL('image/jpeg', 0.8);
       } catch {
         shot.thumb = null;
       }
       const blob = await new Promise((resolve, reject) => {
-        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error(t('이미지 생성 실패')))), 'image/png');
+        picture.toBlob((b) => (b ? resolve(b) : reject(new Error(t('이미지 생성 실패')))), 'image/png');
       });
       const file = new File([blob], `oddity-${new Date().toISOString().replace(/[:.]/g, '-')}.png`, { type: 'image/png' });
       const touch = document.body.classList.contains('touch');

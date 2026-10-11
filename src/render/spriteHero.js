@@ -1,5 +1,5 @@
 import {
-  Scene, FreeCamera, Vector3, Color3, Quaternion, StandardMaterial, Texture, CreatePlane, Mesh,
+  Scene, FreeCamera, Vector3, Color3, Color4, Quaternion, StandardMaterial, Texture, CreatePlane, Mesh,
 } from './babylon.js';
 import { FLIGHT_SHEETS, FRAMES, createSpriteState, stepSprite, spriteFrame, spriteFile } from '../core/sprite.js';
 import { heroScaleFor } from '../core/pose.js';
@@ -17,9 +17,12 @@ const CARD_AT = [0, -0.75, 6];
 const PAL_SIZE = (CARD_HEIGHT * 64) / 256;
 const PAL_OFFSET = [-0.82, 0.78];
 
-export function createSpriteHero(engine) {
+// own: the engine draws nothing but her, on a sheet of its own laid over the view
+// (render/world.js): each frame begins clear, so the view shows through round her.
+export function createSpriteHero(engine, { own = false } = {}) {
   const scene = new Scene(engine);
-  scene.autoClear = false;
+  scene.autoClear = own;
+  scene.clearColor = new Color4(0, 0, 0, 0);
   scene.autoClearDepthAndStencil = true;
 
   const camera = new FreeCamera('heroCamera', Vector3.Zero(), scene);

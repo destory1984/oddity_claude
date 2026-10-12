@@ -54,6 +54,9 @@ uniform float polarCap;
 // y Io, its lakes of lava; z Mars, dust devils walking; w Titan, clouds of methane.
 uniform vec4 sights;
 uniform vec3 nightGlow;
+// A thin layer of air that shines of itself over the whole night side, brightest seen
+// edge on along the limb (Venus's green oxygen light).
+uniform vec3 nightAir;
 uniform vec4 shine;
 // Earth's shadow coming over the Moon in a lunar eclipse (core/eclipses.js): xyz the
 // side it comes from, w how far it has come (0 none, 1 all of the disc).
@@ -336,6 +339,10 @@ void main(){
   vec3 light = col * lit + baseColor * rim + rimColor * pow(limbEdge, 4.) * beyond * beyond * rimLight;
   if (nightGlow.r + nightGlow.g + nightGlow.b > 0.) {
     light += nightGlow * (1. - smoothstep(-.15, .1, l)) * (.5 + fbm(lp.xz * 3. + lp.y * 2. + time * .01));
+  }
+  if (nightAir.r + nightAir.g + nightAir.b > 0.) {
+    float mottle = .65 + .7 * fbm(lp.xz * 2. + lp.y * 1.5 + time * .02);
+    light += nightAir * (.16 + pow(limbEdge, 5.) * 1.2) * (1. - smoothstep(-.2, .05, l)) * mottle;
   }
   // The planet's light on the side turned to it: it shows where the Sun does not reach.
   light += col * shineColor * max(dot(N, shine.xyz), 0.) * shine.w;

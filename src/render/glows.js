@@ -291,7 +291,7 @@ function band(scene, name, foot, top, tessellation, rings = 1) {
 export function createGlows(scene, bodies) {
   const radiusOf = (id) => bodies.find((b) => b.id === id).radiusKm;
 
-  const auroras = AURORAS.flatMap((aurora) => [true, false].filter((north) => !aurora.only || (aurora.only === 'north') === north).map((north) => {
+  const auroras = AURORAS.filter((aurora) => !aurora.whole).flatMap((aurora) => [true, false].filter((north) => !aurora.only || (aurora.only === 'north') === north).map((north) => {
     const { foot, top } = auroraBand(aurora, radiusOf(aurora.body), north);
     const material = veilMaterial(scene, `aurora_${aurora.body}_${north}`, { low: aurora.low, high: aurora.high, ripple: 14, nightOnly: true });
     const mesh = band(scene, `aurora_${aurora.body}_${north}`, foot.radiusKm / KM_PER_UNIT, top.radiusKm / KM_PER_UNIT, 96);

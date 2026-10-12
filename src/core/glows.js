@@ -37,8 +37,10 @@ export const AURORAS = [
   // photographed it from the ground in 2024.
   { body: 'mars', latDeg: 52, baseKm: 80, heightKm: 600, low: [0.3, 1, 0.4], high: [0.6, 1, 0.5], rangeRadii: 6, only: 'south', light: 0.8 },
   // Venus has no field at all: when a storm from the Sun reaches it the oxygen high in
-  // its air glows green over the whole night side, faintly. Drawn as a dim, low band.
-  { body: 'venus', latDeg: 40, baseKm: 150, heightKm: 700, low: [0.35, 1, 0.45], high: [0.5, 0.9, 0.5], rangeRadii: 6, light: 0.45 },
+  // its air glows green over the whole night side, faintly. whole: no band is drawn for
+  // it; the globe itself glows (render/planets.js `nightAir`). The band's numbers stay
+  // for the place its key goes to (core/home.js).
+  { body: 'venus', latDeg: 40, baseKm: 150, heightKm: 700, low: [0.35, 1, 0.45], high: [0.5, 0.9, 0.5], rangeRadii: 6, light: 0.45, whole: true },
   // Ganymede, the one moon with a magnetic field of its own: two belts of oxygen's
   // light. Hubble measured how they rock and so found the sea under its ice (2015).
   { body: 'ganymede', latDeg: 40, baseKm: 30, heightKm: 450, low: [1, 0.42, 0.35], high: [0.55, 1, 0.6], rangeRadii: 6, light: 0.8 },

@@ -30,7 +30,9 @@ function fitName() {
   plate.style.width = `${count * step - (step - key)}px`;
 }
 
-export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAurora, onVista, vistas = [], auroras = ['earth'], skyLabels = [] }) {
+export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome, onAurora, onVista, vistas = [], auroras = ['earth'], skyLabels = [] }) {
+  // A press on the name itself (not on a key at its end, which keeps the press to itself).
+  $('targetName').addEventListener('click', () => onName?.());
   // The way home (core/home.js): a key that stands at the end of the name plate while
   // Earth is the one chosen. Writing another name into the plate takes it out again.
   const homeKey = $('homeButton');

@@ -5352,6 +5352,12 @@ html.gaze #gazeButton {
   margin-right:-4px;
 }
 
+/* A press on the name turns her to look at what it names (main.js onName). */
+#hud #targetPanel > #targetName {
+  cursor:pointer;
+  pointer-events:auto;
+}
+
 /* With them the plate says the name once: the small name in English makes room, so the
    plate does not grow a key wider and reach onto the map. */
 #hud #targetPanel > #targetName:has(#thenKey, #dockKey) small {

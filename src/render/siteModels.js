@@ -1293,8 +1293,49 @@ const LANDER_STAGE_BUILD = {
   insight: alone('insight', fanLander, {}, [0, 0.1, 0, 0.3, 0.16]),
 };
 
+// Vega 1 at Venus (core/moonScenes.js PLACE_STAGES.vega): the lander, the parachute
+// over it, and the balloon with its instruments at the end of a long line. (The real
+// line was nearly four times the balloon's width: drawn at twice, to fit the stage.)
+function vegaPieces(scene, name, mats) {
+  const white = (tag, light) => {
+    const paint = new StandardMaterial(`${name}${tag}`, scene);
+    paint.diffuseColor = new Color3(1, 0.97, 0.9);
+    paint.emissiveColor = new Color3(light, light * 0.94, light * 0.82);
+    paint.specularColor = new Color3(0, 0, 0);
+    paint.backFaceCulling = false;
+    return paint;
+  };
+  const chute = new TransformNode(`${name}Chute`, scene);
+  const canopy = CreateSphere(`${name}Canopy`, { diameter: 1, slice: 0.5, segments: 20 }, scene);
+  canopy.parent = chute;
+  canopy.material = white('Cloth', 0.6);
+  canopy.position.y = 1.15;
+  canopy.scaling.y = 0.75;
+  canopy.isPickable = false;
+  for (let k = 0; k < 8; k++) {
+    const a = (k * Math.PI) / 4;
+    rod(scene, `${name}Line${k}`, chute, mats.white, [Math.cos(a) * 0.49, 1.15, Math.sin(a) * 0.49], [Math.cos(a) * 0.15, 0.42, Math.sin(a) * 0.15], 0.008, 4);
+  }
+  const balloon = new TransformNode(`${name}Balloon`, scene);
+  part(CreateSphere(`${name}Bag`, { diameter: 0.46, segments: 18 }, scene), balloon, white('Skin', 0.7), [0, 0, 0]);
+  rod(scene, `${name}Tether`, balloon, mats.white, [0, -0.23, 0], [0, -0.8, 0], 0.007, 4);
+  drum(scene, `${name}Cone`, balloon, mats.chrome, { height: 0.07, diameterTop: 0.012, diameterBottom: 0.05, tessellation: 10 }, [0, -0.83, 0]);
+  box(scene, `${name}Gondola`, balloon, mats.white, [0.04, 0.15, 0.04], [0, -0.94, 0]);
+  return {
+    pieces: {
+      lander: capsule(scene, `${name}Lander`, mats),
+      chute,
+      balloon,
+      // (Mine, unasked, 2026-10-13.)
+      say: sayBubble(scene, `${name}Say`, t('둥실둥실. 구름 구경 간다~')),
+    },
+    flames: {},
+  };
+}
+
 const MOON_STAGES = {
   ...LANDER_STAGE_BUILD,
+  vega: vegaPieces,
   ...Object.fromEntries(Object.entries(LANDMARKS).map(([id, def]) => [id, landmarkPieces(id, def)])),
   naro: nuriPieces,
   tanegashima: rocketPieces('h2a'),
@@ -1469,7 +1510,7 @@ export const SITE_BUILD = {
   huygens: [huygens, {}],
   lc39a: [launchPad, { rocket: 'saturn' }], naro: [launchPad, { rocket: 'nuri' }],
   tanegashima: [launchPad, { rocket: 'h2a' }], wenchang: [launchPad, { rocket: 'cz5' }],
-  messenger: [messenger, {}], venera7: [capsule, {}], venera13: [capsule, {}],
+  messenger: [messenger, {}], venera7: [capsule, {}], venera13: [capsule, {}], venera9: [capsule, {}], vega: [capsule, {}],
 };
 
 // What one that bounces or comes straight down says (core/replay.js `say`; the user, 2026-10-06, of
@@ -1484,6 +1525,8 @@ export const SITE_SAYS = {
   venera7: () => t('앗 뜨거. 사우나보다 더워~'),
   // (Of five offered for Venera 13: "4": it sent the first sound from another planet.)
   venera13: () => t('쉿. 금성의 바람 소리야'),
+  // (Mine, unasked, 2026-10-13: it carried lamps for a dark that was not there.)
+  venera9: () => t('찰칵. 생각보다 환하네'),
   // (Of five offered for Huygens, 2026-10-07: "2": the ground it met was like wet sand.)
   huygens: () => t('푹. 어라, 젖은 모래 같네'),
   // (Of five offered for pad 39A: "1": Doug Hurley's own words before lift-off, "Let's
@@ -1533,7 +1576,7 @@ export const SITE_REPLAY_BUILD = {
   viking1: [viking, {}, 'flame', 0.1],
   huygens: [huygens, {}, 'chute'],
   // Venus: both came down under a parachute through the thick air.
-  venera7: [capsule, {}, 'chute'], venera13: [capsule, {}, 'chute'],
+  venera7: [capsule, {}, 'chute'], venera13: [capsule, {}, 'chute'], venera9: [capsule, {}, 'chute'],
   curiosity: [rover, { power: 'rtg' }, 'crane'], perseverance: [rover, { power: 'rtg' }, 'crane'],
   // Mars 3 under its parachute (its last rocket is not drawn).
   mars3: [capsule, {}, 'chute'],

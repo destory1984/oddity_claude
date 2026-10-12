@@ -47,9 +47,9 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 
 ## 이야기 장소의 사진
 
-`public/assets/stories/` 의 사진 102장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
+`public/assets/stories/` 의 사진 103장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
 
-같은 폴더의 그림 일곱 장(`acidalia.jpg`, `procellarum.jpg`, `schiaparelli.jpg`, `wadiRum.jpg`, `bohyunsan.jpg`, `tanegashima.jpg`, `wenchang.jpg`, 420×420)은 쓸 수 있는 사진이 없어 이 게임을 위해 그린 것이다. 외부 자료가 아니고 권리를 보유한다(LICENSE).
+같은 폴더의 그림 여덟 장(`acidalia.jpg`, `procellarum.jpg`, `schiaparelli.jpg`, `wadiRum.jpg`, `bohyunsan.jpg`, `tanegashima.jpg`, `wenchang.jpg`, `vega.jpg`, 420×420)은 쓸 수 있는 사진이 없어 이 게임을 위해 그린 것이다. 외부 자료가 아니고 권리를 보유한다(LICENSE).
 
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
@@ -143,6 +143,7 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | `vivaldi.jpg` | [Vivaldi crater MESSENGER WAC IGF to RGB.jpg](https://commons.wikimedia.org/wiki/File:Vivaldi_crater_MESSENGER_WAC_IGF_to_RGB.jpg) | NASA/Johns Hopkins University Applied Physics Laboratory/Carnegie Institution of Washington (James Stuby가 NASA 사진으로 만든 색 합성) | Public domain |
 | `conamara.jpg` | [Europa Ice Rafts.jpg](https://commons.wikimedia.org/wiki/File:Europa_Ice_Rafts.jpg) | NASA/JPL | Public domain |
 | `venera7.jpg` | [Venera-7.jpg](https://commons.wikimedia.org/wiki/File:Venera-7.jpg) | Stanislav Kozlovskiy | CC BY-SA 4.0 |
+| `venera9.jpg` | [Foto de Venera 9.png](https://commons.wikimedia.org/wiki/File:Foto_de_Venera_9.png) | Venera 9, Soviet space program (Ted Stryk가 다시 다듬은 판) | Public domain |
 | `occator.jpg` | [PIA20350 crop - Occator from LAMO.jpg](https://commons.wikimedia.org/wiki/File:PIA20350_crop_-_Occator_from_LAMO.jpg) | NASA / JPL-Caltech / UCLA / Max Planck Institute for Solar S | Public domain |
 | `lc39a.jpg` | [Apollo 11 Launch - GPN-2000-000630.jpg](https://commons.wikimedia.org/wiki/File:Apollo_11_Launch_-_GPN-2000-000630.jpg) | NASA | Public domain |
 | `yiSoyeon.jpg` | [Yi+Malenchenko+Whitson at ISS 08Apr17 (NASA-ISS016-E-036365).jpg](https://commons.wikimedia.org/wiki/File:Yi%2BMalenchenko%2BWhitson_at_ISS_08Apr17_(NASA-ISS016-E-036365).jpg) | ISS crew | Public domain |
@@ -177,6 +178,7 @@ CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수
 | `bohyunsan.jpg` | 이 게임을 위해 그린 그림 (2026-10-05) | 이 저장소 | 권리 보유 (LICENSE) |
 | `tanegashima.jpg` | 이 게임을 위해 그린 그림 (2026-10-07) | 이 저장소 | 권리 보유 (LICENSE) |
 | `wenchang.jpg` | 이 게임을 위해 그린 그림 (2026-10-07) | 이 저장소 | 권리 보유 (LICENSE) |
+| `vega.jpg` | 이 게임을 위해 그린 그림 (2026-10-13) | 이 저장소 | 권리 보유 (LICENSE) |
 
 ## d3-celestial 라이선스 (BSD 3-Clause)
 

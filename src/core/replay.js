@@ -251,6 +251,24 @@ export const REPLAYS = {
       { at: 17, text: t('457도, 89기압에서 127분을 버텼습니다. 금성 땅의 첫 컬러 사진과 바람 소리를 보냈습니다.') },
     ],
   },
+  // A third on Venus (the user, 2026-10-13: "베네라 9호까지 넣자"): the first picture from
+  // the ground of another planet.
+  venera9: {
+    name: t('베네라 9호의 착륙'),
+    day: t('1975년 10월 22일'),
+    seconds: 24,
+    downAt: 17,
+    fromKm: 14,
+    // Once it is down and has looked: from, to.
+    say: [18.4, 23],
+    sounds: [[0, 'chute'], [17.8, 'shutter']],
+    lines: [
+      { at: 0, text: t('1975년 10월 22일. 소련의 베네라 9호가 금성의 구름을 뚫고 내려옵니다. 싣고 온 본체는 위에 남아 금성을 돕니다.') },
+      { at: 6, text: t('낙하산은 높이 50km에서 버립니다. 그 아래로는 몸에 두른 둥근 판으로 짙은 공기를 받으며 내려갑니다.') },
+      { at: 12, text: t('초속 7m로 돌이 널린 비탈에 내렸습니다. 485도, 지구의 90배 기압입니다.') },
+      { at: 17, text: t('카메라 덮개 둘 가운데 하나만 떨어졌습니다. 남은 한쪽으로 찍은 흑백 사진이 다른 행성의 땅에서 온 첫 사진입니다.') },
+    ],
+  },
   // Stages that are not on the Moon: Pluto's heart, Nuri leaving Naro.
   ...PLACE_STAGES,
   // The landmarks: a picture taken, a look through a telescope, or what made the place.

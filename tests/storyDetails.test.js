@@ -15,13 +15,13 @@ test('every story place has a longer telling of three sentences or more', () => 
   }
 });
 
-test('all 109 have a picture on file, with a caption and a credit (102 photographs and seven drawings made for the game)', () => {
+test('all 111 have a picture on file, with a caption and a credit (103 photographs and eight drawings made for the game)', () => {
   const without = STORIES.filter((s) => !STORY_DETAILS[s.id].photo).map((s) => s.id);
   assert.deepEqual(without, []);
   assert.equal(storyPhotoFile('wadiRum'), 'stories/wadiRum.jpg');
   assert.equal(storyPhotoFile('nowhere'), null);
   // A drawing says that it is one.
-  for (const id of ['procellarum', 'acidalia', 'schiaparelli', 'wadiRum', 'bohyunsan', 'tanegashima', 'wenchang']) assert.match(STORY_DETAILS[id].photo.caption, /^그림으로 그린 .*사진이 아닙니다\.$/);
+  for (const id of ['procellarum', 'acidalia', 'schiaparelli', 'wadiRum', 'bohyunsan', 'tanegashima', 'wenchang', 'vega']) assert.match(STORY_DETAILS[id].photo.caption, /^그림으로 그린 .*사진이 아닙니다\.$/);
   const credits = readFileSync('THIRD-PARTY.md', 'utf8');
   let bytes = 0;
   for (const story of STORIES) {
@@ -35,7 +35,8 @@ test('all 109 have a picture on file, with a caption and a credit (102 photograp
     // Where it came from and its licence are written down.
     assert.ok(credits.includes(`| \`${story.id}.jpg\` |`), `${story.id} is not in THIRD-PARTY.md`);
   }
-  assert.equal(readdirSync('public/assets/stories').length, 109);
-  // (4 MB until the four of Mercury came, 2026-10-12: 106 pictures, 39 KB each on average.)
-  assert.ok(bytes < 4.2e6, `${bytes} bytes of pictures`);
+  assert.equal(readdirSync('public/assets/stories').length, 111);
+  // (4 MB until the four of Mercury came, 2026-10-12; 4.2 MB until the two of Venus,
+  // 2026-10-13: 111 pictures, 38 KB each on average.)
+  assert.ok(bytes < 4.3e6, `${bytes} bytes of pictures`);
 });

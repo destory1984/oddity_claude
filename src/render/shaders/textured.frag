@@ -342,7 +342,9 @@ void main(){
   }
   if (nightAir.r + nightAir.g + nightAir.b > 0.) {
     float mottle = .65 + .7 * fbm(lp.xz * 2. + lp.y * 1.5 + time * .02);
-    light += nightAir * (.16 + pow(limbEdge, 5.) * 1.2) * (1. - smoothstep(-.2, .05, l)) * mottle;
+    // (It shines high over the clouds: standing on the ground under them she saw the
+    // ground itself green. It comes in between 60 and 240 km up.)
+    light += nightAir * (.16 + pow(limbEdge, 5.) * 1.2) * (1. - smoothstep(-.2, .05, l)) * mottle * smoothstep(.01, .04, close);
   }
   // The planet's light on the side turned to it: it shows where the Sun does not reach.
   light += col * shineColor * max(dot(N, shine.xyz), 0.) * shine.w;

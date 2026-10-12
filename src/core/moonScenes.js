@@ -443,6 +443,41 @@ export const PLACE_STAGES = {
       };
     },
   },
+  // Vega 1 at Venus (the user, 2026-10-13, of things to add at Venus: "1, 2 넣어"): one
+  // capsule comes down the sky and parts in two at 6 s: the lander goes on down under its
+  // parachute, and the balloon swells where they parted and drifts off on the wind. (The
+  // real balloon floated 54 km up and the lander stood on the ground under the clouds:
+  // drawn on one stage, a unit and a bit apart.)
+  vega: {
+    name: t('금성 하늘에 뜬 풍선'),
+    day: t('1985년 6월 11일'),
+    seconds: 31,
+    downAt: 12,
+    viewKm: 56,
+    sounds: [[0, 'chute'], [6, 'clunk'], [12, 'landed']],
+    lines: [
+      { at: 0, text: t('1985년 6월 11일. 핼리 혜성으로 가던 소련의 베가 1호가 금성에 캡슐 하나를 떨어뜨립니다.') },
+      { at: 6, text: t('캡슐이 구름 속에서 둘로 갈라집니다. 착륙선은 땅으로 내려가고, 풍선은 높이 54km에서 부풉니다.') },
+      { at: 12, text: t('지름 3.5m의 풍선이 13m 줄 끝에 측정 장치를 매달고, 시속 240km의 바람에 실려 갑니다.') },
+      { at: 19, text: t('그 높이는 기압이 지구의 절반, 온도가 30도쯤입니다. 금성에서 지구와 가장 비슷한 곳입니다.') },
+      { at: 25, text: t('46시간 동안 11,000km 넘게 떠다녔습니다. 지구 밖 하늘에 뜬 첫 풍선입니다.') },
+    ],
+    stage(t) {
+      const landerY = t < 6 ? 2.6 - 1.5 * clamp(t / 6) : 1.1 * (1 - clamp((t - 6) / 6)) ** 2;
+      const drift = clamp((t - 9) / 22);
+      // (It swells clear of the parachute's lines, half a unit to the side.)
+      const bx = 0.05 + 0.95 * drift;
+      const by = 1.1 + 0.08 * ease(t, 6, 10) + 0.05 * Math.sin(t * 1.3) * ease(t, 9, 11);
+      return {
+        lander: { x: -0.5, y: landerY },
+        chute: { x: -0.5, y: landerY, shown: t < 12 },
+        // (It leans a little the way the wind carries it.)
+        balloon: { x: bx, y: by, scale: Math.max(0.01, ease(t, 6, 9)), lean: -0.1 * ease(t, 9, 12), shown: t >= 6 },
+        // (Large: this stage is seen from far, and at 0.8 its words were too small to read.)
+        say: said(t, 13.2, 18.4, bx + 0.58, by + 0.42, 1.1),
+      };
+    },
+  },
   // Shoemaker-Levy 9 hits Jupiter (the user, 2026-10-06: "레비 9 충돌은 그날 애니 없어?").
   // Four of its twenty-one pieces are shown: each comes down the sky at a slant, a ball
   // of fire swells and rises where it goes in, and a dark bruise spreads on the cloud

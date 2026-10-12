@@ -361,6 +361,20 @@ STORIES.push(...[
   hint: t`${t('수성')}(${where(latDeg, lonDeg)}) ${withinKm.toLocaleString('ko-KR')}km 안에 내려앉기`,
   text,
 })));
+// Two more on Venus, which had two landings and no more (the user, 2026-10-13: "1, 2
+// 넣어", "베네라 9호까지 넣자"). Vega 1's place is where its lander came down: the balloon
+// was let go over it and drifted a third of the way round the planet. (Longitudes are
+// east ones, as Venus's map and the two Veneras' places.)
+STORIES.push(...[
+  ['vega', t('베가 1호의 풍선'), 'Vega 1', 1985, 7.2, 177.8, 150,
+    t('1985년 6월 11일 소련의 베가 1호가 이곳 하늘에 풍선을 띄웠습니다. 구름 속 54km 높이를 이틀 가까이 떠다녔습니다.')],
+  ['venera9', t('베네라 9호 착륙지'), 'Venera 9', 1975, 31, -68.4, 150,
+    t('1975년 10월 22일 금성에 내려 53분 동안 신호를 보냈습니다. 다른 행성의 땅에서 찍은 첫 사진을 보냈습니다.')],
+].map(([id, name, nameEn, year, latDeg, lonDeg, withinKm, text]) => ({
+  id, name, nameEn, year, type: 'surface', body: 'venus', latDeg, lonDeg, withinKm, landmark: false,
+  hint: t`${t('금성')}(${where(latDeg, lonDeg)}) ${withinKm.toLocaleString('ko-KR')}km 안에 내려앉기`,
+  text,
+})));
 named(STORIES);
 
 // A place's label shows only from within this many of its body's radii above the

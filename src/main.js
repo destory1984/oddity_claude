@@ -25,7 +25,7 @@ import { pickSpot, fromSpot, toSpot, NEAR_EARTH_ONLY } from './core/startSpots.j
 import { teleportSpot, visited } from './core/teleport.js';
 import { behindBody, skyBehind, lostInGlare, nearestBodies, nearbyMoons } from './core/markers.js';
 import { FACTS } from './core/facts.js';
-import { eventMessage, limitText, dateText, withParticle, objectParticle, distanceText } from './ui/messages.js';
+import { eventMessage, limitText, dateText, withParticle, objectParticle, distanceText, markedName } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import {
   updateProgress, recordPhotos, recordStories, recordCraft, recordNote, recordQuiz, createProgress, summarize, score, isComplete,
@@ -955,7 +955,7 @@ ${STORY_MORE[target.id]}` : told };
         // Never been there (○ on its tag): the two ticks alone did not say why nothing
         // happened (the user, 2026-10-12, of the Sun behind Hubble: "딸깍딸깍하는 소리만
         // 나오, 워프를 안 하는데.. 막혀서 그런거지?").
-        if (!visited(chosen, progress)) toast.show(t('아직 가 보지 않은 곳입니다. 왼쪽 위의 지도를 눌러 큰 지도에서 순간 이동할 수 있습니다.'));
+        if (!visited(chosen, progress)) toast.show(t('아직 가 보지 않은 곳입니다. 한 번 다녀오면 이름표로 순간 이동할 수 있습니다.'));
       }
       return;
     }
@@ -1330,12 +1330,20 @@ ${STORY_MORE[target.id]}` : told };
     const away = inExo(state.position);
     return bodies.filter((b) => (away ? b.exo : !b.exo && ['star', 'planet', 'dwarf', 'comet'].includes(b.kind)));
   };
+  // The jump from the map goes only to where she has been, as a name tag's does (the
+  // user, 2026-10-12: "큰 지도도 가 본 곳만 가게 되돌려"; from v0.1.60 it went anywhere,
+  // which was my reading of "별을 선택해서 텔레포트하는 식으로", not their word). A first
+  // visit is flown: "이 방향으로" turns her there. Round the other star all is as it was:
+  // its planets are not kept in the journal.
+  const mapKnown = (id) => inExo(state.position) || visited(here(id), progress);
   function pickOnMap(id) {
     mapPick = id;
     const body = here(id);
-    $('bigMapInfo').textContent = `${body.name} · ${distanceText(surfaceDistance(state.position, body))}`;
+    const known = mapKnown(id);
+    const where = `${body.name} · ${distanceText(surfaceDistance(state.position, body))}`;
+    $('bigMapInfo').textContent = known ? where : `${where}\n${t('가 보지 않은 곳입니다. "이 방향으로"로 날아가세요.')}`;
     $('bigMapGo').disabled = false;
-    $('bigMapJump').disabled = false;
+    $('bigMapJump').disabled = !known;
     for (const chip of $('bigMapList').children) chip.setAttribute('aria-pressed', String(chip.dataset.id === id));
   }
   const bigMap = createMinimap($('bigMapCanvas'), { big: true, onPick: pickOnMap });
@@ -1350,7 +1358,8 @@ ${STORY_MORE[target.id]}` : told };
     $('bigMapJump').disabled = true;
     $('bigMapList').replaceChildren(...mapBodies().map((b) => {
       const chip = document.createElement('button');
-      chip.textContent = b.name;
+      // ✓ where she has been (a jump goes there), ○ where not yet, as on the name tags.
+      chip.textContent = inExo(state.position) ? b.name : markedName(b.name, mapKnown(b.id));
       chip.dataset.id = b.id;
       chip.setAttribute('aria-pressed', 'false');
       chip.addEventListener('click', () => pickOnMap(b.id));
@@ -1375,10 +1384,9 @@ ${STORY_MORE[target.id]}` : told };
   $('bigMapJump').addEventListener('click', () => {
     const id = mapPick;
     $('bigMap').close();
-    if (!id) return;
-    // Anywhere on the map, been there or not (as a tour's jump goes): on a phone,
-    // finding the way by hand was the hard part ("미니맵을 터치하면, 크게 확대되고, 거기에서
-    // 별을 선택해서 텔레포트하는 식으로 바꾸자").
+    if (!id || !mapKnown(id)) return;
+    // From any distance, near too ("미니맵을 터치하면, 크게 확대되고, 거기에서 별을 선택해서
+    // 텔레포트하는 식으로 바꾸자"): to where she has been (mapKnown).
     selectedId = id;
     hud.showSelection(named(id));
     teleport(id, true, false, null, true);

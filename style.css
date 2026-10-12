@@ -5221,6 +5221,7 @@ html.gaze #gazeButton {
 }
 
 #bigMap #bigMapInfo {
+  white-space:pre-line;
   color:#d9c88f;
 }
 

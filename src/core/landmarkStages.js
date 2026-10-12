@@ -78,12 +78,13 @@ export function landmarkStage(kind, sayBy = 'craft') {
 }
 
 // A scene as core/replay.js wants it, from what it tells: { kind, sayBy, name, day,
-// lines: four texts }.
-export function landmarkScene({ kind, sayBy, name, day, lines }) {
+// lines: four texts }. One with little to tell has fewer lines and its own `seconds`
+// (no shorter than its bubble's stay: a look's is gone at 13 s).
+export function landmarkScene({ kind, sayBy, name, day, lines, seconds }) {
   const times = LANDMARK_TIMES[kind];
   return {
     name, day, kind,
-    seconds: times.seconds,
+    seconds: seconds ?? times.seconds,
     downAt: times.downAt,
     viewKm: 56,
     sounds: times.sounds,

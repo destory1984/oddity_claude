@@ -562,15 +562,15 @@ export const LANDMARKS = {
     ],
     say: t('햇볕에 땅이 날아가 버렸대'),
   },
+  // Two lines and 14 s (the user, 2026-10-12, of its four lines and 22 s: "내용에 비해서
+  // 너무 길어. 지루하니까, 뒤는 좀 잘라"): Arecibo and the naming are in its second reading.
   hokusai: {
-    kind: 'look', by: 'Goldstone', body: 'mercury', sayBy: 'place',
+    kind: 'look', by: 'Goldstone', body: 'mercury', sayBy: 'place', seconds: 14,
     name: t('지구의 레이더가 먼저 찾다'),
     day: t('1991년'),
     lines: [
       t('1991년. 미국 골드스톤의 큰 안테나가 수성으로 전파를 쏘고, 되돌아오는 메아리를 받습니다.'),
-      t('탐사선이 찍지 못한 쪽의 땅에서 유난히 밝은 점들이 잡혔습니다. 그 가운데 하나를 B라고 적었습니다.'),
-      t('2000년대에 아레시보 전파망원경이 더 또렷하게 살폈습니다. B는 빛줄기를 거느린 분화구였습니다.'),
-      t('메신저가 가서 찍어 보니 빛줄기는 수천 km를 뻗어 있었습니다. 2010년 호쿠사이라는 이름이 붙었습니다.'),
+      t('탐사선이 찍지 못한 쪽의 땅에서 유난히 밝은 점들이 잡혔습니다. 그 가운데 하나가 이 분화구입니다.'),
     ],
     say: t('사진보다 전파에 먼저 찍혔어'),
   },

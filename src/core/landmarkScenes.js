@@ -524,7 +524,7 @@ export const LANDMARKS = {
       t('메신저는 수성을 돌며 북극에서 나오는 중성자를 셌습니다. 수소가 많은 곳, 곧 물이 있는 곳이 드러났습니다.'),
       t('얼음을 다 모으면 1,000억 톤에서 1조 톤으로 셈합니다. 해에서 가장 가까운 행성의 일입니다.'),
     ],
-    say: t('이렇게 뜨거운 곳에 얼음이'),
+    say: t('수성에 얼음이라니, 믿어져?'),
   },
   discoveryRupes: {
     kind: 'photo', by: 'Mariner 10', body: 'mercury', sayBy: 'craft',

@@ -57,6 +57,10 @@ uniform vec3 nightGlow;
 // A thin layer of air that shines of itself over the whole night side, brightest seen
 // edge on along the limb (Venus's green oxygen light).
 uniform vec3 nightAir;
+// The glory: rings of colour on the cloud tops round the point straight away from the
+// Sun as she sees it (her own shadow's place), where droplets send light back the way it
+// came. x: how strong; y: degrees from its middle to its first ring; z: how many rings.
+uniform vec3 glory;
 uniform vec4 shine;
 // Earth's shadow coming over the Moon in a lunar eclipse (core/eclipses.js): xyz the
 // side it comes from, w how far it has come (0 none, 1 all of the disc).
@@ -344,7 +348,19 @@ void main(){
     float mottle = .65 + .7 * fbm(lp.xz * 2. + lp.y * 1.5 + time * .02);
     // (It shines high over the clouds: standing on the ground under them she saw the
     // ground itself green. It comes in between 60 and 240 km up.)
-    light += nightAir * (.16 + pow(limbEdge, 5.) * 1.2) * (1. - smoothstep(-.2, .05, l)) * mottle * smoothstep(.01, .04, close);
+    // (Against the Sun the rim is the haze's ring of sunlight: the faint green gives way to it.)
+    light += nightAir * (.16 + pow(limbEdge, 5.) * 1.2 * (1. - .85 * beyond * beyond)) * (1. - smoothstep(-.2, .05, l)) * mottle * smoothstep(.01, .04, close);
+  }
+  if (glory.x > 0.) {
+    // How far this spot is from sending the Sun's light straight back to her, in rings.
+    float turned = degrees(acos(clamp(dot(sun, V), -1., 1.))) / glory.y;
+    if (turned < glory.z + .5) {
+      // Each colour's rings stand a little apart, red outermost: white in the middle,
+      // then a dark gap, then rings blue within and red without, paler each time.
+      vec3 rings = pow(cos(3.14159 * turned / vec3(1.12, 1., .86)), vec3(2.));
+      float fade = exp(-turned * .55) * (1. - smoothstep(glory.z - .5, glory.z + .5, turned)) * smoothstep(0., .25, l) * glory.x;
+      light = light * (1. - .34 * fade) + rings * fade * .5;
+    }
   }
   // The planet's light on the side turned to it: it shows where the Sun does not reach.
   light += col * shineColor * max(dot(N, shine.xyz), 0.) * shine.w;

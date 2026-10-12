@@ -180,6 +180,10 @@ const LOOKS = {
     // band at 40 degrees, and the user, 2026-10-13, of the notice that owned up to it:
     // "실제로는 띠가 아니라며, 왜 띠로 그렸어?").
     nightAir: [0.1, 0.42, 0.17],
+    // The glory on its cloud tops, as Venus Express photographed it in 2011 (the user,
+    // 2026-10-13, of what more at Venus is pretty: "1, 2 넣어"). The real rings were some
+    // 6 degrees to their outer edge: drawn wider, to be seen from where she flies.
+    glory: [0.8, 4, 3],
   },
   mars: {
     shader: 'textured', map: 'mars.jpg', saturation: 0.85, tint: [1, 0.98, 0.95], base: [0.72, 0.42, 0.26],
@@ -356,13 +360,14 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
       ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy',
-        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'eclipsed', 'nightGlow', 'nightAir', 'flow', 'tracks', 'polarCap', 'sights'], ['map']);
+        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'eclipsed', 'nightGlow', 'nightAir', 'glory', 'flow', 'tracks', 'polarCap', 'sights'], ['map']);
     material.setVector4('sights', new Vector4(...(look.sights ?? [0, 0, 0, 0])));
     material.setFloat('flow', look.flow ?? 0);
     material.setFloat('tracks', look.tracks ?? 0);
     material.setFloat('polarCap', look.polarCap ?? 0);
     material.setColor3('nightGlow', color(look.nightGlow ?? [0, 0, 0]));
     material.setColor3('nightAir', color(look.nightAir ?? [0, 0, 0]));
+    material.setVector3('glory', new Vector3(...(look.glory ?? [0, 0, 0])));
     material.setVector4('shine', new Vector4(0, 1, 0, 0));
     material.setVector4('eclipsed', new Vector4(0, 1, 0, 0));
     material.setColor3('shineColor', new Color3(1, 1, 1));

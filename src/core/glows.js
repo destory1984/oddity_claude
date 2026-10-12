@@ -342,6 +342,11 @@ const AU = 149597870.7;
 export const E_RING = { body: 'saturn', moon: 'enceladus', spread: 1.9, light: 0.035, rangeRadii: 40 };
 // "Behind" a world: this far round from the Sun's side (the cosine of the angle), or more.
 export const BEHIND = 0.6;
+// Venus's glory (render/planets.js `glory`): rings of colour on the cloud tops round the
+// point straight away from the Sun as she sees it. It is there to be seen when that
+// point is on the planet: she is on the Sun's side, and the line from the Sun through
+// her meets the globe within `inRadii` of its middle.
+export const GLORY = { body: 'venus', inRadii: 0.8, radii: 4 };
 // A planet crossing the Sun is a transit while it looks smaller than this share of the Sun.
 export const TRANSIT_SMALL = 0.25;
 // ...and while it is large enough to be seen at all (from Earth, Mercury is 1/160 of the Sun).
@@ -427,9 +432,20 @@ export function glowsNear(bodies, position, elapsedS = null) {
   const saturn = bodies.find((b) => b.id === 'saturn');
   if (saturn && near('saturn', TELL_RADII.hexagon) && side('saturn', saturn.position.map((n, i) => n + (i === 1 ? 1 : 0))) > 0.5) found.push('hexagon:saturn');
   // Seen from behind, with the Sun beyond: the rings against the light, and the haze of
-  // Titan, of Pluto and the blue dusk of Mars.
+  // Titan, of Pluto, the blue dusk of Mars and the ring of light round Venus.
   if (behind('saturn', TELL_RADII.backlit)) found.push('backlit:saturn');
-  for (const id of ['titan', 'pluto', 'mars']) if (behind(id, TELL_RADII.haze)) found.push(`haze:${id}`);
+  for (const id of ['titan', 'pluto', 'mars', 'venus']) if (behind(id, TELL_RADII.haze)) found.push(`haze:${id}`);
+  {
+    const body = bodies.find((b) => b.id === GLORY.body);
+    if (body && sun && near(GLORY.body, GLORY.radii)) {
+      const out = position.map((n, i) => n - body.position[i]);
+      const toSun = sun.position.map((n, i) => n - body.position[i]);
+      const far = Math.hypot(...toSun);
+      const along = out.reduce((sum, n, i) => sum + (n * toSun[i]) / far, 0);
+      const off = Math.sqrt(Math.max(0, out.reduce((sum, n) => sum + n * n, 0) - along * along));
+      if (along > 0 && off < GLORY.inRadii * body.radiusKm) found.push(`glory:${GLORY.body}`);
+    }
+  }
   // Earthshine on the Moon: from over its night side, on the side turned to Earth.
   const earth = bodies.find((b) => b.id === 'earth');
   if (earth && sun && near('moon', TELL_RADII.shine) && side('moon', sun.position) < 0 && side('moon', earth.position) > 0.3) found.push('shine:moon');

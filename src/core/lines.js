@@ -157,6 +157,9 @@ export const SIGHTS = {
   'haze:titan': t('주황 반지를 꼈네.'),
   'haze:pluto': t('파란 테두리가 생겼어.'),
   'haze:mars': t('화성 노을은 파랗구나.'),
+  // (Mine, unasked, 2026-10-13.)
+  'haze:venus': t('금성이 금반지가 됐어.'),
+  'glory:venus': t('구름에 무지개 과녁이 떴어.'),
   'shine:moon': t('달 그늘이 푸르스름해.'),
   counterglow: t('저기 희미한 빛, 보여?'),
   'ering:saturn': t('분수가 고리를 만들었대.'),

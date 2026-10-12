@@ -231,9 +231,18 @@ test('sights that show from one side: behind a world with the Sun beyond, over t
   };
   assert.ok(glowsNear(BODIES, beside('saturn', 5, -1)).includes('backlit:saturn'));
   assert.ok(!glowsNear(BODIES, beside('saturn', 5, 1)).includes('backlit:saturn'));
-  for (const id of ['titan', 'pluto', 'mars']) {
+  for (const id of ['titan', 'pluto', 'mars', 'venus']) {
     assert.ok(glowsNear(BODIES, beside(id, 3, -1)).includes(`haze:${id}`), id);
     assert.ok(!glowsNear(BODIES, beside(id, 3, 1)).includes(`haze:${id}`), id);
+  }
+  // Venus's glory: from the Sun's side, while the point straight away from the Sun is on the globe.
+  assert.ok(glowsNear(BODIES, beside('venus', 2, 1)).includes('glory:venus'));
+  assert.ok(!glowsNear(BODIES, beside('venus', 2, -1)).includes('glory:venus'));
+  assert.ok(!glowsNear(BODIES, beside('venus', 5, 1)).includes('glory:venus'));
+  {
+    const venus = bodyById('venus');
+    const up = beside('venus', 2, 1).map((n, i) => n + (i === 1 ? venus.radiusKm : 0));
+    assert.ok(!glowsNear(BODIES, up).includes('glory:venus'));
   }
   assert.ok(glowsNear(BODIES, beside('earth', 1, -1)).includes('airglow:earth'));
   assert.ok(!glowsNear(BODIES, beside('earth', 1, 1)).includes('airglow:earth'));

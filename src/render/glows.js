@@ -14,7 +14,7 @@ import {
   AURORAS, auroraBand, auroraStorm, STEVE, PEARL_CLOUDS, PULSE, STORMS, LIGHTNING_LIFE_S, lightningGap, lightningGlow, TYPHOON, typhoonUp, typhoonStrike,
   PLUMES, PLUME_DAY_S, PLUME_RANGE_RADII, plumeUp,
   IMPACT_RANGE_KM, IMPACT_LIFE_S, IMPACT_SIZE_KM, impactGap, impactGlow,
-  NIGHT_CLOUDS, sheetBand, FOOTPRINT, footprintUp, SODIUM_TAIL, JETS, jetDirections, SPRITE, spriteGlow, ELVES, elvesRing, BLUE_JET, blueJetGlow, E_RING,
+  NIGHT_CLOUDS, sheetBand, FOOTPRINT, footprintUp, SODIUM_TAIL, JETS, jetDirections, SPRITE, spriteGlow, ELVES, elvesRing, BLUE_JET, blueJetGlow, E_RING, FAR_PAIR,
 } from '../core/glows.js';
 
 const FLASHES = 8;
@@ -384,6 +384,13 @@ export function createGlows(scene, bodies) {
     return { ...card, north };
   });
 
+  // Earth and the Moon from far off: a point of light each (core/glows.js FAR_PAIR).
+  const farPair = ['earth', 'moon'].map((id) => {
+    const card = lightCard(scene, `far_${id}`, spotTexture(scene, `far_${id}`, FAR_PAIR[id].colour));
+    card.mesh.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    return { ...card, id };
+  });
+
   // Mercury's sodium tail: two planes crossed along its length, like a comet's.
   Effect.ShadersStore.sodiumVertexShader = glowVert;
   Effect.ShadersStore.sodiumFragmentShader = sodiumFrag;
@@ -626,6 +633,21 @@ export function createGlows(scene, bodies) {
         const eye = new Vector3(...position.map((n, i) => n - body.position[i])).normalize();
         const against = Math.max(0, -Vector3.Dot(eye, sunFrom(body)));
         eringMaterial.setFloat('strength', E_RING.light * (1 + 3 * against * against));
+      }
+    }
+
+    {
+      // A point only while the body is too far to show as a globe.
+      for (const { mesh, material, id } of farPair) {
+        const body = find(id);
+        const at = rel(body.position, position);
+        const far = Math.hypot(...at);
+        const k = Math.min(1, Math.max(0, far * KM_PER_UNIT / (body.radiusKm * FAR_PAIR.fromRadii) - 1));
+        mesh.setEnabled(k > 0);
+        if (k <= 0) continue;
+        mesh.position.set(at[0], at[1], at[2]);
+        mesh.scaling.setAll(far * FAR_PAIR[id].size);
+        material.alpha = 0.99 * k;
       }
     }
 

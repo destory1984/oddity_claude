@@ -139,6 +139,8 @@ export const SIGHTS = {
   'spokes:saturn': t('고리에 바큇살이 생겼어.'),
   'spot:neptune': t('검은 눈이 날 보는 것 같아.'),
   'tail:mercury': t('수성에도 꼬리가 있었어?'),
+  'dawn:mercury': t('해보다 빛이 먼저 떴어.'),
+  'pair:earth': t('저 점 두 개가 지구랑 달이래.'),
   'jets:halley': t('혜성이 숨을 내쉬어.'),
   'plume:io': t('화산이 우산처럼 퍼져.'),
   'plume:enceladus': t('얼음 분수다! 반짝반짝해.'),

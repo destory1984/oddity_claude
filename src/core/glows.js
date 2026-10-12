@@ -105,6 +105,29 @@ export function footprintUp(toMoon, north = true, footprint = FOOTPRINT) {
 // Mercury to her at which it is out and at which it is whole (render/glows.js).
 export const SODIUM_TAIL = { body: 'mercury', lengthKm: 243970, spread: 0.09, light: 0.2, endOn: [0.12, 0.45] };
 
+// Mercury before sunrise: it has no air to scatter light, so its sky stays black and the
+// Sun's corona stands over the horizon while the Sun itself is still under it (the Sun
+// shader brings the corona out whenever a world covers the whole disc). Told from low
+// over the ground while the Sun's upper edge is no farther under the horizon than this.
+export const DAWN = { body: 'mercury', underRad: 0.2 };
+
+// Earth and the Moon from far off: two points of light side by side. MESSENGER
+// photographed them so on 2010-05-06, from 183 million km away on its way to Mercury.
+// A disc too small to show (from beside Mercury the Moon is a pixel or two) is drawn as
+// a point: colour, and size as a share of the distance to it; it comes in from
+// fromRadii of the body off and is whole at twice that (render/glows.js). Told from
+// beside Mercury, with Earth at least `clear` Sun half-widths from the Sun's middle, or
+// `past` with the Sun behind Mercury, and while the two stand at least apartRad apart
+// (the Moon goes round in 13 hours of play: in line with Earth the points are one).
+export const FAR_PAIR = {
+  earth: { colour: [140, 185, 255], size: 0.014 },
+  moon: { colour: [215, 210, 200], size: 0.008 },
+  fromRadii: 190,
+  clear: 1.5,
+  past: 1.1,
+  apartRad: 0.011,
+};
+
 // Jets from a comet's nucleus: gas and dust break out where the Sun warms the ground,
 // in a few narrow streams on the day side (Giotto photographed Halley's in 1986). Each
 // is given as a lean away from the line to the Sun: [tilt in degrees, turn round that
@@ -304,7 +327,7 @@ export function plumeUp(plume, spinRad) {
 // flashes are told when one lights.) Several may be in reach at once (near Jupiter: its
 // aurora and Io's footprint); the game tells them one at a time.
 // (Saturn is looked at from nine radii off, to take in its rings: the spokes are told from there.)
-export const TELL_RADII = { aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, backlit: 12, haze: 8, shine: 4, rings: 6, geyser: 3, ashen: 4, horizon: 4, ering: 40, flare: 3, flow: 5, tracks: 0.2, rain: 4, lava: 4, devils: 0.25, methane: 4, hood: 5, thread: 10, typhoon: 2.5, boats: 1.5, ash: 1.5, street: 1, shiptracks: 1, honeycomb: 1, anvils: 2, glory: 2 };
+export const TELL_RADII = { aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, backlit: 12, haze: 8, shine: 4, rings: 6, geyser: 3, ashen: 4, horizon: 4, ering: 40, flare: 3, flow: 5, tracks: 0.2, rain: 4, lava: 4, devils: 0.25, methane: 4, hood: 5, thread: 10, typhoon: 2.5, boats: 1.5, ash: 1.5, street: 1, shiptracks: 1, honeycomb: 1, anvils: 2, glory: 2, dawn: 0.3, pair: 6 };
 // A comet's tail is told from within this far of its nucleus, while it is within this
 // many AU of the Sun (farther out it has no tail to speak of).
 export const TELL_TAIL_KM = 300000;
@@ -339,6 +362,39 @@ export function glowsNear(bodies, position, elapsedS = null) {
   if (near(FOOTPRINT.body, TELL_RADII.footprint)) found.push(`footprint:${FOOTPRINT.moon}`);
   if (near('saturn', TELL_RADII.spokes)) found.push('spokes:saturn');
   if (near('neptune', TELL_RADII.spot)) found.push('spot:neptune');
+  // As seen from here: how far off a body is, how wide (its half-angle) and which way.
+  const seen = (body) => {
+    const to = body.position.map((n, i) => n - position[i]);
+    const far = Math.hypot(...to);
+    return { far, wide: Math.asin(Math.min(1, body.radiusKm / far)), way: to.map((n) => n / far) };
+  };
+  const apart = (a, b) => Math.acos(Math.max(-1, Math.min(1, a.way.reduce((sum, n, i) => sum + n * b.way[i], 0))));
+  // How far under a world's edge the Sun's nearest edge is (radians): 0 or more with the
+  // whole Sun behind the world.
+  const star = bodies.find((b) => b.kind === 'star');
+  const sunUnder = (id) => {
+    const body = bodies.find((b) => b.id === id);
+    if (!body || !star) return -Infinity;
+    const [world, sunSeen] = [seen(body), seen(star)];
+    return sunSeen.far > world.far ? world.wide - apart(world, sunSeen) - sunSeen.wide : -Infinity;
+  };
+  // Mercury before sunrise: the corona over the horizon, the Sun just under it.
+  if (near(DAWN.body, TELL_RADII.dawn)) {
+    const under = sunUnder(DAWN.body);
+    if (under >= 0 && under <= DAWN.underRad) found.push(`dawn:${DAWN.body}`);
+  }
+  // Earth and the Moon as two points, from beside Mercury: out of the Sun's glare (or
+  // with the Sun behind Mercury) and not behind Mercury themselves.
+  {
+    const [mercury, earth, moon] = ['mercury', 'earth', 'moon'].map((id) => bodies.find((b) => b.id === id));
+    if (mercury && earth && moon && star && near('mercury', TELL_RADII.pair)) {
+      const [world, home, sunSeen] = [seen(mercury), seen(earth), seen(star)];
+      // (Past the Sun's edge in any case: Earth goes behind the Sun too.)
+      const gap = apart(home, sunSeen) / sunSeen.wide;
+      const clear = gap > FAR_PAIR.clear || (gap > FAR_PAIR.past && sunUnder('mercury') >= 0);
+      if (clear && apart(home, world) > world.wide && apart(home, seen(moon)) >= FAR_PAIR.apartRad) found.push('pair:earth');
+    }
+  }
   if (near(SODIUM_TAIL.body, TELL_RADII.tail)) found.push(`tail:${SODIUM_TAIL.body}`);
   if (surfaceKm(JETS.body) <= TELL_JETS_KM) found.push(`jets:${JETS.body}`);
   // Sights that show from one side only. side(id, toward): how far round the traveler

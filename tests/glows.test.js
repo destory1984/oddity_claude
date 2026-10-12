@@ -6,7 +6,7 @@ import {
   PLUMES, PLUME_DAY_S, plumeUp, glowNear, glowsNear, TELL_RADII, TELL_JETS_KM, COUNTERGLOW_FROM_KM,
   IMPACT_GAP_S, IMPACT_LIFE_S, impactGap, impactGlow,
   NIGHT_CLOUDS, sheetBand, FOOTPRINT, footprintUp, SODIUM_TAIL, JETS, jetDirections, SPRITE, spriteGlow, SPOKES,
-  ELVES, elvesRing, BLUE_JET, blueJetGlow,
+  ELVES, elvesRing, BLUE_JET, blueJetGlow, DAWN, FAR_PAIR,
 } from '../src/core/glows.js';
 import { BODIES, bodyById } from '../src/core/bodies.js';
 import { eventMessage } from '../src/ui/messages.js';
@@ -317,4 +317,75 @@ test('round Earth\'s aurora: strong nights come and go, and what shows only then
   assert.ok(glowsNear(BODIES, at(-0.3, -1)).includes('pearl:earth'));
   assert.ok(!glowsNear(BODIES, at(-1)).includes('pearl:earth'));
   for (const id of ['storm:earth', 'steve:earth', 'pearl:earth', 'pulse:earth']) assert.ok(eventMessage({ type: 'glow', id }).length > 20, id);
+});
+
+// Made-up skies for Mercury's two sights: the Sun at the middle, Mercury along +x, Earth
+// `turn` degrees round from Mercury as seen from the Sun, the Moon `moonTurn` degrees
+// round Earth from the line to the Sun.
+const sky = (turn, moonTurn = 90) => {
+  const [a, m] = [turn, moonTurn].map((deg) => (deg * Math.PI) / 180);
+  const earth = [2.2e6 * Math.cos(a), 0, 2.2e6 * Math.sin(a)];
+  return [
+    { id: 'sun', kind: 'star', radiusKm: 696000, position: [0, 0, 0] },
+    { id: 'mercury', kind: 'planet', radiusKm: 2439.7, position: [1.27e6, 0, 0] },
+    { id: 'earth', kind: 'planet', radiusKm: 6371, position: earth },
+    { id: 'moon', kind: 'moon', radiusKm: 1737.4, position: [earth[0] + 45738 * Math.cos(a + m), 0, earth[2] + 45738 * Math.sin(a + m)] },
+  ];
+};
+// Over Mercury's equator, `deg` degrees round from the point under the Sun, `km` up.
+const overMercury = (bodies, deg, km) => {
+  const mercury = bodies.find((b) => b.id === 'mercury');
+  const a = (deg * Math.PI) / 180;
+  return [mercury.position[0] - (mercury.radiusKm + km) * Math.cos(a), 0, (mercury.radiusKm + km) * Math.sin(a)];
+};
+
+test('Mercury before sunrise: the corona is told from low over the night side, the whole Sun just under the horizon', () => {
+  const bodies = sky(180);
+  // The Sun is 33 degrees to its edge here: its last edge goes under 33 degrees past the line of day and night.
+  const half = (Math.asin(696000 / 1.27e6) * 180) / Math.PI;
+  const told = (deg, km = 3) => glowsNear(bodies, overMercury(bodies, deg, km)).includes('dawn:mercury');
+  assert.ok(!told(90 + half - 3), 'a sliver of the Sun is still up');
+  assert.ok(told(90 + half + 4));
+  assert.ok(told(90 + half + (DAWN.underRad * 180) / Math.PI - 2));
+  assert.ok(!told(90 + half + (DAWN.underRad * 180) / Math.PI + 4), 'deep in the night the corona is under too');
+  assert.ok(!told(0), 'by day');
+  // From high up it is an eclipse seen from space, not a dawn.
+  assert.ok(!told(90 + half + 4, 2439.7 * (TELL_RADII.dawn + 0.5)));
+  assert.equal(glowsNear(bodies, overMercury(bodies, 90 + half + 4, 3))[0], 'dawn:mercury');
+  assert.ok(eventMessage({ type: 'glow', id: 'dawn:mercury' }).length > 20);
+});
+
+test('Earth and the Moon as two points from beside Mercury: clear of the Sun, apart from each other, not behind Mercury', () => {
+  const told = (bodies, deg = 180, km = 5000) => glowsNear(bodies, overMercury(bodies, deg, km)).includes('pair:earth');
+  // Earth on the far side of the Sun: behind it, or in its glare.
+  assert.ok(!told(sky(180)));
+  assert.ok(!told(sky(150)));
+  // Well round from the Sun: told, from the day side and the night side alike...
+  assert.ok(told(sky(60)));
+  assert.ok(told(sky(60), 90));
+  // ...but not with Mercury itself in the way (she is over the side turned from Earth).
+  assert.ok(!told(sky(0), 0, 500));
+  assert.ok(told(sky(0), 180, 500));
+  // The Moon in line with Earth: one point, nothing to tell.
+  const lined = sky(60);
+  const [mercury, earth, moon] = ['mercury', 'earth', 'moon'].map((id) => lined.find((b) => b.id === id));
+  const out = earth.position.map((n, i) => n - mercury.position[i]);
+  moon.position = earth.position.map((n, i) => n + (out[i] / Math.hypot(...out)) * 45738);
+  assert.ok(!told(lined));
+  // Only beside Mercury.
+  assert.ok(!told(sky(60), 180, 2439.7 * (TELL_RADII.pair + 1)));
+  // Near the Sun's edge it is told only with the Sun behind Mercury.
+  const low = sky(118);
+  const gap = (at) => {
+    const to = (id) => low.find((b) => b.id === id).position.map((n, i) => n - at[i]);
+    const [e, s] = [to('earth'), to('sun')];
+    const cos = e.reduce((sum, n, i) => sum + n * s[i], 0) / (Math.hypot(...e) * Math.hypot(...s));
+    return Math.acos(cos) / Math.asin(696000 / Math.hypot(...s));
+  };
+  // (Over the night side where the Sun is under the edge and Earth still over it.)
+  const night = overMercury(low, 160, 500);
+  assert.ok(gap(night) > FAR_PAIR.past && gap(night) < FAR_PAIR.clear, String(gap(night)));
+  assert.ok(glowsNear(low, night).includes('pair:earth'));
+  assert.ok(!told(low, 20, 5000));
+  assert.ok(eventMessage({ type: 'glow', id: 'pair:earth' }).length > 20);
 });

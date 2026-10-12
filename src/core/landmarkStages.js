@@ -80,7 +80,9 @@ export function landmarkStage(kind, sayBy = 'craft') {
         sky: { x: 0, y: 0, z: SUN_BEHIND + 0.25 },
         sun: { x: SUN_X, y, z: SUN_BEHIND },
         ridge: { x: 0, y: -RIDGE_SUNK },
-        bubble: { x: 0.85, y: 1.1, scale: Math.max(0.01, 0.8 * said), shown: said > 0.01 },
+        // (Larger than the other stages' 0.8, the user, 2026-10-13: "자막이 너무 작아"; at
+        // 1.7 it ran off a phone's right edge: "너무 커졌잖아". Up and right of the Sun.)
+        bubble: { x: 0.78, y: 1.65, scale: Math.max(0.01, 1.1 * said), shown: said > 0.01 },
       };
     };
   }

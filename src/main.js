@@ -802,6 +802,15 @@ async function init() {
       const todo = leg ? stopHint(leg.stop) : null;
       const about = todo ? t`할 일: ${todo}` : docking ? null : aboutKnown(target);
       const arrived = eventMessage({ type: 'teleported', name: target.name });
+      // A story place: she goes down to stand beside it at once, as a craft is docked
+      // with (the user, 2026-10-13: "케네디 클릭하면 워프 -> 여기에서 다시 클릭해서 착륙..
+      // 이걸 이해할 수 있을까"; nothing said a second press was wanted). Not on a tour's
+      // jump, which says what is left to do; the eclipse's place is no story place.
+      const place = known ? null : sites.find((s) => s.id === id);
+      if (place) {
+        goDownTo(place);
+        return;
+      }
       // A tour's jump: its notices replace one another (kind 'tour'), so word of the
       // stop reached is not kept waiting behind this one.
       toast.show(about ? `${arrived}\n${about}` : arrived, known ? 'tour' : null);

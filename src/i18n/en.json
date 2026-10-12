@@ -713,6 +713,8 @@
  "후진 ": "Rev.",
  "현재 제한 {}": "Limit here {0}",
  "{} · 가려짐": "{0} · hidden",
+ "{}{} 바라봅니다.": "Facing {the0}.",
+ "한 번 더 누르면 {}{} 순간 이동합니다.": "Press again to jump to {the0}.",
  "{}{} 바라봅니다. 위치와 속도는 유지됩니다.": "Facing {the0}. Your place and speed stay as they are.",
  "펴기": "Unfold",
  "한 문제. {}": "One question. {0}",

@@ -1,4 +1,4 @@
-import { objectParticle, distanceText, markedName } from './messages.js';
+import { objectParticle, towardParticle, distanceText, markedName } from './messages.js';
 import { lookedAt, touchedSky } from '../core/sky.js';
 import { keepMarker, spreadArrows, settleAbove, crowdedMoons, nearCentre, overlapped, clearOfPanels, COMPACT_WIDTH } from '../core/markers.js';
 import { t } from '../core/i18n.js';
@@ -509,7 +509,11 @@ export function createHud(bodies, { onSelect, onFace, onInspect, onHome, onAuror
       layer.style.webkitMaskComposite = card ? 'xor' : '';
       layer.style.maskComposite = card ? 'exclude' : '';
     },
-    faceToast(body) {
+    // jump: pressing its name tag again would jump there (somewhere been before and far
+    // off): the second line says so (the user, 2026-10-12: "다음줄에 한 번 더 누르면, ..로
+    // 순간이동합니다"). Otherwise the line it always had.
+    faceToast(body, jump = false) {
+      if (jump) return `${t`${body.name}${objectParticle(body.name)} 바라봅니다.`}\n${t`한 번 더 누르면 ${body.name}${towardParticle(body.name)} 순간 이동합니다.`}`;
       return t`${body.name}${objectParticle(body.name)} 바라봅니다. 위치와 속도는 유지됩니다.`;
     },
   };

@@ -919,7 +919,9 @@ ${STORY_MORE[target.id]}` : told };
     aimedId = selectedId;
     // Somewhere already known: say again what it is.
     const about = aboutKnown(body);
-    toast.show(about ? `${hud.faceToast(body)}\n${about}` : hud.faceToast(body));
+    // (Whether a second press of its tag would jump: as selectBody asks it.)
+    const told = hud.faceToast(body, Boolean(teleportSpot(body, { position: state.position, progress, bodies, parent: body.parent ? here(body.parent) : null })));
+    toast.show(about ? `${told}\n${about}` : told);
   }
   // How fast she comes round to face a chosen target (faceTurn): a share of the turn
   // left, per second (nine tenths of it in half a second).

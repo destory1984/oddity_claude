@@ -29,11 +29,17 @@ export const LANDMARK_TIMES = {
   sunrise: { seconds: 21, downAt: 12.8, lines: [0, 6, 11, 15.5], sounds: [[12.8, 'discovered']] },
 };
 
-// The sunrise's Sun: where it stands to the side and behind the ridge, and how low its
-// middle is when it is down (its top is then under the ground).
-const SUN_X = -0.25;
+// The sunrise's Sun: where it stands to the side and behind the rim, and how high its
+// middle is when it is down (its disc, 0.49 to its edge, is then wholly behind the rim,
+// whose crest is 0.45 up: render/siteModels.js SUNRISE), at its first stop (four fifths
+// of the disc over the rim) and at the end (clear of it, its top under the telling).
+// RIDGE_SUNK: how far the rim's drawing stands in the ground.
+const SUN_X = -0.15;
 const SUN_BEHIND = 0.7;
-const SUN_DOWN = -0.45;
+const SUN_DOWN = -0.5;
+const SUN_HALF = 0.75;
+const SUN_UP = 1.1;
+const RIDGE_SUNK = 0.3;
 
 // sayBy: 'craft' (the bubble goes along with what flies or falls) or 'place' (it stands
 // by the picture).
@@ -64,15 +70,16 @@ export function landmarkStage(kind, sayBy = 'craft') {
   }
   if (kind === 'sunrise') {
     return (t) => {
-      // The Sun's middle over the ground (its disc is 0.4 high from there): up, a
-      // stop, back down under the ground, then up again and on.
-      const y = t < 8 ? SUN_DOWN + 1.0 * ease(t, 1.5, 6.5) : t < 12.5 ? SUN_DOWN + 1.0 * (1 - ease(t, 8, 11.6)) : SUN_DOWN + 1.35 * ease(t, 12.8, 19.5);
+      // The Sun's middle over the ground: up till most of its disc is over the rim, a
+      // stop, back down behind it, then up again and clear of it.
+      const y = t < 8 ? SUN_DOWN + (SUN_HALF - SUN_DOWN) * ease(t, 1.5, 6.5)
+        : t < 12.5 ? SUN_DOWN + (SUN_HALF - SUN_DOWN) * (1 - ease(t, 8, 11.6))
+          : SUN_DOWN + (SUN_UP - SUN_DOWN) * ease(t, 12.8, 19.5);
       const said = up(t, 14, 19.5);
       return {
         sky: { x: 0, y: 0, z: SUN_BEHIND + 0.25 },
-        ridge: { x: 0, y: 0 },
-        glow: { x: SUN_X, y, z: SUN_BEHIND + 0.03, scale: 0.8, shown: y > SUN_DOWN + 0.05 },
-        sun: { x: SUN_X, y, z: SUN_BEHIND, scale: 0.8, shown: y > SUN_DOWN + 0.02 },
+        sun: { x: SUN_X, y, z: SUN_BEHIND },
+        ridge: { x: 0, y: -RIDGE_SUNK },
         bubble: { x: 0.85, y: 1.1, scale: Math.max(0.01, 0.8 * said), shown: said > 0.01 },
       };
     };

@@ -1,4 +1,4 @@
-import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, Texture, StandardMaterial, Color3 } from './babylon.js';
+import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, Texture, StandardMaterial, Color3, Constants } from './babylon.js';
 import { t } from '../core/i18n.js';
 import { CRAFT_BUILD, PROBE_BUILD } from './craftModels.js';
 import { LANDMARKS } from '../core/landmarkScenes.js';
@@ -1063,25 +1063,56 @@ function probeFor(by, body) {
   if (own) return own[1];
   return body === 'moon' ? 'lro' : body === 'mars' ? 'mro' : 'voyager1';
 }
-// The Sun rising twice (core/landmarkStages.js 'sunrise'): a crater's rim across the
-// stage, dark against the light, and behind it the Sun's disc with its glow. The disc
-// is flat and faces the front; it is given the flash's light by the stage (`lit`).
-function sunrisePieces(scene, name, mats) {
-  const ridge = new TransformNode(`${name}Ridge`, scene);
-  box(scene, `${name}RidgeWall`, ridge, mats.dark, [5, 0.16, 0.1], [0, 0.08, 0.2]);
-  // Hills along its top, none the same: [x, how high its top stands, how wide].
-  [[-1.75, 0.34, 0.62], [-1.3, 0.44, 0.7], [-0.8, 0.3, 0.6], [-0.3, 0.38, 0.8], [0.3, 0.3, 0.66], [0.8, 0.46, 0.72], [1.3, 0.33, 0.64], [1.75, 0.4, 0.6]]
-    .forEach(([x, top, wide], i) => sphere(scene, `${name}Hill${i}`, ridge, i % 3 ? mats.dark : mats.grey, wide, [x, 0.05, 0], [1, (2 * (top - 0.05)) / wide, 0.5]));
+// The Sun rising twice (core/landmarkStages.js 'sunrise'): a night sky, the Sun, and
+// in front of it the rim of a crater over its cratered floor. The Sun and the rim are
+// drawings ordered for it (public/assets/replay/sunrise-sun.jpg, sunrise-ridge.png): the
+// first stage was a flat disc behind eight round hills, and the user (2026-10-12) "예쁘다는
+// 느낌은 하나도 못 받았어"; of four looks shown side by side they chose this pair.
+// SUNRISE: the sizes the stage's timing goes by (the rim's crest and the Sun's disc).
+// (The rim's drawing is sunk into the ground by `sunk`, so that its dark floor does not
+// stand tall before the game's own ground: its crest is then `crest` up.)
+export const SUNRISE = { ridge: [4.2, 0.984], sunk: 0.3, crest: 0.45, sun: 2.8, disc: 0.49, floor: 2.6 };
+function sunrisePieces(scene, name) {
+  const ridge = drawing(scene, `${name}Ridge`, 'replay/sunrise-ridge.png', SUNRISE.ridge);
+  // Its floor goes on flat toward the eye, over the game's own ground (sunlit and pale,
+  // it showed under the drawing as another world).
+  const ground = new StandardMaterial(`${name}FloorPaint`, scene);
+  const floorPicture = new Texture(`${import.meta.env.BASE_URL}assets/replay/sunrise-floor.jpg`, scene, true, true, Texture.NEAREST_SAMPLINGMODE);
+  floorPicture.wrapU = Texture.CLAMP_ADDRESSMODE;
+  floorPicture.wrapV = Texture.CLAMP_ADDRESSMODE;
+  ground.disableLighting = true;
+  ground.diffuseColor = new Color3(0, 0, 0);
+  ground.specularColor = new Color3(0, 0, 0);
+  // (Drawn at its own brightness the floor came out far paler than the standing card,
+  // which the blending darkens: the two are brought together by their levels.)
+  floorPicture.level = 0.72;
+  for (const mesh of ridge.getChildMeshes()) mesh.material.emissiveTexture.level = 1.5;
+  ground.emissiveTexture = floorPicture;
+  ground.backFaceCulling = false;
+  const floor = CreatePlane(`${name}Floor`, { width: SUNRISE.ridge[0], height: SUNRISE.floor }, scene);
+  floor.parent = ridge;
+  floor.material = ground;
+  floor.rotation.x = Math.PI / 2;
+  floor.position.set(0, SUNRISE.sunk + 0.02, -SUNRISE.floor / 2);
+  floor.isPickable = false;
+  // The Sun is painted on black and added to the sky as light, its rays and all.
   const sun = new TransformNode(`${name}Sun`, scene);
-  part(CreateSphere(`${name}SunDisc`, { diameter: 1, segments: 28 }, scene), sun, mats.white, [0, 0, 0], [0, 0, 0], [1, 1, 0.04]);
-  const glow = new TransformNode(`${name}Glow`, scene);
-  const light = new StandardMaterial(`${name}GlowLight`, scene);
-  light.disableLighting = true;
-  light.diffuseColor = new Color3(0, 0, 0);
-  light.specularColor = new Color3(0, 0, 0);
-  light.emissiveColor = new Color3(1, 0.7, 0.3);
-  light.alpha = 0.13;
-  for (const [i, wide] of [1.22, 1.5, 1.85, 2.3].entries()) part(CreateSphere(`${name}GlowRing${i}`, { diameter: wide, segments: 24 }, scene), glow, light, [0, 0, 0.02 * i], [0, 0, 0], [1, 1, 0.02]);
+  const shine = new StandardMaterial(`${name}SunShine`, scene);
+  const picture = new Texture(`${import.meta.env.BASE_URL}assets/replay/sunrise-sun.jpg`, scene, true, true);
+  picture.wrapU = Texture.CLAMP_ADDRESSMODE;
+  picture.wrapV = Texture.CLAMP_ADDRESSMODE;
+  shine.disableLighting = true;
+  shine.diffuseColor = new Color3(0, 0, 0);
+  shine.specularColor = new Color3(0, 0, 0);
+  shine.emissiveTexture = picture;
+  shine.alphaMode = Constants.ALPHA_ADD;
+  shine.alpha = 0.99;
+  shine.backFaceCulling = false;
+  shine.disableDepthWrite = true;
+  const disc = CreatePlane(`${name}SunCard`, { size: SUNRISE.sun }, scene);
+  disc.parent = sun;
+  disc.material = shine;
+  disc.isPickable = false;
   // The sky behind: Mercury has no air, so it is black with its stars even as the Sun
   // comes up. (Without it the Sun stood against the ground the view looks down on.)
   const sky = new TransformNode(`${name}Sky`, scene);
@@ -1103,18 +1134,19 @@ function sunrisePieces(scene, name, mats) {
   night.specularColor = new Color3(0, 0, 0);
   night.emissiveTexture = dots;
   night.backFaceCulling = false;
-  const sheet = CreatePlane(`${name}SkySheet`, { width: 5, height: 3.2 }, scene);
+  // (It goes down under the ground: past the ends of the rim nothing shows under it.)
+  const sheet = CreatePlane(`${name}SkySheet`, { width: 6, height: 4 }, scene);
   sheet.parent = sky;
   sheet.material = night;
-  sheet.position.y = 1.6;
+  sheet.position.y = 1.2;
   sheet.isPickable = false;
-  return { sky, ridge: fuse(scene, ridge), sun, glow };
+  return { sky, sun, ridge };
 }
 // The pieces of a landmark's scene (core/landmarkStages.js): what flies or falls, the
 // flash, the picture, and what is said. `lazy`: built when the scene is first played.
 const landmarkPieces = (id, { kind, by, body, say }) => {
   const build = (scene, name, mats) => {
-    const pieces = kind === 'sunrise' ? sunrisePieces(scene, name, mats) : { photo: printOf(scene, `${name}Photo`, `stories/${id}.jpg`, 1.05) };
+    const pieces = kind === 'sunrise' ? sunrisePieces(scene, name) : { photo: printOf(scene, `${name}Photo`, `stories/${id}.jpg`, 1.05) };
     if (kind !== 'look' && kind !== 'sunrise') {
       const flash = new TransformNode(`${name}Flash`, scene);
       part(CreateSphere(`${name}FlashBall`, { diameter: 1, segments: 14 }, scene), flash, mats.white, [0, 0, 0]);
@@ -1135,7 +1167,7 @@ const landmarkPieces = (id, { kind, by, body, say }) => {
       pieces.scraps = scraps(scene, `${name}Scraps`, mats, mats.grey);
     }
     if (say) pieces.bubble = sayBubble(scene, `${name}Bubble`, say);
-    return { pieces, flames: {}, lit: pieces.flash ? ['flash'] : kind === 'sunrise' ? ['sun'] : [] };
+    return { pieces, flames: {}, lit: pieces.flash ? ['flash'] : [] };
   };
   build.lazy = true;
   return build;

@@ -22,7 +22,7 @@ import { addPhoto, removePhoto, photoPlace, photoCaption } from './core/album.js
 import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } from './core/postcard.js';
 import { isLocalHost } from './core/count.js';
 import { pickSpot, fromSpot, toSpot, NEAR_EARTH_ONLY } from './core/startSpots.js';
-import { teleportSpot } from './core/teleport.js';
+import { teleportSpot, visited } from './core/teleport.js';
 import { behindBody, skyBehind, lostInGlare, nearestBodies, nearbyMoons } from './core/markers.js';
 import { FACTS } from './core/facts.js';
 import { eventMessage, limitText, dateText, withParticle, objectParticle, distanceText } from './ui/messages.js';
@@ -952,6 +952,10 @@ ${STORY_MORE[target.id]}` : told };
       else {
         sound.cue('click');
         setTimeout(() => sound.cue('click'), 110);
+        // Never been there (○ on its tag): the two ticks alone did not say why nothing
+        // happened (the user, 2026-10-12, of the Sun behind Hubble: "딸깍딸깍하는 소리만
+        // 나오, 워프를 안 하는데.. 막혀서 그런거지?").
+        if (!visited(chosen, progress)) toast.show(t('아직 가 보지 않은 곳입니다. 왼쪽 위의 지도를 눌러 큰 지도에서 순간 이동할 수 있습니다.'));
       }
       return;
     }

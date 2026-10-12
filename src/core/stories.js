@@ -328,6 +328,24 @@ STORIES.push(
     text: t('2020년 11월 24일 이곳에서 창정 5호 로켓이 창어 5호를 싣고 떠났습니다. 달의 흙을 가져온 탐사선입니다.'),
   },
 );
+// Four places on Mercury (the user, 2026-10-12: "수성은 관광지가 메신저 충돌지 달랑 하나야?",
+// then of the four I named "모두 추가해"): the great basin, a crater of the north pole
+// that keeps ice, a cliff of the shrinking planet, and the jumbled ground on the far
+// side from the basin. Longitudes are east ones, as Mercury's map and MESSENGER's place.
+STORIES.push(...[
+  ['caloris', t('수성의 칼로리스 분지'), 'Caloris Planitia', 1974, 30.5, 161.2, 500,
+    t('지름 1,550km의 큰 충돌 자국입니다. 1974년 매리너 10호가 절반을, 2008년 메신저가 전체를 찍었습니다.')],
+  ['prokofiev', t('수성 북극의 얼음 분화구'), 'Prokofiev', 2012, 86, 63.7, 150,
+    t('해에 가장 가까운 행성의 북극 분화구입니다. 햇빛이 들지 않는 바닥에 물 얼음이 있습니다.')],
+  ['discoveryRupes', t('수성의 디스커버리 절벽'), 'Discovery Rupes', 1974, -56.3, -38.3, 200,
+    t('길이 650km, 높이 2km의 절벽입니다. 수성이 식으며 쪼그라들 때 땅이 밀려 올라가 생겼습니다.')],
+  ['weirdTerrain', t('수성의 기묘한 지형'), 'Weird Terrain', 1974, -30.5, -18.8, 300,
+    t('칼로리스 분지의 정반대편입니다. 언덕과 골짜기가 뒤죽박죽이라 매리너 10호 팀이 기묘한 지형이라 불렀습니다.')],
+].map(([id, name, nameEn, year, latDeg, lonDeg, withinKm, text]) => ({
+  id, name, nameEn, year, type: 'surface', body: 'mercury', latDeg, lonDeg, withinKm, landmark: true,
+  hint: t`${t('수성')}(${where(latDeg, lonDeg)}) ${withinKm.toLocaleString('ko-KR')}km 안에 내려앉기`,
+  text,
+})));
 named(STORIES);
 
 // A place's label shows only from within this many of its body's radii above the

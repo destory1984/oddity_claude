@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-12', text: t('수성에 갈 곳 넷이 생겼습니다(칼로리스 분지, 북극의 얼음 분화구 등). 수첩은 196칸입니다.') },
   { day: '2026-10-12', text: t('큰 지도의 순간 이동도 가 본 곳으로만 됩니다. 처음 가는 곳은 직접 날아갑니다.') },
   { day: '2026-10-12', text: t('가 보지 않은 곳의 이름표를 두 번 누르면, 왜 순간 이동하지 않는지 알려 줍니다.') },
   { day: '2026-10-12', text: t('이름 칸의 이름을 누르면 그것을 다시 바라봅니다. 도킹 중에 둘러보다 돌아올 때 씁니다.') },

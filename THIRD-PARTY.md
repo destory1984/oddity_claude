@@ -47,7 +47,7 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 
 ## 이야기 장소의 사진
 
-`public/assets/stories/` 의 사진 95장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
+`public/assets/stories/` 의 사진 99장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
 
 같은 폴더의 그림 일곱 장(`acidalia.jpg`, `procellarum.jpg`, `schiaparelli.jpg`, `wadiRum.jpg`, `bohyunsan.jpg`, `tanegashima.jpg`, `wenchang.jpg`, 420×420)은 쓸 수 있는 사진이 없어 이 게임을 위해 그린 것이다. 외부 자료가 아니고 권리를 보유한다(LICENSE).
 
@@ -134,6 +134,10 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | `hexagon.jpg` | [Saturn north polar hexagon 2012-11-27.jpg](https://commons.wikimedia.org/wiki/File:Saturn_north_polar_hexagon_2012-11-27.jpg) | NASA / JPL-Caltech / Space Science Institute | Public domain |
 | `naro.jpg` | [P R KSLV-2 211021 0113.jpg](https://commons.wikimedia.org/wiki/File:P_R_KSLV-2_211021_0113.jpg) | Korea Aerospace Research Institute (KARI) | KOGL Type 1 |
 | `messenger.jpg` | [Details of MESSENGER's Impact Location.jpg](https://commons.wikimedia.org/wiki/File:Details_of_MESSENGER's_Impact_Location.jpg) | NASA/Johns Hopkins University Applied Physics Laboratory/Car | Public domain |
+| `caloris.jpg` | [PIA10359 Caloris Basin - in Color!.jpg](https://commons.wikimedia.org/wiki/File:PIA10359_Caloris_Basin_-_in_Color!.jpg) | NASA/Johns Hopkins University Applied Physics Laboratory/Arizona State University/Carnegie Institution of Washington | Public domain |
+| `prokofiev.jpg` | [PIA19247-Mercury-NPolarRegion-Messenger20150316.jpg](https://commons.wikimedia.org/wiki/File:PIA19247-Mercury-NPolarRegion-Messenger20150316.jpg) | NASA/Johns Hopkins University Applied Physics Laboratory/Carnegie Institution of Washington | Public domain |
+| `discoveryRupes.jpg` | [Discovery Rupes EN0242804716M.jpg](https://commons.wikimedia.org/wiki/File:Discovery_Rupes_EN0242804716M.jpg) | NASA/Johns Hopkins University Applied Physics Laboratory/Carnegie Institution of Washington | Public domain |
+| `weirdTerrain.jpg` | [Mercury weird terrain.jpg](https://commons.wikimedia.org/wiki/File:Mercury_weird_terrain.jpg) | NASA/JPL | Public domain |
 | `conamara.jpg` | [Europa Ice Rafts.jpg](https://commons.wikimedia.org/wiki/File:Europa_Ice_Rafts.jpg) | NASA/JPL | Public domain |
 | `venera7.jpg` | [Venera-7.jpg](https://commons.wikimedia.org/wiki/File:Venera-7.jpg) | Stanislav Kozlovskiy | CC BY-SA 4.0 |
 | `occator.jpg` | [PIA20350 crop - Occator from LAMO.jpg](https://commons.wikimedia.org/wiki/File:PIA20350_crop_-_Occator_from_LAMO.jpg) | NASA / JPL-Caltech / UCLA / Max Planck Institute for Solar S | Public domain |

@@ -4,6 +4,7 @@
 //   photo: a craft crosses the sky, its shutter sounds, the place's picture comes up.
 //   look: nothing flies: the picture comes up (seen from the ground, or a drawing).
 //   impact: something falls out of the sky and hits; then the picture of the place now.
+//   sunrise: no picture: the Sun comes up behind a ridge, goes back down, comes up again.
 // The picture is the story's own (public/assets/stories/<id>.jpg). What each scene tells
 // is in core/landmarkScenes.js. Pieces are placed as in core/moonScenes.js: x to the
 // side, y up, in the model's units; a narrow phone's view ends about 1.45 to either side,
@@ -25,7 +26,14 @@ export const LANDMARK_TIMES = {
   photo: { seconds: 26, downAt: 9, lines: [0, 6, 10, 18], sounds: [[9, 'shutter'], [10.5, 'discovered']] },
   look: { seconds: 22, downAt: 5, lines: [0, 5, 10, 16], sounds: [[5, 'discovered']] },
   impact: { seconds: 24, downAt: 9, lines: [0, 5, 9, 15], sounds: [[9, 'impact'], [12.5, 'discovered']] },
+  sunrise: { seconds: 21, downAt: 12.8, lines: [0, 6, 11, 15.5], sounds: [[12.8, 'discovered']] },
 };
+
+// The sunrise's Sun: where it stands to the side and behind the ridge, and how low its
+// middle is when it is down (its top is then under the ground).
+const SUN_X = -0.25;
+const SUN_BEHIND = 0.7;
+const SUN_DOWN = -0.45;
 
 // sayBy: 'craft' (the bubble goes along with what flies or falls) or 'place' (it stands
 // by the picture).
@@ -51,6 +59,21 @@ export function landmarkStage(kind, sayBy = 'craft') {
       return {
         photo: { x: -0.25, y: 0.02, scale: Math.max(0.01, 1.15 * ease(t, 5, 6.2)), shown: t >= 5 },
         bubble: { x: 0.85, y: 1.0, scale: Math.max(0.01, 0.8 * said), shown: said > 0.01 },
+      };
+    };
+  }
+  if (kind === 'sunrise') {
+    return (t) => {
+      // The Sun's middle over the ground (its disc is 0.4 high from there): up, a
+      // stop, back down under the ground, then up again and on.
+      const y = t < 8 ? SUN_DOWN + 1.0 * ease(t, 1.5, 6.5) : t < 12.5 ? SUN_DOWN + 1.0 * (1 - ease(t, 8, 11.6)) : SUN_DOWN + 1.35 * ease(t, 12.8, 19.5);
+      const said = up(t, 14, 19.5);
+      return {
+        sky: { x: 0, y: 0, z: SUN_BEHIND + 0.25 },
+        ridge: { x: 0, y: 0 },
+        glow: { x: SUN_X, y, z: SUN_BEHIND + 0.03, scale: 0.8, shown: y > SUN_DOWN + 0.05 },
+        sun: { x: SUN_X, y, z: SUN_BEHIND, scale: 0.8, shown: y > SUN_DOWN + 0.02 },
+        bubble: { x: 0.85, y: 1.1, scale: Math.max(0.01, 0.8 * said), shown: said > 0.01 },
       };
     };
   }

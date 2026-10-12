@@ -348,6 +348,12 @@ STORIES.push(...[
     t('테두리 없이 얕게 꺼진 밝은 구덩이들입니다. 땅속의 물질이 햇볕에 기체가 되어 달아난 자리로 봅니다.')],
   ['hokusai', t('수성의 호쿠사이 분화구'), 'Hokusai', 1991, 58.3, 17.7, 200,
     t('밝은 빛줄기가 수천 km를 뻗는 젊은 분화구입니다. 1991년 지구에서 쏜 레이더에 먼저 잡혔습니다.')],
+  // The Sun rising twice (the user, 2026-10-12, of three sights offered for Mercury: "1번도
+  // 넣자"): it shows only near longitudes 90 and 270, where none of the seven places is,
+  // so a place there: Vivaldi, a two-ringed crater at 86 W. Its year is that of the radar
+  // finding of Mercury's 59-day turn, from which the Sun's going back was worked out.
+  ['vivaldi', t('수성의 비발디 분화구'), 'Vivaldi', 1965, 13.7, -85.9, 200,
+    t('테두리가 두 겹인 지름 213km의 분화구입니다. 이 경도에는 해가 떴다가 도로 지고 다시 뜨는 아침이 있습니다.')],
 ].map(([id, name, nameEn, year, latDeg, lonDeg, withinKm, text]) => ({
   id, name, nameEn, year, type: 'surface', body: 'mercury', latDeg, lonDeg, withinKm, landmark: true,
   hint: t`${t('수성')}(${where(latDeg, lonDeg)}) ${withinKm.toLocaleString('ko-KR')}km 안에 내려앉기`,

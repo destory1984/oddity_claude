@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-12', text: t('수성에 비발디 분화구가 생겼습니다. 해가 떴다가 지고 다시 뜨는 아침을 봅니다. 수첩은 200칸입니다.') },
   { day: '2026-10-12', text: t('호쿠사이 분화구의 그날로 장면이 짧아졌습니다(22초 → 14초).') },
   { day: '2026-10-12', text: t('수성의 해 뜨기 전 지평선에 솟는 코로나와, 멀리서 두 점으로 보이는 지구와 달을 알려 줍니다.') },
   { day: '2026-10-12', text: t('수성 탐사선 베피콜롬보가 생겼습니다. 수성 곁에서 도킹하면 2021년의 첫 통과를 다시 봅니다.') },

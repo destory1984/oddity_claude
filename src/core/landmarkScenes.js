@@ -574,6 +574,19 @@ export const LANDMARKS = {
     ],
     say: t('사진보다 전파에 먼저 찍혔어'),
   },
+  // The Sun rises, stops, goes back down and rises again: a stage of its own kind.
+  vivaldi: {
+    kind: 'sunrise', by: '', body: 'mercury', sayBy: 'place',
+    name: t('해가 두 번 뜨는 아침'),
+    day: t('176일에 한 번'),
+    lines: [
+      t('수성의 아침. 분화구 테두리 너머로 해가 떠오릅니다. 지구에서 보는 해의 세 배쯤 되는 크기입니다.'),
+      t('그런데 해가 멈춥니다. 그러고는 왔던 길로 도로 내려가 져 버립니다.'),
+      t('조금 뒤 해는 같은 자리에서 다시 떠오릅니다. 이번에는 멈추지 않고 제 길을 갑니다.'),
+      t('수성이 해에 가장 가까울 때는 공전이 자전을 앞질러 해가 뒷걸음칩니다. 지구 날로 176일에 한 번입니다.'),
+    ],
+    say: t('해가 졌다가 또 떴어'),
+  },
 };
 
 export const LANDMARK_SCENES = Object.fromEntries(Object.entries(LANDMARKS).map(([id, told]) => [id, landmarkScene(told)]));

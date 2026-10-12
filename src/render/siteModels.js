@@ -1063,12 +1063,59 @@ function probeFor(by, body) {
   if (own) return own[1];
   return body === 'moon' ? 'lro' : body === 'mars' ? 'mro' : 'voyager1';
 }
+// The Sun rising twice (core/landmarkStages.js 'sunrise'): a crater's rim across the
+// stage, dark against the light, and behind it the Sun's disc with its glow. The disc
+// is flat and faces the front; it is given the flash's light by the stage (`lit`).
+function sunrisePieces(scene, name, mats) {
+  const ridge = new TransformNode(`${name}Ridge`, scene);
+  box(scene, `${name}RidgeWall`, ridge, mats.dark, [5, 0.16, 0.1], [0, 0.08, 0.2]);
+  // Hills along its top, none the same: [x, how high its top stands, how wide].
+  [[-1.75, 0.34, 0.62], [-1.3, 0.44, 0.7], [-0.8, 0.3, 0.6], [-0.3, 0.38, 0.8], [0.3, 0.3, 0.66], [0.8, 0.46, 0.72], [1.3, 0.33, 0.64], [1.75, 0.4, 0.6]]
+    .forEach(([x, top, wide], i) => sphere(scene, `${name}Hill${i}`, ridge, i % 3 ? mats.dark : mats.grey, wide, [x, 0.05, 0], [1, (2 * (top - 0.05)) / wide, 0.5]));
+  const sun = new TransformNode(`${name}Sun`, scene);
+  part(CreateSphere(`${name}SunDisc`, { diameter: 1, segments: 28 }, scene), sun, mats.white, [0, 0, 0], [0, 0, 0], [1, 1, 0.04]);
+  const glow = new TransformNode(`${name}Glow`, scene);
+  const light = new StandardMaterial(`${name}GlowLight`, scene);
+  light.disableLighting = true;
+  light.diffuseColor = new Color3(0, 0, 0);
+  light.specularColor = new Color3(0, 0, 0);
+  light.emissiveColor = new Color3(1, 0.7, 0.3);
+  light.alpha = 0.13;
+  for (const [i, wide] of [1.22, 1.5, 1.85, 2.3].entries()) part(CreateSphere(`${name}GlowRing${i}`, { diameter: wide, segments: 24 }, scene), glow, light, [0, 0, 0.02 * i], [0, 0, 0], [1, 1, 0.02]);
+  // The sky behind: Mercury has no air, so it is black with its stars even as the Sun
+  // comes up. (Without it the Sun stood against the ground the view looks down on.)
+  const sky = new TransformNode(`${name}Sky`, scene);
+  const night = new StandardMaterial(`${name}Night`, scene);
+  const dots = new DynamicTexture(`${name}Stars`, { width: 256, height: 256 }, scene, true);
+  const ctx = dots.getContext();
+  ctx.fillStyle = '#04050c';
+  ctx.fillRect(0, 0, 256, 256);
+  let seed = 7;
+  const next = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  for (let i = 0; i < 46; i += 1) {
+    ctx.fillStyle = `rgba(255,255,255,${0.35 + 0.6 * next()})`;
+    const size = next() < 0.2 ? 2 : 1;
+    ctx.fillRect(Math.floor(next() * 254), Math.floor(next() * 254), size, size);
+  }
+  dots.update();
+  night.disableLighting = true;
+  night.diffuseColor = new Color3(0, 0, 0);
+  night.specularColor = new Color3(0, 0, 0);
+  night.emissiveTexture = dots;
+  night.backFaceCulling = false;
+  const sheet = CreatePlane(`${name}SkySheet`, { width: 5, height: 3.2 }, scene);
+  sheet.parent = sky;
+  sheet.material = night;
+  sheet.position.y = 1.6;
+  sheet.isPickable = false;
+  return { sky, ridge: fuse(scene, ridge), sun, glow };
+}
 // The pieces of a landmark's scene (core/landmarkStages.js): what flies or falls, the
 // flash, the picture, and what is said. `lazy`: built when the scene is first played.
 const landmarkPieces = (id, { kind, by, body, say }) => {
   const build = (scene, name, mats) => {
-    const pieces = { photo: printOf(scene, `${name}Photo`, `stories/${id}.jpg`, 1.05) };
-    if (kind !== 'look') {
+    const pieces = kind === 'sunrise' ? sunrisePieces(scene, name, mats) : { photo: printOf(scene, `${name}Photo`, `stories/${id}.jpg`, 1.05) };
+    if (kind !== 'look' && kind !== 'sunrise') {
       const flash = new TransformNode(`${name}Flash`, scene);
       part(CreateSphere(`${name}FlashBall`, { diameter: 1, segments: 14 }, scene), flash, mats.white, [0, 0, 0]);
       pieces.flash = flash;
@@ -1088,7 +1135,7 @@ const landmarkPieces = (id, { kind, by, body, say }) => {
       pieces.scraps = scraps(scene, `${name}Scraps`, mats, mats.grey);
     }
     if (say) pieces.bubble = sayBubble(scene, `${name}Bubble`, say);
-    return { pieces, flames: {}, lit: pieces.flash ? ['flash'] : [] };
+    return { pieces, flames: {}, lit: pieces.flash ? ['flash'] : kind === 'sunrise' ? ['sun'] : [] };
   };
   build.lazy = true;
   return build;

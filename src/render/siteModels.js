@@ -1,6 +1,6 @@
 import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, Texture, StandardMaterial, Color3 } from './babylon.js';
 import { t } from '../core/i18n.js';
-import { CRAFT_BUILD } from './craftModels.js';
+import { CRAFT_BUILD, PROBE_BUILD } from './craftModels.js';
 import { LANDMARKS } from '../core/landmarkScenes.js';
 import { LANDER_TEXTS } from '../core/landerTexts.js';
 import {
@@ -1058,7 +1058,7 @@ function printOf(scene, name, file, size) {
 // game has one, else the orbiter of that world, else a Voyager. (Lunar Orbiter 2 is
 // drawn as the Lunar Reconnaissance Orbiter: a small craft far off, told by its name.)
 function probeFor(by, body) {
-  const known = [['Voyager', 'voyager1'], ['Cassini', 'cassini'], ['New Horizons', 'newHorizons'], ['Juno', 'juno'], ['Reconnaissance', body === 'mars' ? 'mro' : 'lro'], ['Danuri', 'danuri']];
+  const known = [['MESSENGER', 'messengerProbe'], ['Mariner 10', 'mariner10'], ['Voyager', 'voyager1'], ['Cassini', 'cassini'], ['New Horizons', 'newHorizons'], ['Juno', 'juno'], ['Reconnaissance', body === 'mars' ? 'mro' : 'lro'], ['Danuri', 'danuri']];
   const own = known.find(([word]) => by.includes(word));
   if (own) return own[1];
   return body === 'moon' ? 'lro' : body === 'mars' ? 'mro' : 'voyager1';
@@ -1073,7 +1073,7 @@ const landmarkPieces = (id, { kind, by, body, say }) => {
       part(CreateSphere(`${name}FlashBall`, { diameter: 1, segments: 14 }, scene), flash, mats.white, [0, 0, 0]);
       pieces.flash = flash;
     }
-    if (kind === 'photo') pieces.probe = CRAFT_BUILD[probeFor(by, body)](scene, `${name}Probe`, mats);
+    if (kind === 'photo') pieces.probe = (PROBE_BUILD[probeFor(by, body)] ?? CRAFT_BUILD[probeFor(by, body)])(scene, `${name}Probe`, mats);
     if (kind === 'impact') {
       const rock = new TransformNode(`${name}Rock`, scene);
       if (by) {

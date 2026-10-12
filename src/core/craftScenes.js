@@ -346,6 +346,24 @@ export const CRAFT_SCENES = {
       return { pass: clamp((t - 2) / 31), moon: ease(t, 14, 19), pair: ease(t, 21, 25), say: ease(t, 16.2, 16.6) * (1 - ease(t, 20, 20.4)) };
     },
   },
+  bepiColombo: {
+    name: t('수성을 처음 스치다'),
+    day: t('2021년 10월 1일'),
+    seconds: 35,
+    downAt: 14,
+    sounds: [[14, 'shutter'], [28, 'stood']],
+    lines: [
+      { at: 0, text: t('2018년 10월 20일 베피콜롬보가 떠났습니다. 유럽의 궤도선과 일본의 궤도선 미오가 한 몸으로 묶여 갑니다.') },
+      { at: 7, text: t('수성은 해의 중력 깊숙이 있어 가서 멈추기가 어렵습니다. 지구 한 번, 금성 두 번, 수성 여섯 번을 스치며 속도를 줄입니다.') },
+      { at: 14, text: t('2021년 10월 1일, 수성 위 199km를 처음 지나갑니다. 몸에 달린 작은 카메라로 분화구투성이 땅을 찍었습니다.') },
+      { at: 21, text: t('2024년 엔진의 힘이 달려 길을 바꿨습니다. 도착은 2025년 12월에서 2026년 11월로 열한 달 늦어졌습니다.') },
+      { at: 28, text: t('수성에 닿으면 둘은 갈라져 따로 돕니다. 이름은 수성을 여러 번 스치는 길을 찾아낸 이탈리아 과학자에게서 왔습니다.') },
+    ],
+    unfold(t) {
+      // say: its bubble is up, from a second and a half before the shutter.
+      return { pass: clamp((t - 2) / 31), say: ease(t, 12.3, 12.7) * (1 - ease(t, 15.6, 16)) };
+    },
+  },
   mro: {
     name: t('낙하산을 찍다'),
     day: t('2012년 8월 6일'),

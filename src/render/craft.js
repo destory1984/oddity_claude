@@ -42,6 +42,8 @@ const RULES = {
   europaClipper: { visibleKm: 400000, maxKm: 4000 },
   lucy: { visibleKm: 400000, maxKm: 4000 },
   pioneer11: { visibleKm: 3e6, maxKm: Infinity },
+  // Over Mercury, as low as the one over Mars.
+  bepiColombo: { visibleKm: 60000, maxKm: 200 },
 };
 
 // A place with no model of its own gets the plain four-legged lander.

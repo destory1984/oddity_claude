@@ -872,8 +872,94 @@ function lucy(scene, name, mats) {
   return fuse(scene, root);
 }
 
+// MESSENGER: a squat body behind a sunshade of white ceramic cloth, curved a little
+// round it and taller than the craft, which kept all the rest at room temperature beside
+// the Sun; two small solar wings, the large engine on top, and the magnetometer on a boom
+// 3.6 m long that points away from the Sun.
+function messengerProbe(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  box(scene, `${name}Bus`, root, mats.goldFoil, [0.17, 0.2, 0.14]);
+  box(scene, `${name}Deck`, root, mats.blackFoil, [0.175, 0.02, 0.145], [0, 0.11, 0]);
+  // The shade: a middle sheet and two wings of it bent back, on a frame of thin tubes.
+  box(scene, `${name}Shade`, root, mats.white, [0.2, 0.36, 0.008], [0, 0, 0.115]);
+  for (const s of [-1, 1]) {
+    box(scene, `${name}ShadeSide${s}`, root, mats.white, [0.09, 0.36, 0.008], [s * 0.14, 0, 0.098], [0, s * 0.42, 0]);
+    rod(scene, `${name}ShadeTube${s}`, root, mats.grey, [s * 0.1, -0.18, 0.108], [s * 0.1, 0.18, 0.108], 0.008, 4);
+    rod(scene, `${name}ShadeStrut${s}`, root, mats.grey, [s * 0.085, 0.09, 0.07], [s * 0.1, 0.16, 0.105], 0.006, 4);
+    wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.085, 0, -0.02], to: [s * 0.36, 0, -0.02], width: 0.15, panels: 2, face: Z, yoke: 0.08 });
+    // The flat antennas that sent the pictures home without turning the craft.
+    box(scene, `${name}Array${s}`, root, mats.chrome, [0.07, 0.012, 0.03], [s * 0.04, -0.105, 0.05]);
+  }
+  truss(scene, `${name}MagBoom`, root, mats.grey, [0, 0, -0.07], [0, 0, -0.46], 0.016, 6, 0.003);
+  box(scene, `${name}Mag`, root, mats.goldFoil, [0.024, 0.024, 0.024], [0, 0, -0.47]);
+  nozzle(scene, `${name}Engine`, root, mats.dark, [0, 0.12, 0], [0, 1, 0], 0.06, 0.08);
+  thrusters(scene, `${name}Jet`, root, mats, ring(4, 0.09, 0, 0.78).map(([x, z]) => [[x, 0.12, z], [x * 1.6, 0.26, z * 1.6]]), 0.016);
+  // The cameras and the laser altimeter look out of the foot, away from the engine.
+  drum(scene, `${name}Camera`, root, mats.blackFoil, { height: 0.05, diameter: 0.04 }, [0.04, -0.12, -0.02]);
+  drum(scene, `${name}Laser`, root, mats.white, { height: 0.04, diameter: 0.05 }, [-0.04, -0.115, -0.02]);
+  return fuse(scene, root);
+}
+
+// Mariner 10: an eight-sided body under a white sunshade like an umbrella, two solar
+// wings 2.7 m long that could be tilted from the Sun, the dish on its own boom, a long
+// rod of an antenna, the magnetometer far out on a boom of 5.8 m, and two television
+// cameras with telescopes on a platform at the back.
+function mariner10(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  drum(scene, `${name}Bus`, root, mats.foil, { height: 0.09, diameter: 0.22, tessellation: 8 }, [0, 0, 0], Z);
+  drum(scene, `${name}Shade`, root, mats.white, { height: 0.008, diameterTop: 0.3, diameterBottom: 0.22, tessellation: 16 }, [0, 0, 0.06], Z);
+  drum(scene, `${name}ShadeHub`, root, mats.goldFoil, { height: 0.02, diameter: 0.07, tessellation: 10 }, [0, 0, 0.07], Z);
+  for (const s of [-1, 1]) wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.11, 0, 0], to: [s * 0.52, 0, 0], width: 0.13, panels: 3, face: Z, yoke: 0.07 });
+  rod(scene, `${name}DishBoom0`, root, mats.grey, [0.04, -0.09, 0], [0.1, -0.22, 0.01], 0.012, 6);
+  dish(scene, `${name}Dish`, root, mats, { at: [0.1, -0.24, 0.02], toward: [0.2, -0.1, 1], diameter: 0.19 });
+  rod(scene, `${name}LowGain`, root, mats.chrome, [-0.03, 0.09, 0], [-0.06, 0.44, 0.04], 0.012, 6);
+  drum(scene, `${name}LowGainTip`, root, mats.white, { height: 0.03, diameterTop: 0.03, diameterBottom: 0.016 }, [-0.062, 0.455, 0.042]);
+  truss(scene, `${name}MagBoom`, root, mats.grey, [0.05, 0.09, -0.02], [0.3, 0.5, -0.12], 0.014, 7, 0.003);
+  box(scene, `${name}Mag0`, root, mats.goldFoil, [0.022, 0.022, 0.022], [0.305, 0.508, -0.122]);
+  box(scene, `${name}Mag1`, root, mats.goldFoil, [0.02, 0.02, 0.02], [0.2, 0.33, -0.08]);
+  // The scan platform: twin telescopes side by side, and the ultraviolet instrument.
+  rod(scene, `${name}ScanArm`, root, mats.grey, [0, -0.02, -0.045], [0, -0.05, -0.12], 0.016, 6);
+  box(scene, `${name}Scan`, root, mats.blackFoil, [0.11, 0.05, 0.05], [0, -0.06, -0.14]);
+  for (const s of [-1, 1]) {
+    drum(scene, `${name}Telescope${s}`, root, mats.white, { height: 0.12, diameter: 0.04 }, [s * 0.03, -0.14, -0.14]);
+    drum(scene, `${name}TelescopeEye${s}`, root, mats.black, { height: 0.004, diameter: 0.034 }, [s * 0.03, -0.202, -0.14]);
+  }
+  nozzle(scene, `${name}Engine`, root, mats.dark, [0, 0, 0.085], Z, 0.03, 0.04);
+  thrusters(scene, `${name}Jet`, root, mats, [[[0.52, 0.065, 0], [1, 1, 0]], [[-0.52, 0.065, 0], [-1, 1, 0]], [[0.52, -0.065, 0], [1, -1, 0]], [[-0.52, -0.065, 0], [-1, -1, 0]]], 0.014);
+  return fuse(scene, root);
+}
+
+// BepiColombo as it comes to Mercury (its engine module was let go in September 2026):
+// Europe's orbiter below, a box with one long solar wing and a white radiator on the
+// side kept from the planet's heat, and on top of it a white cone of a sunshield with
+// Japan's orbiter Mio, eight-sided, riding inside until both are in orbit.
+function bepiColombo(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  box(scene, `${name}Mpo`, root, mats.foil, [0.17, 0.2, 0.15], [0, -0.08, 0]);
+  box(scene, `${name}Radiator`, root, mats.white, [0.012, 0.2, 0.17], [-0.092, -0.08, 0]);
+  for (const y of [-0.15, -0.08, -0.01]) box(scene, `${name}Louvre${y}`, root, mats.chrome, [0.004, 0.02, 0.16], [-0.1, y, 0]);
+  wing(scene, `${name}Wing`, root, mats, { from: [0.085, -0.08, 0], to: [0.62, -0.08, 0], width: 0.13, panels: 3, face: Z, yoke: 0.09 });
+  rod(scene, `${name}DishBoom`, root, mats.grey, [0, -0.12, 0.075], [0, -0.2, 0.16], 0.012, 6);
+  dish(scene, `${name}Dish`, root, mats, { at: [0, -0.2, 0.17], toward: [0, -0.2, 1], diameter: 0.12 });
+  truss(scene, `${name}MagBoom`, root, mats.grey, [0.05, -0.17, -0.07], [0.16, -0.36, -0.2], 0.012, 5, 0.003);
+  box(scene, `${name}Mag`, root, mats.goldFoil, [0.02, 0.02, 0.02], [0.163, -0.365, -0.203]);
+  nozzle(scene, `${name}Engine`, root, mats.dark, [0, -0.18, 0], [0, -1, 0], 0.04, 0.05);
+  // The sunshield that carries Mio, and Mio in its mouth.
+  drum(scene, `${name}Shield`, root, mats.white, { height: 0.16, diameterTop: 0.24, diameterBottom: 0.13, tessellation: 14 }, [0, 0.1, 0]);
+  drum(scene, `${name}ShieldRing`, root, mats.grey, { height: 0.01, diameter: 0.245, tessellation: 14 }, [0, 0.18, 0]);
+  drum(scene, `${name}Mio`, root, mats.cells, { height: 0.09, diameter: 0.15, tessellation: 8 }, [0, 0.17, 0]);
+  drum(scene, `${name}MioTop`, root, mats.chrome, { height: 0.006, diameter: 0.15, tessellation: 8 }, [0, 0.218, 0]);
+  drum(scene, `${name}MioDish`, root, mats.white, { height: 0.01, diameter: 0.08, tessellation: 12 }, [0, 0.226, 0]);
+  thrusters(scene, `${name}Jet`, root, mats, ring(4, 0.1, 0, 0.78).map(([x, z]) => [[x, -0.17, z], [x * 1.5, -0.3, z * 1.5]]), 0.016);
+  return fuse(scene, root);
+}
+
 export const CRAFT_BUILD = {
   voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid,
   iss, tiangong, sputnik, mro, juno, cassini, parker, roadster, newHorizons, pioneer10: pioneer,
-  danuri, lro, europaClipper, lucy, pioneer11: pioneer,
+  danuri, lro, europaClipper, lucy, pioneer11: pioneer, bepiColombo,
 };
+
+// Craft that are not flown beside (one fell on Mercury, one is long silent): shown as the
+// camera of a place's scene (render/siteModels.js probeFor).
+export const PROBE_BUILD = { messengerProbe, mariner10 };

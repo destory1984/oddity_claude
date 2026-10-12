@@ -31,9 +31,9 @@ function near(bodyId, distanceKm, fromId = 'sun') {
   return add(body.position, scale(toward, distanceKm));
 }
 
-test('there are twenty missions with names and hints', () => {
-  assert.equal(MISSIONS.length, 20);
-  assert.equal(new Set(MISSIONS.map((m) => m.id)).size, 20);
+test('there are twenty-one missions with names and hints', () => {
+  assert.equal(MISSIONS.length, 21);
+  assert.equal(new Set(MISSIONS.map((m) => m.id)).size, 21);
   for (const m of MISSIONS) assert.ok(m.name && m.hint);
 });
 
@@ -94,6 +94,10 @@ test('great red spot: Jupiter fills the frame', () => {
 test('sun skim: taken within 50,000 km of the solar surface', () => {
   assert.ok(shoot(near('sun', 696340 + 10000, 'earth'), 'sun').includes('sunSkim'));
   assert.ok(!shoot(START_POSITION, 'sun').includes('sunSkim'));
+  // Mercury large in the view from near by; not from far off, nor with the back turned to it.
+  assert.ok(shoot(near('mercury', 2439.7 + 3000, 'sun'), 'mercury').includes('mercuryFace'));
+  assert.ok(!shoot(near('mercury', 2439.7 + 60000, 'sun'), 'mercury').includes('mercuryFace'));
+  assert.ok(!shoot(near('mercury', 2439.7 + 3000, 'sun'), 'sun').includes('mercuryFace'));
 });
 
 test('hero selfie: character shown with a big world behind', () => {

@@ -686,6 +686,17 @@ const marsGoesBy = goesBy('europaClipper', (scene, name, world, mats, root) => {
   return says(scene, name, root, t('화성아. 구멍 났어?'));
 }, { from: [-2.4, -1.5], to: [2.4, -1.5] });
 
+// BepiColombo at Mercury, the first of its six passes: the grey planet with a paler basin
+// and a few dark pits.
+const mercuryGoesBy = goesBy('bepiColombo', (scene, name, world, mats, root) => {
+  ball(scene, `${name}Mercury`, world, tint(scene, `${name}MercuryPaint`, '#8f8a84'), 1.6);
+  ball(scene, `${name}Basin`, world, tint(scene, `${name}BasinPaint`, '#b39f7e'), 0.56, [-0.22, 0.3, 0.6], [1, 1, 0.3]);
+  for (const [k, x, y, z, d] of [[0, 0.3, -0.2, 0.68, 0.22], [1, -0.36, -0.3, 0.6, 0.16], [2, 0.12, 0.46, 0.62, 0.14], [3, 0.5, 0.2, 0.56, 0.1]]) {
+    ball(scene, `${name}Pit${k}`, world, tint(scene, `${name}PitPaint${k}`, '#5f5b57'), d, [x, y, z], [1, 1, 0.3]);
+  }
+  return says(scene, name, root, t('수성아. 또 올게'));
+}, { from: [-2.4, -1.5], to: [2.4, -1.5] });
+
 // Lucy at Dinkinesh: the small asteroid, and from behind it a moon that turns out to be
 // two lumps joined. moon: it has come out; pair: its second lump is seen.
 const dinkineshGoesBy = goesBy('lucy', (scene, name, world, mats, root) => {
@@ -851,6 +862,7 @@ export const CRAFT_UNFOLD_ALL = {
   newHorizons: arrokothGoesBy,
   europaClipper: marsGoesBy,
   lucy: dinkineshGoesBy,
+  bepiColombo: mercuryGoesBy,
   mro: mroParachute,
   lro: lroFootpaths,
   danuri: danuriArrives,

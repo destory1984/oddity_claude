@@ -149,6 +149,14 @@ export const MISSIONS = [
     hint: t('행성이나 위성의 가장자리로 태양이 막 나올 때 찍기 (태양이 10% 넘고 40%보다 적게 보여야 한다)'),
     check: (s) => s.frame('sun').visible && s.sunShown > 0.1 && s.sunShown < 0.4,
   },
+  // Mercury's own (the user, 2026-10-12, of four things more for Mercury: "모두 추가해"):
+  // the planet large in the view from near by, as Mariner 10 first showed it in 1974.
+  {
+    id: 'mercuryFace',
+    name: t('수성의 첫 얼굴'),
+    hint: t('수성 표면 10,000km 안에서 수성이 화면 높이의 60% 이상을 채우게 (매리너 10호, 1974년)'),
+    check: (s) => s.distanceToSurface('mercury') <= 10000 && s.seen('mercury') && s.frame('mercury').fill >= 0.6,
+  },
 ];
 
 export function completedMissions({ position, orientation, fovY, aspect, heroVisible, bodies = BODIES, craft = [] }) {

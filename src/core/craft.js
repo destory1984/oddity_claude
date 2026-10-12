@@ -166,6 +166,16 @@ export const CRAFT = [
     launched: 1973,
     intro: t('1979년 토성을 처음으로 지나간 탐사선입니다. 10호와 같은 금속판을 싣고 반대쪽으로 태양계를 떠나고 있으며, 1995년 교신이 끊겼습니다.'),
   },
+  // BepiColombo (the user, 2026-10-12, of four things more for Mercury: "모두 추가해"): on
+  // its way in as this is written and due in Mercury's orbit on 21 November 2026. It is
+  // drawn there already, over the poles, about where Europe's orbiter is to fly
+  // (480 → 1,500 km up).
+  {
+    id: 'bepiColombo', name: t('베피콜롬보'), nameEn: 'BepiColombo', kind: 'craft', parent: 'mercury',
+    ring: { altitudeKm: 1000, lapPlayS: 4320, tiltDeg: 90, phaseDeg: 40 },
+    launched: 2018,
+    intro: t('유럽과 일본이 함께 보낸 수성 탐사선입니다. 2018년에 떠나 수성을 여섯 번 스쳤고, 2026년 11월 수성 둘레를 도는 둘째 탐사선이 됩니다.'),
+  },
 ];
 named(CRAFT);
 

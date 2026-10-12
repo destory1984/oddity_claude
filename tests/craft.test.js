@@ -10,11 +10,11 @@ import { createState, step } from '../src/core/game.js';
 const dist = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
 const near = (a, b, eps) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 
-test('twenty-two craft: probes, telescopes, space stations, the first satellite and a car', () => {
+test('twenty-three craft: probes, telescopes, space stations, the first satellite and a car', () => {
   assert.deepEqual(CRAFT.map((c) => c.id), [
     'voyager1', 'voyager2', 'hubble', 'jwst', 'kepler', 'chandra', 'euclid',
     'iss', 'tiangong', 'sputnik', 'mro', 'juno', 'cassini', 'parker', 'roadster', 'newHorizons', 'pioneer10',
-    'danuri', 'lro', 'europaClipper', 'lucy', 'pioneer11',
+    'danuri', 'lro', 'europaClipper', 'lucy', 'pioneer11', 'bepiColombo',
   ]);
   assert.equal(new Set(CRAFT.map((c) => c.name)).size, CRAFT.length);
   for (const c of CRAFT) assert.ok(c.name && c.nameEn && c.kind === 'craft');
@@ -34,6 +34,7 @@ test('a craft that circles a planet or a moon shows only from close to it: four 
     mars: ['mro'],
     jupiter: ['juno'],
     saturn: ['cassini'],
+    mercury: ['bepiColombo'],
   };
   const all = Object.values(homes).flat();
   // High over the Sun's pole, far from every planet: all of them are hidden...

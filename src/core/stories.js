@@ -328,7 +328,7 @@ STORIES.push(
     text: t('2020년 11월 24일 이곳에서 창정 5호 로켓이 창어 5호를 싣고 떠났습니다. 달의 흙을 가져온 탐사선입니다.'),
   },
 );
-// Four places on Mercury (the user, 2026-10-12: "수성은 관광지가 메신저 충돌지 달랑 하나야?",
+// Six places on Mercury, four and then two (the user, 2026-10-12: "수성은 관광지가 메신저 충돌지 달랑 하나야?",
 // then of the four I named "모두 추가해"): the great basin, a crater of the north pole
 // that keeps ice, a cliff of the shrinking planet, and the jumbled ground on the far
 // side from the basin. Longitudes are east ones, as Mercury's map and MESSENGER's place.
@@ -341,6 +341,13 @@ STORIES.push(...[
     t('길이 650km, 높이 2km의 절벽입니다. 수성이 식으며 쪼그라들 때 땅이 밀려 올라가 생겼습니다.')],
   ['weirdTerrain', t('수성의 기묘한 지형'), 'Weird Terrain', 1974, -30.5, -18.8, 300,
     t('칼로리스 분지의 정반대편입니다. 언덕과 골짜기가 뒤죽박죽이라 매리너 10호 팀이 기묘한 지형이라 불렀습니다.')],
+  // Two more that night ("수성은 이걸로 끝?", then "모두 추가해"): the hollows, a landform
+  // only Mercury has (at Raditladi, where they stand on the ring of peaks), and the
+  // crater whose rays cross half the north.
+  ['hollows', t('수성의 밝은 구덩이, 할로'), 'Hollows of Raditladi', 2011, 27.15, 119.06, 200,
+    t('테두리 없이 얕게 꺼진 밝은 구덩이들입니다. 땅속의 물질이 햇볕에 기체가 되어 달아난 자리로 봅니다.')],
+  ['hokusai', t('수성의 호쿠사이 분화구'), 'Hokusai', 1991, 58.3, 17.7, 200,
+    t('밝은 빛줄기가 수천 km를 뻗는 젊은 분화구입니다. 1991년 지구에서 쏜 레이더에 먼저 잡혔습니다.')],
 ].map(([id, name, nameEn, year, latDeg, lonDeg, withinKm, text]) => ({
   id, name, nameEn, year, type: 'surface', body: 'mercury', latDeg, lonDeg, withinKm, landmark: true,
   hint: t`${t('수성')}(${where(latDeg, lonDeg)}) ${withinKm.toLocaleString('ko-KR')}km 안에 내려앉기`,

@@ -139,7 +139,10 @@ const REPLAY_VIEW = { distanceKm: 48, fovDeg: 34 };
 
 // For tuning a planet's look: set to e.g. { id: 'jupiter', fromCentreKm: 400000 } to
 // start beside it. null starts above Earth, where the first-visit guide begins.
-const START_NEAR = null;
+// On the dev server alone it is Mercury for now (the user, 2026-10-12, while its four
+// new places are being tried: "개발 중에는 당분간 수성에서 시작"); the game as built for
+// players starts where it always did. Take the first half out when they say so.
+const START_NEAR = import.meta.env.DEV ? { id: 'mercury', fromCentreKm: 9000 } : null;
 
 // Two layouts: 'tour' is the hand-made one (planets spread round the Sun); 'today' puts
 // the planets where they really are on the day the game is opened.

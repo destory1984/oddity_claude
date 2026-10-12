@@ -512,7 +512,7 @@ export const LANDMARKS = {
       t('찰칵. 멀어지며 돌아본 사진에 분지가 통째로 들어왔습니다. 지름은 알던 것보다 큰 1,550km였습니다.'),
       t('한가운데에는 골짜기 수백 줄이 바큇살처럼 뻗어 있었습니다. 연구자들은 거미라는 별명을 붙였습니다.'),
     ],
-    say: t('드디어 다 보이네'),
+    say: t('매리너 선배, 나머지 반쪽은 제가 찍을게요'),
   },
   prokofiev: {
     kind: 'photo', by: 'MESSENGER', body: 'mercury', sayBy: 'craft',

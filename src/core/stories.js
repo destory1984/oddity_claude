@@ -328,31 +328,33 @@ STORIES.push(
     text: t('2020년 11월 24일 이곳에서 창정 5호 로켓이 창어 5호를 싣고 떠났습니다. 달의 흙을 가져온 탐사선입니다.'),
   },
 );
+// (Their names had "수성의" before them until v0.2.165: the user, 2026-10-12, "이번에 만든 것들은
+// 다들 '수성의'를 붙였더라"; the Moon's and Mars's places have no such word, and they chose to drop it.)
 // Six places on Mercury, four and then two (the user, 2026-10-12: "수성은 관광지가 메신저 충돌지 달랑 하나야?",
 // then of the four I named "모두 추가해"): the great basin, a crater of the north pole
 // that keeps ice, a cliff of the shrinking planet, and the jumbled ground on the far
 // side from the basin. Longitudes are east ones, as Mercury's map and MESSENGER's place.
 STORIES.push(...[
-  ['caloris', t('수성의 칼로리스 분지'), 'Caloris Planitia', 1974, 30.5, 161.2, 500,
+  ['caloris', t('칼로리스 분지'), 'Caloris Planitia', 1974, 30.5, 161.2, 500,
     t('지름 1,550km의 큰 충돌 자국입니다. 1974년 매리너 10호가 절반을, 2008년 메신저가 전체를 찍었습니다.')],
-  ['prokofiev', t('수성 북극의 얼음 분화구'), 'Prokofiev', 2012, 86, 63.7, 150,
+  ['prokofiev', t('북극의 얼음 분화구'), 'Prokofiev', 2012, 86, 63.7, 150,
     t('해에 가장 가까운 행성의 북극 분화구입니다. 햇빛이 들지 않는 바닥에 물 얼음이 있습니다.')],
-  ['discoveryRupes', t('수성의 디스커버리 절벽'), 'Discovery Rupes', 1974, -56.3, -38.3, 200,
+  ['discoveryRupes', t('디스커버리 절벽'), 'Discovery Rupes', 1974, -56.3, -38.3, 200,
     t('길이 650km, 높이 2km의 절벽입니다. 수성이 식으며 쪼그라들 때 땅이 밀려 올라가 생겼습니다.')],
-  ['weirdTerrain', t('수성의 기묘한 지형'), 'Weird Terrain', 1974, -30.5, -18.8, 300,
+  ['weirdTerrain', t('기묘한 지형'), 'Weird Terrain', 1974, -30.5, -18.8, 300,
     t('칼로리스 분지의 정반대편입니다. 언덕과 골짜기가 뒤죽박죽이라 매리너 10호 팀이 기묘한 지형이라 불렀습니다.')],
   // Two more that night ("수성은 이걸로 끝?", then "모두 추가해"): the hollows, a landform
   // only Mercury has (at Raditladi, where they stand on the ring of peaks), and the
   // crater whose rays cross half the north.
-  ['hollows', t('수성의 밝은 구덩이, 할로'), 'Hollows of Raditladi', 2011, 27.15, 119.06, 200,
+  ['hollows', t('밝은 구덩이 할로'), 'Hollows of Raditladi', 2011, 27.15, 119.06, 200,
     t('테두리 없이 얕게 꺼진 밝은 구덩이들입니다. 땅속의 물질이 햇볕에 기체가 되어 달아난 자리로 봅니다.')],
-  ['hokusai', t('수성의 호쿠사이 분화구'), 'Hokusai', 1991, 58.3, 17.7, 200,
+  ['hokusai', t('호쿠사이 분화구'), 'Hokusai', 1991, 58.3, 17.7, 200,
     t('밝은 빛줄기가 수천 km를 뻗는 젊은 분화구입니다. 1991년 지구에서 쏜 레이더에 먼저 잡혔습니다.')],
   // The Sun rising twice (the user, 2026-10-12, of three sights offered for Mercury: "1번도
   // 넣자"): it shows only near longitudes 90 and 270, where none of the seven places is,
   // so a place there: Vivaldi, a two-ringed crater at 86 W. Its year is that of the radar
   // finding of Mercury's 59-day turn, from which the Sun's going back was worked out.
-  ['vivaldi', t('수성의 비발디 분화구'), 'Vivaldi', 1965, 13.7, -85.9, 200,
+  ['vivaldi', t('비발디 분화구'), 'Vivaldi', 1965, 13.7, -85.9, 200,
     t('테두리가 두 겹인 지름 213km의 분화구입니다. 이 경도에는 해가 떴다가 도로 지고 다시 뜨는 아침이 있습니다.')],
 ].map(([id, name, nameEn, year, latDeg, lonDeg, withinKm, text]) => ({
   id, name, nameEn, year, type: 'surface', body: 'mercury', latDeg, lonDeg, withinKm, landmark: true,

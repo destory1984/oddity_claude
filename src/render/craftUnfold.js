@@ -697,6 +697,32 @@ const mercuryGoesBy = goesBy('bepiColombo', (scene, name, world, mats, root) => 
   return says(scene, name, root, t('수성아. 또 올게'));
 }, { from: [-2.4, -1.5], to: [2.4, -1.5] });
 
+// Akatsuki at Venus, the second time: the pale yellow planet under its bands of cloud,
+// and the white bow 10,000 km long that stood over the highlands (bow: it has shown).
+const venusGoesBy = goesBy('akatsuki', (scene, name, world, mats, root) => {
+  // (Its clouds are bright: more of its own light than the rock worlds of the other scenes.)
+  const cloud = (tag, hex) => {
+    const paint = tint(scene, `${name}${tag}Paint`, hex);
+    paint.emissiveColor = Color3.FromHexString(hex).scale(0.55);
+    return paint;
+  };
+  ball(scene, `${name}Venus`, world, cloud('Venus', '#e2c789'), 1.6);
+  for (const [k, y, hex] of [[0, 0.36, '#e9d19b'], [1, -0.08, '#d9bf80'], [2, -0.44, '#e8cf98']]) {
+    ball(scene, `${name}Band${k}`, world, cloud(`Band${k}`, hex), 2 * Math.sqrt(0.64 - y * y) + 0.015, [0, y, 0], [1, 0.11, 1]);
+  }
+  // The bow lies on the face turned to the watcher (who looks along +x and -z).
+  const bow = ball(scene, `${name}Bow`, world, cloud('Bow', '#fffaf0'), 1, [-0.44, 0, 0.5], [0.07, 1, 0.3]);
+  bow.rotation.y = -Math.PI / 4;
+  const say = says(scene, name, root, t('금성아. 이번엔 안 놓쳐'));
+  return (values) => {
+    const shown = values.bow ?? 0;
+    bow.setEnabled(shown > 0.01);
+    bow.scaling.set(0.07, Math.max(0.01, shown), 0.3);
+    say(values);
+  };
+  // (It stays in the view to the end: the bow is the last thing told.)
+}, { from: [-2.4, -1.5], to: [0.7, -1.5] });
+
 // Lucy at Dinkinesh: the small asteroid, and from behind it a moon that turns out to be
 // two lumps joined. moon: it has come out; pair: its second lump is seen.
 const dinkineshGoesBy = goesBy('lucy', (scene, name, world, mats, root) => {
@@ -863,6 +889,7 @@ export const CRAFT_UNFOLD_ALL = {
   europaClipper: marsGoesBy,
   lucy: dinkineshGoesBy,
   bepiColombo: mercuryGoesBy,
+  akatsuki: venusGoesBy,
   mro: mroParachute,
   lro: lroFootpaths,
   danuri: danuriArrives,

@@ -364,6 +364,24 @@ export const CRAFT_SCENES = {
       return { pass: clamp((t - 2) / 31), say: ease(t, 12.3, 12.7) * (1 - ease(t, 15.6, 16)) };
     },
   },
+  akatsuki: {
+    name: t('다섯 해 만의 두 번째 시도'),
+    day: t('2015년 12월 7일'),
+    seconds: 35,
+    downAt: 21,
+    sounds: [[21, 'stood'], [29, 'shutter']],
+    lines: [
+      { at: 0, text: t('2010년 5월 21일 아카쓰키가 다네가시마에서 떠났습니다. 이름은 새벽이라는 뜻입니다.') },
+      { at: 7, text: t('그해 12월 7일 금성 곁에서 엔진을 켰지만 2분 반 만에 꺼졌습니다. 탐사선은 금성을 지나쳐 해를 돌기 시작했습니다.') },
+      { at: 14, text: t('주 엔진은 깨져 못 쓰게 되었습니다. 다섯 해 동안 해를 돌며 금성을 다시 만날 날을 기다렸습니다.') },
+      { at: 21, text: t('2015년 12월 7일, 자세를 잡는 작은 엔진 넷을 20분 동안 켰습니다. 이번에는 금성 둘레에 들었습니다.') },
+      { at: 28, text: t('곧 구름 꼭대기에서 길이 1만 km의 활 모양 무늬를 찍었습니다. 아래의 높은 땅이 공기를 밀어 올려 생긴 물결입니다.') },
+    ],
+    unfold(t) {
+      // bow: the white bow over the highlands has shown; say: its bubble is up, once it is in.
+      return { pass: clamp((t - 2) / 31), bow: ease(t, 28, 30), say: ease(t, 22.5, 22.9) * (1 - ease(t, 26.4, 26.8)) };
+    },
+  },
   mro: {
     name: t('낙하산을 찍다'),
     day: t('2012년 8월 6일'),

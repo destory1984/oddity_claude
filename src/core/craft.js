@@ -176,6 +176,16 @@ export const CRAFT = [
     launched: 2018,
     intro: t('유럽과 일본이 함께 보낸 수성 탐사선입니다. 2018년에 떠나 수성을 여섯 번 스쳤고, 2026년 11월 수성 둘레를 도는 둘째 탐사선이 됩니다.'),
   },
+  // Akatsuki (the user, 2026-10-13, of things to add at Venus, which had no craft: "1, 2
+  // 넣어"): silent since April 2024 and given up in September 2025, it goes round Venus
+  // still. Its real path is a long ellipse out to 370,000 km, close to the equator; drawn
+  // as a ring low enough to be seen with the planet.
+  {
+    id: 'akatsuki', name: t('아카쓰키'), nameEn: 'Akatsuki', kind: 'craft', parent: 'venus',
+    ring: { altitudeKm: 1500, lapPlayS: 5400, tiltDeg: 3, phaseDeg: 200 },
+    launched: 2010,
+    intro: t('일본의 금성 탐사선입니다. 2010년 궤도에 드는 데 실패하고 해를 다섯 해 돈 뒤, 2015년 작은 엔진으로 다시 해내 2024년까지 금성의 구름을 살폈습니다.'),
+  },
 ];
 named(CRAFT);
 

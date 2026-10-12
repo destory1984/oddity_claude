@@ -44,6 +44,8 @@ const RULES = {
   pioneer11: { visibleKm: 3e6, maxKm: Infinity },
   // Over Mercury, as low as the one over Mars.
   bepiColombo: { visibleKm: 60000, maxKm: 200 },
+  // Over Venus, the same.
+  akatsuki: { visibleKm: 60000, maxKm: 200 },
 };
 
 // A place with no model of its own gets the plain four-legged lander.

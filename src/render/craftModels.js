@@ -929,6 +929,26 @@ function mariner10(scene, name, mats) {
   return fuse(scene, root);
 }
 
+// Akatsuki: a box of gold foil a little over a metre each way, a solar panel on a short
+// arm at each of two opposite sides, a flat round white antenna (a plate of slots, not a
+// dish) on one face, its cameras looking out of the face opposite, and the main engine
+// whose ceramic nozzle broke in 2010.
+function akatsuki(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  box(scene, `${name}Bus`, root, mats.goldFoil, [0.2, 0.26, 0.24]);
+  for (const s of [-1, 1]) wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.1, 0, 0], to: [s * 0.44, 0, 0], width: 0.2, panels: 1, face: Z, yoke: 0.08 });
+  drum(scene, `${name}AntennaRim`, root, mats.grey, { height: 0.008, diameter: 0.215, tessellation: 20 }, [0, 0.01, 0.124], Z);
+  drum(scene, `${name}Antenna`, root, mats.white, { height: 0.012, diameter: 0.2, tessellation: 20 }, [0, 0.01, 0.13], Z);
+  [[-0.05, 0.07], [0.05, 0.07], [-0.05, -0.04], [0.05, -0.04]].forEach(([x, y], k) => {
+    drum(scene, `${name}Camera${k}`, root, mats.blackFoil, { height: 0.04, diameter: 0.05 }, [x, y, -0.135], Z);
+    drum(scene, `${name}CameraEye${k}`, root, mats.black, { height: 0.004, diameter: 0.036 }, [x, y, -0.157], Z);
+  });
+  drum(scene, `${name}Lightning`, root, mats.white, { height: 0.03, diameter: 0.03 }, [0, 0.015, -0.13], Z);
+  nozzle(scene, `${name}Engine`, root, mats.dark, [0, -0.13, 0], [0, -1, 0], 0.05, 0.07);
+  thrusters(scene, `${name}Jet`, root, mats, ring(4, 0.1, 0, 0.78).map(([x, z]) => [[x, 0.13, z], [x * 1.5, 0.26, z * 1.5]]), 0.016);
+  return fuse(scene, root);
+}
+
 // BepiColombo as it comes to Mercury (its engine module was let go in September 2026):
 // Europe's orbiter below, a box with one long solar wing and a white radiator on the
 // side kept from the planet's heat, and on top of it a white cone of a sunshield with
@@ -957,7 +977,7 @@ function bepiColombo(scene, name, mats) {
 export const CRAFT_BUILD = {
   voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid,
   iss, tiangong, sputnik, mro, juno, cassini, parker, roadster, newHorizons, pioneer10: pioneer,
-  danuri, lro, europaClipper, lucy, pioneer11: pioneer, bepiColombo,
+  danuri, lro, europaClipper, lucy, pioneer11: pioneer, bepiColombo, akatsuki,
 };
 
 // Craft that are not flown beside (one fell on Mercury, one is long silent): shown as the

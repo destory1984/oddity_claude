@@ -15,6 +15,10 @@ const RINGED = {
   // choosing the Sun from Earth did nothing (the user, 2026-10-06: "태양 워프는 왜 안
   // 되?"). It is seen from 2.4 radii, where it fills most of the view's height.
   sun: { radii: 2.4, liftDeg: 12 },
+  // Jupiter is met from where the user stood and said so (2026-10-14: "목성 워프 포인트는
+  // 여기로 해줘"): 216,000 km from its centre, nearly on the line to the Sun (2.5 degrees
+  // off it) and 9 degrees above the planets' plane, so the whole lit face fills the view.
+  jupiter: { radii: 3.1, liftDeg: 9, sideDeg: 0 },
 };
 // A body counts as near, and is not jumped to, within this many times its viewing
 // distance: the Sun's is counted closely, or it would be "near" from Earth.
@@ -98,7 +102,10 @@ function overRings(level, toLight, ringNormal) {
 export function bodyVista(body, bodies, ringNormal = null, toward = null) {
   const sun = bodies.find((b) => b.kind === 'star');
   const earth = bodies.find((b) => b.id === 'earth');
-  const { radii, liftDeg } = { radii: VISTA_RADII, liftDeg: LIFT_DEG, ...RINGED[body.id] };
+  // (A place of her own choosing has no two sides to it: a jump to see a moon's shadow,
+  // which must come to the shadow's side, keeps the usual place.)
+  const own = toward && RINGED[body.id]?.sideDeg !== undefined ? null : RINGED[body.id];
+  const { radii, liftDeg, sideDeg } = { radii: VISTA_RADII, liftDeg: LIFT_DEG, sideDeg: SIDE_DEG, ...own };
   // The Sun has no lit side: look from the side Earth is on.
   const toLight = unit(sub((body.kind === 'star' ? earth : sun).position, body.position));
   const side = sideOf(toLight);
@@ -106,7 +113,7 @@ export function bodyVista(body, bodies, ringNormal = null, toward = null) {
   const spots = [];
   for (const shrink of [1, 0.6, 0.4]) {
     for (const turn of turns) {
-      const level = mix(toLight, side.map((n) => n * turn), SIDE_DEG);
+      const level = mix(toLight, side.map((n) => n * turn), sideDeg);
       const out = ringNormal ? overRings(level, toLight, ringNormal) : mix(level, [0, 1, 0], liftDeg);
       spots.push(body.position.map((n, i) => n + out[i] * radii * shrink * body.radiusKm));
     }

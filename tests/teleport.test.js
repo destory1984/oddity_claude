@@ -101,6 +101,13 @@ test('a body is seen from five radii, mostly sunlit, a little from above, clear 
     // The Sun is behind the traveler's shoulder: between 30 and 55 degrees off the line.
     const toSun = sub(sun.position, body.position);
     const cos = dot(out, toSun) / (km * Math.hypot(...toSun));
+    // (Jupiter is met from where the user stood, 2026-10-14: 3.1 radii out, nearly on the
+    // line to the Sun, the whole lit face before her.)
+    if (body.id === 'jupiter') {
+      near(km, 3.1 * body.radiusKm, 1);
+      assert.ok(cos > Math.cos((12 * Math.PI) / 180), `jupiter ${cos}`);
+      continue;
+    }
     assert.ok(cos > Math.cos((55 * Math.PI) / 180) && cos < Math.cos((30 * Math.PI) / 180), `${body.id} ${cos}`);
   }
   // Most keep the full five radii; Saturn stands back for its rings.

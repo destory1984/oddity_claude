@@ -111,9 +111,9 @@ test('a jump from the sky news arrives on the side of the planet the shadow is o
     checked += 1;
     const from = (vista) => vista.map((n, i) => n - jupiter.position[i]);
     const unit = (v) => v.map((n) => n / Math.hypot(...v));
-    const plain = unit(from(bodyVista(jupiter, bodies)));
+    // (Not measured against the plain jump any more: since 2026-10-14 that ends where the
+    // user stood, on the line to the Sun, and has no two sides to choose between.)
     const aimed = unit(from(bodyVista(jupiter, bodies, null, spot)));
-    assert.ok(dot(aimed, spot) >= dot(plain, spot) - 1e-9);
     // The shadow is then seen at a slant of 70 degrees or less, whenever it is on the planet.
     assert.ok(dot(aimed, spot) > 0.34, `slot ${k}: ${dot(aimed, spot)}`);
   }

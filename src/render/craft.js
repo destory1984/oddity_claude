@@ -40,6 +40,7 @@ const RULES = {
   danuri: { visibleKm: 30000, maxKm: 60 },
   lro: { visibleKm: 30000, maxKm: 60 },
   europaClipper: { visibleKm: 400000, maxKm: 4000 },
+  juice: { visibleKm: 400000, maxKm: 4000 },
   lucy: { visibleKm: 400000, maxKm: 4000 },
   pioneer11: { visibleKm: 3e6, maxKm: Infinity },
   // Over Mercury, as low as the one over Mars.

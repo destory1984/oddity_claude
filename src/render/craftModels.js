@@ -981,6 +981,25 @@ function dawn(scene, name, mats) {
   return fuse(scene, root);
 }
 
+// JUICE: a box of foil, a dish 2.5 m across on one face, the radar's 16 m rod across the
+// top (the one that stuck after launch), a boom for the magnetometer, and two great
+// wings (85 square metres in all, each a cross of five panels: drawn as two wide ones).
+function juice(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  box(scene, `${name}Bus`, root, mats.goldFoil, [0.2, 0.26, 0.22]);
+  for (const s of [-1, 1]) {
+    wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.1, 0, 0], to: [s * 0.56, 0, 0], width: 0.3, panels: 2, face: Z, yoke: 0.08 });
+    // (The cross: a panel above and one below the inner panel of each wing.)
+    for (const y of [-1, 1]) wing(scene, `${name}Arm${s}${y}`, root, mats, { from: [s * 0.3, y * 0.15, 0], to: [s * 0.3, y * 0.36, 0], width: 0.2, panels: 1, face: Z, yoke: 0.01 });
+  }
+  dish(scene, `${name}Dish`, root, mats, { at: [0, 0.01, 0.12], toward: [0, 0.1, 1], diameter: 0.24 });
+  rod(scene, `${name}Radar`, root, mats.chrome, [-0.5, 0.14, -0.06], [0.5, 0.14, -0.06], 0.006, 4);
+  rod(scene, `${name}Boom`, root, mats.grey, [0, 0.13, -0.1], [0.12, 0.42, -0.3], 0.008, 4);
+  box(scene, `${name}Camera`, root, mats.blackFoil, [0.05, 0.05, 0.06], [0.05, -0.1, 0.12]);
+  nozzle(scene, `${name}Engine`, root, mats.dark, [0, -0.13, 0], [0, -1, 0], 0.05, 0.08);
+  return fuse(scene, root);
+}
+
 // BepiColombo as it comes to Mercury (its engine module was let go in September 2026):
 // Europe's orbiter below, a box with one long solar wing and a white radiator on the
 // side kept from the planet's heat, and on top of it a white cone of a sunshield with
@@ -1009,7 +1028,7 @@ function bepiColombo(scene, name, mats) {
 export const CRAFT_BUILD = {
   voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid,
   iss, tiangong, sputnik, mro, juno, cassini, parker, roadster, newHorizons, pioneer10: pioneer,
-  danuri, lro, europaClipper, lucy, pioneer11: pioneer, bepiColombo, akatsuki, mangalyaan, dawn,
+  danuri, lro, europaClipper, lucy, pioneer11: pioneer, bepiColombo, akatsuki, mangalyaan, dawn, juice,
 };
 
 // Craft that are not flown beside (one fell on Mercury, one is long silent): shown as the

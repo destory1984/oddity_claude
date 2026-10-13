@@ -203,6 +203,14 @@ export const CRAFT = [
     launched: 2007,
     intro: t('소행성 베스타와 왜행성 세레스의 궤도에 차례로 든 탐사선입니다. 이온 엔진으로 날았습니다. 2018년 연료가 떨어져 멈췄고, 지금도 세레스를 돌고 있습니다.'),
   },
+  // JUICE (the user, 2026-10-13, of what Jupiter lacks: "모두 넣자"): on its way, to
+  // reach Jupiter in July 2031. It roams as Europa Clipper does.
+  {
+    id: 'juice', name: t('주스'), nameEn: 'JUICE', kind: 'craft', parent: null,
+    loop: { lowKm: 0.9 * AU_KM, highKm: 5.2 * AU_KM, periodS: 1900 * 86400, lowAtS: -100 * 86400, tiltDeg: 1, turnDeg: 200, squeeze: 100 },
+    launched: 2023,
+    intro: t('유럽이 보낸 목성 얼음 위성 탐사선입니다. 2023년에 떠나 2031년 목성에 닿습니다. 유로파와 칼리스토를 스치고 가니메데 둘레를 돕니다.'),
+  },
 ];
 named(CRAFT);
 

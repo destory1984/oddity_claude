@@ -1,4 +1,5 @@
 {
+ "목성으로 가는 유럽의 탐사선 주스가 생겼습니다. 도킹하면 달과 지구를 잇달아 스친 2024년의 그날을 봅니다.": "Europe's probe JUICE, on its way to Jupiter, is here. Dock with it to see the day in 2024 it passed the Moon and Earth.",
  "가까이 있는 천체의 이름표를 눌러 아무 일도 없을 때, 가까워서 그렇다고 알려 줍니다.": "When a press on the tag of a body close by does nothing, a note now says it is because you are close.",
  "이미 {} 가까이에 있습니다. 멀리서 누르면 순간 이동합니다.": "You are already close to {the0}. Press its tag from far away to jump there.",
  "게임을 열지 못할 때 뜨는 안내 글이 첫 화면 그림에 묻혀 읽기 어렵던 것을 고쳤습니다.": "The note shown when the game cannot start was lost in the first picture; it can be read now.",
@@ -3926,5 +3927,18 @@
  "세레스의 밝은 점들은 무엇이었나?": "What were the bright spots on Ceres?",
  "돈 탐사선은 2007년 9월 27일에 떠났습니다. 이름은 영어로 새벽이라는 뜻입니다. 화성과 목성 사이 소행성대에서 가장 큰 두 천체, 베스타와 세레스를 찾아갔습니다. 둘은 행성이 되다 만 천체라 태양계가 처음 생기던 때의 모습을 간직하고 있습니다. 2011년 7월부터 열네 달 동안 베스타를 돌았고, 2015년 3월 6일 세레스에 닿았습니다. 지구 밖 두 천체의 궤도에 차례로 든 탐사선은 이것이 처음입니다.\n\n": "Dawn set out on 27 September 2007. It went to Vesta and Ceres, the two largest bodies of the asteroid belt between Mars and Jupiter. Both are worlds that stopped short of becoming planets, so they keep the look of the days when the solar system was new. It went round Vesta for fourteen months from July 2011, and reached Ceres on 6 March 2015. No craft before it had orbited two worlds beyond Earth in turn.\n\n",
  "이 일은 이온 엔진 덕에 할 수 있었습니다. 제논 가스에 전기를 걸어 내뿜는 엔진으로, 미는 힘은 종이 한 장 무게쯤이지만 연료를 아주 적게 쓰고 몇 해씩 켜 둘 수 있습니다. 세레스의 충돌구 안에서 본 밝은 점들은 땅속 짠물이 올라와 마르고 남은 소금이었습니다. 2018년 11월 1일 자세를 잡는 연료가 떨어져 교신이 끊겼습니다. 지금도 세레스 둘레를 돌고 있습니다.": "Ion engines made this possible. They charge xenon gas with electricity and shoot it out; the push is about the weight of a sheet of paper, but they use very little fuel and can burn for years. The bright spots seen inside a crater on Ceres were salt, left when salty water from below came up and dried. On 1 November 2018 the fuel that kept it pointed ran out, and contact was lost. It goes round Ceres still.",
- "세레스야. 소금 뿌렸어?": "Ceres, did you spill salt?"
+ "세레스야. 소금 뿌렸어?": "Ceres, did you spill salt?",
+ "유럽이 보낸 목성 얼음 위성 탐사선입니다. 2023년에 떠나 2031년 목성에 닿습니다. 유로파와 칼리스토를 스치고 가니메데 둘레를 돕니다.": "Europe's probe to Jupiter's icy moons. It left in 2023 and reaches Jupiter in 2031. It will skim Europa and Callisto and go into orbit round Ganymede.",
+ "달과 지구를 잇달아 스치다": "Past the Moon and Earth, a day apart",
+ "2024년 8월 20일": "20 August 2024",
+ "2023년 4월 14일 주스가 프랑스령 기아나에서 떠났습니다. 목성의 얼음 위성 셋을 살피러 가는 유럽의 탐사선입니다.": "On 14 April 2023 JUICE left French Guiana. It is Europe's probe to three icy moons of Jupiter.",
+ "길이 16m 레이더 안테나가 펴지다 걸렸습니다. 한 달 가까이 몸을 흔들고 햇볕에 데운 끝에 풀어냈습니다.": "Its 16 m radar antenna stuck as it unfolded. Nearly a month of shaking the craft and warming it in the Sun set it free.",
+ "2024년 8월 19일 달을, 하루 뒤 지구를 스쳤습니다. 달과 지구의 중력을 잇달아 빌린 탐사선은 처음입니다.": "On 19 August 2024 it skimmed the Moon, and a day later Earth. No craft before it had borrowed the pull of both in a row.",
+ "2025년 8월에는 금성을 스쳤습니다. 지구를 두 번 더 스친 뒤 2031년 7월 목성에 닿습니다.": "In August 2025 it skimmed Venus. After two more passes of Earth it reaches Jupiter in July 2031.",
+ "2034년에는 가니메데 둘레에 듭니다. 지구의 달이 아닌 다른 달을 도는 첫 탐사선이 됩니다.": "In 2034 it goes into orbit round Ganymede: the first craft to orbit a moon that is not our own.",
+ "주스를 보낸 곳은?": "Who sent JUICE?",
+ "유럽우주국": "European Space Agency",
+ "주스는 유럽우주국이 목성의 얼음 위성으로 보낸 탐사선입니다. 이름은 목성 얼음 위성 탐사선이라는 영어의 앞 글자를 이은 것입니다. 2023년 4월 14일 아리안 5 로켓으로 떠났습니다. 곧장 갈 힘이 없어 2024년 8월 달과 지구를, 2025년 8월 금성을 스쳐 속도를 얻었습니다. 지구를 두 번 더 스친 뒤 2031년 7월 목성에 닿을 예정입니다.\n\n": "JUICE is the probe the European Space Agency sent to Jupiter's icy moons. Its name is made of the first letters of Jupiter Icy Moons Explorer. It left on 14 April 2023 on an Ariane 5 rocket. Too weak to go straight there, it skimmed the Moon and Earth in August 2024 and Venus in August 2025 to gain speed. After two more passes of Earth it is to reach Jupiter in July 2031.\n\n",
+ "목성에 닿으면 유로파를 2번, 칼리스토를 21번, 가니메데를 12번 스쳐 지나갑니다. 세 위성 모두 얼음 밑에 바다가 있을 것으로 봅니다. 2034년 12월에는 가니메데 둘레에 듭니다. 지구의 달이 아닌 다른 달을 도는 탐사선은 처음입니다. 목성에서는 햇빛이 지구의 25분의 1뿐이라 태양전지판을 85제곱미터나 달았습니다. 얼음 속을 9km 깊이까지 들여다보는 레이더도 실었습니다.": "At Jupiter it will skim Europa twice, Callisto 21 times and Ganymede 12 times. All three moons are thought to hold a sea under their ice. In December 2034 it goes into orbit round Ganymede: no craft has yet orbited a moon other than our own. Sunlight at Jupiter is one twenty-fifth of what Earth gets, so it carries 85 square metres of solar panels. It also carries a radar that looks 9 km down into the ice.",
+ "달 찍고, 지구 찍고!": "Moon: done. Earth: done!"
 }

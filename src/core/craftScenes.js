@@ -418,6 +418,24 @@ export const CRAFT_SCENES = {
       return { pass: clamp((t - 2) / 31), ion: ease(t, 7, 7.6) * (1 - ease(t, 20, 21)), bright: ease(t, 28, 30), say: ease(t, 30.3, 30.7) * (1 - ease(t, 33.6, 34)) };
     },
   },
+  juice: {
+    name: t('달과 지구를 잇달아 스치다'),
+    day: t('2024년 8월 20일'),
+    seconds: 35,
+    downAt: 14,
+    sounds: [[19.5, 'shutter'], [28, 'stood']],
+    lines: [
+      { at: 0, text: t('2023년 4월 14일 주스가 프랑스령 기아나에서 떠났습니다. 목성의 얼음 위성 셋을 살피러 가는 유럽의 탐사선입니다.') },
+      { at: 7, text: t('길이 16m 레이더 안테나가 펴지다 걸렸습니다. 한 달 가까이 몸을 흔들고 햇볕에 데운 끝에 풀어냈습니다.') },
+      { at: 14, text: t('2024년 8월 19일 달을, 하루 뒤 지구를 스쳤습니다. 달과 지구의 중력을 잇달아 빌린 탐사선은 처음입니다.') },
+      { at: 21, text: t('2025년 8월에는 금성을 스쳤습니다. 지구를 두 번 더 스친 뒤 2031년 7월 목성에 닿습니다.') },
+      { at: 28, text: t('2034년에는 가니메데 둘레에 듭니다. 지구의 달이 아닌 다른 달을 도는 첫 탐사선이 됩니다.') },
+    ],
+    unfold(t) {
+      // The Moon goes by first (about 14 s), then Earth (about 19.5 s); say: its bubble.
+      return { pass: clamp((t - 6) / 27), say: ease(t, 17.6, 18) * (1 - ease(t, 21, 21.4)) };
+    },
+  },
   mro: {
     name: t('낙하산을 찍다'),
     day: t('2012년 8월 6일'),

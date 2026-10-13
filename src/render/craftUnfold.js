@@ -772,6 +772,22 @@ const ceresCatches = goesBy('dawn', (scene, name, world, mats, root) => {
   };
 }, { from: [-2.4, -1.5], to: [0.3, -1.5] });
 
+// JUICE at the Moon and Earth, a day apart: the grey Moon goes by ahead of the blue
+// planet (the watcher's left is the world's +x: what leads is put there).
+const moonThenEarth = goesBy('juice', (scene, name, world, mats, root) => {
+  ball(scene, `${name}Earth`, world, tint(scene, `${name}EarthPaint`, '#2f6fd0'), 1.5);
+  // Clouds and a land on the face the watcher sees: balls pressed thin along the line out.
+  for (const [k, at, turn, d, hex] of [[0, [0.16, 0.2, 0.7], -1.35, 0.6, '#f2f4f8'], [1, [0.5, -0.2, 0.52], -0.8, 0.44, '#f2f4f8'], [2, [0.05, -0.3, 0.68], -1.5, 0.4, '#3f8f4f'], [3, [0.36, 0.5, 0.42], -0.86, 0.3, '#f2f4f8']]) {
+    ball(scene, `${name}Patch${k}`, world, tint(scene, `${name}PatchPaint${k}`, hex), d, at, [0.12, 0.6, 1]).rotation.y = turn;
+  }
+  const moon = group(scene, `${name}MoonAt`, world, [1.15, 0.3, 0.3]);
+  ball(scene, `${name}Moon`, moon, tint(scene, `${name}MoonPaint`, '#a9a6a0'), 0.42);
+  for (const [k, at, turn, d] of [[0, [0.04, 0.03, 0.19], -1.36, 0.14], [1, [0.14, -0.06, 0.13], -0.75, 0.1]]) {
+    ball(scene, `${name}Sea${k}`, moon, tint(scene, `${name}SeaPaint${k}`, '#6f6c68'), d, at, [0.2, 1, 1]).rotation.y = turn;
+  }
+  return says(scene, name, root, t('달 찍고, 지구 찍고!'));
+}, { from: [-2.4, -1.5], to: [2.4, -1.5] });
+
 // Lucy at Dinkinesh: the small asteroid, and from behind it a moon that turns out to be
 // two lumps joined. moon: it has come out; pair: its second lump is seen.
 const dinkineshGoesBy = goesBy('lucy', (scene, name, world, mats, root) => {
@@ -941,6 +957,7 @@ export const CRAFT_UNFOLD_ALL = {
   akatsuki: venusGoesBy,
   mangalyaan: marsCatches,
   dawn: ceresCatches,
+  juice: moonThenEarth,
   mro: mroParachute,
   lro: lroFootpaths,
   danuri: danuriArrives,

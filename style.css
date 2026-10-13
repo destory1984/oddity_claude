@@ -5727,3 +5727,17 @@ body.practicing #guideText.fresh {
   text-align:center;
   line-height:1.25;
 }
+
+/* A start that failed (no WebGL): its words stood straight on the bright picture and
+   could not be read. They get a dark plate, and "heading for the solar system" goes. */
+#loadError:not(:empty) {
+  margin:0 16px;
+  padding:14px 18px;
+  border:1px solid rgba(255,189,179,.5);
+  border-radius:12px;
+  background:rgba(2,4,11,.86);
+  line-height:1.6;
+  word-break:keep-all;
+  text-align:center;
+}
+#loading:has(#loadError:not(:empty)) > span { display:none; }

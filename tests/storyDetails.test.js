@@ -15,7 +15,7 @@ test('every story place has a longer telling of three sentences or more', () => 
   }
 });
 
-test('all 111 have a picture on file, with a caption and a credit (103 photographs and eight drawings made for the game)', () => {
+test('all 114 have a picture on file, with a caption and a credit (106 photographs and eight drawings made for the game)', () => {
   const without = STORIES.filter((s) => !STORY_DETAILS[s.id].photo).map((s) => s.id);
   assert.deepEqual(without, []);
   assert.equal(storyPhotoFile('wadiRum'), 'stories/wadiRum.jpg');
@@ -35,8 +35,9 @@ test('all 111 have a picture on file, with a caption and a credit (103 photograp
     // Where it came from and its licence are written down.
     assert.ok(credits.includes(`| \`${story.id}.jpg\` |`), `${story.id} is not in THIRD-PARTY.md`);
   }
-  assert.equal(readdirSync('public/assets/stories').length, 111);
+  assert.equal(readdirSync('public/assets/stories').length, 114);
   // (4 MB until the four of Mercury came, 2026-10-12; 4.2 MB until the two of Venus,
-  // 2026-10-13: 111 pictures, 38 KB each on average.)
-  assert.ok(bytes < 4.3e6, `${bytes} bytes of pictures`);
+  // 2026-10-13; 4.3 MB until the three round Jupiter, 2026-10-14: 114 pictures, 38 KB each
+  // on average.)
+  assert.ok(bytes < 4.45e6, `${bytes} bytes of pictures`);
 });

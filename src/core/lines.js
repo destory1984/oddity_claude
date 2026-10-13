@@ -165,6 +165,7 @@ export const SIGHTS = {
   'ering:saturn': t('분수가 고리를 만들었대.'),
   'flare:sun': t('해가 재채기를 했어.'),
   'flow:jupiter': t('띠마다 따로 흘러가네.'),
+  'cyclones:jupiter': t('소용돌이가 꽃잎처럼 둘러섰어.'),
   'tracks:mars': t('누가 땅에 낙서했어?'),
   'aurora:uranus': t('천왕성 오로라는 삐딱하네.'),
   'aurora:neptune': t('해왕성 오로라는 극에 없네?'),

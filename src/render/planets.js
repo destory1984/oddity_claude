@@ -203,6 +203,9 @@ const LOOKS = {
     // Its belts slide past each other: the fastest gains a turn on the slowest in about
     // ten minutes (the real winds differ by some hundred m/s: speeded up to be seen).
     flow: 0.0016,
+    // The cyclones round its poles (textured.frag `cyclones`), drawn larger than true to
+    // be seen from where the whole planet is in view.
+    cyclones: [0.85, 1.6, 0.05],
     // A thread of dust that shows only against the light (ring.frag, style 2).
     rings: { innerKm: 100000, outerKm: 129000, tilt: 0.05, style: 2 },
   },
@@ -224,11 +227,11 @@ const LOOKS = {
   },
   ganymede: {
     shader: 'textured', map: 'ganymede.jpg', saturation: 1, tint: [1, 1, 1], base: [0.55, 0.5, 0.45],
-    mapWeight: 1, haze: 0, detail: 0.12, dayS: 618153,
+    mapWeight: 1, haze: 0, detail: 0.12, dayS: SPIN_DAY_S.ganymede,
   },
   callisto: {
     shader: 'textured', map: 'callisto.jpg', saturation: 1, tint: [0.8, 0.72, 0.62], base: [0.35, 0.32, 0.28],
-    mapWeight: 1, haze: 0, detail: 0.14, dayS: 1441931,
+    mapWeight: 1, haze: 0, detail: 0.14, dayS: SPIN_DAY_S.callisto,
   },
   titan: {
     shader: 'textured', map: 'titan.jpg', saturation: 0.5, tint: [1, 0.88, 0.72], base: [0.82, 0.6, 0.32],
@@ -360,7 +363,7 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
       ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy',
-        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'eclipsed', 'nightGlow', 'nightAir', 'glory', 'flow', 'tracks', 'polarCap', 'sights'], ['map']);
+        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'eclipsed', 'nightGlow', 'nightAir', 'glory', 'cyclones', 'flow', 'tracks', 'polarCap', 'sights'], ['map']);
     material.setVector4('sights', new Vector4(...(look.sights ?? [0, 0, 0, 0])));
     material.setFloat('flow', look.flow ?? 0);
     material.setFloat('tracks', look.tracks ?? 0);
@@ -368,6 +371,7 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     material.setColor3('nightGlow', color(look.nightGlow ?? [0, 0, 0]));
     material.setColor3('nightAir', color(look.nightAir ?? [0, 0, 0]));
     material.setVector3('glory', new Vector3(...(look.glory ?? [0, 0, 0])));
+    material.setVector3('cyclones', new Vector3(...(look.cyclones ?? [0, 0, 0])));
     material.setVector4('shine', new Vector4(0, 1, 0, 0));
     material.setVector4('eclipsed', new Vector4(0, 1, 0, 0));
     material.setColor3('shineColor', new Color3(1, 1, 1));

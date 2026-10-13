@@ -47,7 +47,7 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 
 ## 이야기 장소의 사진
 
-`public/assets/stories/` 의 사진 103장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
+`public/assets/stories/` 의 사진 106장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
 
 같은 폴더의 그림 여덟 장(`acidalia.jpg`, `procellarum.jpg`, `schiaparelli.jpg`, `wadiRum.jpg`, `bohyunsan.jpg`, `tanegashima.jpg`, `wenchang.jpg`, `vega.jpg`, 420×420)은 쓸 수 있는 사진이 없어 이 게임을 위해 그린 것이다. 외부 자료가 아니고 권리를 보유한다(LICENSE).
 
@@ -178,6 +178,9 @@ CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수
 | `bohyunsan.jpg` | 이 게임을 위해 그린 그림 (2026-10-05) | 이 저장소 | 권리 보유 (LICENSE) |
 | `tanegashima.jpg` | 이 게임을 위해 그린 그림 (2026-10-07) | 이 저장소 | 권리 보유 (LICENSE) |
 | `wenchang.jpg` | 이 게임을 위해 그린 그림 (2026-10-07) | 이 저장소 | 권리 보유 (LICENSE) |
+| `galileoProbe.jpg` | [Galileo Jupiter Atmospheric Probe in a spacecraft processing room (AC84-0228-3).jpg](https://commons.wikimedia.org/wiki/File:Galileo_Jupiter_Atmospheric_Probe_in_a_spacecraft_processing_room_(AC84-0228-3).jpg) | NASA | Public domain |
+| `valhalla.jpg` | [Voyager 1 Image of Valhalla Crater.jpg](https://commons.wikimedia.org/wiki/File:Voyager_1_Image_of_Valhalla_Crater.jpg) | NASA (Voyager 1) | Public domain |
+| `galileoRegio.jpg` | [Galileo Regio and Uruk.jpg](https://commons.wikimedia.org/wiki/File:Galileo_Regio_and_Uruk.jpg) | NASA/JPL (Galileo) | Public domain |
 | `vega.jpg` | 이 게임을 위해 그린 그림 (2026-10-13) | 이 저장소 | 권리 보유 (LICENSE) |
 
 ## d3-celestial 라이선스 (BSD 3-Clause)

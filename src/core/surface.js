@@ -15,6 +15,8 @@ export const SPIN_DAY_S = {
   jupiter: 35730,
   io: 152854,
   europa: 306822,
+  ganymede: 618153,
+  callisto: 1441931,
   saturn: 38362,
   enceladus: 1.370218 * 86400,
   neptune: 57996,

@@ -106,7 +106,7 @@ test('where several sights are in reach they are all listed, the nearest thing f
   // (Over the pole she stands over the edge of day: the thunderheads' last light is told.)
   assert.deepEqual(glowsNear(BODIES, above('earth', 1)), ['aurora:earth', 'clouds:earth', 'flare:sun', 'anvils:earth']);
   assert.deepEqual(glowsNear(BODIES, above('earth', 2.5)), ['aurora:earth', 'flare:sun']);
-  assert.deepEqual(glowsNear(BODIES, above('jupiter', 1)), ['aurora:jupiter', 'footprint:io', 'flow:jupiter']);
+  assert.deepEqual(glowsNear(BODIES, above('jupiter', 1)), ['aurora:jupiter', 'footprint:io', 'flow:jupiter', 'cyclones:jupiter']);
   assert.deepEqual(glowsNear(BODIES, above('saturn', 1)), ['aurora:saturn', 'spokes:saturn', 'hexagon:saturn', 'rain:saturn']);
   assert.deepEqual(glowsNear(BODIES, above('neptune', 1)), ['aurora:neptune', 'spot:neptune']);
   // Triton is within three radii of Neptune.

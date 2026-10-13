@@ -187,6 +187,7 @@ const where = (latDeg, lonDeg) => `${degrees(latDeg, t('북위'), t('남위'))},
 const CLOUD_HINTS = {
   shoemakerLevy: t('목성 남반구(남위 44도) 구름 꼭대기의 충돌 자리 20,000km 안에 닿기'),
   hexagon: t('토성 북극(북위 78도) 구름 꼭대기의 육각형 15,000km 안에 닿기'),
+  galileoProbe: t('목성 적도 조금 위(북위 6.5도) 구름 꼭대기의 돌입 자리 20,000km 안에 닿기'),
   greatDarkSpot: t('해왕성 남반구 구름 꼭대기의 검은 점 10,000km 안에 닿기'),
 };
 const FAR_PLACES = [
@@ -373,6 +374,22 @@ STORIES.push(...[
 ].map(([id, name, nameEn, year, latDeg, lonDeg, withinKm, text]) => ({
   id, name, nameEn, year, type: 'surface', body: 'venus', latDeg, lonDeg, withinKm, landmark: false,
   hint: t`${t('금성')}(${where(latDeg, lonDeg)}) ${withinKm.toLocaleString('ko-KR')}km 안에 내려앉기`,
+  text,
+})));
+// Three more round Jupiter (the user, 2026-10-13, of what Jupiter lacks: "모두 넣자"):
+// where Galileo's probe went in (a spot on the cloud tops, a quarter turn from the
+// comet's scar so that the two tags do not stand one over the other), the first place
+// on Callisto and the first on Ganymede. Longitudes are east ones (360 less the west).
+STORIES.push(...[
+  ['galileoProbe', t('갈릴레오 탐사구 돌입지'), 'Galileo Probe', 1995, 'jupiter', t('목성'), 6.5, 0, 90, 20000,
+    t('1995년 12월 7일 갈릴레오의 탐사구가 이곳 구름 속으로 뛰어들었습니다. 58분 동안 목성의 공기를 직접 쟀습니다.')],
+  ['valhalla', t('칼리스토의 발할라 분지'), 'Valhalla', 1979, 'callisto', t('칼리스토'), 14.7, -56, -56, 300,
+    t('1979년 보이저 1호가 찾은 겹겹의 둥근 무늬입니다. 지름 3,800km로, 태양계에서 가장 큰 여러 겹 고리 분지입니다.')],
+  ['galileoRegio', t('가니메데의 갈릴레오 지역'), 'Galileo Regio', 1996, 'ganymede', t('가니메데'), 47, -129.6, -129.6, 300,
+    t('가니메데에서 가장 큰 어두운 땅입니다. 1996년 갈릴레오가 이 달 곁을 지나며 가니메데에 자기장이 있음을 알아냈습니다.')],
+].map(([id, name, nameEn, year, body, bodyName, latDeg, realLonDeg, lonDeg, withinKm, text]) => ({
+  id, name, nameEn, year, type: 'surface', body, latDeg, lonDeg, withinKm, landmark: true,
+  hint: CLOUD_HINTS[id] ?? t`${bodyName}(${where(latDeg, realLonDeg)}) ${withinKm.toLocaleString('ko-KR')}km 안에 내려앉기`,
   text,
 })));
 named(STORIES);

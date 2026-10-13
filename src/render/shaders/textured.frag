@@ -27,6 +27,10 @@ uniform vec3 rimColor;
 uniform float rimLight;
 // 1 for Saturn: the six-sided jet stream round its north pole.
 uniform float hexagon;
+// Jupiter's polar cyclones, as Juno found them in 2016: one over each pole and a ring
+// of others round it, eight in the north and five in the south, that have kept their
+// places for years. [strength, size (1 = their true size), how fast the arms turn].
+uniform vec3 cyclones;
 // 1 for Titan: sunlight glinting off the lakes round its north pole.
 uniform float glint;
 // Neptune's Great Dark Spot: xy where it is on the map, z 1 when there is one. Its
@@ -279,6 +283,41 @@ void main(){
     col *= 1. - .4 * exp(-pow((polar - side) / .012, 2.)) * hexagon;
     col *= 1. - .55 * exp(-pow(polar / .035, 2.)) * hexagon;
   }
+  // (The poles lie along the edge of day: the cap keeps a little light of its own there,
+  // or nothing of it would show.)
+  float poleLight = 0.;
+  if (cyclones.x > 0. && abs(lp.y) > .7) {
+    float north = step(0., lp.y);
+    float count = mix(5., 8., north);
+    // (In the north they stand 7 degrees from the pole and are 4,000 km and more across;
+    // the southern five are larger.)
+    float ringAt = .125 * cyclones.y;
+    float size = mix(.058, .046, north) * cyclones.y;
+    float polar = acos(clamp(abs(lp.y), -1., 1.));
+    float a = atan(lp.z, lp.x) * (north * 2. - 1.);
+    vec2 onCap = polar * vec2(cos(a), sin(a));
+    // The poles are bluer than the belts.
+    float cap = 1. - smoothstep(ringAt + size * 1.5, ringAt + size * 3.5, polar);
+    col = mix(col, dot(col, vec3(.4)) * vec3(.7, .86, 1.15), cap * .65 * cyclones.x);
+    poleLight = cap * cyclones.x;
+    float swirl = 0.;
+    float eye = 0.;
+    for (int k = 0; k < 9; k++) {
+      if (float(k) > count) break;
+      float at = (float(k) - 1.) * 6.2832 / count + .3;
+      vec2 centre = k == 0 ? vec2(0.) : ringAt * vec2(cos(at), sin(at));
+      vec2 from = onCap - centre;
+      float d = length(from) / size;
+      if (d < 2.) {
+        float arms = .5 + .5 * sin(atan(from.y, from.x) * 2. + d * 5.5 - time * cyclones.z + float(k));
+        float body = exp(-d * d * 1.5);
+        swirl = max(swirl, body * (.35 + .65 * arms) * smoothstep(0., .25, d));
+        eye = max(eye, exp(-d * d * 40.));
+      }
+    }
+    col = mix(col, vec3(1., .96, .88), swirl * .9 * cyclones.x);
+    col *= 1. - .45 * eye * cyclones.x;
+  }
   vec3 N = normalize(n);
   // On the blurred side the ground is drawn as if from close by, and more strongly.
   float strength = mix(craters, 1., blurred);
@@ -311,6 +350,7 @@ void main(){
   float l = dot(N, sun);
   // The night side keeps a tenth of the light, so a traveler can still see where they fly.
   float lit = smoothstep(-.06, .2, l) * max(l, 0.) * 1.15 + .1;
+  lit += poleLight * .3 * smoothstep(-.35, .05, l);
   // The rings' shadow: follow the sunlight back from this spot to the ring plane and
   // dim it by how dense the ring is where the ray crosses.
   float toPlane = dot(sun, ringNormal);

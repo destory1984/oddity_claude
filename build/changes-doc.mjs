@@ -1,4 +1,5 @@
-// docs/바뀐-것들.md from src/core/changes.js: the game's own "바뀐 것들" page as a
+// 바뀐-것들.md (at the top of the repository: the user, 2026-10-13, "깃헙에서 상위
+// 디렉토리에 놓자"; it was under docs/) from src/core/changes.js: the game's own "바뀐 것들" page as a
 // document to read on GitHub (the user, 2026-10-09, having looked there: "바뀐것들.md
 // 같은게 없네"). One source, so the two cannot drift: tests/changesDoc.test.js fails
 // when the file is not what this makes. Run: node build/changes-doc.mjs
@@ -6,7 +7,7 @@ import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { CHANGES, STARTED } from '../src/core/changes.js';
 
-export const CHANGES_DOC = 'docs/바뀐-것들.md';
+export const CHANGES_DOC = '바뀐-것들.md';
 
 export function changesDoc(changes = CHANGES, started = STARTED) {
   const [y, m, d] = started.split('-').map(Number);
@@ -15,7 +16,7 @@ export function changesDoc(changes = CHANGES, started = STARTED) {
     '',
     '게임 설정의 "바뀐 것들" 쪽과 같은 내용이다. 플레이어가 화면에서 보거나 듣는 변화만 한 줄씩 적는다. 새것이 위에 온다.',
     '',
-    `만들기 시작한 날은 ${y}년 ${m}월 ${d}일이고, 지금까지 ${changes.length}줄이다. 어떻게 만들었는지는 [상세기획서](Space-Oddity-상세기획서.md)에 날짜별로 있다.`,
+    `만들기 시작한 날은 ${y}년 ${m}월 ${d}일이고, 지금까지 ${changes.length}줄이다. 어떻게 만들었는지는 [상세기획서](docs/Space-Oddity-상세기획서.md)에 날짜별로 있다.`,
     '',
     '이 파일은 직접 고치지 않는다. `src/core/changes.js` 에 한 줄을 넣고 `node build/changes-doc.mjs` 를 돌리면 다시 만들어진다.',
   ];

@@ -174,7 +174,9 @@ export function distanceText(km) {
   if (english()) return englishKm(km);
   // (Japanese and Chinese count the same way, with their own characters.)
   if (km < 1e4) return `${Math.round(km).toLocaleString('ko-KR')}km`;
-  if (km < 999950) return counted(`${(km / 1e4).toFixed(1)}만km`);
+  // (From 100,000 km on, whole ten thousands: the user, 2026-10-14, "거리가 10만km 이상일
+  // 때에는 소수점 없애". A tag read "17.8만km".)
+  if (km < 99500) return counted(`${(km / 1e4).toFixed(1)}만km`);
   if (km < 1e8) return counted(`${Math.round(km / 1e4).toLocaleString('ko-KR')}만km`);
   if (km < 1e12) return counted(`${(km / 1e8).toFixed(1)}억km`);
   return counted(`${(km / 1e12).toFixed(1)}조km`);

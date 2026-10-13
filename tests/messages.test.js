@@ -106,7 +106,10 @@ test('distances read in km, then in 만 and 억 as they grow', () => {
   assert.equal(distanceText(540.4), '540km');
   assert.equal(distanceText(9129), '9,129km');
   assert.equal(distanceText(45737), '4.6만km');
-  assert.equal(distanceText(999499), '99.9만km');
+  assert.equal(distanceText(99499), '9.9만km');
+  assert.equal(distanceText(99500), '10만km');
+  assert.equal(distanceText(178000), '18만km');
+  assert.equal(distanceText(999499), '100만km');
   assert.equal(distanceText(2190000), '219만km');
   assert.equal(distanceText(59063800), '5,906만km');
   assert.equal(distanceText(254000000), '2.5억km');

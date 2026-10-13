@@ -969,6 +969,9 @@ ${STORY_MORE[target.id]}` : told };
         // happened (the user, 2026-10-12, of the Sun behind Hubble: "딸깍딸깍하는 소리만
         // 나오, 워프를 안 하는데.. 막혀서 그런거지?").
         if (!visited(chosen, progress)) toast.show(t('아직 가 보지 않은 곳입니다. 한 번 다녀오면 이름표로 순간 이동할 수 있습니다.'));
+        // Been there, and close to it now: the same (the user, 2026-10-13, of Earth's
+        // tag on a phone: "너무 가까워서 그런지 클릭 소리만 나고, 가만히 있더라").
+        else toast.show(t`이미 ${chosen.name} 가까이에 있습니다. 멀리서 누르면 순간 이동합니다.`);
       }
       return;
     }

@@ -1,4 +1,5 @@
 {
+ "세레스에 돈 탐사선이 생겼습니다. 도킹하면 왜행성에 처음 닿은 2015년의 그날과 이온 엔진의 빛을 봅니다.": "Ceres has the probe Dawn. Dock with it to see the day in 2015 it first reached a dwarf planet, and its ion beam.",
  "화성에 인도의 탐사선 망갈리안이 생겼습니다. 도킹하면 첫 시도에 궤도에 든 2014년의 그날을 봅니다.": "Mars has India's probe Mangalyaan. Dock with it to see the day in 2014 it made orbit on the first try.",
  "오래된 브라우저에서는 검은 화면 대신 Chrome을 업데이트하라는 안내가 뜹니다.": "An old browser now shows a note asking to update Chrome, not a black screen.",
  "금성 구름 위의 무지개 고리(글로리)가 생겼습니다. 해를 등진 금성 둘레의 빛 고리도 알려 줍니다.": "Venus has its glory: rainbow rings on the clouds. The ring of light round Venus against the Sun is told of too.",
@@ -3910,5 +3911,17 @@
  "어느 나라가 보낸 탐사선인가?": "Which country sent this probe?",
  "망갈리안은 인도가 보낸 첫 화성 탐사선입니다. 이름은 화성으로 가는 배라는 뜻입니다. 2013년 11월 5일 스리하리코타에서 PSLV 로켓으로 떠났습니다. 로켓의 힘이 모자라 지구를 한 달 가까이 돌며 엔진을 여러 번 켜 궤도를 키운 뒤 화성으로 향했습니다. 2014년 9월 24일 화성 둘레에 들었습니다. 첫 시도에 화성 궤도에 든 나라는 인도가 처음입니다.\n\n": "Mangalyaan is the first Mars probe sent by India. Its name means a ship to Mars. It left Sriharikota on 5 November 2013 on a PSLV rocket. The rocket was too weak to send it straight, so it circled Earth for nearly a month, firing its engine several times to widen its orbit, and then set out for Mars. On 24 September 2014 it entered orbit round Mars. India was the first country to reach Mars orbit on its first try.\n\n",
  "든 돈은 약 7,400만 달러로, 다른 나라 화성 탐사선의 몇 분의 일이었습니다. 화성에서 421km까지 다가갔다가 77,000km까지 멀어지는 길쭉한 길을 사흘에 한 바퀴 돌았습니다. 멀리 있을 때는 화성 전체를 사진 한 장에 담았습니다. 여섯 달을 버티게 만들었지만 2022년 4월 교신이 끊길 때까지 여덟 해 가까이 일했습니다. 지금도 화성 둘레를 돌고 있습니다.": "It cost about 74 million dollars, a fraction of what other countries' Mars probes cost. It went round once in three days on a long path that came within 421 km of Mars and swung out to 77,000 km. From far out it caught the whole of Mars in one picture. Built to last six months, it worked for nearly eight years, until contact was lost in April 2022. It goes round Mars still.",
- "화성아. 한 번에 왔어": "Mars, I made it in one go"
+ "화성아. 한 번에 왔어": "Mars, I made it in one go",
+ "소행성 베스타와 왜행성 세레스의 궤도에 차례로 든 탐사선입니다. 이온 엔진으로 날았습니다. 2018년 연료가 떨어져 멈췄고, 지금도 세레스를 돌고 있습니다.": "The probe that went round the asteroid Vesta and then the dwarf planet Ceres. It flew on ion engines. Its fuel ran out in 2018, and it goes round Ceres still.",
+ "왜행성에 처음 닿다": "First to reach a dwarf planet",
+ "2015년 3월 6일": "6 March 2015",
+ "2007년 9월 27일 돈 탐사선이 떠났습니다. 태양계가 처음 생기던 때를 알아보러 소행성대로 갔습니다.": "On 27 September 2007 Dawn set out. It went to the asteroid belt to learn of the days when the solar system was new.",
+ "이온 엔진을 썼습니다. 미는 힘은 종이 한 장 무게쯤이지만, 몇 해를 쉬지 않고 켜 둘 수 있습니다.": "It flew on ion engines. Their push is about the weight of a sheet of paper, but they can burn for years without a rest.",
+ "2011년 7월 소행성 베스타에 닿아 열네 달을 돌았습니다. 그러고는 궤도를 떠나 세레스로 향했습니다.": "In July 2011 it reached the asteroid Vesta and went round it for fourteen months. Then it left that orbit and made for Ceres.",
+ "2015년 3월 6일, 세레스가 탐사선을 붙잡았습니다. 왜행성의 궤도에 든 것도, 두 천체의 궤도에 차례로 든 것도 이 탐사선이 처음입니다.": "On 6 March 2015 Ceres caught the craft. It was the first to orbit a dwarf planet, and the first to orbit two worlds in turn.",
+ "충돌구 안에 밝은 점들이 보였습니다. 땅속의 짠물이 올라와 마르고 남은 소금이었습니다.": "Bright spots showed inside a crater. They were salt, left when salty water from below came up and dried.",
+ "세레스의 밝은 점들은 무엇이었나?": "What were the bright spots on Ceres?",
+ "돈 탐사선은 2007년 9월 27일에 떠났습니다. 이름은 영어로 새벽이라는 뜻입니다. 화성과 목성 사이 소행성대에서 가장 큰 두 천체, 베스타와 세레스를 찾아갔습니다. 둘은 행성이 되다 만 천체라 태양계가 처음 생기던 때의 모습을 간직하고 있습니다. 2011년 7월부터 열네 달 동안 베스타를 돌았고, 2015년 3월 6일 세레스에 닿았습니다. 지구 밖 두 천체의 궤도에 차례로 든 탐사선은 이것이 처음입니다.\n\n": "Dawn set out on 27 September 2007. It went to Vesta and Ceres, the two largest bodies of the asteroid belt between Mars and Jupiter. Both are worlds that stopped short of becoming planets, so they keep the look of the days when the solar system was new. It went round Vesta for fourteen months from July 2011, and reached Ceres on 6 March 2015. No craft before it had orbited two worlds beyond Earth in turn.\n\n",
+ "이 일은 이온 엔진 덕에 할 수 있었습니다. 제논 가스에 전기를 걸어 내뿜는 엔진으로, 미는 힘은 종이 한 장 무게쯤이지만 연료를 아주 적게 쓰고 몇 해씩 켜 둘 수 있습니다. 세레스의 충돌구 안에서 본 밝은 점들은 땅속 짠물이 올라와 마르고 남은 소금이었습니다. 2018년 11월 1일 자세를 잡는 연료가 떨어져 교신이 끊겼습니다. 지금도 세레스 둘레를 돌고 있습니다.": "Ion engines made this possible. They charge xenon gas with electricity and shoot it out; the push is about the weight of a sheet of paper, but they use very little fuel and can burn for years. The bright spots seen inside a crater on Ceres were salt, left when salty water from below came up and dried. On 1 November 2018 the fuel that kept it pointed ran out, and contact was lost. It goes round Ceres still.",
+ "세레스야. 소금 뿌렸어?": "Ceres, did you spill salt?"
 }

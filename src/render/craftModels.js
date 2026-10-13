@@ -967,6 +967,20 @@ function mangalyaan(scene, name, mats) {
   return fuse(scene, root);
 }
 
+// Dawn: a box of foil with a dish on one face, three ion engines below (one burns at a
+// time), and two wings of five panels each, 19.7 m from tip to tip: power enough as far
+// from the Sun as Ceres. (The wings are drawn shorter than true, to fit a phone's view.)
+function dawn(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  box(scene, `${name}Bus`, root, mats.goldFoil, [0.18, 0.24, 0.18]);
+  for (const s of [-1, 1]) wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.09, 0, 0], to: [s * 0.56, 0, 0], width: 0.13, panels: 5, face: Z, yoke: 0.07 });
+  dish(scene, `${name}Dish`, root, mats, { at: [0, 0.02, 0.1], toward: [0, 0.15, 1], diameter: 0.2 });
+  [[0, -0.03], [-0.055, 0.03], [0.055, 0.03]].forEach(([x, z], k) => nozzle(scene, `${name}Ion${k}`, root, mats.grey, [x, -0.12, z], [0, -1, 0], 0.03, 0.05));
+  box(scene, `${name}Camera`, root, mats.blackFoil, [0.05, 0.05, 0.06], [0.04, 0.145, 0.03]);
+  box(scene, `${name}Spectrometer`, root, mats.white, [0.04, 0.04, 0.05], [-0.04, 0.14, 0.02]);
+  return fuse(scene, root);
+}
+
 // BepiColombo as it comes to Mercury (its engine module was let go in September 2026):
 // Europe's orbiter below, a box with one long solar wing and a white radiator on the
 // side kept from the planet's heat, and on top of it a white cone of a sunshield with
@@ -995,7 +1009,7 @@ function bepiColombo(scene, name, mats) {
 export const CRAFT_BUILD = {
   voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid,
   iss, tiangong, sputnik, mro, juno, cassini, parker, roadster, newHorizons, pioneer10: pioneer,
-  danuri, lro, europaClipper, lucy, pioneer11: pioneer, bepiColombo, akatsuki, mangalyaan,
+  danuri, lro, europaClipper, lucy, pioneer11: pioneer, bepiColombo, akatsuki, mangalyaan, dawn,
 };
 
 // Craft that are not flown beside (one fell on Mercury, one is long silent): shown as the

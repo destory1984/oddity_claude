@@ -400,6 +400,24 @@ export const CRAFT_SCENES = {
       return { pass: clamp((t - 2) / 31), burn: ease(t, 21, 21.6) * (1 - ease(t, 24.4, 25)), say: ease(t, 25.4, 25.8) * (1 - ease(t, 28.6, 29)) };
     },
   },
+  dawn: {
+    name: t('왜행성에 처음 닿다'),
+    day: t('2015년 3월 6일'),
+    seconds: 35,
+    downAt: 21,
+    sounds: [[21, 'stood'], [29, 'shutter']],
+    lines: [
+      { at: 0, text: t('2007년 9월 27일 돈 탐사선이 떠났습니다. 태양계가 처음 생기던 때를 알아보러 소행성대로 갔습니다.') },
+      { at: 7, text: t('이온 엔진을 썼습니다. 미는 힘은 종이 한 장 무게쯤이지만, 몇 해를 쉬지 않고 켜 둘 수 있습니다.') },
+      { at: 14, text: t('2011년 7월 소행성 베스타에 닿아 열네 달을 돌았습니다. 그러고는 궤도를 떠나 세레스로 향했습니다.') },
+      { at: 21, text: t('2015년 3월 6일, 세레스가 탐사선을 붙잡았습니다. 왜행성의 궤도에 든 것도, 두 천체의 궤도에 차례로 든 것도 이 탐사선이 처음입니다.') },
+      { at: 28, text: t('충돌구 안에 밝은 점들이 보였습니다. 땅속의 짠물이 올라와 마르고 남은 소금이었습니다.') },
+    ],
+    unfold(t) {
+      // ion: the ion engine's pale beam is on; bright: the salt in the crater has shown.
+      return { pass: clamp((t - 2) / 31), ion: ease(t, 7, 7.6) * (1 - ease(t, 20, 21)), bright: ease(t, 28, 30), say: ease(t, 30.3, 30.7) * (1 - ease(t, 33.6, 34)) };
+    },
+  },
   mro: {
     name: t('낙하산을 찍다'),
     day: t('2012년 8월 6일'),

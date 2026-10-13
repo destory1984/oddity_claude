@@ -744,6 +744,34 @@ const marsCatches = goesBy('mangalyaan', (scene, name, world, mats, root) => {
   };
 }, { from: [-2.4, -1.5], to: [0.7, -1.5] });
 
+// Dawn at Ceres: the grey dwarf planet comes in and stays, the ion engine's pale beam
+// below the craft on the way (ion), and the salt in a crater shows at the end (bright).
+const ceresCatches = goesBy('dawn', (scene, name, world, mats, root) => {
+  ball(scene, `${name}Ceres`, world, tint(scene, `${name}CeresPaint`, '#8d8a86'), 1.3);
+  // Craters on the face the watcher sees (they look from +x and +z, a little more from
+  // +z): each a ball pressed thin along the line out of Ceres.
+  for (const [k, at, turn, d] of [[0, [0, -0.06, 0.61], -1.571, 0.34], [1, [0.46, -0.2, 0.37], -0.667, 0.24], [2, [0.2, 0.3, 0.5], -1.19, 0.2]]) {
+    ball(scene, `${name}Crater${k}`, world, tint(scene, `${name}CraterPaint${k}`, '#6b6865'), d, at, [0.2, 1, 1]).rotation.y = turn;
+  }
+  const salt = [
+    ball(scene, `${name}Salt0`, world, glow(scene, `${name}SaltLight0`, '#ffffff', 1), 0.09, [0, -0.065, 0.652]),
+    ball(scene, `${name}Salt1`, world, glow(scene, `${name}SaltLight1`, '#ffffff', 1), 0.055, [0.05, -0.04, 0.65]),
+  ];
+  const beam = drum(scene, `${name}Beam`, root, glow(scene, `${name}BeamLight`, '#a8dcff', 0.5), { height: 0.3, diameterTop: 0.03, diameterBottom: 0.08, tessellation: 12 }, [0, CRAFT_Y - 0.32, 0]);
+  const say = says(scene, name, root, t('세레스야. 소금 뿌렸어?'));
+  return (values) => {
+    const on = values.ion ?? 0;
+    beam.setEnabled(on > 0.01);
+    beam.scaling.set(1, Math.max(0.01, on), 1);
+    const shown = values.bright ?? 0;
+    for (const dot of salt) {
+      dot.setEnabled(shown > 0.01);
+      dot.scaling.setAll(Math.max(0.01, shown));
+    }
+    say(values);
+  };
+}, { from: [-2.4, -1.5], to: [0.3, -1.5] });
+
 // Lucy at Dinkinesh: the small asteroid, and from behind it a moon that turns out to be
 // two lumps joined. moon: it has come out; pair: its second lump is seen.
 const dinkineshGoesBy = goesBy('lucy', (scene, name, world, mats, root) => {
@@ -912,6 +940,7 @@ export const CRAFT_UNFOLD_ALL = {
   bepiColombo: mercuryGoesBy,
   akatsuki: venusGoesBy,
   mangalyaan: marsCatches,
+  dawn: ceresCatches,
   mro: mroParachute,
   lro: lroFootpaths,
   danuri: danuriArrives,

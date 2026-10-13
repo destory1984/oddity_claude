@@ -195,6 +195,14 @@ export const CRAFT = [
     launched: 2013,
     intro: t('인도의 첫 화성 탐사선입니다. 2014년 첫 시도에 화성 궤도에 들었습니다. 여섯 달을 버티게 만들었지만 여덟 해 가까이 화성을 살폈습니다.'),
   },
+  // Dawn (the same afternoon: Ceres had no craft). Out of fuel since November 2018, it
+  // goes round Ceres still, on an ellipse of 35 km to 4,000 km; drawn as a ring.
+  {
+    id: 'dawn', name: t('돈 탐사선'), nameEn: 'Dawn', kind: 'craft', parent: 'ceres',
+    ring: { altitudeKm: 400, lapPlayS: 5000, tiltDeg: 80, phaseDeg: 60 },
+    launched: 2007,
+    intro: t('소행성 베스타와 왜행성 세레스의 궤도에 차례로 든 탐사선입니다. 이온 엔진으로 날았습니다. 2018년 연료가 떨어져 멈췄고, 지금도 세레스를 돌고 있습니다.'),
+  },
 ];
 named(CRAFT);
 

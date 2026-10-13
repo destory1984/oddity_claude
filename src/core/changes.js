@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-13', text: t('세레스에 돈 탐사선이 생겼습니다. 도킹하면 왜행성에 처음 닿은 2015년의 그날과 이온 엔진의 빛을 봅니다.') },
   { day: '2026-10-13', text: t('화성에 인도의 탐사선 망갈리안이 생겼습니다. 도킹하면 첫 시도에 궤도에 든 2014년의 그날을 봅니다.') },
   { day: '2026-10-13', text: t('오래된 브라우저에서는 검은 화면 대신 Chrome을 업데이트하라는 안내가 뜹니다.') },
   { day: '2026-10-13', text: t('금성 구름 위의 무지개 고리(글로리)가 생겼습니다. 해를 등진 금성 둘레의 빛 고리도 알려 줍니다.') },

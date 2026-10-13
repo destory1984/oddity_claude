@@ -10,11 +10,11 @@ import { createState, step } from '../src/core/game.js';
 const dist = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
 const near = (a, b, eps) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 
-test('twenty-four craft: probes, telescopes, space stations, the first satellite and a car', () => {
+test('twenty-five craft: probes, telescopes, space stations, the first satellite and a car', () => {
   assert.deepEqual(CRAFT.map((c) => c.id), [
     'voyager1', 'voyager2', 'hubble', 'jwst', 'kepler', 'chandra', 'euclid',
     'iss', 'tiangong', 'sputnik', 'mro', 'juno', 'cassini', 'parker', 'roadster', 'newHorizons', 'pioneer10',
-    'danuri', 'lro', 'europaClipper', 'lucy', 'pioneer11', 'bepiColombo', 'akatsuki',
+    'danuri', 'lro', 'europaClipper', 'lucy', 'pioneer11', 'bepiColombo', 'akatsuki', 'mangalyaan',
   ]);
   assert.equal(new Set(CRAFT.map((c) => c.name)).size, CRAFT.length);
   for (const c of CRAFT) assert.ok(c.name && c.nameEn && c.kind === 'craft');
@@ -31,7 +31,7 @@ test('a craft that circles a planet or a moon shows only from close to it: four 
   const homes = {
     earth: ['hubble', 'jwst', 'chandra', 'euclid', 'iss', 'tiangong', 'sputnik', 'roadster'],
     moon: ['danuri', 'lro'],
-    mars: ['mro'],
+    mars: ['mro', 'mangalyaan'],
     jupiter: ['juno'],
     saturn: ['cassini'],
     mercury: ['bepiColombo'],
@@ -46,7 +46,7 @@ test('a craft that circles a planet or a moon shows only from close to it: four 
     assert.ok(!all.includes(id), id);
   }
   // The low fliers show from four radii above their body, and not from a km farther.
-  for (const [home, ids] of [['moon', ['danuri', 'lro']], ['earth', ['hubble', 'iss', 'tiangong', 'sputnik']], ['mars', ['mro']]]) {
+  for (const [home, ids] of [['moon', ['danuri', 'lro']], ['earth', ['hubble', 'iss', 'tiangong', 'sputnik']], ['mars', ['mro', 'mangalyaan']]]) {
     const b = body(home);
     for (const id of ids) {
       assert.ok(!hidden(above(b, 4 * b.radiusKm)).includes(id), id);

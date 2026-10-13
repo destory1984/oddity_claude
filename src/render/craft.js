@@ -46,6 +46,8 @@ const RULES = {
   bepiColombo: { visibleKm: 60000, maxKm: 200 },
   // Over Venus, the same.
   akatsuki: { visibleKm: 60000, maxKm: 200 },
+  // Over Mars, with the other orbiter.
+  mangalyaan: { visibleKm: 60000, maxKm: 200 },
 };
 
 // A place with no model of its own gets the plain four-legged lander.

@@ -1,4 +1,5 @@
 {
+ "화성에 인도의 탐사선 망갈리안이 생겼습니다. 도킹하면 첫 시도에 궤도에 든 2014년의 그날을 봅니다.": "Mars has India's probe Mangalyaan. Dock with it to see the day in 2014 it made orbit on the first try.",
  "오래된 브라우저에서는 검은 화면 대신 Chrome을 업데이트하라는 안내가 뜹니다.": "An old browser now shows a note asking to update Chrome, not a black screen.",
  "금성 구름 위의 무지개 고리(글로리)가 생겼습니다. 해를 등진 금성 둘레의 빛 고리도 알려 줍니다.": "Venus has its glory: rainbow rings on the clouds. The ring of light round Venus against the Sun is told of too.",
  "금성에 갈 곳 둘이 생겼습니다(베가 1호의 풍선, 베네라 9호 착륙지). 수첩은 202칸입니다.": "Two more places on Venus: Vega 1's balloon and Venera 9's landing place. The notebook has 202 slots.",
@@ -3897,5 +3898,17 @@
  "금성이 금반지가 됐어.": "Venus has turned into a gold ring.",
  "구름에 무지개 과녁이 떴어.": "A rainbow target on the clouds.",
  "해를 등진 금성의 둘레가 온통 빛의 고리입니다.\n두꺼운 대기가 햇빛을 휘어 보냅니다. 금성이 해 앞을 지날 때 지구에서도 이 고리가 보입니다.": "With the Sun behind it, all the rim of Venus is a ring of light.\nIts thick air bends the sunlight round. When Venus crosses the Sun, the ring shows from Earth too.",
- "금성의 구름 위에 색 고리가 겹겹이 떴습니다.\n해를 등지고 보면 구름 방울이 빛을 되돌려 보내 생깁니다. 2011년 비너스 익스프레스가 찍었습니다.": "Rings of colour lie one inside another on the clouds of Venus.\nWith the Sun at your back, the droplets of the clouds send its light back the way it came. Venus Express photographed it in 2011."
+ "금성의 구름 위에 색 고리가 겹겹이 떴습니다.\n해를 등지고 보면 구름 방울이 빛을 되돌려 보내 생깁니다. 2011년 비너스 익스프레스가 찍었습니다.": "Rings of colour lie one inside another on the clouds of Venus.\nWith the Sun at your back, the droplets of the clouds send its light back the way it came. Venus Express photographed it in 2011.",
+ "인도의 첫 화성 탐사선입니다. 2014년 첫 시도에 화성 궤도에 들었습니다. 여섯 달을 버티게 만들었지만 여덟 해 가까이 화성을 살폈습니다.": "India's first Mars probe. In 2014 it entered orbit round Mars on the first try. Built to last six months, it watched Mars for nearly eight years.",
+ "첫 시도에 화성으로": "To Mars on the first try",
+ "2014년 9월 24일": "24 September 2014",
+ "2013년 11월 5일 망갈리안이 인도 스리하리코타에서 떠났습니다. 인도가 다른 행성으로 보낸 첫 탐사선입니다.": "On 5 November 2013 Mangalyaan left Sriharikota in India. It was the first probe India sent to another planet.",
+ "로켓의 힘이 모자라 곧장 가지 못했습니다. 지구를 한 달 가까이 돌며 궤도를 키운 뒤 12월 1일 화성으로 떠났습니다.": "Its rocket was too weak to send it straight there. It circled Earth for nearly a month, widening its orbit, and left for Mars on 1 December.",
+ "열 달을 날아 화성에 다가갔습니다. 300일 동안 쉬던 주 엔진을 이틀 전에 4초 동안 켜 보니 멀쩡했습니다.": "After ten months of flight it neared Mars. The main engine had slept for 300 days; two days before, it was fired for 4 seconds and was sound.",
+ "2014년 9월 24일, 엔진을 23분 동안 켜 속도를 줄였습니다. 화성이 탐사선을 붙잡았습니다.": "On 24 September 2014 the engine burned for 23 minutes to slow the craft down. Mars caught it.",
+ "첫 시도에 화성 궤도에 든 나라는 인도가 처음입니다. 여섯 달을 버티게 만든 탐사선은 여덟 해 가까이 일했습니다.": "India was the first country to reach Mars orbit on its first try. Built to last six months, the craft worked for nearly eight years.",
+ "어느 나라가 보낸 탐사선인가?": "Which country sent this probe?",
+ "망갈리안은 인도가 보낸 첫 화성 탐사선입니다. 이름은 화성으로 가는 배라는 뜻입니다. 2013년 11월 5일 스리하리코타에서 PSLV 로켓으로 떠났습니다. 로켓의 힘이 모자라 지구를 한 달 가까이 돌며 엔진을 여러 번 켜 궤도를 키운 뒤 화성으로 향했습니다. 2014년 9월 24일 화성 둘레에 들었습니다. 첫 시도에 화성 궤도에 든 나라는 인도가 처음입니다.\n\n": "Mangalyaan is the first Mars probe sent by India. Its name means a ship to Mars. It left Sriharikota on 5 November 2013 on a PSLV rocket. The rocket was too weak to send it straight, so it circled Earth for nearly a month, firing its engine several times to widen its orbit, and then set out for Mars. On 24 September 2014 it entered orbit round Mars. India was the first country to reach Mars orbit on its first try.\n\n",
+ "든 돈은 약 7,400만 달러로, 다른 나라 화성 탐사선의 몇 분의 일이었습니다. 화성에서 421km까지 다가갔다가 77,000km까지 멀어지는 길쭉한 길을 사흘에 한 바퀴 돌았습니다. 멀리 있을 때는 화성 전체를 사진 한 장에 담았습니다. 여섯 달을 버티게 만들었지만 2022년 4월 교신이 끊길 때까지 여덟 해 가까이 일했습니다. 지금도 화성 둘레를 돌고 있습니다.": "It cost about 74 million dollars, a fraction of what other countries' Mars probes cost. It went round once in three days on a long path that came within 421 km of Mars and swung out to 77,000 km. From far out it caught the whole of Mars in one picture. Built to last six months, it worked for nearly eight years, until contact was lost in April 2022. It goes round Mars still.",
+ "화성아. 한 번에 왔어": "Mars, I made it in one go"
 }

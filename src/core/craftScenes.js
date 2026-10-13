@@ -382,6 +382,24 @@ export const CRAFT_SCENES = {
       return { pass: clamp((t - 2) / 31), bow: ease(t, 28, 30), say: ease(t, 22.5, 22.9) * (1 - ease(t, 26.4, 26.8)) };
     },
   },
+  mangalyaan: {
+    name: t('첫 시도에 화성으로'),
+    day: t('2014년 9월 24일'),
+    seconds: 35,
+    downAt: 21,
+    sounds: [[21, 'stood'], [29, 'shutter']],
+    lines: [
+      { at: 0, text: t('2013년 11월 5일 망갈리안이 인도 스리하리코타에서 떠났습니다. 인도가 다른 행성으로 보낸 첫 탐사선입니다.') },
+      { at: 7, text: t('로켓의 힘이 모자라 곧장 가지 못했습니다. 지구를 한 달 가까이 돌며 궤도를 키운 뒤 12월 1일 화성으로 떠났습니다.') },
+      { at: 14, text: t('열 달을 날아 화성에 다가갔습니다. 300일 동안 쉬던 주 엔진을 이틀 전에 4초 동안 켜 보니 멀쩡했습니다.') },
+      { at: 21, text: t('2014년 9월 24일, 엔진을 23분 동안 켜 속도를 줄였습니다. 화성이 탐사선을 붙잡았습니다.') },
+      { at: 28, text: t('첫 시도에 화성 궤도에 든 나라는 인도가 처음입니다. 여섯 달을 버티게 만든 탐사선은 여덟 해 가까이 일했습니다.') },
+    ],
+    unfold(t) {
+      // burn: the main engine is lit; say: its bubble is up, once the engine is out.
+      return { pass: clamp((t - 2) / 31), burn: ease(t, 21, 21.6) * (1 - ease(t, 24.4, 25)), say: ease(t, 25.4, 25.8) * (1 - ease(t, 28.6, 29)) };
+    },
+  },
   mro: {
     name: t('낙하산을 찍다'),
     day: t('2012년 8월 6일'),

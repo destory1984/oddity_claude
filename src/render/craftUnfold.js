@@ -723,6 +723,27 @@ const venusGoesBy = goesBy('akatsuki', (scene, name, world, mats, root) => {
   // (It stays in the view to the end: the bow is the last thing told.)
 }, { from: [-2.4, -1.5], to: [0.7, -1.5] });
 
+// Mangalyaan at Mars: the red planet comes in and stays (it was caught), and the main
+// engine burns below the craft while it brakes (burn: the flame is lit).
+const marsCatches = goesBy('mangalyaan', (scene, name, world, mats, root) => {
+  ball(scene, `${name}Mars`, world, tint(scene, `${name}MarsPaint`, '#b9573a'), 1.6);
+  ball(scene, `${name}Cap`, world, tint(scene, `${name}CapPaint`, '#f2ece4'), 0.5, [0, 0.66, 0.1], [1, 0.45, 1]);
+  // A dark plain and a pale basin on the face the watcher sees (they look from +x and
+  // +z, a little more from +z): each ball is pressed thin along the line out of Mars.
+  const dark = ball(scene, `${name}Dark`, world, tint(scene, `${name}DarkPaint`, '#6b3324'), 0.5, [0.147, 0.11, 0.696], [0.3, 0.9, 1.2]);
+  const pale = ball(scene, `${name}Pale`, world, tint(scene, `${name}PalePaint`, '#cf8256'), 0.36, [0.52, -0.26, 0.46], [0.3, 0.8, 1]);
+  dark.rotation.y = -1.363;
+  pale.rotation.y = -0.725;
+  const flame = drum(scene, `${name}Flame`, root, glow(scene, `${name}FlameLight`, '#ffd9a0', 0.75), { height: 0.2, diameterTop: 0.09, diameterBottom: 0.01, tessellation: 12 }, [0, CRAFT_Y - 0.29, 0]);
+  const say = says(scene, name, root, t('화성아. 한 번에 왔어'));
+  return (values) => {
+    const lit = values.burn ?? 0;
+    flame.setEnabled(lit > 0.01);
+    flame.scaling.set(1, Math.max(0.01, lit), 1);
+    say(values);
+  };
+}, { from: [-2.4, -1.5], to: [0.7, -1.5] });
+
 // Lucy at Dinkinesh: the small asteroid, and from behind it a moon that turns out to be
 // two lumps joined. moon: it has come out; pair: its second lump is seen.
 const dinkineshGoesBy = goesBy('lucy', (scene, name, world, mats, root) => {
@@ -890,6 +911,7 @@ export const CRAFT_UNFOLD_ALL = {
   lucy: dinkineshGoesBy,
   bepiColombo: mercuryGoesBy,
   akatsuki: venusGoesBy,
+  mangalyaan: marsCatches,
   mro: mroParachute,
   lro: lroFootpaths,
   danuri: danuriArrives,

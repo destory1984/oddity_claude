@@ -405,6 +405,16 @@ STORIES.push({
   hint: CLOUD_HINTS.greatRedSpot,
   text: t('지구보다 큰 폭풍입니다. 1831년부터 쉬지 않고 관측되었습니다. 2017년 7월 10일 주노가 그 위 9,000km를 지나며 처음으로 가까이 찍었습니다.'),
 });
+// Osiris, the largest bright-rayed crater on Ganymede, told with the oldest scar there:
+// the furrows round one point, left by a giant impact (the user, 2026-10-14: "1번
+// 이야기로 오시리스 넣자"; Hirata et al. 2020). Its place by the USGS names (38.0 S,
+// 166.3 W); the map's longitudes are the real ones there, as at Galileo Regio.
+STORIES.push({
+  id: 'osiris', name: t('가니메데의 오시리스 분화구'), nameEn: 'Osiris', year: 2020, type: 'surface', body: 'ganymede',
+  latDeg: -38, lonDeg: -166.3, withinKm: 300, landmark: true,
+  hint: t`${t('가니메데')}(${where(-38, -166.3)}) ${(300).toLocaleString('ko-KR')}km 안에 내려앉기`,
+  text: t('가니메데에서 가장 큰 빛줄기 분화구입니다. 하얀 빛줄기가 사방으로 뻗어 있습니다. 2020년에는 가니메데 전체에 남은 훨씬 더 큰 충돌의 흔적이 밝혀졌습니다.'),
+});
 named(STORIES);
 
 // A place's label shows only from within this many of its body's radii above the

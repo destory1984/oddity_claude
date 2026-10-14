@@ -19,7 +19,7 @@ const LINES = {
     jupiter: '목성의 붉은 폭풍을 지나',
     saturn: '토성의 고리까지',
     journal: '빈칸 208개를 채워요',
-    end: { title: '할머니의 수첩', note: '본격 우주멍 힐링 비행 게임', find: "구글 플레이에서 'Space Oddity - 할머니의 수첩'을 찾아보세요" },
+    end: { title: '할머니의 수첩', note: '본격 우주멍 힐링 비행 게임', find: '구글 플레이에서 찾아보세요', store: 'Space Oddity - 할머니의 수첩' },
   },
   en: {
     earth: "Grandma's unfinished space notebook",
@@ -30,29 +30,30 @@ const LINES = {
     jupiter: "Pass Jupiter's Great Red Spot",
     saturn: "Out to Saturn's rings",
     journal: 'Fill all 208 slots',
-    end: { title: "Grandma's Notes", note: 'A chill space-gazing flight game', find: "Find 'Space Oddity - Grandma's Notes' on Google Play" },
+    end: { title: "Grandma's Notes", note: 'A chill space-gazing flight game', find: 'Find it on Google Play', store: "Space Oddity - Grandma's Notes" },
   },
 };
-
-const TOP = ['fly'];
 
 const page = (body) => `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="${DEV}fonts/pretendard/pretendardvariable-dynamic-subset.css">
 <link rel="stylesheet" href="${DEV}fonts/gaegu/400.css">
 <style>
 html, body { margin: 0; width: 405px; height: 720px; background: transparent; overflow: hidden; }
-.band { position: absolute; left: 0; right: 0; bottom: 0; height: 200px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 0 22px 46px; box-sizing: border-box;
-  background: linear-gradient(to bottom, rgba(5, 9, 28, 0) 0%, rgba(5, 9, 28, 0.86) 38%, rgba(5, 9, 28, 0.96) 100%); }
-.band.top { top: 0; bottom: auto; justify-content: flex-start; padding: 40px 22px 0;
-  background: linear-gradient(to top, rgba(5, 9, 28, 0) 0%, rgba(5, 9, 28, 0.86) 38%, rgba(5, 9, 28, 0.96) 100%); }
+/* YouTube Shorts lays its own things over the film: its logo row at the top (8 to 12%),
+   the channel, the title and the subscribe key at the foot (the last 12% and more), the
+   like, comment and share keys down the right (from 65%). So the words stand at the top,
+   between 13% and 25%, clear of the sides. */
+.band { position: absolute; left: 0; right: 0; top: 0; height: 215px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 94px 40px 0; box-sizing: border-box;
+  background: linear-gradient(to top, rgba(5, 9, 28, 0) 0%, rgba(5, 9, 28, 0.82) 30%, rgba(5, 9, 28, 0.94) 100%); }
 .kick { font: 700 11px/1 Pretendard Variable, Pretendard, sans-serif; letter-spacing: 0.32em; color: #f2c46b; margin-bottom: 12px; }
 .line { font: 400 37px/1.15 Gaegu, cursive; color: #fdf8ec; text-align: center; word-break: keep-all; text-wrap: balance; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6); }
-.end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-.end img { width: 150px; image-rendering: pixelated; margin-bottom: 14px; }
+.end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 86px; text-align: center; }
+.end img { width: 120px; image-rendering: pixelated; margin-bottom: 14px; }
 .end .name { font: 800 40px/1 Pretendard Variable, Pretendard, sans-serif; color: #fdf8ec; letter-spacing: 0.02em; }
 .end .title { font: 400 50px/1.1 Gaegu, cursive; color: #f2c46b; margin-top: 8px; }
 .end .note { font: 400 27px/1.2 Gaegu, cursive; color: #fdf8ec; margin-top: 22px; word-break: keep-all; }
-.end .find { font: 500 13px/1.5 Pretendard Variable, Pretendard, sans-serif; color: #c9d3f2; margin-top: 30px; padding: 9px 16px; border: 1px solid rgba(242, 196, 107, 0.55); border-radius: 999px; word-break: keep-all; max-width: 330px; }
+.end .find { font: 500 13px/1.5 Pretendard Variable, Pretendard, sans-serif; color: #c9d3f2; margin-top: 30px; padding: 9px 16px; border: 1px solid rgba(242, 196, 107, 0.55); border-radius: 999px; word-break: keep-all; max-width: 250px; }
+.end .find b { display: block; font-weight: 800; font-size: 15px; color: #fdf8ec; white-space: nowrap; margin-top: 2px; }
 </style></head><body>${body}</body></html>`;
 
 (async () => {
@@ -66,9 +67,8 @@ html, body { margin: 0; width: 405px; height: 720px; background: transparent; ov
   await p.goto(`${DEV}fonts/gaegu/400.css`);
   for (const [key, line] of Object.entries(lines)) {
     const body = key === 'end'
-      ? `<div class="end"><img src="${DEV}assets/seora-sprites/cheer-big-1.png"><div class="name">Space Oddity</div><div class="title">${line.title}</div><div class="note">${line.note}</div><div class="find">${line.find}</div></div>`
-      // (Over the flight the band stands at the top: the keys and the speed are at the foot.)
-      : `<div class="band${TOP.includes(key) ? ' top' : ''}"><div class="kick">SPACE ODDITY</div><div class="line">${line}</div></div>`;
+      ? `<div class="end"><img src="${DEV}assets/seora-sprites/cheer-big-1.png"><div class="name">Space Oddity</div><div class="title">${line.title}</div><div class="note">${line.note}</div><div class="find">${line.find}<b>${line.store}</b></div></div>`
+      : `<div class="band"><div class="kick">SPACE ODDITY</div><div class="line">${line}</div></div>`;
     await p.setContent(page(body), { waitUntil: 'networkidle' });
     await p.evaluate(() => document.fonts.ready);
     await p.waitForTimeout(300);

@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { REPLAYS, replayFor, replayFrame, replayOn, replaySounds } from '../src/core/replay.js';
+import { REPLAYS, replayFor, replayFrame, replayOn, replaySounds, replayAt } from '../src/core/replay.js';
 import { STORIES } from '../src/core/stories.js';
 import { CRAFT } from '../src/core/craft.js';
 
@@ -477,4 +477,10 @@ test('the comet\'s scene is offered from beside it too, within six of its radii;
   assert.equal(replayBeside([100, 12, 0], bodies), 'churyumov');
   assert.equal(replayBeside([100, 12.1, 0], bodies), null);
   assert.equal(replayBeside([0, 60000, 0], bodies), null);
+});
+
+test('a place whose scene is played on its body finds it; a place with none finds nothing', () => {
+  assert.equal(replayAt('apollo11'), 'apollo11');
+  assert.equal(replayAt('shoemakerLevy'), 'levyImpact');
+  assert.equal(replayAt('galileoProbe'), null);
 });

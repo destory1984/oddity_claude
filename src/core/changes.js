@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-14', text: t('슈메이커-레비 9 충돌 자리에 서면 "그날로" 단추가 뜹니다. 전에는 목성 다른 곳에서만 떴습니다.') },
   { day: '2026-10-14', text: t('넓은 화면의 사진 모드에서 단추 셋이 한 줄에 나란히 섭니다(둘이 위로 올라가 있었습니다).') },
   { day: '2026-10-14', text: t('발할라 분지와 갈릴레오 지역에 "그날로" 장면이 생겼습니다. 장면은 모두 125개입니다.') },
   { day: '2026-10-14', text: t('목성으로 순간 이동하면 더 가까이, 해를 등진 자리에 나타나 목성의 밝은 면 전체를 봅니다.') },

@@ -298,6 +298,13 @@ export function replayBeside(position, bodies) {
   return null;
 }
 
+// The scene of a story place: its own, or one played on its body that names it as its
+// `place` (the comet's hit on Jupiter), or null.
+export function replayAt(placeId) {
+  if (REPLAYS[placeId]) return placeId;
+  return Object.keys(REPLAYS).find((id) => REPLAYS[id].place === placeId) ?? null;
+}
+
 export function replayFor(id) {
   return REPLAYS[id] ?? null;
 }

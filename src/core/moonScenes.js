@@ -488,11 +488,13 @@ export const PLACE_STAGES = {
   // Not at the story place 'shoemakerLevy' itself: Jupiter's cloud tops turn once in ten
   // hours and a spot on them goes by at 600 km/s of the game's clock, so nobody can stand
   // beside it. Like Cassini's plunge on Saturn it is played by resting anywhere on
-  // Jupiter's cloud tops (`on`), and so has an id of its own.
+  // Jupiter's cloud tops (`on`), and so has an id of its own. Standing at the place it is
+  // offered too (`place`; the user, 2026-10-14, stood there and found no button).
   levyImpact: {
     name: t('혜성이 목성에 부딪히다'),
     day: t('1994년 7월 16일'),
     on: 'jupiter',
+    place: 'shoemakerLevy',
     seconds: 34,
     downAt: 7,
     viewKm: 480,

@@ -79,7 +79,7 @@ import { readingQuizFor, readingKey } from './core/readingQuiz.js';
 import { STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, recordText, valueText, stuntById } from './core/stunts.js';
 import { STORY_DETAILS } from './core/storyDetails.js';
 import { STORY_MORE } from './core/storyMore.js';
-import { replayFor, replayFrame, replaySounds, replayOn, replayBeside } from './core/replay.js';
+import { replayFor, replayFrame, replaySounds, replayOn, replayBeside, replayAt } from './core/replay.js';
 import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from './core/visit.js';
@@ -1055,7 +1055,9 @@ ${STORY_MORE[target.id]}` : told };
       return;
     }
     const sceneOn = sceneBody();
-    const onBody = !visit && sceneOn ? replayOn(sceneOn) : null;
+    // (At a place whose scene is played on its body, as the comet's hit on Jupiter, the
+    // same as anywhere on that body.)
+    const onBody = sceneOn && (!visit || replayAt(visit.id) === replayOn(sceneOn)) ? replayOn(sceneOn) : null;
     if (onBody) {
       // Where she rests, seen along the ground from 15 degrees above it; what comes in
       // crosses the view from one side.
@@ -3088,7 +3090,7 @@ ${STORY_MORE[target.id]}` : told };
     const offer = docked || onGround() ? null : dockable(state.position, craft);
     $('dockTarget').hidden = !docked && !offer;
     // Standing at a place that has a scene of its day.
-    const thenHere = visit ? (hasArrived(visit) ? replayFor(visit.id) : null) : docked ? (isDocked(docked) ? replayFor(docked.id) : null) : (sceneBody() ? replayFor(replayOn(sceneBody())) : null);
+    const thenHere = visit ? (hasArrived(visit) ? replayFor(replayAt(visit.id)) : null) : docked ? (isDocked(docked) ? replayFor(docked.id) : null) : (sceneBody() ? replayFor(replayOn(sceneBody())) : null);
     // The week of a real eclipse: near its place the same button plays it, and from
     // elsewhere another jumps there.
     if (landAtEclipse && !warp.busy()) {

@@ -572,4 +572,139 @@ export const CRAFT_SCENES = {
       return { built: [0, 8, 16, 24].reduce((sum, from) => sum + clamp((t - from) / 4), 0) };
     },
   },
+  // The seven of 2026-10-15 (the user: "애니는?", then "한꺼번에 다 만들어").
+  // Hayabusa2 at Ryugu: dust flies up at the first touch (dust1), the crater the copper
+  // lump made shows (crater), and dust flies again at the second touch beside it (dust2).
+  hayabusa2: {
+    name: t('류구에 두 번 내리다'),
+    day: t('2019년 7월 11일'),
+    seconds: 35,
+    downAt: 24.5,
+    sounds: [[15, 'clunk'], [21, 'shutter'], [24.5, 'stood']],
+    lines: [
+      { at: 0, text: t('2014년 12월 3일 하야부사2가 다네가시마에서 떠났습니다. 2018년 6월 지름 900m의 소행성 류구에 닿았습니다.') },
+      { at: 7, text: t('류구는 팽이 모양이고 온통 돌무더기였습니다. 평평한 곳이 없어 내리는 날을 넉 달 미뤘습니다.') },
+      { at: 14, text: t('2019년 2월 22일 첫 착지. 뿔 끝이 땅에 닿는 순간 작은 총알을 쏘아 튀어 오른 흙을 담았습니다.') },
+      { at: 21, text: t('4월에는 구리 덩어리를 쏘아 구덩이를 팠고, 7월 11일 그 곁에 다시 내렸습니다. 땅속의 흙까지 담았습니다.') },
+      { at: 28, text: t('2020년 12월 6일 캡슐이 호주 사막에 떨어졌습니다. 흙 5.4g 안에서 생명의 재료인 아미노산이 나왔습니다.') },
+    ],
+    unfold(t) {
+      return { pass: clamp((t - 2) / 31), dust1: clamp((t - 15) / 3.5), crater: ease(t, 21, 22), dust2: clamp((t - 24.5) / 3.5), say: ease(t, 10.5, 10.9) * (1 - ease(t, 13.6, 14)) };
+    },
+  },
+  // SOHO at L1: the Sun comes in and stays; a disc is put before it (cover) and the faint
+  // corona round it shows (corona); a small comet dives into the Sun and is gone (comet).
+  soho: {
+    name: t('해를 가리면 보이는 것'),
+    day: t('1995년 12월 2일'),
+    seconds: 35,
+    downAt: 25,
+    sounds: [[7.5, 'clunk'], [25, 'discovered']],
+    lines: [
+      { at: 0, text: t('1995년 12월 2일 소호가 떠났습니다. 지구에서 해 쪽으로 150만km, L1 점에 자리 잡고 해를 지켜봅니다.') },
+      { at: 7, text: t('카메라 앞에 작은 원판을 세워 해의 밝은 몸을 가립니다. 그러면 둘레로 뻗은 희미한 코로나가 보입니다.') },
+      { at: 14, text: t('1998년 6월 연락이 끊겼습니다. 한 달 만에 아레시보 전파 망원경으로 찾아냈고, 석 달 만에 다시 깨웠습니다.') },
+      { at: 21, text: t('사진 속에 해로 뛰어들다 녹아 없어지는 작은 혜성이 자꾸 보였습니다. 사진은 누구나 볼 수 있게 올라옵니다.') },
+      { at: 28, text: t('2024년 3월, 그 사진으로 찾은 혜성이 5,000개가 되었습니다. 대부분 집에서 사진을 들여다본 사람들이 찾았습니다.') },
+    ],
+    unfold(t) {
+      return { pass: clamp((t - 1) / 14), cover: ease(t, 7, 8.5), corona: ease(t, 8, 10), comet: clamp((t - 21) / 4), say: ease(t, 25.6, 26) * (1 - ease(t, 29.2, 29.6)) };
+    },
+  },
+  // Solar Orbiter: the Sun comes in and stays, small flares flicker on it (fires, flick:
+  // the time), and it tips over until its south pole is turned to the watcher (tilt).
+  solarOrbiter: {
+    name: t('해의 남극을 보다'),
+    day: t('2025년 3월'),
+    seconds: 35,
+    downAt: 28,
+    sounds: [[14.5, 'click'], [28, 'shutter'], [29.2, 'discovered']],
+    lines: [
+      { at: 0, text: t('2020년 2월 10일 솔라 오비터가 미국 플로리다에서 떠났습니다. 유럽과 미국이 함께 만든 태양 탐사선입니다.') },
+      { at: 7, text: t('해 쪽 방패는 500도 넘게 달궈집니다. 방패에 낸 작은 문을 열고 그 틈으로 해를 들여다봅니다.') },
+      { at: 14, text: t('처음 찍은 사진에 아주 작은 불꽃이 가득했습니다. 크기가 작은 나라만 해서 캠프파이어라는 이름이 붙었습니다.') },
+      { at: 21, text: t('금성을 스칠 때마다 궤도가 조금씩 기울었습니다. 2025년 2월에는 해의 적도에서 17도 기울었습니다.') },
+      { at: 28, text: t('2025년 3월 해의 남극을 처음 찍었습니다. 남극의 자기장은 한쪽으로 모이지 않고 뒤섞여 있었습니다.') },
+    ],
+    unfold(t) {
+      return { pass: clamp((t - 1) / 14), fires: ease(t, 14, 15) * (1 - ease(t, 20.5, 21.5)), flick: t, tilt: ease(t, 21, 27.5), say: ease(t, 24, 24.4) * (1 - ease(t, 27.2, 27.6)) };
+    },
+  },
+  // Tianwen-1 at Mars: the planet comes in and stays, the lander drops away from the
+  // orbiter toward it (drop), and where it came down shows as a spark (site).
+  tianwen1: {
+    name: t('주룽을 내려보내다'),
+    day: t('2021년 5월 15일'),
+    seconds: 35,
+    downAt: 21,
+    sounds: [[14.5, 'clunk'], [21, 'stood']],
+    lines: [
+      { at: 0, text: t('2020년 7월 23일 톈원 1호가 하이난섬 원창에서 떠났습니다. 궤도선, 착륙선, 탐사차를 한꺼번에 실었습니다.') },
+      { at: 7, text: t('2021년 2월 10일 화성 궤도에 들었습니다. 석 달 동안 내릴 자리인 유토피아 평원을 내려다보았습니다.') },
+      { at: 14, text: t('5월 15일, 착륙선이 궤도선에서 떨어져 나갑니다. 낙하산을 펴고, 엔진을 켜고 내려앉습니다.') },
+      { at: 21, text: t('5월 22일 탐사차 주룽이 땅으로 내려섰습니다. 계획한 90일을 넘겨 1년 가까이 1,921m를 달렸습니다.') },
+      { at: 28, text: t('처음 가는 길에 궤도에 들고, 내리고, 달리기까지 해낸 나라는 중국이 처음입니다. 이름은 불의 신 축융에서 왔습니다.') },
+    ],
+    unfold(t) {
+      return { pass: clamp((t - 2) / 31), drop: clamp((t - 14.5) / 6), site: ease(t, 21, 22), say: ease(t, 11, 11.4) * (1 - ease(t, 14.1, 14.5)) };
+    },
+  },
+  // OSIRIS-REx at Bennu: the asteroid comes in and stays, and at the touch stones and
+  // dust burst up from it (dust).
+  osirisRex: {
+    name: t('베누에 손을 대다'),
+    day: t('2020년 10월 20일'),
+    seconds: 35,
+    downAt: 14.5,
+    sounds: [[14.5, 'clunk'], [21, 'stood']],
+    lines: [
+      { at: 0, text: t('2016년 9월 8일 오시리스-렉스가 떠났습니다. 2018년 12월 지름 500m의 소행성 베누에 닿았습니다.') },
+      { at: 7, text: t('고운 모래밭일 줄 알았던 베누는 큰 바위투성이였습니다. 내릴 자리로 지름 20m의 나이팅게일 분화구를 골랐습니다.') },
+      { at: 14, text: t('2020년 10월 20일, 팔 끝을 땅에 6초 동안 댔습니다. 질소를 뿜어 튀어 오른 돌과 흙을 머리에 담았습니다.') },
+      { at: 21, text: t('땅은 거의 버티지 못했습니다. 팔은 50cm 가까이 파고들었고, 그대로 있었다면 탐사선이 빠져들 뻔했습니다.') },
+      { at: 28, text: t('2023년 9월 24일 캡슐이 미국 유타 사막에 내렸습니다. 121.6g이 들어 있었고, 그 안에서 생명의 재료가 나왔습니다.') },
+    ],
+    unfold(t) {
+      return { pass: clamp((t - 2) / 31), dust: clamp((t - 14.5) / 5), say: ease(t, 10.6, 11) * (1 - ease(t, 13.8, 14.2)) };
+    },
+  },
+  // Hera: Didymos and its small moon come in; DART flies into the moon (dart: 0 → 1 is
+  // its flight to the hit), it flashes (flash), and a tail of stones grows from it (tail).
+  // orbit: how far the small moon has gone round.
+  hera: {
+    name: t('부딪힌 자리를 보러'),
+    day: t('2022년 9월 26일'),
+    seconds: 35,
+    downAt: 21,
+    sounds: [[4.5, 'clunk'], [21, 'stood']],
+    lines: [
+      { at: 0, text: t('2022년 9월 26일. 미국의 다트가 초속 6km로 소행성 디모르포스에 부딪혔습니다. 일부러 부딪힌 것입니다.') },
+      { at: 7, text: t('디모르포스는 지름 150m쯤, 큰 소행성 디디모스를 도는 작은 달입니다. 지구로 오는 돌을 밀어낼 수 있는지 시험했습니다.') },
+      { at: 14, text: t('한 바퀴에 11시간 55분 걸리던 것이 32분 줄었습니다. 부서져 나간 돌이 꼬리처럼 1만km 넘게 뻗었습니다.') },
+      { at: 21, text: t('2024년 10월 7일 유럽의 헤라가 떠났습니다. 2025년 3월 화성을 스치며 작은 위성 데이모스를 찍었습니다.') },
+      { at: 28, text: t('2026년 12월 디디모스에 닿아 부딪힌 자리를 살핍니다. 싣고 간 작은 위성 하나는 디모르포스에 내려앉아 봅니다.') },
+    ],
+    unfold(t) {
+      return { pass: clamp(t / 33), orbit: 0.3 * t, dart: clamp((t - 1.5) / 3), flash: ease(t, 4.5, 4.8) * (1 - ease(t, 5.2, 7)), tail: ease(t, 14, 20), say: ease(t, 23, 23.4) * (1 - ease(t, 26.6, 27)) };
+    },
+  },
+  // TESS: strips of sky come up one after another round the pole, thirteen to a half of
+  // the sky (strips), and then one star dims now and then as a planet crosses it (blink).
+  tess: {
+    name: t('하늘을 띠로 나누어 보다'),
+    day: t('2018년 4월 18일'),
+    seconds: 35,
+    downAt: 22,
+    sounds: [[7, 'snap'], [22, 'discovered']],
+    lines: [
+      { at: 0, text: t('2018년 4월 18일 테스가 미국 플로리다에서 떠났습니다. 케플러가 하늘 한 조각을 봤다면 테스는 하늘 거의 전부를 봅니다.') },
+      { at: 7, text: t('카메라 넷이 길게 이어진 하늘의 띠 하나를 27일 동안 바라봅니다. 그다음 옆 띠로 넘어갑니다.') },
+      { at: 14, text: t('달과 박자를 맞춘 궤도를 13.7일에 한 바퀴 돕니다. 달에 끌려 흔들리지 않아 오래 머물 수 있습니다.') },
+      { at: 21, text: t('가까이 있는 밝은 별들을 봅니다. 그래서 찾은 행성은 다른 망원경으로 그 공기까지 살펴볼 수 있습니다.') },
+      { at: 28, text: t('행성 후보를 7,000개 넘게 찾았고 그중 600개 넘게가 행성으로 밝혀졌습니다. 지구만 한 행성도 여럿입니다.') },
+    ],
+    unfold(t) {
+      return { strips: Math.max(0, Math.min(13, (t - 7) * 1.1)), blink: t >= 22 ? t - 22 : -1, say: ease(t, 9, 9.4) * (1 - ease(t, 12.2, 12.6)) };
+    },
+  },
 };

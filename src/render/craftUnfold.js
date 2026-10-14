@@ -1,4 +1,4 @@
-import { TransformNode, CreateSphere, CreatePlane, StandardMaterial, Color3, Mesh, VertexData, Texture, DynamicTexture, Vector3 } from './babylon.js';
+import { TransformNode, CreateSphere, CreatePlane, StandardMaterial, Color3, Mesh, VertexData, Texture, DynamicTexture, Vector3, Constants } from './babylon.js';
 import { part, cyl, group, box, drum, rod, fuse } from './craftParts.js';
 import { CRAFT_BUILD, CRAFT_UNFOLD } from './craftModels.js';
 import { astronaut, sayBubble } from './siteModels.js';
@@ -945,6 +945,264 @@ const tiangongAssembly = assembly('tiangong', [
   ['mengtian', [1.4, 0, 0], '2022', [0.24, 0.15, 0.19]],
 ]);
 
+// The seven of 2026-10-15. A mark on the face of a world that the watcher sees: a ball
+// pressed thin along the line out of the world's middle, put on its face (`way` is where
+// it lies seen from the middle; `radius` how far out the face is, `squash` its height).
+function faceAt(way, radius, squash = 1) {
+  const d = Math.hypot(...way);
+  return [(way[0] / d) * radius, (way[1] / d) * radius * squash, (way[2] / d) * radius];
+}
+function patch(scene, name, parent, material, diameter, way, radius, squash = 1) {
+  const at = faceAt(way, radius, squash);
+  const mark = ball(scene, name, parent, material, diameter, at, [0.2, 1, 1]);
+  mark.rotation.y = Math.atan2(-at[2], at[0]);
+  return { mark, at };
+}
+// Stones and dust that fly up from `at` and thin out as `u` goes 0 → 1.
+function puff(scene, name, parent, hex, at, count, reach) {
+  const dust = glow(scene, `${name}Light`, hex, 1);
+  const bits = Array.from({ length: count }, (_, k) => {
+    const a = k * 2.4;
+    const up = 0.35 + 0.65 * ((k * 0.37) % 1);
+    const mesh = ball(scene, `${name}${k}`, parent, dust, 0.04 + 0.05 * ((k * 0.61) % 1), at);
+    return { mesh, way: [Math.cos(a) * (1 - up * 0.5), up, 0.4 + 0.5 * Math.abs(Math.sin(a))] };
+  });
+  return (u) => {
+    const out = 1 - (1 - u) * (1 - u);
+    dust.alpha = 1 - u * u;
+    for (const { mesh, way } of bits) {
+      mesh.setEnabled(u > 0.01 && u < 0.99);
+      mesh.position.set(at[0] + way[0] * reach * out, at[1] + way[1] * reach * out, at[2] + way[2] * reach * out);
+    }
+  };
+}
+// A spinning-top asteroid (Ryugu, Bennu): a ball a little flattened with a ridge round
+// its middle, boulders on the face the watcher sees. It sits lower in the world than a
+// planet does, so that all of it is in view. Returns { top, on } (on: a spot on its face).
+function spinningTop(scene, name, world, hex, dark, diameter, rocks) {
+  const top = group(scene, `${name}Top`, world, [0, -0.32, 0]);
+  const paint = tint(scene, `${name}Paint`, hex);
+  ball(scene, name, top, paint, diameter, [0, 0, 0], [1, 0.84, 1]);
+  drum(scene, `${name}Ridge`, top, paint, { height: 0.1 * diameter, diameter: diameter * 1.02, tessellation: 40 }, [0, 0, 0]);
+  const stone = tint(scene, `${name}StonePaint`, dark);
+  const r = diameter / 2;
+  rocks.forEach(([x, y, z, d], k) => patch(scene, `${name}Rock${k}`, top, stone, d, [x, y, z], r, 0.84));
+  return { top, on: (way) => faceAt(way, r, 0.84) };
+}
+
+// Hayabusa2 at Ryugu: dust at the first touch, the crater of the copper lump, dust again.
+const ryuguTouches = goesBy('hayabusa2', (scene, name, world, mats, root) => {
+  const { top, on } = spinningTop(scene, `${name}Ryugu`, world, '#5e5750', '#3a3530', 1.0, [[0.2, 0.3, 0.9, 0.12], [0.6, -0.2, 0.7, 0.15], [-0.3, -0.3, 0.9, 0.1], [0.7, 0.35, 0.5, 0.09], [-0.1, 0.05, 1, 0.07]]);
+  const first = puff(scene, `${name}First`, top, '#d8ccb8', on([0.3, 0.55, 0.8]), 14, 0.45);
+  const dug = patch(scene, `${name}Crater`, top, tint(scene, `${name}CraterPaint`, '#24201c'), 0.12, [-0.25, 0.35, 0.9], 0.5, 0.84);
+  const second = puff(scene, `${name}Second`, top, '#d8ccb8', on([-0.12, 0.38, 0.92]), 14, 0.45);
+  const say = says(scene, name, root, t('류구야. 한 줌만 가져갈게'));
+  return (values) => {
+    first(values.dust1 ?? 0);
+    second(values.dust2 ?? 0);
+    const shown = values.crater ?? 0;
+    dug.mark.setEnabled(shown > 0.01);
+    dug.mark.scaling.set(0.2, Math.max(0.01, shown), Math.max(0.01, shown));
+    say(values);
+  };
+}, { from: [-1.4, -1.5], to: [0.5, -1.5] });
+
+// SOHO at L1: the Sun comes in, a disc covers it, the faint corona shows round the disc,
+// and a small comet dives in and is gone.
+const sunCovered = goesBy('soho', (scene, name, world, mats, root) => {
+  ball(scene, `${name}Sun`, world, glow(scene, `${name}SunLight`, '#ffd27a', 1), 1.0);
+  const halo = glow(scene, `${name}CoronaLight`, '#fff6e0', 0);
+  halo.alphaMode = Constants.ALPHA_ADD;
+  const rays = Array.from({ length: 12 }, (_, k) => {
+    const a = (k / 12) * 2 * Math.PI + 0.3;
+    const long = 0.4 + 0.35 * ((k * 0.53) % 1);
+    const ray = box(scene, `${name}Ray${k}`, world, halo, [0.018, long, 0.006], [Math.cos(a) * (0.55 + long / 2), Math.sin(a) * (0.55 + long / 2), 0.52]);
+    ray.rotation.z = a - Math.PI / 2;
+    return ray;
+  });
+  // Soft rings of light round the disc, fainter outward.
+  const glows = [[1.14, 0.3], [1.26, 0.2], [1.4, 0.14], [1.56, 0.1], [1.74, 0.07], [1.95, 0.05]].map(([d, alpha], k) => {
+    const light = glow(scene, `${name}CoronaRing${k}`, '#fff6e0', 0);
+    light.alphaMode = Constants.ALPHA_ADD;
+    return { light, alpha, mesh: ball(scene, `${name}Ring${k}`, world, light, d, [0, 0, 0.5 - 0.01 * k], [1, 1, 0.02]) };
+  });
+  // Just in front of the Sun's face and a little wider than it.
+  const disc = ball(scene, `${name}Disc`, world, tint(scene, `${name}DiscPaint`, '#16141c'), 1.08, [0, 0, 0.53], [1, 1, 0.02]);
+  // The comet comes in from the watcher's upper right (the world's -x) toward the Sun.
+  const from = [-1.0, 0.35, 0.6];
+  const to = [-0.3, 0.08, 0.6];
+  const away = from.map((n, i) => n - to[i]);
+  const comet = group(scene, `${name}Comet`, world);
+  ball(scene, `${name}CometHead`, comet, glow(scene, `${name}CometLight`, '#f2fbff', 1), 0.1);
+  const length = Math.hypot(...away);
+  drum(scene, `${name}CometTail`, comet, glow(scene, `${name}CometTailLight`, '#cfeaff', 0.6), { height: 0.7, diameterTop: 0.08, diameterBottom: 0.005, tessellation: 10 }, away.map((n) => (n / length) * 0.36), away);
+  const say = says(scene, name, root, t('해야. 또 하나 삼켰어?'));
+  return (values) => {
+    const covered = values.cover ?? 0;
+    disc.setEnabled(covered > 0.01);
+    disc.scaling.set(Math.max(0.01, covered), Math.max(0.01, covered), 0.02);
+    const corona = values.corona ?? 0;
+    halo.alpha = 0.55 * corona;
+    for (const { light, alpha, mesh } of glows) {
+      light.alpha = alpha * corona;
+      mesh.setEnabled(corona > 0.01);
+    }
+    for (const ray of rays) ray.setEnabled(corona > 0.01);
+    const u = values.comet ?? 0;
+    comet.setEnabled(u > 0 && u < 1);
+    const at = mix(from, to, u);
+    comet.position.set(at[0], at[1], at[2]);
+    comet.scaling.setAll(Math.max(0.01, 1 - u * u * u));
+    say(values);
+  };
+}, { from: [-2.4, -1.5], to: [0.4, -1.5] });
+
+// Solar Orbiter: the Sun comes in, small flares flicker on its face, and it tips over
+// until its south pole, a tangle of bright and dark, is turned to the watcher. (A dark
+// sheet behind it all: the craft is close to the game's own Sun, which filled the view.)
+const sunPole = goesBy('solarOrbiter', (scene, name, world, mats, root) => {
+  box(scene, `${name}Night`, root, mats.black, [9, 6, 0.004], [0, 0.4, -2.8]);
+  const sun = group(scene, `${name}Tipped`, world);
+  ball(scene, `${name}Sun`, sun, glow(scene, `${name}SunLight`, '#ffc95e', 1), 1.4);
+  const spark = glow(scene, `${name}FireLight`, '#fffbe8', 0);
+  const fires = Array.from({ length: 12 }, (_, k) => {
+    const a = k * 2.2;
+    const r = 0.15 + 0.4 * ((k * 0.37) % 1);
+    const at = [Math.cos(a) * r, Math.sin(a) * r, 0];
+    at[2] = Math.sqrt(Math.max(0, 0.7 * 0.7 - at[0] * at[0] - at[1] * at[1])) + 0.01;
+    return ball(scene, `${name}Fire${k}`, sun, spark, 0.04, at);
+  });
+  // The south pole (-y): patches pressed thin along the line out.
+  const pole = (k, x, z, d, hex) => {
+    const y = -Math.sqrt(Math.max(0, 0.7 * 0.7 - x * x - z * z)) - 0.005;
+    const mark = ball(scene, `${name}Pole${k}`, sun, glow(scene, `${name}PoleLight${k}`, hex, 1), d, [x, y, z], [1, 0.2, 1]);
+    mark.rotation.set(Math.atan2(z, -y), 0, Math.atan2(x, -y));
+  };
+  [[0, 0, 0, 0.3, '#e0802a'], [1, 0.18, 0.1, 0.16, '#fff0b0'], [2, -0.16, -0.08, 0.18, '#c8661e'], [3, 0.05, -0.2, 0.14, '#fff0b0'], [4, -0.1, 0.2, 0.15, '#d9741f'], [5, 0.24, -0.12, 0.1, '#c8661e']].forEach((p) => pole(...p));
+  const say = says(scene, name, root, t('해야. 아래도 좀 보자'));
+  return (values) => {
+    const on = values.fires ?? 0;
+    const flick = values.flick ?? 0;
+    spark.alpha = on;
+    fires.forEach((fire, k) => {
+      const lit = 0.5 + 0.5 * Math.sin(flick * (5 + k) + k);
+      fire.setEnabled(on > 0.01 && lit > 0.3);
+    });
+    sun.rotation.x = -1.1 * (values.tilt ?? 0);
+    say(values);
+  };
+}, { from: [-2.4, -1.5], to: [0.4, -1.5] });
+
+// Tianwen-1 at Mars: the lander drops away from the orbiter, out in front of it and on
+// toward the planet, and where it came down shows as a spark.
+const zhurongDrops = goesBy('tianwen1', (scene, name, world, mats, root) => {
+  ball(scene, `${name}Mars`, world, tint(scene, `${name}MarsPaint`, '#b9573a'), 1.6);
+  ball(scene, `${name}Cap`, world, tint(scene, `${name}CapPaint`, '#f2ece4'), 0.5, [0, 0.66, 0.1], [1, 0.45, 1]);
+  // Utopia Planitia, a paler plain in the north, and the spot she came down on.
+  const plain = patch(scene, `${name}Plain`, world, tint(scene, `${name}PlainPaint`, '#cf7e55'), 0.32, [0.45, 0.3, 1], 0.8).at;
+  const site = ball(scene, `${name}Site`, world, glow(scene, `${name}SiteLight`, '#fff6d8', 1), 0.06, plain.map((n) => n * 1.02));
+  const lander = group(scene, `${name}Lander`, root);
+  drum(scene, `${name}Capsule`, lander, mats.white, { height: 0.08, diameterTop: 0.05, diameterBottom: 0.12, tessellation: 16 }, [0, 0, 0]);
+  drum(scene, `${name}HeatShield`, lander, mats.goldFoil, { height: 0.02, diameter: 0.13, tessellation: 16 }, [0, -0.05, 0]);
+  const start = [0, CRAFT_Y - 0.24, 0.12];
+  // Out in front of the orbiter first (toward the watcher and down), then on to Mars.
+  const bend = [-0.25, CRAFT_Y - 0.3, 0.7];
+  const say = says(scene, name, root, t('주룽아. 잘 다녀와'));
+  return (values) => {
+    const u = values.drop ?? 0;
+    lander.setEnabled(u > 0 && u < 1);
+    const p = world.position;
+    const s = world.scaling.x;
+    const end = [p.x + plain[0] * s, p.y + plain[1] * s, p.z + plain[2] * s];
+    const at = mix(mix(start, bend, u), mix(bend, end, u), u);
+    lander.position.set(at[0], at[1], at[2]);
+    lander.scaling.setAll(Math.max(0.01, 1 - 0.7 * u));
+    const shown = values.site ?? 0;
+    site.setEnabled(shown > 0.01);
+    site.scaling.setAll(Math.max(0.01, shown * (1 + 0.3 * Math.sin(performance.now() / 160))));
+    say(values);
+  };
+}, { from: [-2.4, -1.5], to: [0.7, -1.5] });
+
+// OSIRIS-REx at Bennu: at the touch, stones and dust burst up from the crater.
+const bennuTouch = goesBy('osirisRex', (scene, name, world, mats, root) => {
+  const { top, on } = spinningTop(scene, `${name}Bennu`, world, '#4a4540', '#2a2622', 0.95, [[0.5, 0.3, 0.7, 0.16], [-0.3, -0.3, 0.9, 0.13], [0.8, -0.3, 0.5, 0.11], [-0.6, 0.3, 0.7, 0.09], [0.1, -0.05, 1, 0.07]]);
+  // Nightingale crater, near its north pole.
+  const crater = patch(scene, `${name}Nightingale`, top, tint(scene, `${name}NightingalePaint`, '#7a7066'), 0.14, [0.1, 0.6, 0.8], 0.475, 0.84).at;
+  const burst = puff(scene, `${name}Burst`, top, '#e2d6c2', crater.map((n) => n * 1.03), 20, 0.6);
+  const say = says(scene, name, root, t('베누야. 살짝만 만질게'));
+  return (values) => {
+    burst(values.dust ?? 0);
+    say(values);
+  };
+}, { from: [-1.4, -1.5], to: [0.5, -1.5] });
+
+// Hera: DART flies into Didymos's small moon, a flash, and a tail of stones grows from it.
+const dartStrike = goesBy('hera', (scene, name, world, mats, root) => {
+  ball(scene, `${name}Didymos`, world, tint(scene, `${name}DidymosPaint`, '#7d766d'), 0.9, [0, -0.2, 0], [1, 0.9, 1]);
+  const moon = group(scene, `${name}Dimorphos`, world);
+  ball(scene, `${name}DimorphosRock`, moon, tint(scene, `${name}DimorphosPaint`, '#8a8277'), 0.22, [0, 0, 0], [1, 0.8, 0.9]);
+  const flash = ball(scene, `${name}Flash`, moon, glow(scene, `${name}FlashLight`, '#fff8e0', 0.95), 0.36);
+  // The tail points away from the Sun, which is behind the watcher: back and up.
+  const trail = drum(scene, `${name}Tail`, moon, glow(scene, `${name}TailLight`, '#d8cbb4', 0.35), { height: 0.9, diameterTop: 0.04, diameterBottom: 0.22, tessellation: 12, cap: 0 }, [-0.3, 0.3, -0.2], [-0.6, 0.6, -0.4]);
+  const dart = group(scene, `${name}Dart`, world);
+  box(scene, `${name}DartBody`, dart, mats.goldFoil, [0.08, 0.08, 0.08]);
+  box(scene, `${name}DartWings`, dart, mats.cells, [0.36, 0.006, 0.07]);
+  drum(scene, `${name}DartTrail`, dart, glow(scene, `${name}DartTrailLight`, '#bfe4ff', 0.5), { height: 0.4, diameterTop: 0.05, diameterBottom: 0.005, tessellation: 10 }, [0.16, 0.12, 0.06], [0.8, 0.6, 0.3]);
+  const say = says(scene, name, root, t('다트야. 네가 한 일 보러 왔어'));
+  const orbitAt = (a) => [Math.cos(a) * 0.85, -0.2 + 0.12 * Math.sin(a), Math.sin(a) * 0.85];
+  // Its moon stands on the near side as DART comes (the hit at 4.5 s, orbit 0.3 a second).
+  const hitAngle = 0.3 * 4.5;
+  return (values) => {
+    const at = orbitAt((values.orbit ?? 0) - hitAngle + Math.PI / 2);
+    moon.position.set(at[0], at[1], at[2]);
+    const u = values.dart ?? 0;
+    dart.setEnabled(u > 0 && u < 1);
+    const go = mix([1.3, 0.75, 1.0], orbitAt(Math.PI / 2), u);
+    dart.position.set(go[0], go[1], go[2]);
+    const lit = values.flash ?? 0;
+    flash.setEnabled(lit > 0.01);
+    flash.scaling.setAll(Math.max(0.01, lit));
+    const grown = values.tail ?? 0;
+    trail.setEnabled(grown > 0.01);
+    trail.scaling.setAll(Math.max(0.01, grown));
+    say(values);
+  };
+}, { from: [-0.3, -1.5], to: [0.6, -1.5] });
+
+// TESS: strips of sky come up one after another round the pole, thirteen to a half of
+// the sky; then one star dims now and then, as a planet crosses it.
+function tessStrips(scene, name, mats) {
+  const { root } = based(scene, name, mats, 'tess');
+  const sky = tint(scene, `${name}SkyPaint`, '#0c1436');
+  const far = glow(scene, `${name}StarLight`, '#fff0d0', 1);
+  const middle = group(scene, `${name}Sky`, root, [0, 0.86, -0.05]);
+  middle.scaling.setAll(0.85);
+  const strips = Array.from({ length: 13 }, (_, k) => {
+    const a = (k / 13) * 2 * Math.PI;
+    const strip = group(scene, `${name}Strip${k}`, middle);
+    strip.rotation.z = a;
+    box(scene, `${name}StripSky${k}`, strip, sky, [0.13, 0.5, 0.006], [0, 0.27, 0]);
+    for (let j = 0; j < 4; j++) ball(scene, `${name}Star${k}${j}`, strip, far, 0.012 + 0.01 * ((k * 0.37 + j * 0.61) % 1), [0.045 * Math.sin(k + j * 2.1), 0.08 + 0.12 * j, 0.006]);
+    return strip;
+  });
+  // The star with a planet, in a strip that lies to one side.
+  const marked = glow(scene, `${name}PlanetStarLight`, '#ffe08a', 1);
+  ball(scene, `${name}PlanetStar`, strips[3], marked, 0.04, [0.02, 0.36, 0.008]);
+  const say = says(scene, name, root, t('하늘아. 한 줄씩 볼게'), [-0.3, 0.42, 0.35]);
+  function pose({ strips: come = 0, blink = -1, say: said = 0 }) {
+    strips.forEach((strip, k) => {
+      const shown = clamp((come - k) * 2);
+      strip.setEnabled(shown > 0);
+      strip.scaling.setAll(Math.max(0.01, smooth(shown)));
+    });
+    marked.alpha = blink >= 0 && blink % 2 < 0.5 ? 0.2 : 1;
+    say({ say: said });
+  }
+  pose({});
+  return { root, pose, face: true, fit: 0.58, lift: -0.3 };
+}
+
 export const CRAFT_UNFOLD_ALL = {
   ...CRAFT_UNFOLD,
   voyager2: neptuneGoesBy,
@@ -958,6 +1216,13 @@ export const CRAFT_UNFOLD_ALL = {
   mangalyaan: marsCatches,
   dawn: ceresCatches,
   juice: moonThenEarth,
+  hayabusa2: ryuguTouches,
+  soho: sunCovered,
+  solarOrbiter: sunPole,
+  tianwen1: zhurongDrops,
+  osirisRex: bennuTouch,
+  hera: dartStrike,
+  tess: tessStrips,
   mro: mroParachute,
   lro: lroFootpaths,
   danuri: danuriArrives,

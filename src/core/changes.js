@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-15', text: t('새 탐사선 일곱에 "그날로" 장면이 생겼습니다. 장면은 모두 138개입니다.') },
   { day: '2026-10-15', text: t('탐사선 일곱이 새로 생겼습니다: 하야부사2, 소호, 솔라 오비터, 톈원 1호, 오시리스-렉스, 헤라, 테스.') },
   { day: '2026-10-15', text: t('설정의 About 쪽에 "의견 보내기"가 생겼습니다. 깃허브 이슈로 이어집니다.') },
   { day: '2026-10-15', text: t('비행 연습: 과정마다 세 번씩, 고리는 더 작게, 고리 구멍을 지나야 통과입니다.') },

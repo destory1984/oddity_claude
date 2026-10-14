@@ -4111,7 +4111,7 @@
  "혼자서 해 보기": "On your own",
  "화면을 드래그해 방향을 틀어 고리를 정면에 두세요": "Drag the view to turn and put the ring straight ahead",
  "고리를 비껴갔어요. 처음 자리에서 다시 해요": "You missed the ring. Try again from the start",
- "너무 멀리 왔어요. 처음 자리에서 다시 해요": "Too far off. Try again from the start",
+ "고리에서 너무 멀어졌어요. 처음 자리로 돌아갑니다": "Too far from the ring. Back to where you started",
  "비행 연습: 과정마다 세 번씩, 고리는 더 작게, 고리 구멍을 지나야 통과입니다.": "Flight practice: each lesson three times, smaller rings, and only through the ring counts.",
  "비행 연습: 비껴가거나 멀리 가면 처음 자리로, 고리가 안 보이면 화살표로.": "Flight practice: a miss or straying far puts you back at the start; an arrow shows a ring out of view.",
  "비행 연습: 순간 이동으로 들어가고, 과정이 바뀔 때 가운데에 이름이 뜹니다.": "Flight practice: you jump in, and each lesson's name shows in the middle as it begins."

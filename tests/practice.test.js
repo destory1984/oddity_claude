@@ -187,14 +187,19 @@ test('only through the ring counts: passing close by, or going far off, puts her
   assert.deepEqual(off2.events, ['strayed']);
 });
 
-test('a ring left far behind comes round before her again', () => {
-  let practice = updatePractice(createPractice(pose([0, 0, 0]), 1), pose([0, 0, 0]));
-  // (Off to the side as well: from straight behind, the first ring is in the middle of her view.)
-  const away = pose([FAR_KM * 5, 0, -FAR_KM * 5]);
-  practice = updatePractice(practice, away);
-  const to = sub(practice.ring, away.position);
-  assert.ok(Math.abs(Math.hypot(...to) - FAR_KM) < 1);
-  assert.ok(to[2] > FAR_KM * 0.99, 'straight ahead');
+test('gone far from the ring in any lesson, she is put back where the try began', () => {
+  const start = pose([0, 0, 0]);
+  let practice = updatePractice(createPractice(start, 1), start);
+  const ring = practice.ring;
+  // (Even in the first lesson, where nothing is to be flown: the user, 2026-10-15,
+  // "고리에서 너무 멀어지면, 다시 시작점으로 이동".)
+  practice = updatePractice(practice, pose([FAR_KM * 5, 0, -FAR_KM * 5]));
+  assert.deepEqual(practice.events, ['strayed']);
+  assert.deepEqual(practice.ring, ring);
+  assert.deepEqual(practice.start.position, [0, 0, 0]);
+  // Not the jump's far ring, before the jump.
+  const warp = { ...createPractice(start, 1), step: 'warp', jumped: false, ring: [0, 0, FAR_KM * 55] };
+  assert.deepEqual(updatePractice(warp, start).events, []);
 });
 
 test('the ring\'s name tag sits on the ring in view and on the edge toward it out of view', () => {

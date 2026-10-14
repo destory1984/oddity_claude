@@ -19,9 +19,11 @@ export const FAR_KM = 80000;
 // (Half a flight a second, 40,000 km/s, until the user, 2026-10-15, with the smaller
 // rings: "연습장소에서는 최고 속도 제한": now a ring one flight off is eight seconds away.)
 export const TOP_SPEED = 10000;
-// Left this far behind, the ring is put before her again: nobody is lost in here. (In a
-// lesson of flying through the ring she is put back where that try began instead.)
-const LOST_KM = FAR_KM * 1.8;
+// Gone this far from the ring, in any lesson, she is put back where that try began (the
+// user, 2026-10-15: "고리에서 너무 멀어지면, 다시 시작점으로 이동"). It was 1.8 flights
+// off, and only the ring was put before her again, without a word. (Not the jump's far
+// ring before the jump.)
+const LOST_KM = FAR_KM * 1.3;
 // Looking at the ring: within this of the middle of the view (the ring itself is 2.9
 // degrees from its middle to its rim at that distance).
 const FACING = (5 * Math.PI) / 180;
@@ -141,7 +143,7 @@ export function updatePractice(practice, pose) {
   const reached = far <= RING_KM;
   // Past it close by without going through, or flown far off: a miss.
   const missed = !reached && throughRing(practice) && practice.far <= NEAR_KM && far > practice.far;
-  const strayed = !reached && throughRing(practice) && far > LOST_KM;
+  const strayed = !reached && !(practice.step === 'warp' && !practice.jumped) && far > LOST_KM;
   next.far = far;
   const moved = length(sub(pose.position, practice.last));
   if (pose.speed >= FLYING) next.flew = true;
@@ -201,12 +203,7 @@ export function updatePractice(practice, pose) {
     } else next = { ...next, ...begin('free', pose, next.left - 1) };
   }
   // A miss in a lesson of flying through: back where the try began, the ring where it was.
-  if (next.step !== null && !events.length && (missed || strayed) && throughRing(next)) next = backToStart(next, missed ? 'missed' : 'strayed');
-  // Flown far past it: the ring comes round before her again. (Not the far ring of the
-  // jump, until she has jumped to it.)
-  if (next.step !== null && !throughRing(next) && !(next.step === 'warp' && !next.jumped) && length(sub(next.ring, pose.position)) > LOST_KM) {
-    next = { ...next, ring: ringFrom(pose, [1, 0, 0]), far: Infinity };
-  }
+  if (next.step !== null && !events.length && (missed || strayed) && (strayed || throughRing(next))) next = backToStart(next, missed ? 'missed' : 'strayed');
   return next;
 }
 

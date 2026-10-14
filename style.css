@@ -5591,6 +5591,23 @@ body.practicing #testBar {
   height:0;
 }
 #practiceArrow[hidden] { display:none; }
+/* Put back where the try began: the screen goes pale blue and clears again, as a short
+   jump (main.js, a miss or straying far). */
+#practiceFlash {
+  position:absolute;
+  inset:0;
+  opacity:0;
+  background:radial-gradient(circle, #ffffff 0%, #cfe6ff 45%, #7fb6ff 100%);
+}
+#practiceFlash.on { animation:practiceFlash .9s ease-out 1; }
+@keyframes practiceFlash {
+  0% { opacity:0; }
+  25% { opacity:.95; }
+  100% { opacity:0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #practiceFlash.on { animation-duration:.3s; }
+}
 #practiceArrow::before {
   content:"";
   position:absolute;

@@ -2380,8 +2380,12 @@ ${STORY_MORE[target.id]}` : told };
         dragTurn = [0, 0];
         practice.turning = false;
         sound.cue('topple');
+        const flash = $('practiceFlash');
+        flash.classList.remove('on');
+        void flash.offsetWidth;
+        flash.classList.add('on');
         practice.wrongAt = performance.now();
-        practice.wrongText = missed ? t('고리를 비껴갔어요. 처음 자리에서 다시 해요') : t('너무 멀리 왔어요. 처음 자리에서 다시 해요');
+        practice.wrongText = missed ? t('고리를 비껴갔어요. 처음 자리에서 다시 해요') : t('고리에서 너무 멀어졌어요. 처음 자리로 돌아갑니다');
       } else if (practice.run.events.length) {
         sound.cue('discovered');
         cheerUntil = performance.now() + 1500;

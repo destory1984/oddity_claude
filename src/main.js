@@ -239,6 +239,7 @@ function practiceWrong() {
   const now = performance.now();
   if (now - (practice.wrongAt ?? -Infinity) > 500) sound.cue('brake');
   practice.wrongAt = now;
+  practice.wrongText = null;
 }
 // The target she is coming round to face (facePicked), or null.
 let faceTurn = null;
@@ -2150,6 +2151,7 @@ ${STORY_MORE[target.id]}` : told };
       practice.run = previousLesson(practice.run, poseNow());
       practice.bornAt = performance.now();
       practice.passAt = undefined;
+      practice.stageAt = performance.now();
       practice.turning = false;
       practice.wrongAt = undefined;
       practice.tip = practice.run.step === 'roll' ? ROLL_START : 0;
@@ -2219,13 +2221,22 @@ ${STORY_MORE[target.id]}` : told };
     if (gazing) setGaze(false);
     if (rear) setRear(false);
     input.clear();
-    const back = state;
-    state = createState(PRACTICE_AT, lookAtDirection([0, 0, 1]));
-    practice = { run: createPractice(poseNow()), back, first, twisted: 0, tip: 0, bornAt: performance.now() };
     setPaused(false);
-    document.body.classList.add('practicing');
-    previous = null;
+    // There by the game's own jump, flash and sound (the user, 2026-10-15: "연습장소로 갈
+    // 때, 워프 효과"): she is moved while the screen is white.
+    sound.cue('warp');
+    warp.play(() => {
+      if (practice || replay) return;
+      input.clear();
+      const back = state;
+      state = createState(PRACTICE_AT, lookAtDirection([0, 0, 1]));
+      // (The first lesson's name comes up as the place fades in, two seconds after the white.)
+      practice = { run: createPractice(poseNow()), back, first, twisted: 0, tip: 0, bornAt: performance.now(), stageAt: performance.now() + PRACTICE_NAME_WAIT_MS };
+      document.body.classList.add('practicing');
+      previous = null;
+    });
   }
+  const PRACTICE_NAME_WAIT_MS = 2000;
   // finished: all six lessons were done (else it was left by its button).
   function endPractice(finished) {
     if (!practice) return;
@@ -2269,7 +2280,8 @@ ${STORY_MORE[target.id]}` : told };
           const to = practice.run.ring.map((n, i) => n - state.position[i]);
           const far = Math.hypot(...to);
           state = createState(practice.run.ring.map((n, i) => n - (to[i] / far) * JUMP_TO_KM), lookAtDirection(to));
-          practice.run = jumped(practice.run);
+          // (A miss after the jump puts her back here, not before it.)
+          practice.run = { ...jumped(practice.run), start: { position: [...state.position], forward: forward(state.orientation), up: rotateVector(state.orientation, [0, 1, 0]) } };
           practice.turning = false;
         });
         return;
@@ -2300,6 +2312,8 @@ ${STORY_MORE[target.id]}` : told };
   // How long the line says well done, how long the ring just done takes to go, and how
   // the next comes up: nothing for a moment, then in over RING_IN_MS.
   const PASS_MS = 1200;
+  // ...and then the next lesson's name stands in the middle this long (style.css stageIn).
+  const STAGE_MS = 2600;
   const RING_GONE_MS = 650;
   const RING_WAIT_MS = 200;
   const RING_IN_MS = 600;
@@ -2339,7 +2353,10 @@ ${STORY_MORE[target.id]}` : told };
       // 스텝으로 넘어갈 떄에 뭔가 이펙트 추가. 부드럽게 전환"): the line says well done in
       // gold for a moment, the ring just done swells and thins away where it stood, and
       // the next comes up out of nothing.
-      if (practice.run.events.includes('step') && practice.run.step !== null) practice.passAt = performance.now();
+      if ((practice.run.events.includes('step') || practice.run.events.includes('round')) && practice.run.step !== null) {
+        practice.passAt = performance.now();
+        practice.stageAt = practice.passAt + PASS_MS;
+      }
       // The ring lined up by sliding (the first half of that lesson): she is stopped
       // there, and the slide key let go of, or she would coast on sideways out of line
       // (letting go of a key keeps the speed reached) and fly past the ring's side.
@@ -2351,8 +2368,21 @@ ${STORY_MORE[target.id]}` : told };
         practice.burst = { position: ringBefore, at: performance.now() };
         practice.bornAt = performance.now();
       }
-      if (practice.run.step === 'roll' && before !== 'roll') practice.tip = ROLL_START;
-      if (practice.run.events.length) {
+      if (practice.run.step === 'roll' && (before !== 'roll' || practice.run.events.includes('round'))) practice.tip = ROLL_START;
+      // A miss (core/practice.js backToStart): back where the try began, stopped, with a
+      // tumbling sound and the line red for a moment saying why (the user, 2026-10-15:
+      // "다른 곳으로 통과하면 or 너무 먼 곳으로 가면, 시작점으로 다시 이동시켜").
+      const missed = practice.run.events.includes('missed');
+      if (missed || practice.run.events.includes('strayed')) {
+        const { position, forward: ahead, up } = practice.run.start;
+        state = stopNow(createState(position, orientationFrom(ahead, up)));
+        input.clear();
+        dragTurn = [0, 0];
+        practice.turning = false;
+        sound.cue('topple');
+        practice.wrongAt = performance.now();
+        practice.wrongText = missed ? t('고리를 비껴갔어요. 처음 자리에서 다시 해요') : t('너무 멀리 왔어요. 처음 자리에서 다시 해요');
+      } else if (practice.run.events.length) {
         sound.cue('discovered');
         cheerUntil = performance.now() + 1500;
       }
@@ -2393,18 +2423,19 @@ ${STORY_MORE[target.id]}` : told };
     if (!goal) return endPractice(true);
     // (Begun by a newcomer's offer its button skips it; begun by hand it gives it up. It
     // says what it leaves: the bare "그만두기" did not, and the user, 2026-10-10, asked.)
-    const wrong = performance.now() - (practice.wrongAt ?? -Infinity) < WRONG_MS && practice.run.step === 'slide';
+    const wrong = performance.now() - (practice.wrongAt ?? -Infinity) < WRONG_MS && (Boolean(practice.wrongText) || practice.run.step === 'slide');
     const passed = !wrong && performance.now() - (practice.passAt ?? -Infinity) < PASS_MS;
     document.body.classList.toggle('practiceWrong', wrong);
     document.body.classList.toggle('practicePass', passed);
-    guideView.show({ ...goal, count: t`1단계 ${goal.count}`, ...(wrong ? { text: t('방향은 돌리지 않아요. 화살표 버튼으로 옆으로 움직이세요') } : passed ? { count: '✓', text: t('잘했어요!') } : {}), leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
+    guideView.show({ ...goal, count: t`1단계 ${goal.count}`, ...(wrong ? { text: practice.wrongText || t('방향은 돌리지 않아요. 화살표 버튼으로 옆으로 움직이세요') } : passed ? { count: '✓', text: t('잘했어요!') } : {}), leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
     const away = Math.hypot(...practice.run.ring.map((n, i) => n - state.position[i]));
     // The speed box as in the game (the user, 2026-10-10: "화면 아래에 본게임과 같은
     // 속도계 붙여줘"): how fast she goes, and the limit the ring sets as she nears it.
     if (frame++ % HUD_EVERY_N_FRAMES === 0) {
       hud.speed({ speed: totalSpeed(state), motionSign: state.speed > 0.01 ? state.motionSign : 1, limitLabel: limitText(Math.min(TOP_SPEED, speedLimit(away)) / C), C });
     }
-    practiceView.show(goal, tagSpot(practice.run.ring, state.position, view.camera, innerWidth, innerHeight), away, slideSide(practice.run, pose));
+    const since = performance.now() - (practice.stageAt ?? -Infinity);
+    practiceView.show(goal, tagSpot(practice.run.ring, state.position, view.camera, innerWidth, innerHeight), away, slideSide(practice.run, pose), since >= 0 && since < STAGE_MS);
   };
 
   // The first frame uploads shaders and textures; count it as zero time so the

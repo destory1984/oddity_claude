@@ -10,21 +10,25 @@ export const PRACTICE_STEPS = ['look', 'fly', 'stop', 'slide', 'roll', 'find', '
 // The ring: how big it is and how far off a new one is put. Near a ring the speed is
 // held down as near a spacecraft (core/game.js slow points), so these distances are
 // each a few seconds of flight.
-export const RING_KM = 6000;
+// (6,000 km until the user, 2026-10-15: "고리 크기를 더 작게".)
+export const RING_KM = 4000;
 export const FAR_KM = 80000;
 // The most speed allowed in here, km/s (the user, 2026-10-10: "테스트 비행에서는
 // 속도제한 걸자"): what the ring allows one flight off. Without it the limit grew with
 // the distance from the ring, and the far ring of the jump could be flown to in seconds.
-export const TOP_SPEED = FAR_KM * 0.5;
-// Left this far behind, the ring is put before her again: nobody is lost in here.
+// (Half a flight a second, 40,000 km/s, until the user, 2026-10-15, with the smaller
+// rings: "연습장소에서는 최고 속도 제한": now a ring one flight off is eight seconds away.)
+export const TOP_SPEED = 10000;
+// Left this far behind, the ring is put before her again: nobody is lost in here. (In a
+// lesson of flying through the ring she is put back where that try began instead.)
 const LOST_KM = FAR_KM * 1.8;
-// Looking at the ring: within this of the middle of the view (the ring itself is 4.3
+// Looking at the ring: within this of the middle of the view (the ring itself is 2.9
 // degrees from its middle to its rim at that distance).
 const FACING = (5 * Math.PI) / 180;
-// A near miss counts: passing within this of the ring's middle and going away again.
-// (Aimed 5 degrees off she passes 7,000 km from it; at first only the ring's own 6,000
-// counted, and the first flight went past and took 26 s.)
-const NEAR_KM = RING_KM * 2.5;
+// Only through the ring counts (a near miss counted too, within this of its middle, until
+// the user, 2026-10-15: "그냥 통과해버렸는데도 잘 했다고 하네"). Passing within this of it
+// and going away again is a miss: she is put back where that try began.
+const NEAR_KM = 15000;
 // Counted as flying, as stopped (km/s), and as having slid (km).
 const FLYING = 2000;
 const STOPPED = 1;
@@ -78,8 +82,22 @@ const RING_AT = {
   // Sixty flights off, to one side and up.
   warp: [55, 20, 10],
 };
+// Each lesson is done three times over before the next (the user, 2026-10-15: "1단계를
+// 몇 번 더", then "단계별 학습을 3회씩"); the last, three rings of its own, once.
+export const REPEATS = 3;
+// The first lesson's second and third rings, each from where she looks once she has the
+// one before in the middle: now to the left and a little low, now high, in view on an
+// upright phone.
+const LOOK_AT = [[0.96, -0.25, -0.12], [0.95, 0.08, 0.3]];
 // The last lesson's three, each from where the one before left her.
 const FREE_AT = [[0.3, 0.9, 0.2], [-0.8, -0.5, -0.2], [0.2, -0.6, 0.75]];
+
+// Where a try began, to be put back to: { position, forward, up }.
+const spot = (pose) => ({ position: [...pose.position], forward: [...pose.forward], up: [...pose.up] });
+
+// The lessons in which the ring is to be flown through (the jump's, once jumped; the
+// slide's, once lined up or as it is lined up).
+const throughRing = (practice) => ['fly', 'slide', 'find', 'free'].includes(practice.step) || (practice.step === 'warp' && practice.jumped);
 
 function ringFrom(pose, [ahead, side, up]) {
   return add(add(add(pose.position, pose.forward, ahead * FAR_KM), pose.right, side * FAR_KM), pose.up, up * FAR_KM);
@@ -87,15 +105,26 @@ function ringFrom(pose, [ahead, side, up]) {
 
 // pose: { position, forward, right, up } (km and unit vectors).
 // (In updatePractice also: speed, sliding, and twist: how far she rolled this frame.)
-export function createPractice(pose) {
+// repeats: how many times each lesson is done (tests walk the lessons once).
+export function createPractice(pose, repeats = REPEATS) {
   return {
-    step: 'look', ring: ringFrom(pose, RING_AT.look), flew: false, slid: 0, lined: false, rolled: 0, jumped: false, left: FREE_RINGS, last: [...pose.position], far: Infinity, events: [],
+    step: 'look', round: 1, repeats, start: spot(pose), ring: ringFrom(pose, RING_AT.look), flew: false, slid: 0, lined: false, rolled: 0, jumped: false, left: FREE_RINGS, last: [...pose.position], far: Infinity, events: [],
   };
 }
 
-function begin(step, pose, left = FREE_RINGS) {
-  const at = step === 'free' ? FREE_AT[FREE_RINGS - left] : RING_AT[step];
-  return { step, flew: false, slid: 0, lined: false, rolled: 0, jumped: false, left, ...(at ? { ring: ringFrom(pose, at), far: Infinity } : {}) };
+function begin(step, pose, left = FREE_RINGS, round = 1) {
+  // (Again: the first lesson's ring elsewhere in view; flying, a ring straight ahead.)
+  const again = step === 'look' ? LOOK_AT[round - 2] : step === 'fly' ? [1, 0, 0.1] : RING_AT[step];
+  const at = step === 'free' ? FREE_AT[FREE_RINGS - left] : round > 1 ? again : RING_AT[step];
+  return { step, round, start: spot(pose), flew: false, slid: 0, lined: false, rolled: 0, jumped: false, left, ...(at ? { ring: ringFrom(pose, at), far: Infinity } : {}) };
+}
+
+// Put back where the try began (main.js moves her there): the slide not yet lined up
+// again. kind: 'missed' (went past the ring) or 'strayed' (went off far, or close without
+// lining it up first).
+function backToStart(practice, kind) {
+  practice.events.push(kind);
+  return { ...practice, far: Infinity, slid: 0, lined: false, last: [...practice.start.position] };
 }
 
 // One frame. pose as above, with speed (km/s) and sliding (a slide key is held).
@@ -109,7 +138,10 @@ export function updatePractice(practice, pose) {
   const toRing = sub(next.ring, pose.position);
   const far = length(toRing);
   // Through it, or close by it and now going away.
-  const reached = far <= RING_KM || (far <= NEAR_KM && far > practice.far);
+  const reached = far <= RING_KM;
+  // Past it close by without going through, or flown far off: a miss.
+  const missed = !reached && throughRing(practice) && practice.far <= NEAR_KM && far > practice.far;
+  const strayed = !reached && throughRing(practice) && far > LOST_KM;
   next.far = far;
   const moved = length(sub(pose.position, practice.last));
   if (pose.speed >= FLYING) next.flew = true;
@@ -117,6 +149,12 @@ export function updatePractice(practice, pose) {
   next.rolled += Math.abs(pose.twist ?? 0);
 
   const done = () => {
+    // Not the last time of this lesson: the same again, from where she is now.
+    if (next.step !== 'free' && next.round < next.repeats) {
+      events.push('round');
+      next = { ...next, ...begin(next.step, pose, FREE_RINGS, next.round + 1) };
+      return;
+    }
     events.push('step');
     const following = PRACTICE_STEPS[PRACTICE_STEPS.indexOf(next.step) + 1];
     next = { ...next, ...begin(following, pose) };
@@ -147,7 +185,7 @@ export function updatePractice(practice, pose) {
     // it before her by sliding (and the view does not turn in this lesson): the ring is
     // put out again from where she is now, and the lesson begins again. (The user,
     // 2026-10-10: "4에서 고리 지나치니까 깰 수가 없게 되었는데?")
-    } else if (next.lined ? ahead < -NEAR_KM : ahead < FAR_KM * 0.35) next = { ...next, ...begin('slide', pose) };
+    } else if (!next.lined && ahead < FAR_KM * 0.35) next = backToStart(next, 'strayed');
   } else if (next.step === 'roll') {
     if (next.rolled >= ROLLED && Math.abs(tiltOf(pose)) <= ROLL_UP) done();
   } else if (next.step === 'find' || next.step === 'warp') {
@@ -162,9 +200,11 @@ export function updatePractice(practice, pose) {
       next = { ...next, step: null, left: 0 };
     } else next = { ...next, ...begin('free', pose, next.left - 1) };
   }
+  // A miss in a lesson of flying through: back where the try began, the ring where it was.
+  if (next.step !== null && !events.length && (missed || strayed) && throughRing(next)) next = backToStart(next, missed ? 'missed' : 'strayed');
   // Flown far past it: the ring comes round before her again. (Not the far ring of the
   // jump, until she has jumped to it.)
-  if (next.step !== null && !(next.step === 'warp' && !next.jumped) && length(sub(next.ring, pose.position)) > LOST_KM) {
+  if (next.step !== null && !throughRing(next) && !(next.step === 'warp' && !next.jumped) && length(sub(next.ring, pose.position)) > LOST_KM) {
     next = { ...next, ring: ringFrom(pose, [1, 0, 0]), far: Infinity };
   }
   return next;
@@ -178,13 +218,28 @@ const TEXT = {
   look: () => t('화면을 드래그해 고리를 가운데로 가져오세요'),
   // (Once she is under way the line tells what holding the key does. The user,
   // 2026-10-10: "앞으로 버튼을 누르면 속도가 점점 빨라집니다.,라는 멘트도 추가".)
-  fly: (left, moving) => (moving ? t('전진 버튼을 누르고 있으면 속도가 점점 빨라집니다') : t('전진 버튼을 꾹 누르면 고리로 날아갑니다')),
+  // (The ring off the middle of her view: forward alone goes past it, and the line said
+  // nothing of turning. The user, 2026-10-15: "방향을 틀어야한다는 얘기도 적어줘".)
+  fly: (left, moving, aimed) => (!aimed ? t('화면을 드래그해 방향을 틀어 고리를 정면에 두세요') : moving ? t('전진 버튼을 누르고 있으면 속도가 점점 빨라집니다') : t('전진 버튼을 꾹 누르면 고리로 날아갑니다')),
   stop: () => t('날다가 정지 버튼으로 멈춰 보세요'),
   slide: (left, moving, aimed, jumped, lined) => (lined ? t('정면에 왔어요. 전진 버튼으로 고리를 지나가세요') : t('화살표 버튼을 눌러 고리가 정면에 오게 하세요')),
   roll: () => t('두 손가락으로 화면을 돌려 고리의 뿔을 위로 세우세요'),
   find: () => t('고리가 등 뒤에 있어요. 이름표를 누르고 날아가세요'),
   warp: (left, moving, aimed, jumped) => (jumped ? t('도착했습니다. 전진 버튼으로 고리를 지나가세요') : aimed ? t('바라본 채 이름표를 한 번 더 누르면 순간 이동합니다') : t('아주 먼 고리입니다. 이름표를 눌러 바라보세요')),
   free: (left) => t`혼자서 해 보세요. 남은 고리 ${left}개`,
+};
+
+// Each lesson's name, shown as it begins (ui/practice.js).
+const NAMES = {
+  look: () => t('둘러보기'),
+  // ("날아가기" until the user, 2026-10-15: "날아서 고리 통과하기.. 아님?")
+  fly: () => t('날아서 고리 통과하기'),
+  stop: () => t('멈추기'),
+  slide: () => t('옆으로 움직이기'),
+  roll: () => t('기울기 바로 하기'),
+  find: () => t('등 뒤의 고리 찾기'),
+  warp: () => t('순간 이동'),
+  free: () => t('혼자서 해 보기'),
 };
 
 // The lesson before this one, begun again from where she is (the user, 2026-10-10:
@@ -202,10 +257,13 @@ export function previousLesson(practice, pose) {
 export function practiceGoal(practice, aimed = false, moving = false) {
   if (practice.step === null) return null;
   return {
-    count: `${PRACTICE_STEPS.indexOf(practice.step) + 1}/${PRACTICE_STEPS.length}`,
+    // (Which time of the lesson this is, after it as dots filled in: "2/8 ●○○". As
+    // "2/8 · 1/3" it was not read: the user, 2026-10-15, "1단계 2/8 - 1/3은 뭐야?")
+    count: `${PRACTICE_STEPS.indexOf(practice.step) + 1}/${PRACTICE_STEPS.length}${practice.step !== 'free' && practice.repeats > 1 ? ` ${'●'.repeat(practice.round)}${'○'.repeat(practice.repeats - practice.round)}` : ''}`,
     // There is a lesson before this one to go back to.
     back: PRACTICE_STEPS.indexOf(practice.step) > 0,
     text: TEXT[practice.step](practice.left, moving, aimed, practice.jumped, practice.lined),
+    name: NAMES[practice.step](),
     // Stopping: the forward key until she has flown, then the stop key. Finding: the
     // name tag until she faces the ring, then the forward key.
     teach: {

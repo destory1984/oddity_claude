@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, JUMP_TO_KM, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, tiltOf, previousLesson, ROLL_START, TOP_SPEED,
+  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, JUMP_TO_KM, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, tiltOf, previousLesson, ROLL_START, TOP_SPEED, REPEATS,
 } from '../src/core/practice.js';
 import { step, createState, totalSpeed } from '../src/core/game.js';
 import { lookAtDirection } from '../src/core/orientation.js';
@@ -20,7 +20,7 @@ const facing = (practice, position) => pose(position, sub(practice.ring, positio
 test('the eight lessons come in order, each with a line and the control it teaches', () => {
   assert.deepEqual(PRACTICE_STEPS, ['look', 'fly', 'stop', 'slide', 'roll', 'find', 'warp', 'free']);
   const start = pose([0, 0, 0]);
-  let practice = createPractice(start);
+  let practice = createPractice(start, 1);
   assert.equal(practice.step, 'look');
   assert.equal(practiceGoal(practice).count, '1/8');
   assert.equal(practiceGoal(practice).teach, null);
@@ -34,9 +34,11 @@ test('the eight lessons come in order, each with a line and the control it teach
   assert.deepEqual(practice.events, ['step']);
   assert.equal(practiceGoal(practice).teach, 'fly');
   // (The line names the key on the screen: the game is played on phones.)
-  assert.match(practiceGoal(practice).text, /전진 버튼/);
+  assert.match(practiceGoal(practice, true).text, /전진 버튼/);
   // (Under way, it says what holding the key does.)
-  assert.match(practiceGoal(practice, false, true).text, /점점 빨라집니다/);
+  assert.match(practiceGoal(practice, true, true).text, /점점 빨라집니다/);
+  // (The ring off the middle of the view: turn first.)
+  assert.match(practiceGoal(practice, false, true).text, /방향을 틀어/);
 
   // 2. Flying into the ring she found.
   const ring = practice.ring;
@@ -61,13 +63,15 @@ test('the eight lessons come in order, each with a line and the control it teach
   assert.equal(practiceGoal(practice).teach, 'slide');
 
   // 4. Turning to face the ring is not a slide; sliding until it is before her is.
-  // (Flown past the ring, it is put out again ahead of her: the lesson can still be done.)
+  // (Flown on past the ring without lining it up: back where the lesson began, the ring
+  // where it was.)
   {
     const past = { ...through, position: practice.ring.map((n, i) => n + through.forward[i] * 30000) };
     const again = updatePractice(practice, past);
     assert.equal(again.step, 'slide');
-    const to = sub(again.ring, past.position);
-    assert.ok(to.reduce((sum, n, i) => sum + n * past.forward[i], 0) > FAR_KM * 0.8, 'ahead of her again');
+    assert.deepEqual(again.events, ['strayed']);
+    assert.deepEqual(again.ring, practice.ring);
+    assert.deepEqual(again.start.position, practice.start.position);
     assert.equal(again.slid, 0);
   }
   const from = through.position;
@@ -154,31 +158,39 @@ test('the eight lessons come in order, each with a line and the control it teach
   assert.deepEqual(updatePractice(practice, pose([0, 0, 0])).events, []);
 });
 
-test('a near miss counts once she is going away again, a wide one does not', () => {
-  let practice = updatePractice(createPractice(pose([0, 0, 0])), pose([0, 0, 0]));
+test('only through the ring counts: passing close by, or going far off, puts her back where the try began', () => {
+  let practice = updatePractice(createPractice(pose([0, 0, 0]), 1), pose([0, 0, 0]));
   practice = updatePractice(practice, facing(practice, [0, 0, 0]));
   assert.equal(practice.step, 'fly');
+  const start = practice.start.position;
   const ring = practice.ring;
   // (Square to the way to the ring.)
   const off = unit(cross(ring, [0, 0, 1]));
   const aside = (km, along) => ring.map((n, i) => n * along + off[i] * km);
-  // Coming nearer, 10,000 km to its side: not yet.
+  // Coming nearer, 10,000 km to its side: nothing yet.
   practice = updatePractice(practice, pose(aside(10000, 0.98)));
   practice = updatePractice(practice, pose(aside(10000, 1)));
-  assert.equal(practice.step, 'fly');
-  // Past it and going away: reached.
+  assert.deepEqual(practice.events, []);
+  // Past it and going away: a miss (it counted once: the user, 2026-10-15, "그냥 통과해버렸는데도 잘 했다고 하네").
   practice = updatePractice(practice, pose(aside(10000, 1.02)));
+  assert.equal(practice.step, 'fly');
+  assert.deepEqual(practice.events, ['missed']);
+  assert.deepEqual(practice.start.position, start);
+  // From the start again, through it: done.
+  practice = updatePractice(practice, pose(start));
+  practice = updatePractice(practice, pose(ring));
   assert.equal(practice.step, 'stop');
-  // (Twenty thousand km to its side is a miss.)
-  let wide = updatePractice(createPractice(pose([0, 0, 0])), pose([0, 0, 0]));
-  wide = updatePractice(wide, facing(wide, [0, 0, 0]));
-  for (const along of [0.98, 1, 1.02]) wide = updatePractice(wide, pose(wide.ring.map((n, i) => n * along + off[i] * 20000)));
-  assert.equal(wide.step, 'fly');
+  // Flown far off the other way: back too.
+  let off2 = updatePractice(createPractice(pose([0, 0, 0]), 1), pose([0, 0, 0]));
+  off2 = updatePractice(off2, facing(off2, [0, 0, 0]));
+  off2 = updatePractice(off2, pose([0, 0, -FAR_KM * 2]));
+  assert.deepEqual(off2.events, ['strayed']);
 });
 
 test('a ring left far behind comes round before her again', () => {
-  let practice = updatePractice(createPractice(pose([0, 0, 0])), pose([0, 0, 0]));
-  const away = pose([0, 0, -FAR_KM * 5]);
+  let practice = updatePractice(createPractice(pose([0, 0, 0]), 1), pose([0, 0, 0]));
+  // (Off to the side as well: from straight behind, the first ring is in the middle of her view.)
+  const away = pose([FAR_KM * 5, 0, -FAR_KM * 5]);
   practice = updatePractice(practice, away);
   const to = sub(practice.ring, away.position);
   assert.ok(Math.abs(Math.hypot(...to) - FAR_KM) < 1);
@@ -205,7 +217,7 @@ test('the ring\'s name tag sits on the ring in view and on the edge toward it ou
 
 test('a lesson can be gone back from to the one before, begun again from where she is', () => {
   const here = pose([5000, 0, 0]);
-  let practice = createPractice(here);
+  let practice = createPractice(here, 1);
   assert.equal(practiceGoal(practice).back, false);
   assert.equal(previousLesson(practice, here), practice, 'none before the first');
   // On to the second, the third, the fourth.
@@ -248,7 +260,7 @@ test('the practice holds the speed down however far the ring is', () => {
 });
 
 test('a short slide that brings the ring before her is enough', () => {
-  let practice = { ...createPractice(pose([0, 0, 0])), step: 'slide', ring: [FAR_KM * 0.2, FAR_KM * 0.02, FAR_KM * 0.9] };
+  let practice = { ...createPractice(pose([0, 0, 0]), 1), step: 'slide', ring: [FAR_KM * 0.2, FAR_KM * 0.02, FAR_KM * 0.9] };
   // Coasting sideways after a short press: part of the way, not yet before her.
   practice = updatePractice(practice, pose([FAR_KM * 0.05, 0, 0], [0, 0, 1], { sliding: true }));
   assert.equal(practice.lined, false);
@@ -256,4 +268,29 @@ test('a short slide that brings the ring before her is enough', () => {
   practice = updatePractice(practice, pose([FAR_KM * 0.13, 0, 0], [0, 0, 1], { sliding: true }));
   assert.equal(practice.lined, true);
   assert.deepEqual(practice.events, ['part']);
+});
+
+test('each lesson is done three times before the next, its count saying which time', () => {
+  assert.equal(REPEATS, 3);
+  let practice = createPractice(pose([0, 0, 0]));
+  assert.equal(practiceGoal(practice).count, '1/8 ●○○');
+  const rings = [practice.ring];
+  for (let k = 1; k < REPEATS; k++) {
+    practice = updatePractice(practice, facing(practice, [0, 0, 0]));
+    assert.equal(practice.step, 'look');
+    assert.deepEqual(practice.events, ['round']);
+    assert.equal(practiceGoal(practice).count, `1/8 ${'●'.repeat(k + 1)}${'○'.repeat(2 - k)}`);
+    // (Somewhere else in view each time.)
+    assert.ok(rings.every((ring) => Math.hypot(...sub(ring, practice.ring)) > FAR_KM * 0.1));
+    rings.push(practice.ring);
+  }
+  practice = updatePractice(practice, facing(practice, [0, 0, 0]));
+  assert.equal(practice.step, 'fly');
+  assert.deepEqual(practice.events, ['step']);
+  // Flying: through a ring, and another put straight ahead, three times.
+  for (let k = 0; k < REPEATS; k++) {
+    assert.equal(practice.step, 'fly');
+    practice = updatePractice(practice, pose(practice.ring));
+  }
+  assert.equal(practice.step, 'stop');
 });

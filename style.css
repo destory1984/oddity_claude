@@ -5582,6 +5582,77 @@ body.practicing #testBar {
   pointer-events:auto;
 }
 #practiceTag[hidden] { display:none; }
+/* The ring out of view: an arrow on the edge of the screen pointing to it (the user,
+   2026-10-15: "고리가 화면에서 벗어나면, 고리 있는 곳을 화살표로 표시해줘"). Only an
+   arrow: in the lessons without the ring's name tag it is not to be pressed. */
+#practiceArrow {
+  position:absolute;
+  width:0;
+  height:0;
+}
+#practiceArrow[hidden] { display:none; }
+#practiceArrow::before {
+  content:"";
+  position:absolute;
+  left:-14px;
+  top:-13px;
+  border-top:13px solid transparent;
+  border-bottom:13px solid transparent;
+  border-left:26px solid #ffd98a;
+  filter:drop-shadow(0 0 6px #ffd98acc);
+  transform:rotate(var(--turn, 0rad));
+  animation:arrowNudge .9s ease-in-out infinite;
+}
+@keyframes arrowNudge {
+  0%, 100% { translate:0 0; }
+  50% { translate:calc(cos(var(--turn, 0rad)) * 6px) calc(sin(var(--turn, 0rad)) * 6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #practiceArrow::before { animation:none; }
+}
+/* A lesson begins (the user, 2026-10-15: "다음 단계로 넘어갈 때에 안내 표시"): its number,
+   name and what to do stand in the middle of the screen for a moment, after the line at
+   the top has said well done. */
+#practiceStage {
+  position:absolute;
+  left:50%;
+  top:38%;
+  transform:translate(-50%, -50%);
+  width:min(300px, 84vw);
+  padding:16px 18px 14px;
+  border:1px solid #ffdfa699;
+  border-radius:18px;
+  background:#0c2236ee;
+  box-shadow:0 0 24px 4px #ffd98a44;
+  text-align:center;
+  word-break:keep-all;
+  animation:stageIn 2.6s ease-in-out 1 both;
+}
+#practiceStage[hidden] { display:none; }
+#practiceStageCount {
+  margin:0;
+  color:#ffdfa6;
+  font-size:13px;
+  font-variant-numeric:tabular-nums;
+}
+#practiceStageName {
+  margin:4px 0 8px;
+  color:#fff6dc;
+  font-size:24px;
+}
+#practiceStageText {
+  margin:0;
+  font-size:15px;
+  line-height:1.45;
+}
+@keyframes stageIn {
+  0% { opacity:0; transform:translate(-50%, -50%) scale(.85); }
+  12%, 82% { opacity:1; transform:translate(-50%, -50%) scale(1); }
+  100% { opacity:0; transform:translate(-50%, -50%) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #practiceStage { animation:none; }
+}
 
 /* The key to press now blinks gold (a slow pulse of its edge at first; the user,
    2026-10-10: "눌러야하는 버튼을 깜박깜박 표시해줘"): lit and unlit by turns, about

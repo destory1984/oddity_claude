@@ -56,8 +56,16 @@ export function createPracticeView({ onTag, onOffer, onDone }) {
   return {
     // goal: core/practice.js practiceGoal(), or null when it is over. spot: tagSpot().
     // km: how far the ring is. side: which way the slide lesson's ring lies.
-    show(goal, spot, km, side = 1) {
+    // staged: a lesson has just begun (its name stands in the middle for a moment).
+    show(goal, spot, km, side = 1, staged = false) {
       $('practiceLayer').hidden = !goal;
+      const stage = $('practiceStage');
+      if (goal && staged && stage.hidden) {
+        $('practiceStageCount').textContent = goal.count;
+        $('practiceStageName').textContent = goal.name;
+        $('practiceStageText').textContent = goal.text;
+      }
+      stage.hidden = !(goal && staged);
       const tag = $('practiceTag');
       tag.hidden = !goal?.tag;
       if (goal?.tag) {
@@ -66,6 +74,14 @@ export function createPracticeView({ onTag, onOffer, onDone }) {
         tag.classList.toggle('inView', !spot.off);
         const text = `${spot.off ? `${arrowFor(spot.angle)} ` : ''}${t('연습 고리')} · ${distanceText(km)}`;
         if (tag.textContent !== text) tag.textContent = text;
+      }
+      // Out of view with no name tag to show the way: an arrow on the edge toward it.
+      const arrow = $('practiceArrow');
+      arrow.hidden = !(goal && !goal.tag && spot?.off);
+      if (!arrow.hidden) {
+        arrow.style.left = `${spot.x}px`;
+        arrow.style.top = `${spot.y}px`;
+        arrow.style.setProperty('--turn', `${spot.angle}rad`);
       }
       light(goal?.teach ? TEACH[goal.teach](side) : []);
     },

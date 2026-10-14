@@ -14,7 +14,7 @@ export function changesDoc(changes = CHANGES, started = STARTED) {
   const lines = [
     '# 바뀐 것들',
     '',
-    '게임 설정의 "바뀐 것들" 쪽과 같은 내용이다. 플레이어가 화면에서 보거나 듣는 변화만 한 줄씩 적는다. 새것이 위에 온다.',
+    '게임 설정의 "바뀐 것들" 쪽과 같은 내용이다. 플레이어가 화면에서 보거나 듣는 변화만 한 줄씩 적는다.',
     '',
     `만들기 시작한 날은 ${y}년 ${m}월 ${d}일이고, 지금까지 ${changes.length}줄이다. 어떻게 만들었는지는 [상세기획서](docs/Space-Oddity-상세기획서.md)에 날짜별로 있다.`,
     '',

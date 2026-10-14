@@ -51,6 +51,16 @@ const RULES = {
   mangalyaan: { visibleKm: 60000, maxKm: 200 },
   // Over Ceres.
   dawn: { visibleKm: 60000, maxKm: 200 },
+  hayabusa2: { visibleKm: 400000, maxKm: 4000 },
+  // At L1, as Webb is at L2.
+  soho: { visibleKm: 400000, maxKm: 4000 },
+  solarOrbiter: { visibleKm: 400000, maxKm: 4000 },
+  // Over Mars, with the other two.
+  tianwen1: { visibleKm: 60000, maxKm: 200 },
+  osirisRex: { visibleKm: 400000, maxKm: 4000 },
+  hera: { visibleKm: 400000, maxKm: 4000 },
+  // Round Earth on a long loop, as Chandra.
+  tess: { visibleKm: 100000, maxKm: 600 },
 };
 
 // A place with no model of its own gets the plain four-legged lander.

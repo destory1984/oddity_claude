@@ -33,6 +33,7 @@ const CHANDRA_ORBIT = {
 // Euclid circles the same L2 point as Webb, in a wide loop: here, a fixed 50,000 km
 // to one side of it.
 export const EUCLID_FROM_WEBB_KM = 50000;
+// SOHO is at the other point, L1, as far from Earth toward the Sun.
 
 // launched and intro are shown on the card that opens when the traveler docks.
 export const CRAFT = [
@@ -211,6 +212,51 @@ export const CRAFT = [
     launched: 2023,
     intro: t('유럽이 보낸 목성 얼음 위성 탐사선입니다. 2023년에 떠나 2031년 목성에 닿습니다. 유로파와 칼리스토를 스치고 가니메데 둘레를 돕니다.'),
   },
+  // Seven more (the user, 2026-10-15: "하야부사, SOHO, 솔라 오비터, 톈원 1호, 오시리스-렉스,
+  // DART와 헤라, TESS"; DART, gone into its asteroid in 2022, is told in Hera's reading).
+  // Those on their way between the planets roam the Sun as Europa Clipper does; their
+  // loops are like their real ones, not where they are on any day.
+  {
+    id: 'hayabusa2', name: t('하야부사2'), nameEn: 'Hayabusa2', kind: 'craft', parent: null,
+    loop: { lowKm: 0.9 * AU_KM, highKm: 1.3 * AU_KM, periodS: 400 * 86400, lowAtS: -50 * 86400, tiltDeg: 2, turnDeg: 120, squeeze: 100 },
+    launched: 2014,
+    intro: t('일본의 소행성 탐사선입니다. 소행성 류구에 두 번 내려 흙을 모아, 2020년 12월 캡슐에 담아 지구로 보냈습니다. 지금은 다음 소행성으로 가고 있습니다.'),
+  },
+  {
+    id: 'soho', name: t('소호 태양 관측선'), nameEn: 'SOHO', kind: 'craft', parent: 'earth',
+    launched: 1995,
+    intro: t('지구에서 태양 쪽으로 150만km 떨어진 L1 점에서 30년째 태양을 지켜봅니다. 그 사진으로 사람들이 혜성을 5,000개 넘게 찾았습니다.'),
+  },
+  {
+    id: 'solarOrbiter', name: t('솔라 오비터'), nameEn: 'Solar Orbiter', kind: 'craft', parent: null,
+    loop: { lowKm: 0.28 * AU_KM, highKm: 0.91 * AU_KM, periodS: 168 * 86400, lowAtS: 60 * 86400, tiltDeg: 17, turnDeg: 300, squeeze: 100 },
+    launched: 2020,
+    intro: t('유럽과 미국의 태양 탐사선입니다. 두꺼운 방패로 열을 막으며 수성보다 안쪽까지 다가가고, 2025년 처음으로 태양의 남극을 찍었습니다.'),
+  },
+  {
+    id: 'tianwen1', name: t('톈원 1호'), nameEn: 'Tianwen-1', kind: 'craft', parent: 'mars',
+    ring: { altitudeKm: 600, lapPlayS: 5400, tiltDeg: 87, phaseDeg: 180 },
+    launched: 2020,
+    intro: t('중국의 첫 화성 탐사선입니다. 2021년 화성 궤도에 들어 탐사차 주룽을 내려보냈고, 지금도 화성 둘레를 돌며 사진을 찍습니다.'),
+  },
+  {
+    id: 'osirisRex', name: t('오시리스-렉스'), nameEn: 'OSIRIS-REx', kind: 'craft', parent: null,
+    loop: { lowKm: 0.5 * AU_KM, highKm: 1.0 * AU_KM, periodS: 250 * 86400, lowAtS: 30 * 86400, tiltDeg: 6, turnDeg: 60, squeeze: 100 },
+    launched: 2016,
+    intro: t('소행성 베누의 흙과 돌을 2023년 지구로 가져온 미국 탐사선입니다. 지금은 오시리스-에이펙스라는 새 이름으로 소행성 아포피스에 가고 있습니다.'),
+  },
+  {
+    id: 'hera', name: t('헤라'), nameEn: 'Hera', kind: 'craft', parent: null,
+    loop: { lowKm: 1.0 * AU_KM, highKm: 2.2 * AU_KM, periodS: 770 * 86400, lowAtS: 100 * 86400, tiltDeg: 3, turnDeg: 250, squeeze: 100 },
+    launched: 2024,
+    intro: t('유럽의 소행성 탐사선입니다. 2022년 미국의 다트가 일부러 부딪혀 궤도를 바꾼 소행성 디모르포스를 살피러 가고 있습니다.'),
+  },
+  {
+    id: 'tess', name: t('테스 외계 행성 탐사 위성'), nameEn: 'TESS', kind: 'craft', parent: 'earth',
+    loop: { lowKm: 6371 + 108000, highKm: 6371 + 375000, periodS: 13.7 * 86400, lowAtS: 0, tiltDeg: 37, turnDeg: 90, squeeze: 10 },
+    launched: 2018,
+    intro: t('케플러를 이어 외계 행성을 찾는 위성입니다. 카메라 네 대로 하늘을 조각조각 훑으며, 별빛이 살짝 어두워지는 순간을 잡습니다.'),
+  },
 ];
 named(CRAFT);
 
@@ -284,10 +330,10 @@ export function craftAt(timeS, bodies) {
         earth.position[1] + r * Math.sin(a) * Math.sin(tilt),
         earth.position[2] + r * Math.sin(a) * Math.cos(tilt),
       ];
-    } else if (craft.id === 'jwst' || craft.id === 'euclid') {
+    } else if (craft.id === 'jwst' || craft.id === 'euclid' || craft.id === 'soho') {
       const away = earth.position.map((n, i) => n - sun.position[i]);
       const length = Math.hypot(...away);
-      position = earth.position.map((n, i) => n + (away[i] / length) * JWST_FROM_EARTH_KM);
+      position = earth.position.map((n, i) => n + (away[i] / length) * JWST_FROM_EARTH_KM * (craft.id === 'soho' ? -1 : 1));
       if (craft.id === 'euclid') {
         // Sideways along Earth's path, level with the planets.
         const side = Math.hypot(away[2], away[0]);

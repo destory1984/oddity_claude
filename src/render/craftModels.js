@@ -1025,10 +1025,101 @@ function bepiColombo(scene, name, mats) {
   return fuse(scene, root);
 }
 
+// The seven of 2026-10-15 (the user: "하야부사, SOHO, 솔라 오비터, 톈원 1호, 오시리스-렉스,
+// DART와 헤라, TESS"). Each as it is known from its pictures, in the same few parts.
+// Hayabusa2: a box of foil, a wing of three panels each side, two flat antennas on top,
+// the sampler horn reaching down, four ion engines on one face.
+function hayabusa2(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  box(scene, `${name}Bus`, root, mats.goldFoil, [0.2, 0.2, 0.16]);
+  for (const s of [-1, 1]) wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.1, 0, 0], to: [s * 0.62, 0, 0], width: 0.2, panels: 3, face: Z, yoke: 0.06 });
+  for (const s of [-1, 1]) box(scene, `${name}Flat${s}`, root, mats.white, [0.09, 0.006, 0.08], [s * 0.045, 0.115, 0], [0, 0, s * 0.35]);
+  drum(scene, `${name}Horn`, root, mats.chrome, { height: 0.3, diameterTop: 0.03, diameterBottom: 0.05, tessellation: 10 }, [0, -0.25, 0]);
+  [[-0.04, 0.04], [0.04, 0.04], [-0.04, -0.04], [0.04, -0.04]].forEach(([x, y], k) => drum(scene, `${name}Ion${k}`, root, mats.dark, { height: 0.02, diameter: 0.04 }, [x, y, -0.09], Z));
+  return fuse(scene, root);
+}
+
+// SOHO: a broad box of foil below, a tall white instrument box on it with its telescopes
+// looking one way, a small dish, and two wide wings.
+function soho(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  box(scene, `${name}Service`, root, mats.goldFoil, [0.3, 0.14, 0.24]);
+  box(scene, `${name}Payload`, root, mats.white, [0.24, 0.22, 0.2], [0, 0.18, 0]);
+  for (const s of [-1, 1]) wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.15, 0, 0], to: [s * 0.72, 0, 0], width: 0.26, panels: 2, face: Z, yoke: 0.06 });
+  [[-0.06, 0.22], [0.02, 0.22], [0.08, 0.15], [-0.03, 0.13]].forEach(([x, y], k) => drum(scene, `${name}Scope${k}`, root, mats.black, { height: 0.02, diameter: 0.045 }, [x, y, 0.105], Z));
+  dish(scene, `${name}Dish`, root, mats, { at: [0.15, 0.26, 0.04], toward: [1, 0.4, 0.2], diameter: 0.1 });
+  return fuse(scene, root);
+}
+
+// Solar Orbiter: a box hidden behind a grey shield larger than itself (windows cut in
+// it), two long narrow wings, the magnetometer's boom out behind, a dish below.
+function solarOrbiter(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  box(scene, `${name}Bus`, root, mats.goldFoil, [0.18, 0.18, 0.2]);
+  box(scene, `${name}Shield`, root, mats.grey, [0.36, 0.34, 0.03], [0, 0, 0.13]);
+  [[-0.06, 0.05], [0.05, 0.06], [0, -0.06]].forEach(([x, y], k) => box(scene, `${name}Window${k}`, root, mats.black, [0.03, 0.03, 0.006], [x, y, 0.147]));
+  for (const s of [-1, 1]) wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.09, 0, -0.02], to: [s * 0.86, 0, -0.02], width: 0.12, panels: 3, face: Z, yoke: 0.05 });
+  rod(scene, `${name}Boom`, root, mats.grey, [0, 0.08, -0.1], [0, 0.22, -0.62], 0.012, 4);
+  dish(scene, `${name}Dish`, root, mats, { at: [0.06, -0.12, -0.04], toward: [0.2, -1, -0.4], diameter: 0.13 });
+  return fuse(scene, root);
+}
+
+// Tianwen-1's orbiter: a tall eight-sided body of foil, a wing of two panels each side,
+// a great dish on top, its engine below.
+function tianwen1(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  drum(scene, `${name}Bus`, root, mats.goldFoil, { height: 0.3, diameter: 0.26, tessellation: 8 });
+  for (const s of [-1, 1]) wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.13, 0, 0], to: [s * 0.72, 0, 0], width: 0.2, panels: 2, face: Z, yoke: 0.08 });
+  dish(scene, `${name}Dish`, root, mats, { at: [0, 0.17, 0], toward: [0, 1, 0.15], diameter: 0.28 });
+  nozzle(scene, `${name}Engine`, root, mats.dark, [0, -0.15, 0], [0, -1, 0], 0.06, 0.09);
+  return fuse(scene, root);
+}
+
+// OSIRIS-REx: a box, one wing each side, a great dish on top, and the arm reaching down
+// and out with the round sampler head at its end.
+function osirisRex(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  box(scene, `${name}Bus`, root, mats.goldFoil, [0.2, 0.2, 0.2]);
+  for (const s of [-1, 1]) wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.1, 0, 0], to: [s * 0.5, 0, 0], width: 0.22, panels: 1, face: Z, yoke: 0.06 });
+  dish(scene, `${name}Dish`, root, mats, { at: [0, 0.12, 0], toward: [0, 1, 0], diameter: 0.26 });
+  rod(scene, `${name}Arm`, root, mats.grey, [0, -0.02, 0.1], [0, -0.12, 0.24], 0.016, 6);
+  rod(scene, `${name}Forearm`, root, mats.grey, [0, -0.12, 0.24], [0, -0.28, 0.3], 0.014, 6);
+  drum(scene, `${name}Head`, root, mats.chrome, { height: 0.03, diameter: 0.09, tessellation: 14 }, [0, -0.3, 0.3]);
+  return fuse(scene, root);
+}
+
+// Hera: a box, a wing of three panels each side, a dish on one face, two cameras on the
+// other, and the two small satellites it carries on top.
+function hera(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  box(scene, `${name}Bus`, root, mats.goldFoil, [0.2, 0.2, 0.2]);
+  for (const s of [-1, 1]) wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.1, 0, 0], to: [s * 0.62, 0, 0], width: 0.18, panels: 3, face: Z, yoke: 0.06 });
+  dish(scene, `${name}Dish`, root, mats, { at: [0, 0.02, 0.11], toward: Z, diameter: 0.2 });
+  for (const s of [-1, 1]) drum(scene, `${name}Camera${s}`, root, mats.blackFoil, { height: 0.04, diameter: 0.04 }, [s * 0.04, 0.03, -0.12], Z);
+  for (const s of [-1, 1]) box(scene, `${name}Cube${s}`, root, mats.white, [0.06, 0.04, 0.04], [s * 0.06, 0.12, 0]);
+  nozzle(scene, `${name}Engine`, root, mats.dark, [0, -0.1, 0], [0, -1, 0], 0.04, 0.06);
+  return fuse(scene, root);
+}
+
+// TESS: a six-sided body, its four cameras standing together on top all looking one way,
+// a wing each side, a small dish below.
+function tess(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  drum(scene, `${name}Bus`, root, mats.goldFoil, { height: 0.1, diameter: 0.3, tessellation: 6 });
+  [[-0.045, -0.045], [0.045, -0.045], [-0.045, 0.045], [0.045, 0.045]].forEach(([x, z], k) => {
+    drum(scene, `${name}Camera${k}`, root, mats.blackFoil, { height: 0.22, diameter: 0.08, tessellation: 12 }, [x, 0.16, z]);
+    drum(scene, `${name}Hood${k}`, root, mats.black, { height: 0.006, diameter: 0.07, tessellation: 12 }, [x, 0.272, z]);
+  });
+  for (const s of [-1, 1]) wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.15, 0, 0], to: [s * 0.52, 0, 0], width: 0.18, panels: 1, face: Z, yoke: 0.05 });
+  dish(scene, `${name}Dish`, root, mats, { at: [0, -0.08, 0.1], toward: [0, -0.6, 1], diameter: 0.09 });
+  return fuse(scene, root);
+}
+
 export const CRAFT_BUILD = {
   voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid,
   iss, tiangong, sputnik, mro, juno, cassini, parker, roadster, newHorizons, pioneer10: pioneer,
   danuri, lro, europaClipper, lucy, pioneer11: pioneer, bepiColombo, akatsuki, mangalyaan, dawn, juice,
+  hayabusa2, soho, solarOrbiter, tianwen1, osirisRex, hera, tess,
 };
 
 // Craft that are not flown beside (one fell on Mercury, one is long silent): shown as the

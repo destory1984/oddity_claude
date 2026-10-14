@@ -311,6 +311,12 @@ export function startedLine(today, started = STARTED) {
   return days >= 1 ? `${began}\n${t`우주 탐험 오늘로 ${days.toLocaleString('ko-KR')}일째`}` : began;
 }
 
+// How many changes there have been so far, under it (the user, 2026-10-15: "change에..
+// 시작 이후로 수정한 것, 총 몇 개 써볼까"): every line of the list, up to today.
+export function changedLine(today, changes = CHANGES) {
+  return t`지금까지 바뀐 것 ${changesUntil(today, changes).length.toLocaleString('ko-KR')}가지`;
+}
+
 // '2026-10-04' → '10.4'
 export function dayLabel(day) {
   const [, month, date] = day.split('-').map(Number);

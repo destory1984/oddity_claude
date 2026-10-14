@@ -3,7 +3,7 @@
 // planets, the sounds), the help (how to fly: it had a "?" button and a sheet of its own
 // until then), what changed, a hundred lines at a time (core/changes.js), and "About"
 // (the title and why the game was made). They open on the options.
-import { changesUntil, firstLines, PAGE_LINES, dayLabel, startedLine } from '../core/changes.js';
+import { changesUntil, firstLines, PAGE_LINES, dayLabel, startedLine, changedLine } from '../core/changes.js';
 import { language } from '../core/i18n.js';
 import { saveLanguage } from './storage.js';
 
@@ -38,7 +38,8 @@ export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, 
   let newsShown = PAGE_LINES;
   function renderNews() {
     let lastDay = null;
-    $('newsStarted').textContent = startedLine(today());
+    $('newsStarted').textContent = `${startedLine(today())}
+${changedLine(today())}`;
     const { lines, more } = firstLines(changesUntil(today()), newsShown);
     $('newsMore').hidden = !more;
     $('newsList').replaceChildren(...lines.map(({ day, text, link }) => {

@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { CHANGES, changesUntil, firstLines, PAGE_LINES, dayLabel, startedLine, STARTED } from '../src/core/changes.js';
+import { CHANGES, changesUntil, firstLines, PAGE_LINES, dayLabel, startedLine, changedLine, STARTED } from '../src/core/changes.js';
 
 test('every change has a day and one short plain sentence, the newest day first', () => {
   assert.ok(CHANGES.length > 0);
@@ -48,4 +48,10 @@ test('the page tells the day the making began and how many days it has been, the
   assert.equal(startedLine('2029-06-26'), '만들기 시작한 날: 2026년 9월 30일\n우주 탐험 오늘로 1,001일째');
   // A clock set before the start tells only the day.
   assert.equal(startedLine('2026-09-01'), '만들기 시작한 날: 2026년 9월 30일');
+});
+
+test('under it, how many changes there have been up to today', () => {
+  const list = [{ day: '2026-10-02', text: 'b' }, { day: '2026-10-01', text: 'a' }, { day: '2026-09-30', text: '0' }];
+  assert.equal(changedLine('2026-10-01', list), '지금까지 바뀐 것 2가지');
+  assert.equal(changedLine('2099-01-01'), `지금까지 바뀐 것 ${CHANGES.length.toLocaleString('ko-KR')}가지`);
 });

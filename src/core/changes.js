@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-15', text: t('토성의 하얀 폭풍에 "그날로" 장면이 생겼습니다. 장면은 모두 131개입니다.') },
   { day: '2026-10-15', text: t('토성의 하얀 폭풍(2010년)과 미마스의 허셜 분화구가 이야기 장소로 생겼습니다. 수첩은 210칸입니다.') },
   { day: '2026-10-14', text: t('유튜브 쇼츠에 30초짜리 홍보 동영상이 생겼습니다. 채널 이름은 @oddity-u6s입니다.'), link: 'https://www.youtube.com/shorts/Bx5qOGBql-k' },
   { day: '2026-10-14', text: t('해왕성의 대흑점에 "그날로" 장면이 생겼습니다. 장면은 모두 130개입니다.') },

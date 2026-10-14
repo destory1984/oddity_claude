@@ -1,6 +1,7 @@
-import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, Texture, StandardMaterial, Color3, Constants } from './babylon.js';
+import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, Texture, StandardMaterial, Color3, Constants, Mesh } from './babylon.js';
 import { t } from '../core/i18n.js';
 import { CRAFT_BUILD, PROBE_BUILD } from './craftModels.js';
+import { STORM_TAIL } from '../core/moonScenes.js';
 import { LANDMARKS } from '../core/landmarkScenes.js';
 import { LANDER_TEXTS } from '../core/landerTexts.js';
 import {
@@ -1343,6 +1344,91 @@ const MOON_STAGES = {
   dokdo: dokdoPieces,
   // Shoemaker-Levy 9: four pieces of the comet (a bright head and its tail, light
   // itself), the ball of fire, and four bruises on the cloud tops.
+  // Saturn's white storm (core/moonScenes.js PLACE_STAGES.whiteSpot): a glow of lightning
+  // in the clouds, the storm's white head, the puffs of its tail, and Cassini going by
+  // with its flash, the card's picture and its words. The clouds are soft cards turned to
+  // the eye, each a heap of white lumps lit from above (balls of cloud looked like
+  // pebbles: the user, 2026-10-15, "구름이 너무 어설퍼...").
+  whiteSpot: (scene, name, mats) => {
+    const card = (tag, draw, add = false) => {
+      const texture = new DynamicTexture(`${name}${tag}Tex`, { width: 256, height: 256 }, scene, true);
+      texture.hasAlpha = true;
+      draw(texture.getContext());
+      texture.update();
+      const material = new StandardMaterial(`${name}${tag}`, scene);
+      material.disableLighting = true;
+      material.emissiveTexture = texture;
+      material.opacityTexture = texture;
+      material.diffuseColor = new Color3(0, 0, 0);
+      material.specularColor = new Color3(0, 0, 0);
+      material.backFaceCulling = false;
+      material.disableDepthWrite = true;
+      if (add) material.alphaMode = Constants.ALPHA_ADD;
+      return material;
+    };
+    // A heap of lumps: each lump bright where the Sun is (up and to the left) and going
+    // cream at its edge; then the heap's underside is shaded.
+    const heap = (lumps) => (ctx) => {
+      ctx.clearRect(0, 0, 256, 256);
+      for (const [x, y, r] of lumps) {
+        const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.35, r * 0.05, x, y, r);
+        g.addColorStop(0, 'rgba(255,255,253,1)');
+        g.addColorStop(0.55, 'rgba(250,247,238,0.97)');
+        g.addColorStop(0.82, 'rgba(232,224,206,0.7)');
+        g.addColorStop(1, 'rgba(226,216,196,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalCompositeOperation = 'source-atop';
+      const under = ctx.createLinearGradient(0, 70, 0, 230);
+      under.addColorStop(0, 'rgba(160,140,110,0)');
+      under.addColorStop(1, 'rgba(160,140,110,0.55)');
+      ctx.fillStyle = under;
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.globalCompositeOperation = 'source-over';
+    };
+    const tall = card('Tall', heap([[128, 150, 70], [88, 165, 52], [170, 160, 56], [118, 98, 56], [150, 78, 40], [98, 120, 44], [190, 190, 40], [62, 192, 38], [130, 196, 52]]));
+    const long = card('Long', heap([[60, 140, 44], [100, 128, 50], [145, 134, 46], [190, 142, 40], [120, 160, 40], [78, 165, 34], [168, 162, 36], [222, 150, 28], [30, 154, 26]]));
+    const flash = card('Bolt', (ctx) => {
+      const g = ctx.createRadialGradient(128, 128, 4, 128, 128, 128);
+      g.addColorStop(0, 'rgba(235,244,255,1)');
+      g.addColorStop(0.3, 'rgba(170,205,255,0.7)');
+      g.addColorStop(1, 'rgba(120,160,255,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 256, 256);
+    }, true);
+    const sprite = (tag, parent, material, size, [x, y, z], [w, h] = [1, 1]) => {
+      const plane = CreatePlane(`${name}${tag}`, { size }, scene);
+      plane.parent = parent;
+      plane.material = material;
+      plane.position.set(x, y, z);
+      plane.scaling.set(w, h, 1);
+      plane.billboardMode = Mesh.BILLBOARDMODE_ALL;
+      plane.isPickable = false;
+      return plane;
+    };
+    const pieces = {};
+    pieces.glow = new TransformNode(`${name}Glow`, scene);
+    sprite('GlowCard', pieces.glow, flash, 1.5, [0, 0.05, 0], [1.4, 0.8]);
+    // The head: big heaps behind, smaller ones in front and on top, a tower of cloud.
+    pieces.head = new TransformNode(`${name}Head`, scene);
+    [[0, 0.3, 0.08, 0.95, 1], [-0.22, 0.16, 0.02, 0.7, 0.9], [0.24, 0.18, 0.03, 0.72, 0.85], [0.04, 0.5, 0, 0.55, 1],
+      [-0.12, 0.08, -0.08, 0.6, 0.8], [0.14, 0.06, -0.1, 0.55, 0.8], [0.36, 0.06, -0.04, 0.5, 0.7]]
+      .forEach(([x, y, z, size, h], k) => sprite(`HeadCard${k}`, pieces.head, tall, size, [x, y, z], [1, h]));
+    for (let k = 0; k < STORM_TAIL; k++) {
+      pieces[`puff${k}`] = new TransformNode(`${name}Puff${k}`, scene);
+      sprite(`PuffCard${k}`, pieces[`puff${k}`], long, 0.56, [0, 0.1, 0], [1.2, 0.72]);
+      sprite(`PuffLow${k}`, pieces[`puff${k}`], k % 2 ? tall : long, 0.4, [0.08, 0.04, -0.05], [1.3, 0.6]);
+    }
+    pieces.flash = new TransformNode(`${name}Flash`, scene);
+    part(CreateSphere(`${name}FlashBall`, { diameter: 1, segments: 14 }, scene), pieces.flash, mats.white, [0, 0, 0]);
+    pieces.probe = CRAFT_BUILD.cassini(scene, `${name}Probe`, mats);
+    pieces.photo = printOf(scene, `${name}Photo`, 'stories/whiteSpot.jpg', 1.05);
+    pieces.bubble = sayBubble(scene, `${name}Bubble`, t('와. 폭풍이 제 꼬리를 쫓아가'));
+    return { pieces, flames: {}, lit: ['flash'] };
+  },
   levyImpact: (scene, name, mats) => {
     // Fire of its own colours, lit by nothing: white light was lost on the pale cloud
     // tops of the day side.

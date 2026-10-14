@@ -537,20 +537,6 @@ export const LANDMARKS = {
     ],
     say: t('와. 정말 여섯 모네'),
   },
-  // The card's photograph is that day's: Cassini's true-colour view of 25 February 2011,
-  // about 12 weeks after the storm began (NASA/JPL release 2011-203).
-  whiteSpot: {
-    kind: 'photo', by: 'Cassini', body: 'saturn', sayBy: 'craft', viewKm: 480, sizeKm: 50,
-    name: t('토성을 감은 하얀 폭풍을 찍다'),
-    day: t('2011년 2월 25일'),
-    lines: [
-      t('2011년 2월 25일. 카시니가 토성을 돌아봅니다. 북반구에는 석 달 전에 솟은 폭풍이 아직 붑니다.'),
-      t('2010년 12월 5일 번개의 전파로 처음 잡힌 폭풍입니다. 구름 머리가 달리며 긴 꼬리를 남깁니다.'),
-      t('찰칵. 하얀 꼬리가 토성을 한 바퀴 감아, 머리가 제 꼬리를 따라잡고 있습니다.'),
-      t('2011년 6월 머리가 제 꼬리에 부딪히고서야 폭풍은 잦아들었습니다. 토성에 30년쯤마다 오는 큰 폭풍입니다.'),
-    ],
-    say: t('와. 폭풍이 제 꼬리를 쫓아가'),
-  },
   inktomi: {
     kind: 'photo', by: 'Cassini', body: 'rhea', sayBy: 'craft',
     name: t('레아의 가장 젊은 분화구를 찍다'),

@@ -409,10 +409,85 @@ export function rocketLaunch({ core: coreTall, upper: upperTall }) {
   };
 }
 
+// Saturn's white storm (PLACE_STAGES.whiteSpot): where its head rises, how far its tail
+// is drawn to either side (past a phone's view, 1.45), the puffs of the tail, and when
+// the lightning shows.
+export const STORM_TAIL = 30;
+const STORM_ORIGIN = 0.55;
+const STORM_LEFT = -2.3;
+const STORM_RIGHT = 2.3;
+const STORM_BOLTS = [[0.8, 1], [1.9, 2.05], [2.25, 2.4], [3.2, 3.45], [4, 4.15]];
+// Where the head is: it rises at the origin (4 to 8 s), runs off to the left (9 to 15),
+// comes back in from the right (15.3 to 22, when Cassini takes it), slows as it nears
+// the tail's far end (to 28) and sinks into the band (to 31).
+function stormX(t) {
+  if (t < 9) return STORM_ORIGIN;
+  if (t < 15.3) return STORM_ORIGIN - (STORM_ORIGIN - STORM_LEFT + 0.3) * clamp((t - 9) / 6);
+  if (t < 22) return 2.6 - 1.55 * clamp((t - 15.3) / 6.7);
+  return 1.05 - 0.3 * ease(t, 22, 28);
+}
+function stormHead(t) {
+  const grow = ease(t, 4, 8) * (1 - 0.45 * ease(t, 28, 31));
+  // (It boils: a little swelling and leaning as it goes.)
+  return { x: stormX(t), y: -0.1 + 0.2 * ease(t, 4, 8), scale: Math.max(0.01, grow * (1 + 0.04 * Math.sin(t * 3))), lean: 0.05 * Math.sin(t * 1.7), shown: t >= 4 };
+}
+// When the head goes by a point of the band, so that the tail is left behind it there.
+function stormPassed(x) {
+  if (x <= STORM_ORIGIN) return 9 + (6 * (STORM_ORIGIN - x)) / (STORM_ORIGIN - STORM_LEFT + 0.3);
+  if (x >= 1.05) return 15.3 + (6.7 * (2.6 - x)) / 1.55;
+  return 22 + 6 * clamp((1.05 - x) / 0.3);
+}
+
 // Two more stages that are not on the Moon (the user, 2026-10-06: "톰보 지역도 애니메이션
 // 이벤트 넣어줘.. 탐사선이 사진 찍고, 앗. 하트네 하는 말풍선 넣어주고", "나로우주센터도
 // 애니 이벤트 넣고").
 export const PLACE_STAGES = {
+  // Saturn's white storm (the user, 2026-10-15, of the plain "photo" stage it had first:
+  // "애니가 너무 밋밋한데? 이 구성은 되게 많았잖아", then the first of three looks: "1").
+  // Lightning glows in the clouds, the storm's white head swells up out of them and runs
+  // off to the left leaving its tail; it comes back round Saturn from the right, Cassini
+  // takes its picture as the head nears the tail's far end, and in the end it runs into
+  // it. Seen from far, on 50 km to a unit, as the comet's fall on Jupiter is.
+  whiteSpot: {
+    name: t('토성을 감은 하얀 폭풍을 찍다'),
+    day: t('2010년 12월 5일'),
+    seconds: 36,
+    downAt: 22,
+    viewKm: 480,
+    sizeKm: 50,
+    sounds: [[0.8, 'brake'], [1.9, 'brake'], [3.2, 'brake'], [22, 'shutter'], [23.5, 'discovered']],
+    lines: [
+      { at: 0, text: t('2010년 12월 5일. 토성 북반구의 구름 속에서 번개가 칩니다. 지나가던 카시니가 그 전파를 먼저 잡습니다.') },
+      { at: 5, text: t('구름 밑에서 하얀 머리가 부풀어 오릅니다. 깊은 곳의 따뜻하고 축축한 공기가 한꺼번에 솟은 것입니다.') },
+      { at: 10, text: t('머리는 북위 35도를 따라 달리며 긴 꼬리를 남깁니다. 저쪽으로 사라진 머리는 토성을 한 바퀴 돌아옵니다.') },
+      { at: 17, text: t('2011년 2월 25일. 꼬리가 토성을 한 바퀴 다 감았습니다. 카시니가 찰칵, 머리가 제 꼬리를 따라잡는 모습을 찍습니다.') },
+      { at: 27, text: t('2011년 6월 머리가 제 꼬리에 부딪히고서야 폭풍은 잦아들었습니다. 토성에 30년쯤마다 오는 큰 폭풍입니다.') },
+    ],
+    stage(t) {
+      const head = stormHead(t);
+      const pieces = {};
+      for (let k = 0; k < STORM_TAIL; k++) {
+        const x = STORM_LEFT + (k * (STORM_RIGHT - STORM_LEFT)) / (STORM_TAIL - 1);
+        const grow = ease(t, stormPassed(x), stormPassed(x) + 1.2);
+        pieces[`puff${k}`] = { x, y: 0.07 + 0.025 * Math.sin(k * 1.7), scale: Math.max(0.01, grow * (0.8 + 0.2 * Math.sin(k * 2.3))), turn: k, shown: grow > 0 };
+      }
+      // Lightning: the clouds light up from inside, now and then.
+      const lit = STORM_BOLTS.some(([from, to]) => t >= from && t < to);
+      const cassini = -2.4 + 4.8 * clamp((t - 17) / 16);
+      const s = t - 22;
+      const flash = s < 0 ? 0 : s < 0.12 ? s / 0.12 : Math.max(0, 1 - (s - 0.12) / 0.5);
+      return {
+        ...pieces,
+        glow: { x: STORM_ORIGIN, y: 0.03, scale: 0.8 + 0.3 * Math.sin(t * 9), shown: lit },
+        head,
+        probe: { x: cassini, y: 1.15, scale: 0.6, shown: t >= 17 && t < 33 },
+        flash: { x: cassini + 0.1, y: 1.1, scale: Math.max(0.01, 0.5 * flash), shown: flash > 0 },
+        // The picture comes up, then goes so that the head is seen to reach the tail.
+        photo: { x: -0.75, y: 0.62, scale: Math.max(0.01, 0.85 * ease(t, 22.3, 23.3) * (1 - ease(t, 26.5, 27.3))), shown: t >= 22.3 && t < 27.3 },
+        bubble: { x: Math.min(0.9, cassini + 0.55), y: 1.6, scale: Math.max(0.01, ease(t, 23.5, 24) * (1 - ease(t, 28.5, 29))), shown: t >= 23.5 && t < 29 },
+      };
+    },
+  },
   // New Horizons goes by over Pluto's heart: it crosses the sky, a flash as it takes its
   // picture, the picture comes up (Pluto with its heart) and it says what it sees.
   tombaughRegio: {

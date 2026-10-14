@@ -984,6 +984,11 @@ ${STORY_MORE[target.id]}` : told };
     if (target && !docked && dockable(state.position, [target])) dock(target);
     // Docked with it already: its name tag shows its card again.
     else if (target && docked?.id === id && isDocked(docked)) showCraftCard(target);
+    // Met before but out of docking reach, or flying with another: a jump to it, near or
+    // far, and she docks there (the user, 2026-10-14, docked with Hubble, of Chandra's tag:
+    // "방향만 바뀌고, 도킹을 못 하는데... 도킹되게 해줘": the two are both near Earth, too
+    // near for a jump, and she turned only to look).
+    else if (target && docked?.id !== id && visited(target, progress)) teleport(id, true);
     // Too far to dock with and never met (no jump): its tag turns her to look at it, as
     // a body's does (the user, 2026-10-12, of Sputnik's arrow: "눌렀는데, 시점 이동 안 한다").
     else if (target && docked?.id !== id) facePicked();

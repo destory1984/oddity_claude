@@ -501,6 +501,18 @@ export const LANDMARKS = {
     ],
     say: t('와. 별이 터진 것 같아'),
   },
+  greatDarkSpot: {
+    kind: 'photo', by: 'Voyager 2', body: 'neptune', sayBy: 'craft', viewKm: 480, sizeKm: 50,
+    name: t('푸른 행성의 검은 점'),
+    day: t('1989년 8월 20일'),
+    lines: [
+      t('1989년 8월 20일. 12년을 날아온 보이저 2호가 해왕성으로 다가갑니다. 가장 가까이 가기 4일 20시간 전입니다.'),
+      t('거리는 아직 710만km입니다. 푸른 행성의 남반구에 검은 점 하나가 보입니다.'),
+      t('찰칵. 지구만 한 검은 폭풍입니다. 곁에는 하얀 구름 조각이 붙어 다닙니다.'),
+      t('둘레에는 시속 2,000km가 넘는 바람이 붑니다. 1994년 허블이 다시 보았을 때에는 사라지고 없었습니다.'),
+    ],
+    say: t('파란 바다에 구멍이 났나'),
+  },
   greatRedSpot: {
     kind: 'photo', by: 'Juno', body: 'jupiter', sayBy: 'craft', viewKm: 480, sizeKm: 50,
     name: t('붉은 폭풍 위를 지나다'),

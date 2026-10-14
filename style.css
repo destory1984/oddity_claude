@@ -4246,7 +4246,9 @@ footer .throttle .rangeLabels {
 
 /* In memory of Carl Sagan, a quiet line at the foot of the About sheet. */
 #aboutSagan {
-  margin:18px 0 0;
+  /* (Two empty lines under its words: the user, 2026-10-15, "칼 세이건을 기억하며.. 뒤에
+     개행 2번".) */
+  margin:18px 0 3.2em;
   text-align:center;
 }
 

@@ -4,6 +4,10 @@
 
 주소: https://destory1984.github.io/oddity_claude/
 
+홍보 동영상(유튜브 쇼츠, 30초): https://www.youtube.com/shorts/Bx5qOGBql-k
+
+동영상을 만드는 스크립트는 [build/promo](build/promo/README.md)에 있다.
+
 안드로이드 앱은 구글 플레이 스토어에서 심사 중이다. 지금은 비공개 테스트 단계이고, 2026년 10월 후반에 정식으로 올릴 예정이다. 아이폰 앱은 시간이 좀 더 걸린다. 그때까지 아이폰에서는 위 주소를 사파리로 열어 홈 화면에 추가하면 앱처럼 쓸 수 있다.
 
 2편 [Time Oddity — 시간 한량](https://github.com/destory1984/time-oddity_claude)을 만들고 있다. 같은 수첩을 들고 지난 날로 가서 그날 그 거리를 걷는 게임이다. 이 게임이 "못 가는 곳"이라면 2편은 "못 가는 때"다. 열어 보기: https://destory1984.github.io/time-oddity_claude/play/

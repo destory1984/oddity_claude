@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-14', text: t('유튜브 쇼츠에 30초짜리 홍보 동영상이 생겼습니다. 채널 이름은 @oddity-u6s입니다.') },
   { day: '2026-10-14', text: t('해왕성의 대흑점에 "그날로" 장면이 생겼습니다. 장면은 모두 130개입니다.') },
   { day: '2026-10-14', text: t('목성의 대적점에 "그날로" 장면이 생겼습니다. 장면은 모두 129개입니다.') },
   { day: '2026-10-14', text: t('토성 북극의 육각형에 "그날로" 장면이 생겼습니다. 장면은 모두 128개입니다.') },

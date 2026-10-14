@@ -142,9 +142,10 @@ const REPLAY_VIEW = { distanceKm: 48, fovDeg: 34 };
 // On the dev server alone it is the world being worked on: Mercury from 2026-10-12 (the
 // user, while its four new places were being tried: "개발 중에는 당분간 수성에서 시작"),
 // Venus from the 13th ("이제 시작점을 금성으로 가자"), Jupiter from that night ("이제
-// 목성으로"); the game as built for players
+// 목성으로"), Saturn from the 15th ("시작점을 토성으로"; 600,000 km, its rings reach
+// 136,775 km); the game as built for players
 // starts where it always did. Take the first half out when they say so.
-const START_NEAR = import.meta.env.DEV ? { id: 'jupiter', fromCentreKm: 400000 } : null;
+const START_NEAR = import.meta.env.DEV ? { id: 'saturn', fromCentreKm: 600000 } : null;
 
 // Two layouts: 'tour' is the hand-made one (planets spread round the Sun); 'today' puts
 // the planets where they really are on the day the game is opened.

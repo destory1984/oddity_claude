@@ -501,6 +501,18 @@ export const LANDMARKS = {
     ],
     say: t('와. 별이 터진 것 같아'),
   },
+  greatRedSpot: {
+    kind: 'photo', by: 'Juno', body: 'jupiter', sayBy: 'craft', viewKm: 480, sizeKm: 50,
+    name: t('붉은 폭풍 위를 지나다'),
+    day: t('2017년 7월 10일'),
+    lines: [
+      t('2017년 7월 10일. 목성을 길게 돌던 주노가 다시 목성 가까이로 내려옵니다.'),
+      t('구름 위 3,500km를 지나고 11분 33초 뒤, 39,771km를 더 날아 붉은 폭풍 바로 위에 닿습니다.'),
+      t('찰칵. 대적점 위 9,000km에서 찍었습니다. 이 폭풍을 이렇게 가까이 본 것은 처음입니다.'),
+      t('지구보다 큰 이 폭풍은 1831년부터 쉬지 않고 붑니다. 뿌리는 구름 아래로 300km 넘게 뻗어 있습니다.'),
+    ],
+    say: t('와. 지구가 쏙 들어가겠다'),
+  },
   hexagon: {
     kind: 'photo', by: 'Cassini', body: 'saturn', sayBy: 'craft', viewKm: 480, sizeKm: 50,
     name: t('토성 북극의 육각형을 찍다'),

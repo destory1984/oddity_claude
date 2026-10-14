@@ -34,7 +34,7 @@ test('aurora curtains ring both poles of Earth, Jupiter and Saturn, standing str
 
 test('lightning comes every 0.3 to 1.6 seconds as two strokes and an afterglow', () => {
   assert.equal(lightningGap(() => 0), LIGHTNING_GAP_S[0]);
-  assert.deepEqual(STORMS.map((s) => s.body), ['jupiter', 'earth', 'venus']);
+  assert.deepEqual(STORMS.map((s) => s.body), ['jupiter', 'earth', 'venus', 'saturn']);
   assert.equal(lightningGap(() => 0, STORMS[1]), 0.5);
   assert.ok(STORMS[1].sizeKm[1] < STORMS[0].sizeKm[0], 'storms on Earth are far smaller');
   near(lightningGap(() => 1), LIGHTNING_GAP_S[1]);

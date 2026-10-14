@@ -790,7 +790,11 @@ export function createGlows(scene, bodies) {
           const toSun = sunFrom(world);
           const spot = meteorSpot(Math.random, [toSun.x, toSun.y, toSun.z], out.map((n) => n / distance));
           set.wait = lightningGap(Math.random, storm);
-          if (spot) {
+          // A storm kept to one band (Saturn's storm alley): a spot outside it is let go
+          // and another tried soon.
+          const inBand = !spot || storm.latDeg === undefined || Math.abs(Math.asin(Math.max(-1, Math.min(1, spot.up[1]))) - (storm.latDeg * Math.PI) / 180) < 0.07;
+          if (!inBand) set.wait = 0.05;
+          if (spot && inBand) {
             strike(spot.up);
             lit = storm.id;
             // A storm flashes several times: one to three more strokes close by, within

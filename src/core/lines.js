@@ -153,6 +153,8 @@ export const SIGHTS = {
   'pearl:earth': t('구름이 자개처럼 반짝여.'),
   'pulse:earth': t('초록 불이 깜박깜박해.'),
   'hexagon:saturn': t('구름이 육각형이야. 누가 그렸지?'),
+  'vortex:saturn': t('남극엔 태풍 눈이 있네.'),
+  'lightning:saturn': t('토성 밤에도 번쩍했어.'),
   'backlit:saturn': t('고리가 뒤에서 빛나. 예쁘다.'),
   'haze:titan': t('주황 반지를 꼈네.'),
   'haze:pluto': t('파란 테두리가 생겼어.'),

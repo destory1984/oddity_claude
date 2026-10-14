@@ -210,6 +210,10 @@ export const STORMS = [
   // Venus: still argued over. Probes have heard the radio crackle of it for decades and
   // Akatsuki caught one flash of light in 2020. Drawn seldom.
   { id: 'lightning:venus', body: 'venus', rangeKm: 80000, gapS: [3, 7], sizeKm: [500, 1100], liftKm: 70, spread: 0.05 },
+  // Saturn (the user, 2026-10-15, "모두 넣어"): its thunderstorms keep to the band at 35 S
+  // that Cassini's team called storm alley (the "Dragon Storm" of 2004, whose radio
+  // crackle Cassini heard; in 2009 it saw the flashes). Strokes fall only there (latDeg).
+  { id: 'lightning:saturn', body: 'saturn', rangeKm: 150000, gapS: [1.2, 3.5], sizeKm: [2500, 5000], liftKm: 150, spread: 0.03, latDeg: -35 },
 ];
 // Lightning in Earth's typhoon (the swirl clouds.frag draws on the cloud map at this
 // latitude and longitude): on the night side the storm cannot be seen, so its own
@@ -329,7 +333,7 @@ export function plumeUp(plume, spinRad) {
 // flashes are told when one lights.) Several may be in reach at once (near Jupiter: its
 // aurora and Io's footprint); the game tells them one at a time.
 // (Saturn is looked at from nine radii off, to take in its rings: the spokes are told from there.)
-export const TELL_RADII = { cyclones: 4, aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, backlit: 12, haze: 8, shine: 4, rings: 6, geyser: 3, ashen: 4, horizon: 4, ering: 40, flare: 3, flow: 5, tracks: 0.2, rain: 4, lava: 4, devils: 0.25, methane: 4, hood: 5, thread: 10, typhoon: 2.5, boats: 1.5, ash: 1.5, street: 1, shiptracks: 1, honeycomb: 1, anvils: 2, glory: 2, dawn: 0.3, pair: 6 };
+export const TELL_RADII = { cyclones: 4, aurora: 3, plume: 12, sheet: 2, footprint: 2.5, tail: 40, spot: 5, spokes: 9, airglow: 1.5, hexagon: 6, vortex: 6, backlit: 12, haze: 8, shine: 4, rings: 6, geyser: 3, ashen: 4, horizon: 4, ering: 40, flare: 3, flow: 5, tracks: 0.2, rain: 4, lava: 4, devils: 0.25, methane: 4, hood: 5, thread: 10, typhoon: 2.5, boats: 1.5, ash: 1.5, street: 1, shiptracks: 1, honeycomb: 1, anvils: 2, glory: 2, dawn: 0.3, pair: 6 };
 // A comet's tail is told from within this far of its nucleus, while it is within this
 // many AU of the Sun (farther out it has no tail to speak of).
 export const TELL_TAIL_KM = 300000;
@@ -431,6 +435,8 @@ export function glowsNear(bodies, position, elapsedS = null) {
   // Saturn's hexagon, from over its north pole (the globe's pole is +y).
   const saturn = bodies.find((b) => b.id === 'saturn');
   if (saturn && near('saturn', TELL_RADII.hexagon) && side('saturn', saturn.position.map((n, i) => n + (i === 1 ? 1 : 0))) > 0.5) found.push('hexagon:saturn');
+  // The storm with an eye on its south pole, from over that pole.
+  if (saturn && near('saturn', TELL_RADII.vortex) && side('saturn', saturn.position.map((n, i) => n - (i === 1 ? 1 : 0))) > 0.5) found.push('vortex:saturn');
   // Seen from behind, with the Sun beyond: the rings against the light, and the haze of
   // Titan, of Pluto, the blue dusk of Mars and the ring of light round Venus.
   if (behind('saturn', TELL_RADII.backlit)) found.push('backlit:saturn');

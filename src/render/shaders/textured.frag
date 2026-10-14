@@ -272,6 +272,7 @@ void main(){
     vec2 fromScooter = vec2((fract(vUV.x - storm.x - .08 + time * .0006 + .5) - .5) * 2., vUV.y - storm.y - .11);
     col = mix(col, vec3(.92, .95, 1.), (1. - smoothstep(.2, 1., length(fromScooter / vec2(.02, .008)))) * .7);
   }
+  float poleLight = 0.;
   if (hexagon > 0. && lp.y > .9) {
     // A hexagon 12 degrees out from the pole (latitude 78), darker and bluer inside,
     // with a dark rim and the eye of the polar storm in the middle.
@@ -283,9 +284,21 @@ void main(){
     col *= 1. - .4 * exp(-pow((polar - side) / .012, 2.)) * hexagon;
     col *= 1. - .55 * exp(-pow(polar / .035, 2.)) * hexagon;
   }
+  if (hexagon > 0. && lp.y < -.9) {
+    // The storm on the south pole (Cassini, 2006): a dark eye 8,000 km across, its wall
+    // of cloud standing bright round it, and bands of cloud wound in round it.
+    float polar = acos(clamp(-lp.y, -1., 1.));
+    float a = atan(lp.z, lp.x);
+    float eye = 1. - smoothstep(.05, .072, polar);
+    col = mix(col, col * vec3(.55, .5, .48), eye * hexagon);
+    col = mix(col, min(col * 1.3 + .06, vec3(1.)), exp(-pow((polar - .078) / .012, 2.)) * .7 * hexagon);
+    float arms = smoothstep(.085, .11, polar) * (1. - smoothstep(.17, .26, polar));
+    col *= 1. - .2 * arms * (.5 + .5 * sin(a * 3. + polar * 70.)) * hexagon;
+    // (Along the edge of day, as Jupiter's poles: a little light of its own.)
+    poleLight = (1. - smoothstep(.2, .32, polar)) * hexagon;
+  }
   // (The poles lie along the edge of day: the cap keeps a little light of its own there,
   // or nothing of it would show.)
-  float poleLight = 0.;
   if (cyclones.x > 0. && abs(lp.y) > .7) {
     float north = step(0., lp.y);
     float count = mix(5., 8., north);

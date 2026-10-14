@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-15', text: t('토성 남극에 태풍의 눈이, 밤 쪽 남위 35도에 번개가 보입니다.') },
   { day: '2026-10-15', text: t('엔셀라두스의 물기둥이 곧은 빛줄기 대신 부드럽게 흩어지는 분출로 보입니다.') },
   { day: '2026-10-15', text: t('하얀 폭풍의 "그날로" 장면을 새로 지었습니다. 번개, 솟는 머리, 토성을 감는 꼬리가 보입니다.') },
   { day: '2026-10-15', text: t('토성의 하얀 폭풍에 "그날로" 장면이 생겼습니다. 장면은 모두 131개입니다.') },

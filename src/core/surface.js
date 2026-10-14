@@ -19,6 +19,7 @@ export const SPIN_DAY_S = {
   callisto: 1441931,
   saturn: 38362,
   enceladus: 1.370218 * 86400,
+  rhea: 4.518212 * 86400,
   neptune: 57996,
   ceres: 9.074 * 3600,
   pluto: -6.387 * 86400,

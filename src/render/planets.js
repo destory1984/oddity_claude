@@ -150,7 +150,7 @@ const LOOKS = {
   },
   rhea: {
     shader: 'textured', map: 'rhea.jpg', saturation: 0.3, tint: [1, 1, 1], base: [0.75, 0.75, 0.76],
-    mapWeight: 1, haze: 0, detail: 0.1, dayS: 4.518212 * 86400,
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: SPIN_DAY_S.rhea,
   },
   iapetus: {
     shader: 'textured', map: 'iapetus.jpg', saturation: 0.4, tint: [1, 1, 1], base: [0.6, 0.58, 0.55],

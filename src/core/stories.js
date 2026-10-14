@@ -415,6 +415,16 @@ STORIES.push({
   hint: t`${t('가니메데')}(${where(-38, -166.3)}) ${(300).toLocaleString('ko-KR')}km 안에 내려앉기`,
   text: t('가니메데에서 가장 큰 빛줄기 분화구입니다. 하얀 빛줄기가 사방으로 뻗어 있습니다. 2020년에는 가니메데 전체에 남은 훨씬 더 큰 충돌의 흔적이 밝혀졌습니다.'),
 });
+// Inktomi, the youngest large crater on Rhea, nicknamed "the Splat" for its rays (the
+// user, 2026-10-14: "토성가자", then Kevin Gill's colour picture). Its place by the USGS
+// names (14.1 S, 112.1 W = 247.9 E); Rhea's map is centred on longitude 180, as Pluto's
+// and Ceres's are, so 180 is taken off (the crater sits at u = 0.689 of rhea.jpg).
+STORIES.push({
+  id: 'inktomi', name: t('레아의 잉크토미 분화구'), nameEn: 'Inktomi', year: 2007, type: 'surface', body: 'rhea',
+  latDeg: -14.1, lonDeg: 67.9, withinKm: 150, landmark: true,
+  hint: t`${t('레아')}(${where(-14.1, -112.1)}) ${(150).toLocaleString('ko-KR')}km 안에 내려앉기`,
+  text: t('레아의 큰 지형 가운데 가장 젊은 분화구입니다. 하얀 빛줄기가 나비 날개처럼 퍼져 있습니다. 2007년 8월 카시니가 가까이 지나며 찍었습니다.'),
+});
 named(STORIES);
 
 // A place's label shows only from within this many of its body's radii above the

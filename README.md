@@ -8,7 +8,7 @@
 - 아이폰: 앱은 시간이 좀 더 걸린다. 그때까지는 위 주소를 사파리로 열어 홈 화면에 추가하면 앱처럼 쓸 수 있다.
 - 홍보 동영상(유튜브 쇼츠, 30초): https://www.youtube.com/shorts/Bx5qOGBql-k
 
-<a href="https://www.youtube.com/shorts/Bx5qOGBql-k"><img src="https://i.ytimg.com/vi/Bx5qOGBql-k/oardefault.jpg" width="220" alt="홍보 동영상의 표지. 오로라 위를 나는 소라와 '오로라 위를 날고'라는 자막. 누르면 유튜브에서 열린다"></a>
+<a href="https://www.youtube.com/shorts/Bx5qOGBql-k"><img src="docs/promo-cover.jpg" width="220" alt="홍보 동영상의 마지막 장면. 소라 그림 아래에 Space Oddity, 할머니의 수첩, 본격 우주멍 힐링 비행 게임, 구글 플레이에서 찾아보세요. 누르면 유튜브에서 열린다"></a>
 
 2편 [Time Oddity — 시간 한량](https://github.com/destory1984/time-oddity_claude)을 만들고 있다. 같은 수첩을 들고 지난 날로 가서 그날 그 거리를 걷는 게임이다. 이 게임이 "못 가는 곳"이라면 2편은 "못 가는 때"다.
 

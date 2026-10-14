@@ -338,9 +338,13 @@ export function createGlows(scene, bodies) {
       ? { low: [0.1, 0.09, 0.09], high: [0.1, 0.09, 0.09], ripple: 0, nightOnly: false, dark: true }
       : dusty
         ? { low: [0.95, 0.72, 0.5], high: [0.8, 0.6, 0.42], ripple: 0, nightOnly: false }
-        : { low: ice ? [0.8, 0.9, 1] : [0.75, 0.8, 1], high: ice ? [0.5, 0.7, 1] : [0.45, 0.55, 0.9], ripple: 0, nightOnly: false });
-    material.setFloat('strength', plume.dark ? 0.6 : dusty ? 0.45 : ice ? 0.13 : 0.4);
-    const mesh = band(scene, `plume_${plume.id}`, (plume.widthKm * 0.04) / KM_PER_UNIT, (plume.widthKm / 2) / KM_PER_UNIT, 24);
+        : { low: ice ? [0.8, 0.9, 1] : [0.75, 0.8, 1], high: ice ? [0.5, 0.7, 1] : [0.45, 0.55, 0.9], ripple: 0, nightOnly: false, soft: ice });
+    // (Enceladus's jets are drawn as soft fans, wider at the top, on more sides (veil.frag
+    // soft 2): as even walls on 24 sides they crossed the sky as hard-edged beams, the
+    // user, 2026-10-15: "엔셀라두스 꼬리가 너무 ... 각졌는데?")
+    material.setFloat('strength', plume.dark ? 0.6 : dusty ? 0.45 : ice ? 0.3 : 0.4);
+    if (ice) material.setFloat('soft', 2);
+    const mesh = band(scene, `plume_${plume.id}`, (plume.widthKm * 0.04) / KM_PER_UNIT, (plume.widthKm * (ice ? 0.8 : 0.5)) / KM_PER_UNIT, ice ? 72 : 24);
     mesh.material = material;
     mesh.scaling.y = plume.heightKm / KM_PER_UNIT;
     return { plume, mesh, material };

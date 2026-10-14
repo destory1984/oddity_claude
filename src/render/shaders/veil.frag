@@ -173,6 +173,18 @@ void main(){
     gl_FragColor = vec4(mix(colorLow, colorHigh, h) * sunlit * (.85 + .15 * wound), clamp(dust * strength, 0., 1.));
     return;
   }
+  // Enceladus's jets (soft 2): a soft fan, brightest just over the ground and thinning
+  // out slowly upward, with the finer jets showing as faint streaks in it; nothing of
+  // it ends in a line, at its sides, its foot or its top. (Drawn as the cone's even
+  // wall, five of them stood out of the south pole as hard-edged beams of a searchlight.)
+  if (soft > 1.5) {
+    float u = a / 6.2831853 + .5;
+    float jets = .6 + .4 * ringNoise(u * 40. + h * 3., 40.);
+    float body = pow(smoothstep(0., 1., vFace), 2.2);
+    float rise = smoothstep(0., .1, h) * pow(1. - h, 2.4) * (1. + 1.6 * exp(-h * 7.));
+    gl_FragColor = vec4(mix(colorLow, colorHigh, h) * rise * body * jets * night * strength, 1.);
+    return;
+  }
   float stream = mix(1., smoothstep(0., .75, vFace), soft);
   gl_FragColor = vec4(mix(mix(colorLow, colorHigh, tint), vec3(1., .16, .2), red) * fade * wave * night * strength * stream, 1.);
 }

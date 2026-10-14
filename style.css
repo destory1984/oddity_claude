@@ -5305,6 +5305,7 @@ html.gaze #gazeButton {
 #hud #targetPanel #targetName #homeButton,
 #hud #targetPanel #targetName #vistaButton,
 #hud #targetPanel #targetName #auroraButton,
+#hud #targetPanel #targetName #poleButton,
 #hud #targetPanel #targetName #thenKey,
 #hud #targetPanel #targetName #dockKey {
   display:inline-flex;
@@ -5368,15 +5369,15 @@ html.gaze #gazeButton {
 /* The keys of the moment (the day of this place, letting go of a craft: ui/hud.js) come
    after those, so any of the five may be first or last: the first key on the plate is
    pushed to the right end, the rest follow it, the last reaches 4px into the padding. */
-#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #thenKey, #dockKey) {
+#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #poleButton, #thenKey, #dockKey) {
   margin:0;
 }
 
-#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #thenKey, #dockKey):first-of-type {
+#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #poleButton, #thenKey, #dockKey):first-of-type {
   margin-left:auto;
 }
 
-#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #thenKey, #dockKey):last-of-type {
+#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #poleButton, #thenKey, #dockKey):last-of-type {
   margin-right:-4px;
 }
 

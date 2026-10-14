@@ -30,7 +30,7 @@ function fitName() {
   plate.style.width = `${count * step - (step - key)}px`;
 }
 
-export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome, onAurora, onVista, vistas = [], auroras = ['earth'], skyLabels = [] }) {
+export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome, onAurora, onVista, onPole, vistas = [], auroras = ['earth'], poles = [], skyLabels = [] }) {
   // A press on the name itself (not on a key at its end, which keeps the press to itself).
   $('targetName').addEventListener('click', () => onName?.());
   // The way home (core/home.js): a key that stands at the end of the name plate while
@@ -49,6 +49,14 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
   auroraKey.addEventListener('click', (event) => {
     event.stopPropagation();
     onAurora?.();
+  });
+  // Jupiter's plate has one more, after those: over its north pole (core/home.js POLES).
+  const poleKey = $('poleButton');
+  poleKey.hidden = false;
+  poleKey.remove();
+  poleKey.addEventListener('click', (event) => {
+    event.stopPropagation();
+    onPole?.();
   });
   // The worlds that have one best view (core/vista.js) show one key for it.
   const vistaKey = $('vistaButton');
@@ -187,6 +195,7 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
       else if (auroras.includes(body.id) && vistas.includes(body.id)) $('targetName').append(auroraKey, vistaKey);
       else if (vistas.includes(body.id)) $('targetName').append(vistaKey);
       else if (auroras.includes(body.id)) $('targetName').append(auroraKey);
+      if (poles.includes(body.id)) $('targetName').append(poleKey);
       // (The keys of the moment went out with the old name: the next frame puts them back.)
       plateNow = { undock: false, then: null };
       fitName();

@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { HOME, HOME_NEAR_S, HOME_ROUND_S, AURORA_VIEW, meteorSpot, auroraSpot, homeSpot, startHome, homeStep, homeArrived, slerp } from '../src/core/home.js';
+import { HOME, HOME_NEAR_S, HOME_ROUND_S, AURORA_VIEW, meteorSpot, auroraSpot, poleSpot, POLES, homeSpot, startHome, homeStep, homeArrived, slerp } from '../src/core/home.js';
 import { forward, up } from '../src/core/orientation.js';
 
 const earth = { id: 'earth', position: [1000, 2000, 3000], radiusKm: 6371 };
@@ -109,4 +109,17 @@ test('every ring of light has a place in it: at its latitude, low in its curtain
     assert.ok(view.position[0] < 0);
     assert.ok(view.up.reduce((sum, n, i) => sum + n * view.position[i], 0) > 0.7);
   }
+});
+
+test('over Jupiter\'s north pole: 2.6 radii up, half a radius toward the Sun, looking down at it', () => {
+  const jupiter = { id: 'jupiter', position: [500000, 0, 0], radiusKm: 69911 };
+  const spot = poleSpot(jupiter, [0, 0, 0]);
+  const out = spot.position.map((n, i) => (n - jupiter.position[i]) / jupiter.radiusKm);
+  assert.ok(Math.abs(out[1] - 2.6) < 1e-9 && Math.abs(out[0] + 0.5) < 1e-9 && Math.abs(out[2]) < 1e-9);
+  const ahead = forward(spot.facing);
+  const down = out.map((n) => -n / Math.hypot(...out));
+  assert.ok(ahead.every((n, i) => Math.abs(n - down[i]) < 1e-6));
+  // The Sun's side is the top of the view.
+  assert.ok(up(spot.facing)[0] < -0.9);
+  assert.deepEqual(POLES, ['jupiter']);
 });

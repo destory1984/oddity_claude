@@ -145,6 +145,21 @@ export function meteorSpot(body, sun) {
   const { position, orientation } = fromSpot(METEOR_VIEW, body, sun);
   return { position, up: unit(sub(position, body.position)), facing: orientation };
 }
+// The worlds whose plate has a key to stand over the north pole: Jupiter's ring of
+// cyclones (the user, 2026-10-14, shown it from there on the Jupiter tour: "그래.. 버튼
+// 하나 더"; the best view stays over the red spot).
+export const POLES = ['jupiter'];
+// Over the north pole, POLE_RADII from the middle, moved POLE_SUNWARD radii toward the
+// Sun so that the lit half fills the view, with the Sun's side at the top. (The pole is
+// the world's +y: core/glows.js tells the cyclones by it.)
+const POLE_RADII = 2.6;
+const POLE_SUNWARD = 0.5;
+export function poleSpot(body, sunPosition) {
+  const toSun = sub(sunPosition, body.position);
+  const sunward = unit([toSun[0], 0, toSun[2]]);
+  const position = body.position.map((n, i) => n + body.radiusKm * ([0, POLE_RADII, 0][i] + POLE_SUNWARD * sunward[i]));
+  return { position, up: unit(sub(position, body.position)), facing: orientationFrom(sub(body.position, position), sunward) };
+}
 // Jupiter's: where the user stood and said "목성의 코로나 위치는 여기로 해" (2026-10-08;
 // the aurora was meant): on the night side at 70.5 degrees north, 4,376 km over the
 // clouds, the curtain standing to her left and the stars before her.

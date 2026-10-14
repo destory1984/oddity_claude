@@ -83,7 +83,7 @@ import { replayFor, replayFrame, replaySounds, replayOn, replayBeside, replayAt 
 import { EXO_STAR, EXO_PLANETS, EXO_IDS, exoBodiesAt, inExo, exoArrival, recordExo, exoNote } from './core/exo.js';
 import { createInspectInfo } from './ui/inspectInfo.js';
 import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRound } from './core/visit.js';
-import { HOME, homeSpot, auroraSpot, AURORA_VIEWS, meteorSpot, startHome, homeStep, homeArrived } from './core/home.js';
+import { HOME, homeSpot, auroraSpot, AURORA_VIEWS, meteorSpot, poleSpot, POLES, startHome, homeStep, homeArrived } from './core/home.js';
 import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
@@ -1191,11 +1191,13 @@ ${STORY_MORE[target.id]}` : told };
   const VISTA_FREE_TOLD = { pluto: t('명왕성의 낮 쪽입니다. 하트는 지금 밤 쪽에 있습니다.'), neptune: t('대흑점은 지금 밤 쪽에 있습니다. 트리톤 지평선 위로 해왕성이 보이는 자리입니다.') };
   function goHome(kind) {
     if (photo.active() || warp.busy() || paused || (docked && !isDocked(docked)) || (visit && !hasArrived(visit))) return;
-    const bodyId = kind === 'vista' || (kind === 'aurora' && AURORA_VIEWS[selectedId]) ? selectedId : HOME.body;
+    const bodyId = kind === 'vista' || kind === 'pole' || (kind === 'aurora' && AURORA_VIEWS[selectedId]) ? selectedId : HOME.body;
     if (kind === 'vista' && !VISTAS.includes(bodyId)) return;
+    if (kind === 'pole' && !POLES.includes(bodyId)) return;
     const spot = kind === 'home' ? () => homeSpot(here(bodyId), simTime)
       : kind === 'aurora' ? () => auroraSpot(here(bodyId), here('sun').position, AURORA_VIEWS[bodyId])
       : kind === 'meteors' ? () => meteorSpot(here(bodyId), here('sun'))
+      : kind === 'pole' ? () => poleSpot(here(bodyId), here('sun').position)
         : () => vistaSpot(bodyId, { body: here(bodyId), sun: here('sun'), earth: here('earth'), timeS: simTime, elapsedS: world.elapsed(), ringNormal: world.ringNormal(bodyId), of: here });
     if (docked) undock();
     visit = null;
@@ -1205,7 +1207,7 @@ ${STORY_MORE[target.id]}` : told };
       kind, bodyId, spot,
       // (free: a view that is not over a place of the ground this time: Pluto's by night.)
       hold: kind === 'home' || (kind === 'vista' && VISTA_HELD.includes(bodyId) && !first.free),
-      told: kind === 'home' ? t('한국이 내려다보이는 자리입니다. 움직이면 풀려납니다.') : kind === 'aurora' ? t('오로라 속입니다. 빛줄기 뒤로 별이 보입니다.') : kind === 'meteors' ? t('지구의 밤 쪽 한가운데입니다. 유성우는 1분에 한 번 내립니다.') : first.free ? VISTA_FREE_TOLD[bodyId] : VISTA_TOLD[bodyId],
+      told: kind === 'home' ? t('한국이 내려다보이는 자리입니다. 움직이면 풀려납니다.') : kind === 'aurora' ? t('오로라 속입니다. 빛줄기 뒤로 별이 보입니다.') : kind === 'meteors' ? t('지구의 밤 쪽 한가운데입니다. 유성우는 1분에 한 번 내립니다.') : kind === 'pole' ? t('목성 북극 위입니다. 달 모양 단추로 소라를 숨기면 소용돌이가 잘 보입니다.') : first.free ? VISTA_FREE_TOLD[bodyId] : VISTA_TOLD[bodyId],
     };
     input.clear();
   }
@@ -1236,6 +1238,11 @@ ${STORY_MORE[target.id]}` : told };
     onVista() {
       goHome('vista');
     },
+    // Jupiter's last key: over its north pole, the ring of cyclones below.
+    onPole() {
+      goHome('pole');
+    },
+    poles: POLES,
     vistas: VISTAS,
     auroras: Object.keys(AURORA_VIEWS),
     onInspect() {

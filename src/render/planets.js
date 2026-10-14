@@ -134,7 +134,7 @@ const LOOKS = {
   deimos: { shader: 'rocky', colorA: [0.24, 0.22, 0.2], colorB: [0.48, 0.44, 0.4], cap: 0, haze: 0, contrast: 0.4, craters: 0.8, dayS: 1.263 * 86400 },
   mimas: {
     shader: 'textured', map: 'mimas.jpg', saturation: 0.3, tint: [1, 1, 1], base: [0.75, 0.75, 0.76],
-    mapWeight: 1, haze: 0, detail: 0.1, dayS: 0.942422 * 86400,
+    mapWeight: 1, haze: 0, detail: 0.1, dayS: SPIN_DAY_S.mimas,
   },
   enceladus: {
     shader: 'textured', map: 'enceladus.jpg', saturation: 0.25, tint: [1.04, 1.04, 1.07], base: [0.9, 0.92, 0.95],

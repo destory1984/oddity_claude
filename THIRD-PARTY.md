@@ -180,6 +180,8 @@ CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수
 | `wenchang.jpg` | 이 게임을 위해 그린 그림 (2026-10-07) | 이 저장소 | 권리 보유 (LICENSE) |
 | `greatRedSpot.jpg` | [PIA21775.jpg](https://commons.wikimedia.org/wiki/File:PIA21775.jpg) | NASA/JPL-Caltech/SwRI/MSSS/Björn Jónsson | Public domain |
 | `inktomi.jpg` | [Inktomi Crater, Rhea - August 30 2007 (54203072443).png](https://commons.wikimedia.org/wiki/File:Inktomi_Crater,_Rhea_-_August_30_2007_(54203072443).png) | NASA/JPL-Caltech/SSI/CICLOPS, processed by Kevin M. Gill | CC BY 2.0 |
+| `whiteSpot.jpg` | [Saturn Storm.jpg](https://commons.wikimedia.org/wiki/File:Saturn_Storm.jpg) | NASA/JPL-Caltech/SSI | Public domain |
+| `herschel.jpg` | [Mimas Cassini.jpg](https://commons.wikimedia.org/wiki/File:Mimas_Cassini.jpg) | NASA/JPL-Caltech/SSI (PIA12570) | Public domain |
 | `osiris.jpg` | [Osiris Crater Ganymede.png](https://commons.wikimedia.org/wiki/File:Osiris_Crater_Ganymede.png) | NASA/JPL, processed by Björn Jónsson | CC BY 3.0 |
 | `galileoProbe.jpg` | [Galileo Jupiter Atmospheric Probe in a spacecraft processing room (AC84-0228-3).jpg](https://commons.wikimedia.org/wiki/File:Galileo_Jupiter_Atmospheric_Probe_in_a_spacecraft_processing_room_(AC84-0228-3).jpg) | NASA | Public domain |
 | `valhalla.jpg` | [Voyager 1 Image of Valhalla Crater.jpg](https://commons.wikimedia.org/wiki/File:Voyager_1_Image_of_Valhalla_Crater.jpg) | NASA (Voyager 1) | Public domain |

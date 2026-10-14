@@ -15,7 +15,7 @@ test('every story place has a longer telling of three sentences or more', () => 
   }
 });
 
-test('all 117 have a picture on file, with a caption and a credit (109 photographs and eight drawings made for the game)', () => {
+test('all 119 have a picture on file, with a caption and a credit (111 photographs and eight drawings made for the game)', () => {
   const without = STORIES.filter((s) => !STORY_DETAILS[s.id].photo).map((s) => s.id);
   assert.deepEqual(without, []);
   assert.equal(storyPhotoFile('wadiRum'), 'stories/wadiRum.jpg');
@@ -35,7 +35,7 @@ test('all 117 have a picture on file, with a caption and a credit (109 photograp
     // Where it came from and its licence are written down.
     assert.ok(credits.includes(`| \`${story.id}.jpg\` |`), `${story.id} is not in THIRD-PARTY.md`);
   }
-  assert.equal(readdirSync('public/assets/stories').length, 117);
+  assert.equal(readdirSync('public/assets/stories').length, 119);
   // (4 MB until the four of Mercury came, 2026-10-12; 4.2 MB until the two of Venus,
   // 2026-10-13; 4.3 MB until the three round Jupiter, 2026-10-14; 4.45 MB until Osiris, the
   // same day; 4.55 MB until Inktomi, the same day: 117 pictures, 39 KB each on average.)

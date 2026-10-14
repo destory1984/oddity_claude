@@ -18,6 +18,7 @@ export const SPIN_DAY_S = {
   ganymede: 618153,
   callisto: 1441931,
   saturn: 38362,
+  mimas: 0.942422 * 86400,
   enceladus: 1.370218 * 86400,
   rhea: 4.518212 * 86400,
   neptune: 57996,

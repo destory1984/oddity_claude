@@ -191,6 +191,7 @@ const CLOUD_HINTS = {
   galileoProbe: t('목성 적도 조금 위(북위 6.5도) 구름 꼭대기의 돌입 자리 20,000km 안에 닿기'),
   greatDarkSpot: t('해왕성 남반구 구름 꼭대기의 검은 점 10,000km 안에 닿기'),
   greatRedSpot: t('목성 남반구(남위 21도) 구름 꼭대기의 붉은 폭풍 20,000km 안에 닿기'),
+  whiteSpot: t('토성 북반구(북위 35도) 구름 꼭대기의 하얀 폭풍 15,000km 안에 닿기'),
 };
 const FAR_PLACES = [
   ['pele', t('이오의 펠레 화산'), 'Pele', 1979, 'io', t('이오'), -18.7, 104.7, 104.7, 300, true,
@@ -424,6 +425,24 @@ STORIES.push({
   latDeg: -14.1, lonDeg: 67.9, withinKm: 150, landmark: true,
   hint: t`${t('레아')}(${where(-14.1, -112.1)}) ${(150).toLocaleString('ko-KR')}km 안에 내려앉기`,
   text: t('레아의 큰 지형 가운데 가장 젊은 분화구입니다. 하얀 빛줄기가 나비 날개처럼 퍼져 있습니다. 2007년 8월 카시니가 가까이 지나며 찍었습니다.'),
+});
+// Saturn's Great White Spot of 2010-11 (the user, 2026-10-15: "1,2 하자", the storm and
+// Herschel). The storm's head stood near 35 N; its tail went all the way round, so any
+// longitude is the storm's: 120 keeps the tag clear of the hexagon's.
+STORIES.push({
+  id: 'whiteSpot', name: t('토성의 하얀 폭풍'), nameEn: 'Great White Spot', year: 2010, type: 'surface', body: 'saturn',
+  latDeg: 35, lonDeg: 120, withinKm: 15000, landmark: true,
+  hint: CLOUD_HINTS.whiteSpot,
+  text: t('2010년 12월 토성 북반구에 하얀 폭풍이 솟았습니다. 두 달 만에 꼬리가 토성을 한 바퀴 휘감았습니다. 카시니가 처음부터 끝까지 지켜본 가장 큰 폭풍입니다.'),
+});
+// Herschel on Mimas, the crater that makes the moon look like the Death Star. Its place
+// by the USGS names (1.4 S, 111.8 W = 248.2 E); Mimas's map is centred on longitude 180
+// as Rhea's is, so 180 is taken off (the central peak sits at u = 0.689 of mimas.jpg).
+STORIES.push({
+  id: 'herschel', name: t('미마스의 허셜 분화구'), nameEn: 'Herschel', year: 2010, type: 'surface', body: 'mimas',
+  latDeg: -1.4, lonDeg: 68.2, withinKm: 100, landmark: true,
+  hint: t`${t('미마스')}(${where(-1.4, -111.8)}) ${(100).toLocaleString('ko-KR')}km 안에 내려앉기`,
+  text: t('미마스 지름의 3분의 1이 넘는 분화구입니다. 이 구덩이 때문에 미마스는 스타워즈의 "죽음의 별"을 닮았습니다. 2010년 카시니가 가까이 찍었습니다.'),
 });
 named(STORIES);
 

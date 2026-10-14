@@ -2164,7 +2164,7 @@ ${STORY_MORE[target.id]}` : told };
     const goal = guideGoal(guide, touch);
     // (Its count stands in two rows and its key is the short word: beside the map a
     // phone has 254px for the line, and with more the last word of a step was cut off.)
-    return { ...goal, count: t`2단계 ${goal.count}`, stacked: true, quit: true };
+    return { ...goal, count: t`달까지 가기 ${goal.count}`, stacked: true, quit: true };
   };
   const goalNow = () => (guide.step !== null ? moonGoal() : stunt ? stuntGoal() : tourGoal());
   guideView.show(goalNow());
@@ -2260,7 +2260,7 @@ ${STORY_MORE[target.id]}` : told };
       return;
     }
     practiceKept = savePractice({ ...practiceKept, moon: true });
-    toast.show(t('비행 연습 2단계: 이번에는 진짜 우주에서 달까지 가 봅니다.'));
+    toast.show(t('빈 우주 연습 끝. 이번에는 진짜 우주에서 달까지 가 봅니다.'));
     guideView.show(goalNow());
   }
   const practiceView = createPracticeView({
@@ -2431,7 +2431,7 @@ ${STORY_MORE[target.id]}` : told };
     const passed = !wrong && performance.now() - (practice.passAt ?? -Infinity) < PASS_MS;
     document.body.classList.toggle('practiceWrong', wrong);
     document.body.classList.toggle('practicePass', passed);
-    guideView.show({ ...goal, count: t`1단계 ${goal.count}`, ...(wrong ? { text: practice.wrongText || t('방향은 돌리지 않아요. 화살표 버튼으로 옆으로 움직이세요') } : passed ? { count: '✓', text: t('잘했어요!') } : {}), leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
+    guideView.show({ ...goal, count: t`빈 우주 연습 ${goal.count}`, ...(wrong ? { text: practice.wrongText || t('방향은 돌리지 않아요. 화살표 버튼으로 옆으로 움직이세요') } : passed ? { count: '✓', text: t('잘했어요!') } : {}), leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
     const away = Math.hypot(...practice.run.ring.map((n, i) => n - state.position[i]));
     // The speed box as in the game (the user, 2026-10-10: "화면 아래에 본게임과 같은
     // 속도계 붙여줘"): how fast she goes, and the limit the ring sets as she nears it.

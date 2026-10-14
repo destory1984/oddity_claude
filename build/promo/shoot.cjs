@@ -25,6 +25,16 @@ async function shoot(browser, lang, name) {
       localStorage.setItem('oddity.music', music ? '1' : '0');
       localStorage.setItem('oddity.muted', music ? '1' : '0');
     } catch {}
+    // Once the scene is set (window.__hush, shots.cjs settle) no sheet opens at all but
+    // those kept (window.__keep): shut 0.15 s after it opened, today's request still
+    // showed for one frame of the film (2026-10-14, at 13 s).
+    for (const name of ['show', 'showModal']) {
+      const open = HTMLDialogElement.prototype[name];
+      HTMLDialogElement.prototype[name] = function (...args) {
+        if (window.__hush && !(window.__keep ?? []).includes(this.id)) return undefined;
+        return open.apply(this, args);
+      };
+    }
     // What goes to the speakers goes to a recorder as well.
     const connect = AudioNode.prototype.connect;
     AudioNode.prototype.connect = function (to, ...rest) {

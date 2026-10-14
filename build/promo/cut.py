@@ -6,7 +6,7 @@ alone (the shot 'music'), faded out at the end, brought to YouTube's loudness (-
 Run: python -P build/promo/cut.py <lang>  ->  assets/promo/oddity-<lang>.mp4 (30 fps, 1080 x 1920)
 """
 import json, os, shutil, subprocess, sys
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageStat
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'promo')
 FPS = 30
@@ -88,6 +88,13 @@ def main(lang):
         for i in range(BLEND):
             frames[-BLEND + i] = Image.blend(frames[-BLEND + i], nxt[i], (i + 1) / (BLEND + 1))
         frames.extend(nxt[BLEND:])
+    # A frame unlike both its neighbours, which are alike: something flashed for one frame.
+    small = [im.convert('L').resize((135, 240)) for im in frames]
+    diff = lambda a, b: ImageStat.Stat(ImageChops.difference(a, b)).mean[0]
+    for i in range(1, len(small) - 1):
+        a, b = diff(small[i - 1], small[i]), diff(small[i], small[i + 1])
+        if a > 15 and b > 15 and diff(small[i - 1], small[i + 1]) < a / 3:
+            print(f'FLASH at frame {i} ({i / FPS:.2f} s): look at the shot recorded there')
     tmp = os.path.join(ROOT, lang, 'cut')
     shutil.rmtree(tmp, ignore_errors=True)
     os.makedirs(tmp)

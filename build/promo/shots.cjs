@@ -7,6 +7,7 @@ const settle = async (p) => {
   await p.keyboard.press('Shift');
   await closeAll(p);
   // A new player is offered the flight practice and handed notes: shut them as they come.
+  await p.evaluate(() => { window.__hush = true; });
   await p.evaluate(() => { window.__shut = setInterval(() => document.querySelectorAll('dialog[open]').forEach((d) => { if (!window.__keep?.includes(d.id)) d.close(); }), 150); });
 };
 const closeAll = async (p) => {
@@ -133,7 +134,7 @@ module.exports = {
   // The notebook, full (the dev server's test key fills it: PROMO_URL to port 4417).
   journal: async (p, rec) => {
     await settle(p);
-    await p.evaluate(() => { window.__keep = ['journal']; document.getElementById('testAll').click(); });
+    await p.evaluate(() => { window.__keep = ['journal']; window.__hush = false; document.getElementById('testAll').click(); });
     await p.waitForTimeout(2500);
     // Notes and today's request come one after another: fold each by its own key.
     await p.evaluate(() => clearInterval(window.__shut));
@@ -141,7 +142,7 @@ module.exports = {
       await p.evaluate(() => { for (const id of ['closeNoteCard', 'closeGate', 'closeStoryCard']) { const b = document.getElementById(id); if (b?.offsetParent) b.click(); } document.querySelectorAll('dialog[open]:not(#journal):not(#noteCard):not(#gateScene)').forEach((d) => d.close()); });
       await p.waitForTimeout(300);
     }
-    await p.evaluate(() => document.getElementById('journalButton').click());
+    await p.evaluate(() => { window.__hush = true; document.getElementById('journalButton').click(); });
     await p.waitForTimeout(1200);
     await rec.start();
     await p.waitForTimeout(1500);

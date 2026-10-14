@@ -11,3 +11,5 @@ coverage/
 *.local
 .playwright-mcp/
 .superpowers/
+# promo video frames and films (build/promo)
+assets/promo/

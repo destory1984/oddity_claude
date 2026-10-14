@@ -19,7 +19,7 @@ const LINES = {
     jupiter: '목성의 붉은 폭풍을 지나',
     saturn: '토성의 고리까지',
     journal: '빈칸 208개를 채워요',
-    end: { title: '할머니의 수첩', note: '본격 우주멍 힐링 게임', find: "구글 플레이에서 'Space Oddity - 할머니의 수첩'을 찾아보세요" },
+    end: { title: '할머니의 수첩', note: '본격 우주멍 힐링 비행 게임', find: "구글 플레이에서 'Space Oddity - 할머니의 수첩'을 찾아보세요" },
   },
   en: {
     earth: "Grandma's unfinished space notebook",
@@ -30,7 +30,7 @@ const LINES = {
     jupiter: "Pass Jupiter's Great Red Spot",
     saturn: "Out to Saturn's rings",
     journal: 'Fill all 208 slots',
-    end: { title: "Grandma's Notes", note: 'A chill game of gazing at space', find: "Find 'Space Oddity - Grandma's Notes' on Google Play" },
+    end: { title: "Grandma's Notes", note: 'A chill space-gazing flight game', find: "Find 'Space Oddity - Grandma's Notes' on Google Play" },
   },
 };
 

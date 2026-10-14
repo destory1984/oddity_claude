@@ -12,6 +12,7 @@ const ROOT = path.join(__dirname, '..', '..', 'assets', 'promo');
 const LINES = {
   ko: {
     earth: '할머니가 적다 만 우주 탐험 수첩',
+    fly: '내 손으로 직접 날아서',
     naro: '그날의 발사를 다시 보고',
     aurora: '오로라 위를 날고',
     apollo: '달에 내리던 순간으로',
@@ -22,6 +23,7 @@ const LINES = {
   },
   en: {
     earth: "Grandma's unfinished space notebook",
+    fly: 'Fly there with your own hands',
     naro: 'Watch the launches again',
     aurora: 'Fly over the aurora',
     apollo: 'Be there when Apollo 11 lands',
@@ -32,6 +34,8 @@ const LINES = {
   },
 };
 
+const TOP = ['fly'];
+
 const page = (body) => `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="${DEV}fonts/pretendard/pretendardvariable-dynamic-subset.css">
 <link rel="stylesheet" href="${DEV}fonts/gaegu/400.css">
@@ -39,6 +43,8 @@ const page = (body) => `<!doctype html><html><head><meta charset="utf-8">
 html, body { margin: 0; width: 405px; height: 720px; background: transparent; overflow: hidden; }
 .band { position: absolute; left: 0; right: 0; bottom: 0; height: 200px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 0 22px 46px; box-sizing: border-box;
   background: linear-gradient(to bottom, rgba(5, 9, 28, 0) 0%, rgba(5, 9, 28, 0.86) 38%, rgba(5, 9, 28, 0.96) 100%); }
+.band.top { top: 0; bottom: auto; justify-content: flex-start; padding: 40px 22px 0;
+  background: linear-gradient(to top, rgba(5, 9, 28, 0) 0%, rgba(5, 9, 28, 0.86) 38%, rgba(5, 9, 28, 0.96) 100%); }
 .kick { font: 700 11px/1 Pretendard Variable, Pretendard, sans-serif; letter-spacing: 0.32em; color: #f2c46b; margin-bottom: 12px; }
 .line { font: 400 37px/1.15 Gaegu, cursive; color: #fdf8ec; text-align: center; word-break: keep-all; text-wrap: balance; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6); }
 .end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
@@ -61,7 +67,8 @@ html, body { margin: 0; width: 405px; height: 720px; background: transparent; ov
   for (const [key, line] of Object.entries(lines)) {
     const body = key === 'end'
       ? `<div class="end"><img src="${DEV}assets/seora-sprites/cheer-big-1.png"><div class="name">Space Oddity</div><div class="title">${line.title}</div><div class="note">${line.note}</div><div class="find">${line.find}</div></div>`
-      : `<div class="band"><div class="kick">SPACE ODDITY</div><div class="line">${line}</div></div>`;
+      // (Over the flight the band stands at the top: the keys and the speed are at the foot.)
+      : `<div class="band${TOP.includes(key) ? ' top' : ''}"><div class="kick">SPACE ODDITY</div><div class="line">${line}</div></div>`;
     await p.setContent(page(body), { waitUntil: 'networkidle' });
     await p.evaluate(() => document.fonts.ready);
     await p.waitForTimeout(300);

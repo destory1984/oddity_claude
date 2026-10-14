@@ -90,6 +90,29 @@ module.exports = {
     await rec.start();
     await p.waitForTimeout(36000);
   },
+  // She flies by the player's own hand: facing the Moon, the forward key held down and the
+  // speed climbing. Where and when the key was held goes to touch.json, for cut.py to draw
+  // a fingertip on it (x, y: its middle in CSS pixels; from, to: seconds since 1970).
+  fly: async (p, rec, lang, out) => {
+    await settle(p);
+    await p.waitForTimeout(6000);
+    const picked = await pick(p, ['달', 'Moon']);
+    await p.waitForTimeout(600);
+    await p.evaluate(() => document.getElementById('faceTarget').click());
+    await p.waitForTimeout(3000);
+    const box = await p.evaluate(() => { const r = document.getElementById('flyButton').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, w: r.width }; });
+    await rec.start();
+    await p.waitForTimeout(800);
+    await p.mouse.move(box.x, box.y);
+    await p.mouse.down();
+    const from = await p.evaluate(() => Date.now() / 1000);
+    await p.waitForTimeout(5500);
+    await p.mouse.up();
+    const to = await p.evaluate(() => Date.now() / 1000);
+    await p.waitForTimeout(700);
+    require('fs').writeFileSync(require('path').join(out, 'touch.json'), JSON.stringify({ ...box, from, to }));
+    return `picked ${picked}, key at ${Math.round(box.x)},${Math.round(box.y)}`;
+  },
   // The aurora by Earth's plate key.
   aurora: async (p, rec) => {
     await settle(p);

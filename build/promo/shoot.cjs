@@ -72,7 +72,7 @@ async function shoot(browser, lang, name) {
     stop: () => cdp.send('Page.stopScreencast'),
   };
   await p.goto(URL, { waitUntil: 'domcontentloaded' });
-  const log = await SHOTS[name](p, rec, lang);
+  const log = await SHOTS[name](p, rec, lang, out);
   await rec.stop().catch(() => {});
   const sound = await p.evaluate(() => window.__tapStop()).catch(() => null);
   if (sound) {

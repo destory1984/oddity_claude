@@ -6,7 +6,7 @@ alone (the shot 'music'), faded out at the end, brought to YouTube's loudness (-
 Run: python -P build/promo/cut.py <lang>  ->  assets/promo/oddity-<lang>.mp4 (30 fps, 1080 x 1920)
 """
 import json, os, shutil, subprocess, sys
-from PIL import Image, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'promo')
 FPS = 30
@@ -16,14 +16,37 @@ BLEND = 8  # frames over which one shot gives way to the next
 # shot, from (s into its recording), length (s). The caption of the same name goes over it.
 CUT = [
     ('earth', 2.0, 3.5),
-    ('naro', 7.5, 4.5),
-    ('aurora', 0.5, 4.0),
-    ('apollo', 10.5, 4.5),
-    ('jupiter', 0.5, 4.0),
-    ('saturn', 0.5, 4.0),
-    ('journal', 1.0, 2.8),
+    ('fly', 0.6, 4.0),
+    ('naro', 8.0, 4.0),
+    ('aurora', 0.5, 3.5),
+    ('apollo', 11.0, 4.0),
+    ('jupiter', 0.5, 3.5),
+    ('saturn', 0.5, 3.5),
+    ('journal', 1.0, 2.6),
 ]
 END_S = 3.2
+
+
+SCALE = SIZE[0] / 405
+
+
+def fingertip(im, touch, now):
+    """A fingertip on the key while it is held (touch.json from shots.cjs): a soft white
+    disc that lands with a ring going out from it."""
+    held = now - touch['from']
+    if held < 0 or now > touch['to']:
+        return
+    x, y = touch['x'] * SCALE, touch['y'] * SCALE
+    r = touch['w'] * SCALE * 0.42
+    layer = Image.new('RGBA', im.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    land = min(1, held / 0.15)
+    rr = r * (1.25 - 0.25 * land)
+    d.ellipse((x - rr, y - rr, x + rr, y + rr), fill=(255, 255, 255, int(110 * land)), outline=(255, 255, 255, int(220 * land)), width=6)
+    if held < 0.6:
+        ring = r * (1 + 1.6 * held / 0.6)
+        d.ellipse((x - ring, y - ring, x + ring, y + ring), outline=(255, 255, 255, int(200 * (1 - held / 0.6))), width=5)
+    im.alpha_composite(layer)
 
 
 def shot_frames(lang, name, start, length):
@@ -32,6 +55,8 @@ def shot_frames(lang, name, start, length):
     t0 = times[0]
     rel = [t - t0 for t in times]
     caption = Image.open(os.path.join(ROOT, lang, 'captions', f'{name}.png')).convert('RGBA')
+    touch_file = os.path.join(folder, 'touch.json')
+    touch = json.load(open(touch_file)) if os.path.exists(touch_file) else None
     out, j = [], 0
     for k in range(round(length * FPS)):
         t = start + k / FPS
@@ -44,6 +69,8 @@ def shot_frames(lang, name, start, length):
         if a < 1:
             c = caption.copy()
             c.putalpha(caption.getchannel('A').point(lambda v: int(v * a)))
+        if touch:
+            fingertip(im, touch, t0 + t)
         im.alpha_composite(c)
         out.append(im.convert('RGB'))
     return out

@@ -4890,11 +4890,38 @@ html.gaze #gazeButton {
 /* The photo panel's buttons are one size (the user, 2026-10-06, over a picture of them:
    "버튼 크기 통일"; each was as wide as its words: 98, 99 and 156px). On a phone the
    check box and the slider take the first row and the buttons share the second evenly,
-   two of them or three (the scene's "다시 보기" shows only in a scene). */
+   two of them or three (the scene's "다시 보기" shows only in a scene). On a wide screen
+   the rows are the same (the user, 2026-10-14: "화면을 넓게하니까, 버튼들이 위로
+   올라오네": two buttons had climbed up beside the slider and the third stayed below). */
 @media (min-width: 481px) {
-  #photoTools button {
+  #photoTools {
+    flex-wrap:wrap;
+    justify-content:center;
+    row-gap:10px;
+    /* (Set at left 50%, it would shrink to half the screen and break the row of three
+       buttons; 540px holds them with the panel's padding.) */
     box-sizing:border-box;
-    width:150px;
+    width:min(96vw, 540px);
+  }
+
+  #photoTools label {
+    order:1;
+  }
+
+  #photoTools::before {
+    content:"";
+    order:2;
+    flex-basis:100%;
+    height:0;
+  }
+
+  #photoTools button {
+    order:3;
+    box-sizing:border-box;
+    /* 150px each, a little less when the screen is narrower than the panel. */
+    flex:1 1 0;
+    max-width:150px;
+    min-width:0;
     padding-left:0;
     padding-right:0;
   }

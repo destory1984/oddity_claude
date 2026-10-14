@@ -41,14 +41,26 @@ export function createSettings({ onOpen, onClose, today, onLanguage = () => {}, 
     $('newsStarted').textContent = startedLine(today());
     const { lines, more } = firstLines(changesUntil(today()), newsShown);
     $('newsMore').hidden = !more;
-    $('newsList').replaceChildren(...lines.map(({ day, text }) => {
+    $('newsList').replaceChildren(...lines.map(({ day, text, link }) => {
       const item = document.createElement('li');
       // The day is written once, at the first line of that day.
       const when = document.createElement('time');
       when.dateTime = day;
       when.textContent = day === lastDay ? '' : dayLabel(day);
       lastDay = day;
-      item.append(when, text);
+      // (The words and a link under them in one cell, beside the day.)
+      const words = document.createElement('span');
+      words.append(text);
+      if (link) {
+        // (Opened outside the game; in the app, in the phone's browser.)
+        const a = document.createElement('a');
+        a.href = link;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = link.replace(/^https:\/\/(www\.)?/, '');
+        words.append(a);
+      }
+      item.append(when, words);
       return item;
     }));
   }

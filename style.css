@@ -4206,6 +4206,14 @@ footer .throttle .rangeLabels {
   word-break:keep-all;
 }
 
+/* A line's link (core/changes.js `link`) on a line of its own, never broken. */
+#newsList a {
+  display:block;
+  width:max-content;
+  color:var(--blue);
+  white-space:nowrap;
+}
+
 #newsList time {
   color:var(--gold);
   font-size:12px;

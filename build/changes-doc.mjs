@@ -27,7 +27,7 @@ export function changesDoc(changes = CHANGES, started = STARTED) {
       lines.push('', `## ${day}`, '');
     }
     // (A tilde would be read as a strike-through by some markdown editors.)
-    lines.push(`- ${change.text.replaceAll('~', '→')}`);
+    lines.push(`- ${change.text.replaceAll('~', '→')}${change.link ? ` ${change.link}` : ''}`);
   }
   return `${lines.join('\n')}\n`;
 }

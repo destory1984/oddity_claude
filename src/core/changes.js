@@ -9,6 +9,7 @@ import { t } from './i18n.js';
 
 // (In another language each line is given in it: the Korean line is the key.)
 export const CHANGES = [
+  { day: '2026-10-14', text: t('가니메데의 오시리스 분화구에 "그날로" 장면이 생겼습니다. 장면은 모두 126개입니다.') },
   { day: '2026-10-14', text: t('가니메데에 오시리스 분화구가 이야기 장소로 생겼습니다. 수첩은 207칸입니다.') },
   { day: '2026-10-14', text: t('탐사선에 도킹한 채로 가 본 다른 탐사선의 이름표를 누르면, 그리로 건너가 도킹합니다.') },
   { day: '2026-10-14', text: t('목성의 대적점이 이야기 장소가 되었습니다. 이름표가 대적점을 따라 움직입니다. 수첩은 206칸입니다.') },

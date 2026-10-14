@@ -501,6 +501,18 @@ export const LANDMARKS = {
     ],
     say: t('와. 별이 터진 것 같아'),
   },
+  hexagon: {
+    kind: 'photo', by: 'Cassini', body: 'saturn', sayBy: 'craft', viewKm: 480, sizeKm: 50,
+    name: t('토성 북극의 육각형을 찍다'),
+    day: t('2012년 11월 27일'),
+    lines: [
+      t('2012년 11월 27일. 카시니가 토성의 북극 위로 높이 올라가 내려다봅니다.'),
+      t('토성의 북극은 15년 동안 밤이었습니다. 2009년 봄이 오고서야 햇빛이 들기 시작했습니다.'),
+      t('찰칵. 북위 78도를 따라 여섯 변의 구름 띠가 돕니다. 한 변이 14,500km로 지구 지름보다 깁니다.'),
+      t('한가운데에는 지름 2,000km의 태풍의 눈이 있습니다. 1981년 보이저 2호가 찍은 모양 그대로였습니다.'),
+    ],
+    say: t('와. 정말 여섯 모네'),
+  },
   inktomi: {
     kind: 'photo', by: 'Cassini', body: 'rhea', sayBy: 'craft',
     name: t('레아의 가장 젊은 분화구를 찍다'),

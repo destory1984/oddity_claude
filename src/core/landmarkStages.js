@@ -111,14 +111,18 @@ export function landmarkStage(kind, sayBy = 'craft') {
 
 // A scene as core/replay.js wants it, from what it tells: { kind, sayBy, name, day,
 // lines: four texts }. One with little to tell has fewer lines and its own `seconds`
-// (no shorter than its bubble's stay: a look's is gone at 13 s).
-export function landmarkScene({ kind, sayBy, name, day, lines, seconds }) {
+// (no shorter than its bubble's stay: a look's is gone at 13 s). On a planet of gas the
+// eye is held 0.2% of its radius over the clouds (core/eye.js: 116 km on Saturn), so a
+// scene there is seen from farther (viewKm) and drawn larger to match (sizeKm, km to a
+// unit), as the comet's fall on Jupiter is.
+export function landmarkScene({ kind, sayBy, name, day, lines, seconds, viewKm = 56, sizeKm }) {
   const times = LANDMARK_TIMES[kind];
   return {
     name, day, kind,
     seconds: seconds ?? times.seconds,
     downAt: times.downAt,
-    viewKm: 56,
+    viewKm,
+    ...(sizeKm ? { sizeKm } : {}),
     sounds: times.sounds,
     lines: lines.map((text, i) => ({ at: times.lines[i], text })),
     stage: landmarkStage(kind, sayBy),

@@ -1,6 +1,7 @@
 import { named } from './i18n.js';
 import { SPIN_DAY_S, EARTH_START_SPIN, spinAngle, surfaceDirection } from './surface.js';
 import { t } from './i18n.js';
+import { RED_SPOT, redSpotLonDeg } from './vista.js';
 
 // Story places: spots where something real happened. Reaching one logs it in the
 // journal and tells its story. Each is added by hand.
@@ -189,6 +190,7 @@ const CLOUD_HINTS = {
   hexagon: t('토성 북극(북위 78도) 구름 꼭대기의 육각형 15,000km 안에 닿기'),
   galileoProbe: t('목성 적도 조금 위(북위 6.5도) 구름 꼭대기의 돌입 자리 20,000km 안에 닿기'),
   greatDarkSpot: t('해왕성 남반구 구름 꼭대기의 검은 점 10,000km 안에 닿기'),
+  greatRedSpot: t('목성 남반구(남위 21도) 구름 꼭대기의 붉은 폭풍 20,000km 안에 닿기'),
 };
 const FAR_PLACES = [
   ['pele', t('이오의 펠레 화산'), 'Pele', 1979, 'io', t('이오'), -18.7, 104.7, 104.7, 300, true,
@@ -392,6 +394,17 @@ STORIES.push(...[
   hint: CLOUD_HINTS[id] ?? t`${bodyName}(${where(latDeg, realLonDeg)}) ${withinKm.toLocaleString('ko-KR')}km 안에 내려앉기`,
   text,
 })));
+// The Great Red Spot (the user, 2026-10-14, asked what is special on Jupiter: "1번
+// 넣자"). The clouds slide (core/vista.js redSpotLonDeg: once round in about 47
+// minutes of the picture's clock), so its tag goes with the spot (`redSpot`); lonDeg is
+// where the spot stands before they have slid. No scene: nobody can stand on the
+// clouds beside it (as at the comet's scar).
+STORIES.push({
+  id: 'greatRedSpot', name: t('목성의 대적점'), nameEn: 'Great Red Spot', year: 2017, type: 'surface', body: 'jupiter',
+  latDeg: RED_SPOT.latDeg, lonDeg: RED_SPOT.lonDeg, withinKm: 20000, landmark: true, redSpot: true,
+  hint: CLOUD_HINTS.greatRedSpot,
+  text: t('지구보다 큰 폭풍입니다. 1831년부터 쉬지 않고 관측되었습니다. 2017년 7월 10일 주노가 그 위 9,000km를 지나며 처음으로 가까이 찍었습니다.'),
+});
 named(STORIES);
 
 // A place's label shows only from within this many of its body's radii above the
@@ -404,13 +417,19 @@ export function siteFar(body, position) {
 
 const gap = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
 
+// A place's east longitude now: its own, or the red spot's after the clouds have slid
+// for elapsedS seconds of the picture's clock (render/world.js elapsed).
+export function storyLonDeg(story, elapsedS = 0) {
+  return story.redSpot ? redSpotLonDeg(elapsedS) : story.lonDeg;
+}
+
 // Where the surface places are at game time timeS. They are shown and selected like
 // spacecraft (kind 'site', no size), and turn with their body.
-export function storySitesAt(timeS, bodies) {
+export function storySitesAt(timeS, bodies, elapsedS = 0) {
   return STORIES.filter((s) => s.type === 'surface').map((s) => {
     const body = bodies.find((b) => b.id === s.body);
     const start = s.body === 'earth' ? EARTH_START_SPIN : 0;
-    const up = surfaceDirection(s.latDeg, s.lonDeg, spinAngle(SPIN_DAY_S[s.body], timeS, start));
+    const up = surfaceDirection(s.latDeg, storyLonDeg(s, elapsedS), spinAngle(SPIN_DAY_S[s.body], timeS, start));
     return {
       id: s.id, name: s.name, nameEn: s.nameEn, kind: 'site', parent: s.body, radiusKm: 0, landmark: Boolean(s.landmark),
       position: body.position.map((n, i) => n + up[i] * body.radiusKm),

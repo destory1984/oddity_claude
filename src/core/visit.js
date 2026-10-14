@@ -3,6 +3,7 @@
 // second at its equator), so the traveler is held to the spot and turns with it, as
 // when docked with a craft. Any thrust lets go.
 import { stopNow } from './game.js';
+import { storyLonDeg } from './stories.js';
 import { eyeHeightKm } from './eye.js';
 import { surfaceDirection, spinOf } from './surface.js';
 import { orientationFrom, rotateLocal, blend, multiply, turnAboutY, rotateVector } from './orientation.js';
@@ -38,11 +39,12 @@ const sub = (a, b) => a.map((n, i) => n - b[i]);
 // time timeS: fixed to the ground, so it turns with the body.
 // Returns { position, up, facing }: where, which way is up there, and the orientation
 // that looks at the place from there.
-export function standSpot(story, body, timeS, narrow = false) {
+export function standSpot(story, body, timeS, narrow = false, elapsedS = 0) {
   const spin = spinOf(story.body, timeS);
+  const lonDeg = storyLonDeg(story, elapsedS);
   const shiftDeg = ((narrow ? NARROW_STAND_KM : STAND_KM) / body.radiusKm) / RAD;
-  const up = surfaceDirection(story.latDeg - (story.latDeg < 0 ? -1 : 1) * shiftDeg, story.lonDeg, spin);
-  const siteUp = surfaceDirection(story.latDeg, story.lonDeg, spin);
+  const up = surfaceDirection(story.latDeg - (story.latDeg < 0 ? -1 : 1) * shiftDeg, lonDeg, spin);
+  const siteUp = surfaceDirection(story.latDeg, lonDeg, spin);
   const position = body.position.map((n, i) => n + up[i] * (body.radiusKm + STAND_UP_KM));
   const target = body.position.map((n, i) => n + siteUp[i] * (body.radiusKm + MODEL_MIDDLE_KM));
   // The view is drawn from the eye, which is held higher than she stands on a big body

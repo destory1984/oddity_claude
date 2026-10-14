@@ -740,7 +740,7 @@ async function init() {
   const standBeside = (id) => {
     // (The place of a solar eclipse is no story, but it has a latitude and a longitude.)
     const story = STORIES.find((s) => s.id === id) ?? (eventPlace?.id === id ? { body: 'earth', latDeg: eclipse.latDeg, lonDeg: eclipse.lonDeg } : null);
-    return standSpot(story, here(story.body), simTime, innerWidth / innerHeight < 0.75);
+    return standSpot(story, here(story.body), simTime, innerWidth / innerHeight < 0.75, world.elapsed());
   };
 
   // A place whose name shows (near its body, this side of the horizon): glide down and
@@ -2425,7 +2425,7 @@ ${STORY_MORE[target.id]}` : told };
         rideKmS = rideSpeed(docked.id, craftBefore, craft, before, bodies, dt);
         rideDrift = releaseDrift(docked.id, craftBefore, craft, before, bodies, state.position, dt);
       }
-      sites = storySitesAt(simTime, bodies);
+      sites = storySitesAt(simTime, bodies, world.elapsed());
       if (eventPlace) Object.assign(eventPlace, eclipseSpotAt(simTime, bodies));
       const stood = state.position;
       state = carryAlong(state, before, bodies);

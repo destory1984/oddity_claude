@@ -1,9 +1,10 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { STORIES, storySitesAt, completedStories, siteHidden, siteFar, SITE_SHOWN_RADII } from '../src/core/stories.js';
+import { STORIES, storySitesAt, completedStories, siteHidden, siteFar, SITE_SHOWN_RADII, storyLonDeg } from '../src/core/stories.js';
 import { surfaceDirection, spinAngle, SPIN_DAY_S } from '../src/core/surface.js';
 import { BODIES, bodiesAt, bodyById } from '../src/core/bodies.js';
 import { craftAt } from '../src/core/craft.js';
+import { RED_SPOT, redSpotLonDeg } from '../src/core/vista.js';
 
 const near = (a, b, eps) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 const add = (a, b, k = 1) => a.map((n, i) => n + b[i] * k);
@@ -14,10 +15,10 @@ const done = (position, restingOn = null, t = 0) => {
   return completedStories({ position, restingOn, bodies, craft: craftAt(t, bodies), sites: storySitesAt(t, bodies) });
 };
 
-test('there are 114 story places, each with a name, a hint and a short story; events have a year', () => {
-  assert.equal(STORIES.length, 114);
-  assert.equal(new Set(STORIES.map((s) => s.id)).size, 114);
-  assert.equal(new Set(STORIES.map((s) => s.name)).size, 114);
+test('there are 115 story places, each with a name, a hint and a short story; events have a year', () => {
+  assert.equal(STORIES.length, 115);
+  assert.equal(new Set(STORIES.map((s) => s.id)).size, 115);
+  assert.equal(new Set(STORIES.map((s) => s.name)).size, 115);
   for (const s of STORIES) {
     assert.ok(s.name && s.nameEn && s.hint, s.id);
     assert.ok(s.year === undefined || s.year > 1900, s.id);
@@ -89,7 +90,7 @@ test("a place's label shows only from within four radii of its body's surface", 
 
 test('the places sit on the surface of their body and move as it spins', () => {
   const sites = storySitesAt(0, BODIES);
-  assert.equal(sites.length, 103);
+  assert.equal(sites.length, 104);
   assert.deepEqual(sites.slice(0, 4).map((s) => s.id), ['apollo11', 'viking1', 'huygens', 'dokdo']);
   for (const site of sites) {
     const body = bodyById(site.parent);
@@ -254,4 +255,12 @@ test('landing on Dokdo counts; landing 100 km away does not', () => {
   const side = unit([up[2], 0, -up[0]]);
   const away = add(earth.position, unit(add(up, side, 100 / earth.radiusKm)), earth.radiusKm);
   assert.deepEqual(done(away, 'earth'), []);
+});
+
+test('the red spot\'s place goes with the spot as the clouds slide; the others stay put', () => {
+  const spot = STORIES.find((s) => s.id === 'greatRedSpot');
+  assert.equal(storyLonDeg(spot, 0), RED_SPOT.lonDeg);
+  assert.equal(storyLonDeg(spot, 600), redSpotLonDeg(600));
+  assert.notEqual(storyLonDeg(spot, 600), RED_SPOT.lonDeg);
+  assert.equal(storyLonDeg(STORIES.find((s) => s.id === 'galileoProbe'), 600), 90);
 });

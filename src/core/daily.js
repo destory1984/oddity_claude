@@ -19,7 +19,7 @@ const ANNIVERSARIES = [
   [1, 25, 2004, 'opportunity'], [2, 3, 1966, 'luna9'], [2, 5, 1971, 'apollo14'], [2, 18, 2021, 'perseverance'],
   [3, 1, 1982, 'venera13'], [3, 6, 1979, 'valhalla'], [3, 13, 2013, 'alma'], [3, 14, 1986, 'giotto'], [4, 8, 2008, 'yiSoyeon'], [4, 12, 1961, 'baikonur'],
   [4, 21, 1972, 'apollo16'],
-  [4, 30, 2015, 'messenger'], [5, 25, 2008, 'phoenix'], [6, 11, 1985, 'vega'], [6, 21, 2022, 'naro'], [6, 27, 1996, 'galileoRegio'], [7, 4, 1997, 'pathfinder'],
+  [4, 30, 2015, 'messenger'], [5, 25, 2008, 'phoenix'], [6, 11, 1985, 'vega'], [6, 21, 2022, 'naro'], [6, 27, 1996, 'galileoRegio'], [7, 4, 1997, 'pathfinder'], [7, 10, 2017, 'greatRedSpot'],
   [7, 14, 2015, 'newHorizons'], [7, 21, 1969, 'apollo11'], [7, 30, 1971, 'apollo15'], [8, 6, 2012, 'curiosity'],
   [8, 23, 2023, 'chandrayaan3'], [8, 25, 1989, 'voyager2Neptune'], [9, 3, 1976, 'viking2'], [9, 7, 2023, 'tanegashima'], [9, 14, 1959, 'luna2'],
   [9, 15, 2017, 'cassini'], [10, 4, 1957, 'sputnik'], [10, 22, 1975, 'venera9'], [11, 12, 2014, 'rosetta'], [11, 17, 1970, 'lunokhod1'],

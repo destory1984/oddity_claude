@@ -178,6 +178,7 @@ CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수
 | `bohyunsan.jpg` | 이 게임을 위해 그린 그림 (2026-10-05) | 이 저장소 | 권리 보유 (LICENSE) |
 | `tanegashima.jpg` | 이 게임을 위해 그린 그림 (2026-10-07) | 이 저장소 | 권리 보유 (LICENSE) |
 | `wenchang.jpg` | 이 게임을 위해 그린 그림 (2026-10-07) | 이 저장소 | 권리 보유 (LICENSE) |
+| `greatRedSpot.jpg` | [PIA21775.jpg](https://commons.wikimedia.org/wiki/File:PIA21775.jpg) | NASA/JPL-Caltech/SwRI/MSSS/Björn Jónsson | Public domain |
 | `galileoProbe.jpg` | [Galileo Jupiter Atmospheric Probe in a spacecraft processing room (AC84-0228-3).jpg](https://commons.wikimedia.org/wiki/File:Galileo_Jupiter_Atmospheric_Probe_in_a_spacecraft_processing_room_(AC84-0228-3).jpg) | NASA | Public domain |
 | `valhalla.jpg` | [Voyager 1 Image of Valhalla Crater.jpg](https://commons.wikimedia.org/wiki/File:Voyager_1_Image_of_Valhalla_Crater.jpg) | NASA (Voyager 1) | Public domain |
 | `galileoRegio.jpg` | [Galileo Regio and Uruk.jpg](https://commons.wikimedia.org/wiki/File:Galileo_Regio_and_Uruk.jpg) | NASA/JPL (Galileo) | Public domain |

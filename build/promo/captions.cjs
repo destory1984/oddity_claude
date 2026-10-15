@@ -67,7 +67,9 @@ const GAZE = {
     aurora: '오로라 위에 가만히 떠서',
     jupiter: '목성의 폭풍을 바라보다 보면',
     calm: '그냥 바라만 봐도 돼요',
-    end: FIRST.ko.end,
+    // (Still in closed testing: nobody but the testers could find it on Google Play. The
+    // user, 2026-10-16: "차라리 출시 준비 중이라고 해라".)
+    end: { ...FIRST.ko.end, find: '구글 플레이 출시 준비 중' },
   },
   en: {
     earth: FIRST.en.earth,
@@ -77,7 +79,7 @@ const GAZE = {
     aurora: 'Float over the aurora',
     jupiter: "Watch Jupiter's storm go by",
     calm: 'You can just look. That is all',
-    end: FIRST.en.end,
+    end: { ...FIRST.en.end, find: 'Coming soon to Google Play' },
   },
 };
 const LINES = { thatday: THAT_DAY, gaze: GAZE }[process.env.FILM] ?? FIRST;

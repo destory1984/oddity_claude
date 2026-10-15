@@ -60,8 +60,10 @@ const GAZE = {
   ko: {
     earth: FIRST.ko.earth,
     fly: FIRST.ko.fly,
-    spaceout: '멍때리고 싶을 땐 우주멍',
-    hide: '소라도 숨고, 우주만 남아요',
+    // (Broken by hand: balanced, it fell as "멍때리고 싶을 / 땐 우주멍".)
+    spaceout: '멍때리고 싶을 땐\n우주멍',
+    // (Was "소라도 숨고, 우주만 남아요": the user, 2026-10-16, "의미 전달 0%"; they picked this.)
+    hide: '캐릭터도 숨기고 풍경만 오롯이',
     aurora: '오로라 위에 가만히 떠서',
     jupiter: '목성의 폭풍을 바라보다 보면',
     calm: '그냥 바라만 봐도 돼요',
@@ -71,7 +73,7 @@ const GAZE = {
     earth: FIRST.en.earth,
     fly: FIRST.en.fly,
     spaceout: 'Want to zone out? Tap "Just looking"',
-    hide: 'Even Sora hides. Only space is left',
+    hide: 'Hide the character too: just the view',
     aurora: 'Float over the aurora',
     jupiter: "Watch Jupiter's storm go by",
     calm: 'You can just look. That is all',
@@ -114,7 +116,7 @@ html, body { margin: 0; width: 405px; height: 720px; background: transparent; ov
   for (const [key, line] of Object.entries(lines)) {
     const body = key === 'end'
       ? `<div class="end"><img src="${DEV}assets/seora-sprites/cheer-big-1.png"><div class="name">Space Oddity</div><div class="title">${line.title}</div><div class="note">${line.note}</div><div class="find">${line.find}<b>${line.store}</b></div></div>`
-      : `<div class="band"><div class="kick">SPACE ODDITY</div><div class="line">${line}</div></div>`;
+      : `<div class="band"><div class="kick">SPACE ODDITY</div><div class="line">${line.replace(/\n/g, '<br>')}</div></div>`;
     await p.setContent(page(body), { waitUntil: 'networkidle' });
     await p.evaluate(() => document.fonts.ready);
     await p.waitForTimeout(300);

@@ -54,7 +54,31 @@ const THAT_DAY = {
     end: FIRST.en.end,
   },
 };
-const LINES = process.env.FILM === 'thatday' ? THAT_DAY : FIRST;
+// The space-out film (FILM=gaze): the first two shots as in the first film, then what
+// space-out is (the user, 2026-10-16: "1,2는 그대로 쓰고, 그 이후는 우주멍에 대해서 소개하는 글").
+const GAZE = {
+  ko: {
+    earth: FIRST.ko.earth,
+    fly: FIRST.ko.fly,
+    spaceout: '멍때리고 싶을 땐 우주멍',
+    hide: '소라도 숨고, 우주만 남아요',
+    aurora: '오로라 위에 가만히 떠서',
+    jupiter: '목성의 폭풍을 바라보다 보면',
+    calm: '그냥 바라만 봐도 돼요',
+    end: FIRST.ko.end,
+  },
+  en: {
+    earth: FIRST.en.earth,
+    fly: FIRST.en.fly,
+    spaceout: 'Want to zone out? Tap "Just looking"',
+    hide: 'Even Sora hides. Only space is left',
+    aurora: 'Float over the aurora',
+    jupiter: "Watch Jupiter's storm go by",
+    calm: 'You can just look. That is all',
+    end: FIRST.en.end,
+  },
+};
+const LINES = { thatday: THAT_DAY, gaze: GAZE }[process.env.FILM] ?? FIRST;
 
 const page = (body) => `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="${DEV}fonts/pretendard/pretendardvariable-dynamic-subset.css">

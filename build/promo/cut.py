@@ -14,7 +14,8 @@ SIZE = (1080, 1920)
 BLEND = 8  # frames over which one shot gives way to the next
 
 # shot, from (s into its recording), length (s). The caption of the same name goes over it.
-# Which film: the first (none) or 'thatday' (2026-10-16, six days played again), by FILM.
+# Which film: the first (none), 'gaze' (2026-10-16, what space-out is) or 'thatday'
+# (2026-10-16, six days played again; not used: it showed nothing of the game itself), by FILM.
 FILM = os.environ.get('FILM', '')
 CUTS = {
   '': [
@@ -27,6 +28,15 @@ CUTS = {
     ('saturn', 0.5, 3.5),
     ('journal', 1.0, 2.6),
   ],
+  'gaze': [
+    ('earth', 2.0, 3.5),
+    ('fly', 0.6, 4.0),
+    ('spaceout', 0.1, 4.0),
+    ('hide', 0.2, 4.0),
+    ('aurora', 0.5, 3.5),
+    ('jupiter', 0.5, 3.5),
+    ('calm', 0.8, 4.2),
+  ],
   'thatday': [
     ('dart', 0.6, 4.6),
     ('hayabusa', 1.2, 4.2),
@@ -38,7 +48,7 @@ CUTS = {
 }
 CUT = CUTS[FILM]
 # The end card stands on a blurred still of this shot's last frame.
-END_ON = {'': -2, 'thatday': -1}[FILM]
+END_ON = {'': -2, 'thatday': -1, 'gaze': -1}[FILM]
 END_S = 3.2
 
 

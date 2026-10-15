@@ -117,7 +117,29 @@ const craftDay = (id, holdS, skipS = 0) => async (p, rec) => {
   return `docked ${docked}, key ${key}`;
 };
 
+// The space-out film (2026-10-16): the space-out key pressed on screen.
+// spaceout: the opening view, then the key once: the words and keys go.
+const spaceout = async (p, rec) => {
+  await settle(p);
+  await p.waitForTimeout(9000);
+  await rec.start();
+  await p.waitForTimeout(1500);
+  await gaze(p);
+  await p.waitForTimeout(3000);
+};
+// A best view with the key already pressed once, then once more: she hides too.
+const vistaHide = (id, name, holdS, hideAtS) => async (p, rec) => {
+  const log = await vista(id, name, 0)(p, rec);
+  await p.waitForTimeout(hideAtS * 1000);
+  await gaze(p);
+  await p.waitForTimeout((holdS - hideAtS) * 1000);
+  return log;
+};
+
 module.exports = {
+  spaceout,
+  hide: vistaHide('saturn', ['토성', 'Saturn'], 5, 1.2),
+  calm: vistaHide('moon', ['달', 'Moon'], 6, 0),
   // The "그날로" film (2026-10-16): six days played again where they happened.
   dart: craftDay('hera', 7, 1),
   hayabusa: craftDay('hayabusa2', 7, 13),

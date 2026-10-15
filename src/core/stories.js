@@ -136,7 +136,7 @@ const MOON_LANDMARKS = [
   ['shackleton', t('섀클턴 분화구'), 'Shackleton', -89.67, 129.78, 150, t('달 남극에 있는 지름 21km 분화구입니다. 바닥에 햇빛이 한 번도 들지 않아 얼음이 있을 것으로 봅니다.')],
   ['apennines', t('아펜니노 산맥'), 'Montes Apenninus', 18.9, -3.7, 150, t('비의 바다 가장자리를 따라 600km 뻗은 산맥입니다. 가장 높은 하위헌스산은 5,500m입니다.')],
   ['alpineValley', t('알프스 계곡'), 'Vallis Alpes', 48.5, 3.2, 150, t('알프스 산맥을 가로지르는 길이 166km, 폭 10km의 곧은 골짜기입니다.')],
-  ['straightWall', t('직선벽'), 'Rupes Recta', -21.8, -7.8, 150, t('길이 110km, 높이 약 300m의 곧은 단층 절벽입니다. 해가 낮게 비치면 검은 선으로 보입니다.')],
+  ['straightWall', t('직선벽'), 'Rupes Recta', -21.8, -7.8, 150, t('길이 110km, 높이 약 300m의 곧은 단층 절벽입니다. 태양이 낮게 비치면 검은 선으로 보입니다.')],
   ['moscoviense', t('모스크바의 바다'), 'Mare Moscoviense', 27.3, 147.9, 200, t('달 뒷면에 드문 바다입니다. 1959년 루나 3호가 처음 찍은 뒷면 사진에서 발견되어 이름이 붙었습니다.')],
   ['tsiolkovskiy', t('치올콥스키 분화구'), 'Tsiolkovskiy', -20.4, 129.1, 150, t('달 뒷면에서 가장 눈에 띄는 분화구입니다. 지름 185km 바닥에 검은 용암이 차 있고 가운데 봉우리가 솟아 있습니다.')],
   // More of the near side, the face seen from Earth.
@@ -342,7 +342,7 @@ STORIES.push(...[
   ['caloris', t('칼로리스 분지'), 'Caloris Planitia', 1974, 30.5, 161.2, 500,
     t('지름 1,550km의 큰 충돌 자국입니다. 1974년 매리너 10호가 절반을, 2008년 메신저가 전체를 찍었습니다.')],
   ['prokofiev', t('북극의 얼음 분화구'), 'Prokofiev', 2012, 86, 63.7, 150,
-    t('해에 가장 가까운 행성의 북극 분화구입니다. 햇빛이 들지 않는 바닥에 물 얼음이 있습니다.')],
+    t('태양에 가장 가까운 행성의 북극 분화구입니다. 햇빛이 들지 않는 바닥에 물 얼음이 있습니다.')],
   ['discoveryRupes', t('디스커버리 절벽'), 'Discovery Rupes', 1974, -56.3, -38.3, 200,
     t('길이 650km, 높이 2km의 절벽입니다. 수성이 식으며 쪼그라들 때 땅이 밀려 올라가 생겼습니다.')],
   ['weirdTerrain', t('기묘한 지형'), 'Weird Terrain', 1974, -30.5, -18.8, 300,
@@ -359,7 +359,7 @@ STORIES.push(...[
   // so a place there: Vivaldi, a two-ringed crater at 86 W. Its year is that of the radar
   // finding of Mercury's 59-day turn, from which the Sun's going back was worked out.
   ['vivaldi', t('비발디 분화구'), 'Vivaldi', 1965, 13.7, -85.9, 200,
-    t('테두리가 두 겹인 지름 213km의 분화구입니다. 이 경도에는 해가 떴다가 도로 지고 다시 뜨는 아침이 있습니다.')],
+    t('테두리가 두 겹인 지름 213km의 분화구입니다. 이 경도에는 태양이 떴다가 도로 지고 다시 뜨는 아침이 있습니다.')],
 ].map(([id, name, nameEn, year, latDeg, lonDeg, withinKm, text]) => ({
   id, name, nameEn, year, type: 'surface', body: 'mercury', latDeg, lonDeg, withinKm, landmark: true,
   hint: t`${t('수성')}(${where(latDeg, lonDeg)}) ${withinKm.toLocaleString('ko-KR')}km 안에 내려앉기`,

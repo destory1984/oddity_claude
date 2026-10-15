@@ -30,14 +30,14 @@ export const FAMOUS = {
     name: t('푸른 구슬'),
     by: t('아폴로 17호, 1972년 12월 7일'),
     credit: 'NASA / Apollo 17 crew',
-    note: t('달로 가는 길에 지구에서 2만 9천km쯤 떨어져 찍었다. 해를 등지고 있어 지구가 통째로 환하다.'),
+    note: t('달로 가는 길에 지구에서 2만 9천km쯤 떨어져 찍었다. 태양을 등지고 있어 지구가 통째로 환하다.'),
   },
   saturnShadow: {
     file: 'famous/saturnShadow.jpg',
     name: t('토성의 그늘에서'),
     by: t('카시니, 2006년 9월 15일'),
     credit: 'NASA/JPL/Space Science Institute',
-    note: t('토성이 해를 가린 동안 220만km 밖에서 찍은 165장을 이어 붙였다. 고리 왼쪽 바깥의 작은 점이 지구다.'),
+    note: t('토성이 태양을 가린 동안 220만km 밖에서 찍은 165장을 이어 붙였다. 고리 왼쪽 바깥의 작은 점이 지구다.'),
   },
   earthAndMoon: {
     file: 'famous/earthAndMoon.jpg',

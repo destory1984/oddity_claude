@@ -1036,7 +1036,7 @@ const sunCovered = goesBy('soho', (scene, name, world, mats, root) => {
   ball(scene, `${name}CometHead`, comet, glow(scene, `${name}CometLight`, '#f2fbff', 1), 0.1);
   const length = Math.hypot(...away);
   drum(scene, `${name}CometTail`, comet, glow(scene, `${name}CometTailLight`, '#cfeaff', 0.6), { height: 0.7, diameterTop: 0.08, diameterBottom: 0.005, tessellation: 10 }, away.map((n) => (n / length) * 0.36), away);
-  const say = says(scene, name, root, t('해야. 또 하나 삼켰어?'));
+  const say = says(scene, name, root, t('태양아. 또 하나 삼켰어?'));
   return (values) => {
     const covered = values.cover ?? 0;
     disc.setEnabled(covered > 0.01);
@@ -1079,7 +1079,7 @@ const sunPole = goesBy('solarOrbiter', (scene, name, world, mats, root) => {
     mark.rotation.set(Math.atan2(z, -y), 0, Math.atan2(x, -y));
   };
   [[0, 0, 0, 0.3, '#e0802a'], [1, 0.18, 0.1, 0.16, '#fff0b0'], [2, -0.16, -0.08, 0.18, '#c8661e'], [3, 0.05, -0.2, 0.14, '#fff0b0'], [4, -0.1, 0.2, 0.15, '#d9741f'], [5, 0.24, -0.12, 0.1, '#c8661e']].forEach((p) => pole(...p));
-  const say = says(scene, name, root, t('해야. 아래도 좀 보자'));
+  const say = says(scene, name, root, t('태양아. 아래도 좀 보자'));
   return (values) => {
     const on = values.fires ?? 0;
     const flick = values.flick ?? 0;

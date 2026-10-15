@@ -60,7 +60,7 @@ export const TOURS = [
     name: t('물을 찾아서'),
     memo: t('물이 있는 곳에 생명이 있을지도 모른다고 읽었다. 얼음과 바다를 찾아가는 길.'),
     stops: [
-      { story: 'shackleton', line: t('여긴 해가 안 들어. 얼음이 있대.') },
+      { story: 'shackleton', line: t('여긴 태양이 안 들어. 얼음이 있대.') },
       { story: 'korolev', line: t('분화구에 얼음이 가득해!') },
       { story: 'phoenix', line: t('흙을 팠더니 얼음이 나왔대.') },
       { story: 'conamara', line: t('이 얼음 밑이 다 바다래.') },

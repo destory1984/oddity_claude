@@ -185,7 +185,7 @@ export const CRAFT = [
     id: 'akatsuki', name: t('아카쓰키'), nameEn: 'Akatsuki', kind: 'craft', parent: 'venus',
     ring: { altitudeKm: 1500, lapPlayS: 5400, tiltDeg: 3, phaseDeg: 200 },
     launched: 2010,
-    intro: t('일본의 금성 탐사선입니다. 2010년 궤도에 드는 데 실패하고 해를 다섯 해 돈 뒤, 2015년 작은 엔진으로 다시 해내 2024년까지 금성의 구름을 살폈습니다.'),
+    intro: t('일본의 금성 탐사선입니다. 2010년 궤도에 드는 데 실패하고 태양을 다섯 해 돈 뒤, 2015년 작은 엔진으로 다시 해내 2024년까지 금성의 구름을 살폈습니다.'),
   },
   // Mangalyaan (built while the user was away, 2026-10-13, on "개발해놔": Mars had one
   // craft). Silent since April 2022, it goes round Mars still. Its real path is a long

@@ -97,7 +97,7 @@ test('a solar show: the Moon comes in from one side, sits on the Sun, and leaves
 
 test('every show says that it is staged, and why', () => {
   for (const e of ECLIPSES) assert.match(stagedNote(e), /^이 장면은 연출입니다\. 게임은 거리를 줄여 놓아/);
-  assert.match(stagedNote(ECLIPSES[1]), /달이 해를 가리지 못합니다/);
+  assert.match(stagedNote(ECLIPSES[1]), /달이 태양을 가리지 못합니다/);
   assert.match(stagedNote(ECLIPSES[4]), /지구 그림자가 달에 닿지 않습니다/);
 });
 

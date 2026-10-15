@@ -75,7 +75,7 @@ export function arrivedReplies(album, today) {
 // What grandmother feels about each place: one line each. Everything she says she saw
 // really happened (the same events as her memos in core/story.js).
 const HEARTS = {
-  sun: t('해를 그리 가까이서 보다니. 나는 필터 너머로만 봤단다.'),
+  sun: t('태양을 그리 가까이서 보다니. 나는 필터 너머로만 봤단다.'),
   mercury: t('수성은 평생 몇 번 못 봤는데, 네가 대신 실컷 보는구나.'),
   venus: t('새벽마다 제일 먼저 뜨던 별이 저렇게 생겼구나.'),
   earth: t('우리 집이 저기 어디쯤이겠구나. 마당에 빨래 널어 놨단다.'),
@@ -122,8 +122,8 @@ export const cardPlace = (storyIds) => storyIds.find((id) => lineOf(BY_PLACE, id
 // What she says when a place or a picture she has already answered comes again.
 const AGAIN = {
   sun: t('또 해구나. 눈 조심하렴. 나는 2009년 일식 때도 필터를 꼭 댔단다.'),
-  mercury: t('수성을 또 찍었구나. 해 뜨기 전에 나가도 번번이 놓치던 별인데.'),
-  venus: t('금성을 또 보냈구나. 2012년에 해 앞을 지나던 검은 점이 저것이란다.'),
+  mercury: t('수성을 또 찍었구나. 태양이 뜨기 전에 나가도 번번이 놓치던 별인데.'),
+  venus: t('금성을 또 보냈구나. 2012년에 태양 앞을 지나던 검은 점이 저것이란다.'),
   earth: t('또 우리 집이구나. 이번에는 마당에 나가 손을 흔들었단다.'),
   moon: t('달을 또 찍었구나. 볼 때마다 좋은 건 나도 그렇단다.'),
   mars: t('화성을 또 보냈구나. 내 망원경으로는 흰 극관밖에 못 봤는데.'),

@@ -190,9 +190,9 @@ export function photoSlots(missionIds, { open, earthKm, progress }) {
 // eye shows, "읽었다" for the rest) and Sora's line on getting there (the speech bubble
 // at the discovery, then under the memo). Numbers in a line equal core/facts.js.
 export const MEMOS = {
-  sun: { memo: t('2009.7.22. 부분일식. 해가 80%쯤 가려졌다. 필터를 대고 봤다.'), line: t('더워, 부채 어디 갔지.') },
-  mercury: { memo: t('해 뜨기 전 동쪽 하늘 낮은 곳. 평생 몇 번밖에 못 봤다.'), line: t('낮이랑 밤이 600도 차이래.') },
-  venus: { memo: t('2012.6.6. 금성이 해 앞을 지나감. 검은 점 하나를 봤다. 다음은 2117년.'), line: t('하루가 일 년보다 길대. 이상해!') },
+  sun: { memo: t('2009.7.22. 부분일식. 태양이 80%쯤 가려졌다. 필터를 대고 봤다.'), line: t('더워, 부채 어디 갔지.') },
+  mercury: { memo: t('태양이 뜨기 전 동쪽 하늘 낮은 곳. 평생 몇 번밖에 못 봤다.'), line: t('낮이랑 밤이 600도 차이래.') },
+  venus: { memo: t('2012.6.6. 금성이 태양 앞을 지나감. 검은 점 하나를 봤다. 다음은 2117년.'), line: t('하루가 일 년보다 길대. 이상해!') },
   earth: { memo: t('1972.12. 아폴로 17호가 찍은 둥근 지구. 잡지에서 오려 붙이고 한참 봤다.'), line: t('우리 집이다. 바다가 71%래.') },
   moon: { memo: t('1969.7.21. 사람이 달에 내렸다. 이웃집 마당 텔레비전으로 봤다.'), line: t('달이다! 할머니 수첩 첫 장이네.') },
   mars: { memo: t('2003.8.27. 6만 년 만에 가장 가까이 옴. 망원경으로 흰 극관을 봤다.'), line: t('산 높이가 22km래. 못 올라가.') },

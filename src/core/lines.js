@@ -87,8 +87,8 @@ export const IDLE_GAP_S = 45;
 // across, Jupiter holds 1,300 Earths, sunlight takes four hours to reach Neptune).
 export const NEAR_RADII = 30;
 export const NEAR = {
-  sun: [t('눈부셔! 손차양 해야겠다.'), t('해는 지구 백구 개가 늘어선 크기래.')],
-  mercury: [t('해가 엄청 크게 보여.'), t('수성의 하루는 일 년보다 길대.')],
+  sun: [t('눈부셔! 손차양 해야겠다.'), t('태양은 지구 백구 개가 늘어선 크기래.')],
+  mercury: [t('태양이 엄청 크게 보여.'), t('수성의 하루는 일 년보다 길대.')],
   venus: [t('구름이 두꺼워서 땅이 안 보여.'), t('금성은 거꾸로 돈대. 신기해.')],
   earth: [t('저기 어디쯤이 우리 집일 텐데.'), t('바다가 진짜 파랗다.'), t('구름이 솜사탕 같아.')],
   moon: [t('토끼는 어디 있지?'), t('달은 늘 같은 얼굴만 보여 줘.')],
@@ -139,7 +139,7 @@ export const SIGHTS = {
   'spokes:saturn': t('고리에 바큇살이 생겼어.'),
   'spot:neptune': t('검은 눈이 날 보는 것 같아.'),
   'tail:mercury': t('수성에도 꼬리가 있었어?'),
-  'dawn:mercury': t('해보다 빛이 먼저 떴어.'),
+  'dawn:mercury': t('태양보다 빛이 먼저 떴어.'),
   'pair:earth': t('저 점 두 개가 지구랑 달이래.'),
   'jets:halley': t('혜성이 숨을 내쉬어.'),
   'plume:io': t('화산이 우산처럼 퍼져.'),
@@ -165,7 +165,7 @@ export const SIGHTS = {
   'shine:moon': t('달 그늘이 푸르스름해.'),
   counterglow: t('저기 희미한 빛, 보여?'),
   'ering:saturn': t('분수가 고리를 만들었대.'),
-  'flare:sun': t('해가 재채기를 했어.'),
+  'flare:sun': t('태양이 재채기를 했어.'),
   'flow:jupiter': t('띠마다 따로 흘러가네.'),
   'cyclones:jupiter': t('소용돌이가 꽃잎처럼 둘러섰어.'),
   'tracks:mars': t('누가 땅에 낙서했어?'),
@@ -190,7 +190,7 @@ export const SIGHTS = {
   'lightning:venus': t('금성에서도 번쩍했어.'),
   'horizon:moon': t('달 끝에 빛줄이 섰어.'),
   tailcut: t('꼬리가 뚝 끊어졌어.'),
-  'transit:venus': t('해 위에 까만 점이 지나가.'),
+  'transit:venus': t('태양 위에 까만 점이 지나가.'),
   'transit:mercury': t('저 작은 점이 수성이야?'),
   meteor: t('별똥별! 소원 빌었어.'),
   belt: t('돌멩이 밭이다. 살살 가자.'),
@@ -232,10 +232,10 @@ export function milestoneLine(before, after) {
 // 보면, 하루에 한 번은 소라가 설명해주는 것도 넣어", then of three ways offered: "2"): after
 // her own word (SIGHTS) come these two lines, one after the other, in place of the notice.
 export const SIGHT_TELLS = {
-  'anvils:earth': [t('높이 솟은 번개 구름의 머리야.'), t('땅은 저물어도 저기는 아직 해가 닿아.')],
+  'anvils:earth': [t('높이 솟은 번개 구름의 머리야.'), t('땅은 저물어도 저기는 아직 태양이 닿아.')],
   'shiptracks:earth': [t('배가 지나간 자국이야.'), t('배 연기에 물방울이 맺혀 더 하얘진대.')],
   'honeycomb:earth': [t('찬 바다 위에서 공기가 오르내려서 그래.'), t('오르는 데는 구름, 내리는 데는 맑아.')],
-  'glory:earth': [t('해를 등지고 구름을 보면 생겨.'), t('비행기 창밖으로도 볼 수 있대.')],
+  'glory:earth': [t('태양을 등지고 구름을 보면 생겨.'), t('비행기 창밖으로도 볼 수 있대.')],
   elves: [t('번개 한참 위 하늘에서 퍼진 빛이야.'), t('눈 깜짝할 새보다 빨리 사라져.')],
   bluejet: [t('번개가 하늘 쪽으로 친 거야.'), t('구름 위로 40km까지 올라간대.')],
 };

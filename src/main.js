@@ -1048,7 +1048,7 @@ ${STORY_MORE[target.id]}` : told };
     if (eclipse && (!visit || visit.id === eventPlace.id)) {
       const watch = canWatch(eclipse, eventPlace, here('sun'), state.position);
       if (watch === 'yes') return startShow();
-      if (watch === 'night') return toast.show(t('이곳은 지금 밤입니다. 해가 뜨면 볼 수 있습니다. 게임의 하루는 28분 48초입니다.'));
+      if (watch === 'night') return toast.show(t('이곳은 지금 밤입니다. 태양이 뜨면 볼 수 있습니다. 게임의 하루는 28분 48초입니다.'));
     }
     // Docked with a craft that has a day of its own (Webb unfolding): its close view,
     // and the scene in it.
@@ -1170,7 +1170,7 @@ ${STORY_MORE[target.id]}` : told };
         saveExo(exo);
       }
       toast.show(t('트라피스트-1에 왔습니다. 지구에서 약 40광년 떨어진 붉은 왜성과 행성 일곱입니다.\n크기와 궤도는 잰 값이고, 겉모습은 아무도 몰라 상상해서 그렸습니다.'));
-      say.show(t('해가 빨개! 행성이 일곱이나 돼.'));
+      say.show(t('태양이 빨개! 행성이 일곱이나 돼.'));
     });
     return undefined;
   });
@@ -1184,7 +1184,7 @@ ${STORY_MORE[target.id]}` : told };
   const VISTA_TOLD = {
     moon: t('지구가 달 지평선 위에 떠 있는 자리입니다.'),
     jupiter: t('대적점이 내려다보이는 자리입니다. 움직이면 풀려납니다.'),
-    saturn: t('토성 뒤에서 고리 너머로 해가 비치는 자리입니다.'),
+    saturn: t('토성 뒤에서 고리 너머로 태양이 비치는 자리입니다.'),
     mars: t('마리너 계곡이 내려다보이는 자리입니다. 움직이면 풀려납니다.'),
     io: t('이오 뒤로 목성의 구름이 가득한 자리입니다.'),
     enceladus: t('얼음 분수 곁으로 토성이 보이는 자리입니다.'),
@@ -2972,7 +2972,7 @@ ${STORY_MORE[target.id]}` : told };
             saveEclipses(eclipsesSeen);
           }
           toast.show(t`${eclipseDayText(eclipse)}의 ${eclipseTitle(eclipse)}${first ? t('을 보았습니다') : t('을 다시 보았습니다')}. 이번 주 동안 몇 번이든 볼 수 있습니다.`);
-          say.show(eclipse.kind === 'lunar' ? t('달이 빨개졌어. 할머니한테 말해야지.') : eclipse.type === 'total' ? t('해가 사라졌어. 저 하얀 게 코로나구나.') : t('불반지다! 가운데가 까매.'));
+          say.show(eclipse.kind === 'lunar' ? t('달이 빨개졌어. 할머니한테 말해야지.') : eclipse.type === 'total' ? t('태양이 사라졌어. 저 하얀 게 코로나구나.') : t('불반지다! 가운데가 까매.'));
         }
       } else stageMoon(showNow);
     }
@@ -3150,7 +3150,7 @@ ${STORY_MORE[target.id]}` : told };
     const watch = eclipse && (!visit || visit.id === eventPlace.id) && !photo.active() ? canWatch(eclipse, eventPlace, here('sun'), state.position) : null;
     const watchable = watch === 'yes' || watch === 'night';
     $('replayButton').hidden = !thenHere && !watchable;
-    if (watchable) $('replayButton').textContent = watch === 'yes' ? t`${eclipseTitle(eclipse)} 보기` : t('해가 뜨면 일식을 볼 수 있습니다');
+    if (watchable) $('replayButton').textContent = watch === 'yes' ? t`${eclipseTitle(eclipse)} 보기` : t('태양이 뜨면 일식을 볼 수 있습니다');
     else if (thenHere) $('replayButton').textContent = t`그날로 · ${thenHere.day}`;
     $('eclipseJump').hidden = watch !== 'far' || away;
     if (eclipse) $('eclipseJump').textContent = t`${eclipseTitle(eclipse)} 자리로`;

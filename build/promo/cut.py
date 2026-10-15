@@ -14,7 +14,10 @@ SIZE = (1080, 1920)
 BLEND = 8  # frames over which one shot gives way to the next
 
 # shot, from (s into its recording), length (s). The caption of the same name goes over it.
-CUT = [
+# Which film: the first (none) or 'thatday' (2026-10-16, six days played again), by FILM.
+FILM = os.environ.get('FILM', '')
+CUTS = {
+  '': [
     ('earth', 2.0, 3.5),
     ('fly', 0.6, 4.0),
     ('naro', 8.0, 4.0),
@@ -23,7 +26,19 @@ CUT = [
     ('jupiter', 0.5, 3.5),
     ('saturn', 0.5, 3.5),
     ('journal', 1.0, 2.6),
-]
+  ],
+  'thatday': [
+    ('dart', 0.6, 4.6),
+    ('hayabusa', 1.2, 4.2),
+    ('soho', 0.6, 4.4),
+    ('osiris', 0.2, 4.6),
+    ('herschel', 11.5, 4.2),
+    ('tess', 1.0, 4.4),
+  ],
+}
+CUT = CUTS[FILM]
+# The end card stands on a blurred still of this shot's last frame.
+END_ON = {'': -2, 'thatday': -1}[FILM]
 END_S = 3.2
 
 
@@ -78,8 +93,8 @@ def shot_frames(lang, name, start, length):
 
 def main(lang):
     shots = [shot_frames(lang, name, start, length) for name, start, length in CUT]
-    # The end card on a darkened, blurred last look at Saturn.
-    back = shots[-2][-1].filter(ImageFilter.GaussianBlur(28)).point(lambda v: int(v * 0.35)).convert('RGBA')
+    # The end card on a darkened, blurred last look (Saturn in the first film).
+    back = shots[END_ON][-1].filter(ImageFilter.GaussianBlur(28)).point(lambda v: int(v * 0.35)).convert('RGBA')
     card = Image.open(os.path.join(ROOT, lang, 'captions', 'end.png')).convert('RGBA')
     back.alpha_composite(card)
     shots.append([back.convert('RGB')] * round(END_S * FPS))
@@ -100,7 +115,7 @@ def main(lang):
     os.makedirs(tmp)
     for i, im in enumerate(frames):
         im.save(os.path.join(tmp, f'{i:05d}.jpg'), quality=95)
-    film = os.path.join(ROOT, f'oddity-{lang}.mp4')
+    film = os.path.join(ROOT, f'oddity-{FILM + "-" if FILM else ""}{lang}.mp4')
     total = len(frames) / FPS
     inputs, chains, mix = [], [], []
     at = 0.0

@@ -32,6 +32,14 @@ const near = (p, id, radii) => p.evaluate(([id, radii]) => {
   const out = b.position.map((n) => -n / l);
   o.place(b.position.map((n, i) => n + out[i] * b.radiusKm * radii), b.position);
 }, [id, radii]);
+// The scene's own keys at the foot (save photo, replay, back to flight, the field of view)
+// and the dev server's test keys at the top are hidden while a day is filmed.
+const clean = (p) => p.evaluate(() => {
+  const tools = document.getElementById('photoTools');
+  if (tools) tools.style.visibility = 'hidden';
+  const test = document.getElementById('testBar');
+  if (test) test.style.visibility = 'hidden';
+});
 const gaze = (p) => p.evaluate(() => document.getElementById('gazeButton').click());
 const busy = (p) => p.evaluate(() => document.body.classList.contains('warping') || /가는 중|on the way|向かって|前往/.test(document.querySelector('#flightLabel, .flightLabel')?.textContent ?? ''));
 
@@ -70,12 +78,53 @@ const scene = (body, id, name, holdS, skipS = 0) => async (p, rec) => {
   await p.waitForTimeout(11000);
   const key = await p.evaluate(() => { const k = document.getElementById('thenKey'); if (k) k.click(); return Boolean(k); });
   await p.waitForTimeout(skipS * 1000);
+  await clean(p);
   await rec.start();
   await p.waitForTimeout(holdS * 1000);
   return `picked ${picked}, key ${key}`;
 };
 
+// A craft's "That day" scene (core/craftScenes.js): 200 km off the craft, away from the
+// body nearest it, docked by the dock key, then the scene's key; recording from skipS in.
+const craftDay = (id, holdS, skipS = 0) => async (p, rec) => {
+  await settle(p);
+  await p.evaluate((craftId) => {
+    const o = window.oddity;
+    const c = o.craft().find((x) => x.id === craftId);
+    let near = null;
+    let nearKm = Infinity;
+    for (const b of o.bodies()) {
+      const km = Math.hypot(...c.position.map((n, i) => n - b.position[i])) - b.radiusKm;
+      if (km < nearKm) { nearKm = km; near = b; }
+    }
+    const d = c.position.map((n, i) => n - near.position[i]);
+    const l = Math.hypot(...d);
+    o.place(c.position.map((n, i) => n + (d[i] / l) * 200), c.position);
+  }, id);
+  await p.waitForTimeout(1500);
+  const docked = await p.evaluate(() => { const b = document.getElementById('dockTarget'); if (b && !b.hidden) { b.click(); return true; } return false; });
+  let key = false;
+  for (let i = 0; i < 30 && !key; i++) {
+    await p.waitForTimeout(1000);
+    key = await p.evaluate(() => { const k = document.getElementById('thenKey'); return Boolean(k && !k.hidden && k.offsetParent); });
+  }
+  await closeAll(p);
+  await p.evaluate(() => document.getElementById('thenKey')?.click());
+  await p.waitForTimeout(skipS * 1000);
+  await clean(p);
+  await rec.start();
+  await p.waitForTimeout(holdS * 1000);
+  return `docked ${docked}, key ${key}`;
+};
+
 module.exports = {
+  // The "그날로" film (2026-10-16): six days played again where they happened.
+  dart: craftDay('hera', 7, 1),
+  hayabusa: craftDay('hayabusa2', 7, 13),
+  soho: craftDay('soho', 7, 6),
+  osiris: craftDay('osirisRex', 7, 12.5),
+  herschel: scene('mimas', 'herschel', ['허셜', 'Herschel'], 30),
+  tess: craftDay('tess', 9, 7),
   // The opening view, as a new player sees it once the first cards are closed.
   earth: async (p, rec) => {
     await settle(p);

@@ -9,7 +9,7 @@ const DEV = process.env.PROMO_DEV || 'http://localhost:4417/oddity_claude/';
 const ROOT = path.join(__dirname, '..', '..', 'assets', 'promo');
 
 // One line for each shot of the cut (build/promo/cut.py CUT), in its order.
-const LINES = {
+const FIRST = {
   ko: {
     earth: '할머니가 적다 만 우주 탐험 수첩',
     fly: '내 손으로 직접 날아서',
@@ -33,6 +33,28 @@ const LINES = {
     end: { title: "Grandma's Notes", note: 'A chill space-gazing flight game', find: 'Find it on Google Play', store: "Space Oddity - Grandma's Notes" },
   },
 };
+// The "그날로" film (FILM=thatday): the same end card.
+const THAT_DAY = {
+  ko: {
+    dart: '다트가 소행성에 부딪히던 날로',
+    hayabusa: '하야부사2와 류구에 내려앉고',
+    soho: '태양을 가리면 코로나가 보이고',
+    osiris: '베누의 흙을 한 줌 떠 오고',
+    herschel: '죽음의 별을 닮은 분화구를 찍고',
+    tess: '새 행성을 찾아 하늘을 훑어요',
+    end: FIRST.ko.end,
+  },
+  en: {
+    dart: 'Be there the day DART hit an asteroid',
+    hayabusa: 'Touch down on Ryugu with Hayabusa2',
+    soho: 'Hide the Sun and see its corona',
+    osiris: 'Grab a handful of Bennu',
+    herschel: "Find the Death Star's crater",
+    tess: 'Sweep the sky for new worlds',
+    end: FIRST.en.end,
+  },
+};
+const LINES = process.env.FILM === 'thatday' ? THAT_DAY : FIRST;
 
 const page = (body) => `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="${DEV}fonts/pretendard/pretendardvariable-dynamic-subset.css">

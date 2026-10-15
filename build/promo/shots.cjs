@@ -122,6 +122,10 @@ const craftDay = (id, holdS, skipS = 0) => async (p, rec) => {
 const spaceout = async (p, rec) => {
   await settle(p);
   await p.waitForTimeout(9000);
+  // Her word to a newcomer about the flight practice and the notices came and went in
+  // the first second of the shot (the user, 2026-10-16: "7~8초 사이에 대사가 1컷"):
+  // neither shows while it is filmed.
+  await p.addStyleTag({ content: '#heroSay, #toast { visibility: hidden !important; }' });
   await rec.start();
   await p.waitForTimeout(1500);
   await gaze(p);

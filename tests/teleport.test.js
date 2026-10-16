@@ -160,3 +160,22 @@ test('a ringed body is seen from 30 degrees off its rings, on their sunlit side,
     assert.ok(dot(out, toSun) > 0, `${normal}`);
   }
 });
+
+test('the slab and the ship by Jupiter: met once, then jumped to from far, from their side', async () => {
+  const { curiosAt } = await import('../src/core/curios.js');
+  const { recordCurios } = await import('../src/core/progress.js');
+  const [slab, ship] = curiosAt(bodies, far);
+  const fresh = createProgress();
+  assert.equal(visited(slab, fresh), false);
+  assert.equal(teleportSpot(slab, { position: far, progress: fresh, bodies }), null);
+  const met = recordCurios(fresh);
+  assert.deepEqual(met.curios, ['monolith', 'unknown']);
+  assert.equal(recordCurios(met), met);
+  assert.equal(visited(ship, met), true);
+  const spot = teleportSpot(slab, { position: far, progress: met, bodies });
+  near(gap(spot, slab.position), 220, 1e-6);
+  // Not jumped to from beside it.
+  assert.equal(teleportSpot(slab, { position: spot, progress: met, bodies }), null);
+  // Kept through storage, junk dropped.
+  assert.deepEqual(sanitizeProgress({ curios: ['monolith', 'x', 'unknown'] }, BODIES, MISSIONS).curios, ['monolith', 'unknown']);
+});

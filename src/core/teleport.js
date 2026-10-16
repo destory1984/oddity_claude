@@ -53,6 +53,7 @@ function sideOf(d) {
 export function visited(target, progress) {
   if (target.kind === 'craft') return (progress.craft ?? []).includes(target.id);
   if (target.kind === 'site') return (progress.stories ?? []).includes(target.id);
+  if (target.kind === 'curio') return (progress.curios ?? []).includes(target.id);
   return progress.discovered.includes(target.id);
 }
 
@@ -68,6 +69,7 @@ export function farFrom(target, position, bodies = null) {
   const km = gap(position, target.position);
   if (target.kind === 'craft') return km > DOCK_RANGE_KM;
   if (target.kind === 'site') return km > 2000;
+  if (target.kind === 'curio') return km > CURIO_NEAR_KM;
   if (km > nearKm(target)) return true;
   const beside = bodies ? nearestSurface(position, bodies).body : null;
   return Boolean(beside) && beside.id !== target.id && gap(position, beside.position) <= nearKm(beside);
@@ -135,6 +137,18 @@ export function craftArrival(craft, bodies) {
   return craft.position.map((n, i) => n + out[i] * CRAFT_ARRIVAL_KM);
 }
 
+// The slab and the ship by Jupiter (core/curios.js): met from the side, a little toward
+// the Sun and above, so the lit slab and the ship before it are both in view (on a phone
+// held upright too: 150 km off, the ship stood at the edge, cut in half).
+export const CURIO_ARRIVAL_KM = 220;
+const CURIO_NEAR_KM = 1000;
+export function curioArrival(curio, bodies) {
+  const sun = bodies.find((b) => b.kind === 'star');
+  const toLight = unit(sub(sun.position, curio.position));
+  const out = mix(mix(sideOf(toLight), toLight, 20), [0, 1, 0], 10);
+  return curio.position.map((n, i) => n + out[i] * CURIO_ARRIVAL_KM);
+}
+
 // Where to appear over a story place: 400 km up and as far to one side, so the ground
 // slants away to the horizon.
 export function siteArrival(site, body) {
@@ -151,5 +165,6 @@ export function teleportSpot(target, { position, progress, bodies, parent = null
   if ((!known && !visited(target, progress)) || (!anywhere && !farFrom(target, position, bodies))) return null;
   if (target.kind === 'craft') return craftArrival(target, bodies);
   if (target.kind === 'site') return siteArrival(target, parent);
+  if (target.kind === 'curio') return curioArrival(target, bodies);
   return bodyVista(target, bodies, ringNormal, toward);
 }

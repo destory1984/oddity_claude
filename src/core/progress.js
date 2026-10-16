@@ -1,4 +1,5 @@
 import { surfaceDistance, BODY_DATA } from './bodies.js';
+import { CURIOS } from './curios.js';
 
 // The explorer's log: which bodies were discovered and landed on, which photo
 // missions were completed, which story places were visited, which craft were met (not
@@ -28,7 +29,7 @@ export function journalOrder(bodies) {
 }
 
 export function createProgress() {
-  return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], notes: [], tours: [], tour: null, quiz: [] };
+  return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], curios: [], notes: [], tours: [], tour: null, quiz: [] };
 }
 
 // A question answered right: a story card's (core/storyQuiz.js) or the one under a
@@ -97,6 +98,14 @@ export function summarize(progress, bodies, missions, stories = []) {
   };
 }
 
+// The slab and the ship by Jupiter (core/curios.js), once come near: both, at once (the
+// ship stands before the slab). Not scored; it only allows jumping back to them.
+export function recordCurios(progress) {
+  const have = progress.curios ?? [];
+  if (CURIOS.every((c) => have.includes(c.id))) return progress;
+  return { ...progress, curios: CURIOS.map((c) => c.id) };
+}
+
 // Stored data may be old, edited or broken: keep only known, unique ids.
 // tours: core/tours.js TOURS. The tour under way is kept only if its step exists.
 export function sanitizeProgress(raw, bodies, missions, stories = [], craft = [], notes = [], tours = []) {
@@ -113,6 +122,7 @@ export function sanitizeProgress(raw, bodies, missions, stories = [], craft = []
     photos: clean(raw.photos, missionIds),
     stories: clean(raw.stories, storyIds),
     craft: clean(raw.craft, craftIds),
+    curios: clean(raw.curios, new Set(CURIOS.map((c) => c.id))),
     notes: clean(raw.notes, new Set(notes.map((n) => n.id))),
     tours: clean(raw.tours, new Set(tours.map((t) => t.id))),
     tour: underWay(raw.tour, tours),

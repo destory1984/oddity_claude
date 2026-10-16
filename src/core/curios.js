@@ -55,6 +55,9 @@ export function hiddenCurios(position, bodies, keepId = null) {
   return above > SHOWN_RADII * jupiter.radiusKm ? CURIOS.map((c) => c.id).filter((id) => id !== keepId) : [];
 }
 
+// Within this far of the slab she is carried along with it, not with Jupiter.
+export const CURIO_CARRY_KM = 5000;
+
 // Near enough to the slab for her to say something about it.
 export const CURIO_TELL_KM = 2500;
 export function nearSlab(bodies, position) {

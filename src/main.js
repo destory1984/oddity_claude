@@ -9,7 +9,7 @@ import {
   rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, right, swingToward, turnToward,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/craft.js';
-import { curiosAt, hiddenCurios } from './core/curios.js';
+import { curiosAt, hiddenCurios, nearSlab, CURIO_CARRY_KM } from './core/curios.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
@@ -29,7 +29,7 @@ import { FACTS } from './core/facts.js';
 import { eventMessage, limitText, dateText, withParticle, objectParticle, distanceText, markedName } from './ui/messages.js';
 import { MISSIONS, completedMissions } from './core/missions.js';
 import {
-  updateProgress, recordPhotos, recordStories, recordCraft, recordNote, recordQuiz, createProgress, summarize, score, isComplete,
+  updateProgress, recordPhotos, recordStories, recordCraft, recordCurios, recordNote, recordQuiz, createProgress, summarize, score, isComplete,
 } from './core/progress.js';
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
@@ -97,6 +97,7 @@ const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
 // After a jump to a body the view is turned this far (radians) off it.
 const VISTA_YAW = 0.3;
+const CURIO_TILT = 0.12;
 // Turned to face a target (바라보기, 목표 고정, the big map), the view is tipped down by
 // this much, 15 degrees, so the target stands over her head: square on, it sat in the
 // very middle of the view, behind her ("소라의 머리가 그걸 막게 되어서 움직이기 불편해").
@@ -793,7 +794,9 @@ async function init() {
       // The traveler stands in the middle of the view: on a wide screen turn a little
       // so a body sits beside them, not behind them.
       const aside = target.kind !== 'craft' && target.kind !== 'site' && innerWidth / innerHeight >= 1;
-      state = createState(spot, aside ? rotateLocal(facing, VISTA_YAW, 0) : facing);
+      // The slab is small and stood behind her head: the view dips so it shows over her.
+      const tilt = target.kind === 'curio' ? CURIO_TILT : 0;
+      state = createState(spot, aside ? rotateLocal(facing, VISTA_YAW, tilt) : rotateLocal(facing, 0, tilt));
       // Saturn: she arrives off the sunlit face of its rings, all of them in view
       // (core/vista.js warpSpot; the user, 2026-10-07, standing there: "지금 저 위치는 왜
       // 토성 워프 위치로 안 넣었어?"). Not on a tour's jump to see a moon's shadow on it
@@ -2477,6 +2480,14 @@ ${STORY_MORE[target.id]}` : told };
       if (eventPlace) Object.assign(eventPlace, eclipseSpotAt(simTime, bodies));
       const stood = state.position;
       state = carryAlong(state, before, bodies);
+      // By the slab she goes along with it instead of with Jupiter: it stands on the line
+      // to Io and goes round with Io, and ran from her at 160 km a second (the user,
+      // 2026-10-16, of the slab: "고정이 안 되네").
+      const slabWas = curiosAt(before, stood)[0];
+      if (slabWas && Math.hypot(...stood.map((n, i) => n - slabWas.position[i])) <= CURIO_CARRY_KM) {
+        const slabIs = curiosAt(bodies, stood)[0];
+        state = { ...state, position: stood.map((n, i) => n + slabIs.position[i] - slabWas.position[i]) };
+      }
       // Locked on a craft from near by, she rides along with it instead: a craft goes
       // round its planet fast on this clock (Chandra, hundreds of km a second), and
       // left behind she was dragged after it at the end of the lock's range in a path
@@ -2687,6 +2698,14 @@ ${STORY_MORE[target.id]}` : told };
     if (met.newly.length) {
       progress = met.progress;
       saveProgress(progress);
+    }
+    // So are the slab and the ship by Jupiter (core/curios.js).
+    if (nearSlab(bodies, state.position)) {
+      const seen = recordCurios(progress);
+      if (seen !== progress) {
+        progress = seen;
+        saveProgress(progress);
+      }
     }
     // The Pale Blue Dot is not logged by going far: it is the last slot, filled by a
     // photograph (photoSlots above).
@@ -3214,7 +3233,7 @@ ${STORY_MORE[target.id]}` : told };
       C,
       goalId: goalNow()?.targetId ?? null,
       // A place on the far side of its body, or seen from far away, gets no label.
-      knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...(glowsTold.has('curio:monolith') ? ['monolith', 'unknown'] : []), ...progress.stories, ...exo.seen, ...(exo.been ? [EXO_STAR.id] : []), ...(eventPlace ? [eventPlace.id] : [])]),
+      knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...(progress.curios ?? []), ...(glowsTold.has('curio:monolith') ? ['monolith', 'unknown'] : []), ...progress.stories, ...exo.seen, ...(exo.been ? [EXO_STAR.id] : []), ...(eventPlace ? [eventPlace.id] : [])]),
       // A name in the sky that a planet or a moon stands before is not written.
       skyHidden: (direction) => skyBehind(direction, state.position, bodies),
       hiddenIds: [

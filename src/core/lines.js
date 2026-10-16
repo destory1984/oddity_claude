@@ -110,6 +110,12 @@ export const CURIO_HINTS = {
   moonSlab: { near: 'moon', line: t('티코 분화구에 이상한 판이 있대.') },
   rose: { near: 'mars', line: t('소행성대에 장미 핀 별이 있대.') },
   monolith: { near: 'jupiter', line: t('이오 쪽에 하얀 판이 떠 있대.') },
+  moonRabbit: { near: 'moon', line: t('맑음의 바다에 토끼가 산대.') },
+  whale: { near: 'earth', line: t('지구 앞쪽에 고래가 떠 있대.') },
+  ringStation: { near: 'saturn', line: t('토성 곁에 도는 바퀴가 있대.') },
+  potatoFarm: { near: 'mars', line: t('화성 평원에 감자밭이 있대.') },
+  goldenRecord: { near: 'neptune', line: t('보이저가 금빛 음반을 싣고 갔대.') },
+  robot: { near: 'pluto', line: t('명왕성에서 삐빅 소리가 난대.') },
 };
 
 // Far from every world (DEEP_FROM_KM from the nearest ground, or more).
@@ -153,6 +159,13 @@ export const SIGHTS = {
   'curio:teapot': t('진짜 있었네?'),
   'curio:rose': t('장미야, 안녕?'),
   'curio:moonSlab': t('목성에서 본 거랑 똑같아.'),
+  'curio:moonRabbit': t('토끼다! 정말 있었네.'),
+  'curio:magpieBridge': t('오늘 밤은 다리가 놓였네.'),
+  'curio:whale': t('왜 고래가 여기에? 화분까지?'),
+  'curio:ringStation': t('저 구멍, 들어가 봐도 돼?'),
+  'curio:potatoFarm': t('누가 여기서 감자를 키웠지?'),
+  'curio:goldenRecord': t('안녕하세요! 나도 인사할래.'),
+  'curio:robot': t('안녕? 혼자 일하는 거야?'),
   'tail:mercury': t('수성에도 꼬리가 있었어?'),
   'dawn:mercury': t('태양보다 빛이 먼저 떴어.'),
   'pair:earth': t('저 점 두 개가 지구랑 달이래.'),

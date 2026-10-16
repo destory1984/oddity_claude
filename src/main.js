@@ -9,7 +9,7 @@ import {
   rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, right, swingToward, turnToward,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/craft.js';
-import { curiosAt, hiddenCurios, carryingCurio, curiosNear, curioHead, CURIO_ABOUT } from './core/curios.js';
+import { curiosAt, hiddenCurios, carryingCurio, curiosNear, curioHead, setCurioDay, CURIO_ABOUT } from './core/curios.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
@@ -168,6 +168,8 @@ const openedAt = (() => {
   }
   return new Date();
 })();
+// (The Magpie Bridge is up on Chilseok of that day: core/curios.js.)
+setCurioDay(openedAt);
 const bodyData = layout === 'today' ? todayData(openedAt) : BODY_DATA;
 const bodiesAt = (timeS) => placeBodies(bodyData, timeS);
 // Everything that is flown among and drawn: the Solar System, and far off TRAPPIST-1
@@ -1000,6 +1002,8 @@ ${STORY_MORE[target.id]}` : told };
         return;
       }
       if (teleportSpot(chosen, { position: state.position, progress, bodies })) teleport(id);
+      // (The bridge in the sky is only looked at.)
+      else if (chosen.sky) return;
       else {
         sound.cue('click');
         setTimeout(() => sound.cue('click'), 110);

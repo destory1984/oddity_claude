@@ -219,4 +219,293 @@ function rose(scene, name) {
 }
 
 // The slab on the Moon is the slab by Jupiter, standing on the ground.
-export const CURIO_BUILD = { monolith, unknown, teapot, rose, moonSlab: monolith };
+// Light itself, never shaded (a glow, a halo).
+const LIGHTS = new WeakMap();
+function light(scene, name, hex, alpha = 1) {
+  const kept = LIGHTS.get(scene) ?? new Map();
+  LIGHTS.set(scene, kept);
+  if (kept.has(name)) return kept.get(name);
+  const material = new StandardMaterial(name, scene);
+  material.disableLighting = true;
+  material.emissiveColor = Color3.FromHexString(hex);
+  material.alpha = alpha;
+  material.backFaceCulling = false;
+  kept.set(name, material);
+  return material;
+}
+// Those standing on the ground (core/curios.js GROUND) stand on y = FLOOR, half their
+// drawn size under their middle.
+const FLOOR = -0.45;
+const disc = (scene, name, parent, material, diameter, at, height = 0.01) => drum(scene, name, parent, material, { height, diameter, tessellation: 36 }, at);
+
+// The Moon Rabbit (an old tale of Korea, China and Japan): a white rabbit pounding a
+// mortar under the cassia tree. (metadata: the pestle and the rabbit, for a scene.)
+function moonRabbit(scene, name) {
+  const root = new TransformNode(name, scene);
+  const bark = paint(scene, 'cassiaBark', '#6b4a2b');
+  const leaves = paint(scene, 'cassiaLeaves', '#4f7a3a', { glow: 0.12 });
+  const bloom = paint(scene, 'cassiaBloom', '#e8c25a', { glow: 0.35 });
+  const fur = paint(scene, 'rabbitFur', '#f6f4ee', { shine: 0.2, glow: 0.25 });
+  const pink = paint(scene, 'rabbitPink', '#e89aa6', { glow: 0.2 });
+  const eye = paint(scene, 'rabbitEye', '#c0182c', { glow: 0.5 });
+  const wood = paint(scene, 'mortarWood', '#8a5a35');
+  disc(scene, `${name}Ground`, root, paint(scene, 'rabbitGround', '#8e8b86'), 1.3, [0, FLOOR - 0.005, 0]);
+  // The tree, to the left.
+  rod(scene, `${name}Trunk`, root, bark, [-0.28, FLOOR, 0], [-0.25, 0.05, 0], 0.07, 10);
+  rod(scene, `${name}Bough0`, root, bark, [-0.26, -0.05, 0], [-0.42, 0.12, 0.04], 0.035, 8);
+  rod(scene, `${name}Bough1`, root, bark, [-0.26, 0, 0], [-0.08, 0.16, -0.03], 0.03, 8);
+  [[-0.25, 0.2, 0, 0.36], [-0.43, 0.14, 0.05, 0.24], [-0.07, 0.17, -0.04, 0.24], [-0.27, 0.36, 0.02, 0.22]].forEach(([x, y, z, d], k) => {
+    ball(scene, `${name}Crown${k}`, root, leaves, d, [x, y, z], [1, 0.75, 1]);
+  });
+  for (let k = 0; k < 9; k++) {
+    const a = k * 2.4;
+    ball(scene, `${name}Flower${k}`, root, bloom, 0.035, [-0.25 + Math.cos(a) * 0.18, 0.2 + Math.sin(k) * 0.1, 0.12 + Math.sin(a) * 0.05]);
+  }
+  // The mortar, before the rabbit.
+  drum(scene, `${name}Mortar`, root, wood, { height: 0.12, diameterTop: 0.15, diameterBottom: 0.11, tessellation: 24 }, [0.1, FLOOR + 0.06, 0.05]);
+  disc(scene, `${name}MortarHole`, root, paint(scene, 'mortarDark', '#3b2717'), 0.11, [0.1, FLOOR + 0.121, 0.05], 0.004);
+  // The rabbit, on its hind legs, facing the mortar (-x).
+  const rabbit = new TransformNode(`${name}Rabbit`, scene);
+  rabbit.parent = root;
+  rabbit.position.set(0.3, FLOOR, 0.05);
+  ball(scene, `${name}Body`, rabbit, fur, 0.18, [0, 0.12, 0], [0.9, 1.25, 0.85]);
+  ball(scene, `${name}Haunch`, rabbit, fur, 0.13, [0.04, 0.06, 0], [1.1, 0.8, 1]);
+  ball(scene, `${name}Head`, rabbit, fur, 0.12, [-0.03, 0.27, 0], [1, 0.95, 0.9]);
+  for (const side of [-1, 1]) {
+    const ear = ball(scene, `${name}Ear${side}`, rabbit, fur, 0.05, [0.0, 0.4, side * 0.025], [0.55, 3, 0.5]);
+    ear.rotation.set(side * 0.12, 0, 0.25);
+    const inner = ball(scene, `${name}EarIn${side}`, rabbit, pink, 0.03, [-0.008, 0.4, side * 0.025], [0.4, 3.6, 0.3]);
+    inner.rotation.set(side * 0.12, 0, 0.25);
+    ball(scene, `${name}Eye${side}`, rabbit, eye, 0.016, [-0.075, 0.29, side * 0.03]);
+  }
+  ball(scene, `${name}Nose`, rabbit, pink, 0.016, [-0.09, 0.26, 0]);
+  ball(scene, `${name}Tail`, rabbit, fur, 0.05, [0.09, 0.07, 0]);
+  // The pestle, held up in its paws over the mortar.
+  const pestle = new TransformNode(`${name}PestleHolder`, scene);
+  pestle.parent = rabbit;
+  pestle.position.set(-0.08, 0.17, 0);
+  rod(scene, `${name}Pestle`, pestle, wood, [0, 0, 0], [-0.14, -0.05, 0], 0.03, 8);
+  ball(scene, `${name}PestleHead`, pestle, wood, 0.06, [-0.15, -0.06, 0], [1.4, 1, 1]);
+  for (let k = 0; k < 3; k++) ball(scene, `${name}Cake${k}`, root, fur, 0.035, [0.2 + k * 0.045, FLOOR + 0.018, 0.2], [1, 0.5, 1]);
+  root.metadata = { rabbit, pestle };
+  return root;
+}
+
+// The Magpie Bridge (an old tale): magpies and crows wing to wing in an arch from the
+// weaver's star to the herdsman's, faint lit so they show on the night sky. In its own
+// units it spans x from -0.5 to 0.5, the two stars (render/craft.js sizes it).
+const BIRDS = 33;
+function magpieBridge(scene, name) {
+  const root = new TransformNode(name, scene);
+  const dark = light(scene, 'birdDark', '#33405c');
+  const white = light(scene, 'birdWhite', '#eef3ff');
+  const glow = light(scene, 'bridgeGlow', '#9fb8ff', 0.18);
+  for (let k = 0; k < BIRDS; k++) {
+    const u = k / (BIRDS - 1);
+    const x = u - 0.5;
+    const y = 0.07 * (1 - (2 * x) ** 2);
+    const bird = new TransformNode(`${name}Bird${k}`, scene);
+    bird.parent = root;
+    bird.position.set(x, y + (k % 2 ? 0.006 : -0.006), 0);
+    bird.rotation.z = -Math.atan(-0.28 * x) * 2;
+    const magpie = k % 2 === 0;
+    ball(scene, `${name}Body${k}`, bird, dark, 0.012, [0, 0, 0], [2.2, 0.8, 0.8]);
+    if (magpie) ball(scene, `${name}Belly${k}`, bird, white, 0.008, [0.002, -0.002, 0.002], [1.6, 0.7, 0.7]);
+    for (const side of [-1, 1]) {
+      const wing = ball(scene, `${name}Wing${k}${side}`, bird, magpie ? white : dark, 0.016, [0, 0.004 * side, 0], [0.9, 0.18, 1.6]);
+      wing.rotation.x = side * 0.6;
+    }
+    ball(scene, `${name}Halo${k}`, bird, glow, 0.05);
+  }
+  return root;
+}
+
+// A sperm whale and a bowl of petunias (a funny book), side by side in the dark.
+function whale(scene, name) {
+  const root = new TransformNode(name, scene);
+  const skin = paint(scene, 'whaleSkin', '#5d6f86', { shine: 0.25, glow: 0.12 });
+  const belly = paint(scene, 'whaleBelly', '#b9c4d0', { glow: 0.15 });
+  const black = paint(scene, 'whaleEye', '#111418');
+  // The body along -z (head) to +z (tail).
+  const body = new TransformNode(`${name}Whale`, scene);
+  body.parent = root;
+  body.position.x = -0.18;
+  ball(scene, `${name}Head`, body, skin, 0.24, [0, 0, -0.22], [1, 1.05, 1.7]);
+  ball(scene, `${name}Trunk`, body, skin, 0.24, [0, -0.01, 0.05], [0.95, 0.95, 2]);
+  ball(scene, `${name}Tailstock`, body, skin, 0.12, [0, 0.01, 0.33], [0.8, 0.9, 2.4]);
+  ball(scene, `${name}Jaw`, body, belly, 0.06, [0, -0.1, -0.2], [0.8, 0.35, 4.2]);
+  for (const side of [-1, 1]) {
+    const fluke = ball(scene, `${name}Fluke${side}`, body, skin, 0.12, [side * 0.07, 0.02, 0.47], [1.2, 0.12, 0.6]);
+    fluke.rotation.y = side * 0.5;
+    const fin = ball(scene, `${name}Fin${side}`, body, skin, 0.07, [side * 0.12, -0.07, -0.08], [0.25, 0.12, 1]);
+    fin.rotation.z = side * 0.6;
+    ball(scene, `${name}Eye${side}`, body, black, 0.018, [side * 0.1, -0.02, -0.12]);
+  }
+  // The bowl, to its right.
+  const pot = new TransformNode(`${name}Bowl`, scene);
+  pot.parent = root;
+  pot.position.set(0.32, -0.05, 0);
+  drum(scene, `${name}Pot`, pot, paint(scene, 'potClay', '#b8613a'), { height: 0.12, diameterTop: 0.16, diameterBottom: 0.1, tessellation: 24 }, [0, 0, 0]);
+  disc(scene, `${name}Soil`, pot, paint(scene, 'potSoil', '#4a3222'), 0.145, [0, 0.059, 0], 0.004);
+  const leaf = paint(scene, 'petuniaLeaf', '#4e8a3e', { glow: 0.1 });
+  const petals = [paint(scene, 'petuniaPurple', '#8e4cc8', { glow: 0.3 }), paint(scene, 'petuniaPink', '#e86aa8', { glow: 0.3 })];
+  for (let k = 0; k < 10; k++) {
+    const a = k * 2.4;
+    const r = 0.025 + (k % 3) * 0.018;
+    ball(scene, `${name}Leaf${k}`, pot, leaf, 0.035, [Math.cos(a) * r, 0.075, Math.sin(a) * r], [1, 0.4, 1]);
+    ball(scene, `${name}Petunia${k}`, pot, petals[k % 2], 0.04, [Math.cos(a + 1) * r * 1.2, 0.1 + (k % 2) * 0.015, Math.sin(a + 1) * r * 1.2], [1, 0.55, 1]);
+  }
+  return root;
+}
+
+// A wheel of a station turning slowly round its hub (a film), and beside it a round
+// hole where the light bends: a dark ball in a ring of light.
+function ringStation(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  const wheel = new TransformNode(`${name}Wheel`, scene);
+  wheel.parent = root;
+  wheel.position.x = -0.35;
+  const hull = paint(scene, 'stationHull', '#d9dcdf', { shine: 0.5, glow: 0.1 });
+  for (let k = 0; k < 24; k++) {
+    const a = (k / 24) * 2 * Math.PI;
+    box(scene, `${name}Pod${k}`, wheel, hull, [0.1, 0.07, 0.07], [Math.cos(a) * 0.38, Math.sin(a) * 0.38, 0], [0, 0, a + Math.PI / 2]);
+  }
+  for (let k = 0; k < 4; k++) {
+    const a = (k / 4) * 2 * Math.PI + 0.4;
+    rod(scene, `${name}Spoke${k}`, wheel, mats.grey, [0, 0, 0], [Math.cos(a) * 0.36, Math.sin(a) * 0.36, 0], 0.02, 6);
+  }
+  drum(scene, `${name}Hub`, wheel, hull, { height: 0.2, diameter: 0.09, tessellation: 16 }, [0, 0, 0], [0, 0, 1]);
+  scene.onBeforeRenderObservable.add(() => {
+    wheel.rotation.z = (performance.now() / 40000) * 2 * Math.PI;
+  });
+  const hole = new TransformNode(`${name}Hole`, scene);
+  hole.parent = root;
+  hole.position.x = 0.55;
+  ball(scene, `${name}HoleCore`, hole, light(scene, 'holeCore', '#020308'), 0.5);
+  ball(scene, `${name}HoleRim`, hole, light(scene, 'holeRim', '#b9d4ff', 0.22), 0.62);
+  ball(scene, `${name}HoleHalo`, hole, light(scene, 'holeHalo', '#7fa3ff', 0.1), 0.85);
+  drum(scene, `${name}HoleBand`, hole, light(scene, 'holeBand', '#fff1d0', 0.5), { height: 0.004, diameter: 0.7, tessellation: 48 }, [0, 0, 0], [0.15, 1, 0.25]);
+  return root;
+}
+
+// A round house on Mars with potato shoots in rows inside it (a story), a rover beside it
+// and a row of solar panels.
+function potatoFarm(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  disc(scene, `${name}Ground`, root, paint(scene, 'farmGround', '#a5623a'), 1.5, [0, FLOOR - 0.005, 0]);
+  disc(scene, `${name}Soil`, root, paint(scene, 'farmSoil', '#5a3b26'), 0.62, [0, FLOOR + 0.002, 0], 0.006);
+  const shoot = paint(scene, 'potatoShoot', '#5aa047', { glow: 0.2 });
+  for (let row = 0; row < 5; row++) {
+    for (let k = 0; k < 7; k++) {
+      const x = -0.21 + k * 0.07;
+      const z = -0.16 + row * 0.08;
+      if (Math.hypot(x, z) > 0.27) continue;
+      ball(scene, `${name}Shoot${row}${k}`, root, shoot, 0.04, [x, FLOOR + 0.02, z], [1, 0.8, 1]);
+    }
+  }
+  part(CreateSphere(`${name}Dome`, { diameter: 0.7, segments: 24, slice: 0.5 }, scene), root, paint(scene, 'farmDome', '#eef2f4', { shine: 0.6, glow: 0.15, alpha: 0.35 }), [0, FLOOR, 0], [0, 0, 0], [1, 0.75, 1]);
+  box(scene, `${name}Door`, root, paint(scene, 'farmDoor', '#d8d8d8'), [0.1, 0.12, 0.08], [0.36, FLOOR + 0.06, 0]);
+  // The rover, to the right.
+  const rover = new TransformNode(`${name}Rover`, scene);
+  rover.parent = root;
+  rover.position.set(0.52, FLOOR, 0.25);
+  box(scene, `${name}RoverBody`, rover, paint(scene, 'roverBody', '#e8e4dc'), [0.2, 0.07, 0.11], [0, 0.07, 0]);
+  for (const x of [-0.07, 0, 0.07]) for (const z of [-0.065, 0.065]) drum(scene, `${name}Wheel${x}${z}`, rover, mats.dark, { height: 0.02, diameter: 0.05, tessellation: 12 }, [x, 0.025, z], [0, 0, 1]);
+  // Solar panels, to the left.
+  for (let k = 0; k < 3; k++) {
+    const panel = box(scene, `${name}Panel${k}`, root, mats.solar ?? paint(scene, 'farmPanel', '#24346a'), [0.16, 0.008, 0.1], [-0.5, FLOOR + 0.05, -0.2 + k * 0.13]);
+    panel.rotation.z = 0.35;
+  }
+  return root;
+}
+
+// Voyager's golden record (real): a disc of gold with the drawings on its cover: the
+// fourteen pulsars' lines out from the Sun, the hydrogen atom's two rings, the way to play it.
+function goldenRecord(scene, name) {
+  const root = new TransformNode(name, scene);
+  const map = new DynamicTexture('goldenRecordMap', { width: 512, height: 512 }, scene, true);
+  const c = map.getContext();
+  const grad = c.createRadialGradient(256, 256, 20, 256, 256, 256);
+  grad.addColorStop(0, '#f6d67a');
+  grad.addColorStop(1, '#b8892f');
+  c.fillStyle = grad;
+  c.fillRect(0, 0, 512, 512);
+  c.strokeStyle = 'rgba(90, 60, 10, 0.35)';
+  for (let r = 70; r < 250; r += 7) {
+    c.beginPath();
+    c.arc(256, 256, r, 0, 2 * Math.PI);
+    c.stroke();
+  }
+  c.strokeStyle = 'rgba(60, 40, 5, 0.9)';
+  c.lineWidth = 2;
+  // The pulsar map, lower left.
+  const [px, py] = [170, 330];
+  for (let k = 0; k < 14; k++) {
+    const a = (k / 14) * 2 * Math.PI + 0.3;
+    const len = 30 + ((k * 37) % 50);
+    c.beginPath();
+    c.moveTo(px, py);
+    c.lineTo(px + Math.cos(a) * len, py + Math.sin(a) * len);
+    c.stroke();
+  }
+  // Hydrogen's two states, lower right; the record and its stylus, upper left.
+  for (const x of [330, 370]) {
+    c.beginPath();
+    c.arc(x, 360, 10, 0, 2 * Math.PI);
+    c.stroke();
+  }
+  c.beginPath();
+  c.arc(170, 170, 34, 0, 2 * Math.PI);
+  c.stroke();
+  c.beginPath();
+  c.moveTo(150, 120);
+  c.lineTo(205, 170);
+  c.stroke();
+  c.fillStyle = '#8a6420';
+  c.beginPath();
+  c.arc(256, 256, 22, 0, 2 * Math.PI);
+  c.fill();
+  map.update();
+  const gold = new StandardMaterial('goldenRecordFace', scene);
+  gold.diffuseTexture = map;
+  gold.emissiveTexture = map;
+  gold.emissiveColor = new Color3(0.35, 0.3, 0.2);
+  gold.specularColor = new Color3(0.8, 0.7, 0.4);
+  gold.specularPower = 40;
+  // A flat drum, its faces along z (the craft's way: +z toward the Sun).
+  const face = drum(scene, `${name}Disc`, root, gold, { height: 0.03, diameter: 0.9, tessellation: 64 }, [0, 0, 0], [0, 0, 1]);
+  face.rotation.y = Math.PI / 2;
+  return root;
+}
+
+// A little robot on Pluto's plain (a cartoon), squashing rubbish into cubes and stacking
+// them into a tower: a box on two treads, a neck and two round eyes.
+function robot(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  disc(scene, `${name}Ground`, root, paint(scene, 'robotGround', '#d9c7b0'), 1.3, [0, FLOOR - 0.005, 0]);
+  const rust = paint(scene, 'robotRust', '#c9952e', { shine: 0.2, glow: 0.08 });
+  const tread = paint(scene, 'robotTread', '#3a3836');
+  const lens = paint(scene, 'robotLens', '#0e1820', { shine: 0.9, glow: 0.05 });
+  const bot = new TransformNode(`${name}Bot`, scene);
+  bot.parent = root;
+  bot.position.set(-0.12, FLOOR, 0.05);
+  for (const z of [-0.08, 0.08]) box(scene, `${name}Tread${z}`, bot, tread, [0.2, 0.07, 0.05], [0, 0.035, z]);
+  box(scene, `${name}Box`, bot, rust, [0.15, 0.14, 0.14], [0, 0.14, 0]);
+  rod(scene, `${name}Neck`, bot, mats.grey, [0, 0.21, 0], [-0.01, 0.29, 0], 0.025, 6);
+  for (const z of [-0.035, 0.035]) {
+    drum(scene, `${name}Eye${z}`, bot, mats.grey, { height: 0.07, diameter: 0.055, tessellation: 16 }, [-0.02, 0.31, z], [-1, 0, 0]);
+    disc(scene, `${name}Lens${z}`, bot, lens, 0.04, [-0.056, 0.31, z], 0.004).rotation.z = Math.PI / 2;
+  }
+  for (const z of [-0.09, 0.09]) rod(scene, `${name}Arm${z}`, bot, mats.grey, [0, 0.15, z], [-0.12, 0.12, z * 1.1], 0.02, 6);
+  // The tower of cubes, to the right.
+  const shades = ['#7a6f63', '#8c7a5c', '#6c6a66', '#9a8566', '#77706a', '#857767', '#6f6559'];
+  for (let k = 0; k < 7; k++) {
+    const sizeK = 0.09 - k * 0.004;
+    box(scene, `${name}Cube${k}`, root, paint(scene, `rubbish${k}`, shades[k]), [sizeK, sizeK, sizeK], [0.25 + (k % 2 ? 0.008 : -0.006), FLOOR + 0.045 + k * 0.088, 0.02], [0, k * 0.4, 0]);
+  }
+  box(scene, `${name}Waiting`, root, paint(scene, 'rubbishNew', '#8f8473'), [0.08, 0.08, 0.08], [0.04, FLOOR + 0.04, 0.12], [0, 0.3, 0]);
+  return root;
+}
+
+// The slab on the Moon is the slab by Jupiter, standing on the ground.
+export const CURIO_BUILD = { monolith, unknown, teapot, rose, moonSlab: monolith, moonRabbit, magpieBridge, whale, ringStation, potatoFarm, goldenRecord, robot };

@@ -176,6 +176,8 @@ export function siteArrival(site, body) {
 // was asked for outright (the journal's button), so being near does not cancel it.
 // known: the next stop of a tour, which may be jumped near without having been there.
 export function teleportSpot(target, { position, progress, bodies, parent = null, anywhere = false, known = false, ringNormal = null, toward = null }) {
+  // (Nobody jumps into the sky to the Magpie Bridge: core/curios.js.)
+  if (target.sky) return null;
   if ((!known && !visited(target, progress)) || (!anywhere && !farFrom(target, position, bodies))) return null;
   if (target.kind === 'craft') return craftArrival(target, bodies);
   if (target.kind === 'site') return siteArrival(target, parent);

@@ -4,6 +4,7 @@ import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
 import { CRAFT_BUILD } from './craftModels.js';
 import { CURIO_BUILD } from './curioModels.js';
+import { BRIDGE_KM } from '../core/curios.js';
 import { CRAFT_UNFOLD_ALL as CRAFT_UNFOLD } from './craftUnfold.js';
 import { SITE_BUILD, SITE_REPLAY_BUILD, SITE_SAYS, SECOND_SAYS, BOOSTER_SAYS, SAYS_ON_LEFT, SAYS_BY, sayBubble } from './siteModels.js';
 import { drum, rod, group, box } from './craftParts.js';
@@ -69,6 +70,15 @@ const RULES = {
   rose: { visibleKm: 2e6, maxKm: 4000 },
   // Standing in Tycho on the Moon: 8 to 40 km tall (core/curios.js), seen from near the Moon.
   moonSlab: { visibleKm: 30000, minKm: 8, maxKm: 40 },
+  // The others of core/curios.js: on the ground as the slab on the Moon, in space as the
+  // teapot; the bridge in the sky always as wide as from Vega to Altair.
+  moonRabbit: { visibleKm: 30000, minKm: 8, maxKm: 40 },
+  potatoFarm: { visibleKm: 30000, minKm: 8, maxKm: 40 },
+  robot: { visibleKm: 30000, minKm: 8, maxKm: 40 },
+  whale: { visibleKm: 2e6, maxKm: 4000 },
+  ringStation: { visibleKm: 2e6, maxKm: 4000 },
+  goldenRecord: { visibleKm: 2e6, maxKm: 4000 },
+  magpieBridge: { visibleKm: Infinity, minKm: BRIDGE_KM, maxKm: BRIDGE_KM },
 };
 
 // A place with no model of its own gets the plain four-legged lander.
@@ -618,7 +628,10 @@ export function createCraft(scene, craftList) {
       // (The curios' ship turns its back from the slab instead, core/curios.js.)
       const toward = c.awayFrom ? c.position.map((n, i) => 2 * n - c.awayFrom[i]) : sunPosition;
       const ahead = new Vector3(...toward.map((n, i) => (n - position[i]) / KM_PER_UNIT));
-      if (c.up) {
+      if (c.facing) {
+        // Turned as it says (the bridge in the sky: core/curios.js).
+        node.rotationQuaternion = Quaternion.FromLookDirectionLH(new Vector3(...c.facing.forward), new Vector3(...c.facing.up));
+      } else if (c.up) {
         // Standing on the ground (the slab on the Moon): upright with it, its broad face
         // turned the Sun's way along the ground.
         const up = new Vector3(...c.up);

@@ -13,7 +13,7 @@ import { TOURS, stopName, stampFile, sceneFile } from '../core/tours.js';
 import { stuntStampFile } from '../core/stunts.js';
 import { t } from '../core/i18n.js';
 import { craftPicture } from '../core/craft.js';
-import { CURIOS, CURIO_ABOUT } from '../core/curios.js';
+import { CURIOS, CURIO_ABOUT, nextChilseok } from '../core/curios.js';
 import { CURIO_HINTS } from '../core/lines.js';
 
 const $ = (id) => document.getElementById(id);
@@ -458,7 +458,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   // 나중에 쉽게 갈 수 있도록, 탐험 수첩에 넣어줘"): not scored, as the craft. One not
   // found yet shows the word she has heard of it, where to look. (The ship by Jupiter's
   // slab is in the slab's row.)
-  const CURIO_MARKS = { monolith: '▮', teapot: '🫖', rose: '🌹', moonSlab: '▯' };
+  const CURIO_MARKS = { monolith: '▮', teapot: '🫖', rose: '🌹', moonSlab: '▯', moonRabbit: '🐇', magpieBridge: '🌉', whale: '🐋', ringStation: '🛰', potatoFarm: '🥔', goldenRecord: '💿', robot: '🤖' };
   function renderCurios() {
     const list = $('journalCurios');
     list.replaceChildren();
@@ -473,9 +473,15 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const title = document.createElement('strong');
       title.textContent = `${found ? '✓' : '○'} ${c.name}`;
       const line = document.createElement('span');
-      line.textContent = found ? `${CURIO_ABOUT[c.id].kicker}. ${CURIO_ABOUT[c.id].text.split('\n')[0]}` : t`아직 찾지 못했습니다. ${CURIO_HINTS[c.id]?.line ?? ''}`;
+      // (Its notice's first line alone: "소설과 영화에서 온 것." before it was "굳이?".)
+      line.textContent = found ? CURIO_ABOUT[c.id].text.split('\n')[0] : t`아직 찾지 못했습니다. ${CURIO_HINTS[c.id]?.line ?? ''}`;
+      // The bridge is not gone to: it is up in the sky on Chilseok alone.
+      if (c.sky) {
+        const next = nextChilseok();
+        line.textContent += ` ${next ? t`칠석날에만 놓입니다. 다음 칠석은 ${next}입니다.` : t('칠석날에만 놓입니다.')}`;
+      }
       li.append(art, title, line);
-      if (found) li.append(jumpButton(c.id, c.name));
+      if (found && !c.sky) li.append(jumpButton(c.id, c.name));
       list.append(li);
     }
   }

@@ -71,3 +71,12 @@ test('each is told of, logged and carried by itself; the ship goes by the slab',
   assert.deepEqual(log.curios, ['monolith', 'unknown']);
   assert.deepEqual(recordCurios(log, ['teapot']).curios, ['monolith', 'unknown', 'teapot']);
 });
+
+test('one she has been near is named from anywhere after', () => {
+  const bodies = bodiesAt(0);
+  const earth = bodies.find((b) => b.id === 'earth');
+  assert.ok(hiddenCurios(earth.position, bodies).includes('teapot'));
+  assert.ok(!hiddenCurios(earth.position, bodies, null, ['teapot']).includes('teapot'));
+  // The ship goes by the slab.
+  assert.ok(!hiddenCurios(earth.position, bodies, null, ['monolith', 'unknown']).includes('unknown'));
+});

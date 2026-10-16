@@ -104,15 +104,17 @@ export function curiosAt(bodies, position) {
   return out;
 }
 
-// The ids not to draw or name from where she is (the chosen target stays): the Jupiter
-// pair far from Jupiter, the others far from themselves.
-export function hiddenCurios(position, bodies, keepId = null) {
+// The ids not to draw or name from where she is: the Jupiter pair far from Jupiter, the
+// others far from themselves. The chosen target stays, and so does one she has been near
+// (known: ids of the log's curios), from anywhere (the user, 2026-10-16: "한 번 찾으면, 그
+// 다음부터는 멀리서도 뜨는거지?").
+export function hiddenCurios(position, bodies, keepId = null, known = []) {
   const jupiter = bodies.find((b) => b.id === 'jupiter');
   if (!jupiter) return CURIOS.map((c) => c.id);
   const byJupiter = gap(position, jupiter.position) - jupiter.radiusKm <= SHOWN_RADII * jupiter.radiusKm;
   const all = curiosAt(bodies, position);
   return all.filter((c) => {
-    if (c.id === keepId) return false;
+    if (c.id === keepId || known.includes(curioHead(c.id))) return false;
     if (c.id === 'monolith' || c.id === 'unknown') return !byJupiter;
     return gap(position, c.position) > c.shownKm;
   }).map((c) => c.id);

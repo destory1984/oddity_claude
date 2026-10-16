@@ -2953,7 +2953,7 @@ ${STORY_MORE[target.id]}` : told };
     const awayCraft = hiddenCraft(state.position, bodies, selectedId, craft);
     // The slab and the ship between Jupiter and Io (core/curios.js), and those of them too far to show.
     const curios = curiosAt(bodies, state.position);
-    const awayCurios = hiddenCurios(state.position, bodies, selectedId);
+    const awayCurios = hiddenCurios(state.position, bodies, selectedId, progress.curios ?? []);
     // The way she is really going when that is not where she faces: toward the craft
     // while gliding in to dock, or along a drift she is being carried on. In her own
     // frame (x right, y up, z ahead), for the sprite character's choice of drawing.

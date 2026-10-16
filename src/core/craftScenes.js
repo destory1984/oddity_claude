@@ -242,6 +242,92 @@ export const CRAFT_SCENES = {
       };
     },
   },
+  // The slab on the Moon (core/curios.js moonSlab), played from beside it as the one by
+  // Jupiter is (the user, 2026-10-16: "달의 모노리스 애니 만들어"): as in the novel and
+  // the film, people come down into the pit dug round it, one puts a glove to it, and as
+  // the Sun first comes over it the slab sends a piercing call toward Jupiter. walk: the
+  // four come in, 0 → 1; touch: one steps up to it and lays a hand on it; sun: the Sun
+  // rises behind it; signal: the call goes up (seconds since it began, 0 before); cower:
+  // they shrink from the sound.
+  moonSlab: {
+    name: t('달의 판이 깨어나다'),
+    day: t('소설 속 어느 날'),
+    seconds: 36,
+    downAt: 32,
+    sounds: [[25, 'signal'], [29, 'signal']],
+    lines: [
+      { at: 0, text: t('지어낸 이야기입니다. 달의 티코 분화구에서 자기장이 이상한 곳을 파 보니, 판 하나가 묻혀 있었습니다.') },
+      { at: 8, text: t('우주복을 입은 사람들이 파낸 구덩이로 내려와 판을 둘러섭니다. 판은 아주 오래전부터 거기 묻혀 있었습니다.') },
+      { at: 16, text: t('한 사람이 장갑 낀 손으로 판을 쓸어 봅니다. 다 같이 판 앞에 서서 사진을 찍으려 합니다.') },
+      { at: 24, text: t('그때 태양이 판 위로 떠올라 처음으로 햇빛이 닿습니다. 판이 날카로운 신호를 목성 쪽으로 쏘아 보냅니다.') },
+    ],
+    unfold(t) {
+      return {
+        walk: ease(t, 0, 12),
+        touch: ease(t, 15, 18) * (1 - ease(t, 21, 23)),
+        sun: ease(t, 20, 25),
+        signal: t >= 25 ? t - 25 : 0,
+        cower: ease(t, 25, 26.5),
+      };
+    },
+  },
+  // Russell's teapot (core/curios.js), played from beside it (the user, 2026-10-16: "오늘
+  // 만든 다른 곳도 애니 넣고"): his figure told in four lines while the beams of great
+  // telescopes sweep the sky near it and never find it; then, here, it is: its lid hops
+  // and it steams. sweep: how far the beams have come in (0 → 1 → 0); pop: the lid up;
+  // steam: seconds of steam (0 before); twirl: one turn of it, 0 → 1.
+  teapot: {
+    name: t('아무도 못 본 찻주전자'),
+    day: t('1952년'),
+    seconds: 32,
+    downAt: 28,
+    sounds: [[24.6, 'click'], [25.4, 'click']],
+    lines: [
+      { at: 0, text: t('1952년, 철학자 버트런드 러셀은 이렇게 썼습니다. 지구와 화성 사이에 작은 사기 찻주전자가 태양을 돈다고 해 봅시다.') },
+      { at: 8, text: t('찻주전자는 너무 작아서 아무리 큰 망원경으로도 보이지 않습니다. 그러니 아무도 없다고 증명할 수 없습니다.') },
+      { at: 16, text: t('러셀은 증명할 수 없다는 까닭만으로 믿으라고 할 수는 없다고 했습니다. 증명은 있다고 말하는 쪽이 해야 합니다.') },
+      { at: 24, text: t('그런데 이 게임 속 우주에서는 찻주전자가 정말 여기 떠 있습니다.') },
+    ],
+    unfold(t) {
+      return {
+        sweep: ease(t, 6, 14) * (1 - ease(t, 17, 22)),
+        pop: ease(t, 24.5, 24.8) * (1 - ease(t, 25.1, 25.4)) + ease(t, 25.4, 25.7) * (1 - ease(t, 26, 26.3)),
+        steam: t >= 25 ? t - 25 : 0,
+        twirl: ease(t, 27, 30),
+      };
+    },
+  },
+  // The little star with a rose (core/curios.js; the book is not named), played from
+  // beside it: an empty little chair moved a few steps at a time while the Sun sets again
+  // and again, the volcanoes swept (their fires puff), a baobab sprout pulled as it
+  // grows, and the rose under its glass. Nobody is drawn. day: how far the Sun has gone
+  // round (turns); chair: which of its spots the chair has come to (0 → 3); puff: the
+  // fires flare; grow: the sprout grows, 0 → 1, then is gone (pulled); lift: the glass
+  // raised; sway: the rose sways.
+  rose: {
+    name: t('작은 별의 하루'),
+    day: t('책 속 어느 날'),
+    seconds: 32,
+    downAt: 28,
+    sounds: [[20.5, 'click']],
+    lines: [
+      { at: 0, text: t('책 속 이야기를 닮은 별입니다. 아주 작아서, 의자를 몇 걸음만 옮기면 태양이 지는 것을 또 볼 수 있습니다.') },
+      { at: 8, text: t('별의 주인은 아침마다 화산을 청소합니다. 불이 꺼진 화산도 언제 깰지 모르니 똑같이 청소합니다.') },
+      { at: 16, text: t('바오밥 싹은 보이는 대로 뽑아야 합니다. 그냥 두면 뿌리가 별을 뚫고 별을 쪼갠다고 합니다.') },
+      { at: 24, text: t('유리 덮개 아래 장미 한 송이가 바람을 피해 있습니다. 주인이 날마다 물을 주고 돌보는 꽃입니다.') },
+    ],
+    unfold(t) {
+      return {
+        day: t < 8 ? t / 2.5 : 3.2 + (t - 8) / 12,
+        chair: Math.min(3, t / 2.5),
+        puff: t >= 8 && t < 16 ? Math.abs(Math.sin((t - 8) * 2.4)) : 0,
+        grow: t >= 20.5 ? 0 : ease(t, 15, 20),
+        pulled: t >= 20.5,
+        lift: ease(t, 24, 25.5) * (1 - ease(t, 29.5, 31)),
+        sway: t >= 24 ? Math.sin((t - 24) * 2.2) : 0,
+      };
+    },
+  },
   // Juno's one chance to be caught by Jupiter. burn: its main engine is lit; spin: how
   // far it has turned (radians; it spins faster for the burn and slows after).
   juno: {

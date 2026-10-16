@@ -105,8 +105,12 @@ function teapot(scene, name) {
   const blue = paint(scene, 'teapotBlue', '#2f5fae', { shine: 0.4, glow: 0.1 });
   turned(scene, `${name}Body`, root, china, [[0, -0.22], [0.2, -0.21], [0.29, -0.12], [0.31, 0], [0.27, 0.12], [0.18, 0.19], [0, 0.2]]);
   drum(scene, `${name}Band`, root, blue, { height: 0.035, diameter: 0.625, tessellation: 36 }, [0, -0.02, 0]);
-  turned(scene, `${name}Lid`, root, china, [[0, 0.27], [0.06, 0.26], [0.14, 0.21], [0.17, 0.19]]);
-  ball(scene, `${name}Knob`, root, blue, 0.07, [0, 0.29, 0]);
+  // (The lid and its knob ride together, for a scene to lift: render/craftUnfold.js.)
+  const lid = new TransformNode(`${name}LidHolder`, scene);
+  lid.parent = root;
+  turned(scene, `${name}Lid`, lid, china, [[0, 0.27], [0.06, 0.26], [0.14, 0.21], [0.17, 0.19]]);
+  ball(scene, `${name}Knob`, lid, blue, 0.07, [0, 0.29, 0]);
+  root.metadata = { lid };
   // The spout, out and up from the side (+x); the handle a loop on the other side.
   drum(scene, `${name}Spout`, root, china, { height: 0.3, diameterTop: 0.04, diameterBottom: 0.1, tessellation: 16 }, [0.38, 0.06, 0], [1, 1.1, 0]);
   const loop = [[-0.27, 0.12], [-0.4, 0.13], [-0.45, 0.04], [-0.42, -0.06], [-0.28, -0.12]];
@@ -136,10 +140,11 @@ function rose(scene, name) {
     aim(holder, up);
     return holder;
   };
-  [[[-0.5, 0.8, 0.3], true], [[-0.8, 0.3, -0.5], true], [[0.2, 0.5, -0.85], false]].forEach(([way, lit], k) => {
+  // (Its moving parts are kept for a scene: render/craftUnfold.js.)
+  const volcanoes = [[[-0.5, 0.8, 0.3], true], [[-0.8, 0.3, -0.5], true], [[0.2, 0.5, -0.85], false]].map(([way, lit], k) => {
     const at = on(`Volcano${k}`, way);
     drum(scene, `${name}Cone${k}`, at, dark, { height: 0.09, diameterTop: 0.03, diameterBottom: 0.14 }, [0, 0.04, 0]);
-    if (lit) ball(scene, `${name}Fire${k}`, at, fire, 0.035, [0, 0.09, 0]);
+    return lit ? ball(scene, `${name}Fire${k}`, at, fire, 0.035, [0, 0.09, 0]) : at;
   });
   const sprout = on('Sprout', [0.8, 0.4, 0.45]);
   rod(scene, `${name}SproutStem`, sprout, green, [0, 0, 0], [0, 0.07, 0], 0.012);
@@ -150,7 +155,8 @@ function rose(scene, name) {
   ball(scene, `${name}RoseLeaf`, flower, green, 0.04, [0.02, 0.06, 0], [1, 0.4, 0.6]);
   ball(scene, `${name}RoseBloom`, flower, red, 0.06, [0, 0.15, 0], [1, 1.2, 1]);
   ball(scene, `${name}RosePetal`, flower, red, 0.045, [0.02, 0.17, 0.01], [1, 1.3, 1]);
-  part(CreateSphere(`${name}Dome`, { diameter: 0.24, segments: 18, slice: 0.5 }, scene), flower, glass, [0, 0, 0]);
+  const dome = part(CreateSphere(`${name}Dome`, { diameter: 0.24, segments: 18, slice: 0.5 }, scene), flower, glass, [0, 0, 0]);
+  root.metadata = { volcanoes, sprout, flower, dome };
   return root;
 }
 

@@ -1,5 +1,5 @@
-import { TransformNode, CreateSphere, CreatePlane, StandardMaterial, Color3, Mesh, VertexData, Texture, DynamicTexture, Vector3, Constants } from './babylon.js';
-import { part, cyl, group, box, drum, rod, fuse } from './craftParts.js';
+import { TransformNode, CreateSphere, CreatePlane, StandardMaterial, Color3, Mesh, VertexData, Texture, DynamicTexture, Vector3, Quaternion, Constants } from './babylon.js';
+import { part, cyl, group, box, drum, rod, fuse, aim } from './craftParts.js';
 import { CRAFT_BUILD, CRAFT_UNFOLD } from './craftModels.js';
 import { astronaut, sayBubble } from './siteModels.js';
 import { CURIO_BUILD } from './curioModels.js';
@@ -1248,8 +1248,155 @@ function monolithShip(scene, name, mats) {
   return { root, pose, face: true, fit: 0.7 };
 }
 
+// The slab on the Moon found (core/craftScenes.js moonSlab): it stands in the pit dug
+// round it, its broad face to the watcher; four people in suits come down to it from
+// the sides, one lays a glove on it, the Sun comes up behind its top and rings of its
+// call go up from it while they shrink back. Stood on the ground (render/craft.js turns
+// a grounded stage upright, its +z to the watcher): the ground is half the slab's
+// height under its middle.
+const FLOOR = -0.45;
+const PEOPLE = [[-0.62, 0.38], [-0.3, 0.62], [0.3, 0.62], [0.62, 0.38]];
+const RINGS = 3;
+const RING_EVERY = 1.4;
+function moonSlabFound(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  drum(scene, `${name}Ground`, root, tint(scene, `${name}GroundPaint`, '#8d8a85'), { height: 0.02, diameter: 3.4, tessellation: 40 }, [0, FLOOR - 0.01, 0]);
+  box(scene, `${name}Pit`, root, tint(scene, `${name}PitPaint`, '#4a4743'), [1.7, 0.012, 1.3], [0, FLOOR + 0.003, 0.15]);
+  const slab = CURIO_BUILD.monolith(scene, `${name}Slab`, mats);
+  slab.parent = root;
+  // People about twice the slab's height under it, as in the film (3.4 m slab).
+  const people = PEOPLE.map(([x, z], k) => {
+    const holder = group(scene, `${name}Holder${k}`, root);
+    const person = astronaut(scene, `${name}Person${k}`, mats);
+    person.parent = holder;
+    person.scaling.setAll(2);
+    // (An astronaut faces +x: turned to the slab.)
+    holder.rotation.y = Math.atan2(-z, x) + Math.PI;
+    return { holder, person, at: [x, z], from: [x * 2.4, z * 2.4 + 0.4] };
+  });
+  const sun = ball(scene, `${name}Sun`, root, glow(scene, `${name}SunLight`, '#fff6d8', 1), 0.22);
+  const halo = ball(scene, `${name}Halo`, root, glow(scene, `${name}HaloLight`, '#ffe3a0', 0.25), 0.6);
+  const ringLight = glow(scene, `${name}RingLight`, '#bfe8ff', 0.6);
+  const rings = Array.from({ length: RINGS }, (_, k) => drum(scene, `${name}Ring${k}`, root, ringLight, { height: 0.01, diameter: 1, tessellation: 40, cap: 0 }, [0, 0.45, 0]));
+  function pose({ walk = 0, touch = 0, sun: up = 0, signal = 0, cower = 0 }) {
+    people.forEach(({ holder, person, at, from }, k) => {
+      const go = clamp(walk * 1.3 - k * 0.1);
+      let [x, z] = mix(from, at, smooth(go));
+      // The second steps up to the slab's face and back.
+      if (k === 1) z += (0.16 - z) * touch;
+      holder.position.set(x, FLOOR + 0.01 * Math.abs(Math.sin(go * 18)) * (go < 1 ? 1 : 0), z);
+      person.rotation.z = -0.35 * cower;
+    });
+    sun.position.set(0, 0.05 + 0.55 * up, -1.3);
+    halo.position.copyFrom(sun.position);
+    for (const mesh of [sun, halo]) mesh.setEnabled(up > 0.01);
+    rings.forEach((ring, k) => {
+      const age = signal - k * RING_EVERY;
+      const on = signal > 0 && age > 0;
+      ring.setEnabled(on);
+      if (!on) return;
+      const u = (age % (RINGS * RING_EVERY)) / (RINGS * RING_EVERY);
+      ring.position.y = 0.45 + 1.2 * u;
+      ring.scaling.set(0.3 + 1.4 * u, 1, 0.3 + 1.4 * u);
+      ring.visibility = 1 - u;
+    });
+  }
+  pose({});
+  return { root, pose, ground: true, fit: 1 };
+}
+
+// Russell's teapot (core/craftScenes.js teapot): two telescope beams come sweeping in
+// from below on either side and stop short of it; then its lid hops twice, steam puffs
+// out of it and it turns round once.
+const BEAM_BASES = [[-1.7, -1.7, -0.6, 0.55, -0.62], [1.7, -1.6, -0.6, -0.55, 0.6]];
+function teapotScene(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  const spin = group(scene, `${name}Spin`, root);
+  const pot = CURIO_BUILD.teapot(scene, `${name}Pot`, mats);
+  pot.parent = spin;
+  const { lid } = pot.metadata;
+  const beamLight = glow(scene, `${name}BeamLight`, '#d9ecff', 0.13);
+  const beams = BEAM_BASES.map(([x, y, z, from, to], k) => {
+    const holder = group(scene, `${name}Beam${k}`, root, [x, y, z]);
+    drum(scene, `${name}BeamCone${k}`, holder, beamLight, { height: 3, diameterTop: 0.7, diameterBottom: 0.04, tessellation: 20, cap: 0 }, [0, 1.5, 0]);
+    return { holder, from, to };
+  });
+  const steamLight = glow(scene, `${name}SteamLight`, '#ffffff', 0.5);
+  const puffs = Array.from({ length: 4 }, (_, k) => ball(scene, `${name}Steam${k}`, spin, steamLight, 0.08));
+  function pose({ sweep = 0, pop = 0, steam = 0, twirl = 0 }) {
+    for (const { holder, from, to } of beams) {
+      holder.rotation.z = from + (to - from) * sweep;
+      holder.setEnabled(sweep > 0.01);
+    }
+    lid.position.y = 0.12 * pop;
+    lid.rotation.z = 0.25 * pop;
+    puffs.forEach((puff, k) => {
+      const age = steam - k * 0.6;
+      const u = age > 0 ? (age % 2.4) / 2.4 : -1;
+      puff.setEnabled(u >= 0 && steam < 7);
+      if (u < 0) return;
+      // Up from the spout's mouth, drifting only a little outward.
+      puff.position.set(0.47 + 0.08 * u, 0.2 + 0.55 * u, 0.04 * Math.sin(k * 2 + u * 6));
+      puff.scaling.setAll(0.6 + 1.6 * u);
+      puff.visibility = 1 - u;
+    });
+    spin.rotation.y = 2 * Math.PI * twirl;
+  }
+  pose({});
+  return { root, pose, face: true, fit: 0.8 };
+}
+
+// The little star with a rose (core/craftScenes.js rose): the Sun goes round it fast, so
+// that it sets again and again; an empty little chair is moved a few steps at a time; the
+// volcanoes' fires puff as they are swept; a baobab sprout grows and is gone; the glass
+// over the rose is lifted while the rose sways. Nobody is drawn.
+const CHAIR_SPOTS = [[0.25, 1, 0.55], [0.65, 0.85, 0.35], [0.9, 0.45, 0.2], [0.75, 0.1, 0.65]];
+function roseScene(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  const star = CURIO_BUILD.rose(scene, `${name}Star`, mats);
+  star.parent = root;
+  const { volcanoes, sprout, flower, dome } = star.metadata;
+  const fires = volcanoes.filter((v) => v.getClassName?.() === 'Mesh');
+  const sun = ball(scene, `${name}Sun`, root, glow(scene, `${name}SunLight`, '#ffd27a', 1), 0.16);
+  const halo = ball(scene, `${name}Halo`, root, glow(scene, `${name}HaloLight`, '#ffb050', 0.22), 0.42);
+  const wood = tint(scene, `${name}Wood`, '#8a5a35');
+  const chair = new TransformNode(`${name}Chair`, scene);
+  chair.parent = root;
+  box(scene, `${name}Seat`, chair, wood, [0.05, 0.008, 0.05], [0, 0.03, 0]);
+  box(scene, `${name}Back`, chair, wood, [0.008, 0.05, 0.05], [-0.022, 0.055, 0]);
+  for (const [x, z] of [[-0.02, -0.02], [-0.02, 0.02], [0.02, -0.02], [0.02, 0.02]]) box(scene, `${name}Leg${x}${z}`, chair, wood, [0.006, 0.03, 0.006], [x, 0.015, z]);
+  const unit = (v) => {
+    const length = Math.hypot(...v);
+    return v.map((n) => n / length);
+  };
+  const domeY = dome.position.y;
+  // (The rose stands turned out from the ball: it sways about its own forward axis.)
+  const upright = flower.rotationQuaternion.clone();
+  function pose({ day = 0, chair: moved = 0, puff = 0, grow = 0, pulled = false, lift = 0, sway = 0 }) {
+    const a = 2 * Math.PI * day;
+    sun.position.set(Math.cos(a) * 1.15, Math.sin(a) * 1.15 * 0.6, -0.5 - 0.3 * Math.sin(a));
+    halo.position.copyFrom(sun.position);
+    // From one spot to the next it slides, as if carried.
+    const from = Math.min(CHAIR_SPOTS.length - 1, Math.floor(moved));
+    const to = Math.min(CHAIR_SPOTS.length - 1, from + 1);
+    const way = unit(mix(CHAIR_SPOTS[from], CHAIR_SPOTS[to], smooth(moved - from)));
+    chair.position.set(...way.map((n) => n * 0.3));
+    aim(chair, way);
+    for (const fire of fires) fire.scaling.setAll(1 + 1.8 * puff);
+    sprout.setEnabled(!pulled);
+    sprout.scaling.set(1 + grow, 1 + 2.5 * grow, 1 + grow);
+    dome.position.y = domeY + 0.14 * lift;
+    flower.rotationQuaternion = upright.multiply(Quaternion.RotationAxis(Vector3.Forward(), 0.15 * sway));
+  }
+  pose({});
+  return { root, pose, face: true, fit: 0.75 };
+}
+
 export const CRAFT_UNFOLD_ALL = {
   monolith: monolithShip,
+  moonSlab: moonSlabFound,
+  teapot: teapotScene,
+  rose: roseScene,
   ...CRAFT_UNFOLD,
   voyager2: neptuneGoesBy,
   pioneer10: jupiterGoesBy,

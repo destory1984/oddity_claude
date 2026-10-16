@@ -651,7 +651,16 @@ export function createCraft(scene, craftList) {
         loose.root.scaling.copyFrom(node.scaling).scaleInPlace(1 + ((loose.fit ?? 1) - 1) * eased);
         loose.root.position.copyFrom(node.position);
         if (loose.lift) loose.root.position.y += loose.lift * node.scaling.y * eased;
-        if (loose.face) {
+        if (loose.ground && c.up) {
+          // A stage on the ground (the slab on the Moon): upright with the ground, its +z
+          // turned along the ground toward whoever watches.
+          const up = new Vector3(...c.up);
+          const toEye = scene.activeCamera.globalPosition.subtract(loose.root.position);
+          // (FromLookDirectionLH turns +z to the way given: away from the eye, then
+          // flipped, as the stage stood back to front.)
+          const level = toEye.subtract(up.scale(Vector3.Dot(toEye, up))).scale(-1);
+          loose.root.rotationQuaternion = Quaternion.FromLookDirectionLH(level.lengthSquared() > 1e-12 ? level.normalize() : Vector3.Cross(up, Vector3.Right()).normalize(), up);
+        } else if (loose.face) {
           // Its +z toward the eye (as lookAt at the eye turned it: this look direction is
           // the one from the eye), with the eye's own "up": docked from above or rolled
           // over, the scene still stands upright in the view.

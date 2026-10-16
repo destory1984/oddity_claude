@@ -384,6 +384,13 @@ export function createSound() {
       tone({ freq: 192, to: 208, type: 'triangle', length: 3.2, volume: 0.03, attack: 0.3, out });
       for (let k = 0; k < 14; k++) noise({ start: 0.2 + k * 0.21, length: 0.03, volume: 0.07, type: 'bandpass', freq: 1300, out });
     },
+    // The slab on the Moon calling out to Jupiter as the Sun first touches it (core/craftScenes.js
+    // moonSlab): a high whine beating fast, four seconds, kept soft (in the film it hurt).
+    signal: () => {
+      const out = scene();
+      for (let k = 0; k < 16; k++) tone({ freq: 2600, start: k * 0.25, length: 0.2, volume: 0.03, attack: 0.01, hold: 0.15, out });
+      tone({ freq: 1300, start: 0, length: 4, volume: 0.015, attack: 0.3, hold: 3.6, out });
+    },
     // Something breaks off: a sharp crack and a ring.
     clunk: () => {
       const out = scene();

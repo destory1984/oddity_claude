@@ -9,7 +9,7 @@ import {
   rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, right, swingToward, turnToward,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/craft.js';
-import { curiosAt, hiddenCurios, nearSlab, carryingCurio, curiosNear, curioHead, CURIO_ABOUT } from './core/curios.js';
+import { curiosAt, hiddenCurios, carryingCurio, curiosNear, curioHead, CURIO_ABOUT } from './core/curios.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
@@ -140,6 +140,8 @@ function inspectView(target) {
 // The close view while a day is played again (core/replay.js): the model is drawn 6 km
 // wide and starts 14 km up; from 48 km at 34 degrees the view is 29 km high.
 const REPLAY_VIEW = { distanceKm: 48, fovDeg: 34 };
+// The slab on the Moon's scene from farther than its close look, so its people fit.
+const CURIO_GROUND_VIEW_KM = 60;
 
 // For tuning a planet's look: set to e.g. { id: 'jupiter', fromCentreKm: 400000 } to
 // start beside it. null starts above Earth, where the first-visit guide begins.
@@ -374,8 +376,13 @@ let scenePlace = null;
 const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? curiosAt(bodies, state.position).find((c) => c.id === id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null) ?? (eventPlace?.id === id ? eventPlace : null);
 // The body whose own scene may be played now: the one she rests on if it has one (Saturn,
 // Jupiter, the comet), else one she is close beside (the comet: core/replay.js besideRadii).
-// By the slab, with it or its ship chosen: the slab's scene (core/craftScenes.js monolith).
-const curioScene = () => (!visit && !docked && (selectedId === 'monolith' || selectedId === 'unknown') && nearSlab(bodies, state.position) ? 'monolith' : null);
+// By a curio with a scene of its own, it chosen (or the ship, for the slab by Jupiter):
+// that scene (core/craftScenes.js monolith, moonSlab).
+const curioScene = () => {
+  if (visit || docked || !selectedId) return null;
+  const head = curioHead(selectedId);
+  return replayFor(head) && curiosNear(bodies, state.position).includes(head) ? head : null;
+};
 const sceneBody = () => (state.restingOn && replayOn(state.restingOn) ? state.restingOn : replayBeside(state.position, bodies));
 const named = (id) => bodyById(id) ?? craftById(id) ?? curiosAt(bodies, state.position).find((c) => c.id === id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null) ?? (eventPlace?.id === id ? eventPlace : null);
 
@@ -1084,13 +1091,26 @@ ${STORY_MORE[target.id]}` : told };
       replay = { id, startedAt: performance.now(), down: false };
       return;
     }
-    // By the slab: the same, without docking (nothing docks with it).
+    // By a curio: the same, without docking (nothing docks with them).
     if (curioScene()) {
       const id = curioScene();
       selectedId = id;
       hud.showSelection(named(id));
       $('inspectTarget').click();
       if (photo.orbit()?.id !== id) return;
+      // One standing on the ground (the slab on the Moon) is seen along the ground from
+      // 15 degrees above it, as a scene on a body is: from overhead it lay flat.
+      const curio = here(id);
+      if (curio.up) {
+        const ahead = forward(photo.orbit().orientation);
+        const rise = ahead.reduce((sum, n, i) => sum + n * curio.up[i], 0);
+        let level = ahead.map((n, i) => n - curio.up[i] * rise);
+        if (Math.hypot(...level) < 1e-6) level = [curio.up[1], -curio.up[0], 0];
+        const length = Math.hypot(...level);
+        const tilt = (15 * Math.PI) / 180;
+        const facing = orientationFrom(level.map((n, i) => (n / length) * Math.cos(tilt) - curio.up[i] * Math.sin(tilt)), curio.up);
+        photo.orbitAround({ id, facing, ...inspectView(curio), distanceKm: CURIO_GROUND_VIEW_KM });
+      }
       replay = { id, startedAt: performance.now(), down: false };
       return;
     }

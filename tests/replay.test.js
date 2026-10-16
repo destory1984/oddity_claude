@@ -9,8 +9,8 @@ test('every scene belongs to a story place on a surface and tells its lines in o
     // A scene on a body belongs to a story told there: by landing on it (Saturn), or by
     // passing near it (Philae's comet), or by coming to a place on its cloud tops, where
     // nobody can stand (Jupiter: the comet's bruises).
-    // A scene of unfolding belongs to a craft she can dock with, or to the slab by Jupiter.
-    if (scene.unfold) assert.ok(CRAFT.some((c) => c.id === id) || id === 'monolith', id);
+    // A scene of unfolding belongs to a craft she can dock with, or to a curio (core/curios.js).
+    if (scene.unfold) assert.ok(CRAFT.some((c) => c.id === id) || ['monolith', 'moonSlab', 'teapot', 'rose'].includes(id), id);
     else if (scene.on) assert.ok(STORIES.some((s) => (s.type === 'land' && s.body === scene.on) || (s.type === 'near' && s.target === scene.on) || (s.type === 'surface' && s.body === scene.on)), id);
     else assert.equal(STORIES.find((s) => s.id === id)?.type, 'surface', id);
     assert.equal(scene.lines[0].at, 0);
@@ -111,7 +111,7 @@ test('Curiosity has a scene of its own day, told in four lines', () => {
   assert.equal(replayFor('curiosity').day, '2012년 8월 6일');
   assert.equal(replayFor('curiosity').lines.length, 4);
   assert.match(replayFrame('curiosity', 17).text, /게일 분화구/);
-  assert.equal(Object.keys(REPLAYS).length, 140);
+  assert.equal(Object.keys(REPLAYS).length, 143);
   assert.equal(replayFor('viking1').day, '1976년 7월 20일');
   assert.match(replayFrame('viking1', 17).text, /25초/);
 });
@@ -494,4 +494,15 @@ test('the slab has a made-up scene: the ship comes in, burns, stops and says a w
   assert.equal(at(16).come, 1);
   assert.ok(at(20).say > 0.99 && at(23).say === 0);
   assert.equal(at(30).glint, 1);
+});
+
+test('the slab on the Moon has a made-up scene: they come, one touches it, the Sun comes up and it calls', () => {
+  assert.equal(replayFor('moonSlab').day, '소설 속 어느 날');
+  const at = (t) => replayFrame('moonSlab', t).unfold;
+  assert.equal(at(0).walk, 0);
+  assert.equal(at(12).walk, 1);
+  assert.ok(at(19).touch > 0.99 && at(24).touch === 0);
+  assert.equal(at(24).signal, 0);
+  assert.ok(at(30).signal > 0 && at(30).cower === 1 && at(30).sun === 1);
+  assert.deepEqual(replaySounds('moonSlab', 24, 30), ['signal', 'signal']);
 });

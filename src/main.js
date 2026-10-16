@@ -261,8 +261,9 @@ let locked = false;
 // head, they dragged it back to where they liked it, and the first slide threw it down
 // again). Out of sight when she locks on, the target is brought to AIM_LINE.
 let lockAim = null;
-// The target lockAim was set for. Another target chosen while locked (its name tag, a
-// jump, a tour): the lock goes over to it and frames it anew (the user, 2026-10-07:
+// The target lockAim was set for. Another target chosen while locked (a tour): the lock
+// goes over to it and frames it anew; a look or a jump lets go of the lock since
+// 2026-10-16 (facePicked, teleport). (The user, 2026-10-07:
 // "목표물에 고정시켜놓고, 다른 행성을 보려고 하면, 안 먹히고 엉뚱한 방향을 보게 되네":
 // the new one was swung to where the old one had been held in her view).
 let lockFor = null;
@@ -771,6 +772,8 @@ async function init() {
   // free: somewhere not been to may be jumped to as well (the big map, an eclipse's place).
   function teleport(id, anywhere = false, known = false, toward = null, free = false) {
     if (warp.busy()) return;
+    // A jump lets go of a lock too (as facePicked).
+    locked = false;
     sound.cue('warp');
     warp.play(() => {
       const target = here(id);
@@ -927,6 +930,9 @@ ${STORY_MORE[target.id]}` : told };
 
   // Turn her to look at what is chosen (the "바라보기" key, and a body's name tag).
   function facePicked() {
+    // Looking somewhere lets go of a lock, without a word of its own (the user, 2026-10-16:
+    // "고정된 상태에서 워프, 바라보기 버튼을 누르면, 자동으로 고정 해제").
+    locked = false;
     const body = here(selectedId);
     // She comes round to it over half a second or so, not at a blow (the user,
     // 2026-10-10, of the flight practice's ring and then of this: "한번에 휙~ 돌리지말고,

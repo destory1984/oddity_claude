@@ -2526,6 +2526,10 @@ ${STORY_MORE[target.id]}` : told };
     // A suspended tab must never fast-forward the journey.
     // (That one long frame counts as no time; the flight goes on from the next.)
     const dt = paused || elapsed > MAX_FRAME_GAP_S ? 0 : elapsed;
+    // A day played again waits with the game: its clock ran on while the game stood
+    // paused (as it does when the page loses the focus), and Spirit's word came and went
+    // unseen (the user, 2026-10-16: "대사는?").
+    if (replay && dt === 0 && elapsed > 0) replay.startedAt += elapsed * 1000;
 
     // Advance the orbits, carry the traveler with a nearby body, then fly.
     if (dt > 0) {

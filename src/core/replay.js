@@ -145,6 +145,8 @@ export const REPLAYS = {
     rollFrom: 'start',
     turns: 5,
     bagSeconds: 2.5,
+    // Its word as it bounces, as Spirit's (render/siteModels.js SITE_SAYS).
+    say: [11.4, 16.2],
     sounds: [[0, 'chuteShort'], [5, 'bounce'], [8, 'bounce'], [10.4, 'bounce'], [12.3, 'bounce'], [13.8, 'bounce'], [15, 'bounce']],
     lines: [
       { at: 0, text: t('1997년 7월 4일. 패스파인더가 낙하산에 매달려 아레스 계곡으로 내려옵니다. 화성에 21년 만에 내리는 탐사선입니다.') },

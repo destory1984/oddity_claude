@@ -1605,6 +1605,8 @@ export const SITE_SAYS = {
   luna9: () => t('통. 통. 통. 어지러워~'),
   // (Of five lines offered for Viking 1, 2026-10-07: "2".)
   viking1: () => t('화성아. 안녕? 처음 뵙겠습니다'),
+  // (Mine, on the user's "대사는?", 2026-10-16: it bounced fifteen times or more.)
+  pathfinder: () => t('통통통. 열다섯 번이나 튀었어!'),
   // (Of five offered for Curiosity: "4": to the stage that let it down, as that flies off.)
   curiosity: () => t('태워 줘서 고마워. 잘 가~'),
   // (Of five offered for Venera 7: "1": as it comes down through 475 degrees.)

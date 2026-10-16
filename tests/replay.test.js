@@ -167,11 +167,12 @@ test('Luna 9 opens its petals after its bags are off; Pathfinder is shown open a
   assert.ok(luna.openAt >= luna.downAt + luna.bagSeconds);
   assert.ok(!replayFrame('luna9', luna.openAt - 0.1).open);
   assert.ok(replayFrame('luna9', luna.openAt).open);
-  // It speaks only while it bounces; Pathfinder says nothing.
+  // It speaks only while it bounces; so does Pathfinder, later in its bounces.
   assert.equal(replayFrame('luna9', 5).say, 0);
   assert.equal(replayFrame('luna9', 9).say, 1);
   assert.equal(replayFrame('luna9', 13).say, 0);
-  assert.equal(replayFrame('pathfinder', 12).say, 0);
+  assert.equal(replayFrame('pathfinder', 10).say, 0);
+  assert.equal(replayFrame('pathfinder', 13).say, 1);
   // Viking 1 greets Mars once it is down.
   assert.equal(replayFrame('viking1', 16).say, 0);
   assert.equal(replayFrame('viking1', 20).say, 1);

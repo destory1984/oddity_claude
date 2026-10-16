@@ -3,8 +3,9 @@ import { t } from '../core/i18n.js';
 const $ = (id) => document.getElementById(id);
 
 // The photo a "사진 보기" key opens: the picture fills the screen, its words on a dark band
-// at the foot; with more than one, a swipe or a press on either side goes to the next,
-// and dots say which it is (the user, 2026-10-16, of three looks: "3").
+// at the foot; with more than one, a swipe goes to the next and dots say which it is
+// (the user, 2026-10-16, of three looks: "3"). A press anywhere puts it away, as ✕ does
+// (the user, 2026-10-17: "그냥 화면 아무데나 눌러도, 이전 화면으로 보내줘").
 // slides: [{ file, title, caption, credit }] (core/photoSlides.js).
 export function createPhotoView({ onOpen, onClose }) {
   const dialog = $('photoView');
@@ -34,15 +35,13 @@ export function createPhotoView({ onOpen, onClose }) {
     draw();
   }
 
-  // A press on the left third goes back, anywhere else on the picture forward.
-  picture.addEventListener('click', (event) => {
-    // (The press that ends a swipe has moved it already.)
+  dialog.addEventListener('click', () => {
+    // (The press that ends a swipe has moved it on instead.)
     if (swiped) {
       swiped = false;
       return;
     }
-    const box = picture.getBoundingClientRect();
-    go(event.clientX < box.left + box.width / 3 ? -1 : 1);
+    dialog.close();
   });
   let downX = null;
   let swiped = false;

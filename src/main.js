@@ -805,9 +805,14 @@ async function init() {
       input.clear();
       // (By the slab she looks between it and its ship, both in view: core/teleport.js
       // curioArrival.)
-      const pair = target.id === 'monolith' ? curiosAt(bodies, spot) : null;
-      const aim = pair ? pair[0].position.map((n, i) => (n + pair[1].position[i]) / 2) : target.position;
-      const facing = lookAtDirection(aim.map((n, i) => n - spot[i]));
+      // (A curio is placed as seen from where she arrives: the slab on the Moon stands
+      // half its drawn height up, and from afar it was drawn five times taller. One on
+      // the ground is looked at with the ground level under her.)
+      const pair = target.kind === 'curio' ? curiosAt(bodies, spot) : null;
+      const seen = pair?.find((c) => c.id === target.id) ?? target;
+      const aim = target.id === 'monolith' ? pair[0].position.map((n, i) => (n + pair[1].position[i]) / 2) : seen.position;
+      const toward = aim.map((n, i) => n - spot[i]);
+      const facing = seen.up ? orientationFrom(toward, seen.up) : lookAtDirection(toward);
       // The traveler stands in the middle of the view: on a wide screen turn a little
       // so a body sits beside them, not behind them.
       const aside = target.kind !== 'craft' && target.kind !== 'site' && innerWidth / innerHeight >= 1;

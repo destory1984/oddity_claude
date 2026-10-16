@@ -29,7 +29,7 @@ const CURIO = Object.fromEntries(CURIOS.map((c) => [c.id, c]));
 // (ui/messages.js gives the same when she comes near).
 const FROM_FILM = t('소설과 영화에서 온 것');
 export const CURIO_ABOUT = {
-  monolith: { kicker: FROM_FILM, text: t('목성과 이오 사이에 대리석 판 하나가 떠 있습니다. 가로, 세로, 두께가 1:4:9입니다.\n누가 왜 두었는지 아무도 모릅니다. 앞의 배도 이것을 보러 온 듯합니다.') },
+  monolith: { kicker: FROM_FILM, text: t('목성과 이오 사이에 대리석 판 하나가 떠 있습니다. 가로, 세로, 두께가 1:4:9입니다.\n누가 왜 두었는지 아무도 모릅니다. 앞의 우주선도 이것을 보러 온 듯합니다.') },
   teapot: { kicker: t('철학자의 비유에서 온 것'), text: t('지구와 화성 사이에서 사기 찻주전자 하나가 태양을 돕니다.\n철학자 러셀의 비유로, 너무 작아 없다고 증명할 수 없는 것을 뜻합니다.') },
   rose: { kicker: t('책에서 온 것'), text: t('소행성대의 작은 별에 화산 셋과 바오밥 싹, 장미 한 송이가 있습니다.\n어느 책에서 읽은 별과 꼭 닮았습니다.') },
   moonSlab: { kicker: FROM_FILM, text: t('달의 티코 분화구에 목성 곁과 같은 1:4:9 대리석 판이 서 있습니다.\n소설과 영화에서는 이 판을 파내자 목성 쪽으로 신호를 보냈습니다.') },

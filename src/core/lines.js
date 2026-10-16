@@ -102,6 +102,16 @@ export const NEAR = {
   neptune: [t('바람이 소리보다 빠르대.'), t('여기까지 햇빛이 네 시간 걸려.')],
   pluto: [t('하트가 진짜 있네.'), t('작아도 달이 다섯이나 돼.')],
 };
+// Near a world, before anything else, a word heard about a curio not found yet
+// (core/curios.js): where to look (the user, 2026-10-16, of the teapot 1.48 million km
+// from Earth: "그래", to a hint like "지구와 화성 사이에 뭔가 있다더라").
+export const CURIO_HINTS = {
+  teapot: { near: 'earth', line: t('지구랑 화성 사이에 찻주전자가 돈대.') },
+  tycho: { near: 'moon', line: t('티코 분화구에 이상한 판이 있대.') },
+  rose: { near: 'mars', line: t('소행성대에 장미 핀 별이 있대.') },
+  monolith: { near: 'jupiter', line: t('이오 쪽에 하얀 판이 떠 있대.') },
+};
+
 // Far from every world (DEEP_FROM_KM from the nearest ground, or more).
 export const DEEP_FROM_KM = 2e6;
 export const DEEP = [t('사방이 다 별이야.'), t('여긴 아무것도 없어. 넓다.'), t('내 숨소리만 들려.')];

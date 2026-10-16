@@ -80,3 +80,12 @@ test('one she has been near is named from anywhere after', () => {
   // The ship goes by the slab.
   assert.ok(!hiddenCurios(earth.position, bodies, null, ['monolith', 'unknown']).includes('unknown'));
 });
+
+test('near a world she passes on a word about a curio there, in her own short way', async () => {
+  const { CURIO_HINTS } = await import('../src/core/lines.js');
+  for (const [id, hint] of Object.entries(CURIO_HINTS)) {
+    assert.ok(CURIOS.some((c) => c.id === id && !c.group), id);
+    assert.ok(BODIES.some((b) => b.id === hint.near), id);
+    assert.ok(hint.line.length <= 25, hint.line);
+  }
+});

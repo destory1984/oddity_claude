@@ -58,7 +58,7 @@ import { dailyRequest, requestTarget, requestMet, recordDay, streak, lastWeek } 
 import { palFor } from './core/pal.js';
 import { seeFor, SEE_S } from './core/sprite.js';
 import {
-  LANDED, IDLE, AGAIN, IDLE_AFTER_S, IDLE_GAP_S, freshLine, milestoneLine,
+  LANDED, IDLE, AGAIN, IDLE_AFTER_S, IDLE_GAP_S, freshLine, milestoneLine, CURIO_HINTS,
   NEAR, NEAR_RADII, DEEP, DEEP_FROM_KM, REAR, PHOTO, JUMP, DOCK, SIGHTS, SIGHT_TELLS, fastLine,
 } from './core/lines.js';
 import {
@@ -2828,7 +2828,9 @@ ${STORY_MORE[target.id]}` : told };
     idleQuiet = Math.max(0, idleQuiet - dt);
     if (idleFor >= IDLE_AFTER_S && idleQuiet === 0) {
       const nearby = nearestSurface(state.position, bodies);
-      const topic = nearby.distance <= NEAR_RADII * nearby.body.radiusKm ? NEAR[nearby.body.id]
+      // (First a word about a curio near this world not found yet.)
+      const hints = Object.entries(CURIO_HINTS).filter(([id, h]) => h.near === nearby.body.id && !(progress.curios ?? []).includes(id)).map(([, h]) => h.line);
+      const topic = nearby.distance <= NEAR_RADII * nearby.body.radiusKm ? [...hints, ...(NEAR[nearby.body.id] ?? [])]
         : (nearby.distance >= DEEP_FROM_KM ? DEEP : null);
       if (!(topic && sayFresh(topic))) sayFresh(IDLE);
       idleFor = 0;

@@ -1205,31 +1205,37 @@ function tessStrips(scene, name, mats) {
 }
 
 // The slab, and spaceship unknown coming in from the watcher's right to stop beside it,
-// its head toward it (core/craftScenes.js monolith). Both stand a little turned: square
-// on, the slab was a white card and the ship's wheel a line. The Sun comes up on the
+// its head toward it (core/craftScenes.js monolith). The ship stops square before the
+// slab's broad face, the two seen from the side, nearly edge on (the user, 2026-10-16:
+// "배를 모노리스의 정면에 배치에... | - <- 이런 식으로"); turned SHIP_TURN toward the
+// watcher, so the slab is not a sliver and the ship's wheel not a line. The Sun comes up on the
 // slab's top edge at the end.
-const SHIP_TURN = 0.55;
-const SHIP_STOP = [-0.22, -0.08, 0.1];
+const SHIP_TURN = 0.35;
+const SLAB_AT = [0.45, 0, 0];
+// From the slab's middle to the ship's, straight out from its broad face.
+const SHIP_GAP = 0.68;
 const SHIP_WAY = 2.3;
 function monolithShip(scene, name, mats) {
   const root = new TransformNode(name, scene);
   const slab = CURIO_BUILD.monolith(scene, `${name}Slab`, mats);
   slab.parent = root;
-  slab.position.x = 0.4;
-  slab.rotation.y = 0.4;
+  slab.position.set(...SLAB_AT);
+  // Its broad face (+z) toward the ship, to the watcher's right.
+  slab.rotation.y = -Math.PI / 2 + SHIP_TURN;
   const ship = CURIO_BUILD.unknown(scene, `${name}Ship`, mats);
   ship.parent = root;
   ship.scaling.setAll(0.62);
   ship.rotation.y = -Math.PI / 2 + SHIP_TURN;
   // The way its head points: it comes in along it.
   const ahead = [Math.cos(SHIP_TURN), 0, -Math.sin(SHIP_TURN)];
+  const stop = SLAB_AT.map((n, i) => n - ahead[i] * SHIP_GAP);
   const burn = ball(scene, `${name}Burn`, ship, glow(scene, `${name}BurnLight`, '#9fd0ff', 0.75), 0.16, [0, 0, 0.66], [1, 1, 1.6]);
-  const glint = ball(scene, `${name}Glint`, root, glow(scene, `${name}GlintLight`, '#fff6d8', 0.95), 0.07, [0.4, 0.45, 0.06]);
-  const halo = ball(scene, `${name}Halo`, root, glow(scene, `${name}HaloLight`, '#ffe9b0', 0.3), 0.3, [0.4, 0.45, 0.06]);
+  const glint = ball(scene, `${name}Glint`, root, glow(scene, `${name}GlintLight`, '#fff6d8', 0.95), 0.07, [SLAB_AT[0], 0.45, 0]);
+  const halo = ball(scene, `${name}Halo`, root, glow(scene, `${name}HaloLight`, '#ffe9b0', 0.3), 0.3, [SLAB_AT[0], 0.45, 0]);
   const say = says(scene, name, root, t('저건 누가 둔 걸까?'), [-0.35, 0.26, 0.3]);
   function pose({ come = 0, burn: lit = 0, glint: shone = 0, say: said = 0 }) {
     const left = SHIP_WAY * (1 - come);
-    ship.position.set(...SHIP_STOP.map((n, i) => n - ahead[i] * left));
+    ship.position.set(...stop.map((n, i) => n - ahead[i] * left));
     burn.setEnabled(lit > 0.01);
     burn.scaling.setAll(Math.max(0.01, lit));
     for (const [mesh, most] of [[glint, 1], [halo, 1]]) {

@@ -145,9 +145,10 @@ const REPLAY_VIEW = { distanceKm: 48, fovDeg: 34 };
 // user, while its four new places were being tried: "개발 중에는 당분간 수성에서 시작"),
 // Venus from the 13th ("이제 시작점을 금성으로 가자"), Jupiter from that night ("이제
 // 목성으로"), Saturn from the 15th ("시작점을 토성으로"; 600,000 km, its rings reach
-// 136,775 km); the game as built for players
-// starts where it always did. Take the first half out when they say so.
-const START_NEAR = import.meta.env.DEV ? { id: 'saturn', fromCentreKm: 600000 } : null;
+// 136,775 km), Jupiter again from the 16th, as the slab and its ship were tried
+// ("시작점을 목성으로"); the game as built for players starts where it always did. Take
+// the first half out when they say so.
+const START_NEAR = import.meta.env.DEV ? { id: 'jupiter', fromCentreKm: 400000 } : null;
 
 // Two layouts: 'tour' is the hand-made one (planets spread round the Sun); 'today' puts
 // the planets where they really are on the day the game is opened.
@@ -370,6 +371,8 @@ let scenePlace = null;
 const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? curiosAt(bodies, state.position).find((c) => c.id === id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null) ?? (eventPlace?.id === id ? eventPlace : null);
 // The body whose own scene may be played now: the one she rests on if it has one (Saturn,
 // Jupiter, the comet), else one she is close beside (the comet: core/replay.js besideRadii).
+// By the slab, with it or its ship chosen: the slab's scene (core/craftScenes.js monolith).
+const curioScene = () => (!visit && !docked && (selectedId === 'monolith' || selectedId === 'unknown') && nearSlab(bodies, state.position) ? 'monolith' : null);
 const sceneBody = () => (state.restingOn && replayOn(state.restingOn) ? state.restingOn : replayBeside(state.position, bodies));
 const named = (id) => bodyById(id) ?? craftById(id) ?? curiosAt(bodies, state.position).find((c) => c.id === id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null) ?? (eventPlace?.id === id ? eventPlace : null);
 
@@ -1064,6 +1067,16 @@ ${STORY_MORE[target.id]}` : told };
     // and the scene in it.
     if (!visit && docked && isDocked(docked) && replayFor(docked.id)) {
       const { id } = docked;
+      selectedId = id;
+      hud.showSelection(named(id));
+      $('inspectTarget').click();
+      if (photo.orbit()?.id !== id) return;
+      replay = { id, startedAt: performance.now(), down: false };
+      return;
+    }
+    // By the slab: the same, without docking (nothing docks with it).
+    if (curioScene()) {
+      const id = curioScene();
       selectedId = id;
       hud.showSelection(named(id));
       $('inspectTarget').click();
@@ -3033,7 +3046,8 @@ ${STORY_MORE[target.id]}` : told };
       replay: replayNow && replayForWorld(replayNow),
       bodies,
       craft: [...craft, ...curios],
-      hiddenCraft: [...awayCraft, ...awayCurios],
+      // (While the slab's scene plays, its ship is in the scene's own stage.)
+      hiddenCraft: [...awayCraft, ...awayCurios, ...(replay?.id === 'monolith' ? ['unknown'] : [])],
       sites: scenePlace || eventPlace ? [...sites, ...(scenePlace ? [scenePlace] : []), ...(eventPlace ? [eventPlace] : [])] : sites,
       // A lunar eclipse being watched: Earth's shadow comes over the Moon from one side.
       eclipsed: show && showNow && eclipse.kind === 'lunar'
@@ -3169,7 +3183,7 @@ ${STORY_MORE[target.id]}` : told };
     const offer = docked || onGround() ? null : dockable(state.position, craft);
     $('dockTarget').hidden = !docked && !offer;
     // Standing at a place that has a scene of its day.
-    const thenHere = visit ? (hasArrived(visit) ? replayFor(replayAt(visit.id)) : null) : docked ? (isDocked(docked) ? replayFor(docked.id) : null) : (sceneBody() ? replayFor(replayOn(sceneBody())) : null);
+    const thenHere = visit ? (hasArrived(visit) ? replayFor(replayAt(visit.id)) : null) : docked ? (isDocked(docked) ? replayFor(docked.id) : null) : curioScene() ? replayFor(curioScene()) : (sceneBody() ? replayFor(replayOn(sceneBody())) : null);
     // The week of a real eclipse: near its place the same button plays it, and from
     // elsewhere another jumps there.
     if (landAtEclipse && !warp.busy()) {
@@ -3211,7 +3225,7 @@ ${STORY_MORE[target.id]}` : told };
     // While the plate names the very thing they act on, the two are small keys on it
     // (ui/hud.js plateKeys) and the wide buttons under it are put away.
     const undockKey = Boolean(docked);
-    const thenId = visit ? visit.id : docked ? docked.id : sceneBody();
+    const thenId = visit ? visit.id : docked ? docked.id : curioScene() ? selectedId : sceneBody();
     const thenKey = thenHere && !watchable && thenId === plateId ? t`그날로 · ${thenHere.day}` : null;
     if (undockKey) $('dockTarget').hidden = true;
     if (thenKey) $('replayButton').hidden = true;

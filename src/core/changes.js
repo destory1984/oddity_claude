@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-16', text: t('모노리스 곁에서 판을 고르면 "그날로" 장면을 볼 수 있습니다. 배 한 척이 다가와 판 앞에 멈춥니다.') },
   { day: '2026-10-16', text: t('목표를 고정한 채 순간 이동하거나 바라보기를 누르면 고정이 저절로 풀립니다.') },
   { day: '2026-10-16', text: t('목성과 이오 사이에 대리석 모노리스와 spaceship unknown이 생겼습니다.') },
   { day: '2026-10-16', text: t('미마스의 허셜 분화구에 "그날로" 장면이 생겼습니다. 장면은 모두 139개입니다.') },

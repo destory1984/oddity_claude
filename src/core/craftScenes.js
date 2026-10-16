@@ -216,6 +216,32 @@ export const CRAFT_SCENES = {
       return { open: ease(t, 6, 12), gone: ease(t, 12, 34), say: ease(t, 9, 9.4) * (1 - ease(t, 14.5, 15)) };
     },
   },
+  // Not a craft's but the slab's (core/curios.js), played from beside it, not docked: the
+  // ship comes in from afar and stops before it (the user, 2026-10-16: "모노리스는 동영상
+  // 없음?", then picked of three "우주선이 다가와 멈추는 장면"). Made up, as the two are,
+  // so its day is the novel's year. come: the ship's way in, 0 → 1; burn: its engines are
+  // lit; glint: the Sun stands on the slab's top edge; say: the ship's bubble.
+  monolith: {
+    name: t('판 앞에 멈춘 배'),
+    day: t('소설 속 2010년'),
+    seconds: 32,
+    downAt: 16,
+    sounds: [[0.5, 'burnLong'], [16, 'stood'], [24, 'clunk']],
+    lines: [
+      { at: 0, text: t('지어낸 이야기입니다. 배 한 척이 목성까지 날아와, 목성과 이오 사이에 떠 있는 판 앞에서 속도를 줄입니다.') },
+      { at: 8, text: t('배는 가운데 바퀴를 돌려 그 안에 무게를 만듭니다. 사람이 오래 머물러야 하는 배입니다.') },
+      { at: 16, text: t('배가 판 앞에 멈춥니다. 판의 두께, 너비, 높이는 1:4:9, 1, 2, 3을 각각 제곱한 수입니다.') },
+      { at: 24, text: t('태양이 판의 꼭대기에 걸렸습니다. 누가 왜 두었는지는 아직 아무도 모릅니다.') },
+    ],
+    unfold(t) {
+      return {
+        come: ease(t, 0, 16),
+        burn: t > 0.5 && t < 12 ? 1 - ease(t, 9, 12) : 0,
+        glint: ease(t, 24, 27),
+        say: ease(t, 17.5, 17.9) * (1 - ease(t, 22.1, 22.5)),
+      };
+    },
+  },
   // Juno's one chance to be caught by Jupiter. burn: its main engine is lit; spin: how
   // far it has turned (radians; it spins faster for the burn and slows after).
   juno: {

@@ -2,6 +2,7 @@ import { TransformNode, CreateSphere, CreatePlane, StandardMaterial, Color3, Mes
 import { part, cyl, group, box, drum, rod, fuse } from './craftParts.js';
 import { CRAFT_BUILD, CRAFT_UNFOLD } from './craftModels.js';
 import { astronaut, sayBubble } from './siteModels.js';
+import { CURIO_BUILD } from './curioModels.js';
 import { t } from '../core/i18n.js';
 
 // The craft that have a day played again (core/craftScenes.js), each built once more
@@ -1203,7 +1204,46 @@ function tessStrips(scene, name, mats) {
   return { root, pose, face: true, fit: 0.58, lift: -0.3 };
 }
 
+// The slab, and spaceship unknown coming in from the watcher's right to stop beside it,
+// its head toward it (core/craftScenes.js monolith). Both stand a little turned: square
+// on, the slab was a white card and the ship's wheel a line. The Sun comes up on the
+// slab's top edge at the end.
+const SHIP_TURN = 0.55;
+const SHIP_STOP = [-0.22, -0.08, 0.1];
+const SHIP_WAY = 2.3;
+function monolithShip(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  const slab = CURIO_BUILD.monolith(scene, `${name}Slab`, mats);
+  slab.parent = root;
+  slab.position.x = 0.4;
+  slab.rotation.y = 0.4;
+  const ship = CURIO_BUILD.unknown(scene, `${name}Ship`, mats);
+  ship.parent = root;
+  ship.scaling.setAll(0.62);
+  ship.rotation.y = -Math.PI / 2 + SHIP_TURN;
+  // The way its head points: it comes in along it.
+  const ahead = [Math.cos(SHIP_TURN), 0, -Math.sin(SHIP_TURN)];
+  const burn = ball(scene, `${name}Burn`, ship, glow(scene, `${name}BurnLight`, '#9fd0ff', 0.75), 0.16, [0, 0, 0.66], [1, 1, 1.6]);
+  const glint = ball(scene, `${name}Glint`, root, glow(scene, `${name}GlintLight`, '#fff6d8', 0.95), 0.07, [0.4, 0.45, 0.06]);
+  const halo = ball(scene, `${name}Halo`, root, glow(scene, `${name}HaloLight`, '#ffe9b0', 0.3), 0.3, [0.4, 0.45, 0.06]);
+  const say = says(scene, name, root, t('저건 누가 둔 걸까?'), [-0.35, 0.26, 0.3]);
+  function pose({ come = 0, burn: lit = 0, glint: shone = 0, say: said = 0 }) {
+    const left = SHIP_WAY * (1 - come);
+    ship.position.set(...SHIP_STOP.map((n, i) => n - ahead[i] * left));
+    burn.setEnabled(lit > 0.01);
+    burn.scaling.setAll(Math.max(0.01, lit));
+    for (const [mesh, most] of [[glint, 1], [halo, 1]]) {
+      mesh.setEnabled(shone > 0.01);
+      mesh.scaling.setAll(Math.max(0.01, most * shone));
+    }
+    say({ say: said });
+  }
+  pose({});
+  return { root, pose, face: true, fit: 0.7 };
+}
+
 export const CRAFT_UNFOLD_ALL = {
+  monolith: monolithShip,
   ...CRAFT_UNFOLD,
   voyager2: neptuneGoesBy,
   pioneer10: jupiterGoesBy,

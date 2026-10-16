@@ -9,8 +9,8 @@ test('every scene belongs to a story place on a surface and tells its lines in o
     // A scene on a body belongs to a story told there: by landing on it (Saturn), or by
     // passing near it (Philae's comet), or by coming to a place on its cloud tops, where
     // nobody can stand (Jupiter: the comet's bruises).
-    // A scene of unfolding belongs to a craft she can dock with.
-    if (scene.unfold) assert.ok(CRAFT.some((c) => c.id === id), id);
+    // A scene of unfolding belongs to a craft she can dock with, or to the slab by Jupiter.
+    if (scene.unfold) assert.ok(CRAFT.some((c) => c.id === id) || id === 'monolith', id);
     else if (scene.on) assert.ok(STORIES.some((s) => (s.type === 'land' && s.body === scene.on) || (s.type === 'near' && s.target === scene.on) || (s.type === 'surface' && s.body === scene.on)), id);
     else assert.equal(STORIES.find((s) => s.id === id)?.type, 'surface', id);
     assert.equal(scene.lines[0].at, 0);
@@ -111,7 +111,7 @@ test('Curiosity has a scene of its own day, told in four lines', () => {
   assert.equal(replayFor('curiosity').day, '2012년 8월 6일');
   assert.equal(replayFor('curiosity').lines.length, 4);
   assert.match(replayFrame('curiosity', 17).text, /게일 분화구/);
-  assert.equal(Object.keys(REPLAYS).length, 139);
+  assert.equal(Object.keys(REPLAYS).length, 140);
   assert.equal(replayFor('viking1').day, '1976년 7월 20일');
   assert.match(replayFrame('viking1', 17).text, /25초/);
 });
@@ -483,4 +483,15 @@ test('a place whose scene is played on its body finds it; a place with none find
   assert.equal(replayAt('apollo11'), 'apollo11');
   assert.equal(replayAt('shoemakerLevy'), 'levyImpact');
   assert.equal(replayAt('galileoProbe'), null);
+});
+
+test('the slab has a made-up scene: the ship comes in, burns, stops and says a word', () => {
+  const scene = replayFor('monolith');
+  assert.equal(scene.day, '소설 속 2010년');
+  const at = (t) => replayFrame('monolith', t).unfold;
+  assert.equal(at(0).come, 0);
+  assert.ok(at(5).burn > 0.9 && at(13).burn === 0);
+  assert.equal(at(16).come, 1);
+  assert.ok(at(20).say > 0.99 && at(23).say === 0);
+  assert.equal(at(30).glint, 1);
 });

@@ -6,6 +6,7 @@
 // render/glows.js. Every one of them has been photographed.
 import { surfaceDirection } from './surface.js';
 import { t } from './i18n.js';
+import { nearSlab } from './curios.js';
 
 const RAD = Math.PI / 180;
 
@@ -373,6 +374,7 @@ export function glowsNear(bodies, position, elapsedS = null) {
   if (near(FOOTPRINT.body, TELL_RADII.footprint)) found.push(`footprint:${FOOTPRINT.moon}`);
   if (near('saturn', TELL_RADII.spokes)) found.push('spokes:saturn');
   if (near('neptune', TELL_RADII.spot)) found.push('spot:neptune');
+  if (nearSlab(bodies, position)) found.push('curio:monolith');
   // As seen from here: how far off a body is, how wide (its half-angle) and which way.
   const seen = (body) => {
     const to = body.position.map((n, i) => n - position[i]);

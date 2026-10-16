@@ -3,6 +3,7 @@ import { KM_PER_UNIT } from '../core/bodies.js';
 import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
 import { CRAFT_BUILD } from './craftModels.js';
+import { CURIO_BUILD } from './curioModels.js';
 import { CRAFT_UNFOLD_ALL as CRAFT_UNFOLD } from './craftUnfold.js';
 import { SITE_BUILD, SITE_REPLAY_BUILD, SITE_SAYS, SECOND_SAYS, BOOSTER_SAYS, SAYS_ON_LEFT, SAYS_BY, sayBubble } from './siteModels.js';
 import { drum, rod, group, box } from './craftParts.js';
@@ -61,6 +62,9 @@ const RULES = {
   hera: { visibleKm: 400000, maxKm: 4000 },
   // Round Earth on a long loop, as Chandra.
   tess: { visibleKm: 100000, maxKm: 600 },
+  // The two curios between Jupiter and Io (core/curios.js curioSizeKm sizes them the same).
+  monolith: { visibleKm: 2e6, maxKm: 4000 },
+  unknown: { visibleKm: 2e6, maxKm: 4000 },
 };
 
 // A place with no model of its own gets the plain four-legged lander.
@@ -572,7 +576,7 @@ export function createSiteModels(scene, siteList) {
 
 export function createCraft(scene, craftList) {
   const mats = craftMaterials(scene);
-  const nodes = new Map(craftList.map((c) => [c.id, CRAFT_BUILD[c.id](scene, c.id, mats)]));
+  const nodes = new Map(craftList.map((c) => [c.id, (CRAFT_BUILD[c.id] ?? CURIO_BUILD[c.id])(scene, c.id, mats)]));
   const unfolding = new Map(Object.entries(CRAFT_UNFOLD).map(([id, build]) => {
     const loose = build(scene, `${id}Unfolding`, mats);
     loose.root.setEnabled(false);

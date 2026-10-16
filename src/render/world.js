@@ -25,6 +25,7 @@ import { ringCrossing, ringDensity } from '../core/rings.js';
 import { eyeView } from '../core/eye.js';
 import { sunFrame } from '../core/sunView.js';
 import { CRAFT } from '../core/craft.js';
+import { CURIOS } from '../core/curios.js';
 import { normalize } from './math.js';
 
 // The view is drawn no finer than this many points to one of the page's.
@@ -81,7 +82,7 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
   craftFill.intensity = 0.35;
   const craftSun = new DirectionalLight('craftSun', new Vector3(0, 0, 1), scene);
   craftSun.intensity = 1.1;
-  const craftMeshes = createCraft(scene, CRAFT);
+  const craftMeshes = createCraft(scene, [...CRAFT, ...CURIOS]);
   const siteModels = createSiteModels(scene, storySitesAt(0, bodies));
   // A glow and a tail for each comet.
   const comets = bodies.filter((b) => b.kind === 'comet').map((b) => ({ id: b.id, glow: createComet(scene) }));

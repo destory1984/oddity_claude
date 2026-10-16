@@ -9,6 +9,7 @@ import {
   rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, right, swingToward, turnToward,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/craft.js';
+import { curiosAt, hiddenCurios } from './core/curios.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
@@ -125,7 +126,7 @@ const NOTE_GAP_S = 20;
 // two thirds of the view's height (Saturn stands back for its rings); a craft is drawn
 // 30 km wide and a lander 6 km; a crater or a sea is seen from 500 km.
 function inspectView(target) {
-  if (target.kind === 'craft') return { distanceKm: 110, fovDeg: 30 };
+  if (target.kind === 'craft' || target.kind === 'curio') return { distanceKm: 110, fovDeg: 30 };
   // (The drawn cards of a small place: the islets, the observatory on its mountain.)
   if (target.id === 'dokdo' || target.id === 'bohyunsan') return { distanceKm: 30, fovDeg: 40 };
   // (A landmark with something standing on it, MESSENGER's wreck, is looked at from close.)
@@ -364,11 +365,11 @@ let showNow = null;
 // plunge, where she rests on Saturn): a place for the close view only, with `up` its
 // direction from the body's middle and `level` the way the view looks along the ground.
 let scenePlace = null;
-const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null) ?? (eventPlace?.id === id ? eventPlace : null);
+const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? curiosAt(bodies, state.position).find((c) => c.id === id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null) ?? (eventPlace?.id === id ? eventPlace : null);
 // The body whose own scene may be played now: the one she rests on if it has one (Saturn,
 // Jupiter, the comet), else one she is close beside (the comet: core/replay.js besideRadii).
 const sceneBody = () => (state.restingOn && replayOn(state.restingOn) ? state.restingOn : replayBeside(state.position, bodies));
-const named = (id) => bodyById(id) ?? craftById(id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null) ?? (eventPlace?.id === id ? eventPlace : null);
+const named = (id) => bodyById(id) ?? craftById(id) ?? curiosAt(bodies, state.position).find((c) => c.id === id) ?? sites.find((s) => s.id === id) ?? (scenePlace?.id === id ? scenePlace : null) ?? (eventPlace?.id === id ? eventPlace : null);
 
 const toast = createToast($('toast'));
 const say = createSay($('heroSay'));
@@ -1218,7 +1219,7 @@ ${STORY_MORE[target.id]}` : told };
     };
     input.clear();
   }
-  const hud = createHud([...BODIES, ...exoBodiesAt(0), ...craft, ...sites, ...(eventPlace ? [eventPlace] : [])], {
+  const hud = createHud([...BODIES, ...exoBodiesAt(0), ...craft, ...curiosAt(bodies, state.position), ...sites, ...(eventPlace ? [eventPlace] : [])], {
     skyLabels: skyLabels(),
     onSelect: selectBody,
     onFace: () => facePicked(),
@@ -2898,6 +2899,9 @@ ${STORY_MORE[target.id]}` : told };
 
     // Craft that circle a planet or a moon are drawn and named only from near it.
     const awayCraft = hiddenCraft(state.position, bodies, selectedId, craft);
+    // The slab and the ship between Jupiter and Io (core/curios.js), and those of them too far to show.
+    const curios = curiosAt(bodies, state.position);
+    const awayCurios = hiddenCurios(state.position, bodies, selectedId);
     // The way she is really going when that is not where she faces: toward the craft
     // while gliding in to dock, or along a drift she is being carried on. In her own
     // frame (x right, y up, z ahead), for the sprite character's choice of drawing.
@@ -3001,8 +3005,8 @@ ${STORY_MORE[target.id]}` : told };
       trail,
       replay: replayNow && replayForWorld(replayNow),
       bodies,
-      craft,
-      hiddenCraft: awayCraft,
+      craft: [...craft, ...curios],
+      hiddenCraft: [...awayCraft, ...awayCurios],
       sites: scenePlace || eventPlace ? [...sites, ...(scenePlace ? [scenePlace] : []), ...(eventPlace ? [eventPlace] : [])] : sites,
       // A lunar eclipse being watched: Earth's shadow comes over the Moon from one side.
       eclipsed: show && showNow && eclipse.kind === 'lunar'
@@ -3202,7 +3206,7 @@ ${STORY_MORE[target.id]}` : told };
       C,
       goalId: goalNow()?.targetId ?? null,
       // A place on the far side of its body, or seen from far away, gets no label.
-      knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...progress.stories, ...exo.seen, ...(exo.been ? [EXO_STAR.id] : []), ...(eventPlace ? [eventPlace.id] : [])]),
+      knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...(glowsTold.has('curio:monolith') ? ['monolith', 'unknown'] : []), ...progress.stories, ...exo.seen, ...(exo.been ? [EXO_STAR.id] : []), ...(eventPlace ? [eventPlace.id] : [])]),
       // A name in the sky that a planet or a moon stands before is not written.
       skyHidden: (direction) => skyBehind(direction, state.position, bodies),
       hiddenIds: [
@@ -3213,9 +3217,10 @@ ${STORY_MORE[target.id]}` : told };
         ...(away ? homeIds : EXO_IDS),
         ...sites.filter((s) => siteHidden(s, here(s.parent), state.position) || (s.id !== selectedId && siteFar(here(s.parent), state.position))).map((s) => s.id),
         ...awayCraft,
+        ...awayCurios,
         // Whatever is behind a planet or a moon cannot be seen and gets no label (the
         // Sun says "가려짐" itself; the chosen target and the guide's goal stay).
-        ...[...bodies, ...craft]
+        ...[...bodies, ...craft, ...curios]
           .filter((t) => t.kind !== 'star' && t.id !== selectedId && t.id !== goalNow()?.targetId && behindBody(t, state.position, bodies))
           .map((t) => t.id),
         // Far off and beside the Sun: lost in its light (core/markers.js lostInGlare). Home

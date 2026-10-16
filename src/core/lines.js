@@ -138,6 +138,8 @@ export const SIGHTS = {
   'footprint:io': t('이오가 발자국을 찍었네.'),
   'spokes:saturn': t('고리에 바큇살이 생겼어.'),
   'spot:neptune': t('검은 눈이 날 보는 것 같아.'),
+  // (Picked by the user from five on 2026-10-16: "5".)
+  'curio:monolith': t('만지면 안 될 것 같아'),
   'tail:mercury': t('수성에도 꼬리가 있었어?'),
   'dawn:mercury': t('태양보다 빛이 먼저 떴어.'),
   'pair:earth': t('저 점 두 개가 지구랑 달이래.'),

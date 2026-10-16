@@ -2531,8 +2531,11 @@ ${STORY_MORE[target.id]}` : told };
     const dt = paused || elapsed > MAX_FRAME_GAP_S ? 0 : elapsed;
     // A day played again waits with the game: its clock ran on while the game stood
     // paused (as it does when the page loses the focus), and Spirit's word came and went
-    // unseen (the user, 2026-10-16: "대사는?").
-    if (replay && dt === 0 && elapsed > 0) replay.startedAt += elapsed * 1000;
+    // unseen (the user, 2026-10-16: "대사는?"). Not for the pause of the close view
+    // itself, which every scene is played in: by that every scene stood at its first
+    // moment ("또 멈춤"). It waits while the page is away, a frame came late, or a card is up.
+    const sceneWaits = document.hidden || elapsed > MAX_FRAME_GAP_S || Boolean(document.querySelector('dialog[open]'));
+    if (replay && elapsed > 0 && sceneWaits) replay.startedAt += elapsed * 1000;
 
     // Advance the orbits, carry the traveler with a nearby body, then fly.
     if (dt > 0) {

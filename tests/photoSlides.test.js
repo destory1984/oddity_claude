@@ -5,6 +5,7 @@ import { FAMOUS } from '../src/core/famous.js';
 import { STORIES } from '../src/core/stories.js';
 import { STORY_DETAILS } from '../src/core/storyDetails.js';
 import { CRAFT } from '../src/core/craft.js';
+import { CRAFT_PHOTOS } from '../src/core/craftPhotos.js';
 
 describe('the "사진 보기" key', () => {
   it('shows a place its card photo, and nothing for a body', () => {
@@ -19,10 +20,17 @@ describe('the "사진 보기" key', () => {
     for (const [id, keys] of Object.entries(CRAFT_SHOTS)) {
       expect(CRAFT.some((c) => c.id === id), id).toBe(true);
       for (const key of keys) expect(key.story ? STORY_DETAILS[key.story]?.photo : FAMOUS[key], JSON.stringify(key)).toBeTruthy();
-      expect(photoSlides({ id, kind: 'craft', name: id })).toHaveLength(keys.length);
       for (const slide of photoSlides({ id, kind: 'craft', name: id })) expect(existsSync(`public/assets/${slide.file}`), slide.file).toBe(true);
     }
-    expect(photoSlides({ id: 'voyager1', kind: 'craft', name: '보이저 1호' }).map((s) => s.title)).toEqual(['창백한 푸른 점', '태양계 가족사진', '한 장에 담긴 지구와 달']);
+    expect(photoSlides({ id: 'voyager1', kind: 'craft', name: '보이저 1호' }).map((s) => s.title)).toEqual(['보이저 1호', '창백한 푸른 점', '태양계 가족사진', '한 장에 담긴 지구와 달']);
+  });
+
+  it('has a real photo file for every craft photo, and none for the craft left out', () => {
+    for (const [id, { craft, shots = [] }] of Object.entries(CRAFT_PHOTOS)) {
+      expect(CRAFT.some((c) => c.id === id), id).toBe(true);
+      for (const photo of [...(craft ? [craft] : []), ...shots]) expect(existsSync(`public/assets/craftPhotos/${photo.file}`), photo.file).toBe(true);
+    }
+    for (const id of ['akatsuki', 'hayabusa2', 'tianwen1', 'tiangong']) expect(photoSlides({ id, kind: 'craft', name: id }), id).toEqual([]);
   });
 
   it("finds every place's photo on disk", () => {

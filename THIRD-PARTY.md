@@ -188,6 +188,57 @@ CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수
 | `galileoRegio.jpg` | [Galileo Regio and Uruk.jpg](https://commons.wikimedia.org/wiki/File:Galileo_Regio_and_Uruk.jpg) | NASA/JPL (Galileo) | Public domain |
 | `vega.jpg` | 이 게임을 위해 그린 그림 (2026-10-13) | 이 저장소 | 권리 보유 (LICENSE) |
 
+## 탐사선 사진과 탐사선이 찍은 사진
+
+`public/assets/craftPhotos/` 의 사진 44장은 이름표의 "사진 보기" 단추가 보인다. 모두 위키미디어 공용에서 받아 가로 1024px, 세로 1400px 안에 들도록 줄였다(2026-10-17). CC BY-SA 사진은 줄인 것도 같은 조건으로 쓸 수 있다. 일본 JAXA(상업 이용에 사전 허락이 필요하다)와 중국 국가항천국(다시 쓰는 조건을 밝히지 않았다)의 사진은 넣지 않았다.
+
+| 파일 | 원본 | 만든 이 | 라이선스 |
+|---|---|---|---|
+| `bepiColombo-craft.jpg` | [BepiColombo spacecraft stack ESA380846.jpg](https://commons.wikimedia.org/wiki/File:BepiColombo_spacecraft_stack_ESA380846.jpg) | ESA (CC BY-SA 3.0 IGO) | CC BY-SA 3.0 IGO |
+| `bepiColombo-shot1.jpg` | [BepiColombo Earth Selfie 10 april 2020.jpg](https://commons.wikimedia.org/wiki/File:BepiColombo_Earth_Selfie_10_april_2020.jpg) | ESA/BepiColombo/MTM (CC BY-SA 3.0 IGO) | CC BY-SA 3.0 IGO |
+| `cassini-craft.jpg` | [Cassini preflight testing.jpg](https://commons.wikimedia.org/wiki/File:Cassini_preflight_testing.jpg) | NASA | Public domain |
+| `chandra-craft.jpg` | [Chandra X-ray Observatory after release from Space Shuttle Columbia.jpg](https://commons.wikimedia.org/wiki/File:Chandra_X-ray_Observatory_after_release_from_Space_Shuttle_Columbia.jpg) | NASA | Public domain |
+| `chandra-shot1.jpg` | [Chandra Broadband Image of Cassiopeia A (2004-casa-more-4).jpg](https://commons.wikimedia.org/wiki/File:Chandra_Broadband_Image_of_Cassiopeia_A_(2004-casa-more-4).jpg) | NASA/CXC/GSFC/U. Hwang et al. | Public domain |
+| `danuri-craft.jpg` | [Kplo rendered image.png](https://commons.wikimedia.org/wiki/File:Kplo_rendered_image.png) | 과학기술정보통신부 (공공누리 제1유형) | KOGL Type 1 |
+| `danuri-shot2.jpg` | [Korea Pathfinder Lunar Orbiter (KPLO) Launches from Cape Canaveral Space Force Station (7353885).jpeg](https://commons.wikimedia.org/wiki/File:Korea_Pathfinder_Lunar_Orbiter_(KPLO)_Launches_from_Cape_Canaveral_Space_Force_Station_(7353885).jpeg) | U.S. Space Force/Joshua Conti | Public domain |
+| `dawn-craft.jpg` | [Dawn spacecraft in thermal vacuum chamber.jpg](https://commons.wikimedia.org/wiki/File:Dawn_spacecraft_in_thermal_vacuum_chamber.jpg) | NASA/JPL | Public domain |
+| `euclid-craft.jpg` | [Euclid Spacecraft in Cleanroom (PIA25783) (cropped).jpg](https://commons.wikimedia.org/wiki/File:Euclid_Spacecraft_in_Cleanroom_(PIA25783)_(cropped).jpg) | NASA/JPL | Public domain |
+| `euclid-shot1.jpg` | [Euclid’s view of the Perseus cluster of galaxies ESA25170535.jpg](https://commons.wikimedia.org/wiki/File:Euclid%E2%80%99s_view_of_the_Perseus_cluster_of_galaxies_ESA25170535.jpg) | ESA/Euclid/Euclid Consortium/NASA, J.-C. Cuillandre, E. Bertin, G. Anselmi (CC BY-SA 3.0 IGO) | CC BY-SA 3.0 IGO |
+| `europaClipper-craft.jpg` | [Europa Clipper.jpg](https://commons.wikimedia.org/wiki/File:Europa_Clipper.jpg) | NASA/JPL-Caltech | Public domain |
+| `hera-craft.jpg` | [Hera in orbit.jpg](https://commons.wikimedia.org/wiki/File:Hera_in_orbit.jpg) | ESA (CC BY-SA 3.0 IGO) | CC BY-SA 3.0 IGO |
+| `hubble-craft.jpg` | [View of Hubble after Being Released from the Shuttle Atlantis (28223588012).jpg](https://commons.wikimedia.org/wiki/File:View_of_Hubble_after_Being_Released_from_the_Shuttle_Atlantis_(28223588012).jpg) | NASA | Public domain |
+| `hubble-shot1.jpg` | [Pillars of creation 2014 HST WFC3-UVIS full-res denoised.jpg](https://commons.wikimedia.org/wiki/File:Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg) | NASA, ESA, Hubble Heritage Team (STScI/AURA) | Public domain |
+| `iss-craft.jpg` | [International Space Station after undocking of STS-132.jpg](https://commons.wikimedia.org/wiki/File:International_Space_Station_after_undocking_of_STS-132.jpg) | NASA | Public domain |
+| `iss-shot1.jpg` | [ISS-44 Night Earth Observation of an Aurora Australis.jpg](https://commons.wikimedia.org/wiki/File:ISS-44_Night_Earth_Observation_of_an_Aurora_Australis.jpg) | NASA/Scott Kelly | Public domain |
+| `juice-craft.jpg` | [JUICE inside Airbus Defence and Space Astrolabe facilities 11.jpg](https://commons.wikimedia.org/wiki/File:JUICE_inside_Airbus_Defence_and_Space_Astrolabe_facilities_11.jpg) | Don-vip (CC BY-SA 4.0) | CC BY-SA 4.0 |
+| `juice-shot1.jpg` | [Juice snaps Moon en route to Earth ESA500734.png](https://commons.wikimedia.org/wiki/File:Juice_snaps_Moon_en_route_to_Earth_ESA500734.png) | ESA (CC BY-SA 3.0 IGO) | CC BY-SA 3.0 IGO |
+| `jwst-craft.jpg` | [NASA’s James Webb Space Telescope Has Been Assembled for the First Time (48636983867).jpg](https://commons.wikimedia.org/wiki/File:NASA%E2%80%99s_James_Webb_Space_Telescope_Has_Been_Assembled_for_the_First_Time_(48636983867).jpg) | NASA/Chris Gunn | Public domain |
+| `jwst-shot1.jpg` | [NASA’s Webb Reveals Cosmic Cliffs, Glittering Landscape of Star Birth.jpg](https://commons.wikimedia.org/wiki/File:NASA%E2%80%99s_Webb_Reveals_Cosmic_Cliffs,_Glittering_Landscape_of_Star_Birth.jpg) | NASA, ESA, CSA, STScI | Public domain |
+| `kepler-craft.jpg` | [Kepler space telescope seen fom downside.jpg](https://commons.wikimedia.org/wiki/File:Kepler_space_telescope_seen_fom_downside.jpg) | NASA/Troy Cryder | Public domain |
+| `lro-craft.jpg` | [Lunar Reconnaissance Orbiter LRO during testing at NASA.jpg](https://commons.wikimedia.org/wiki/File:Lunar_Reconnaissance_Orbiter_LRO_during_testing_at_NASA.jpg) | NASA | Public domain |
+| `lro-shot1.jpg` | [Earthrise over Compton crater -LRO full res.jpg](https://commons.wikimedia.org/wiki/File:Earthrise_over_Compton_crater_-LRO_full_res.jpg) | NASA/GSFC/Arizona State University | Public domain |
+| `lucy-shot1.jpg` | [Dinkinesh First Look L'LORRI.png](https://commons.wikimedia.org/wiki/File:Dinkinesh_First_Look_L%27LORRI.png) | NASA/Goddard/SwRI/JHU APL/NOIRLab | Public domain |
+| `mangalyaan-craft.jpg` | [Mars Orbiter Mission in cleanroom (1).jpg](https://commons.wikimedia.org/wiki/File:Mars_Orbiter_Mission_in_cleanroom_(1).jpg) | ISRO (GODL-India) | GODL-India |
+| `mro-craft.jpg` | [MRO 01.jpg](https://commons.wikimedia.org/wiki/File:MRO_01.jpg) | NASA/JPL/Corby Waste | Public domain |
+| `newHorizons-craft.jpg` | [New Horizons Spacecraft (ann24023a).jpg](https://commons.wikimedia.org/wiki/File:New_Horizons_Spacecraft_(ann24023a).jpg) | NOIRLab/NSF/AURA/NASA (CC BY 4.0) | CC BY 4.0 |
+| `osirisRex-craft.jpg` | [OSIRIS-REx Spacecraft Prepared for Mission.jpg](https://commons.wikimedia.org/wiki/File:OSIRIS-REx_Spacecraft_Prepared_for_Mission.jpg) | NASA/Dimitri Gerondidakis | Public domain |
+| `osirisRex-shot1.jpg` | [Bennu mosaic OSIRIS-REx.jpg](https://commons.wikimedia.org/wiki/File:Bennu_mosaic_OSIRIS-REx.jpg) | NASA/Goddard/University of Arizona | Public domain |
+| `parker-craft.jpg` | [Parker Solar Probe.jpg](https://commons.wikimedia.org/wiki/File:Parker_Solar_Probe.jpg) | NASA/Johns Hopkins APL/Steve Gribben | Public domain |
+| `parker-shot1.jpg` | [Venus-ParkerSolarProbe-July2020.jpg](https://commons.wikimedia.org/wiki/File:Venus-ParkerSolarProbe-July2020.jpg) | NASA/Johns Hopkins APL/NRL | Public domain |
+| `pioneer10-craft.jpg` | [PIONEER 10 SPACECRAFT FINAL ASSEMBLY AT TRW (TRW SYSTEMS GROUP, REDONDO BEACH, CALIFORNIA DESIGNED AND FABRICATED THE PIONEER SPACECRAFT) (ARC-1973-AC73-9019).jpg](https://commons.wikimedia.org/wiki/File:PIONEER_10_SPACECRAFT_FINAL_ASSEMBLY_AT_TRW_(TRW_SYSTEMS_GROUP,_REDONDO_BEACH,_CALIFORNIA_DESIGNED_AND_FABRICATED_THE_PIONEER_SPACECRAFT)_(ARC-1973-AC73-9019).jpg) | NASA Ames/TRW | Public domain |
+| `pioneer10-shot1.jpg` | [Pioneer 10 Jupiter 1974 GPN-2000-001698.jpg](https://commons.wikimedia.org/wiki/File:Pioneer_10_Jupiter_1974_GPN-2000-001698.jpg) | NASA | Public domain |
+| `pioneer11-craft.jpg` | [Pioneer 10-11 spacecraft.jpg](https://commons.wikimedia.org/wiki/File:Pioneer_10-11_spacecraft.jpg) | Don Davis/NASA | Public domain |
+| `pioneer11-shot1.jpg` | [Pioneer 11 Image of Saturn and Its Moon Titan.jpg](https://commons.wikimedia.org/wiki/File:Pioneer_11_Image_of_Saturn_and_Its_Moon_Titan.jpg) | NASA Ames | Public domain |
+| `roadster-craft.jpg` | [Elon Musk's Tesla Roadster (40110298232).jpg](https://commons.wikimedia.org/wiki/File:Elon_Musk%27s_Tesla_Roadster_(40110298232).jpg) | SpaceX (CC0) | CC0 |
+| `soho-shot1.jpg` | [Blasting CME (4446276828).jpg](https://commons.wikimedia.org/wiki/File:Blasting_CME_(4446276828).jpg) | NASA/ESA SOHO, NASA SDO | Public domain |
+| `solarOrbiter-craft.jpg` | [Solar Orbiter spacecraft is prepared for encapsulation in the United Launch Alliance Atlas V payload fairing.jpg](https://commons.wikimedia.org/wiki/File:Solar_Orbiter_spacecraft_is_prepared_for_encapsulation_in_the_United_Launch_Alliance_Atlas_V_payload_fairing.jpg) | NASA/Ben Smegelsky | Public domain |
+| `solarOrbiter-shot1.jpg` | [Solar Orbiter’s widest high-res view of the Sun ESA508430.jpg](https://commons.wikimedia.org/wiki/File:Solar_Orbiter%E2%80%99s_widest_high-res_view_of_the_Sun_ESA508430.jpg) | ESA & NASA/Solar Orbiter/EUI Team (CC BY-SA 3.0 IGO) | CC BY-SA 3.0 IGO |
+| `sputnik-craft.jpg` | [Sputnik asm.jpg](https://commons.wikimedia.org/wiki/File:Sputnik_asm.jpg) | NSSDC, NASA | Public domain |
+| `tess-craft.jpg` | [TESS alone high res.jpg](https://commons.wikimedia.org/wiki/File:TESS_alone_high_res.jpg) | Orbital ATK/NASA | Public domain |
+| `tess-shot1.jpg` | [TESS First light.jpg](https://commons.wikimedia.org/wiki/File:TESS_First_light.jpg) | NASA/MIT/TESS | Public domain |
+| `voyager1-craft.jpg` | [Voyager spacecraft.jpg](https://commons.wikimedia.org/wiki/File:Voyager_spacecraft.jpg) | NASA/JPL | Public domain |
+| `voyager2-craft.jpg` | [Voyager 2 Testing PIA21736.jpg](https://commons.wikimedia.org/wiki/File:Voyager_2_Testing_PIA21736.jpg) | NASA/JPL | Public domain |
+
 ## d3-celestial 라이선스 (BSD 3-Clause)
 
 Copyright (c) 2015, Olaf Frohn. All rights reserved.

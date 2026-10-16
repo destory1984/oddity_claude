@@ -1,6 +1,7 @@
 import { t } from './i18n.js';
 import { STORY_DETAILS, storyPhotoFile, DRAWN } from './storyDetails.js';
 import { FAMOUS } from './famous.js';
+import { CRAFT_PHOTOS } from './craftPhotos.js';
 
 // What the "사진 보기" key on the name plate shows (ui/photoView.js), one picture after
 // another: a place's card photo; for a craft, the photos it is best known for (the user,
@@ -38,11 +39,16 @@ export function photoSlides(thing) {
     return slide ? [slide] : [];
   }
   if (thing.kind === 'craft') {
-    return (CRAFT_SHOTS[thing.id] ?? []).map((shot) => {
+    // Its own photo first, then what it took (core/craftPhotos.js), then the game's own
+    // photos it took.
+    const { craft = null, shots = [] } = CRAFT_PHOTOS[thing.id] ?? {};
+    const real = [...(craft ? [{ ...craft, title: thing.name }] : []), ...shots]
+      .map(({ file, title, caption, credit }) => ({ file: `craftPhotos/${file}`, title, caption, credit: t`사진: ${credit}` }));
+    return [...real, ...(CRAFT_SHOTS[thing.id] ?? []).map((shot) => {
       if (shot.story) return storySlide(shot.story, thing.name);
       const famous = FAMOUS[shot];
       return { file: famous.file, title: famous.name, caption: famous.note, credit: `${famous.by} · ${famous.credit}` };
-    }).filter(Boolean);
+    }).filter(Boolean)];
   }
   return [];
 }

@@ -2240,6 +2240,9 @@ ${STORY_MORE[target.id]}` : told };
   let practiceTalkAt = null;
   const showPracticeButton = () => {
     $('practiceButton').hidden = !practiceKept.button;
+    // Its gold rim is put away once the practice has been flown through (the user,
+    // 2026-10-16: "비행 연습 한 번하면, 노란색 테두리는 없애줘").
+    $('practiceButton').classList.toggle('flown', practiceKept.flown);
     $('practiceShow').checked = practiceKept.button;
   };
   const poseNow = () => ({
@@ -2279,6 +2282,8 @@ ${STORY_MORE[target.id]}` : told };
     guideView.show(goalNow());
     previous = null;
     if (!finished) return;
+    practiceKept = savePractice({ ...practiceKept, flown: true });
+    showPracticeButton();
     sound.cue('mission');
     // The second part is on already (the first was flown again meanwhile).
     if (guide.step !== null) return;

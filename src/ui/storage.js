@@ -315,15 +315,15 @@ const PRACTICE_KEY = 'oddity.practice.v1';
 export function loadPractice() {
   try {
     const kept = JSON.parse(localStorage.getItem(PRACTICE_KEY));
-    return { asked: Boolean(kept?.asked), button: kept?.button !== false, moon: Boolean(kept?.moon) };
+    return { asked: Boolean(kept?.asked), button: kept?.button !== false, moon: Boolean(kept?.moon), flown: Boolean(kept?.flown) };
   } catch {
-    return { asked: false, button: true, moon: false };
+    return { asked: false, button: true, moon: false, flown: false };
   }
 }
 
 export function savePractice(value) {
   try {
-    localStorage.setItem(PRACTICE_KEY, JSON.stringify({ asked: Boolean(value.asked), button: value.button !== false, moon: Boolean(value.moon) }));
+    localStorage.setItem(PRACTICE_KEY, JSON.stringify({ asked: Boolean(value.asked), button: value.button !== false, moon: Boolean(value.moon), flown: Boolean(value.flown) }));
   } catch {
     // It is then offered again at the next opening.
   }

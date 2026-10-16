@@ -5420,8 +5420,10 @@ html.gaze #gazeButton {
   display:none;
 }
 
-/* The day's key is gold, as the wide "그날로" button it stands for. */
-#hud #targetPanel #targetName #thenKey {
+/* The day's key is gold, as the wide "그날로" button it stands for; the photo's key too
+   (the user, 2026-10-17: "사진 보기도 노란색으로 해줘"). */
+#hud #targetPanel #targetName #thenKey,
+#hud #targetPanel #targetName #photoKey {
   border-color:#fff1c4;
   background:linear-gradient(#f3d27a, #d9a93f);
   color:#1a1640;

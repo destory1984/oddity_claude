@@ -128,7 +128,7 @@ const NOTE_GAP_S = 20;
 // 30 km wide and a lander 6 km; a crater or a sea is seen from 500 km.
 function inspectView(target) {
   // (The slab on the Moon is drawn smaller, core/curios.js.)
-  if (target.id === 'tycho') return { distanceKm: 35, fovDeg: 30 };
+  if (target.id === 'moonSlab') return { distanceKm: 35, fovDeg: 30 };
   if (target.kind === 'craft' || target.kind === 'curio') return { distanceKm: 110, fovDeg: 30 };
   // (The drawn cards of a small place: the islets, the observatory on its mountain.)
   if (target.id === 'dokdo' || target.id === 'bohyunsan') return { distanceKm: 30, fovDeg: 40 };
@@ -148,9 +148,10 @@ const REPLAY_VIEW = { distanceKm: 48, fovDeg: 34 };
 // Venus from the 13th ("이제 시작점을 금성으로 가자"), Jupiter from that night ("이제
 // 목성으로"), Saturn from the 15th ("시작점을 토성으로"; 600,000 km, its rings reach
 // 136,775 km), Jupiter again from the 16th, as the slab and its ship were tried
-// ("시작점을 목성으로"); the game as built for players starts where it always did. Take
-// the first half out when they say so.
-const START_NEAR = import.meta.env.DEV ? { id: 'jupiter', fromCentreKm: 400000 } : null;
+// ("시작점을 목성으로"), and the Moon later that day, for its slab in Tycho ("시작점을 달로");
+// the game as built for players starts where it always did. Take the first half out
+// when they say so.
+const START_NEAR = import.meta.env.DEV ? { id: 'moon', fromCentreKm: 8000 } : null;
 
 // Two layouts: 'tour' is the hand-made one (planets spread round the Sun); 'today' puts
 // the planets where they really are on the day the game is opened.

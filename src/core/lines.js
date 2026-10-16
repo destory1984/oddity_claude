@@ -107,7 +107,7 @@ export const NEAR = {
 // from Earth: "그래", to a hint like "지구와 화성 사이에 뭔가 있다더라").
 export const CURIO_HINTS = {
   teapot: { near: 'earth', line: t('지구랑 화성 사이에 찻주전자가 돈대.') },
-  tycho: { near: 'moon', line: t('티코 분화구에 이상한 판이 있대.') },
+  moonSlab: { near: 'moon', line: t('티코 분화구에 이상한 판이 있대.') },
   rose: { near: 'mars', line: t('소행성대에 장미 핀 별이 있대.') },
   monolith: { near: 'jupiter', line: t('이오 쪽에 하얀 판이 떠 있대.') },
 };
@@ -152,7 +152,7 @@ export const SIGHTS = {
   'curio:monolith': t('만지면 안 될 것 같아'),
   'curio:teapot': t('진짜 있었네?'),
   'curio:rose': t('장미야, 안녕?'),
-  'curio:tycho': t('목성에서 본 거랑 똑같아.'),
+  'curio:moonSlab': t('목성에서 본 거랑 똑같아.'),
   'tail:mercury': t('수성에도 꼬리가 있었어?'),
   'dawn:mercury': t('태양보다 빛이 먼저 떴어.'),
   'pair:earth': t('저 점 두 개가 지구랑 달이래.'),

@@ -155,4 +155,4 @@ function rose(scene, name) {
 }
 
 // The slab on the Moon is the slab by Jupiter, standing on the ground.
-export const CURIO_BUILD = { monolith, unknown, teapot, rose, tycho: monolith };
+export const CURIO_BUILD = { monolith, unknown, teapot, rose, moonSlab: monolith };

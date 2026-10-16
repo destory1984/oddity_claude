@@ -22,7 +22,7 @@ export const CURIOS = [
   { id: 'unknown', name: t('spaceship unknown'), nameEn: 'spaceship unknown', kind: 'curio', group: 'monolith' },
   { id: 'teapot', name: t('러셀의 찻주전자'), nameEn: "Russell's Teapot", kind: 'curio', tellKm: 2500, shownKm: 300000 },
   { id: 'rose', name: t('장미가 있는 작은 별'), nameEn: 'The Little Star with a Rose', kind: 'curio', tellKm: 2500, shownKm: 300000 },
-  { id: 'tycho', name: t('달의 모노리스'), nameEn: 'Monolith on the Moon', kind: 'curio', tellKm: 800, shownKm: 20000, minKm: 8, maxKm: 40 },
+  { id: 'moonSlab', name: t('달의 모노리스'), nameEn: 'Monolith on the Moon', kind: 'curio', tellKm: 800, shownKm: 20000, minKm: 8, maxKm: 40 },
 ];
 const CURIO = Object.fromEntries(CURIOS.map((c) => [c.id, c]));
 // What a close look at one reads (main.js readingFor): where it comes from, and its notice
@@ -32,7 +32,7 @@ export const CURIO_ABOUT = {
   monolith: { kicker: FROM_FILM, text: t('목성과 이오 사이에 대리석 판 하나가 떠 있습니다. 가로, 세로, 두께가 1:4:9입니다.\n누가 왜 두었는지 아무도 모릅니다. 앞의 배도 이것을 보러 온 듯합니다.') },
   teapot: { kicker: t('철학자의 비유에서 온 것'), text: t('지구와 화성 사이에서 사기 찻주전자 하나가 태양을 돕니다.\n철학자 러셀의 비유로, 너무 작아 없다고 증명할 수 없는 것을 뜻합니다.') },
   rose: { kicker: t('책에서 온 것'), text: t('소행성대의 작은 별에 화산 셋과 바오밥 싹, 장미 한 송이가 있습니다.\n어느 책에서 읽은 별과 꼭 닮았습니다.') },
-  tycho: { kicker: FROM_FILM, text: t('달의 티코 분화구에 목성 곁과 같은 1:4:9 대리석 판이 서 있습니다.\n소설과 영화에서는 이 판을 파내자 목성 쪽으로 신호를 보냈습니다.') },
+  moonSlab: { kicker: FROM_FILM, text: t('달의 티코 분화구에 목성 곁과 같은 1:4:9 대리석 판이 서 있습니다.\n소설과 영화에서는 이 판을 파내자 목성 쪽으로 신호를 보냈습니다.') },
 };
 // The curio whose name, notice and jump this one goes by: the ship goes by the slab.
 export const curioHead = (id) => CURIO[id]?.group ?? id;
@@ -99,8 +99,8 @@ export function curiosAt(bodies, position) {
   // slab is 0.9 of its drawn size tall), its face turned up with the ground (up).
   const up = surfaceDirection(TYCHO_AT.latDeg, TYCHO_AT.lonDeg, spinAngle(SPIN_DAY_S.moon, bodies.timeS ?? 0));
   const ground = moon.position.map((n, i) => n + up[i] * moon.radiusKm);
-  const tall = curioSizeKm(gap(position, ground), 'tycho');
-  out.push({ ...CURIO.tycho, position: ground.map((n, i) => n + up[i] * 0.45 * tall), radiusKm: 0, up, parent: 'moon' });
+  const tall = curioSizeKm(gap(position, ground), 'moonSlab');
+  out.push({ ...CURIO.moonSlab, position: ground.map((n, i) => n + up[i] * 0.45 * tall), radiusKm: 0, up, parent: 'moon' });
   return out;
 }
 
@@ -125,7 +125,7 @@ export function hiddenCurios(position, bodies, keepId = null, known = []) {
 // her at 160 km a second). Not the one on the Moon: she goes with the Moon there.
 export const CURIO_CARRY_KM = 5000;
 export function carryingCurio(bodies, position) {
-  return curiosAt(bodies, position).find((c) => !c.group && c.id !== 'tycho' && gap(position, c.position) <= CURIO_CARRY_KM) ?? null;
+  return curiosAt(bodies, position).find((c) => !c.group && c.id !== 'moonSlab' && gap(position, c.position) <= CURIO_CARRY_KM) ?? null;
 }
 
 // The curios (by the one each goes by) near enough for her to say something of them.

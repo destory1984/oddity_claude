@@ -48,14 +48,14 @@ test('the teapot goes round between Earth and Mars, the little star in the belt,
   assert.ok(fromSun(one('teapot')) > gap(at('earth').position, sun.position) && fromSun(one('teapot')) < gap(at('mars').position, sun.position));
   assert.ok(fromSun(one('rose')) > BELT.innerKm && fromSun(one('rose')) < BELT.outerKm);
   const moon = at('moon');
-  const tycho = one('tycho');
+  const slab = one('moonSlab');
   // On the ground, upright: its middle a few km over the Moon's surface, its up the ground's.
-  const over = gap(tycho.position, moon.position) - moon.radiusKm;
+  const over = gap(slab.position, moon.position) - moon.radiusKm;
   assert.ok(over > 0 && over < 20, String(over));
-  const out = tycho.position.map((n, i) => (n - moon.position[i]) / gap(tycho.position, moon.position));
-  assert.ok(out.reduce((s, n, i) => s + n * tycho.up[i], 0) > 0.999);
+  const out = slab.position.map((n, i) => (n - moon.position[i]) / gap(slab.position, moon.position));
+  assert.ok(out.reduce((s, n, i) => s + n * slab.up[i], 0) > 0.999);
   // In Tycho's south: the Moon's southern half.
-  assert.ok(tycho.up[1] < -0.6);
+  assert.ok(slab.up[1] < -0.6);
 });
 
 test('each is told of, logged and carried by itself; the ship goes by the slab', () => {
@@ -88,4 +88,10 @@ test('near a world she passes on a word about a curio there, in her own short wa
     assert.ok(BODIES.some((b) => b.id === hint.near), id);
     assert.ok(hint.line.length <= 25, hint.line);
   }
+});
+
+test('no curio shares its id with a body, a craft or a story place (the slab on the Moon was "tycho", as Tycho is)', async () => {
+  const { STORIES } = await import('../src/core/stories.js');
+  const taken = new Set([...BODIES, ...CRAFT, ...STORIES].map((x) => x.id));
+  for (const c of CURIOS) assert.ok(!taken.has(c.id), c.id);
 });

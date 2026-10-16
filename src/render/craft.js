@@ -68,7 +68,7 @@ const RULES = {
   teapot: { visibleKm: 2e6, maxKm: 4000 },
   rose: { visibleKm: 2e6, maxKm: 4000 },
   // Standing in Tycho on the Moon: 8 to 40 km tall (core/curios.js), seen from near the Moon.
-  tycho: { visibleKm: 30000, minKm: 8, maxKm: 40 },
+  moonSlab: { visibleKm: 30000, minKm: 8, maxKm: 40 },
 };
 
 // A place with no model of its own gets the plain four-legged lander.

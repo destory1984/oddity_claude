@@ -84,7 +84,7 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
   // A clock's face with an arrow going back round it; two links of a chain come apart.
   const thenKey = momentKey('thenKey', '<path d="M4.2 12a7.8 7.8 0 1 0 2.5-5.7"/><path d="M4.2 4.4v4.2h4.2"/><path d="M12 8v4.3l2.9 1.8"/>', 'replayButton');
   const dockKey = momentKey('dockKey', '<path d="M9.2 8H7a4 4 0 0 0 0 8h2.2"/><path d="M14.8 8H17a4 4 0 0 1 0 8h-2.2"/><path d="M12 5v2.6M12 16.4V19"/>', 'dockTarget');
-  // A photo of what the plate names (core/photoSlides.js), before the day's key: a
+  // A photo of what the plate names (core/photoSlides.js), at the right end after the day's key: a
   // picture in a frame (the user, 2026-10-16: "여기에 새로운 버튼 "사진 보기"").
   const photoKey = document.createElement('button');
   photoKey.id = 'photoKey';
@@ -233,6 +233,9 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
         dockKey.setAttribute('aria-label', t('도킹 풀기'));
         $('targetName').append(dockKey);
       } else dockKey.remove();
+      // The photo's key stays at the right end, after these (the user, 2026-10-17:
+      // "버튼 위치를 서로 바꾸자.. 사진이 오른쪽").
+      if (photoKey.isConnected) $('targetName').append(photoKey);
       fitName();
     },
     // goalId: the body the first-visit guide points at; its label always shows and pulses.

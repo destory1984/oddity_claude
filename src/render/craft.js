@@ -611,7 +611,9 @@ export function createCraft(scene, craftList) {
       const sizeKm = Math.min(rule.maxKm, Math.max(CRAFT_SIZE_KM, distanceKm * APPARENT));
       node.scaling.setAll(sizeKm / KM_PER_UNIT);
       node.position.set(rel[0], rel[1], rel[2]);
-      node.lookAt(new Vector3(...sunPosition.map((n, i) => (n - position[i]) / KM_PER_UNIT)));
+      // (The curios' ship turns its back from the slab instead, core/curios.js.)
+      const toward = c.awayFrom ? c.position.map((n, i) => 2 * n - c.awayFrom[i]) : sunPosition;
+      node.lookAt(new Vector3(...toward.map((n, i) => (n - position[i]) / KM_PER_UNIT)));
       if (jolt?.id === c.id && (jolt.push || jolt.tilt)) {
         // Knocked sideways as the traveler sees it (a shove along the line of sight
         // would not show), a little away, and tipped about its own sunward axis.

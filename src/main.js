@@ -793,7 +793,8 @@ async function init() {
       stuntJumped = true;
       home = null;
       input.clear();
-      const facing = lookAtDirection(target.position.map((n, i) => n - spot[i]));
+      // (By the slab she looks at the Sun over its top: core/teleport.js curioArrival.)
+      const facing = lookAtDirection((target.kind === 'curio' ? here('sun') : target).position.map((n, i) => n - spot[i]));
       // The traveler stands in the middle of the view: on a wide screen turn a little
       // so a body sits beside them, not behind them.
       const aside = target.kind !== 'craft' && target.kind !== 'site' && innerWidth / innerHeight >= 1;
@@ -878,6 +879,8 @@ async function init() {
 
 ${STORY_MORE[target.id]}` : told };
     }
+    // The slab and the ship by Jupiter (core/curios.js): no journal slot; the slab's notice.
+    if (target.kind === 'curio') return { ...head, kicker: t('소설과 영화에서 온 것'), text: t('목성과 이오 사이에 대리석 판 하나가 떠 있습니다. 가로, 세로, 두께가 1:4:9입니다.\n누가 왜 두었는지 아무도 모릅니다. 앞의 배도 이것을 보러 온 듯합니다.') };
     // Another star and its planets (core/exo.js): a word each, no journal slot.
     if (target.exo) return { ...head, kicker: target.kind === 'exostar' ? t('붉은 왜성 · 지구에서 약 40광년') : t('외계 행성 · 겉모습은 상상해서 그림'), text: exoNote(target.id) };
     const parent = target.parent ? bodyById(target.parent) : null;

@@ -2482,9 +2482,11 @@ ${STORY_MORE[target.id]}` : told };
       // left behind she was dragged after it at the end of the lock's range in a path
       // nobody could follow (the user, 2026-10-06: "찬드라에 고정해서 이동하니까, 어떻게
       // 도는지 설명할 수 없게 도는데").
+      // The slab and the ship too: they stand on the line from Jupiter to Io and go round
+      // with Io (the user, 2026-10-16: "모노리스에 고정이 안 되네").
       if (locked && !docked && !visit) {
-        const was = craftBefore.find((c) => c.id === selectedId);
-        const is = was && craft.find((c) => c.id === selectedId);
+        const was = craftBefore.find((c) => c.id === selectedId) ?? curiosAt(before, stood).find((c) => c.id === selectedId);
+        const is = was && (craft.find((c) => c.id === selectedId) ?? curiosAt(bodies, stood).find((c) => c.id === selectedId));
         if (is && Math.hypot(...stood.map((n, i) => n - was.position[i])) <= LOCK_RIDE_KM) {
           state = { ...state, position: stood.map((n, i) => n + is.position[i] - was.position[i]) };
         }

@@ -13,6 +13,8 @@ import { TOURS, stopName, stampFile, sceneFile } from '../core/tours.js';
 import { stuntStampFile } from '../core/stunts.js';
 import { t } from '../core/i18n.js';
 import { craftPicture } from '../core/craft.js';
+import { CURIOS, CURIO_ABOUT } from '../core/curios.js';
+import { CURIO_HINTS } from '../core/lines.js';
 
 const $ = (id) => document.getElementById(id);
 // 로 after a vowel or ㄹ, 으로 after any other final consonant.
@@ -452,6 +454,32 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     }
   }
 
+  // The imaginary places (core/curios.js; the user, 2026-10-16: "오늘 만든 상상 속의 장소들도
+  // 나중에 쉽게 갈 수 있도록, 탐험 수첩에 넣어줘"): not scored, as the craft. One not
+  // found yet shows the word she has heard of it, where to look. (The ship by Jupiter's
+  // slab is in the slab's row.)
+  const CURIO_MARKS = { monolith: '▮', teapot: '🫖', rose: '🌹', moonSlab: '▯' };
+  function renderCurios() {
+    const list = $('journalCurios');
+    list.replaceChildren();
+    for (const c of CURIOS.filter((x) => !x.group)) {
+      const found = (lastProgress.curios ?? []).includes(c.id);
+      const li = document.createElement('li');
+      li.className = found ? 'done' : '';
+      const art = document.createElement('span');
+      art.className = 'craftArt curioArt';
+      art.textContent = CURIO_MARKS[c.id] ?? '?';
+      art.setAttribute('aria-hidden', 'true');
+      const title = document.createElement('strong');
+      title.textContent = `${found ? '✓' : '○'} ${c.name}`;
+      const line = document.createElement('span');
+      line.textContent = found ? `${CURIO_ABOUT[c.id].kicker}. ${CURIO_ABOUT[c.id].text.split('\n')[0]}` : t`아직 찾지 못했습니다. ${CURIO_HINTS[c.id]?.line ?? ''}`;
+      li.append(art, title, line);
+      if (found) li.append(jumpButton(c.id, c.name));
+      list.append(li);
+    }
+  }
+
   // The nine tours: gone round (a stamp), under way (how far), or yet to start.
   function renderTours() {
     const list = $('journalTours');
@@ -571,6 +599,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     renderSky();
     renderStories();
     renderCraft();
+    renderCurios();
     renderTours();
     renderStunts();
     renderViews();

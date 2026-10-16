@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-16', text: t('탐험 수첩에 "상상" 칸이 생겼습니다. 상상 속 장소 넷을 모아 두고, 한 번 다녀온 곳은 바로 순간 이동할 수 있습니다.') },
   { day: '2026-10-16', text: t('달의 모노리스, 러셀의 찻주전자, 장미가 있는 작은 별에도 "그날로" 장면이 생겼습니다.') },
   { day: '2026-10-16', text: t('지구와 화성 사이에 러셀의 찻주전자, 소행성대에 장미가 있는 작은 별, 달의 티코 분화구에 모노리스가 생겼습니다.') },
   { day: '2026-10-16', text: t('비행 연습을 끝까지 한 번 마치면 비행 연습 단추의 금빛 테두리가 사라집니다.') },

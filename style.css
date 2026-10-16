@@ -1020,7 +1020,8 @@ body.touch #reticle span {
 
 #journalMissions li,
 #journalStories li,
-#journalCraft li {
+#journalCraft li,
+#journalCurios li {
   padding: 6px 0;
   font-size: 13px;
   color: var(--muted);
@@ -1028,7 +1029,8 @@ body.touch #reticle span {
 
 #journalMissions li strong,
 #journalStories li strong,
-#journalCraft li strong {
+#journalCraft li strong,
+#journalCurios li strong {
   display: block;
   font-weight: 400;
   color: #b6cbe0;
@@ -1036,12 +1038,14 @@ body.touch #reticle span {
 
 #journalMissions li.done strong,
 #journalStories li.done strong,
-#journalCraft li.done strong {
+#journalCraft li.done strong,
+#journalCurios li.done strong {
   color: #7fe3c5;
 }
 
 #journalStories li button,
-#journalCraft li button {
+#journalCraft li button,
+#journalCurios li button {
   display: block;
   margin-top: 6px;
 }
@@ -2484,7 +2488,8 @@ input[type=range] {
 #journalStories li strong,
 #journalCraft li strong,
 #journalTours li strong,
-#journalStunts li strong {
+#journalStunts li strong,
+#journalCurios li strong {
   color:#3b2a1a;
   font-weight:600;
 }
@@ -2499,7 +2504,8 @@ input[type=range] {
 #journalStunts li,
 #journalAlbum figure,
 #journalNotes,
-#dailyCount {
+#dailyCount,
+#journalCurios li {
   color:#7a5a36;
 }
 
@@ -2508,7 +2514,8 @@ input[type=range] {
 #journalCraft li.done strong,
 #journalTours li.done strong,
 #journalStunts li.done strong,
-#journalAlbum figcaption span {
+#journalAlbum figcaption span,
+#journalCurios li.done strong {
   color:#2f6b3a;
 }
 
@@ -3785,29 +3792,34 @@ footer .throttle .rangeLabels {
 /* A craft's small drawing (public/assets/craft): at the left of its lines in the
    notebook, and at the head of the card that is up while docked. One not yet met is a
    dark shape. */
-#journalCraft li {
+#journalCraft li,
+#journalCurios li {
   display:grid;
   grid-template-columns:56px 1fr;
   column-gap:10px;
   align-items:start;
 }
 
-#journalCraft li > .craftArt {
+#journalCraft li > .craftArt,
+#journalCurios li > .craftArt {
   grid-row:1 / span 3;
   width:56px;
   height:56px;
   border-radius:8px;
 }
 
-#journalCraft li > :not(.craftArt) {
+#journalCraft li > :not(.craftArt),
+#journalCurios li > :not(.craftArt) {
   grid-column:2;
 }
 
-#journalCraft li > button {
+#journalCraft li > button,
+#journalCurios li > button {
   justify-self:start;
 }
 
-#journalCraft li:not(.done) > .craftArt {
+#journalCraft li:not(.done) > .craftArt,
+#journalCurios li:not(.done) > .craftArt {
   filter:brightness(.3) saturate(.2);
 }
 
@@ -4980,7 +4992,8 @@ html.gaze #gazeButton {
 }
 
 #journal #journalStories li button,
-#journal #journalCraft li button {
+#journal #journalCraft li button,
+#journal #journalCurios li button {
   display:inline-block;
   box-sizing:border-box;
   width:108px;
@@ -5016,7 +5029,8 @@ html.gaze #gazeButton {
    their own under it: after inline words "자세히" stood at the end of the last line and
    "순간 이동" dropped to the next, the user's picture of 2026-10-06.) */
 #journal #journalStories li > span,
-#journal #journalCraft li > span {
+#journal #journalCraft li > span,
+#journal #journalCurios li > span {
   display:block;
 }
 
@@ -5044,7 +5058,8 @@ html.gaze #gazeButton {
 #journal #journalStories li button,
 #journal #journalCraft li button,
 #journal #journalTours li button,
-#journal #journalAlbum button {
+#journal #journalAlbum button,
+#journal #journalCurios li button {
   box-sizing:border-box;
   height:36px;
   min-height:36px;
@@ -5058,7 +5073,8 @@ html.gaze #gazeButton {
 #journal #journalMissions li button,
 #journal #journalStories li button,
 #journal #journalCraft li button,
-#journal #journalTours li button {
+#journal #journalTours li button,
+#journal #journalCurios li button {
   width:88px;
 }
 
@@ -5868,3 +5884,14 @@ body.practicing #guideText.fresh {
   text-align:center;
 }
 #loading:has(#loadError:not(:empty)) > span { display:none; }
+
+/* The imaginary places' marks stand where a craft's drawing does (ui/journal.js
+   renderCurios): a sign on a dark tile. */
+#journal #journalCurios li > .curioArt {
+  display:grid;
+  place-items:center;
+  background:#1d2440;
+  color:#f2efe6;
+  font-size:30px;
+  line-height:1;
+}

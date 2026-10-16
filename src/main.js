@@ -811,8 +811,8 @@ async function init() {
       const pair = target.kind === 'curio' ? curiosAt(bodies, spot) : null;
       const seen = pair?.find((c) => c.id === target.id) ?? target;
       const aim = target.id === 'monolith' ? pair[0].position.map((n, i) => (n + pair[1].position[i]) / 2) : seen.position;
-      const toward = aim.map((n, i) => n - spot[i]);
-      const facing = seen.up ? orientationFrom(toward, seen.up) : lookAtDirection(toward);
+      const lookWay = aim.map((n, i) => n - spot[i]);
+      const facing = seen.up ? orientationFrom(lookWay, seen.up) : lookAtDirection(lookWay);
       // The traveler stands in the middle of the view: on a wide screen turn a little
       // so a body sits beside them, not behind them.
       const aside = target.kind !== 'craft' && target.kind !== 'site' && innerWidth / innerHeight >= 1;

@@ -333,6 +333,17 @@
     </div>
   </dialog>
 
+  <dialog id="photoView" aria-labelledby="photoViewTitle">
+    <img id="photoViewPicture" alt="">
+    <button id="photoViewClose" aria-label="닫기"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <div id="photoViewBand">
+      <strong id="photoViewTitle"></strong>
+      <p id="photoViewCaption"></p>
+      <small id="photoViewCredit"></small>
+      <div id="photoViewDots" hidden></div>
+    </div>
+  </dialog>
+
   <dialog id="settings" aria-labelledby="settingsTitle">
     <div class="sheetHead"><h1 id="settingsTitle">설정</h1><small id="appVersion">{{version}} · {{updated}}</small><div class="textSize" role="group" aria-label="글자 크기"><button data-way="-1" aria-label="글자 작게" title="글자 작게">가<span aria-hidden="true">−</span></button><button data-way="1" aria-label="글자 크게" title="글자 크게">가<span aria-hidden="true">+</span></button></div></div>
     <div id="settingsTabs" role="tablist" aria-label="설정의 갈래">

@@ -5333,6 +5333,7 @@ html.gaze #gazeButton {
 #hud #targetPanel #targetName #auroraButton,
 #hud #targetPanel #targetName #poleButton,
 #hud #targetPanel #targetName #thenKey,
+#hud #targetPanel #targetName #photoKey,
 #hud #targetPanel #targetName #dockKey {
   display:inline-flex;
   align-items:center;
@@ -5395,15 +5396,15 @@ html.gaze #gazeButton {
 /* The keys of the moment (the day of this place, letting go of a craft: ui/hud.js) come
    after those, so any of the five may be first or last: the first key on the plate is
    pushed to the right end, the rest follow it, the last reaches 4px into the padding. */
-#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #poleButton, #thenKey, #dockKey) {
+#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #poleButton, #thenKey, #photoKey, #dockKey) {
   margin:0;
 }
 
-#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #poleButton, #thenKey, #dockKey):first-of-type {
+#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #poleButton, #thenKey, #photoKey, #dockKey):first-of-type {
   margin-left:auto;
 }
 
-#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #poleButton, #thenKey, #dockKey):last-of-type {
+#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #poleButton, #thenKey, #photoKey, #dockKey):last-of-type {
   margin-right:-4px;
 }
 
@@ -5415,7 +5416,7 @@ html.gaze #gazeButton {
 
 /* With them the plate says the name once: the small name in English makes room, so the
    plate does not grow a key wider and reach onto the map. */
-#hud #targetPanel > #targetName:has(#thenKey, #dockKey) small {
+#hud #targetPanel > #targetName:has(#thenKey, #photoKey, #dockKey) small {
   display:none;
 }
 
@@ -5894,4 +5895,98 @@ body.practicing #guideText.fresh {
   color:#f2efe6;
   font-size:30px;
   line-height:1;
+}
+
+/* A photo of what the plate names, the whole screen (ui/photoView.js; the user,
+   2026-10-16, with the place ringed left of the day's key: "여기에 새로운 버튼 "사진
+   보기""; of three looks: "3"). The words lie on a dark band at the foot. */
+dialog#photoView {
+  width:100vw;
+  max-width:none;
+  height:100dvh;
+  max-height:none;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:#000;
+  overflow:hidden;
+}
+
+dialog#photoView::backdrop {
+  background:#000;
+}
+
+#photoView #photoViewPicture {
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+
+#photoView #photoViewClose {
+  position:absolute;
+  top:max(12px, env(safe-area-inset-top));
+  right:12px;
+  display:grid;
+  place-items:center;
+  width:40px;
+  min-height:0;
+  height:40px;
+  margin:0;
+  padding:0;
+  border:1px solid var(--glass-line, #9fb4ff66);
+  border-radius:50%;
+  background:#0b1630cc;
+  color:#fff;
+}
+
+#photoView #photoViewBand {
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:40px 18px max(18px, env(safe-area-inset-bottom));
+  background:linear-gradient(#0000, #000d 40px);
+  pointer-events:none;
+}
+
+#photoView #photoViewTitle {
+  display:block;
+  font-size:17px;
+}
+
+#photoView #photoViewCaption {
+  margin:6px 0;
+  font-size:14px;
+  line-height:1.5;
+}
+
+#photoView #photoViewCredit {
+  color:var(--muted);
+  font-size:12px;
+}
+
+#photoView #photoViewDots {
+  display:flex;
+  justify-content:center;
+  gap:7px;
+  margin-top:10px;
+}
+
+#photoView #photoViewDots[hidden] {
+  display:none;
+}
+
+#photoView #photoViewDots i {
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#fff5;
+}
+
+#photoView #photoViewDots i.on {
+  background:#fff;
 }

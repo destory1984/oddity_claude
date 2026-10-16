@@ -2,6 +2,7 @@ import { objectParticle, towardParticle, distanceText, markedName } from './mess
 import { lookedAt, touchedSky } from '../core/sky.js';
 import { keepMarker, spreadArrows, settleAbove, crowdedMoons, nearCentre, overlapped, clearOfPanels, COMPACT_WIDTH } from '../core/markers.js';
 import { t } from '../core/i18n.js';
+import { photoSlides } from '../core/photoSlides.js';
 
 const $ = (id) => document.getElementById(id);
 const ARROWS = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
@@ -30,7 +31,7 @@ function fitName() {
   plate.style.width = `${count * step - (step - key)}px`;
 }
 
-export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome, onAurora, onVista, onPole, vistas = [], auroras = ['earth'], poles = [], skyLabels = [] }) {
+export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome, onAurora, onVista, onPole, onPhoto, vistas = [], auroras = ['earth'], poles = [], skyLabels = [] }) {
   // A press on the name itself (not on a key at its end, which keeps the press to itself).
   $('targetName').addEventListener('click', () => onName?.());
   // The way home (core/home.js): a key that stands at the end of the name plate while
@@ -83,6 +84,17 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
   // A clock's face with an arrow going back round it; two links of a chain come apart.
   const thenKey = momentKey('thenKey', '<path d="M4.2 12a7.8 7.8 0 1 0 2.5-5.7"/><path d="M4.2 4.4v4.2h4.2"/><path d="M12 8v4.3l2.9 1.8"/>', 'replayButton');
   const dockKey = momentKey('dockKey', '<path d="M9.2 8H7a4 4 0 0 0 0 8h2.2"/><path d="M14.8 8H17a4 4 0 0 1 0 8h-2.2"/><path d="M12 5v2.6M12 16.4V19"/>', 'dockTarget');
+  // A photo of what the plate names (core/photoSlides.js), before the day's key: a
+  // picture in a frame (the user, 2026-10-16: "여기에 새로운 버튼 "사진 보기"").
+  const photoKey = document.createElement('button');
+  photoKey.id = 'photoKey';
+  photoKey.title = t('사진 보기');
+  photoKey.setAttribute('aria-label', t('사진 보기'));
+  photoKey.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M5 17l5-5 3 3 2.5-2.5L19 16"/></svg>';
+  photoKey.addEventListener('click', (event) => {
+    event.stopPropagation();
+    onPhoto?.();
+  });
   let plateNow = { undock: false, then: null };
   let plateId = null;
   window.addEventListener('resize', fitName);
@@ -196,6 +208,7 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
       else if (vistas.includes(body.id)) $('targetName').append(vistaKey);
       else if (auroras.includes(body.id)) $('targetName').append(auroraKey);
       if (poles.includes(body.id)) $('targetName').append(poleKey);
+      if (photoSlides(body).length) $('targetName').append(photoKey);
       // (The keys of the moment went out with the old name: the next frame puts them back.)
       plateNow = { undock: false, then: null };
       fitName();

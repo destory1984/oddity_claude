@@ -42,6 +42,8 @@ import { createGuideView } from './ui/guide.js';
 import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, previousLesson, RING_KM, JUMP_TO_KM, ROLL_START, TOP_SPEED } from './core/practice.js';
 import { createPracticeView } from './ui/practice.js';
 import { createJournal } from './ui/journal.js';
+import { createPhotoView } from './ui/photoView.js';
+import { photoSlides } from './core/photoSlides.js';
 import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
@@ -1290,6 +1292,7 @@ ${STORY_MORE[target.id]}` : told };
     skyLabels: skyLabels(),
     onSelect: selectBody,
     onFace: () => facePicked(),
+    onPhoto: () => photoView.show(photoSlides(named(hud.plateId()))),
     // A press on the name plate turns her to what it names: the craft she flies with or
     // the place she stands at, after she has looked about, and otherwise what is chosen
     // (the user, 2026-10-12: "망원경 도킹 -> 사용자가 화면 회전을 함 -> 이름을 누르면 ->
@@ -1718,6 +1721,17 @@ ${STORY_MORE[target.id]}` : told };
   }
   // What Sora says when the journal closes after a postcard was sent from it.
   let sayAfterJournal = null;
+
+  // The photo of what the plate names: the game waits behind it, as behind a card.
+  let photoPriorPause = false;
+  const photoView = createPhotoView({
+    onOpen() {
+      photoPriorPause = paused;
+      setPaused(true);
+      input.clear();
+    },
+    onClose: () => setPaused(photoPriorPause),
+  });
 
   let journalPriorPause = false;
   const journal = createJournal({

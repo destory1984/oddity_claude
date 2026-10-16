@@ -1392,11 +1392,212 @@ function roseScene(scene, name, mats) {
   return { root, pose, face: true, fit: 0.75 };
 }
 
+// The seven curios of 2026-10-16's evening (core/craftScenes.js), each on its own model
+// (render/curioModels.js), its moving parts from the model's metadata.
+const based2 = (scene, name, mats, id) => {
+  const root = new TransformNode(name, scene);
+  const model = CURIO_BUILD[id](scene, `${name}Model`, mats);
+  model.parent = root;
+  return { root, model, parts: model.metadata ?? {} };
+};
+
+// The rabbit pounds; rice cakes pile up by the mortar; the cassia's flowers light up.
+function moonRabbitScene(scene, name, mats) {
+  const { root, parts } = based2(scene, name, mats, 'moonRabbit');
+  const { pestle, rabbit } = parts;
+  const cakeLight = tint(scene, `${name}Cake`, '#fbf7ee');
+  const cakes = Array.from({ length: 8 }, (_, k) => ball(scene, `${name}NewCake${k}`, root, cakeLight, 0.035, [0.16 + (k % 4) * 0.04, FLOOR + 0.018 + Math.floor(k / 4) * 0.02, 0.27 + (k % 2) * 0.03], [1, 0.5, 1]));
+  const bloom = glow(scene, `${name}Bloom`, '#ffe08a', 0.35);
+  const glows = Array.from({ length: 6 }, (_, k) => ball(scene, `${name}Glow${k}`, root, bloom, 0.08, [-0.25 + Math.cos(k * 1.1) * 0.16, 0.22 + Math.sin(k * 1.7) * 0.08, 0.1]));
+  function pose({ pound = 0, cakes: made = 0, bloom: lit = 0 }) {
+    // The pestle goes up out of the mortar and down again by itself.
+    pestle.position.y = FLOOR + 0.1 + 0.12 * (1 - pound);
+    rabbit.position.y = FLOOR + 0.008 * pound;
+    cakes.forEach((cake, k) => cake.setEnabled(k < made));
+    for (const g of glows) {
+      g.setEnabled(lit > 0.01);
+      g.scaling.setAll(Math.max(0.01, lit));
+    }
+  }
+  pose({});
+  return { root, pose, ground: true, fit: 1 };
+}
+
+// The Magpie Bridge in close: the birds fly in from either side to their places in the
+// arch; the weaver's star (left) and the herdsman's (right) come along it and meet; then
+// a rain of light falls.
+function magpieBridgeScene(scene, name) {
+  const root = new TransformNode(name, scene);
+  const dark = glow(scene, `${name}Dark`, '#3a4866', 1);
+  const white = glow(scene, `${name}White`, '#f2f5ff', 1);
+  const N = 25;
+  const birds = Array.from({ length: N }, (_, k) => {
+    const u = k / (N - 1);
+    const x = (u - 0.5) * 1.6;
+    const bird = group(scene, `${name}Bird${k}`, root);
+    ball(scene, `${name}Body${k}`, bird, dark, 0.04, [0, 0, 0], [2.2, 0.8, 0.8]);
+    for (const side of [-1, 1]) {
+      const wing = ball(scene, `${name}Wing${k}${side}`, bird, k % 2 ? dark : white, 0.05, [0, 0.012 * side, 0], [0.9, 0.18, 1.6]);
+      wing.rotation.x = side * 0.6;
+    }
+    return { bird, at: [x, 0.22 * (1 - (x / 0.8) ** 2) - 0.15, 0], from: [x < 0 ? -1.6 : 1.6, -0.6 - (k % 5) * 0.12, 0.3] };
+  });
+  const weaver = ball(scene, `${name}Weaver`, root, glow(scene, `${name}WeaverLight`, '#cfe0ff', 1), 0.09);
+  const herdsman = ball(scene, `${name}Herdsman`, root, glow(scene, `${name}HerdsmanLight`, '#fff0c8', 1), 0.09);
+  const halos = [weaver, herdsman].map((star, k) => ball(scene, `${name}Halo${k}`, star, glow(scene, `${name}HaloLight${k}`, k ? '#ffe4a0' : '#a8c4ff', 0.25), 0.3));
+  const rainLight = glow(scene, `${name}Rain`, '#bcd2ff', 0.6);
+  const drops = Array.from({ length: 18 }, (_, k) => part(cyl(scene, `${name}Drop${k}`, { height: 0.06, diameter: 0.006, tessellation: 4 }), root, rainLight, [-0.6 + k * 0.07, 0, 0.05]));
+  function pose({ gather = 0, meet = 0, rain = 0 }) {
+    birds.forEach(({ bird, at, from }, k) => {
+      const u = clamp(gather * 1.6 - (k % 7) * 0.08);
+      const p = mix(from, at, smooth(u));
+      bird.position.set(p[0], p[1], p[2]);
+      bird.rotation.x = Math.sin(performance.now() / 120 + k) * 0.3 * (1 - u * 0.7);
+    });
+    const end = (x) => [x, 0.22 * (1 - (x / 0.8) ** 2) - 0.15 + 0.08, 0];
+    weaver.position.set(...end(-0.8 + 0.76 * meet));
+    herdsman.position.set(...end(0.8 - 0.76 * meet));
+    halos.forEach((h) => h.scaling.setAll(1 + 0.6 * meet));
+    drops.forEach((drop, k) => {
+      drop.setEnabled(rain > 0.01);
+      drop.position.y = 0.4 - ((performance.now() / 900 + k * 0.37) % 1.2);
+    });
+  }
+  pose({});
+  return { root, pose, face: true, fit: 0.9 };
+}
+
+// The whale and the bowl pop out of nowhere with a flash; the whale turns about looking
+// round; the bowl spins on.
+function whaleScene(scene, name, mats) {
+  const { root, model, parts } = based2(scene, name, mats, 'whale');
+  const { body, pot } = parts;
+  const flash = ball(scene, `${name}Flash`, root, glow(scene, `${name}FlashLight`, '#ffffff', 0.6), 1.1);
+  function pose({ appear = 0, tumble = 0, spin = 0 }) {
+    model.scaling.setAll(Math.max(0.01, smooth(appear)));
+    flash.setEnabled(appear > 0.01 && appear < 0.99);
+    flash.scaling.setAll(0.3 + appear);
+    flash.visibility = 1 - appear;
+    body.rotation.set(0.4 * tumble, 0.9 * tumble, 0.25 * tumble);
+    pot.rotation.y = spin;
+  }
+  pose({});
+  return { root, pose, face: true, fit: 0.85 };
+}
+
+// The wheel speeds up; a small craft leaves the hub for the hole and goes in with a flash.
+function ringStationScene(scene, name, mats) {
+  const { root, parts } = based2(scene, name, mats, 'ringStation');
+  const { wheel, hole } = parts;
+  const ship = group(scene, `${name}Ship`, root);
+  ball(scene, `${name}ShipBody`, ship, mats.white, 0.05, [0, 0, 0], [2.2, 0.8, 0.8]);
+  ball(scene, `${name}ShipBurn`, ship, glow(scene, `${name}BurnLight`, '#9fd0ff', 0.8), 0.03, [-0.06, 0, 0]);
+  const flare = ball(scene, `${name}Flare`, hole, glow(scene, `${name}FlareLight`, '#e8f0ff', 0.7), 1.0);
+  let turned = 0;
+  let last = performance.now();
+  function pose({ speed = 1, go = 0, flash = 0 }) {
+    const now = performance.now();
+    turned += ((now - last) / 40000) * 2 * Math.PI * speed;
+    last = now;
+    wheel.rotation.z = turned;
+    const from = [-0.35, 0, 0.12];
+    const to = [hole.position.x, 0, 0];
+    const p = mix(from, to, smooth(go));
+    ship.position.set(p[0], p[1] + 0.12 * Math.sin(go * Math.PI), p[2] * (1 - go));
+    ship.setEnabled(go > 0.001 && go < 0.999);
+    flare.setEnabled(flash > 0.01);
+    flare.scaling.setAll(0.6 + flash);
+    flare.visibility = flash;
+  }
+  pose({});
+  return { root, pose, face: true, fit: 0.75 };
+}
+
+// The shoots come up in their rows, the lamp in the house is lit, the rover comes home.
+function potatoFarmScene(scene, name, mats) {
+  const { root, parts } = based2(scene, name, mats, 'potatoFarm');
+  const { shoots, rover } = parts;
+  const lamp = ball(scene, `${name}Lamp`, root, glow(scene, `${name}LampLight`, '#fff2c0', 0.35), 0.4, [0, FLOOR + 0.12, 0]);
+  const home = rover.position.clone();
+  function pose({ grow = 0, drive = 0, glow: lit = 0 }) {
+    shoots.forEach((shoot, k) => {
+      const u = clamp(grow * 1.5 - (k / shoots.length) * 0.5);
+      shoot.scaling.set(0.2 + 0.8 * u, 0.2 + 1.2 * u, 0.2 + 0.8 * u);
+    });
+    lamp.setEnabled(lit > 0.01);
+    lamp.scaling.setAll(Math.max(0.01, lit));
+    rover.position.set(home.x + 0.6 * (1 - smooth(drive)), home.y, home.z + 0.3 * (1 - smooth(drive)));
+  }
+  pose({});
+  return { root, pose, ground: true, fit: 1 };
+}
+
+// The record turns; notes of light go out from it as it plays.
+function goldenRecordScene(scene, name, mats) {
+  const { root, parts } = based2(scene, name, mats, 'goldenRecord');
+  const { face } = parts;
+  const noteLight = glow(scene, `${name}Note`, '#ffe9a8', 0.8);
+  const notes = Array.from({ length: 10 }, (_, k) => ball(scene, `${name}Note${k}`, root, noteLight, 0.04));
+  const base = face.rotationQuaternion?.clone() ?? null;
+  function pose({ spin = 0, sing = 0 }) {
+    face.rotation.z = spin;
+    if (base) face.rotationQuaternion = null;
+    notes.forEach((note, k) => {
+      const age = sing - k * 0.8;
+      const u = age > 0 ? (age % 8) / 8 : -1;
+      note.setEnabled(u >= 0);
+      if (u < 0) return;
+      const a = k * 2.3;
+      note.position.set(Math.cos(a) * (0.3 + 0.6 * u), Math.sin(a) * (0.3 + 0.6 * u), 0.1 + 0.2 * u);
+      note.visibility = 1 - u;
+    });
+  }
+  pose({});
+  return { root, pose, face: true, fit: 0.85 };
+}
+
+// The robot rolls to the waiting cube, takes it up, sets it on top of the tower and rolls
+// back; then it looks up.
+function robotScene(scene, name, mats) {
+  const { root, parts } = based2(scene, name, mats, 'robot');
+  const { bot, cubes, waiting } = parts;
+  const start = bot.position.clone();
+  const lying = waiting.position.clone();
+  const top = cubes[cubes.length - 1].position.clone();
+  const neck = bot.getChildMeshes().filter((m) => /Eye|Lens|Neck/.test(m.name));
+  function pose({ carry = 0, lift = 0, set = 0, back = 0, look = 0 }) {
+    const goTo = [lying.x - 0.1, start.y, lying.z];
+    const atTower = [top.x - 0.17, start.y, top.z];
+    let p = mix([start.x, start.y, start.z], goTo, smooth(carry));
+    p = mix(p, atTower, smooth(set));
+    p = mix(p, [start.x, start.y, start.z], smooth(back));
+    bot.position.set(...p);
+    // The cube: on the ground, then held up in its arms, then on the tower's top.
+    const held = [p[0] + 0.12, start.y + 0.13 + 0.06 * lift, p[2]];
+    const onTop = [top.x, top.y + 0.085, top.z];
+    let c = carry < 1 ? [lying.x, lying.y, lying.z] : held;
+    if (set >= 1) c = onTop;
+    else if (set > 0) c = mix(held, onTop, smooth(set));
+    waiting.position.set(...c);
+    for (const m of neck) m.rotation.x = 0;
+    bot.rotation.z = -0.35 * look;
+  }
+  pose({});
+  return { root, pose, ground: true, fit: 1 };
+}
+
 export const CRAFT_UNFOLD_ALL = {
   monolith: monolithShip,
   moonSlab: moonSlabFound,
   teapot: teapotScene,
   rose: roseScene,
+  moonRabbit: moonRabbitScene,
+  magpieBridge: magpieBridgeScene,
+  whale: whaleScene,
+  ringStation: ringStationScene,
+  potatoFarm: potatoFarmScene,
+  goldenRecord: goldenRecordScene,
+  robot: robotScene,
   ...CRAFT_UNFOLD,
   voyager2: neptuneGoesBy,
   pioneer10: jupiterGoesBy,

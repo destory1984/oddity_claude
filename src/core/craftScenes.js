@@ -328,6 +328,138 @@ export const CRAFT_SCENES = {
       };
     },
   },
+  // The seven curios of 2026-10-16's evening (core/curios.js), each with a scene of its
+  // own (the user: "새로 만든 것들은 애니 모두 넣고"). Made up but the golden record's.
+  // The Moon Rabbit: pound: the pestle's beat (0 up → 1 down); cakes: how many lie by the
+  // mortar; bloom: the cassia's flowers lit.
+  moonRabbit: {
+    name: t('옥토끼의 떡방아'),
+    day: t('옛이야기 속 보름날'),
+    seconds: 32,
+    downAt: 28,
+    sounds: [3, 4.2, 5.4, 6.6, 7.8, 9, 10.2, 11.4, 12.6, 13.8, 15, 16.2, 17.4, 18.6, 19.8, 21, 22.2, 23.4].map((at) => [at, 'brake']),
+    lines: [
+      { at: 0, text: t('옛사람들은 보름달의 어두운 무늬를 보고, 계수나무 아래에서 토끼가 방아를 찧는다고 했습니다.') },
+      { at: 8, text: t('한국에서는 떡방아를 찧는다고 했고, 중국에서는 늙지 않는 약을 찧는다고 했습니다.') },
+      { at: 16, text: t('그 무늬는 39억 년 전쯤 큰 충돌 자리에 용암이 흘러들어 굳은 낮은 땅, 달의 바다입니다.') },
+      { at: 24, text: t('2013년 달에 내린 중국의 월면차 이름도 옥토끼라는 뜻의 위투였습니다.') },
+    ],
+    unfold(t) {
+      const beat = t >= 2.4 && t < 24 ? ((t - 2.4) % 1.2) / 1.2 : 0;
+      return { pound: beat < 0.5 ? beat * 2 : 2 - beat * 2, cakes: Math.min(8, Math.floor(Math.max(0, t - 3) / 2.6)), bloom: ease(t, 24, 28) };
+    },
+  },
+  // The Magpie Bridge, seen on Chilseok: gather: the birds flying in to their places in the
+  // arch (0 → 1); meet: the weaver's and the herdsman's stars come along it to its middle;
+  // rain: the tears that fall as rain after (0 → 1).
+  magpieBridge: {
+    name: t('까치와 까마귀의 다리'),
+    day: t('칠월 칠석'),
+    seconds: 34,
+    downAt: 30,
+    sounds: [[16, 'docking'], [25, 'mission']],
+    lines: [
+      { at: 0, text: t('하늘나라의 직녀는 베를 짜고 견우는 소를 몰았습니다. 둘은 혼인한 뒤 일을 게을리했습니다.') },
+      { at: 8, text: t('화가 난 옥황상제는 둘을 은하수 양쪽에 떼어 놓고, 일 년에 한 번만 만나게 했습니다.') },
+      { at: 16, text: t('칠석날이 되면 까치와 까마귀가 날아올라 머리를 맞대고 은하수에 다리를 놓습니다.') },
+      { at: 24, text: t('둘이 다리 위에서 만나 흘린 눈물이 칠석날 내리는 비라고 합니다.') },
+    ],
+    unfold(t) {
+      return { gather: ease(t, 15, 23), meet: ease(t, 23, 27), rain: ease(t, 27, 29) };
+    },
+  },
+  // The whale and the petunias: appear: they come out of nowhere (0 → 1); tumble: how far
+  // the whale has turned looking round; spin: the bowl turning.
+  whale: {
+    name: t('난데없는 고래와 화분'),
+    day: t('소설 속 어느 날'),
+    seconds: 32,
+    downAt: 28,
+    sounds: [[2, 'warp']],
+    lines: [
+      { at: 0, text: t('어느 우스운 소설에서는, 날아가던 미사일 두 발이 갑자기 고래 한 마리와 피튜니아 화분 하나로 바뀝니다.') },
+      { at: 8, text: t('난데없이 하늘에 생겨난 고래는 이게 뭔지, 자기가 누군지 궁금해하며 떨어집니다.') },
+      { at: 16, text: t('화분은 이런 일이 처음이 아니라는 듯 아무렇지 않게 빙글빙글 돕니다.') },
+      { at: 24, text: t('이 게임 속 우주에서는 다행히 둘 다 떨어지지 않고 지구 앞에 떠 있습니다.') },
+    ],
+    unfold(t) {
+      return { appear: ease(t, 1.5, 3.5), tumble: t < 24 ? Math.sin(t * 0.7) : Math.sin(24 * 0.7) * (1 - ease(t, 24, 27)), spin: t * 0.9 };
+    },
+  },
+  // The wheel station and the hole: speed: how fast the wheel turns (1 as ever); go: a
+  // small craft's way from the station into the hole (0 → 1); flash: the hole flares as
+  // it goes in.
+  ringStation: {
+    name: t('구멍 너머로'),
+    day: t('영화 속 어느 날'),
+    seconds: 32,
+    downAt: 28,
+    sounds: [[9, 'docking'], [19.5, 'warp']],
+    lines: [
+      { at: 0, text: t('지어낸 이야기입니다. 토성 곁에 누군가 두고 간 구멍이 나타났습니다. 둘레의 빛이 휘어 보입니다.') },
+      { at: 8, text: t('정거장은 바퀴처럼 돌며 안쪽에 무게를 만듭니다. 작은 우주선 한 척이 정거장을 떠납니다.') },
+      { at: 16, text: t('우주선이 구멍 속으로 들어가자 빛이 한 번 번쩍입니다. 구멍 너머는 먼 은하라고 합니다.') },
+      { at: 24, text: t('이런 구멍, 웜홀은 이론으로만 있을 수 있다고 할 뿐 아직 아무도 본 적이 없습니다.') },
+    ],
+    unfold(t) {
+      return { speed: 1 + 2 * ease(t, 4, 8), go: ease(t, 9, 19.5), flash: t >= 19.5 ? Math.max(0, 1 - (t - 19.5) / 2) : 0 };
+    },
+  },
+  // The potato farm: grow: the shoots come up (0 → 1); drive: the rover coming home (0 →
+  // 1); glow: the lamp in the house lit.
+  potatoFarm: {
+    name: t('화성의 감자 농사'),
+    day: t('소설 속 어느 날'),
+    seconds: 32,
+    downAt: 28,
+    sounds: [[24, 'roll']],
+    lines: [
+      { at: 0, text: t('지어낸 이야기입니다. 화성에 홀로 남은 사람이 둥근 집 안에 흙을 깔고 감자를 심었습니다.') },
+      { at: 8, text: t('물은 로켓 연료를 태워 얻고, 흙은 화성 흙에 거름을 섞어 만들었습니다.') },
+      { at: 16, text: t('싹이 줄지어 돋아납니다. 실제 화성 흙에는 독이 되는 소금이 섞여 있어 그대로는 키우기 어렵습니다.') },
+      { at: 24, text: t('구조대가 올 때까지 그는 감자로 버텼습니다. 이 게임 속 화성에도 그 밭이 남아 있습니다.') },
+    ],
+    unfold(t) {
+      return { grow: ease(t, 8, 22), drive: ease(t, 24, 30), glow: ease(t, 4, 6) };
+    },
+  },
+  // Voyager's golden record (real): spin: how far it has turned (radians); sing: notes
+  // going out from it (seconds, 0 before); hello: the Korean greeting heard.
+  goldenRecord: {
+    name: t('지구의 인사'),
+    day: t('1977년 9월 5일'),
+    seconds: 34,
+    downAt: 30,
+    sounds: [[25.5, 'hello']],
+    lines: [
+      { at: 0, text: t('1977년 9월 5일 떠난 보이저 1호에는 금으로 입힌 구리 음반이 한 장 실려 있습니다.') },
+      { at: 8, text: t('파도 소리, 웃음소리, 고래의 노래, 음악 27곡, 그리고 55개 언어의 인사가 들어 있습니다.') },
+      { at: 16, text: t('겉면에는 트는 법과, 펄서 14개로 태양의 자리를 알리는 지도가 새겨져 있습니다.') },
+      { at: 24, text: t('한국어 인사는 "안녕하세요"입니다. 보이저 1호는 지금 지구에서 250억km 넘게 떨어져 있습니다.') },
+    ],
+    unfold(t) {
+      return { spin: t * 0.55, sing: t >= 8 ? t - 8 : 0 };
+    },
+  },
+  // The little robot: work: where it is in one round of its work (picks the cube up,
+  // carries it, sets it on the tower); stacked: how many more cubes the tower has; look:
+  // it looks up at the sky at the end.
+  robot: {
+    name: t('작은 로봇의 하루'),
+    day: t('만화 영화 속 어느 날'),
+    seconds: 32,
+    downAt: 28,
+    sounds: [[6, 'click'], [12, 'brake'], [18, 'click'], [21, 'brake']],
+    lines: [
+      { at: 0, text: t('지어낸 이야기입니다. 아무도 없는 명왕성에서 작은 로봇 하나가 오늘도 일을 합니다.') },
+      { at: 8, text: t('흩어진 쓰레기를 주워 담아, 네모난 덩어리로 꾹꾹 눌러 뭉칩니다.') },
+      { at: 16, text: t('뭉친 덩어리를 차곡차곡 쌓아 올리면, 탑이 또 한 층 높아집니다.') },
+      { at: 24, text: t('일을 마친 로봇이 고개를 들어 하늘을 봅니다. 저 멀리 밝은 점 하나가 태양입니다.') },
+    ],
+    unfold(t) {
+      return { carry: ease(t, 4, 12), lift: ease(t, 12, 16), set: ease(t, 16, 21), back: ease(t, 21, 23), look: ease(t, 24, 26.5) };
+    },
+  },
   // Juno's one chance to be caught by Jupiter. burn: its main engine is lit; spin: how
   // far it has turned (radians; it spins faster for the burn and slows after).
   juno: {

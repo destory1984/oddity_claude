@@ -9,7 +9,7 @@ import {
   rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, right, swingToward, turnToward,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/craft.js';
-import { curiosAt, hiddenCurios, carryingCurio, curiosNear, curioHead, setCurioDay, CURIO_ABOUT } from './core/curios.js';
+import { CURIOS, curiosAt, hiddenCurios, carryingCurio, curiosNear, curioHead, setCurioDay, CURIO_ABOUT, BRIDGE_KM } from './core/curios.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
@@ -127,8 +127,11 @@ const NOTE_GAP_S = 20;
 // two thirds of the view's height (Saturn stands back for its rings); a craft is drawn
 // 30 km wide and a lander 6 km; a crater or a sea is seen from 500 km.
 function inspectView(target) {
-  // (The slab on the Moon is drawn smaller, core/curios.js.)
-  if (target.id === 'moonSlab') return { distanceKm: 35, fovDeg: 30 };
+  // (Those on the ground are drawn smaller: the slab on the Moon, the rabbit, the farm...,
+  // core/curios.js.)
+  if (target.kind === 'curio' && target.up) return { distanceKm: 35, fovDeg: 30 };
+  // (The bridge in the sky: from in front, as wide as it is, core/curios.js.)
+  if (target.kind === 'curio' && target.sky) return { distanceKm: BRIDGE_KM * 0.9, fovDeg: 50 };
   if (target.kind === 'craft' || target.kind === 'curio') return { distanceKm: 110, fovDeg: 30 };
   // (The drawn cards of a small place: the islets, the observatory on its mountain.)
   if (target.id === 'dokdo' || target.id === 'bohyunsan') return { distanceKm: 30, fovDeg: 40 };
@@ -1320,11 +1323,12 @@ ${STORY_MORE[target.id]}` : told };
       // the flight heading and any coast in progress are as they were when it closes.
       const toward = body.position.map((n, i) => n - state.position[i]);
       let facing = lookAtDirection(toward);
-      if (body.kind === 'site') {
+      if (body.kind === 'site' || body.up) {
         // A place on the ground is first seen from the side she is on, 15 degrees above
-        // its horizon, with its sky at the top of the view.
+        // its horizon, with its sky at the top of the view. (So is a curio standing on the
+        // ground: from overhead the rabbit was a ring of grey.)
         const ground = here(body.parent);
-        const up = body.position.map((n, i) => (n - ground.position[i]) / ground.radiusKm);
+        const up = body.up ?? body.position.map((n, i) => (n - ground.position[i]) / ground.radiusKm);
         const rise = toward.reduce((sum, n, i) => sum + n * up[i], 0);
         let level = toward.map((n, i) => n - up[i] * rise);
         if (Math.hypot(...level) < 1e-6) level = [up[1], -up[0], 0];
@@ -1841,7 +1845,8 @@ ${STORY_MORE[target.id]}` : told };
       localStorage.setItem('oddity.progress.before-all', localStorage.getItem('oddity.progress.v1') ?? '');
     } catch { /* storage shut: nothing to keep */ }
     // (Into the log in hand as well: it is written out again as the page leaves.)
-    progress = { ...progress, discovered: ids(BODIES), landed: ids(BODIES), photos: ids(MISSIONS), stories: ids(STORIES), craft: ids(CRAFT), notes: ids(NOTES), tours: ids(TOURS), tour: null };
+    // (And every imagined place: the user, 2026-10-16: "상상 탭에 있는 것들도 포함해줘".)
+    progress = { ...progress, discovered: ids(BODIES), landed: ids(BODIES), photos: ids(MISSIONS), stories: ids(STORIES), craft: ids(CRAFT), curios: ids(CURIOS), notes: ids(NOTES), tours: ids(TOURS), tour: null };
     saveProgress(progress);
     saveGuideDone();
     location.reload();

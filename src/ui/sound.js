@@ -384,6 +384,18 @@ export function createSound() {
       tone({ freq: 192, to: 208, type: 'triangle', length: 3.2, volume: 0.03, attack: 0.3, out });
       for (let k = 0; k < 14; k++) noise({ start: 0.2 + k * 0.21, length: 0.03, volume: 0.07, type: 'bandpass', freq: 1300, out });
     },
+    // The Korean greeting on Voyager's golden record (core/craftScenes.js goldenRecord), in
+    // a Korean voice whatever the game's language (the record's own words).
+    hello: () => {
+      if (muted || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+      const words = new SpeechSynthesisUtterance('안녕하세요');
+      words.lang = 'ko-KR';
+      const voice = window.speechSynthesis.getVoices().find((v) => v.lang?.startsWith('ko'));
+      if (voice) words.voice = voice;
+      words.rate = 0.95;
+      words.volume = 0.5;
+      window.speechSynthesis.speak(words);
+    },
     // The slab on the Moon calling out to Jupiter as the Sun first touches it (core/craftScenes.js
     // moonSlab): a high whine beating fast, four seconds, kept soft (in the film it hurt).
     signal: () => {

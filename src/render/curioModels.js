@@ -280,12 +280,14 @@ function moonRabbit(scene, name) {
   }
   ball(scene, `${name}Nose`, rabbit, pink, 0.016, [-0.09, 0.26, 0]);
   ball(scene, `${name}Tail`, rabbit, fur, 0.05, [0.09, 0.07, 0]);
-  // The pestle, held up in its paws over the mortar.
+  // The pestle stands upright in the mortar on its own (the user, 2026-10-16, of it held
+  // in the rabbit's paws: "방아 위치가 좀 이상해.. 그냥 방아가 혼자서 위 아래로 움직이는걸로
+  // 하자"); a scene lifts it (render/craftUnfold.js).
   const pestle = new TransformNode(`${name}PestleHolder`, scene);
-  pestle.parent = rabbit;
-  pestle.position.set(-0.08, 0.17, 0);
-  rod(scene, `${name}Pestle`, pestle, wood, [0, 0, 0], [-0.14, -0.05, 0], 0.03, 8);
-  ball(scene, `${name}PestleHead`, pestle, wood, 0.06, [-0.15, -0.06, 0], [1.4, 1, 1]);
+  pestle.parent = root;
+  pestle.position.set(0.1, FLOOR + 0.1, 0.05);
+  ball(scene, `${name}PestleHead`, pestle, wood, 0.06, [0, 0.01, 0], [1, 1.5, 1]);
+  rod(scene, `${name}Pestle`, pestle, wood, [0, 0.03, 0], [0, 0.22, 0], 0.025, 8);
   for (let k = 0; k < 3; k++) ball(scene, `${name}Cake${k}`, root, fur, 0.035, [0.2 + k * 0.045, FLOOR + 0.018, 0.2], [1, 0.5, 1]);
   root.metadata = { rabbit, pestle };
   return root;
@@ -355,6 +357,7 @@ function whale(scene, name) {
     ball(scene, `${name}Leaf${k}`, pot, leaf, 0.035, [Math.cos(a) * r, 0.075, Math.sin(a) * r], [1, 0.4, 1]);
     ball(scene, `${name}Petunia${k}`, pot, petals[k % 2], 0.04, [Math.cos(a + 1) * r * 1.2, 0.1 + (k % 2) * 0.015, Math.sin(a + 1) * r * 1.2], [1, 0.55, 1]);
   }
+  root.metadata = { body, pot };
   return root;
 }
 
@@ -385,6 +388,7 @@ function ringStation(scene, name, mats) {
   ball(scene, `${name}HoleRim`, hole, light(scene, 'holeRim', '#b9d4ff', 0.22), 0.62);
   ball(scene, `${name}HoleHalo`, hole, light(scene, 'holeHalo', '#7fa3ff', 0.1), 0.85);
   drum(scene, `${name}HoleBand`, hole, light(scene, 'holeBand', '#fff1d0', 0.5), { height: 0.004, diameter: 0.7, tessellation: 48 }, [0, 0, 0], [0.15, 1, 0.25]);
+  root.metadata = { wheel, hole };
   return root;
 }
 
@@ -395,12 +399,13 @@ function potatoFarm(scene, name, mats) {
   disc(scene, `${name}Ground`, root, paint(scene, 'farmGround', '#a5623a'), 1.5, [0, FLOOR - 0.005, 0]);
   disc(scene, `${name}Soil`, root, paint(scene, 'farmSoil', '#5a3b26'), 0.62, [0, FLOOR + 0.002, 0], 0.006);
   const shoot = paint(scene, 'potatoShoot', '#5aa047', { glow: 0.2 });
+  const shoots = [];
   for (let row = 0; row < 5; row++) {
     for (let k = 0; k < 7; k++) {
       const x = -0.21 + k * 0.07;
       const z = -0.16 + row * 0.08;
       if (Math.hypot(x, z) > 0.27) continue;
-      ball(scene, `${name}Shoot${row}${k}`, root, shoot, 0.04, [x, FLOOR + 0.02, z], [1, 0.8, 1]);
+      shoots.push(ball(scene, `${name}Shoot${row}${k}`, root, shoot, 0.04, [x, FLOOR + 0.02, z], [1, 0.8, 1]));
     }
   }
   part(CreateSphere(`${name}Dome`, { diameter: 0.7, segments: 24, slice: 0.5 }, scene), root, paint(scene, 'farmDome', '#eef2f4', { shine: 0.6, glow: 0.15, alpha: 0.35 }), [0, FLOOR, 0], [0, 0, 0], [1, 0.75, 1]);
@@ -416,6 +421,7 @@ function potatoFarm(scene, name, mats) {
     const panel = box(scene, `${name}Panel${k}`, root, mats.solar ?? paint(scene, 'farmPanel', '#24346a'), [0.16, 0.008, 0.1], [-0.5, FLOOR + 0.05, -0.2 + k * 0.13]);
     panel.rotation.z = 0.35;
   }
+  root.metadata = { shoots, rover };
   return root;
 }
 
@@ -475,6 +481,7 @@ function goldenRecord(scene, name) {
   // A flat drum, its faces along z (the craft's way: +z toward the Sun).
   const face = drum(scene, `${name}Disc`, root, gold, { height: 0.03, diameter: 0.9, tessellation: 64 }, [0, 0, 0], [0, 0, 1]);
   face.rotation.y = Math.PI / 2;
+  root.metadata = { face };
   return root;
 }
 
@@ -499,11 +506,13 @@ function robot(scene, name, mats) {
   for (const z of [-0.09, 0.09]) rod(scene, `${name}Arm${z}`, bot, mats.grey, [0, 0.15, z], [-0.12, 0.12, z * 1.1], 0.02, 6);
   // The tower of cubes, to the right.
   const shades = ['#7a6f63', '#8c7a5c', '#6c6a66', '#9a8566', '#77706a', '#857767', '#6f6559'];
+  const cubes = [];
   for (let k = 0; k < 7; k++) {
     const sizeK = 0.09 - k * 0.004;
-    box(scene, `${name}Cube${k}`, root, paint(scene, `rubbish${k}`, shades[k]), [sizeK, sizeK, sizeK], [0.25 + (k % 2 ? 0.008 : -0.006), FLOOR + 0.045 + k * 0.088, 0.02], [0, k * 0.4, 0]);
+    cubes[k] = box(scene, `${name}Cube${k}`, root, paint(scene, `rubbish${k}`, shades[k]), [sizeK, sizeK, sizeK], [0.25 + (k % 2 ? 0.008 : -0.006), FLOOR + 0.045 + k * 0.088, 0.02], [0, k * 0.4, 0]);
   }
-  box(scene, `${name}Waiting`, root, paint(scene, 'rubbishNew', '#8f8473'), [0.08, 0.08, 0.08], [0.04, FLOOR + 0.04, 0.12], [0, 0.3, 0]);
+  const waiting = box(scene, `${name}Waiting`, root, paint(scene, 'rubbishNew', '#8f8473'), [0.08, 0.08, 0.08], [0.04, FLOOR + 0.04, 0.12], [0, 0.3, 0]);
+  root.metadata = { bot, cubes, waiting };
   return root;
 }
 

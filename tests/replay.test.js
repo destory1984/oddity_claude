@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { REPLAYS, replayFor, replayFrame, replayOn, replaySounds, replayAt } from '../src/core/replay.js';
 import { STORIES } from '../src/core/stories.js';
 import { CRAFT } from '../src/core/craft.js';
+import { CURIOS } from '../src/core/curios.js';
 
 test('every scene belongs to a story place on a surface and tells its lines in order', () => {
   for (const [id, scene] of Object.entries(REPLAYS)) {
@@ -10,7 +11,7 @@ test('every scene belongs to a story place on a surface and tells its lines in o
     // passing near it (Philae's comet), or by coming to a place on its cloud tops, where
     // nobody can stand (Jupiter: the comet's bruises).
     // A scene of unfolding belongs to a craft she can dock with, or to a curio (core/curios.js).
-    if (scene.unfold) assert.ok(CRAFT.some((c) => c.id === id) || ['monolith', 'moonSlab', 'teapot', 'rose'].includes(id), id);
+    if (scene.unfold) assert.ok(CRAFT.some((c) => c.id === id) || CURIOS.some((c) => c.id === id), id);
     else if (scene.on) assert.ok(STORIES.some((s) => (s.type === 'land' && s.body === scene.on) || (s.type === 'near' && s.target === scene.on) || (s.type === 'surface' && s.body === scene.on)), id);
     else assert.equal(STORIES.find((s) => s.id === id)?.type, 'surface', id);
     assert.equal(scene.lines[0].at, 0);
@@ -111,7 +112,7 @@ test('Curiosity has a scene of its own day, told in four lines', () => {
   assert.equal(replayFor('curiosity').day, '2012년 8월 6일');
   assert.equal(replayFor('curiosity').lines.length, 4);
   assert.match(replayFrame('curiosity', 17).text, /게일 분화구/);
-  assert.equal(Object.keys(REPLAYS).length, 143);
+  assert.equal(Object.keys(REPLAYS).length, 150);
   assert.equal(replayFor('viking1').day, '1976년 7월 20일');
   assert.match(replayFrame('viking1', 17).text, /25초/);
 });

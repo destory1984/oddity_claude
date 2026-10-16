@@ -793,8 +793,11 @@ async function init() {
       stuntJumped = true;
       home = null;
       input.clear();
-      // (By the slab she looks at the Sun over its top: core/teleport.js curioArrival.)
-      const facing = lookAtDirection((target.kind === 'curio' ? here('sun') : target).position.map((n, i) => n - spot[i]));
+      // (By the slab she looks between it and its ship, both in view: core/teleport.js
+      // curioArrival.)
+      const pair = target.kind === 'curio' ? curiosAt(bodies, spot) : null;
+      const aim = pair ? pair[0].position.map((n, i) => (n + pair[1].position[i]) / 2) : target.position;
+      const facing = lookAtDirection(aim.map((n, i) => n - spot[i]));
       // The traveler stands in the middle of the view: on a wide screen turn a little
       // so a body sits beside them, not behind them.
       const aside = target.kind !== 'craft' && target.kind !== 'site' && innerWidth / innerHeight >= 1;

@@ -161,7 +161,7 @@ test('a ringed body is seen from 30 degrees off its rings, on their sunlit side,
   }
 });
 
-test('the slab and the ship by Jupiter: met once, then jumped to from far, to their shadowed side', async () => {
+test('the slab and the ship by Jupiter: met once, then jumped to from far, to a quarter view of them', async () => {
   const { curiosAt } = await import('../src/core/curios.js');
   const { recordCurios } = await import('../src/core/progress.js');
   const [slab, ship] = curiosAt(bodies, far);
@@ -173,10 +173,10 @@ test('the slab and the ship by Jupiter: met once, then jumped to from far, to th
   assert.equal(recordCurios(met), met);
   assert.equal(visited(ship, met), true);
   const spot = teleportSpot(slab, { position: far, progress: met, bodies });
-  // On its shadowed side, about 40 km off, a little below its top: the Sun over its edge.
-  near(gap(spot, slab.position), 40, 5);
+  // From a quarter on its sunlit side, 160 km off.
+  near(gap(spot, slab.position), 160, 1e-6);
   const sun = bodies.find((b) => b.kind === 'star');
-  assert.ok(dot(sub(spot, slab.position), sub(sun.position, slab.position)) < 0);
+  assert.ok(dot(sub(spot, slab.position), sub(sun.position, slab.position)) > 0);
   // Not jumped to from beside it.
   assert.equal(teleportSpot(slab, { position: spot, progress: met, bodies }), null);
   // Kept through storage, junk dropped.

@@ -17,12 +17,10 @@ const ALONG = 0.55;
 const APPARENT = 0.05;
 export const CURIO_MAX_KM = 4000;
 export const curioSizeKm = (distanceKm) => Math.min(CURIO_MAX_KM, Math.max(CRAFT_SIZE_KM, distanceKm * APPARENT));
-// The ship stands this many of the slab's heights from it, before its sunlit face but
-// SHIP_ASIDE off the line to the Sun, its head toward the slab: on that line it hid the
-// slab from anyone who came from the Sun's side (the user, 2026-10-16: "너무 정면에
-// 배치했네. 45도 쿼터뷰로 배치해").
+// The ship stands this many of the slab's heights from it, square before its sunlit face,
+// its head toward it (the user, 2026-10-16: "모노리스와 우주선은 | - 배치"; a jump to
+// them looks at the two from a quarter, core/teleport.js curioArrival).
 const SHIP_OFF = 1.7;
-const SHIP_ASIDE = Math.PI / 4;
 // Their tags show from within this many of Jupiter's radii of its cloud tops.
 const SHOWN_RADII = 8;
 
@@ -43,11 +41,7 @@ export function curiosAt(bodies, position) {
   const toSun = sun.position.map((n, i) => n - slab[i]);
   const far = Math.hypot(...toSun);
   const size = curioSizeKm(gap(position, slab));
-  // Level and square to the line to the Sun.
-  const level = [-toSun[2], 0, toSun[0]];
-  const flat = Math.hypot(...level) || 1;
-  const aside = toSun.map((n, i) => (n / far) * Math.cos(SHIP_ASIDE) + (level[i] / flat) * Math.sin(SHIP_ASIDE));
-  const ship = slab.map((n, i) => n + aside[i] * size * SHIP_OFF);
+  const ship = slab.map((n, i) => n + (toSun[i] / far) * size * SHIP_OFF);
   return [
     { ...CURIOS[0], position: slab, radiusKm: CRAFT_SIZE_KM / 2 },
     // (awayFrom: render/craft.js turns its back from there, its head to the slab.)

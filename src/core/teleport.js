@@ -3,7 +3,6 @@
 // seen from above.
 import { nearestSurface } from './bodies.js';
 import { DOCK_RANGE_KM } from './dock.js';
-import { curioSizeKm } from './curios.js';
 
 // A body is seen from this many of its radii from its centre: the disc then fills
 // about a third of the screen's height (the view is 60 degrees tall).
@@ -138,25 +137,18 @@ export function craftArrival(craft, bodies) {
   return craft.position.map((n, i) => n + out[i] * CRAFT_ARRIVAL_KM);
 }
 
-// The slab and the ship by Jupiter (core/curios.js): met from its shadowed side and a
-// little below, looking at the Sun, which just peeks over the slab's top edge (the
-// user, 2026-10-16: "태양이 모노리스 위로 빼꼼 얼굴을 내밀어야지"). The ship stands 45
-// degrees off the slab's sunlit face, beside it in the view.
-// (From 150 km the Sun, drawn large, was wider than the slab and stood round it: from
-// 40 km the slab is wider than the Sun.)
-export const CURIO_ARRIVAL_KM = 40;
+// The slab and the ship by Jupiter (core/curios.js), which stands square before its
+// sunlit face ("| -"): met from a quarter, 45 degrees round from the line through the two
+// and 20 above, so both are in view, the slab lit at a slant and the ship side on (the
+// user, 2026-10-16: "워프를 했을 때에 카메라 시점은 쿼터뷰"). 160 km off: from nearer
+// the ship, 51 km from the slab, went out of a phone's upright view.
+export const CURIO_ARRIVAL_KM = 160;
 const CURIO_NEAR_KM = 1000;
-// How much of the Sun's disc shows over the edge: its middle this many of its radii
-// under the edge.
-const PEEK = 0.3;
 export function curioArrival(curio, bodies) {
   const sun = bodies.find((b) => b.kind === 'star');
   const toLight = unit(sub(sun.position, curio.position));
-  // The slab stands upright (render/curioModels.js: 0.9 of its drawn size tall).
-  const top = curio.position.map((n, i) => n + (i === 1 ? 0.45 * curioSizeKm(CURIO_ARRIVAL_KM) : 0));
-  const sunRadians = Math.asin(Math.min(1, sun.radiusKm / gap(sun.position, curio.position)));
-  const drop = CURIO_ARRIVAL_KM * Math.tan(PEEK * sunRadians);
-  return top.map((n, i) => n - toLight[i] * CURIO_ARRIVAL_KM - (i === 1 ? drop : 0));
+  const out = mix(mix(toLight, sideOf(toLight), 45), [0, 1, 0], 20);
+  return curio.position.map((n, i) => n + out[i] * CURIO_ARRIVAL_KM);
 }
 
 // Where to appear over a story place: 400 km up and as far to one side, so the ground

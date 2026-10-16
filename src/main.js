@@ -3270,6 +3270,10 @@ ${STORY_MORE[target.id]}` : told };
         ...sites.filter((s) => siteHidden(s, here(s.parent), state.position) || (s.id !== selectedId && siteFar(here(s.parent), state.position))).map((s) => s.id),
         ...awayCraft,
         ...awayCurios,
+        // The ship by the slab is part of it: the one name is the slab's (the user,
+        // 2026-10-16: "spaceship unknown은 그냥 모노리스와 하나로 보여지게 하면 안 됨? 대표명
+        // 모노리스").
+        'unknown',
         // Whatever is behind a planet or a moon cannot be seen and gets no label (the
         // Sun says "가려짐" itself; the chosen target and the guide's goal stay).
         ...[...bodies, ...craft, ...curios]

@@ -1087,6 +1087,9 @@ ${STORY_MORE[target.id]}` : told };
 
   $('replayButton').addEventListener('click', () => {
     if (photo.active()) return;
+    // Asked for, a day is played at once: a pause left on (by a card, by the page put
+    // away) held it at its first moment (the user, 2026-10-16: "오퍼튜니티 동영상 안 나온다").
+    if (paused) setPaused(false);
     if (eclipse && (!visit || visit.id === eventPlace.id)) {
       const watch = canWatch(eclipse, eventPlace, here('sun'), state.position);
       if (watch === 'yes') return startShow();

@@ -1,4 +1,4 @@
-import { TransformNode, CreateSphere, CreateLathe, DynamicTexture, StandardMaterial, Color3, Vector3 } from './babylon.js';
+import { TransformNode, CreateSphere, CreateLathe, DynamicTexture, StandardMaterial, Color3, Vector3, Quaternion } from './babylon.js';
 import { part, box, rod, nozzle, fuse, drum, aim } from './craftParts.js';
 
 // The two curios near Jupiter (core/curios.js), built as craft are: about one unit
@@ -118,6 +118,66 @@ function teapot(scene, name) {
   return root;
 }
 
+// One rose (the user, 2026-10-16: "장미를 좀 더 정교하게"): a stem bent a little, with
+// thorns and two leaves of three leaflets each; five sepals under the bloom; the bloom a
+// tight dark bud wrapped by three rings of cupped petals (3, 5 and 7), each ring wider,
+// more open and lighter than the one inside it, turned by the golden angle from it.
+const GOLDEN = Math.PI * (3 - Math.sqrt(5));
+// A thin part leant out from the middle at `a` round it by `lean` from straight up: its
+// own +y along that way, its flat face (+z) turned out from the middle.
+function leanOut(mesh, a, lean) {
+  const up = new Vector3(Math.cos(a) * Math.sin(lean), Math.cos(lean), Math.sin(a) * Math.sin(lean));
+  const face = new Vector3(Math.cos(a) * Math.cos(lean), -Math.sin(lean), Math.sin(a) * Math.cos(lean));
+  mesh.rotationQuaternion = Quaternion.FromLookDirectionLH(face, up);
+}
+const PETAL_RINGS = [
+  { count: 3, size: 0.034, out: 0.006, open: 0.25, deep: true },
+  { count: 5, size: 0.042, out: 0.013, open: 0.55, deep: false },
+  { count: 7, size: 0.048, out: 0.019, open: 0.95, deep: false },
+];
+function roseFlower(scene, name, parent, { green, red, deep }) {
+  const stemTop = [0.008, 0.13, 0];
+  rod(scene, `${name}Stem0`, parent, green, [0, 0, 0], [0.012, 0.065, 0], 0.01, 8);
+  rod(scene, `${name}Stem1`, parent, green, [0.012, 0.065, 0], stemTop, 0.009, 8);
+  [[0.007, 0.03, 0.004, 0.6], [0.015, 0.085, -0.004, -0.5], [0.004, 0.105, 0.005, 2.2]].forEach(([x, y, z, turn], k) => {
+    const thorn = drum(scene, `${name}Thorn${k}`, parent, green, { height: 0.01, diameterTop: 0, diameterBottom: 0.005, tessellation: 6 }, [x, y, z]);
+    thorn.rotation.set(0, turn, Math.PI / 2.3);
+  });
+  [[0.011, 0.05, 0.4], [0.013, 0.09, Math.PI + 0.3]].forEach(([x, y, turn], k) => {
+    const leaf = new TransformNode(`${name}Leaf${k}`, scene);
+    leaf.parent = parent;
+    leaf.position.set(x, y, 0);
+    leaf.rotation.set(0, turn, -0.9);
+    rod(scene, `${name}Petiole${k}`, leaf, green, [0, 0, 0], [0, 0.03, 0], 0.004, 5);
+    [[0, 0.04, 0], [-0.012, 0.025, 0.4], [0.012, 0.025, -0.4]].forEach(([lx, ly, lean], j) => {
+      const blade = ball(scene, `${name}Leaflet${k}${j}`, leaf, green, 0.022, [lx, ly, 0], [0.55, 1, 0.12]);
+      blade.rotation.z = lean;
+    });
+  });
+  const head = new TransformNode(`${name}Head`, scene);
+  head.parent = parent;
+  head.position.set(...stemTop);
+  for (let k = 0; k < 5; k++) {
+    const sepal = ball(scene, `${name}Sepal${k}`, head, green, 0.03, [0, 0, 0], [0.3, 1, 0.1]);
+    const a = (k / 5) * 2 * Math.PI;
+    sepal.position.set(Math.cos(a) * 0.012, 0.002, Math.sin(a) * 0.012);
+    leanOut(sepal, a, 2.1);
+  }
+  ball(scene, `${name}Bud`, head, deep, 0.026, [0, 0.022, 0], [0.8, 1.25, 0.8]);
+  let turn = 0;
+  PETAL_RINGS.forEach(({ count, size, out, open, deep: dark }, ring) => {
+    for (let k = 0; k < count; k++) {
+      turn += GOLDEN;
+      const a = turn + (k / count) * 2 * Math.PI;
+      const petal = ball(scene, `${name}Petal${ring}${k}`, head, dark ? deep : red, size, [0, 0, 0], [0.9, 1.15, 0.3]);
+      // Stood up round the bud, its cup facing in, then leant out by `open`.
+      petal.position.set(Math.cos(a) * out, 0.02 + size * 0.15, Math.sin(a) * out);
+      leanOut(petal, a, open);
+    }
+  });
+  return head;
+}
+
 // The little star with a rose: a grey-brown ball no bigger than a house, three volcanoes
 // (two of them glowing), a baobab sprout, and a rose under a glass dome.
 function rose(scene, name) {
@@ -151,11 +211,9 @@ function rose(scene, name) {
   ball(scene, `${name}SproutLeaf0`, sprout, green, 0.035, [0.015, 0.075, 0], [1, 0.5, 1]);
   ball(scene, `${name}SproutLeaf1`, sprout, green, 0.035, [-0.015, 0.07, 0], [1, 0.5, 1]);
   const flower = on('Rose', [0.15, 1, 0.25]);
-  rod(scene, `${name}RoseStem`, flower, green, [0, 0, 0], [0, 0.13, 0], 0.012);
-  ball(scene, `${name}RoseLeaf`, flower, green, 0.04, [0.02, 0.06, 0], [1, 0.4, 0.6]);
-  ball(scene, `${name}RoseBloom`, flower, red, 0.06, [0, 0.15, 0], [1, 1.2, 1]);
-  ball(scene, `${name}RosePetal`, flower, red, 0.045, [0.02, 0.17, 0.01], [1, 1.3, 1]);
-  const dome = part(CreateSphere(`${name}Dome`, { diameter: 0.24, segments: 18, slice: 0.5 }, scene), flower, glass, [0, 0, 0]);
+  roseFlower(scene, `${name}Rose`, flower, { green, red, deep: paint(scene, 'roseStarDeep', '#9e0f26', { shine: 0.3, glow: 0.2 }) });
+  // A bell of glass over it, taller than the rose (it stood out of a round half before).
+  const dome = part(CreateSphere(`${name}Dome`, { diameter: 0.3, segments: 24, slice: 0.5 }, scene), flower, glass, [0, 0, 0], [0, 0, 0], [0.8, 1.45, 0.8]);
   root.metadata = { volcanoes, sprout, flower, dome };
   return root;
 }

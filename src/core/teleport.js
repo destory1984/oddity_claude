@@ -144,11 +144,23 @@ export function craftArrival(craft, bodies) {
 // the ship, 51 km from the slab, went out of a phone's upright view.
 export const CURIO_ARRIVAL_KM = 160;
 const CURIO_NEAR_KM = 1000;
+// The teapot and the little star, alone, are met the same way from nearer; the slab on
+// the Moon from 35 degrees above its ground, on its sunlit side (it is drawn 8 km tall).
+const CURIO_ALONE_KM = 100;
+const GROUND_CURIO = { km: 30, liftDeg: 35 };
 export function curioArrival(curio, bodies) {
   const sun = bodies.find((b) => b.kind === 'star');
   const toLight = unit(sub(sun.position, curio.position));
+  if (curio.up) {
+    const dot = toLight.reduce((sum, n, i) => sum + n * curio.up[i], 0);
+    let level = toLight.map((n, i) => n - curio.up[i] * dot);
+    if (Math.hypot(...level) < 1e-6) level = sideOf(curio.up);
+    const out = mix(unit(level), curio.up, GROUND_CURIO.liftDeg);
+    return curio.position.map((n, i) => n + out[i] * GROUND_CURIO.km);
+  }
   const out = mix(mix(toLight, sideOf(toLight), 45), [0, 1, 0], 20);
-  return curio.position.map((n, i) => n + out[i] * CURIO_ARRIVAL_KM);
+  const km = curio.id === 'monolith' ? CURIO_ARRIVAL_KM : CURIO_ALONE_KM;
+  return curio.position.map((n, i) => n + out[i] * km);
 }
 
 // Where to appear over a story place: 400 km up and as far to one side, so the ground

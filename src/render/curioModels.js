@@ -1,5 +1,5 @@
-import { TransformNode, CreateSphere, DynamicTexture, StandardMaterial, Color3 } from './babylon.js';
-import { part, box, rod, nozzle, fuse } from './craftParts.js';
+import { TransformNode, CreateSphere, CreateLathe, DynamicTexture, StandardMaterial, Color3, Vector3 } from './babylon.js';
+import { part, box, rod, nozzle, fuse, drum, aim } from './craftParts.js';
 
 // The two curios near Jupiter (core/curios.js), built as craft are: about one unit
 // across, local +z toward the Sun (render/craft.js turns them so).
@@ -80,4 +80,79 @@ function unknown(scene, name, mats) {
   return root;
 }
 
-export const CURIO_BUILD = { monolith, unknown };
+// A plain coloured material, made once a scene.
+const PAINTS = new WeakMap();
+function paint(scene, name, hex, { shine = 0.1, glow = 0, alpha = 1 } = {}) {
+  const kept = PAINTS.get(scene) ?? new Map();
+  PAINTS.set(scene, kept);
+  if (kept.has(name)) return kept.get(name);
+  const material = new StandardMaterial(name, scene);
+  material.diffuseColor = Color3.FromHexString(hex);
+  material.specularColor = new Color3(shine, shine, shine);
+  material.emissiveColor = Color3.FromHexString(hex).scale(glow);
+  material.alpha = alpha;
+  kept.set(name, material);
+  return material;
+}
+const turned = (scene, name, parent, material, profile, at = [0, 0, 0]) => part(
+  CreateLathe(name, { shape: profile.map(([r, y]) => new Vector3(r, y, 0)), tessellation: 36, sideOrientation: 2 }, scene), parent, material, at,
+);
+
+// Russell's teapot: white porcelain with a blue band, its spout and handle on either side.
+function teapot(scene, name) {
+  const root = new TransformNode(name, scene);
+  const china = paint(scene, 'porcelain', '#f4f1ea', { shine: 0.6, glow: 0.12 });
+  const blue = paint(scene, 'teapotBlue', '#2f5fae', { shine: 0.4, glow: 0.1 });
+  turned(scene, `${name}Body`, root, china, [[0, -0.22], [0.2, -0.21], [0.29, -0.12], [0.31, 0], [0.27, 0.12], [0.18, 0.19], [0, 0.2]]);
+  drum(scene, `${name}Band`, root, blue, { height: 0.035, diameter: 0.625, tessellation: 36 }, [0, -0.02, 0]);
+  turned(scene, `${name}Lid`, root, china, [[0, 0.27], [0.06, 0.26], [0.14, 0.21], [0.17, 0.19]]);
+  ball(scene, `${name}Knob`, root, blue, 0.07, [0, 0.29, 0]);
+  // The spout, out and up from the side (+x); the handle a loop on the other side.
+  drum(scene, `${name}Spout`, root, china, { height: 0.3, diameterTop: 0.04, diameterBottom: 0.1, tessellation: 16 }, [0.38, 0.06, 0], [1, 1.1, 0]);
+  const loop = [[-0.27, 0.12], [-0.4, 0.13], [-0.45, 0.04], [-0.42, -0.06], [-0.28, -0.12]];
+  for (let k = 0; k < loop.length - 1; k++) rod(scene, `${name}Handle${k}`, root, china, [loop[k][0], loop[k][1], 0], [loop[k + 1][0], loop[k + 1][1], 0], 0.045, 10);
+  return root;
+}
+
+// The little star with a rose: a grey-brown ball no bigger than a house, three volcanoes
+// (two of them glowing), a baobab sprout, and a rose under a glass dome.
+function rose(scene, name) {
+  const root = new TransformNode(name, scene);
+  const rock = paint(scene, 'roseStarRock', '#a08f7c', { shine: 0.05 });
+  const dark = paint(scene, 'roseStarDark', '#6b5d50', { shine: 0.05 });
+  const fire = paint(scene, 'roseStarFire', '#ff8a3c', { glow: 1 });
+  const green = paint(scene, 'roseStarGreen', '#4f9a45', { glow: 0.15 });
+  const red = paint(scene, 'roseStarRed', '#d7263d', { shine: 0.3, glow: 0.25 });
+  const glass = paint(scene, 'roseStarGlass', '#d8ecff', { shine: 0.9, glow: 0.2, alpha: 0.28 });
+  const R = 0.3;
+  ball(scene, `${name}Ball`, root, rock, 2 * R);
+  // Something standing on the ball at `way` (any length; local +y outward).
+  const on = (key, way) => {
+    const length = Math.hypot(...way);
+    const up = way.map((n) => n / length);
+    const holder = new TransformNode(`${name}${key}`, scene);
+    holder.parent = root;
+    holder.position = new Vector3(...up.map((n) => n * R * 0.97));
+    aim(holder, up);
+    return holder;
+  };
+  [[[-0.5, 0.8, 0.3], true], [[-0.8, 0.3, -0.5], true], [[0.2, 0.5, -0.85], false]].forEach(([way, lit], k) => {
+    const at = on(`Volcano${k}`, way);
+    drum(scene, `${name}Cone${k}`, at, dark, { height: 0.09, diameterTop: 0.03, diameterBottom: 0.14 }, [0, 0.04, 0]);
+    if (lit) ball(scene, `${name}Fire${k}`, at, fire, 0.035, [0, 0.09, 0]);
+  });
+  const sprout = on('Sprout', [0.8, 0.4, 0.45]);
+  rod(scene, `${name}SproutStem`, sprout, green, [0, 0, 0], [0, 0.07, 0], 0.012);
+  ball(scene, `${name}SproutLeaf0`, sprout, green, 0.035, [0.015, 0.075, 0], [1, 0.5, 1]);
+  ball(scene, `${name}SproutLeaf1`, sprout, green, 0.035, [-0.015, 0.07, 0], [1, 0.5, 1]);
+  const flower = on('Rose', [0.15, 1, 0.25]);
+  rod(scene, `${name}RoseStem`, flower, green, [0, 0, 0], [0, 0.13, 0], 0.012);
+  ball(scene, `${name}RoseLeaf`, flower, green, 0.04, [0.02, 0.06, 0], [1, 0.4, 0.6]);
+  ball(scene, `${name}RoseBloom`, flower, red, 0.06, [0, 0.15, 0], [1, 1.2, 1]);
+  ball(scene, `${name}RosePetal`, flower, red, 0.045, [0.02, 0.17, 0.01], [1, 1.3, 1]);
+  part(CreateSphere(`${name}Dome`, { diameter: 0.24, segments: 18, slice: 0.5 }, scene), flower, glass, [0, 0, 0]);
+  return root;
+}
+
+// The slab on the Moon is the slab by Jupiter, standing on the ground.
+export const CURIO_BUILD = { monolith, unknown, teapot, rose, tycho: monolith };

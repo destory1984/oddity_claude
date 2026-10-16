@@ -65,6 +65,10 @@ const RULES = {
   // The two curios between Jupiter and Io (core/curios.js curioSizeKm sizes them the same).
   monolith: { visibleKm: 2e6, maxKm: 4000 },
   unknown: { visibleKm: 2e6, maxKm: 4000 },
+  teapot: { visibleKm: 2e6, maxKm: 4000 },
+  rose: { visibleKm: 2e6, maxKm: 4000 },
+  // Standing in Tycho on the Moon: 8 to 40 km tall (core/curios.js), seen from near the Moon.
+  tycho: { visibleKm: 30000, minKm: 8, maxKm: 40 },
 };
 
 // A place with no model of its own gets the plain four-legged lander.
@@ -608,12 +612,20 @@ export function createCraft(scene, craftList) {
       const rule = RULES[c.id];
       node.setEnabled(distanceKm < rule.visibleKm && !hidden.includes(c.id));
       if (!node.isEnabled()) continue;
-      const sizeKm = Math.min(rule.maxKm, Math.max(CRAFT_SIZE_KM, distanceKm * APPARENT));
+      const sizeKm = Math.min(rule.maxKm, Math.max(rule.minKm ?? CRAFT_SIZE_KM, distanceKm * APPARENT));
       node.scaling.setAll(sizeKm / KM_PER_UNIT);
       node.position.set(rel[0], rel[1], rel[2]);
       // (The curios' ship turns its back from the slab instead, core/curios.js.)
       const toward = c.awayFrom ? c.position.map((n, i) => 2 * n - c.awayFrom[i]) : sunPosition;
-      node.lookAt(new Vector3(...toward.map((n, i) => (n - position[i]) / KM_PER_UNIT)));
+      const ahead = new Vector3(...toward.map((n, i) => (n - position[i]) / KM_PER_UNIT));
+      if (c.up) {
+        // Standing on the ground (the slab on the Moon): upright with it, its broad face
+        // turned the Sun's way along the ground.
+        const up = new Vector3(...c.up);
+        const way = ahead.subtract(node.position);
+        const level = way.subtract(up.scale(Vector3.Dot(way, up)));
+        node.rotationQuaternion = Quaternion.FromLookDirectionLH(level.lengthSquared() > 1e-12 ? level.normalize() : Vector3.Cross(up, Vector3.Right()).normalize(), up);
+      } else node.lookAt(ahead);
       if (jolt?.id === c.id && (jolt.push || jolt.tilt)) {
         // Knocked sideways as the traveler sees it (a shove along the line of sight
         // would not show), a little away, and tipped about its own sunward axis.

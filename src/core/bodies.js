@@ -250,7 +250,14 @@ export function placeBodies(data, timeS = 0) {
     if (sunKm !== undefined) body.sunKm = sunKm;
     placed.set(id, Object.freeze(body));
   }
-  return Object.freeze([...placed.values()]);
+  return Object.freeze(withTime([...placed.values()], timeS));
+}
+
+// The game time a list of bodies stands at, kept on the list (not counted as an item):
+// what is fixed on a turning surface needs it (core/curios.js, the slab on the Moon).
+export function withTime(list, timeS) {
+  Object.defineProperty(list, 'timeS', { value: timeS });
+  return list;
 }
 
 export const BODIES = placeBodies(named(BODY_DATA));

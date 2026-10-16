@@ -168,9 +168,9 @@ test('the slab and the ship by Jupiter: met once, then jumped to from far, to a 
   const fresh = createProgress();
   assert.equal(visited(slab, fresh), false);
   assert.equal(teleportSpot(slab, { position: far, progress: fresh, bodies }), null);
-  const met = recordCurios(fresh);
+  const met = recordCurios(fresh, ['monolith']);
   assert.deepEqual(met.curios, ['monolith', 'unknown']);
-  assert.equal(recordCurios(met), met);
+  assert.equal(recordCurios(met, ['monolith']), met);
   assert.equal(visited(ship, met), true);
   const spot = teleportSpot(slab, { position: far, progress: met, bodies });
   // From a quarter on its sunlit side, 160 km off.

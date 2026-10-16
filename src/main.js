@@ -1,5 +1,5 @@
 import {
-  BODIES, BODY_DATA, TIME_SCALE, placeBodies, bodyById, nearestSurface, nearestLocalBody, surfaceDistance, AU_KM,
+  BODIES, BODY_DATA, TIME_SCALE, placeBodies, bodyById, nearestSurface, nearestLocalBody, surfaceDistance, AU_KM, withTime,
 } from './core/bodies.js';
 import { C, speedLimit } from './core/flight.js';
 import {
@@ -9,7 +9,7 @@ import {
   rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, right, swingToward, turnToward,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/craft.js';
-import { curiosAt, hiddenCurios, nearSlab, CURIO_CARRY_KM } from './core/curios.js';
+import { curiosAt, hiddenCurios, nearSlab, carryingCurio, curiosNear, curioHead, CURIO_ABOUT } from './core/curios.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
@@ -127,6 +127,8 @@ const NOTE_GAP_S = 20;
 // two thirds of the view's height (Saturn stands back for its rings); a craft is drawn
 // 30 km wide and a lander 6 km; a crater or a sea is seen from 500 km.
 function inspectView(target) {
+  // (The slab on the Moon is drawn smaller, core/curios.js.)
+  if (target.id === 'tycho') return { distanceKm: 35, fovDeg: 30 };
   if (target.kind === 'craft' || target.kind === 'curio') return { distanceKm: 110, fovDeg: 30 };
   // (The drawn cards of a small place: the islets, the observatory on its mountain.)
   if (target.id === 'dokdo' || target.id === 'bohyunsan') return { distanceKm: 30, fovDeg: 40 };
@@ -168,7 +170,7 @@ const bodiesAt = (timeS) => placeBodies(bodyData, timeS);
 // Everything that is flown among and drawn: the Solar System, and far off TRAPPIST-1
 // with its seven planets (core/exo.js), which have no slot in the journal (it lists
 // the ones she has been to at the foot of its bodies, uncounted).
-const allAt = (timeS) => [...bodiesAt(timeS), ...exoBodiesAt(timeS)];
+const allAt = (timeS) => withTime([...bodiesAt(timeS), ...exoBodiesAt(timeS)], timeS);
 let bodies = allAt(0);
 // The trip there: whether she has been, and which planets she has seen from close by.
 let exo = loadExo();
@@ -795,7 +797,7 @@ async function init() {
       input.clear();
       // (By the slab she looks between it and its ship, both in view: core/teleport.js
       // curioArrival.)
-      const pair = target.kind === 'curio' ? curiosAt(bodies, spot) : null;
+      const pair = target.id === 'monolith' ? curiosAt(bodies, spot) : null;
       const aim = pair ? pair[0].position.map((n, i) => (n + pair[1].position[i]) / 2) : target.position;
       const facing = lookAtDirection(aim.map((n, i) => n - spot[i]));
       // The traveler stands in the middle of the view: on a wide screen turn a little
@@ -882,8 +884,9 @@ async function init() {
 
 ${STORY_MORE[target.id]}` : told };
     }
-    // The slab and the ship by Jupiter (core/curios.js): no journal slot; the slab's notice.
-    if (target.kind === 'curio') return { ...head, kicker: t('소설과 영화에서 온 것'), text: t('목성과 이오 사이에 대리석 판 하나가 떠 있습니다. 가로, 세로, 두께가 1:4:9입니다.\n누가 왜 두었는지 아무도 모릅니다. 앞의 배도 이것을 보러 온 듯합니다.') };
+    // A curio (core/curios.js): no journal slot; where it comes from and its notice (the
+    // ship by Jupiter's slab, the slab's).
+    if (target.kind === 'curio') return { ...head, ...CURIO_ABOUT[curioHead(target.id)] };
     // Another star and its planets (core/exo.js): a word each, no journal slot.
     if (target.exo) return { ...head, kicker: target.kind === 'exostar' ? t('붉은 왜성 · 지구에서 약 40광년') : t('외계 행성 · 겉모습은 상상해서 그림'), text: exoNote(target.id) };
     const parent = target.parent ? bodyById(target.parent) : null;
@@ -2504,13 +2507,13 @@ ${STORY_MORE[target.id]}` : told };
       if (eventPlace) Object.assign(eventPlace, eclipseSpotAt(simTime, bodies));
       const stood = state.position;
       state = carryAlong(state, before, bodies);
-      // By the slab she goes along with it instead of with Jupiter: it stands on the line
-      // to Io and goes round with Io, and ran from her at 160 km a second (the user,
-      // 2026-10-16, of the slab: "고정이 안 되네").
-      const slabWas = curiosAt(before, stood)[0];
-      if (slabWas && Math.hypot(...stood.map((n, i) => n - slabWas.position[i])) <= CURIO_CARRY_KM) {
-        const slabIs = curiosAt(bodies, stood)[0];
-        state = { ...state, position: stood.map((n, i) => n + slabIs.position[i] - slabWas.position[i]) };
+      // By a curio that goes round on its own she goes along with it instead (core/curios.js
+      // carryingCurio): the slab by Jupiter goes round with Io, and ran from her at 160 km
+      // a second (the user, 2026-10-16, of the slab: "고정이 안 되네").
+      const curioWas = state.restingOn ? null : carryingCurio(before, stood);
+      if (curioWas) {
+        const curioIs = curiosAt(bodies, stood).find((c) => c.id === curioWas.id);
+        state = { ...state, position: stood.map((n, i) => n + curioIs.position[i] - curioWas.position[i]) };
       }
       // Locked on a craft from near by, she rides along with it instead: a craft goes
       // round its planet fast on this clock (Chandra, hundreds of km a second), and
@@ -2723,13 +2726,11 @@ ${STORY_MORE[target.id]}` : told };
       progress = met.progress;
       saveProgress(progress);
     }
-    // So are the slab and the ship by Jupiter (core/curios.js).
-    if (nearSlab(bodies, state.position)) {
-      const seen = recordCurios(progress);
-      if (seen !== progress) {
-        progress = seen;
-        saveProgress(progress);
-      }
+    // So are the curios (core/curios.js).
+    const seen = recordCurios(progress, curiosNear(bodies, state.position));
+    if (seen !== progress) {
+      progress = seen;
+      saveProgress(progress);
     }
     // The Pale Blue Dot is not logged by going far: it is the last slot, filled by a
     // photograph (photoSlots above).
@@ -3258,7 +3259,7 @@ ${STORY_MORE[target.id]}` : told };
       C,
       goalId: goalNow()?.targetId ?? null,
       // A place on the far side of its body, or seen from far away, gets no label.
-      knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...(progress.curios ?? []), ...(glowsTold.has('curio:monolith') ? ['monolith', 'unknown'] : []), ...progress.stories, ...exo.seen, ...(exo.been ? [EXO_STAR.id] : []), ...(eventPlace ? [eventPlace.id] : [])]),
+      knownIds: new Set([...progress.discovered, ...(progress.craft ?? []), ...(progress.curios ?? []), ...[...glowsTold].filter((id) => id.startsWith('curio:')).map((id) => id.slice(6)), ...progress.stories, ...exo.seen, ...(exo.been ? [EXO_STAR.id] : []), ...(eventPlace ? [eventPlace.id] : [])]),
       // A name in the sky that a planet or a moon stands before is not written.
       skyHidden: (direction) => skyBehind(direction, state.position, bodies),
       hiddenIds: [
@@ -3322,6 +3323,7 @@ ${STORY_MORE[target.id]}` : told };
     // bodies are now, and a way to stand at `position` (km) facing the point `toward`.
     bodies: () => bodies.map((b) => ({ id: b.id, position: [...b.position], radiusKm: b.radiusKm })),
     craft: () => craft.map((c) => ({ id: c.id, position: [...c.position] })),
+    curios: () => curiosAt(bodies, state.position).map((c) => ({ id: c.id, position: [...c.position] })),
     sites: () => sites.map((x) => ({ id: x.id, parent: x.parent, position: [...x.position] })),
     // Where she stands now, as a line for core/startSpots.js (a place the game may open at).
     spot: (bodyId = null) => toSpot(state, (bodyId && bodyById(bodyId, bodies)) || nearestSurface(state.position, bodies).body, bodyById('sun', bodies)),

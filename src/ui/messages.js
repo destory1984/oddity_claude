@@ -2,6 +2,7 @@ import { FACTS } from '../core/facts.js';
 import { BODY_DATA } from '../core/bodies.js';
 import { SHADOW_CASTERS, shadowEdge } from '../core/shadows.js';
 import { t, english, englishKm, counted } from '../core/i18n.js';
+import { CURIO_ABOUT } from '../core/curios.js';
 
 const HANGUL_START = 0xac00;
 const HANGUL_END = 0xd7a3;
@@ -147,7 +148,8 @@ export function eventMessage(event, bodies = []) {
         'footprint:io': t('목성의 오로라 띠 안쪽에 밝은 점이 따로 떠 있습니다. 이오의 발자국입니다.\n이오와 목성을 잇는 자기력선을 따라 전류가 흐르는 자리로, 이오가 도는 대로 따라 돕니다.'),
         'spokes:saturn': t('토성의 밝은 고리 위에 어두운 살 무늬가 가로질러 있습니다.\n1980년 보이저 1호가 찾은 스포크입니다. 고리 위로 뜬 먼지가 토성의 자기장을 따라 도는 것으로 봅니다.'),
         'spot:neptune': t('해왕성 남반구에 검푸른 소용돌이가 있습니다. 대흑점입니다.\n1989년 보이저 2호가 본 지구만 한 폭풍이고, 둘레의 흰 구름은 얼어붙은 메탄입니다. 1994년 허블이 다시 보았을 때는 사라지고 없었습니다.'),
-        'curio:monolith': t('목성과 이오 사이에 대리석 판 하나가 떠 있습니다. 가로, 세로, 두께가 1:4:9입니다.\n누가 왜 두었는지 아무도 모릅니다. 앞의 배도 이것을 보러 온 듯합니다.'),
+        // The curios' notices are their close looks' (core/curios.js).
+        ...Object.fromEntries(Object.entries(CURIO_ABOUT).map(([id, about]) => [`curio:${id}`, about.text])),
         'dawn:mercury': t('태양은 아직 땅 밑인데 지평선 위로 흰 빛이 솟아 있습니다. 태양의 코로나입니다.\n공기가 없는 수성에서는 태양보다 코로나가 먼저 뜹니다.'),
         'pair:earth': t('저 푸른 점이 지구이고, 곁에 붙은 작은 점이 달입니다.\n2010년 탐사선 메신저가 수성으로 가는 길에 1억 8,300만 km 밖에서 둘을 한 장에 찍었습니다.'),
         'tail:mercury': t('수성 뒤로 누런 꼬리가 뻗어 있습니다. 태양 반대쪽입니다.\n햇빛에 밀려 나간 나트륨 원자가 내는 빛으로, 실제 길이는 수백만 km를 넘습니다.'),

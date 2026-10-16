@@ -98,12 +98,12 @@ export function summarize(progress, bodies, missions, stories = []) {
   };
 }
 
-// The slab and the ship by Jupiter (core/curios.js), once come near: both, at once (the
-// ship stands before the slab). Not scored; it only allows jumping back to them.
-export function recordCurios(progress) {
+// The curios (core/curios.js) come near: ids, each with those that go by it (the ship
+// by Jupiter's slab). Not scored; it only allows jumping back to them.
+export function recordCurios(progress, ids) {
   const have = progress.curios ?? [];
-  if (CURIOS.every((c) => have.includes(c.id))) return progress;
-  return { ...progress, curios: CURIOS.map((c) => c.id) };
+  const newly = CURIOS.filter((c) => ids.includes(c.group ?? c.id) && !have.includes(c.id)).map((c) => c.id);
+  return newly.length ? { ...progress, curios: [...have, ...newly] } : progress;
 }
 
 // Stored data may be old, edited or broken: keep only known, unique ids.

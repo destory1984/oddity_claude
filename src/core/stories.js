@@ -1,5 +1,5 @@
 import { named } from './i18n.js';
-import { SPIN_DAY_S, EARTH_START_SPIN, spinAngle, surfaceDirection } from './surface.js';
+import { spinOf, surfaceDirection } from './surface.js';
 import { t } from './i18n.js';
 import { RED_SPOT, redSpotLonDeg } from './vista.js';
 
@@ -467,8 +467,7 @@ export function storyLonDeg(story, elapsedS = 0) {
 export function storySitesAt(timeS, bodies, elapsedS = 0) {
   return STORIES.filter((s) => s.type === 'surface').map((s) => {
     const body = bodies.find((b) => b.id === s.body);
-    const start = s.body === 'earth' ? EARTH_START_SPIN : 0;
-    const up = surfaceDirection(s.latDeg, storyLonDeg(s, elapsedS), spinAngle(SPIN_DAY_S[s.body], timeS, start));
+    const up = surfaceDirection(s.latDeg, storyLonDeg(s, elapsedS), spinOf(s.body, timeS));
     return {
       id: s.id, name: s.name, nameEn: s.nameEn, kind: 'site', parent: s.body, radiusKm: 0, landmark: Boolean(s.landmark),
       position: body.position.map((n, i) => n + up[i] * body.radiusKm),

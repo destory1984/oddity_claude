@@ -15,7 +15,7 @@ import ringsGlsl from './shaders/rings.glsl?raw';
 import texturedFrag from './shaders/textured.frag?raw';
 import { KM_PER_UNIT, TIME_SCALE } from '../core/bodies.js';
 import { normalize } from './math.js';
-import { SPIN_DAY_S, EARTH_START_SPIN, cloudSpin } from '../core/surface.js';
+import { SPIN_DAY_S, EARTH_START_SPIN, START_SPIN, cloudSpin } from '../core/surface.js';
 import { SPOKES } from '../core/glows.js';
 import { SHADOW_SLOTS } from '../core/shadows.js';
 
@@ -439,7 +439,7 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     // (Not Jupiter's: there is nothing there to fly through and be told of.)
     rings: ring && look.rings.style !== 2 ? { normal: [ring.normal.x, ring.normal.y, ring.normal.z], innerKm: look.rings.innerKm, outerKm: look.rings.outerKm } : null,
     spin(elapsed) {
-      sphere.rotation.y = -(elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
+      sphere.rotation.y = (START_SPIN[body.id] ?? 0) - (elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
       if (ring) ring.setTime(elapsed);
       if (look.storm || look.nightGlow || look.flow || look.sights || look.clouds || look.shader === 'ember') material.setFloat('time', elapsed);
     },

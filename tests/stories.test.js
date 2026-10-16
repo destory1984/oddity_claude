@@ -264,3 +264,18 @@ test('the red spot\'s place goes with the spot as the clouds slide; the others s
   assert.notEqual(storyLonDeg(spot, 600), RED_SPOT.lonDeg);
   assert.equal(storyLonDeg(STORIES.find((s) => s.id === 'galileoProbe'), 600), 90);
 });
+
+test('the Moon keeps its near side to Earth: longitude 0 faces Earth, Tycho is on the face seen', async () => {
+  const { spinOf, surfaceDirection } = await import('../src/core/surface.js');
+  for (const timeS of [0, 3e5, 4e6, 2e7]) {
+    const bodies = bodiesAt(timeS);
+    const moon = bodies.find((b) => b.id === 'moon');
+    const earth = bodies.find((b) => b.id === 'earth');
+    const to = earth.position.map((n, i) => n - moon.position[i]);
+    const length = Math.hypot(...to);
+    const near = surfaceDirection(0, 0, spinOf('moon', timeS));
+    assert.ok(near.reduce((s, n, i) => s + n * to[i] / length, 0) > 0.9, String(timeS));
+    const tycho = surfaceDirection(-43.31, -11.36, spinOf('moon', timeS));
+    assert.ok(tycho.reduce((s, n, i) => s + n * to[i] / length, 0) > 0.5, String(timeS));
+  }
+});

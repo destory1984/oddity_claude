@@ -1,7 +1,7 @@
 import { t } from './i18n.js';
 import { CRAFT_SIZE_KM } from './craft.js';
 import { BELT } from './belt.js';
-import { SPIN_DAY_S, spinAngle, surfaceDirection } from './surface.js';
+import { spinOf, surfaceDirection } from './surface.js';
 // Things from no real mission, from books, films and a philosopher's word. They are not
 // craft: nothing docks with them and the notebook does not count them; each has its tag,
 // a notice and her word, and once she has been near one its tag jumps there.
@@ -97,7 +97,7 @@ export function curiosAt(bodies, position) {
   out.push({ ...CURIO.rose, position: round(sun, earth, (BELT.innerKm + BELT.outerKm) / 2, ROSE_LEAD), radiusKm: CRAFT_SIZE_KM / 2 });
   // Standing on the ground: its middle half its height up (render/curioModels.js: the
   // slab is 0.9 of its drawn size tall), its face turned up with the ground (up).
-  const up = surfaceDirection(TYCHO_AT.latDeg, TYCHO_AT.lonDeg, spinAngle(SPIN_DAY_S.moon, bodies.timeS ?? 0));
+  const up = surfaceDirection(TYCHO_AT.latDeg, TYCHO_AT.lonDeg, spinOf('moon', bodies.timeS ?? 0));
   const ground = moon.position.map((n, i) => n + up[i] * moon.radiusKm);
   const tall = curioSizeKm(gap(position, ground), 'moonSlab');
   out.push({ ...CURIO.moonSlab, position: ground.map((n, i) => n + up[i] * 0.45 * tall), radiusKm: 0, up, parent: 'moon' });

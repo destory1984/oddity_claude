@@ -30,6 +30,14 @@ export const SPIN_DAY_S = {
 // Earth alone starts part-way through its turn, so the opening view shows it half lit
 // with the Pacific in front.
 export const EARTH_START_SPIN = 1.35;
+// The Moon turns once an orbit, so it keeps one face to Earth; it starts so that the
+// face is its near side (latitude 0, longitude 0 toward Earth). It started at 0 and
+// showed Earth a side 127 degrees round, Tycho near the edge (the user, 2026-10-16:
+// "티코가 달의 뒷편에 있어?"). From its orbit's direction at time 0 in core/bodies.js,
+// [-0.6, 0.35, 0.72]: atan2(-0.72, -0.6).
+export const MOON_START_SPIN = Math.atan2(-0.72, -0.6);
+// Where each body begins its turn (0 for the rest).
+export const START_SPIN = { earth: EARTH_START_SPIN, moon: MOON_START_SPIN };
 // Earth's clouds drift a little faster than the ground so the weather visibly moves,
 // and start a little east of it.
 export const CLOUD_DRIFT = 1.08;
@@ -65,5 +73,5 @@ export function surfaceDirection(latDeg, lonDeg, spinRad) {
 // no places).
 export function spinOf(bodyId, timeS) {
   if (!SPIN_DAY_S[bodyId]) return 0;
-  return spinAngle(SPIN_DAY_S[bodyId], timeS, bodyId === 'earth' ? EARTH_START_SPIN : 0);
+  return spinAngle(SPIN_DAY_S[bodyId], timeS, START_SPIN[bodyId] ?? 0);
 }

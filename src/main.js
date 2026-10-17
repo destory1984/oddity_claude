@@ -948,7 +948,9 @@ ${STORY_MORE[target.id]}` : told };
   function orbitLamp() {
     const orbit = photo.orbit();
     const target = orbit ? here(orbit.id) : null;
-    if (target?.kind !== 'site') {
+    // A place, or a curio standing on the ground (its scene was black at night on Pluto:
+    // the user, 2026-10-17, "너무 어두운데?", "밤이라서 그런가", then of three ways "1").
+    if (target?.kind !== 'site' && !(target?.kind === 'curio' && target.up && target.parent)) {
       lampTold = null;
       return null;
     }

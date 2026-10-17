@@ -18,12 +18,16 @@ const TOUCH_SECONDS = 10;
 
 // The name plate is as wide as a whole number of the keys over it with the gaps between
 // them: two at least, and as many more as its words need. (Nothing is set while the
-// panel does not show: the keys then have no width to count by.)
+// panel does not show: the keys then have no width to count by. It is done when the
+// panel shows again: a key put on in the close view stood out past the plate's end, the
+// user, 2026-10-17: "아이콘 밀려서 줄 벗어났다".)
+let fitLater = false;
 function fitName() {
   const plate = $('targetName');
   const keys = [$('faceTarget'), $('lockTarget')].map((key) => key.getBoundingClientRect());
   const key = keys[0].width;
-  if (!(key > 0)) return;
+  fitLater = !(key > 0);
+  if (fitLater) return;
   const step = keys[1].left - keys[0].left;
   plate.style.width = '';
   const needs = plate.getBoundingClientRect().width;
@@ -253,6 +257,7 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
       $('speedLimit').textContent = t`현재 제한 ${limitLabel}`;
     },
     update({ view, local, nearestIds = [local.body.id], moonIds = [], selected, speed, motionSign, limitLabel, flightLabel, throttle, C, goalId = null, hiddenIds = [], knownIds = null, skyHidden = null }) {
+      if (fitLater) fitName();
       $('altitudeLabel').textContent = local.label;
       $('altitude').textContent = fmt(local.altitude);
       this.speed({ speed, motionSign, limitLabel, C });

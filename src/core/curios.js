@@ -46,6 +46,10 @@ const GROUND = {
   // Out on the plains west of the heart.
   robot: { body: 'pluto', latDeg: 12, lonDeg: 120 },
 };
+// Where one standing on the ground is, or null: she can go down and stand beside it, as
+// beside a story place (main.js standBeside; the user, 2026-10-17, of the potato farm:
+// "도킹 안 됨?", then "해바바").
+export const groundSpot = (id) => GROUND[id] ?? null;
 // The Magpie Bridge stands in the sky between Vega (the weaver) and Altair (the herdsman)
 // on Chilseok, the seventh day of the seventh lunar month, alone: these days (read off a
 // lunar calendar on 2026-10-16). Drawn this far off, as the stars are, spanning the two.

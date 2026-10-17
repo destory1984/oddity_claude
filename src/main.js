@@ -9,7 +9,7 @@ import {
   rotateLocal, lookAtDirection, multiply, conjugate, forward, rotateVector, orientationFrom, REAR_VIEW, rearTurn, right, swingToward, turnToward,
 } from './core/orientation.js';
 import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/craft.js';
-import { CURIOS, curiosAt, hiddenCurios, carryingCurio, curiosNear, curioHead, setCurioDay, CURIO_ABOUT, BRIDGE_KM } from './core/curios.js';
+import { CURIOS, curiosAt, hiddenCurios, carryingCurio, curiosNear, curioHead, setCurioDay, CURIO_ABOUT, BRIDGE_KM, groundSpot } from './core/curios.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
@@ -386,7 +386,8 @@ const here = (id) => bodyById(id, bodies) ?? craft.find((c) => c.id === id) ?? c
 // By a curio with a scene of its own, it chosen (or the ship, for the slab by Jupiter):
 // that scene (core/craftScenes.js monolith, moonSlab).
 const curioScene = () => {
-  if (visit || docked || !selectedId) return null;
+  // (Standing beside a curio on the ground is a visit to it: its scene plays there too.)
+  if ((visit && visit.id !== curioHead(selectedId)) || docked || !selectedId) return null;
   const head = curioHead(selectedId);
   return replayFor(head) && curiosNear(bodies, state.position).includes(head) ? head : null;
 };
@@ -764,7 +765,8 @@ async function init() {
   // Where to stand beside a place on a surface right now.
   const standBeside = (id) => {
     // (The place of a solar eclipse is no story, but it has a latitude and a longitude.)
-    const story = STORIES.find((s) => s.id === id) ?? (eventPlace?.id === id ? { body: 'earth', latDeg: eclipse.latDeg, lonDeg: eclipse.lonDeg } : null);
+    // (Nor is a curio on the ground: core/curios.js groundSpot.)
+    const story = STORIES.find((s) => s.id === id) ?? (eventPlace?.id === id ? { body: 'earth', latDeg: eclipse.latDeg, lonDeg: eclipse.lonDeg } : null) ?? groundSpot(id);
     return standSpot(story, here(story.body), simTime, innerWidth / innerHeight < 0.75, world.elapsed());
   };
 
@@ -999,6 +1001,10 @@ ${STORY_MORE[target.id]}` : told };
     // 2026-10-06, of Earth's and the Moon's tags: "1) 해당 물체를 바라본다. 2) 바라보고
     // 있는 상태에서 누르면, 멀면 워프하고, 가까우면 틱틱 소리만 낸다"). A craft's or a
     // place's tag acts at once, as before.
+    // A curio on the ground, near its world and this side of it: down to stand beside it,
+    // as a place's tag does.
+    if (chosen.kind === 'curio' && groundSpot(id) && !docked && visit?.id !== id
+      && !siteHidden(chosen, here(chosen.parent), state.position) && !siteFar(here(chosen.parent), state.position)) return goDownTo(chosen);
     if (chosen.kind !== 'craft' && chosen.kind !== 'site') {
       const want = forward(faceToward(chosen.position.map((n, i) => n - state.position[i])));
       const now = forward(state.orientation);

@@ -325,23 +325,29 @@ function magpieBridge(scene, name) {
 // A sperm whale and a bowl of petunias (a funny book), side by side in the dark.
 function whale(scene, name) {
   const root = new TransformNode(name, scene);
-  const skin = paint(scene, 'whaleSkin', '#5d6f86', { shine: 0.25, glow: 0.12 });
-  const belly = paint(scene, 'whaleBelly', '#b9c4d0', { glow: 0.15 });
-  const black = paint(scene, 'whaleEye', '#111418');
-  // The body along -z (head) to +z (tail).
+  const skin = paint(scene, 'whaleSkin', '#5a6068', { shine: 0.25, glow: 0.12 });
+  const belly = paint(scene, 'whaleBelly', '#c9ccd0', { glow: 0.12 });
+  const black = paint(scene, 'whaleEye', '#101214');
+  // The body along -z (head) to +z (tail): one smooth body, blunt at the brow and taller
+  // than wide at the head, a narrow pale jaw under it, a low hump and knuckles down the
+  // back, wide flukes (the user, 2026-10-17: "고래 다시 그리자"; of three looks "a": the
+  // old one was three balls in a row).
   const body = new TransformNode(`${name}Whale`, scene);
   body.parent = root;
   body.position.x = -0.18;
-  ball(scene, `${name}Head`, body, skin, 0.24, [0, 0, -0.22], [1, 1.05, 1.7]);
-  ball(scene, `${name}Trunk`, body, skin, 0.24, [0, -0.01, 0.05], [0.95, 0.95, 2]);
-  ball(scene, `${name}Tailstock`, body, skin, 0.12, [0, 0.01, 0.33], [0.8, 0.9, 2.4]);
-  ball(scene, `${name}Jaw`, body, belly, 0.06, [0, -0.1, -0.2], [0.8, 0.35, 4.2]);
+  const trunk = turned(scene, `${name}Trunk`, body, skin, [[0, -0.46], [0.09, -0.458], [0.125, -0.44], [0.14, -0.39], [0.145, -0.25], [0.14, -0.1], [0.125, 0.05], [0.095, 0.2], [0.06, 0.32], [0.035, 0.41], [0.02, 0.46], [0, 0.47]]);
+  trunk.rotation.x = Math.PI / 2;
+  trunk.scaling.z = 1.2;
+  ball(scene, `${name}Jaw`, body, belly, 0.05, [0, -0.145, -0.24], [0.9, 0.35, 5.5]);
+  ball(scene, `${name}Hump`, body, skin, 0.07, [0, 0.135, 0.1], [0.55, 0.5, 1.3]);
+  for (let k = 0; k < 4; k++) ball(scene, `${name}Knuckle${k}`, body, skin, 0.03, [0, 0.105 - k * 0.018, 0.19 + k * 0.05], [0.6, 0.6, 1]);
   for (const side of [-1, 1]) {
-    const fluke = ball(scene, `${name}Fluke${side}`, body, skin, 0.12, [side * 0.07, 0.02, 0.47], [1.2, 0.12, 0.6]);
-    fluke.rotation.y = side * 0.5;
-    const fin = ball(scene, `${name}Fin${side}`, body, skin, 0.07, [side * 0.12, -0.07, -0.08], [0.25, 0.12, 1]);
-    fin.rotation.z = side * 0.6;
-    ball(scene, `${name}Eye${side}`, body, black, 0.018, [side * 0.1, -0.02, -0.12]);
+    const fluke = ball(scene, `${name}Fluke${side}`, body, skin, 0.22, [side * 0.11, 0, 0.5], [1.15, 0.09, 0.5]);
+    fluke.rotation.y = side * 0.45;
+    const fin = ball(scene, `${name}Fin${side}`, body, skin, 0.1, [side * 0.13, -0.1, -0.12], [0.25, 0.12, 1]);
+    fin.rotation.x = 0.3;
+    fin.rotation.z = side * 0.7;
+    ball(scene, `${name}Eye${side}`, body, black, 0.018, [side * 0.125, -0.06, -0.19]);
   }
   // The bowl, to its right.
   const pot = new TransformNode(`${name}Bowl`, scene);

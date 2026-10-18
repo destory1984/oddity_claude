@@ -38,6 +38,28 @@ export function scannerPoints(position, orientation, things, count = SCANNER_COU
   }));
 }
 
+// The world she is close to, which scannerPoints leaves out (its surface nearer than three
+// of its radii), comes into the scanner as ground (the user, 2026-10-19: "스캐너는 근거리
+// 스캐너잖아.. 행성이나 위성 부근에 가면, 지평선이 보일텐데", then of three looks "A"): the
+// nearest such world; the way to its middle in her own frame (x right, h up, z ahead); and
+// how far in its ground comes, a quarter of the way at three radii up to 0.85 on its surface.
+export function scannerGround(position, orientation, things) {
+  const axes = [right(orientation), up(orientation), forward(orientation)];
+  let best = null;
+  for (const thing of things) {
+    const radius = thing.radiusKm ?? 0;
+    if (!(radius > 0)) continue;
+    const rel = thing.position.map((n, i) => n - position[i]);
+    const centre = Math.hypot(...rel);
+    const surface = Math.max(0, centre - radius);
+    if (!(centre > 0) || surface >= radius * 3) continue;
+    if (best && best.surface <= surface) continue;
+    const [x, h, z] = axes.map((a) => a.reduce((s, v, i) => s + v * rel[i], 0) / centre);
+    best = { id: thing.id, x, h, z, surface, fill: 0.25 + 0.6 * (1 - Math.log1p(surface / radius) / Math.log1p(3)) };
+  }
+  return best;
+}
+
 // Where a point's ball is drawn, as ui/scanner.js draws it (the ellipse is about a third
 // as tall as it is wide, the stalk 1.4 times its height): x across, y up, in half-widths.
 const FLAT = 0.35;

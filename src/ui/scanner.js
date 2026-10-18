@@ -1,4 +1,5 @@
-import { scannerPoints } from '../core/scanner.js';
+import { scannerPoints, scannerGround } from '../core/scanner.js';
+import { distanceText } from './messages.js';
 
 // The 3D scanner over the speed box (core/scanner.js says where each thing goes): a gold
 // ellipse lying flat round her, she a white wedge in its middle pointing ahead, each
@@ -58,6 +59,56 @@ export function createScanner(canvas) {
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   }
 
+  const byIdOf = (things) => new Map(things.map((thing) => [thing.id, thing]));
+
+  // The world she is close to (core/scanner.js scannerGround), as round ground coming in
+  // from its side of the ellipse: a large circle, clipped to the ellipse, whose near edge
+  // reaches `fill` of the way in, with its name and how far its surface is. The side is
+  // where its middle would be drawn on the scanner (below her when it is under her feet).
+  const GROUND_TINT = { earth: '#7fb2ff', mars: '#e8916a', moon: '#cfc9c0', venus: '#e8cf8a', jupiter: '#e3b98d', sun: '#ffd27a' };
+  function drawGround(ground, thing, cx, cy, rx, ry) {
+    let [u, v] = [ground.x, -(ground.z + 1.4 * ground.h)];
+    const length = Math.hypot(u, v);
+    [u, v] = length > 1e-3 ? [u / length, v / length] : [0, 1];
+    const big = 1.6;
+    const from = 1 - ground.fill + big;
+    const tint = GROUND_TINT[ground.id] ?? '#b9c6e8';
+    const ratio = window.devicePixelRatio || 1;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(rx, ry);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 1, 1, 0, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.beginPath();
+    ctx.arc(u * from, v * from, big, 0, Math.PI * 2);
+    // (Filled and stroked in plain pixels, so the line keeps its width.)
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.globalAlpha = 0.45;
+    ctx.fillStyle = tint;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = tint;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+    // Its name and height in the upper left corner, in its colour (on the ground itself the
+    // names of the craft round her lay over it).
+    const label = `${thing?.name ?? ground.id} · ${distanceText(ground.surface)}`;
+    ctx.font = '600 10px "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    const lx = 4;
+    const ly = 8;
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.75)';
+    ctx.strokeText(label, lx, ly);
+    ctx.fillStyle = tint;
+    ctx.fillText(label, lx, ly);
+    ctx.textAlign = 'start';
+    ctx.lineWidth = 1;
+  }
+
   // things: [{ id, name, kind: 'craft'|'curio'|'body', position, radiusKm? }].
   function draw({ position, orientation, things, selectedId = null }) {
     place();
@@ -75,6 +126,8 @@ export function createScanner(canvas) {
     ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
+    const ground = scannerGround(position, orientation, things);
+    if (ground) drawGround(ground, byIdOf(things).get(ground.id), cx, cy, rx, ry);
     ctx.strokeStyle = FAINT;
     for (const f of [0.5, 0.25]) {
       ctx.beginPath();

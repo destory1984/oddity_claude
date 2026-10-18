@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { scannerPoints, SCANNER_COUNT } from '../src/core/scanner.js';
+import { scannerPoints, scannerGround, SCANNER_COUNT } from '../src/core/scanner.js';
 
 const still = [0, 0, 0, 1];
 
@@ -45,4 +45,18 @@ test('things lying the same way are turned apart, keeping their distances and he
   }
   // None is pushed off the rim.
   assert.ok(points.every((p) => Math.hypot(p.x, p.z) <= 1 + 1e-9));
+});
+
+test('the world she is close to comes in as ground from its side, further the nearer she is', () => {
+  const world = { id: 'w', position: [0, -2000, 0], radiusKm: 1000 };
+  const low = scannerGround([0, 0, 0], still, [world]);
+  assert.equal(low.id, 'w');
+  assert.ok(Math.abs(low.h + 1) < 1e-9 && Math.abs(low.x) < 1e-9);
+  assert.equal(low.surface, 1000);
+  const lower = scannerGround([0, -900, 0], still, [world]);
+  assert.ok(lower.fill > low.fill && lower.fill <= 0.85);
+  // From three radii up and beyond, none: it is one of the points then.
+  assert.equal(scannerGround([0, 2001, 0], still, [world]), null);
+  // Things with no size are never ground.
+  assert.equal(scannerGround([0, 0, 0], still, [{ id: 'craft', position: [0, 10, 0] }]), null);
 });

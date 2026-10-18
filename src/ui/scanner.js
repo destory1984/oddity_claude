@@ -14,9 +14,10 @@ export function createScanner(canvas) {
   const ctx = canvas.getContext('2d');
   let size = [0, 0];
 
-  // In the speed box's own place, which is moved up by the scanner's height.
+  // In the speed box's own place; the speed box goes over the flying keys, its right edge
+  // on theirs (the user, 2026-10-18, a picture with an arrow from the box to that corner).
   const GAP = 16;
-  let lifted = 0;
+  let moved = [0, 0];
   function place() {
     const box = document.querySelector('#hud footer .speedBox');
     const speed = box?.getBoundingClientRect();
@@ -26,17 +27,25 @@ export function createScanner(canvas) {
     if (!speed || !speed.width) return;
     // As large as the corner allows (the user: "그 위치에서 최대한 크게"): from the screen's
     // edge to just before the keys, and as tall as their three rows.
-    const left = Math.max(4, speed.left - 10);
+    // (Where the box stands before it is moved.)
+    const natural = { left: speed.left - moved[0], right: speed.right - moved[0], bottom: speed.bottom - moved[1] };
+    const left = Math.max(4, natural.left - 10);
     const end = keys.length ? Math.min(...keys.map((r) => r.left)) - 6 : left + 260;
     const width = Math.max(120, end - left);
     const rows = keys.length ? Math.max(...keys.map((r) => r.bottom)) - Math.min(...keys.map((r) => r.top)) : 0;
     const height = Math.round(Math.max(width * 0.42, Math.min(width * 0.7, rows || width * 0.5)));
-    const bottom = Math.max(speed.bottom + lifted, ...keys.map((r) => r.bottom));
+    const bottom = Math.max(natural.bottom, ...keys.map((r) => r.bottom));
     canvas.style.left = `${left}px`;
     canvas.style.top = `${bottom - height}px`;
-    if (lifted !== height + GAP) {
-      lifted = height + GAP;
-      box.style.transform = `translateY(${-lifted}px)`;
+    const pad = ['reverseButton', 'flyButton', 'slideUp', 'slideRight', 'gazeButton']
+      .map((id) => document.getElementById(id)?.getBoundingClientRect())
+      .filter((r) => r && r.width > 0);
+    const want = pad.length
+      ? [Math.round(Math.max(...pad.map((r) => r.right)) - natural.right), Math.round(Math.min(...pad.map((r) => r.top)) - GAP - natural.bottom)]
+      : [0, -(height + GAP)];
+    if (want[0] !== moved[0] || want[1] !== moved[1]) {
+      moved = want;
+      box.style.transform = `translate(${moved[0]}px, ${moved[1]}px)`;
     }
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;

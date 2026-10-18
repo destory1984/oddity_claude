@@ -5839,6 +5839,20 @@ body.practicing #guideSkip {
   white-space:normal;
   line-height:1.2;
 }
+/* Why a lesson is learnt (ui/practice.js why): a sheet of three short paragraphs. */
+#practiceWhy #practiceWhyCount {
+  margin:0;
+  color:#ffdfa6;
+  font-size:13px;
+}
+#practiceWhy #practiceWhyName:focus {
+  outline:none;
+}
+#practiceWhy #practiceWhyText p {
+  margin:0 0 .7em;
+  word-break:keep-all;
+  line-height:1.55;
+}
 /* The count in two rows (main.js): its name over the numbers. */
 body.practicing #guideCount {
   flex:none;

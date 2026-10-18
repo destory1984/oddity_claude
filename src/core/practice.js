@@ -226,6 +226,15 @@ const TEXT = {
   free: (left) => t`혼자서 해 보세요. 남은 고리 ${left}개`,
 };
 
+// Why a lesson is learnt, in full, for the two that teach finding the way: shown on a
+// sheet that waits for its OK before the lesson goes on (the user, 2026-10-18, asking
+// what lessons 6 and 7 are for: "연습화면에 넣어", "자세히 넣어", "확인을 눌러야 다음
+// 화면으로 넘어갈 수 있게 해줘").
+const WHY = {
+  find: () => t('실제 우주에서는 가고 싶은 행성이나 탐사선이 화면 밖에 있을 때가 많아요. 그런 곳은 화면 가장자리에 화살표가 붙은 이름표(예: ↓ 태양)로만 보여요.\n이름표를 한 번 누르면 소라가 저절로 그쪽으로 돌아서요. 화면을 이리저리 끌며 찾지 않아도 돼요. 돌아선 다음에는 전진 버튼으로 날아가면 됩니다.\n이번 고리는 등 뒤에 있어요. 고리의 이름표를 누르고 날아가 보세요.'),
+  warp: () => t('태양계는 아주 넓어요. 빛도 지구에서 해왕성까지 4시간 넘게 걸려요. 전진 버튼만으로는 다른 행성까지 한참 걸립니다.\n그래서 한 번 가 본 곳은 순간 이동으로 갈 수 있어요. 이름표를 한 번 누르면 그쪽을 바라보고, 바라본 채 한 번 더 누르면 하얀 빛과 함께 그 곁으로 건너가요.\n이번 고리는 아주 멀리 있어요. 이름표를 두 번 눌러 건너가 보세요.'),
+};
+
 // Each lesson's name, shown as it begins (ui/practice.js).
 const NAMES = {
   look: () => t('둘러보기'),
@@ -271,6 +280,8 @@ export function practiceGoal(practice, aimed = false, moving = false) {
     next: PRACTICE_STEPS.indexOf(practice.step) < PRACTICE_STEPS.length - 1,
     text: TEXT[practice.step](practice.left, moving, aimed, practice.jumped, practice.lined),
     name: NAMES[practice.step](),
+    // Why it is learnt (a sheet before it begins), or null.
+    why: WHY[practice.step]?.() ?? null,
     // Stopping: the forward key until she has flown, then the stop key. Finding: the
     // name tag until she faces the ring, then the forward key.
     teach: {

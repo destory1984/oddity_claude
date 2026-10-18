@@ -606,7 +606,7 @@ async function init() {
       if (paused) toast.show(t('멈췄습니다. Esc나 비행 키를 누르면 이어집니다.'), 'pause', 4);
     },
     onWheel: (deltaY) => photo.zoom(deltaY),
-    isBlocked: () => $('settings').open || $('journal').open || $('noteCard').open || $('bigMap').open || $('practiceOffer').open || $('practiceDone').open,
+    isBlocked: () => $('settings').open || $('journal').open || $('noteCard').open || $('bigMap').open || $('practiceOffer').open || $('practiceDone').open || $('practiceWhy').open,
   });
   photo = createPhoto({
     world,
@@ -2451,7 +2451,8 @@ ${STORY_MORE[target.id]}` : told };
   };
   // One frame of the practice, in place of the game's own.
   const practiceFrame = (elapsed) => {
-    const dt = paused || elapsed > MAX_FRAME_GAP_S ? 0 : elapsed;
+    // (Held while the sheet on why a lesson is learnt is up.)
+    const dt = paused || $('practiceWhy').open || elapsed > MAX_FRAME_GAP_S ? 0 : elapsed;
     const intent = input.intent();
     if (dt > 0) state = step(state, intent, dt, [], [practice.run.ring], TOP_SPEED).state;
     // Turning to the ring whose name tag was pressed: most of what is left of the turn
@@ -2570,7 +2571,14 @@ ${STORY_MORE[target.id]}` : told };
       hud.speed({ speed: totalSpeed(state), motionSign: state.speed > 0.01 ? state.motionSign : 1, limitLabel: limitText(Math.min(TOP_SPEED, speedLimit(away)) / C), C });
     }
     const since = performance.now() - (practice.stageAt ?? -Infinity);
-    practiceView.show(goal, tagSpot(practice.run.ring, state.position, view.camera, innerWidth, innerHeight), away, slideSide(practice.run, pose), since >= 0 && since < STAGE_MS);
+    // A lesson with a why: as it begins, the sheet saying it in place of its name in the
+    // middle, and the practice waits for its OK.
+    if (goal?.why && since >= 0 && practice.whyFor !== practice.run.step) {
+      practice.whyFor = practice.run.step;
+      input.clear();
+      practiceView.why(goal);
+    }
+    practiceView.show(goal, tagSpot(practice.run.ring, state.position, view.camera, innerWidth, innerHeight), away, slideSide(practice.run, pose), since >= 0 && since < STAGE_MS && !goal?.why);
   };
 
   // The first frame uploads shaders and textures; count it as zero time so the

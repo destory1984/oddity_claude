@@ -40,6 +40,7 @@ export function createPracticeView({ onTag, onOffer, onDone }) {
   });
   $('practicePass').addEventListener('click', () => answer('practiceOffer', onOffer, false));
   $('practiceKeep').addEventListener('click', () => answer('practiceDone', onDone, false));
+  $('practiceWhyOk').addEventListener('click', () => $('practiceWhy').close());
   $('practiceHide').addEventListener('click', () => answer('practiceDone', onDone, true));
   // Put away by Esc or the back key: as the quieter of the two answers.
   $('practiceOffer').addEventListener('close', () => { if (!answered) onOffer(false); });
@@ -98,6 +99,14 @@ export function createPracticeView({ onTag, onOffer, onDone }) {
       $('practiceKeep').textContent = ask ? t('그대로 두기') : t('확인');
       $('practiceDone').showModal();
     },
-    isOpen: () => $('practiceOffer').open || $('practiceDone').open,
+    // Why a lesson is learnt: a sheet held until its OK (goal: practiceGoal()).
+    why(goal) {
+      $('practiceWhyCount').textContent = goal.count;
+      $('practiceWhyName').textContent = goal.name;
+      // One paragraph to a line of it.
+      $('practiceWhyText').replaceChildren(...goal.why.split('\n').map((line) => Object.assign(document.createElement('p'), { textContent: line })));
+      $('practiceWhy').showModal();
+    },
+    isOpen: () => $('practiceOffer').open || $('practiceDone').open || $('practiceWhy').open,
   };
 }

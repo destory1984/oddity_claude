@@ -298,6 +298,9 @@ const LOCK_KEEP_VIEW = 0.5;
 let aimedId = null;
 // How fast the view swings onto the target: most of the way in a third of a second.
 const LOCK_RATE = 6;
+// The fastest the lock swings the view, radians a second: passing close by the target the
+// way to it turned half round in a moment and the view whirled.
+const LOCK_SWING_MAX = 1;
 let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT, NOTES, TOURS);
 // Small copies of saved photos, shown in the journal (core/album.js).
 let album = loadAlbum(MISSIONS);
@@ -2709,6 +2712,12 @@ ${STORY_MORE[target.id]}` : told };
     const slowPoints = craft.map((c) => c.position);
     // (How far the locked target is before this step: sliding round it keeps that.)
     if (aimedId !== selectedId) aimedId = null;
+    // Locked and something else chosen, or locked and flying forward with the target
+    // turned off the screen: she means to go elsewhere, and the lock lets go (the user,
+    // 2026-10-18, having forgotten the lock: "화면이 미친듯이 움직이는데"). Forward and back with the target
+    // in view still go straight at it and away, to see it near or far.
+    if (locked && lockFor && lockFor !== selectedId) unlock();
+    else if (locked && !docked && !visit && !home && !photo.active() && intent.drive > 0 && hud.offScreen(selectedId)) unlock();
     if (locked && lockFor !== selectedId) {
       const seen = aimNow();
       lockAim = Math.acos(Math.max(-1, Math.min(1, seen[2]))) <= LOCK_KEEP_VIEW ? seen : AIM_LINE;
@@ -2757,7 +2766,14 @@ ${STORY_MORE[target.id]}` : told };
           // The view is swung onto the target from where it is, by the shortest turn
           // (core/orientation.js swingToward): built anew from world-up each frame it
           // span half round whenever she passed over or under the target.
-          const orientation = locked ? swingToward(state.orientation, lockAim ?? AIM_LINE, aim.position.map((n, i) => n - position[i]), 1 - Math.exp(-dt * LOCK_RATE)) : state.orientation;
+          const way = aim.position.map((n, i) => n - position[i]);
+          let share = 1 - Math.exp(-dt * LOCK_RATE);
+          if (locked) {
+            const from = rotateVector(state.orientation, lockAim ?? AIM_LINE);
+            const off = Math.acos(Math.max(-1, Math.min(1, from.reduce((sum, n, i) => sum + n * way[i], 0) / (Math.hypot(...way) || 1))));
+            if (off * share > LOCK_SWING_MAX * dt) share = (LOCK_SWING_MAX * dt) / off;
+          }
+          const orientation = locked ? swingToward(state.orientation, lockAim ?? AIM_LINE, way, share) : state.orientation;
           state = { ...state, position, orientation };
         }
       }

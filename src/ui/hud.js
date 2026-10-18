@@ -104,6 +104,8 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
   window.addEventListener('resize', fitName);
   document.fonts?.ready.then(fitName);
   const markers = new Map();
+  // Which labels were off screen at the last update (an edge arrow), by id.
+  const offScreen = new Set();
   for (const body of bodies) {
     const el = document.createElement('button');
     el.className = { star: 'marker sun', exostar: 'marker sun', site: 'marker site' }[body.kind] ?? 'marker';
@@ -224,6 +226,8 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
     plateId: () => plateId,
     // The keys of the moment on the name plate. then: what the day's key is called
     // ("그날로 · 1957년 10월 4일") or null; undock: whether the key to let go stands there.
+    // Whether a target was off screen at the last update (not known: false).
+    offScreen: (id) => offScreen.has(id),
     plateKeys({ undock = false, then = null }) {
       if (undock === plateNow.undock && then === plateNow.then) return;
       plateNow = { undock, then };
@@ -284,6 +288,8 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
         if (nearestHere || moonHere || (!spot.outside && nearCentre(spot.x, spot.y, innerWidth, innerHeight))) {
           el.textContent += ` · ${distanceText(Math.max(0, view.distances[body.id] - body.radiusKm))}`;
         }
+        if (spot.outside) offScreen.add(body.id);
+        else offScreen.delete(body.id);
         const selectedHere = body.id === selected.id;
         // A story place gets no off-screen arrow unless it is the chosen target.
         const keep = (body.kind !== 'site' || !spot.outside || selectedHere) && keepMarker({

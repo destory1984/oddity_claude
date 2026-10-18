@@ -16,13 +16,13 @@ import { t } from './i18n.js';
 // [month, day, year, story id or craft id]: the dates are those in the story texts.
 const ANNIVERSARIES = [
   [1, 3, 2019, 'change4'], [1, 4, 2004, 'spirit'], [1, 14, 2005, 'huygens'], [1, 24, 1986, 'voyager2Uranus'],
-  [1, 25, 2004, 'opportunity'], [2, 3, 1966, 'luna9'], [2, 5, 1971, 'apollo14'], [2, 18, 2021, 'perseverance'],
+  [1, 25, 2004, 'opportunity'], [2, 3, 1966, 'luna9'], [2, 5, 1971, 'apollo14'], [2, 18, 2021, 'perseverance'], [2, 18, 1930, 'lowell'],
   [3, 1, 1982, 'venera13'], [3, 6, 1979, 'valhalla'], [3, 13, 2013, 'alma'], [3, 14, 1986, 'giotto'], [4, 8, 2008, 'yiSoyeon'], [4, 12, 1961, 'baikonur'],
   [4, 21, 1972, 'apollo16'],
-  [4, 30, 2015, 'messenger'], [5, 25, 2008, 'phoenix'], [6, 11, 1985, 'vega'], [6, 21, 2022, 'naro'], [6, 23, 2025, 'rubin'], [6, 27, 1996, 'galileoRegio'], [7, 4, 1997, 'pathfinder'], [7, 10, 2017, 'greatRedSpot'], [7, 13, 2018, 'meerkat'],
+  [4, 30, 2015, 'messenger'], [5, 25, 2008, 'phoenix'], [6, 3, 1948, 'palomar'], [6, 11, 1985, 'vega'], [6, 21, 2022, 'naro'], [6, 23, 2025, 'rubin'], [6, 27, 1996, 'galileoRegio'], [7, 4, 1997, 'pathfinder'], [7, 10, 2017, 'greatRedSpot'], [7, 13, 2018, 'meerkat'],
   [7, 14, 2015, 'newHorizons'], [7, 21, 1969, 'apollo11'], [7, 30, 1971, 'apollo15'], [8, 6, 2012, 'curiosity'],
   [8, 23, 2023, 'chandrayaan3'], [8, 25, 1989, 'voyager2Neptune'], [9, 3, 1976, 'viking2'], [9, 7, 2023, 'tanegashima'], [9, 14, 1959, 'luna2'],
-  [9, 15, 2017, 'cassini'], [9, 25, 2016, 'fast'], [10, 4, 1957, 'sputnik'], [10, 22, 1975, 'venera9'], [11, 10, 2005, 'salt'], [11, 12, 2014, 'rosetta'], [11, 17, 1970, 'lunokhod1'],
+  [9, 15, 2017, 'cassini'], [9, 25, 2016, 'fast'], [10, 4, 1957, 'sputnik'], [10, 10, 1980, 'vla'], [10, 22, 1975, 'venera9'], [11, 10, 2005, 'salt'], [11, 12, 2014, 'rosetta'], [11, 17, 1970, 'lunokhod1'],
   [11, 19, 1969, 'apollo12'], [11, 24, 2020, 'wenchang'], [12, 7, 1995, 'galileoProbe'], [12, 11, 1972, 'apollo17'], [12, 14, 2013, 'change3'], [12, 15, 1970, 'venera7'],
   [12, 24, 2024, 'parkerPerihelion'],
 ];
@@ -45,7 +45,9 @@ const nameOf = (id) => (BODIES.find((b) => b.id === id) ?? CRAFT.find((c) => c.i
 // Returns { kind, id, year?, text } with text in grandmother's words.
 export function dailyRequest(day, progress) {
   const [, month, date] = day.split('-').map(Number);
-  const event = ANNIVERSARIES.find(([m, d]) => m === month && d === date);
+  // Two events on one day (18 February: Perseverance, Lowell) take turns by year.
+  const events = ANNIVERSARIES.filter(([m, d]) => m === month && d === date);
+  const event = events[Number(day.slice(0, 4)) % events.length];
   if (event) {
     const [, , year, id] = event;
     return { kind: 'day', id, year, text: t`${year}년 오늘이 그날이란다. ${nameOf(id)}에 다녀와 다오.` };

@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-18', text: t('지구에 로웰 천문대, 팔로마 천문대, VLA 전파망원경이 생겼습니다. 수첩은 218칸입니다.') },
   { day: '2026-10-18', text: t('보름달은 태양 반대쪽 둘레가 환해지고, 티코 분화구에서 흰 빛줄기가 뻗습니다.') },
   { day: '2026-10-18', text: t('달 뒤에서 해가 뜨기 직전, 달 가장자리 위로 빛살이 솟습니다.') },
   { day: '2026-10-18', text: t('월식 때 달이 더 밝은 구릿빛이 되고, 그림자 가장자리에 푸른 띠가 비칩니다.') },

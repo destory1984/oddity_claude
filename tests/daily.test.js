@@ -16,10 +16,15 @@ test('on the day of a real event the errand is its place, with the year', () => 
   assert.deepEqual({ kind: apollo.kind, id: apollo.id, year: apollo.year }, { kind: 'day', id: 'apollo11', year: 1969 });
   assert.equal(apollo.text, '1969년 오늘이 그날이란다. 아폴로 11호 착륙지에 다녀와 다오.');
   assert.equal(dailyRequest('2031-10-04', far).id, 'sputnik');
-  assert.equal(ANNIVERSARY_COUNT, 47);
+  assert.equal(ANNIVERSARY_COUNT, 50);
   // Gagarin's day sends her to where he left from, and ALMA's opening to ALMA.
   assert.deepEqual([dailyRequest('2027-04-12', fresh).id, dailyRequest('2027-04-12', fresh).year], ['baikonur', 1961]);
   assert.equal(dailyRequest('2027-03-13', fresh).id, 'alma');
+  // Lowell, Palomar and the VLA have their days; 18 February is Perseverance's too, so the two take turns by year.
+  assert.deepEqual([dailyRequest('2027-06-03', fresh).id, dailyRequest('2027-06-03', fresh).year], ['palomar', 1948]);
+  assert.deepEqual([dailyRequest('2027-10-10', fresh).id, dailyRequest('2027-10-10', fresh).year], ['vla', 1980]);
+  assert.equal(dailyRequest('2026-02-18', fresh).id, 'perseverance');
+  assert.deepEqual([dailyRequest('2027-02-18', fresh).id, dailyRequest('2027-02-18', fresh).year], ['lowell', 1930]);
 });
 
 test('every day of a year has an errand whose place exists, in grandmother\'s words', () => {
@@ -41,7 +46,8 @@ test('every day of a year has an errand whose place exists, in grandmother\'s wo
 
 test('the same day gives the same errand; a new log is sent near home, a later one where it has been', () => {
   assert.deepEqual(dailyRequest('2026-10-02', far), dailyRequest('2026-10-02', far));
-  for (let d = 5; d <= 10; d++) {
+  // (5 to 9 October: the 10th has been the VLA's day since 2026-10-18.)
+  for (let d = 5; d <= 9; d++) {
     const request = dailyRequest(`2026-10-${String(d).padStart(2, '0')}`, fresh);
     assert.ok(['moon', 'iss', 'hubble'].includes(request.id), request.id);
     const later = dailyRequest(`2026-10-${String(d).padStart(2, '0')}`, far);

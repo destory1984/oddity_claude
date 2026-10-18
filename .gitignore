@@ -13,3 +13,4 @@ coverage/
 .superpowers/
 # promo video frames and films (build/promo)
 assets/promo/
+.claude/worktrees/

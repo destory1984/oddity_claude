@@ -481,6 +481,27 @@ STORIES.push(
     text: t('인도 자이푸르에 돌과 놋쇠로 만든 천문 기구 열아홉 개가 서 있습니다. 가장 큰 해시계는 높이가 27m입니다.'),
   },
 );
+// Three more on Earth, all observatories of the American West (the user, 2026-10-18).
+STORIES.push(
+  {
+    id: 'lowell', name: t('로웰 천문대'), nameEn: 'Lowell Observatory', year: 1930, type: 'surface', body: 'earth',
+    latDeg: 35.2, lonDeg: -111.66, withinKm: 40, landmark: false,
+    hint: t('지구 미국 애리조나의 로웰 천문대(북위 35.2도, 서경 111.7도) 40km 안에 내려앉기'),
+    text: t('1930년 2월 18일 이곳에서 명왕성을 찾았습니다. 퍼시벌 로웰이 화성을 보려고 1894년에 세운 천문대입니다.'),
+  },
+  {
+    id: 'palomar', name: t('팔로마 천문대'), nameEn: 'Palomar Observatory', year: 1948, type: 'surface', body: 'earth',
+    latDeg: 33.36, lonDeg: -116.865, withinKm: 40, landmark: false,
+    hint: t('지구 미국 캘리포니아의 팔로마 천문대(북위 33.4도, 서경 116.9도) 40km 안에 내려앉기'),
+    text: t('1948년 6월 3일 지름 5.1m의 헤일 망원경이 문을 열었습니다. 1975년까지 세계에서 가장 큰 망원경이었습니다.'),
+  },
+  {
+    id: 'vla', name: t('뉴멕시코의 VLA 전파망원경'), nameEn: 'Very Large Array', year: 1980, type: 'surface', body: 'earth',
+    latDeg: 34.08, lonDeg: -107.62, withinKm: 40, landmark: false,
+    hint: t('지구 미국 뉴멕시코의 VLA 전파망원경(북위 34.1도, 서경 107.6도) 40km 안에 내려앉기'),
+    text: t('1980년 10월 10일 문을 열었습니다. 지름 25m 접시 27개가 Y자 레일 위에서 하나의 망원경처럼 일합니다.'),
+  },
+);
 named(STORIES);
 
 // A place's label shows only from within this many of its body's radii above the

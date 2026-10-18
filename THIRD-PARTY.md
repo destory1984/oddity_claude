@@ -162,8 +162,11 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | `salt.jpg` | [SA large telescope.jpg](https://commons.wikimedia.org/wiki/File:SA_large_telescope.jpg) | User:siener | Public domain |
 | `fast.jpg` | [202508 FAST (Five-hundred-meter Aperture Spherical radio Telescope).jpg](https://commons.wikimedia.org/wiki/File:202508_FAST_(Five-hundred-meter_Aperture_Spherical_radio_Telescope).jpg) | SCJiang | CC BY-SA 4.0 |
 | `jantarMantar.jpg` | [Brihat Samrat Yantra, Jantar Mantar, Jaipur, 20191218 0911 8996.jpg](https://commons.wikimedia.org/wiki/File:Brihat_Samrat_Yantra,_Jantar_Mantar,_Jaipur,_20191218_0911_8996.jpg) | Jakub Hałun | CC BY-SA 4.0 |
+| `lowell.jpg` | [Flagstaff-Lowell Observatory-1894-The Clark Telescope Dome on Mars Hill.jpg](https://commons.wikimedia.org/wiki/File:Flagstaff-Lowell_Observatory-1894-The_Clark_Telescope_Dome_on_Mars_Hill.jpg) | Marine 69-71 | CC BY-SA 4.0 |
+| `palomar.jpg` | [Palomar Observatory 2012 01.jpg](https://commons.wikimedia.org/wiki/File:Palomar_Observatory_2012_01.jpg) | Mike Peel | CC BY-SA 4.0 |
+| `vla.jpg` | [NRAO Very Large Array, New Mexico, USA 2024 2.jpg](https://commons.wikimedia.org/wiki/File:NRAO_Very_Large_Array,_New_Mexico,_USA_2024_2.jpg) | dconvertini | CC BY-SA 2.0 |
 
-CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수 있고, 고친 것은 같은 조건으로 내야 한다. 이 저장소의 MIT 라이선스는 이 사진들에 미치지 않는다.
+CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수 있고, 고친 것은 같은 조건으로 내야 한다. 이 저장소의 MIT 라이선스는 이 사진들에 미치지 않는다.
 
 ## 사진 임무가 따라 찍는 실제 사진
 

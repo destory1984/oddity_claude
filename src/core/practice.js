@@ -44,7 +44,10 @@ const SLID_KM = 3000;
 // The jump (the user, 2026-10-10: "워프 연습 추가"): a ring far too far to fly to in a
 // moment, reached as a far body is in the game: its name tag turns her to it, and pressed
 // again while she looks at it, jumps her to this far before it (main.js makes the jump).
-export const JUMP_TO_KM = FAR_KM * 0.9;
+// (72,000 km, nine tenths of the other rings' distance, till the user, 2026-10-18: "워프를
+// 하고나서 거리가 꽤 먼데". Now a quarter of it: a few seconds' flight, and still more
+// than NEAR_KM, so that going past it counts as a miss only once she has come near.)
+export const JUMP_TO_KM = 20000;
 // Rolling (two fingers turned on the view, or Q and E): she is tipped over by this much
 // as the lesson begins (main.js does it), and is to stand the ring's horn up again: up
 // within ROLL_UP of the top of the screen, having turned at least ROLLED herself.

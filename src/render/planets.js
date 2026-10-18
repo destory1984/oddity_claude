@@ -13,9 +13,10 @@ import ringFrag from './shaders/ring.frag?raw';
 import noiseGlsl from './shaders/noise.glsl?raw';
 import ringsGlsl from './shaders/rings.glsl?raw';
 import texturedFrag from './shaders/textured.frag?raw';
+import lunarGlowFrag from './shaders/lunarGlow.frag?raw';
 import { KM_PER_UNIT, TIME_SCALE } from '../core/bodies.js';
 import { normalize } from './math.js';
-import { SPIN_DAY_S, EARTH_START_SPIN, START_SPIN, cloudSpin } from '../core/surface.js';
+import { SPIN_DAY_S, EARTH_START_SPIN, START_SPIN, cloudSpin, surfaceDirection } from '../core/surface.js';
 import { SPOKES } from '../core/glows.js';
 import { SHADOW_SLOTS } from '../core/shadows.js';
 
@@ -124,6 +125,10 @@ const LOOKS = {
     // The horizon glow: seen from behind, a thin line of light along its edge (dust
     // lifted off the ground, as the Surveyors and Apollo 17 saw at sunrise).
     rim: [0.9, 0.9, 1], rimLight: 0.3,
+    // Its own sights (textured.frag `lunar`): the opposition surge and Tycho's rays; the
+    // minerals' colours are chosen in photo mode. And the streamers of the horizon glow
+    // over its edge (lunarGlow.frag), on a shell this many radii out.
+    lunar: [1, 1], glowShell: 1.45,
   },
   // Small moons: plain cratered rock or ice in each one's own shade. All keep one face
   // to their planet, so a day lasts one orbit.
@@ -363,7 +368,10 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   if (look.shader === 'textured') {
     material = shader(scene, 'textured', texturedFrag,
       ['sun', 'tint', 'baseColor', 'saturation', 'mapWeight', 'haze', 'detail', 'ringNormal', 'ringInner', 'ringOuter', 'craters', 'close', 'radius', 'patchy',
-        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'eclipsed', 'nightGlow', 'nightAir', 'glory', 'cyclones', 'flow', 'tracks', 'polarCap', 'sights'], ['map']);
+        'rimColor', 'rimLight', 'hexagon', 'glint', 'storm', 'time', 'shadeAt', 'shadeEdge', 'shine', 'shineColor', 'eclipsed', 'nightGlow', 'nightAir', 'glory', 'cyclones', 'flow', 'tracks', 'polarCap', 'sights', 'lunar', 'rayFrom'], ['map']);
+    material.setVector3('lunar', new Vector3(look.lunar?.[0] ?? 0, look.lunar?.[1] ?? 0, 0));
+    // Tycho, 43.31 degrees south and 11.36 west.
+    material.setVector3('rayFrom', new Vector3(...surfaceDirection(-43.31, -11.36, 0)));
     material.setVector4('sights', new Vector4(...(look.sights ?? [0, 0, 0, 0])));
     material.setFloat('flow', look.flow ?? 0);
     material.setFloat('tracks', look.tracks ?? 0);
@@ -421,6 +429,21 @@ function createProceduralPlanet(scene, body, look, sunDir) {
   sphere.material = material;
 
   const meshes = [sphere];
+  let glow = null;
+  if (look.glowShell) {
+    const shell = CreateSphere(`${body.id}Glow`, { diameter: diameter * look.glowShell, segments: 64 }, scene);
+    glow = shader(scene, 'lunarGlow', lunarGlowFrag, ['sun', 'size', 'shell']);
+    glow.setVector3('sun', sunDir);
+    glow.setFloat('size', (diameter * look.glowShell) / 2);
+    glow.setFloat('shell', look.glowShell);
+    glow.alphaMode = Constants.ALPHA_ADD;
+    glow.needAlphaBlending = () => true;
+    glow.disableDepthWrite = true;
+    glow.backFaceCulling = false;
+    shell.material = glow;
+    shell.isPickable = false;
+    meshes.push(shell);
+  }
   let ring = null;
   if (look.rings) {
     ring = createRings(scene, body, look.rings, sunDir);
@@ -450,6 +473,11 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     setSun(dir) {
       material.setVector3('sun', new Vector3(...dir));
       if (ring) ring.setSun(new Vector3(...dir));
+      if (glow) glow.setVector3('sun', new Vector3(...dir));
+    },
+    // The minerals' colours on the Moon (photo mode's choice), on or off.
+    setMinerals(on) {
+      if (look.lunar) material.setVector3('lunar', new Vector3(look.lunar[0], look.lunar[1], on ? 1 : 0));
     },
     // The light of the planet it goes round (core/shine.js planetshine), or none.
     setShine(light) {

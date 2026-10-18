@@ -69,6 +69,11 @@ uniform vec4 shine;
 // Earth's shadow coming over the Moon in a lunar eclipse (core/eclipses.js): xyz the
 // side it comes from, w how far it has come (0 none, 1 all of the disc).
 uniform vec4 eclipsed;
+// The Moon's own sights (planets.js LOOKS moon `lunar`): x the opposition surge, y the
+// rays of Tycho, z the minerals' colours (a choice in photo mode). rayFrom: Tycho in
+// the body's own frame (as lp).
+uniform vec3 lunar;
+uniform vec3 rayFrom;
 uniform vec3 shineColor;
 uniform vec4 shadeAt[6];
 uniform vec3 shadeEdge[6];
@@ -478,12 +483,51 @@ void main(){
     // (By how cratered the world is: the Moon in full, Mars a third, which is darker anyway.)
     light /= 1. + craters * nearness * .75 * smoothstep(.6, 1., max(dot(normalize(n), sun), 0.));
   }
+  if (lunar.y > 0.) {
+    // Tycho's rays (the user, 2026-10-18, "모두 넣자"): streaks of rock thrown out by
+    // the crater, up to 1,500 km long, each of its own length and width, brightest under
+    // a high Sun; and the crater's bright rim, 86 km across.
+    float dd = acos(clamp(dot(lp, rayFrom), -1., 1.));
+    vec3 e1 = normalize(cross(rayFrom, vec3(0., 1., 0.)));
+    vec3 e2 = cross(rayFrom, e1);
+    float around = atan(dot(lp, e2), dot(lp, e1)) / 6.28318 + .5;
+    float rays = 0.;
+    for (int k = 0; k < 2; k++) {
+      float s = around * (34. + 19. * float(k)) + float(k) * .37;
+      float id = floor(s);
+      float h = fract(sin(id * 12.9898 + float(k) * 4.1) * 43758.5453);
+      float h2 = fract(sin(id * 78.233 + float(k) * 9.7) * 12345.678);
+      float across = abs(fract(s) - .5 - (h2 - .5) * .3);
+      float reach = .12 + .55 * h2 * h2;
+      rays += step(.35, h) * (1. - smoothstep(0., .05 + .1 * h, across)) * exp(-dd / reach) * (.5 + .5 * h2);
+    }
+    rays = min(rays, 1.) * smoothstep(.035, .07, dd) * (1. - smoothstep(.9, 1.2, dd));
+    float pit = exp(-pow((dd - .022) / .009, 2.)) * .8 + exp(-pow(dd / .016, 2.)) * .4;
+    light += col * (rays * .55 + pit) * max(l, 0.) * lunar.y * 1.4;
+  }
+  if (lunar.x > 0.) {
+    // The opposition surge: with the Sun straight behind her every stone hides its own
+    // shadow, and the ground brightens sharply round the point opposite the Sun (why a
+    // full Moon is some ten times brighter than a half one).
+    float phase = acos(clamp(dot(sun, V), -1., 1.));
+    light *= 1. + lunar.x * (1.1 * exp(-phase / .03) + .35 * exp(-phase / .14));
+  }
+  if (lunar.z > 0.) {
+    // The minerals' colours, as Galileo's enhanced-colour pictures show them: the seas
+    // rich in titanium blue, the poorer ones and the highlands orange.
+    float lm = dot(col, vec3(.299, .587, .114));
+    light *= mix(vec3(1.), mix(vec3(.45, .6, 1.2), vec3(1.15, .8, .52), smoothstep(.3, .52, lm)), .65 * lunar.z) * (1. + .08 * lunar.z);
+  }
   if (eclipsed.w > 0.) {
     // The shadow's edge crosses the globe; under it the ground is lit only by the red
-    // light bent round Earth: dim, and copper.
+    // light bent round Earth: copper (brighter since 2026-10-18, as photographs show
+    // it), and along the shadow's edge a thin blue band, sunlight that came through the
+    // ozone high in Earth's air.
     float edge = 1.2 - 2.4 * eclipsed.w;
-    float under = smoothstep(edge - .22, edge + .22, dot(normalize(n), eclipsed.xyz));
-    light = mix(light, col * vec3(.34, .09, .04), under);
+    float across = dot(normalize(n), eclipsed.xyz);
+    float under = smoothstep(edge - .22, edge + .22, across);
+    light = mix(light, col * vec3(.62, .17, .06) * 1.25, under);
+    light += vec3(.25, .5, 1.) * exp(-pow((across - edge) / .06, 2.)) * .22 * max(dot(normalize(n), V), 0.);
   }
   gl_FragColor = vec4(pow(light, vec3(.92)), 1.);
 }

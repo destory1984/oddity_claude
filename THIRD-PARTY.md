@@ -162,7 +162,7 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | `salt.jpg` | [SA large telescope.jpg](https://commons.wikimedia.org/wiki/File:SA_large_telescope.jpg) | User:siener | Public domain |
 | `fast.jpg` | [202508 FAST (Five-hundred-meter Aperture Spherical radio Telescope).jpg](https://commons.wikimedia.org/wiki/File:202508_FAST_(Five-hundred-meter_Aperture_Spherical_radio_Telescope).jpg) | SCJiang | CC BY-SA 4.0 |
 | `jantarMantar.jpg` | [Brihat Samrat Yantra, Jantar Mantar, Jaipur, 20191218 0911 8996.jpg](https://commons.wikimedia.org/wiki/File:Brihat_Samrat_Yantra,_Jantar_Mantar,_Jaipur,_20191218_0911_8996.jpg) | Jakub Hałun | CC BY-SA 4.0 |
-| `lowell.jpg` | [Flagstaff-Lowell Observatory-1894-The Clark Telescope Dome on Mars Hill.jpg](https://commons.wikimedia.org/wiki/File:Flagstaff-Lowell_Observatory-1894-The_Clark_Telescope_Dome_on_Mars_Hill.jpg) | Marine 69-71 | CC BY-SA 4.0 |
+| `lowell.jpg` | [Lowell Observatory NRIS-66000172-Clark Telescope1-Flagstaff Arizona.jpg](https://commons.wikimedia.org/wiki/File:Lowell_Observatory_NRIS-66000172-Clark_Telescope1-Flagstaff_Arizona.jpg) | Packbj | CC BY-SA 4.0 |
 | `palomar.jpg` | [Palomar Observatory 2012 01.jpg](https://commons.wikimedia.org/wiki/File:Palomar_Observatory_2012_01.jpg) | Mike Peel | CC BY-SA 4.0 |
 | `vla.jpg` | [NRAO Very Large Array, New Mexico, USA 2024 2.jpg](https://commons.wikimedia.org/wiki/File:NRAO_Very_Large_Array,_New_Mexico,_USA_2024_2.jpg) | dconvertini | CC BY-SA 2.0 |
 

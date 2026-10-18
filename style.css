@@ -5604,6 +5604,7 @@ html.gaze #gazeButton {
 body.practicing #hud header,
 body.practicing #hud .telemetry,
 body.practicing #minimap,
+body.practicing #scanner,
 body.practicing #markers,
 body.practicing #targetPanel,
 body.practicing #hud footer .throttle,

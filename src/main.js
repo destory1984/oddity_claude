@@ -1419,7 +1419,7 @@ ${STORY_MORE[target.id]}` : told };
   }
   function unlock() {
     locked = false;
-    toast.show(t('목표 고정을 풀었습니다.'));
+    toast.show(t('맴돌며 보기를 풀었습니다.'));
   }
   $('lockTarget').addEventListener('click', () => {
     if (locked) return unlock();
@@ -1432,7 +1432,11 @@ ${STORY_MORE[target.id]}` : told };
       lockAim = AIM_LINE;
       state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
     }
-    toast.show(t`${body.name}에 고정했습니다. 가까이에서는 땅과 함께 돌아 같은 곳 위에 머뭅니다.\n화면을 끌어 둘러봐도 풀리지 않습니다. 단추를 다시 누르면 풀립니다.`);
+    // (Called "목표 고정" till 2026-10-18; the user, asking how it differs from docking,
+    // wanted it kept for going round small things and named it "맴돌며 보기".)
+    // Three short lines, what to press for what (the user, 2026-10-18: "고정을 누를 때에
+    // 나오는 도움말 개선"): it was four long ones, under her bubble on a phone.
+    toast.show(t`${body.name} 둘레를 맴돌며 봅니다.\n화살표 단추를 누르면 그 둘레를 돕니다.\n자물쇠를 다시 누르면 풀립니다.`);
     return undefined;
   });
 
@@ -1492,7 +1496,7 @@ ${STORY_MORE[target.id]}` : told };
     locked = true;
     lockAim = AIM_LINE;
     $('bigMap').close();
-    toast.show(t`${body.name} 쪽을 바라보고 화면을 고정했습니다. 전진을 누르면 다가갑니다.`);
+    toast.show(t`${body.name} 쪽을 바라보고 맴돌며 보기를 켰습니다. 전진을 누르면 다가갑니다.`);
   });
   $('bigMapJump').addEventListener('click', () => {
     const id = mapPick;
@@ -3363,7 +3367,7 @@ ${STORY_MORE[target.id]}` : told };
     minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId, away });
     if ($('bigMap').open) bigMap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId: mapPick ?? selectedId, away });
     $('lockTarget').setAttribute('aria-pressed', String(locked));
-    $('lockTarget').textContent = locked ? t('고정 풀기') : t('목표 고정');
+    $('lockTarget').textContent = locked ? t('맴돌기 풀기') : t('맴돌며 보기');
   });
 
   // As an app, the phone's back key puts away what is open before it leaves the game.

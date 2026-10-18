@@ -43,7 +43,7 @@ export const huygensTurn = (t) => (2 * Math.PI * (t - TURN_FROM)) / HUYGENS_TURN
 // (The field stands nearer than the telescope, whose tube then runs in under its rim:
 // behind it, the tube lay across Mars.)
 const VIEW_Z = -0.3;
-export const HUYGENS = { view: { x: -0.2, y: 0.82, size: 1.0, globe: 0.36 }, table: { x: -1.0, top: 0.36 }, sheets: 3 };
+export const HUYGENS = { view: { x: -0.2, y: 0.82, size: 1.0, globe: 0.36 }, table: { x: -0.92, top: 0.36 }, sheets: 3 };
 
 // The sunrise's Sun: where it stands to the side and behind the rim, and how high its
 // middle is when it is down (its disc, 0.49 to its edge, is then wholly behind the rim,
@@ -91,15 +91,15 @@ export function landmarkStage(kind, sayBy = 'craft') {
       const said = up(t, 17, 23);
       const stage = {
         room: { x: 0, y: 0 },
-        // The candle's flame trembles a little.
-        flame: { x: table.x + 0.15, y: table.top + 0.13, z: 0.18, scale: 1 + 0.12 * Math.sin(t * 13) * Math.sin(t * 3.1) },
+        // The candle's flame (at the table's front corner, before the drawings) trembles a little.
+        flame: { x: table.x - 0.17, y: table.top + 0.13, z: 0.0, scale: 1 + 0.12 * Math.sin(t * 13) * Math.sin(t * 3.1) },
         view: { x: view.x, y: view.y, z: VIEW_Z, scale: Math.max(0.01, view.size * shown), shown: shown > 0 },
         globe: { x: view.x, y: view.y, z: VIEW_Z, scale: Math.max(0.01, view.globe * shown), turn: huygensTurn(t), shown: shown > 0 },
         bubble: { x: 0.55, y: 1.3, scale: Math.max(0.01, 0.8 * said), shown: said > 0.01 },
       };
       for (let k = 0; k < sheets; k += 1) {
         const laid = ease(t, TURN_FROM + k * HUYGENS_TURN + 0.2, TURN_FROM + k * HUYGENS_TURN + 0.8);
-        stage[`sheet${k}`] = { x: table.x - 0.12 + k * 0.12, y: table.top + 0.02 + k * 0.004, z: 0.08, scale: Math.max(0.01, laid), shown: laid > 0 };
+        stage[`sheet${k}`] = { x: table.x - 0.05 + k * 0.05, y: table.top + 0.015, z: 0.12 - k * 0.04, scale: Math.max(0.01, laid), shown: laid > 0 };
       }
       return stage;
     };

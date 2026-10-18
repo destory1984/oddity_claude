@@ -1,13 +1,13 @@
-import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, StandardMaterial, Color3 } from './babylon.js';
+import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, Texture, StandardMaterial, Color3 } from './babylon.js';
 import { part, box, drum, rod, fuse } from './craftParts.js';
 import { HUYGENS } from '../core/landmarkStages.js';
 
 // Syrtis Major's scene (core/landmarkStages.js 'huygens'): a night in 1659, Christiaan
 // Huygens at his long telescope, what he sees in it drawn large in the middle (Mars
-// turning, its dark wedge going round and coming back), and his drawings on a table.
+// turning, its dark wedge going round and coming back), and his drawing (the real one) laid on a table each time.
 // The user (2026-10-18) had the old scene, the photo alone, made again ("애니 다시
 // 만들어"): of three ways they chose this one, and of three looks side by side, "C".
-// Built of shapes and canvas paint, no ordered drawings. A stage's +z is away from the
+// Built of shapes and canvas paint and his own drawing, no ordered drawings. A stage's +z is away from the
 // one who watches, x to the side, y up; a phone's view ends about 1.45 to either side.
 
 // A colour lit by the scene's light, with some of its own so the night does not swallow it.
@@ -73,25 +73,6 @@ function marsMap(ctx, w, h) {
   ctx.fillRect(0, 0, w, h * 0.18);
   ctx.fillRect(0, h * 0.88, w, h * 0.12);
 }
-// His drawing, ink on cream paper; the wedge a little to one side each time.
-const sketch = (shift) => (ctx, w, h) => {
-  ctx.fillStyle = '#efe4c8';
-  ctx.fillRect(0, 0, w, h);
-  ctx.strokeStyle = '#b9a77e';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(2, 2, w - 4, h - 4);
-  const r = w * 0.3;
-  ctx.strokeStyle = '#2a2018';
-  ctx.lineWidth = r * 0.06;
-  ctx.beginPath();
-  ctx.arc(w / 2, h * 0.45, r, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.fillStyle = '#2a2018';
-  wedge(ctx, w / 2 + shift * r, h * 0.45, r);
-  ctx.font = `${Math.round(h * 0.09)}px serif`;
-  ctx.textAlign = 'center';
-  ctx.fillText('1659', w / 2, h * 0.9);
-};
 // A night sky behind, deep blue with its stars.
 function stars(ctx, w, h) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
@@ -171,7 +152,7 @@ export function huygensPieces(scene, name) {
   const { x, top } = HUYGENS.table;
   box(scene, `${name}Top`, room, wood, [0.42, 0.03, 0.3], [x, top, 0.1]);
   for (const dx of [-0.18, 0.18]) for (const dz of [-0.12, 0.12]) box(scene, `${name}TableLeg`, room, wood, [0.03, top, 0.03], [x + dx, top / 2, 0.1 + dz]);
-  drum(scene, `${name}Candle`, room, paint(scene, `${name}Wax`, '#efe6d0', 0.6), { height: 0.1, diameter: 0.03 }, [x + 0.15, top + 0.065, 0.18]);
+  drum(scene, `${name}Candle`, room, paint(scene, `${name}Wax`, '#efe6d0', 0.6), { height: 0.1, diameter: 0.03 }, [x - 0.17, top + 0.065, 0.0]);
   telescope(scene, `${name}Scope`, room, [0.68, 0.49, 0], 0.9, 0.6);
   const man = huygens(scene, `${name}Huygens`, room);
   man.position.set(0.75, 0, 0);
@@ -207,12 +188,25 @@ export function huygensPieces(scene, name) {
   part(CreateSphere(`${name}MarsBall`, { diameter: 1, segments: 32 }, scene), globe, face);
 
   const pieces = { room, flame, view, globe };
+  // His own drawing of that night (south up, as the telescope showed it), from Lowell's
+  // "Mars" (1894): public/assets/replay/huygens-1659.jpg, THIRD-PARTY.md. The user
+  // (2026-10-18) asked why the drawing was not the real one; it is now.
+  const drawing = new StandardMaterial(`${name}Drawing`, scene);
+  drawing.disableLighting = true;
+  drawing.emissiveTexture = new Texture(`${import.meta.env.BASE_URL}assets/replay/huygens-1659.jpg`, scene, true, true);
+  drawing.diffuseColor = new Color3(0, 0, 0);
+  drawing.specularColor = new Color3(0, 0, 0);
+  drawing.backFaceCulling = false;
   for (let k = 0; k < HUYGENS.sheets; k += 1) {
     const sheet = new TransformNode(`${name}Sheet${k}`, scene);
-    const paper = card(scene, `${name}Paper${k}`, [0.15, 0.2], [160, 210], sketch([-0.12, 0.1, 0][k]));
+    const paper = CreatePlane(`${name}Paper${k}`, { width: 0.26, height: 0.294 }, scene);
+    paper.material = drawing;
+    paper.isPickable = false;
     paper.parent = sheet;
-    // Lying on the table, tipped toward the one who watches.
-    paper.rotation.set(1.2, 0, [0.15, -0.2, 0.05][k]);
+    // Standing on the table, leant back a little, each a little askew; its foot at the
+    // sheet's own y = 0. (Lying flat, the drawing was a pale strip too small to make out.)
+    paper.position.y = 0.147;
+    paper.rotation.set(0.15, 0, [0.06, -0.05, 0.02][k]);
     pieces[`sheet${k}`] = sheet;
   }
   return pieces;

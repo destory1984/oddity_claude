@@ -239,6 +239,10 @@ CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수
 | `voyager1-craft.jpg` | [Voyager spacecraft.jpg](https://commons.wikimedia.org/wiki/File:Voyager_spacecraft.jpg) | NASA/JPL | Public domain |
 | `voyager2-craft.jpg` | [Voyager 2 Testing PIA21736.jpg](https://commons.wikimedia.org/wiki/File:Voyager_2_Testing_PIA21736.jpg) | NASA/JPL | Public domain |
 
+## "그날로" 장면에 쓴 옛 그림
+
+`public/assets/replay/huygens-1659.jpg` 는 크리스티안 하위헌스가 1659년 11월 28일에 그린 시르티스 메이저 스케치다. 퍼시벌 로웰의 책 『Mars』(1894)에 다시 실린 것을 위키미디어 공용에서 받아(610×690) 304×344로 줄였다. 원본: [Lowell - Mars (1894) - Huyghens' drawing of the Syrtis Major, Nov. 28, 1659.jpg](https://commons.wikimedia.org/wiki/File:Lowell_-_Mars_(1894)_-_Huyghens%27_drawing_of_the_Syrtis_Major,_Nov._28,_1659.jpg). Public domain.
+
 ## d3-celestial 라이선스 (BSD 3-Clause)
 
 Copyright (c) 2015, Olaf Frohn. All rights reserved.

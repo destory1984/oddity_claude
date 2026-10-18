@@ -249,6 +249,14 @@ export function previousLesson(practice, pose) {
   return { ...practice, ...begin(step, pose), ...(step === 'fly' ? { ring: ringFrom(pose, [1, 0, 0.1]), far: Infinity } : {}), last: [...pose.position], events: [] };
 }
 
+// The lesson after this one, begun from where she is (the user, 2026-10-18: "다음연습
+// 버튼도 넣어줘"). The last lesson has none after it.
+export function nextLesson(practice, pose) {
+  const at = PRACTICE_STEPS.indexOf(practice.step);
+  if (at < 0 || at >= PRACTICE_STEPS.length - 1) return practice;
+  return { ...practice, ...begin(PRACTICE_STEPS[at + 1], pose), last: [...pose.position], events: [] };
+}
+
 // What the line at the top says, and which key is to be pressed now (it blinks).
 // aimed: she is looking at the ring. moving: she is under way.
 export function practiceGoal(practice, aimed = false, moving = false) {
@@ -259,6 +267,8 @@ export function practiceGoal(practice, aimed = false, moving = false) {
     count: `${PRACTICE_STEPS.indexOf(practice.step) + 1}/${PRACTICE_STEPS.length}${practice.step !== 'free' && practice.repeats > 1 ? ` ${'●'.repeat(practice.round)}${'○'.repeat(practice.repeats - practice.round)}` : ''}`,
     // There is a lesson before this one to go back to.
     back: PRACTICE_STEPS.indexOf(practice.step) > 0,
+    // There is a lesson after this one to go on to.
+    next: PRACTICE_STEPS.indexOf(practice.step) < PRACTICE_STEPS.length - 1,
     text: TEXT[practice.step](practice.left, moving, aimed, practice.jumped, practice.lined),
     name: NAMES[practice.step](),
     // Stopping: the forward key until she has flown, then the stop key. Finding: the

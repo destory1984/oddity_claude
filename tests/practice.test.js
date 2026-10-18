@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, JUMP_TO_KM, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, tiltOf, previousLesson, ROLL_START, TOP_SPEED, REPEATS,
+  PRACTICE_STEPS, RING_KM, FAR_KM, FREE_RINGS, JUMP_TO_KM, createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, tiltOf, previousLesson, nextLesson, ROLL_START, TOP_SPEED, REPEATS,
 } from '../src/core/practice.js';
 import { step, createState, totalSpeed } from '../src/core/game.js';
 import { lookAtDirection } from '../src/core/orientation.js';
@@ -298,4 +298,19 @@ test('each lesson is done three times before the next, its count saying which ti
     practice = updatePractice(practice, pose(practice.ring));
   }
   assert.equal(practice.step, 'stop');
+});
+
+test('a lesson can be skipped to the one after, begun from where she is', () => {
+  const here = pose([5000, 0, 0]);
+  let practice = createPractice(here, 1);
+  assert.equal(practiceGoal(practice).next, true);
+  const at = pose([9000, 100, -400]);
+  practice = nextLesson({ ...practice, slid: 5000 }, at);
+  assert.equal(practice.step, 'fly');
+  assert.equal(practice.slid, 0);
+  assert.deepEqual(practice.events, []);
+  assert.deepEqual(practice.last, at.position);
+  while (practiceGoal(practice).next) practice = nextLesson(practice, at);
+  assert.equal(practice.step, PRACTICE_STEPS[PRACTICE_STEPS.length - 1]);
+  assert.equal(nextLesson(practice, at), practice, 'none after the last');
 });

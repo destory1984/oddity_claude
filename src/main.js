@@ -40,7 +40,7 @@ import {
 import { todayData, startAbove } from './core/ephemeris.js';
 import { createGuide, updateGuide, skipGuide, guideGoal } from './core/guide.js';
 import { createGuideView } from './ui/guide.js';
-import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, previousLesson, RING_KM, JUMP_TO_KM, ROLL_START, TOP_SPEED } from './core/practice.js';
+import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimedAt, jumped, previousLesson, nextLesson, RING_KM, JUMP_TO_KM, ROLL_START, TOP_SPEED } from './core/practice.js';
 import { createPracticeView } from './ui/practice.js';
 import { createJournal } from './ui/journal.js';
 import { createPhotoView } from './ui/photoView.js';
@@ -2262,17 +2262,25 @@ ${STORY_MORE[target.id]}` : told };
     },
     // The flight practice's lesson before this one, begun again from where she is.
     onBack() {
-      if (!practice || warp.busy()) return;
-      practice.run = previousLesson(practice.run, poseNow());
-      practice.bornAt = performance.now();
-      practice.passAt = undefined;
-      practice.stageAt = performance.now();
-      practice.turning = false;
-      practice.wrongAt = undefined;
-      practice.tip = practice.run.step === 'roll' ? ROLL_START : 0;
-      sound.cue('click');
+      goLesson(previousLesson);
+    },
+    // And the lesson after this one.
+    onNext() {
+      goLesson(nextLesson);
     },
   });
+  // to: core/practice.js previousLesson or nextLesson.
+  function goLesson(to) {
+    if (!practice || warp.busy()) return;
+    practice.run = to(practice.run, poseNow());
+    practice.bornAt = performance.now();
+    practice.passAt = undefined;
+    practice.stageAt = performance.now();
+    practice.turning = false;
+    practice.wrongAt = undefined;
+    practice.tip = practice.run.step === 'roll' ? ROLL_START : 0;
+    sound.cue('click');
+  }
   // What the goal line points at: the Moon of the practice's second part, or a tour's
   // next stop.
   const moonGoal = () => {
@@ -2551,7 +2559,10 @@ ${STORY_MORE[target.id]}` : told };
     const passed = !wrong && performance.now() - (practice.passAt ?? -Infinity) < PASS_MS;
     document.body.classList.toggle('practiceWrong', wrong);
     document.body.classList.toggle('practicePass', passed);
-    guideView.show({ ...goal, count: t`빈 우주 연습 ${goal.count}`, ...(wrong ? { text: practice.wrongText || t('방향은 돌리지 않아요. 화살표 버튼으로 옆으로 움직이세요') } : passed ? { count: '✓', text: t('잘했어요!') } : {}), leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
+    // (The count stands in two rows, its name over the numbers: beside the keys to the
+    // lessons before and after, the line's words were cut off: "이름표를" and no more.
+    // The user, 2026-10-18: "무슨 뜻?")
+    guideView.show({ ...goal, count: `${t`빈 우주 연습 ${''}`.trim()}\n${goal.count}`, ...(wrong ? { text: practice.wrongText || t('방향은 돌리지 않아요. 화살표 버튼으로 옆으로 움직이세요') } : passed ? { count: '✓', text: t('잘했어요!') } : {}), leave: practice.first ? t('연습 비행 건너뛰기') : t('연습 비행 그만두기') });
     const away = Math.hypot(...practice.run.ring.map((n, i) => n - state.position[i]));
     // The speed box as in the game (the user, 2026-10-10: "화면 아래에 본게임과 같은
     // 속도계 붙여줘"): how fast she goes, and the limit the ring sets as she nears it.

@@ -5831,6 +5831,21 @@ body.practicing #guide {
 body.practicing #guideText {
   flex:1;
 }
+/* Its key to give up in two rows too: "연습 비행" over "그만두기" (the user, 2026-10-18:
+   「"연습비행 그만두기" 버튼도 2줄로」). */
+body.practicing #guideSkip {
+  max-width:5.5em;
+  word-break:keep-all;
+  white-space:normal;
+  line-height:1.2;
+}
+/* The count in two rows (main.js): its name over the numbers. */
+body.practicing #guideCount {
+  flex:none;
+  white-space:pre-line;
+  text-align:center;
+  line-height:1.25;
+}
 
 /* The flight practice says "not that way" (main.js practiceWrong): the line at the top
    goes red and shakes once. */
@@ -5861,6 +5876,14 @@ body.practiceWrong #guideCount {
   margin-right:-4px;
 }
 #guide #guideBack[hidden] { display:none; }
+/* And on to the lesson after: small, after the count. */
+#guide #guideNext {
+  flex:none;
+  min-width:30px;
+  padding:4px 7px;
+  margin-left:-4px;
+}
+#guide #guideNext[hidden] { display:none; }
 
 /* From one lesson of the flight practice to the next: the line says well done in gold
    with a small swell, and each new line comes up softly. */

@@ -466,6 +466,21 @@ STORIES.push(
     text: t('남아프리카공화국 서덜랜드의 해발 1,798m 언덕에 있습니다. 육각형 거울 91장을 이어 붙인 지름 11m 망원경입니다.'),
   },
 );
+// Two more on Earth (the user, 2026-10-18, after "인도나 동남 아시아 쪽은?": "FAST, 잔타르 만타르").
+STORIES.push(
+  {
+    id: 'fast', name: t('구이저우의 FAST 전파망원경'), nameEn: 'FAST', year: 2016, type: 'surface', body: 'earth',
+    latDeg: 25.65, lonDeg: 106.86, withinKm: 60, landmark: false,
+    hint: t('지구 중국 구이저우의 FAST 전파망원경(북위 25.7도, 동경 106.9도) 60km 안에 내려앉기'),
+    text: t('중국 구이저우의 분지에 지름 500m 접시가 놓여 있습니다. 접시가 하나인 전파망원경으로는 세계에서 가장 큽니다.'),
+  },
+  {
+    id: 'jantarMantar', name: t('자이푸르의 잔타르 만타르'), nameEn: 'Jantar Mantar', year: 1734, type: 'surface', body: 'earth',
+    latDeg: 26.92, lonDeg: 75.82, withinKm: 40, landmark: false,
+    hint: t('지구 인도 자이푸르의 잔타르 만타르(북위 26.9도, 동경 75.8도) 40km 안에 내려앉기'),
+    text: t('인도 자이푸르에 돌과 놋쇠로 만든 천문 기구 열아홉 개가 서 있습니다. 가장 큰 해시계는 높이가 27m입니다.'),
+  },
+);
 named(STORIES);
 
 // A place's label shows only from within this many of its body's radii above the

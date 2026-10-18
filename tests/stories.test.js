@@ -15,13 +15,14 @@ const done = (position, restingOn = null, t = 0) => {
   return completedStories({ position, restingOn, bodies, craft: craftAt(t, bodies), sites: storySitesAt(t, bodies) });
 };
 
-test('there are 122 story places, each with a name, a hint and a short story; events have a year', () => {
-  assert.equal(STORIES.length, 122);
-  assert.equal(new Set(STORIES.map((s) => s.id)).size, 122);
-  assert.equal(new Set(STORIES.map((s) => s.name)).size, 122);
+test('there are 124 story places, each with a name, a hint and a short story; events have a year', () => {
+  assert.equal(STORIES.length, 124);
+  assert.equal(new Set(STORIES.map((s) => s.id)).size, 124);
+  assert.equal(new Set(STORIES.map((s) => s.name)).size, 124);
   for (const s of STORIES) {
     assert.ok(s.name && s.nameEn && s.hint, s.id);
-    assert.ok(s.year === undefined || s.year > 1900, s.id);
+    // (1900 until Jantar Mantar, finished in 1734, 2026-10-18.)
+    assert.ok(s.year === undefined || s.year > 1700, s.id);
     assert.ok(s.text.length <= 90 && s.text.endsWith('.') && !s.text.includes('~'), `${s.id}: ${s.text.length}`);
   }
 });
@@ -90,7 +91,7 @@ test("a place's label shows only from within four radii of its body's surface", 
 
 test('the places sit on the surface of their body and move as it spins', () => {
   const sites = storySitesAt(0, BODIES);
-  assert.equal(sites.length, 111);
+  assert.equal(sites.length, 113);
   assert.deepEqual(sites.slice(0, 4).map((s) => s.id), ['apollo11', 'viking1', 'huygens', 'dokdo']);
   for (const site of sites) {
     const body = bodyById(site.parent);

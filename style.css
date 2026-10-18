@@ -5442,11 +5442,11 @@ html.gaze #gazeButton {
   display:none;
 }
 
-/* The day's key is gold, as the wide "그날로" button it stands for; the photo's key too
-   (the user, 2026-10-17: "사진 보기도 노란색으로 해줘"). The key to let go of a craft, shown only while docked, is gold
-   too (the user, 2026-10-18: "도킹 중이면 노란색 마킹"). */
+/* The day's key is gold, as the wide "그날로" button it stands for. The photo's key was gold
+   too (2026-10-17) and is plain again now that every body has one (the user, 2026-10-19:
+   "사진 표시는 노란색 없애"). The key to let go of a craft, shown only while docked, is gold
+   (the user, 2026-10-18: "도킹 중이면 노란색 마킹"). */
 #hud #targetPanel #targetName #thenKey,
-#hud #targetPanel #targetName #photoKey,
 #hud #targetPanel #targetName #dockKey {
   border-color:#fff1c4;
   background:linear-gradient(#f3d27a, #d9a93f);

@@ -1226,6 +1226,12 @@ nav button {
   font-size: 12px;
 }
 
+/* The 3D scanner over the speed box (ui/scanner.js places it). */
+#scanner {
+  position:fixed;
+  pointer-events:none;
+}
+
 #minimap {
   position:absolute;
   top:250px;

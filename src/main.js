@@ -15,6 +15,7 @@ import { createWorld } from './render/world.js';
 import { createInput } from './ui/input.js';
 import { createHud } from './ui/hud.js';
 import { createMinimap } from './ui/minimap.js';
+import { createScanner } from './ui/scanner.js';
 import { createPhoto } from './ui/photo.js';
 import { createToast } from './ui/toast.js';
 import { createBackKey } from './ui/backKey.js';
@@ -1510,6 +1511,7 @@ ${STORY_MORE[target.id]}` : told };
     teleport(id, true, false, null, true);
   });
   const minimap = createMinimap($('minimap'), { onTap: openBigMap });
+  const scanner = createScanner($('scanner'));
 
   // A word to a probe left alone (core/story.js GREETINGS): once per visit to the game.
   const greeted = new Set();
@@ -1985,7 +1987,7 @@ ${STORY_MORE[target.id]}` : told };
   const gazePieces = () => {
     // The target panel is a name and bare keys (on a wide screen too since v0.1.186).
     const panel = '#targetPanel > *';
-    const all = `#hud header nav button, #hud header .brand, #hud .telemetry, #minimap, #reticle, #markers > *, ${panel}, #hud footer .speedBox, #hud footer .throttle, #hud footer button:not(#gazeButton), #hint, #guide, #toast, #heroSay, #skyTold, #testBar button`;
+    const all = `#hud header nav button, #hud header .brand, #hud .telemetry, #minimap, #scanner, #reticle, #markers > *, ${panel}, #hud footer .speedBox, #hud footer .throttle, #hud footer button:not(#gazeButton), #hint, #guide, #toast, #heroSay, #skyTold, #testBar button`;
     return [...document.querySelectorAll(all)].filter((el) => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden' && Number(getComputedStyle(el).opacity) > 0.02);
   };
   const gazeInk = (pieces, moon, lasts) => {
@@ -3366,6 +3368,19 @@ ${STORY_MORE[target.id]}` : told };
     // newcomer, landed looking at the ground, could not find it).
     hud.photoGoal(view, photo.active() && guide.step === 'photo' ? here('earth') : null);
     minimap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId, away });
+    // The nearest few round her: worlds of this star's family, craft, curios; not the craft
+    // she flies with (it is beside her) nor the Sun (always far, and the minimap has it).
+    const riding = docked && isDocked(docked) ? docked.id : null;
+    scanner.draw({
+      position: state.position,
+      orientation: state.orientation,
+      selectedId,
+      things: [
+        ...bodies.filter((b) => b.kind !== 'star' && Boolean(b.exo) === away).map((b) => ({ ...b, kind: 'body' })),
+        ...(away ? [] : craft.filter((c) => c.id !== riding).map((c) => ({ ...c, kind: 'craft' }))),
+        ...(away ? [] : curiosAt(bodies, state.position).map((c) => ({ ...c, kind: 'curio' }))),
+      ].map((thing) => ({ ...thing, name: named(thing.id)?.name ?? thing.id })),
+    });
     if ($('bigMap').open) bigMap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId: mapPick ?? selectedId, away });
     $('lockTarget').setAttribute('aria-pressed', String(locked));
     $('lockTarget').textContent = locked ? t('맴돌기 풀기') : t('맴돌며 보기');

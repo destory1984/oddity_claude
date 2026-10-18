@@ -3416,6 +3416,22 @@ body.rear.touch #reticle span {
   footer .speedBox {
     margin:0 0 8px 8px;
   }
+  /* Small, to leave room beside the pad for the scanner (the user, 2026-10-18: "지금
+     비행속도칸을 작게"; it was 110px wide, its number 22px). */
+  #hud footer .speedBox {
+    width:auto;
+    min-width:72px;
+  }
+  #hud footer .speedBox>span {
+    font-size:9px;
+  }
+  #hud footer .speedBox strong {
+    font-size:16px;
+    margin-top:2px;
+  }
+  #hud footer .speedBox small {
+    font-size:9px;
+  }
 
   #hud footer .throttle {
     display:none;

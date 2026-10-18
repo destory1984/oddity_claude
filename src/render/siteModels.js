@@ -5,6 +5,7 @@ import { STORM_TAIL } from '../core/moonScenes.js';
 import { LANDMARKS } from '../core/landmarkScenes.js';
 import { LANDER_TEXTS } from '../core/landerTexts.js';
 import { huygensPieces } from './huygensStage.js';
+import { DINO_BUILD, dinoGround } from './dinoModels.js';
 import {
   QUARTER, part, cyl, group, aim, box, drum, rod, dish, wing, rtg, nozzle, truss, fuse,
 } from './craftParts.js';
@@ -1146,7 +1147,7 @@ function sunrisePieces(scene, name) {
 }
 // The pieces of a landmark's scene (core/landmarkStages.js): what flies or falls, the
 // flash, the picture, and what is said. `lazy`: built when the scene is first played.
-const landmarkPieces = (id, { kind, by, body, say }) => {
+const landmarkPieces = (id, { kind, by, body, say, dinos }) => {
   const build = (scene, name, mats) => {
     const pieces = kind === 'sunrise' ? sunrisePieces(scene, name)
       : kind === 'huygens' ? huygensPieces(scene, name)
@@ -1169,6 +1170,15 @@ const landmarkPieces = (id, { kind, by, body, say }) => {
       }
       pieces.rock = fuse(scene, rock);
       pieces.scraps = scraps(scene, `${name}Scraps`, mats, mats.grey);
+      // Chicxulub's three, who watch it come (core/landmarkStages.js DINOS).
+      if (dinos) {
+        pieces.dinoGround = dinoGround(scene, `${name}DinoGround`);
+        for (const [key, build] of Object.entries(DINO_BUILD)) {
+          const { body: trunk, head } = build(scene, `${name}${key}`);
+          pieces[`${key}Body`] = trunk;
+          pieces[`${key}Head`] = head;
+        }
+      }
     }
     if (say) pieces.bubble = sayBubble(scene, `${name}Bubble`, say);
     return { pieces, flames: {}, lit: pieces.flash ? ['flash'] : [] };

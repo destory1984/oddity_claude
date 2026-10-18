@@ -396,7 +396,7 @@ export const LANDMARKS = {
     say: t('화성 같지? 지구야'),
   },
   chicxulub: {
-    kind: 'impact', by: '', body: 'earth', sayBy: 'craft',
+    kind: 'impact', by: '', body: 'earth', sayBy: 'craft', dinos: true,
     name: t('칙술루브 소행성 충돌'),
     day: t('6,600만 년 전'),
     lines: [

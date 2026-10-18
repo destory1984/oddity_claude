@@ -57,9 +57,35 @@ const SUN_HALF = 0.75;
 const SUN_UP = 1.1;
 const RIDGE_SUNK = 0.3;
 
+// Chicxulub's three dinosaurs (render/dinoModels.js; the user, 2026-10-18: "공룡들이
+// 하늘에서 돌 떨어지는거 보고 있다가.. 이건 어때?"): where each stands on the right of
+// where the stone comes down, turned to face it; how large; the joint of its neck in its
+// own units (x ahead, y up), about which its head is raised; how far it raises it (rad)
+// and when it starts to, once the stone is in a phone's view (about 4 s). Till then the
+// heads are a little down and bob, as if grazing. They are gone in the flash.
+export const DINOS = [
+  { id: 'trex', x: 0.3, z: -0.05, scale: 0.75, neck: [0.15, 0.42], raise: 0.7, from: 4.4 },
+  { id: 'longNeck', x: 0.82, z: 0.45, scale: 0.62, neck: [0.2, 0.48], raise: 0.35, from: 5.2 },
+  { id: 'triceratops', x: 1.15, z: -0.35, scale: 0.66, neck: [0.2, 0.3], raise: 0.6, from: 5.8 },
+];
+const GONE_AT = 9.3;
+function dinoPieces(t) {
+  // The rise of grass they stand on (in the air over the sea they seemed to float).
+  const out = { dinoGround: { x: 0.78, y: -0.02, z: 0.05, scale: 1, shown: t < GONE_AT } };
+  DINOS.forEach((d, k) => {
+    const shown = t < GONE_AT;
+    const grazing = -0.18 + 0.06 * Math.sin(t * 1.4 + k * 2.1);
+    const lean = grazing + (d.raise - grazing) * ease(t, d.from, d.from + 1.6);
+    // Turned half round (to face -x, the stone), its neck joint lies to the left of its middle.
+    out[`${d.id}Body`] = { x: d.x, y: 0, z: d.z, scale: d.scale, turn: Math.PI, shown };
+    out[`${d.id}Head`] = { x: d.x - d.neck[0] * d.scale, y: d.neck[1] * d.scale, z: d.z, scale: d.scale, turn: Math.PI, lean, shown };
+  });
+  return out;
+}
+
 // sayBy: 'craft' (the bubble goes along with what flies or falls) or 'place' (it stands
-// by the picture).
-export function landmarkStage(kind, sayBy = 'craft') {
+// by the picture). dinos: Chicxulub's three stand and watch (DINOS).
+export function landmarkStage(kind, sayBy = 'craft', { dinos = false } = {}) {
   if (kind === 'photo') {
     return (t) => {
       const x = -2.4 + 4.8 * clamp(t / 20);
@@ -132,6 +158,7 @@ export function landmarkStage(kind, sayBy = 'craft') {
     const said = sayBy === 'craft' ? up(t, 4.4, 8.8) : up(t, 13.6, 19);
     const rock = { x: -2.6 * (1 - u), y: 0.1 + 2.23 * (1 - u) };
     return {
+      ...(dinos ? dinoPieces(t) : {}),
       rock: { ...rock, lean: -3 * t, shown: t < 9 },
       flash: { x: 0, y: 0.15, scale: Math.max(0.01, flash), shown: flash > 0 },
       // What it threw out: a ring that spreads and thins.
@@ -151,7 +178,7 @@ export function landmarkStage(kind, sayBy = 'craft') {
 // eye is held 0.2% of its radius over the clouds (core/eye.js: 116 km on Saturn), so a
 // scene there is seen from farther (viewKm) and drawn larger to match (sizeKm, km to a
 // unit), as the comet's fall on Jupiter is.
-export function landmarkScene({ kind, sayBy, name, day, lines, seconds, viewKm = 56, sizeKm }) {
+export function landmarkScene({ kind, sayBy, name, day, lines, seconds, viewKm = 56, sizeKm, dinos }) {
   const times = LANDMARK_TIMES[kind];
   return {
     name, day, kind,
@@ -161,6 +188,6 @@ export function landmarkScene({ kind, sayBy, name, day, lines, seconds, viewKm =
     ...(sizeKm ? { sizeKm } : {}),
     sounds: times.sounds,
     lines: lines.map((text, i) => ({ at: times.lines[i], text })),
-    stage: landmarkStage(kind, sayBy),
+    stage: landmarkStage(kind, sayBy, { dinos }),
   };
 }

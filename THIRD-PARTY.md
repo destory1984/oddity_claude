@@ -153,7 +153,7 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | `parkerPerihelion.jpg` | [Parker Solar Probe.jpg](https://commons.wikimedia.org/wiki/File:Parker_Solar_Probe.jpg) | NASA/Johns Hopkins APL/Steve Gribben | Public domain |
 | `greatDarkSpot.jpg` | [Great Dark Spot (cropped).jpg](https://commons.wikimedia.org/wiki/File:Great_Dark_Spot_(cropped).jpg) | NASA | Public domain |
 | `baikonur.jpg` | [Baikonur Cosmodrome Soyuz launch pad.jpg](https://commons.wikimedia.org/wiki/File:Baikonur_Cosmodrome_Soyuz_launch_pad.jpg) | NASA/Bill Ingalls | Public domain |
-| `chicxulub.jpg` | [Chicxulub radar topography.jpg](https://commons.wikimedia.org/wiki/File:Chicxulub_radar_topography.jpg) | NASA/JPL-Caltech | Public domain |
+| `chicxulub.jpg` | [Chicxulub2.jpg](https://commons.wikimedia.org/wiki/File:Chicxulub2.jpg) (컴퓨터로 만든 중력 지도, 2026-10-18에 바꿈) | NASA | Public domain |
 | `barringer.jpg` | [Barringer Crater aerial photo by USGS.jpg](https://commons.wikimedia.org/wiki/File:Barringer_Crater_aerial_photo_by_USGS.jpg) | USGS/D. Roddy | Public domain |
 | `maunaKea.jpg` | [Mauna Kea Eastern Telescopes.jpg](https://commons.wikimedia.org/wiki/File:Mauna_Kea_Eastern_Telescopes.jpg) | Generic1139 | CC BY 4.0 |
 | `alma.jpg` | [ALMA antennas on Chajnantor.jpg](https://commons.wikimedia.org/wiki/File:ALMA_antennas_on_Chajnantor.jpg) | ESO/B. Tafreshi (twanight.org) | CC BY 4.0 |

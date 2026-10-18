@@ -397,9 +397,19 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
       }
       // The keys and the readouts along the foot: no arrow's label lies on them (30: y is
       // the middle of a label some 28px tall, and a plate's ring reaches 8px past its box).
-      const feet = ['footer .speedBox', 'footer .throttle', '#hint', '#slidePad', '#reverseButton', '#flyButton', '#rearButton', '#slideDown', '#craftCard']
+      const footBoxes = ['footer .speedBox', 'footer .throttle', '#hint', '#slidePad', '#reverseButton', '#flyButton', '#rearButton', '#slideDown', '#craftCard', '#scanner']
         .map((q) => document.querySelector(q)?.getBoundingClientRect())
         .filter((box) => box?.width && box.top > innerHeight / 2);
+      // On a phone the scanner and the flying keys fill the foot from side to side: the
+      // whole band from the highest of them down is kept clear (the Sun's arrow stood in
+      // the gap between the scanner and the keys, on the scanner's ring).
+      // (The speed box, lifted over the keys, and the hint keep their own boxes.)
+      const band = ['#scanner', '#slidePad', '#reverseButton', '#flyButton', '#rearButton', '#slideDown']
+        .map((q) => document.querySelector(q)?.getBoundingClientRect())
+        .filter((box) => box?.width && box.top > innerHeight / 2);
+      const feet = compact && band.length
+        ? [...footBoxes, { left: 0, top: Math.min(...band.map((b) => b.top)), right: innerWidth, bottom: innerHeight }]
+        : footBoxes;
       settleAbove(spreadArrows(arrows, 40, innerHeight).map((spot, i) => ({ ...arrows[i], y: spot.y })), feet, 30).forEach((spot, i) => {
         arrows[i].el.style.top = `${spot.y}px`;
         arrows[i].el.style.left = `${arrows[i].x}px`;

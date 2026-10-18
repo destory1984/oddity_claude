@@ -184,7 +184,7 @@ function rose(scene, name) {
   const root = new TransformNode(name, scene);
   const rock = paint(scene, 'roseStarRock', '#a08f7c', { shine: 0.05 });
   const dark = paint(scene, 'roseStarDark', '#6b5d50', { shine: 0.05 });
-  const fire = paint(scene, 'roseStarFire', '#ff8a3c', { glow: 1 });
+  const fire = paint(scene, 'roseStarFire', '#ffb347', { glow: 1 });
   const green = paint(scene, 'roseStarGreen', '#4f9a45', { glow: 0.15 });
   const red = paint(scene, 'roseStarRed', '#d7263d', { shine: 0.3, glow: 0.25 });
   const glass = paint(scene, 'roseStarGlass', '#d8ecff', { shine: 0.9, glow: 0.2, alpha: 0.28 });
@@ -201,10 +201,23 @@ function rose(scene, name) {
     return holder;
   };
   // (Its moving parts are kept for a scene: render/craftUnfold.js.)
+  // A lit volcano glows in its mouth, orange round a pale middle, and smoke rises from it
+  // in three puffs, wider and fainter going up (the user, 2026-10-18, of four looks "B":
+  // a glowing ball on top looked like a bead; in the book the volcanoes are swept and
+  // warm a breakfast). The lowest puff is the mesh the scene puffs: the two above it go
+  // with it, so the smoke swells and climbs.
+  const ember = paint(scene, 'roseStarEmber', '#fff1a8', { glow: 1 });
+  const smoke = [0.55, 0.4, 0.25].map((alpha, s) => paint(scene, `roseStarSmoke${s}`, '#8b827c', { glow: 0.25, alpha }));
   const volcanoes = [[[-0.5, 0.8, 0.3], true], [[-0.8, 0.3, -0.5], true], [[0.2, 0.5, -0.85], false]].map(([way, lit], k) => {
     const at = on(`Volcano${k}`, way);
     drum(scene, `${name}Cone${k}`, at, dark, { height: 0.09, diameterTop: 0.03, diameterBottom: 0.14 }, [0, 0.04, 0]);
-    return lit ? ball(scene, `${name}Fire${k}`, at, fire, 0.035, [0, 0.09, 0]) : at;
+    if (!lit) return at;
+    ball(scene, `${name}Mouth${k}`, at, fire, 0.03, [0, 0.085, 0], [1, 0.25, 1]);
+    ball(scene, `${name}Ember${k}`, at, ember, 0.016, [0, 0.087, 0], [1, 0.3, 1]);
+    const puff = ball(scene, `${name}Smoke${k}`, at, smoke[0], 0.028, [0, 0.108, 0]);
+    ball(scene, `${name}Smoke${k}Up`, puff, smoke[1], 0.036, [0.009, 0.026, 0]);
+    ball(scene, `${name}Smoke${k}Top`, puff, smoke[2], 0.046, [0, 0.058, 0]);
+    return puff;
   });
   const sprout = on('Sprout', [0.8, 0.4, 0.45]);
   rod(scene, `${name}SproutStem`, sprout, green, [0, 0, 0], [0, 0.07, 0], 0.012);

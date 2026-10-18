@@ -1348,7 +1348,7 @@ function teapotScene(scene, name, mats) {
 
 // The little star with a rose (core/craftScenes.js rose): the Sun goes round it fast, so
 // that it sets again and again; an empty little chair is moved a few steps at a time; the
-// volcanoes' fires puff as they are swept; a baobab sprout grows and is gone; the glass
+// volcanoes' smoke puffs up as they are swept; a baobab sprout grows and is gone; the glass
 // over the rose is lifted while the rose sways. Nobody is drawn.
 const CHAIR_SPOTS = [[0.25, 1, 0.55], [0.65, 0.85, 0.35], [0.9, 0.45, 0.2], [0.75, 0.1, 0.65]];
 function roseScene(scene, name, mats) {

@@ -299,10 +299,10 @@ export const CRAFT_SCENES = {
   },
   // The little star with a rose (core/curios.js; the book is not named), played from
   // beside it: an empty little chair moved a few steps at a time while the Sun sets again
-  // and again, the volcanoes swept (their fires puff), a baobab sprout pulled as it
+  // and again, the volcanoes swept (their smoke puffs up), a baobab sprout pulled as it
   // grows, and the rose under its glass. Nobody is drawn. day: how far the Sun has gone
   // round (turns); chair: which of its spots the chair has come to (0 → 3); puff: the
-  // fires flare; grow: the sprout grows, 0 → 1, then is gone (pulled); lift: the glass
+  // smoke swells; grow: the sprout grows, 0 → 1, then is gone (pulled); lift: the glass
   // raised; sway: the rose sways.
   rose: {
     name: t('작은 별의 하루'),
@@ -318,7 +318,9 @@ export const CRAFT_SCENES = {
     ],
     unfold(t) {
       return {
-        day: t < 8 ? t / 2.5 : 3.2 + (t - 8) / 12,
+        // One turn in 6 s at first, 2.5 s before (the user, 2026-10-18: "처음에 태양이
+        // 너무 빨리 돌아"), then slower still.
+        day: t < 8 ? t / 6 : 8 / 6 + (t - 8) / 12,
         chair: Math.min(3, t / 2.5),
         puff: t >= 8 && t < 16 ? Math.abs(Math.sin((t - 8) * 2.4)) : 0,
         grow: t >= 20.5 ? 0 : ease(t, 15, 20),

@@ -227,16 +227,19 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
     plateKeys({ undock = false, then = null }) {
       if (undock === plateNow.undock && then === plateNow.then) return;
       plateNow = { undock, then };
-      if (then) {
-        thenKey.title = then;
-        thenKey.setAttribute('aria-label', then);
-        $('targetName').append(thenKey);
-      } else thenKey.remove();
+      // The key to let go comes first, then the day's gold key (the user, 2026-10-18,
+      // docked with MRO: "두 아이콘 자리 바꿈").
+      thenKey.remove();
       if (undock) {
         dockKey.title = t('도킹 풀기');
         dockKey.setAttribute('aria-label', t('도킹 풀기'));
         $('targetName').append(dockKey);
       } else dockKey.remove();
+      if (then) {
+        thenKey.title = then;
+        thenKey.setAttribute('aria-label', then);
+        $('targetName').append(thenKey);
+      }
       // The photo's key stays at the right end, after these (the user, 2026-10-17:
       // "버튼 위치를 서로 바꾸자.. 사진이 오른쪽").
       if (photoKey.isConnected) $('targetName').append(photoKey);

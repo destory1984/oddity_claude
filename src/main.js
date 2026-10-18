@@ -1425,6 +1425,19 @@ ${STORY_MORE[target.id]}` : told };
   }
   $('lockTarget').addEventListener('click', () => {
     if (locked) return unlock();
+    // Docked, she goes round the craft she held, not the world on the plate: she lets
+    // go of it and the lock takes it (the user, 2026-10-18, docked with Hubble: "맴돌기
+    // 버튼을 누르면 지구를 맴돌게 되.. 허블을 맴도는거야").
+    if (docked) {
+      const held = docked.id;
+      undock();
+      // (The lock carries her along with it: the craft's own drift would add to that.)
+      state = { ...state, drift: [0, 0, 0] };
+      selectedId = held;
+      // (Not handed back to the nearest world on the next frame, as a plain undock is.)
+      wasWith = null;
+      hud.showSelection(named(held));
+    }
     locked = true;
     const body = here(selectedId);
     // In sight already: the view stays as it is. Else it turns to the target.

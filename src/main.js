@@ -158,7 +158,8 @@ const CURIO_GROUND_VIEW_KM = 60;
 // ("시작점을 목성으로"), and the Moon later that day, for its slab in Tycho ("시작점을 달로");
 // the game as built for players starts where it always did. Take the first half out
 // when they say so.
-const START_NEAR = import.meta.env.DEV ? { id: 'moon', fromCentreKm: 8000 } : null;
+// From the 18th it is Earth, as its observatories were added ("시작점을 지구로").
+const START_NEAR = import.meta.env.DEV ? { id: 'earth', fromCentreKm: 20000 } : null;
 
 // Two layouts: 'tour' is the hand-made one (planets spread round the Sun); 'today' puts
 // the planets where they really are on the day the game is opened.

@@ -2,6 +2,7 @@ import { t } from './i18n.js';
 import { STORY_DETAILS, storyPhotoFile, DRAWN } from './storyDetails.js';
 import { FAMOUS } from './famous.js';
 import { CRAFT_PHOTOS } from './craftPhotos.js';
+import { OBJECT_PHOTOS } from './objectPhotos.js';
 
 // What the "사진 보기" key on the name plate shows (ui/photoView.js), one picture after
 // another: a place's card photo; for a craft, the photos it is best known for (the user,
@@ -50,5 +51,8 @@ export function photoSlides(thing) {
       return { file: famous.file, title: famous.name, caption: famous.note, credit: `${famous.by} · ${famous.credit}` };
     }).filter(Boolean)];
   }
+  // A body, or the golden record: its one photo (core/objectPhotos.js).
+  const own = OBJECT_PHOTOS[thing.id];
+  if (own) return [{ file: `objectPhotos/${own.file}`, title: thing.name, caption: own.caption, credit: t`사진: ${own.credit}` }];
   return [];
 }

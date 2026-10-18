@@ -4,10 +4,26 @@ import { t } from './i18n.js';
 // (core/photoSlides.js; the user, 2026-10-17: "사진 작업 빨리 하자", "받아").
 // file: under public/assets/craftPhotos/. Sources and licences: THIRD-PARTY.md.
 // craft: the craft itself (its slide is titled with the craft's name); shots: what it
-// took, each with its own title. Not here: JAXA's Akatsuki and Hayabusa2 (their photos
-// may not be used commercially without leave), China's Tianwen-1 and Tiangong (no terms
-// for reuse found): those show their drawing alone.
+// took, each with its own title. JAXA's Akatsuki and Hayabusa2 and China's Tianwen-1 and
+// Tiangong have no free photos of their own (JAXA's may not be used commercially without
+// leave, China's have no terms for reuse): theirs are free photos of models and a drawing
+// (2026-10-19), as Juno's is NASA's drawing.
 export const CRAFT_PHOTOS = {
+  juno: {
+    craft: { file: 'juno-craft.jpg', caption: t('목성 앞을 나는 주노를 그린 NASA의 그림. 태양전지판 세 장을 바람개비처럼 펼쳤습니다.'), credit: 'NASA/JPL' },
+  },
+  akatsuki: {
+    craft: { file: 'akatsuki-craft.jpg', caption: t('전시관에 놓인 아카쓰키의 모형. 금빛 단열재로 감싼 상자에 태양전지판 두 장이 달렸습니다.'), credit: '江戸村のとくぞう (CC BY-SA 4.0)' },
+  },
+  hayabusa2: {
+    craft: { file: 'hayabusa2-craft.jpg', caption: t('호주 우주 발견 센터에 전시된 하야부사2의 20분의 1 모형.'), credit: 'Yu Chu Chin (CC BY-SA 4.0)' },
+  },
+  tianwen1: {
+    craft: { file: 'tianwen1-craft.jpg', caption: t('중국 과학기술관에 전시된 실물 크기 모형. 톈원 1호가 화성에 내려놓은 착륙선과 탐사차 주룽입니다.'), credit: 'Shujianyang (CC BY-SA 4.0)' },
+  },
+  tiangong: {
+    craft: { file: 'tiangong-craft.jpg', caption: t('2022년에 다 지어진 톈궁 정거장을 3D로 그린 그림. 아래로 지구가 보입니다.'), credit: 'Shujianyang (CC BY-SA 4.0)' },
+  },
   voyager1: {
     craft: { file: 'voyager1-craft.jpg', caption: t('1977년에 쏘아 올린 쌍둥이 탐사선 보이저의 모습.'), credit: 'NASA/JPL' },
   },

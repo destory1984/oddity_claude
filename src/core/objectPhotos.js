@@ -1,0 +1,43 @@
+import { t } from './i18n.js';
+
+// One real photo of each body and of the golden record, for the "사진 보기" key (core/photoSlides.js;
+// the user, 2026-10-19: "이런 탐사선들도 모두 실제 사진 한 장씩 넣자. 모든 오브젝트들").
+// file: under public/assets/objectPhotos/. Sources and licences: THIRD-PARTY.md.
+export const OBJECT_PHOTOS = {
+  sun: { file: 'sun.jpg', caption: t('2010년 8월, 태양 관측 위성 SDO가 자외선으로 찍은 태양. 가장자리에 홍염이 솟아 있습니다.'), credit: 'NASA/SDO' },
+  mercury: { file: 'mercury.jpg', caption: t('2008년, 메신저호가 수성을 지나가며 찍은 사진. 땅의 차이가 잘 보이도록 색을 강조했습니다.'), credit: 'NASA/JHUAPL/Carnegie Institution' },
+  venus: { file: 'venus.jpg', caption: t('1974년, 매리너 10호가 찍은 금성의 구름. 짙은 구름이 별 전체를 덮고 있습니다.'), credit: 'NASA/JPL-Caltech' },
+  earth: { file: 'earth.jpg', caption: t('1972년 12월, 아폴로 17호 우주비행사들이 달로 가는 길에 찍은 지구. "푸른 구슬"이라 불립니다.'), credit: 'NASA/Apollo 17' },
+  moon: { file: 'moon.jpg', caption: t('2010년, 땅에서 망원경으로 찍은 보름달.'), credit: 'Gregory H. Revera (CC BY-SA 3.0)' },
+  mars: { file: 'mars.jpg', caption: t('2007년, 혜성으로 가던 로제타가 화성 곁을 지나며 찍은 화성. 사람 눈에 보이는 색에 가깝습니다.'), credit: 'ESA & MPS for OSIRIS Team (CC BY-SA 3.0 IGO)' },
+  phobos: { file: 'phobos.jpg', caption: t('2008년, 화성 정찰 궤도선(MRO)이 찍은 포보스. 커다란 스티크니 충돌구가 보입니다.'), credit: 'NASA/JPL-Caltech/University of Arizona' },
+  deimos: { file: 'deimos.jpg', caption: t('2009년, 화성 정찰 궤도선(MRO)이 찍은 데이모스. 지름 12km쯤의 작은 위성입니다.'), credit: 'NASA/JPL/University of Arizona' },
+  jupiter: { file: 'jupiter.jpg', caption: t('2000년 12월, 토성으로 가던 카시니가 목성 곁을 지나며 찍은 목성. 대적점이 보입니다.'), credit: 'NASA/JPL' },
+  io: { file: 'io.jpg', caption: t('갈릴레오 탐사선이 찍은 사진을 이어 붙인 이오. 노랗고 붉은 얼룩은 화산에서 나온 황입니다.'), credit: 'NASA/JPL/University of Arizona' },
+  europa: { file: 'europa.jpg', caption: t('갈릴레오 탐사선이 찍은 유로파. 얼음 껍질에 갈색 금이 그물처럼 나 있습니다.'), credit: 'NASA/JPL/DLR' },
+  ganymede: { file: 'ganymede.jpg', caption: t('갈릴레오 탐사선이 찍은 가니메데. 태양계에서 가장 큰 위성으로, 수성보다도 큽니다.'), credit: 'NASA/JPL' },
+  callisto: { file: 'callisto.jpg', caption: t('갈릴레오 탐사선이 찍은 칼리스토. 온통 충돌구로 덮여 있습니다.'), credit: 'NASA/JPL/DLR' },
+  saturn: { file: 'saturn.jpg', caption: t('2009년 8월, 춘분 무렵 카시니가 찍은 토성. 햇빛이 고리를 옆에서 비춰 고리가 어둡게 보입니다.'), credit: 'NASA/JPL/Space Science Institute' },
+  mimas: { file: 'mimas.jpg', caption: t('2010년, 카시니가 찍은 미마스. 커다란 허셜 충돌구가 눈에 띕니다.'), credit: 'NASA/JPL-Caltech/Space Science Institute' },
+  enceladus: { file: 'enceladus.jpg', caption: t('2013년, 카시니가 다가가며 찍은 엔셀라두스. 태양계에서 가장 하얗게 빛나는 천체 가운데 하나입니다.'), credit: 'NASA/JPL-Caltech/Space Science Institute' },
+  tethys: { file: 'tethys.jpg', caption: t('카시니가 찍은 테티스. 얼음으로 된 위성으로, 표면이 온통 충돌구입니다.'), credit: 'NASA/JPL-Caltech/SSI/Gordan Ugarkovic' },
+  dione: { file: 'dione.jpg', caption: t('2008년, 카시니가 사람 눈에 보이는 색으로 찍은 디오네.'), credit: 'NASA/JPL/Space Science Institute' },
+  rhea: { file: 'rhea.jpg', caption: t('2005년, 카시니가 찍은 사진을 이어 붙인 레아. 토성의 위성 가운데 두 번째로 큽니다.'), credit: 'NASA/JPL/Space Science Institute' },
+  titan: { file: 'titan.jpg', caption: t('2005년, 카시니가 사람 눈에 보이는 색으로 찍은 타이탄. 짙은 주황색 안개가 땅을 가립니다.'), credit: 'NASA/JPL-Caltech/Space Science Institute' },
+  iapetus: { file: 'iapetus.jpg', caption: t('2007년, 카시니가 찍은 이아페투스. 한쪽은 숯처럼 검고 한쪽은 눈처럼 흽니다.'), credit: 'NASA/JPL/Space Science Institute' },
+  uranus: { file: 'uranus.jpg', caption: t('1986년 1월, 보이저 2호가 지나가며 찍은 천왕성. 지금까지 천왕성에 다녀간 탐사선은 보이저 2호뿐입니다.'), credit: 'NASA/JPL-Caltech' },
+  miranda: { file: 'miranda.jpg', caption: t('1986년, 보이저 2호가 찍은 미란다. 조각을 이어 붙인 듯 울퉁불퉁한 땅이 보입니다.'), credit: 'NASA/JPL' },
+  ariel: { file: 'ariel.jpg', caption: t('1986년, 보이저 2호가 찍은 아리엘. 천왕성의 위성 가운데 가장 밝습니다.'), credit: 'NASA/JPL' },
+  umbriel: { file: 'umbriel.jpg', caption: t('1986년, 보이저 2호가 찍은 움브리엘. 천왕성의 큰 위성 가운데 가장 어둡습니다.'), credit: 'NASA/JPL' },
+  titania: { file: 'titania.jpg', caption: t('1986년, 보이저 2호가 찍은 티타니아. 천왕성의 위성 가운데 가장 큽니다.'), credit: 'NASA/JPL' },
+  oberon: { file: 'oberon.jpg', caption: t('1986년, 보이저 2호가 찍은 오베론. 천왕성의 큰 위성 가운데 가장 바깥을 돕니다.'), credit: 'NASA/JPL' },
+  neptune: { file: 'neptune.jpg', caption: t('1989년 8월, 보이저 2호가 지나가며 찍은 해왕성. 가운데 왼쪽의 검은 얼룩이 대흑점입니다.'), credit: 'NASA/JPL' },
+  triton: { file: 'triton.jpg', caption: t('1989년, 보이저 2호가 찍은 사진을 이어 붙인 트리톤. 아래쪽 분홍빛 땅은 남극의 얼음입니다.'), credit: 'NASA/JPL/USGS' },
+  ceres: { file: 'ceres.jpg', caption: t('돈 탐사선이 찍은 세레스. 밝은 점들은 오카토르 충돌구에 남은 소금입니다.'), credit: 'NASA/JPL-Caltech/UCLA/MPS/DLR/IDA' },
+  pluto: { file: 'pluto.jpg', caption: t('2015년 7월, 뉴허라이즌스가 지나가며 찍은 명왕성. 하트 모양의 밝은 평원이 보입니다.'), credit: 'NASA/JHUAPL/SwRI' },
+  charon: { file: 'charon.jpg', caption: t('2015년 7월, 뉴허라이즌스가 찍은 카론. 북극 둘레의 붉은 땅은 "모르도르"라 불립니다.'), credit: 'NASA/JHUAPL/SwRI' },
+  halley: { file: 'halley.jpg', caption: t('1986년 3월, 유럽의 조토 탐사선이 찍은 핼리 혜성의 핵. 혜성의 핵을 처음으로 가까이서 찍은 사진입니다.'), credit: 'ESA/MPS (CC BY-SA 3.0 IGO)' },
+  haleBopp: { file: 'haleBopp.jpg', caption: t('1997년 3월 29일, 땅에서 찍은 헤일-밥 혜성. 푸른 이온 꼬리와 흰 먼지 꼬리가 갈라져 보입니다.'), credit: 'Philipp Salzgeber (CC BY-SA 2.0 AT)' },
+  churyumov: { file: 'churyumov.jpg', caption: t('2014년 9월, 로제타가 찍은 67P 혜성. 작은 덩이와 큰 덩이가 붙은 오리 모양입니다.'), credit: 'ESA/Rosetta/NAVCAM (CC BY-SA 3.0 IGO)' },
+  goldenRecord: { file: 'goldenRecord.jpg', caption: t('보이저 1호와 2호에 실려 간 금빛 음반의 덮개. 음반을 트는 법이 그림으로 새겨져 있습니다.'), credit: 'NASA/JPL' },
+};

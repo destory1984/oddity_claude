@@ -6,14 +6,16 @@ import { STORIES } from '../src/core/stories.js';
 import { STORY_DETAILS } from '../src/core/storyDetails.js';
 import { CRAFT } from '../src/core/craft.js';
 import { CRAFT_PHOTOS } from '../src/core/craftPhotos.js';
+import { OBJECT_PHOTOS } from '../src/core/objectPhotos.js';
+import { BODIES } from '../src/core/bodies.js';
 
 describe('the "사진 보기" key', () => {
-  it('shows a place its card photo, and nothing for a body', () => {
+  it('shows a place its card photo, and a body its own', () => {
     const slides = photoSlides({ id: 'alpineValley', kind: 'site', name: '알프스 계곡' });
     expect(slides).toHaveLength(1);
     expect(slides[0].file).toBe('stories/alpineValley.jpg');
     expect(slides[0].credit).toMatch(/^사진: /);
-    expect(photoSlides({ id: 'mars', kind: 'planet', name: '화성' })).toEqual([]);
+    expect(photoSlides({ id: 'mars', kind: 'planet', name: '화성' }).map((s) => s.file)).toEqual(['objectPhotos/mars.jpg']);
   });
 
   it('shows a craft the photos it took, each a file that is there', () => {
@@ -25,12 +27,18 @@ describe('the "사진 보기" key', () => {
     expect(photoSlides({ id: 'voyager1', kind: 'craft', name: '보이저 1호' }).map((s) => s.title)).toEqual(['보이저 1호', '창백한 푸른 점', '태양계 가족사진', '한 장에 담긴 지구와 달']);
   });
 
-  it('has a real photo file for every craft photo, and none for the craft left out', () => {
+  it('has a real photo file for every craft photo, and one for every craft', () => {
     for (const [id, { craft, shots = [] }] of Object.entries(CRAFT_PHOTOS)) {
       expect(CRAFT.some((c) => c.id === id), id).toBe(true);
       for (const photo of [...(craft ? [craft] : []), ...shots]) expect(existsSync(`public/assets/craftPhotos/${photo.file}`), photo.file).toBe(true);
     }
-    for (const id of ['akatsuki', 'hayabusa2', 'tianwen1', 'tiangong']) expect(photoSlides({ id, kind: 'craft', name: id }), id).toEqual([]);
+    for (const { id } of CRAFT) expect(photoSlides({ id, kind: 'craft', name: id }).length, id).toBeGreaterThan(0);
+  });
+
+  it('has a photo on disk for every body and the golden record', () => {
+    for (const { id } of BODIES) expect(OBJECT_PHOTOS[id], id).toBeTruthy();
+    for (const { file } of Object.values(OBJECT_PHOTOS)) expect(existsSync(`public/assets/objectPhotos/${file}`), file).toBe(true);
+    expect(photoSlides({ id: 'goldenRecord', kind: 'curio', name: 'x' })).toHaveLength(1);
   });
 
   it("finds every place's photo on disk", () => {

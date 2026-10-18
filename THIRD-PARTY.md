@@ -198,7 +198,7 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 
 ## 탐사선 사진과 탐사선이 찍은 사진
 
-`public/assets/craftPhotos/` 의 사진 44장은 이름표의 "사진 보기" 단추가 보인다. 모두 위키미디어 공용에서 받아 가로 1024px, 세로 1400px 안에 들도록 줄였다(2026-10-17). CC BY-SA 사진은 줄인 것도 같은 조건으로 쓸 수 있다. 일본 JAXA(상업 이용에 사전 허락이 필요하다)와 중국 국가항천국(다시 쓰는 조건을 밝히지 않았다)의 사진은 넣지 않았다.
+`public/assets/craftPhotos/` 의 사진 49장은 이름표의 "사진 보기" 단추가 보인다. 모두 위키미디어 공용에서 받아 가로 1024px, 세로 1400px 안에 들도록 줄였다(2026-10-17). CC BY-SA 사진은 줄인 것도 같은 조건으로 쓸 수 있다. 일본 JAXA(상업 이용에 사전 허락이 필요하다)와 중국 국가항천국(다시 쓰는 조건을 밝히지 않았다)의 사진은 넣지 않았다.
 
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
@@ -246,6 +246,54 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `tess-shot1.jpg` | [TESS First light.jpg](https://commons.wikimedia.org/wiki/File:TESS_First_light.jpg) | NASA/MIT/TESS | Public domain |
 | `voyager1-craft.jpg` | [Voyager spacecraft.jpg](https://commons.wikimedia.org/wiki/File:Voyager_spacecraft.jpg) | NASA/JPL | Public domain |
 | `voyager2-craft.jpg` | [Voyager 2 Testing PIA21736.jpg](https://commons.wikimedia.org/wiki/File:Voyager_2_Testing_PIA21736.jpg) | NASA/JPL | Public domain |
+| `juno-craft.jpg` | [JUNO - PIA13746.jpg](https://commons.wikimedia.org/wiki/File:JUNO_-_PIA13746.jpg) | NASA/JPL | Public domain |
+| `akatsuki-craft.jpg` | [Akatsuki-1.jpg](https://commons.wikimedia.org/wiki/File:Akatsuki-1.jpg) | 江戸村のとくぞう | CC BY-SA 4.0 |
+| `hayabusa2-craft.jpg` | [Model of Hayabusa2 at the Australian Space Discovery Centre (DSCF4736).jpg](https://commons.wikimedia.org/wiki/File:Model_of_Hayabusa2_at_the_Australian_Space_Discovery_Centre_(DSCF4736).jpg) | Yu Chu Chin | CC BY-SA 4.0 |
+| `tianwen1-craft.jpg` | [Zhurong rover mockup at CSTM 01.jpg](https://commons.wikimedia.org/wiki/File:Zhurong_rover_mockup_at_CSTM_01.jpg) | Shujianyang | CC BY-SA 4.0 |
+| `tiangong-craft.jpg` | [Chinese Tiangong Space Station.jpg](https://commons.wikimedia.org/wiki/File:Chinese_Tiangong_Space_Station.jpg) | Shujianyang | CC BY-SA 4.0 |
+
+## 천체 사진과 금빛 음반
+
+`public/assets/objectPhotos/` 의 사진 36장은 천체 35개와 보이저의 금빛 음반의 "사진 보기" 단추가 보인다. 모두 위키미디어 공용에서 가로 960px 판(원본이 더 작으면 원본)을 받아 960px 안에 들도록 줄이고, 한 장이 160KB를 넘지 않게 눌러 담았다(2026-10-19).
+
+| 파일 | 원본 | 만든 이 | 라이선스 |
+|---|---|---|---|
+| `sun.jpg` | [The Sun by the Atmospheric Imaging Assembly of NASA's Solar Dynamics Observatory - 20100819.jpg](https://commons.wikimedia.org/wiki/File:The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg) | NASA/SDO (AIA) | Public domain |
+| `mercury.jpg` | [Mercury in color - Prockter07-edit1.jpg](https://commons.wikimedia.org/wiki/File:Mercury_in_color_-_Prockter07-edit1.jpg) | National Aeronautics and Space Administration/Johns Hopkins University Applied Physics Laboratory/Ca | Public domain |
+| `venus.jpg` | [Venus from Mariner 10.jpg](https://commons.wikimedia.org/wiki/File:Venus_from_Mariner_10.jpg) | NASA/JPL-Caltech | Public domain |
+| `earth.jpg` | [The Blue Marble (remastered).jpg](https://commons.wikimedia.org/wiki/File:The_Blue_Marble_(remastered).jpg) | NASA/Apollo 17 crew; taken by either Harrison Schmitt or Ron Evans | Public domain |
+| `moon.jpg` | [FullMoon2010.jpg](https://commons.wikimedia.org/wiki/File:FullMoon2010.jpg) | Gregory H. Revera | CC BY-SA 3.0 |
+| `mars.jpg` | [OSIRIS Mars true color.jpg](https://commons.wikimedia.org/wiki/File:OSIRIS_Mars_true_color.jpg) | ESA & MPS for OSIRIS Team MPS/UPD/LAM/IAA/RSSD/INTA/UPM/DASP/IDA, CC BY-SA 3.0 IGO | CC BY-SA 3.0 IGO |
+| `phobos.jpg` | [Phobos colour 2008.jpg](https://commons.wikimedia.org/wiki/File:Phobos_colour_2008.jpg) | NASA / JPL-Caltech / University of Arizona | Public domain |
+| `deimos.jpg` | [NASA-Deimos-MarsMoon-20090221.jpg](https://commons.wikimedia.org/wiki/File:NASA-Deimos-MarsMoon-20090221.jpg) | NASA/JPL/University of Arizona | Public domain |
+| `jupiter.jpg` | [Jupiter in true color.jpg](https://commons.wikimedia.org/wiki/File:Jupiter_in_true_color.jpg) | NASA | Public domain |
+| `io.jpg` | [Io highest resolution true color.jpg](https://commons.wikimedia.org/wiki/File:Io_highest_resolution_true_color.jpg) | NASA / JPL / University of Arizona | Public domain |
+| `europa.jpg` | [Europa-moon.jpg](https://commons.wikimedia.org/wiki/File:Europa-moon.jpg) | NASA/JPL/DLR | Public domain |
+| `ganymede.jpg` | [Ganymede g1 true-edit1.jpg](https://commons.wikimedia.org/wiki/File:Ganymede_g1_true-edit1.jpg) | NASA/JPL (edited by PlanetUser) | Public domain |
+| `callisto.jpg` | [Callisto.jpg](https://commons.wikimedia.org/wiki/File:Callisto.jpg) | NASA/JPL/DLR(German Aerospace Center) | Public domain |
+| `saturn.jpg` | [Saturn during Equinox.jpg](https://commons.wikimedia.org/wiki/File:Saturn_during_Equinox.jpg) | NASA / JPL / Space Science Institute | Public domain |
+| `mimas.jpg` | [Mimas Cassini.jpg](https://commons.wikimedia.org/wiki/File:Mimas_Cassini.jpg) | NASA / JPL-Caltech / Space Science Institute | Public domain |
+| `enceladus.jpg` | [PIA17202 - Approaching Enceladus.jpg](https://commons.wikimedia.org/wiki/File:PIA17202_-_Approaching_Enceladus.jpg) | National Aeronautics and Space Administration (NASA) / Jet Propulsion Laboratory (JPL) | Public domain |
+| `tethys.jpg` | [Global view of Tethys from Cassini.jpg](https://commons.wikimedia.org/wiki/File:Global_view_of_Tethys_from_Cassini.jpg) | NASA / JPL-Caltech / SSI / Gordan Ugarkovic | Public domain |
+| `dione.jpg` | [Dione in natural light.jpg](https://commons.wikimedia.org/wiki/File:Dione_in_natural_light.jpg) | NASA | Public domain |
+| `rhea.jpg` | [PIA07763 Rhea full globe5.jpg](https://commons.wikimedia.org/wiki/File:PIA07763_Rhea_full_globe5.jpg) | NASA/JPL/Space Science Institute | Public domain |
+| `titan.jpg` | [Titan in true color.jpg](https://commons.wikimedia.org/wiki/File:Titan_in_true_color.jpg) | NASA/JPL-Caltech/Space Science Institute | Public domain |
+| `iapetus.jpg` | [Iapetus as seen by the Cassini probe - 20071008.jpg](https://commons.wikimedia.org/wiki/File:Iapetus_as_seen_by_the_Cassini_probe_-_20071008.jpg) | NASA / JPL / Space Science Institute | Public domain |
+| `uranus.jpg` | [Uranus2.jpg](https://commons.wikimedia.org/wiki/File:Uranus2.jpg) | NASA/JPL-Caltech | Public domain |
+| `miranda.jpg` | [Miranda as seen by Voyager 2 - GPN-2003-000005.jpg](https://commons.wikimedia.org/wiki/File:Miranda_as_seen_by_Voyager_2_-_GPN-2003-000005.jpg) | NASA | Public domain |
+| `ariel.jpg` | [Ariel (moon).jpg](https://commons.wikimedia.org/wiki/File:Ariel_(moon).jpg) | NASA/JPL | Public domain |
+| `umbriel.jpg` | [Umbriel Voyager2.jpg](https://commons.wikimedia.org/wiki/File:Umbriel_Voyager2.jpg) | NASA | Public domain |
+| `titania.jpg` | [Titania (moon) color.jpg](https://commons.wikimedia.org/wiki/File:Titania_(moon)_color.jpg) | NASA/JPL | Public domain |
+| `oberon.jpg` | [Voyager 2 picture of Oberon.jpg](https://commons.wikimedia.org/wiki/File:Voyager_2_picture_of_Oberon.jpg) | NASA | Public domain |
+| `neptune.jpg` | [Neptune Full.jpg](https://commons.wikimedia.org/wiki/File:Neptune_Full.jpg) | NASA | Public domain |
+| `triton.jpg` | [Triton moon mosaic Voyager 2 (large).jpg](https://commons.wikimedia.org/wiki/File:Triton_moon_mosaic_Voyager_2_(large).jpg) | NASA / Jet Propulsion Lab / U.S. Geological Survey | Public domain |
+| `ceres.jpg` | [PIA21906-Ceres-DwarfPlanet-HighResolution-Dawn-20170920.jpg](https://commons.wikimedia.org/wiki/File:PIA21906-Ceres-DwarfPlanet-HighResolution-Dawn-20170920.jpg) | NASA/JPL-Caltech/UCLA/MPS/DLR/IDA | Public domain |
+| `pluto.jpg` | [Pluto in True Color - High-Res.jpg](https://commons.wikimedia.org/wiki/File:Pluto_in_True_Color_-_High-Res.jpg) | NASA/Johns Hopkins University Applied Physics Laboratory/Southwest Research Institute/Alex Parker | Public domain |
+| `charon.jpg` | [Charon in Color (HQ).jpg](https://commons.wikimedia.org/wiki/File:Charon_in_Color_(HQ).jpg) | NASA-JHUAPL-SWRI (colored using Adobe Photoshop CS5) | Public domain |
+| `halley.jpg` | [Comet Halley close up.jpg](https://commons.wikimedia.org/wiki/File:Comet_Halley_close_up.jpg) | ESA/MPS | CC BY-SA 3.0 IGO |
+| `haleBopp.jpg` | [Comet-Hale-Bopp-29-03-1997 hires adj.jpg](https://commons.wikimedia.org/wiki/File:Comet-Hale-Bopp-29-03-1997_hires_adj.jpg) | Philipp Salzgeber | CC BY-SA 2.0 AT |
+| `churyumov.jpg` | [Comet 67P on 19 September 2014 NavCam mosaic.jpg](https://commons.wikimedia.org/wiki/File:Comet_67P_on_19_September_2014_NavCam_mosaic.jpg) | ESA/Rosetta/NAVCAM, CC BY-SA IGO 3.0 | CC BY-SA 3.0 IGO |
+| `goldenRecord.jpg` | [Voyager Golden Record.jpg](https://commons.wikimedia.org/wiki/File:The_Sounds_of_Earth_Record_Cover_-_GPN-2000-001978.jpg) | NASA/JPL | Public domain |
 
 ## "그날로" 장면에 쓴 옛 그림
 

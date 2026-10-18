@@ -444,6 +444,28 @@ STORIES.push({
   hint: t`${t('미마스')}(${where(-1.4, -111.8)}) ${(100).toLocaleString('ko-KR')}km 안에 내려앉기`,
   text: t('미마스 지름의 3분의 1이 넘는 분화구입니다. 이 구덩이 때문에 미마스는 스타워즈의 "죽음의 별"을 닮았습니다. 2010년 카시니가 가까이 찍었습니다.'),
 });
+// Three observatories more (the user, 2026-10-18: "칠레에도 유명 천문대 있지않나", "루빈만
+// 넣자", then of Africa's: "미어캣, SALT 2개"). Rubin's height is NOIRLab's (2,647 m).
+STORIES.push(
+  {
+    id: 'rubin', name: t('베라 C. 루빈 천문대'), nameEn: 'Vera C. Rubin Observatory', year: 2025, type: 'surface', body: 'earth',
+    latDeg: -30.24, lonDeg: -70.74, withinKm: 60, landmark: false,
+    hint: t('지구 칠레의 베라 C. 루빈 천문대(남위 30.2도, 서경 70.7도) 60km 안에 내려앉기'),
+    text: t('칠레 안데스산맥 해발 2,647m에 있습니다. 32억 화소 카메라로 남쪽 하늘 전체를 사나흘마다 찍습니다.'),
+  },
+  {
+    id: 'meerkat', name: t('카루의 미어캣 전파망원경'), nameEn: 'MeerKAT', year: 2018, type: 'surface', body: 'earth',
+    latDeg: -30.71, lonDeg: 21.44, withinKm: 60, landmark: false,
+    hint: t('지구 남아프리카공화국 카루의 미어캣 전파망원경(남위 30.7도, 동경 21.4도) 60km 안에 내려앉기'),
+    text: t('남아프리카공화국 카루 반사막에 지름 13.5m 접시 안테나 64대가 서 있습니다. 우리 은하 한가운데의 전파 실타래를 찍었습니다.'),
+  },
+  {
+    id: 'salt', name: t('남아프리카 대형 망원경 SALT'), nameEn: 'Southern African Large Telescope', year: 2005, type: 'surface', body: 'earth',
+    latDeg: -32.38, lonDeg: 20.81, withinKm: 60, landmark: false,
+    hint: t('지구 남아프리카공화국 서덜랜드의 SALT(남위 32.4도, 동경 20.8도) 60km 안에 내려앉기'),
+    text: t('남아프리카공화국 서덜랜드의 해발 1,798m 언덕에 있습니다. 육각형 거울 91장을 이어 붙인 지름 11m 망원경입니다.'),
+  },
+);
 named(STORIES);
 
 // A place's label shows only from within this many of its body's radii above the

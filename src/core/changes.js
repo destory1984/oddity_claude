@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-18', text: t('지구에 천문대 셋이 생겼습니다: 칠레의 루빈 천문대, 남아공의 미어캣과 SALT. 수첩은 213칸입니다.') },
   { day: '2026-10-18', text: t('시르티스 메이저의 "그날로" 장면을 새로 만들었습니다. 하위헌스의 망원경 속에서 화성이 돕니다.') },
   { day: '2026-10-17', text: t('고래와 피튜니아 화분의 고래를 다시 그렸습니다. 이마가 뭉툭한 향유고래 한 덩어리입니다.') },
   { day: '2026-10-17', text: t('땅 위의 상상 속 장소 넷(달의 모노리스, 옥토끼, 감자밭, 작은 로봇)도 이름표를 누르면 바로 옆에 내려섭니다.') },

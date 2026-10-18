@@ -157,6 +157,9 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | `barringer.jpg` | [Barringer Crater aerial photo by USGS.jpg](https://commons.wikimedia.org/wiki/File:Barringer_Crater_aerial_photo_by_USGS.jpg) | USGS/D. Roddy | Public domain |
 | `maunaKea.jpg` | [Mauna Kea Eastern Telescopes.jpg](https://commons.wikimedia.org/wiki/File:Mauna_Kea_Eastern_Telescopes.jpg) | Generic1139 | CC BY 4.0 |
 | `alma.jpg` | [ALMA antennas on Chajnantor.jpg](https://commons.wikimedia.org/wiki/File:ALMA_antennas_on_Chajnantor.jpg) | ESO/B. Tafreshi (twanight.org) | CC BY 4.0 |
+| `rubin.jpg` | [Sunset at Rubin Observatory (Pachon VRubin Dusk 2-CC).jpg](https://commons.wikimedia.org/wiki/File:Sunset_at_Rubin_Observatory_(Pachon_VRubin_Dusk_2-CC).jpg) | NOIRLab/NSF/AURA/P. Horálek | CC BY 4.0 |
+| `meerkat.jpg` | [2018-MeerKAT-1.png](https://commons.wikimedia.org/wiki/File:2018-MeerKAT-1.png) | Square Kilometre Array Organisation (SKAO) / South African Radio Astronomy Observatory (SARAO) | CC BY 3.0 |
+| `salt.jpg` | [SA large telescope.jpg](https://commons.wikimedia.org/wiki/File:SA_large_telescope.jpg) | User:siener | Public domain |
 
 CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수 있고, 고친 것은 같은 조건으로 내야 한다. 이 저장소의 MIT 라이선스는 이 사진들에 미치지 않는다.
 

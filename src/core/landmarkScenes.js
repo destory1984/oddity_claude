@@ -345,8 +345,9 @@ export const LANDMARKS = {
     ],
     say: t('앗. 누가 쳐다본다'),
   },
+  // (Its own stage since 2026-10-18: Huygens at his telescope, Mars turning in it.)
   syrtis: {
-    kind: 'look', by: 'Christiaan Huygens', body: 'mars', sayBy: 'place',
+    kind: 'huygens', by: 'Christiaan Huygens', body: 'mars', sayBy: 'place',
     name: t('하위헌스의 화성 그림'),
     day: t('1659년 11월 28일'),
     lines: [
@@ -355,7 +356,8 @@ export const LANDMARKS = {
       t('그는 이 얼룩이 제자리로 돌아오는 것을 거듭 지켜보고, 화성의 하루가 24시간쯤이라고 적었습니다.'),
       t('다른 행성의 땅 무늬를 그린 가장 오랜 기록입니다. 화성의 하루는 실제로 24시간 37분입니다.'),
     ],
-    say: t('나 내일도 여기 있을게'),
+    // (The user's pick of five, 2026-10-18: Mars to the man drawing it.)
+    say: t('나 그렸어? 예쁘게 그려줘'),
   },
   acidalia: {
     kind: 'look', by: 'Giovanni Schiaparelli', body: 'mars', sayBy: 'place',

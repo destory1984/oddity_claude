@@ -4,6 +4,7 @@ import { CRAFT_BUILD, PROBE_BUILD } from './craftModels.js';
 import { STORM_TAIL } from '../core/moonScenes.js';
 import { LANDMARKS } from '../core/landmarkScenes.js';
 import { LANDER_TEXTS } from '../core/landerTexts.js';
+import { huygensPieces } from './huygensStage.js';
 import {
   QUARTER, part, cyl, group, aim, box, drum, rod, dish, wing, rtg, nozzle, truss, fuse,
 } from './craftParts.js';
@@ -1147,8 +1148,10 @@ function sunrisePieces(scene, name) {
 // flash, the picture, and what is said. `lazy`: built when the scene is first played.
 const landmarkPieces = (id, { kind, by, body, say }) => {
   const build = (scene, name, mats) => {
-    const pieces = kind === 'sunrise' ? sunrisePieces(scene, name) : { photo: printOf(scene, `${name}Photo`, `stories/${id}.jpg`, 1.05) };
-    if (kind !== 'look' && kind !== 'sunrise') {
+    const pieces = kind === 'sunrise' ? sunrisePieces(scene, name)
+      : kind === 'huygens' ? huygensPieces(scene, name)
+        : { photo: printOf(scene, `${name}Photo`, `stories/${id}.jpg`, 1.05) };
+    if (kind !== 'look' && kind !== 'sunrise' && kind !== 'huygens') {
       const flash = new TransformNode(`${name}Flash`, scene);
       part(CreateSphere(`${name}FlashBall`, { diameter: 1, segments: 14 }, scene), flash, mats.white, [0, 0, 0]);
       pieces.flash = flash;

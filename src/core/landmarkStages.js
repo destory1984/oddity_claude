@@ -27,7 +27,23 @@ export const LANDMARK_TIMES = {
   look: { seconds: 22, downAt: 5, lines: [0, 5, 10, 16], sounds: [[5, 'discovered']] },
   impact: { seconds: 24, downAt: 9, lines: [0, 5, 9, 15], sounds: [[9, 'impact'], [12.5, 'discovered']] },
   sunrise: { seconds: 21, downAt: 12.8, lines: [0, 6, 11, 15.5], sounds: [[12.8, 'discovered']] },
+  huygens: { seconds: 24, downAt: 16, lines: [0, 5, 10, 16], sounds: [[16, 'discovered']] },
 };
+
+// Huygens's night (render/huygensStage.js): Mars turns in the eyepiece once every
+// HUYGENS_TURN seconds, its dark wedge facing the eye at TURN_FROM and at each turn after;
+// each time it comes back a drawing is laid on the table. (Its true day is 24 h 37 min:
+// here a day goes by in 6.5 s.)
+export const HUYGENS_TURN = 6.5;
+const TURN_FROM = 3;
+export const huygensTurn = (t) => (2 * Math.PI * (t - TURN_FROM)) / HUYGENS_TURN;
+// Where things stand (render/huygensStage.js builds them so): the eyepiece's round field
+// and Mars in it, under the telling's reach (1.45 up); the table to the left, where a
+// drawing is laid each time the wedge comes back.
+// (The field stands nearer than the telescope, whose tube then runs in under its rim:
+// behind it, the tube lay across Mars.)
+const VIEW_Z = -0.3;
+export const HUYGENS = { view: { x: -0.2, y: 0.82, size: 1.0, globe: 0.36 }, table: { x: -1.0, top: 0.36 }, sheets: 3 };
 
 // The sunrise's Sun: where it stands to the side and behind the rim, and how high its
 // middle is when it is down (its disc, 0.49 to its edge, is then wholly behind the rim,
@@ -66,6 +82,26 @@ export function landmarkStage(kind, sayBy = 'craft') {
         photo: { x: -0.25, y: 0.02, scale: Math.max(0.01, 1.15 * ease(t, 5, 6.2)), shown: t >= 5 },
         bubble: { x: 0.85, y: 1.0, scale: Math.max(0.01, 0.8 * said), shown: said > 0.01 },
       };
+    };
+  }
+  if (kind === 'huygens') {
+    const { view, table, sheets } = HUYGENS;
+    return (t) => {
+      const shown = ease(t, 1.2, 2.4);
+      const said = up(t, 17, 23);
+      const stage = {
+        room: { x: 0, y: 0 },
+        // The candle's flame trembles a little.
+        flame: { x: table.x + 0.15, y: table.top + 0.13, z: 0.18, scale: 1 + 0.12 * Math.sin(t * 13) * Math.sin(t * 3.1) },
+        view: { x: view.x, y: view.y, z: VIEW_Z, scale: Math.max(0.01, view.size * shown), shown: shown > 0 },
+        globe: { x: view.x, y: view.y, z: VIEW_Z, scale: Math.max(0.01, view.globe * shown), turn: huygensTurn(t), shown: shown > 0 },
+        bubble: { x: 0.55, y: 1.3, scale: Math.max(0.01, 0.8 * said), shown: said > 0.01 },
+      };
+      for (let k = 0; k < sheets; k += 1) {
+        const laid = ease(t, TURN_FROM + k * HUYGENS_TURN + 0.2, TURN_FROM + k * HUYGENS_TURN + 0.8);
+        stage[`sheet${k}`] = { x: table.x - 0.12 + k * 0.12, y: table.top + 0.02 + k * 0.004, z: 0.08, scale: Math.max(0.01, laid), shown: laid > 0 };
+      }
+      return stage;
     };
   }
   if (kind === 'sunrise') {

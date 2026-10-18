@@ -125,8 +125,8 @@ const LOOKS = {
     // The horizon glow: seen from behind, a thin line of light along its edge (dust
     // lifted off the ground, as the Surveyors and Apollo 17 saw at sunrise).
     rim: [0.9, 0.9, 1], rimLight: 0.3,
-    // Its own sights (textured.frag `lunar`): the opposition surge and Tycho's rays; the
-    // minerals' colours are chosen in photo mode. And the streamers of the horizon glow
+    // Its own sights (textured.frag `lunar`): the opposition surge and Tycho's rays. And
+    // the streamers of the horizon glow
     // over its edge (lunarGlow.frag), on a shell this many radii out.
     lunar: [1, 1], glowShell: 1.45,
   },
@@ -474,10 +474,6 @@ function createProceduralPlanet(scene, body, look, sunDir) {
       material.setVector3('sun', new Vector3(...dir));
       if (ring) ring.setSun(new Vector3(...dir));
       if (glow) glow.setVector3('sun', new Vector3(...dir));
-    },
-    // The minerals' colours on the Moon (photo mode's choice), on or off.
-    setMinerals(on) {
-      if (look.lunar) material.setVector3('lunar', new Vector3(look.lunar[0], look.lunar[1], on ? 1 : 0));
     },
     // The light of the planet it goes round (core/shine.js planetshine), or none.
     setShine(light) {

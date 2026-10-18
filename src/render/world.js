@@ -253,10 +253,6 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
     // The picture's own clock: seconds drawn since the game opened (the clouds of
     // Jupiter slide by it, core/vista.js).
     elapsed: () => elapsed,
-    // The Moon in its minerals' colours (photo mode, ui/photo.js), or as it looks.
-    setMinerals(on) {
-      rendered.find((item) => item.body.id === 'moon')?.setMinerals?.(on);
-    },
     ringNormal(id) {
       return rendered.find((item) => item.body.id === id)?.rings?.normal ?? null;
     },

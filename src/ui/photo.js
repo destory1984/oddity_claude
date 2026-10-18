@@ -42,15 +42,10 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
       $('photoTools').hidden = true;
       setFovDeg(DEFAULT_FOV_DEG);
       $('showHero').checked = true;
-      // The Moon goes back to how it looks.
-      $('showMinerals').checked = false;
-      world.setMinerals(false);
     }
   }
 
   $('fov').addEventListener('input', (e) => setFovDeg(Number(e.target.value)));
-  // The Moon in its minerals' colours (the user, 2026-10-18, "모두 넣자").
-  $('showMinerals').addEventListener('change', (e) => world.setMinerals(e.target.checked));
   $('exitPhoto').addEventListener('click', toggle);
   $('capture').addEventListener('click', async () => {
     const button = $('capture');

@@ -70,7 +70,7 @@ uniform vec4 shine;
 // side it comes from, w how far it has come (0 none, 1 all of the disc).
 uniform vec4 eclipsed;
 // The Moon's own sights (planets.js LOOKS moon `lunar`): x the opposition surge, y the
-// rays of Tycho, z the minerals' colours (a choice in photo mode). rayFrom: Tycho in
+// rays of Tycho, z unused (it held the minerals' colours, taken out 2026-10-18). rayFrom: Tycho in
 // the body's own frame (as lp).
 uniform vec3 lunar;
 uniform vec3 rayFrom;
@@ -511,12 +511,6 @@ void main(){
     // full Moon is some ten times brighter than a half one).
     float phase = acos(clamp(dot(sun, V), -1., 1.));
     light *= 1. + lunar.x * (1.1 * exp(-phase / .03) + .35 * exp(-phase / .14));
-  }
-  if (lunar.z > 0.) {
-    // The minerals' colours, as Galileo's enhanced-colour pictures show them: the seas
-    // rich in titanium blue, the poorer ones and the highlands orange.
-    float lm = dot(col, vec3(.299, .587, .114));
-    light *= mix(vec3(1.), mix(vec3(.45, .6, 1.2), vec3(1.15, .8, .52), smoothstep(.3, .52, lm)), .65 * lunar.z) * (1. + .08 * lunar.z);
   }
   if (eclipsed.w > 0.) {
     // The shadow's edge crosses the globe; under it the ground is lit only by the red

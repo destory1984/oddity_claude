@@ -31,9 +31,45 @@ export function scannerPoints(position, orientation, things, count = SCANNER_COU
   const farthest = Math.max(nearest * 1.5, near[near.length - 1].surface);
   const reach = (d) => 0.18 + 0.82 * (Math.log1p(Math.max(0, d) / nearest) / Math.log1p(farthest / nearest));
   const rank = (k) => (near.length > 1 ? 0.25 + 0.75 * (k / (near.length - 1)) : 0.6);
-  return near.map((n, k) => {
+  return spread(near.map((n, k) => {
     const [x, h, z] = axes.map((a) => a.reduce((s, v, i) => s + v * n.rel[i], 0) / n.centre);
     const r = Math.min(1, (reach(n.surface) + rank(k)) / 2);
     return { id: n.id, x: x * r, z: z * r, h: h * r };
-  });
+  }));
+}
+
+// Where a point's ball is drawn, as ui/scanner.js draws it (the ellipse is about a third
+// as tall as it is wide, the stalk 1.4 times its height): x across, y up, in half-widths.
+const FLAT = 0.35;
+const ballAt = (p) => [p.x, (p.z + 1.4 * p.h) * FLAT];
+
+// Things that lie much the same way from her stood in one heap, their names piled up
+// (the user's worry on 2026-10-18 when the scanner came in, taken up the same day): two
+// balls nearer than `gap` are turned apart round her, a little at a time, keeping how
+// far each is from her and how high.
+export function spread(points, gap = 0.22, rounds = 60) {
+  const out = points.map((p) => ({ ...p }));
+  for (let round = 0; round < rounds; round += 1) {
+    let moved = false;
+    for (let a = 0; a < out.length; a += 1) {
+      for (let b = a + 1; b < out.length; b += 1) {
+        const [ax, ay] = ballAt(out[a]);
+        const [bx, by] = ballAt(out[b]);
+        if (Math.hypot(ax - bx, ay - by) >= gap) continue;
+        // Turn each the other way round her, the farther from her (on the flat) the less.
+        const side = Math.sign(out[a].x * out[b].z - out[a].z * out[b].x) || (a % 2 ? 1 : -1);
+        for (const [p, s] of [[out[a], -side], [out[b], side]]) {
+          const r = Math.hypot(p.x, p.z);
+          if (r < 1e-6) continue;
+          const turn = (s * 0.04) / Math.max(r, 0.3);
+          const c = Math.cos(turn);
+          const sn = Math.sin(turn);
+          [p.x, p.z] = [p.x * c - p.z * sn, p.x * sn + p.z * c];
+        }
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+  return out;
 }

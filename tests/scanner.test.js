@@ -31,3 +31,18 @@ test('it shows a handful, and leaves out the world she is down on', () => {
   assert.equal(scannerPoints([0, 0, 0], still, [ground, moon])[0].z, scannerPoints([0, 0, 0], still, [moon])[0].z);
   assert.deepEqual(scannerPoints([0, 0, 0], still, []), []);
 });
+
+test('things lying the same way are turned apart, keeping their distances and heights', () => {
+  const heap = [100, 200, 400, 800, 1600].map((d, k) => ({ id: `t${k}`, position: [d * 0.05, 0, d] }));
+  const points = scannerPoints([0, 0, 0], still, heap);
+  const ball = (p) => [p.x, (p.z + 1.4 * p.h) * 0.35];
+  for (let a = 0; a < points.length; a += 1) {
+    for (let b = a + 1; b < points.length; b += 1) {
+      const [ax, ay] = ball(points[a]);
+      const [bx, by] = ball(points[b]);
+      assert.ok(Math.hypot(ax - bx, ay - by) > 0.12, `${points[a].id} ${points[b].id}`);
+    }
+  }
+  // None is pushed off the rim.
+  assert.ok(points.every((p) => Math.hypot(p.x, p.z) <= 1 + 1e-9));
+});

@@ -6656,22 +6656,23 @@ footer .throttle output,
 #inspectInfo #inspectFold::after {
   content:"";
   position:absolute;
-  inset:-4px;
-}
-
-/* (30px keys: 5px round them; 32px tall: 4px above and under; 34px: 3px.) */
-#hud #targetPanel #targetName button::after,
-#scannerButton::after,
-#guide :is(#guideBack, #guideNext)::after {
   inset:-5px;
 }
 
+/* (Measured from inside the key's 1px line: 30px keys 6px round them; 32px tall, 5px
+   above and under; 34px, 4px.) */
+#hud #targetPanel #targetName button::after,
+#scannerButton::after,
+#guide :is(#guideBack, #guideNext)::after {
+  inset:-6px;
+}
+
 #guide :is(#guideJump, #guideSkip)::after {
-  inset:-4px -2px;
+  inset:-5px -3px;
 }
 
 #inspectInfo #inspectFold::after {
-  inset:-3px;
+  inset:-4px;
 }
 
 /* The map's names are 32px tall (they were 26px), 4px apart, and a press anywhere in the
@@ -6692,7 +6693,7 @@ footer .throttle output,
 #bigMap #bigMapList button::after {
   content:"";
   position:absolute;
-  inset:-2px;
+  inset:-3px;
 }
 
 #bigMap #bigMapStage {
@@ -6714,4 +6715,35 @@ footer .throttle output,
   #bigMap #bigMapList button {
     min-height:28px;
   }
+}
+
+/* "가−" and "가+" size every reading, not only the journal's and the settings' (the user,
+   2026-10-19: "다 해", of "글자 크기는 읽는 글 모두에"): the photo page's reading, the
+   reading over a target looked at closely, a story card's telling and its question,
+   grandmother's note, the words of the side by side photos, and why a lesson of the flight
+   practice is learnt. Titles and keys keep their size, as in the journal. */
+#photoView #photoViewMore,
+#inspectInfo #inspectBody,
+#storyCard :is(#storyCardText, #storyQuiz),
+#noteCard :is(#noteCardScene, #noteCardPaper, #noteCardSay),
+#pair #pairNote,
+#practiceWhy #practiceWhyText {
+  zoom:var(--text, 1);
+}
+
+/* The map's three keys at its foot stay in one row now that the last says "비행으로
+   돌아가기": three equal columns, a long name in two lines inside the same 44px (in a
+   second row they took 52px from the dial). */
+#bigMap #bigMapActions {
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:8px;
+}
+
+dialog#bigMap #bigMapActions button {
+  min-width:0;
+  padding:4px 6px;
+  line-height:1.15;
+  white-space:normal;
+  word-break:keep-all;
 }

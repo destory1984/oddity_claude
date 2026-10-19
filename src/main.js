@@ -2561,11 +2561,16 @@ ${STORY_MORE[target.id]}` : told };
       window.top.location.reload();
     });
   }
-  // The feel of speed: switched at once, no restart.
-  const showFeel = () => {
-    $('feelNow').textContent = feel ? t('지금: 켜짐.') : t('지금: 꺼짐.');
-    $('feelButton').textContent = feel ? t('끄기') : t('켜기');
+  // The feel of speed: switched at once, no restart. The key says what it is now and is
+  // lined in gold while on, as every on/off key (the user, 2026-10-19: "다 해"; it was a
+  // line "지금: 켜짐." and a key "끄기").
+  const showToggle = (key, on) => {
+    key.textContent = on ? t('켜짐') : t('꺼짐');
+    key.setAttribute('aria-pressed', String(on));
   };
+  $('feelNow').hidden = true;
+  $('skyNamesNow').hidden = true;
+  const showFeel = () => showToggle($('feelButton'), feel);
   showFeel();
   $('feelButton').addEventListener('click', () => {
     feel = !feel;
@@ -2583,8 +2588,7 @@ ${STORY_MORE[target.id]}` : told };
   }
   const showSkyNames = () => {
     document.documentElement.classList.toggle('noSkyNames', !skyNames);
-    $('skyNamesNow').textContent = skyNames ? t('지금: 켜짐.') : t('지금: 꺼짐.');
-    $('skyNamesButton').textContent = skyNames ? t('끄기') : t('켜기');
+    showToggle($('skyNamesButton'), skyNames);
   };
   showSkyNames();
   $('skyNamesButton').addEventListener('click', () => {

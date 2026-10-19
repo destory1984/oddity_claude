@@ -172,12 +172,12 @@
 
   <dialog id="journal" aria-labelledby="journalTitle">
     <div class="journalHead">
-      <h1 id="journalTitle"><img id="journalPortrait" src="/assets/seora-sprites/portrait.png" alt="">탐험 수첩</h1>
+      <h1 id="journalTitle" tabindex="-1" autofocus><img id="journalPortrait" src="/assets/seora-sprites/portrait.png" alt="">탐험 수첩</h1>
       <div id="journalText" class="textSize" role="group" aria-label="글자 크기">
         <button id="textSmaller" data-way="-1" aria-label="글자 작게" title="글자 작게">가<span aria-hidden="true">−</span></button>
         <button id="textLarger" data-way="1" aria-label="글자 크게" title="글자 크게">가<span aria-hidden="true">+</span></button>
       </div>
-      <button id="closeJournal" aria-label="비행으로 돌아가기" title="비행으로 돌아가기 (Esc, J)" autofocus>✕</button>
+      <button id="closeJournal" aria-label="비행으로 돌아가기" title="비행으로 돌아가기 (Esc, J)">✕</button>
     </div>
     <p id="journalSummary"></p>
     <div id="journalNotes" hidden></div>
@@ -239,7 +239,7 @@
 
   <dialog id="storyCard" aria-labelledby="storyCardTitle">
     <span id="storyCardYear"></span>
-    <h1 id="storyCardTitle"></h1>
+    <h1 id="storyCardTitle" tabindex="-1" autofocus></h1>
     <small id="storyCardEn"></small>
     <figure id="storyCardFigure">
       <img id="storyCardPhoto" alt="">
@@ -252,11 +252,11 @@
       <p id="storyQuizResult" role="status" aria-live="polite"></p>
     </div>
     <div class="journalActions">
-      <button id="closeStoryCard" autofocus>비행으로 돌아가기</button>
+      <button id="closeStoryCard">비행으로 돌아가기</button>
     </div>
   </dialog>
 
-  <dialog id="noteCard" aria-labelledby="noteCardTitle">
+  <dialog id="noteCard" aria-labelledby="noteCardTitle" tabindex="-1" autofocus>
     <img id="noteCardImage" class="scenePicture" alt="" hidden>
     <p id="noteCardScene"></p>
     <div class="notePaper" id="noteCardPaper">
@@ -265,21 +265,21 @@
     </div>
     <p id="noteCardSay" hidden></p>
     <div class="journalActions">
-      <button id="closeNoteCard" autofocus>쪽지를 접는다</button>
+      <button id="closeNoteCard">쪽지를 접는다</button>
     </div>
   </dialog>
 
-  <dialog id="gateScene" aria-labelledby="gateLine">
+  <dialog id="gateScene" aria-labelledby="gateLine" tabindex="-1" autofocus>
     <img class="scenePicture" src="/assets/notebook/gate.png" alt="태양이 진 저녁, 닫힌 대문 앞에 선 소라의 뒷모습. 한 손을 들어 문을 두드리려 한다">
     <p id="gateText"></p>
     <strong id="gateLine"></strong>
     <div class="journalActions">
-      <button id="closeGate" autofocus>비행으로 돌아가기</button>
+      <button id="closeGate">비행으로 돌아가기</button>
     </div>
   </dialog>
 
   <dialog id="bigMap" aria-labelledby="bigMapTitle">
-    <h1 id="bigMapTitle">태양계 가족</h1>
+    <h1 id="bigMapTitle" tabindex="-1" autofocus>태양계 가족</h1>
     <div id="bigMapStage">
       <canvas id="bigMapSky" aria-hidden="true"></canvas>
       <canvas id="bigMapCanvas" aria-label="태양계 지도. 갈 곳을 누릅니다."></canvas>
@@ -294,7 +294,7 @@
     </div>
   </dialog>
 
-  <dialog id="lookBack" aria-label="지나온 길 돌아보기">
+  <dialog id="lookBack" aria-label="지나온 길 돌아보기" tabindex="-1" autofocus>
     <img id="lookImage" class="out" alt="">
     <p id="lookCaption"></p>
     <p id="lookCount" class="muted"></p>
@@ -302,7 +302,7 @@
   </dialog>
 
   <dialog id="pair" aria-labelledby="pairTitle">
-    <h1 id="pairTitle"></h1>
+    <h1 id="pairTitle" tabindex="-1" autofocus></h1>
     <figure>
       <img id="pairMine" alt="내가 찍은 사진">
       <figcaption id="pairMineCaption"></figcaption>
@@ -317,7 +317,7 @@
   </dialog>
 
   <dialog id="shareSheet" aria-labelledby="shareTitle">
-    <h1 id="shareTitle">내 자리 공유</h1>
+    <h1 id="shareTitle" tabindex="-1" autofocus>내 자리 공유</h1>
     <img id="sharePic" alt="" hidden>
     <p id="shareWhere" class="muted"></p>
     <label class="checkRow" id="sharePhotoRow" hidden><input type="checkbox" id="sharePhoto" checked> 지금 화면 사진도 함께</label>
@@ -374,7 +374,7 @@
   </dialog>
 
   <dialog id="settings" aria-labelledby="settingsTitle">
-    <div class="sheetHead"><h1 id="settingsTitle">설정</h1><div class="soundKeys"><button id="soundButton" aria-label="효과음 끄기"></button><button id="bgmButton" aria-label="배경 음악 끄기"></button></div><div class="textSize" role="group" aria-label="글자 크기"><button data-way="-1" aria-label="글자 작게" title="글자 작게">가<span aria-hidden="true">−</span></button><button data-way="1" aria-label="글자 크게" title="글자 크게">가<span aria-hidden="true">+</span></button></div></div>
+    <div class="sheetHead"><h1 id="settingsTitle" tabindex="-1" autofocus>설정</h1><div class="soundKeys"><button id="soundButton" aria-label="효과음 끄기"></button><button id="bgmButton" aria-label="배경 음악 끄기"></button></div><div class="textSize" role="group" aria-label="글자 크기"><button data-way="-1" aria-label="글자 작게" title="글자 작게">가<span aria-hidden="true">−</span></button><button data-way="1" aria-label="글자 크게" title="글자 크게">가<span aria-hidden="true">+</span></button></div></div>
     <small id="appVersion">{{version}} · {{updated}}</small>
     <div id="settingsTabs" role="tablist" aria-label="설정의 갈래">
       <button role="tab" data-tab="options" aria-selected="true">설정</button>
@@ -440,7 +440,7 @@
         <figcaption><a id="aboutMemory" href="https://ko.wikipedia.org/wiki/%EC%B9%BC_%EC%84%B8%EC%9D%B4%EA%B1%B4" target="_blank" rel="noopener">칼 세이건(1934 → 1996)을 기억하며</a></figcaption>
       </figure>
     </section>
-    <button id="closeSettings" autofocus>비행으로 돌아가기</button>
+    <button id="closeSettings">비행으로 돌아가기</button>
   </dialog>
 
   <!-- A browser too old to read the game's code (a Chrome of before 2022: a phone of 2019

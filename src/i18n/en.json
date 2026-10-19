@@ -238,10 +238,6 @@
  "지금: 창을 가득 채운 넓은 화면.": "Now: a wide screen filling the window.",
  "넓은 화면으로 바꾸기": "Change to the wide screen",
  "세로 화면으로 바꾸기": "Change to the upright screen",
- "지금: 켜짐.": "Now: on.",
- "지금: 꺼짐.": "Now: off.",
- "끄기": "Turn off",
- "켜기": "Turn on",
  "{} 근처에 도착했습니다. 드래그로 둘러보세요.": "Arrived near {the0}. Drag to look around.",
  "{}\n\"{} 자리로\" 단추를 누르면 그곳으로 갑니다.": "{0}\nPress \"To the {1}\" and you go there.",
  "수첩 버튼": "the notebook button",
@@ -5045,5 +5041,7 @@
  "만든 이": "Credits",
  "설정의 첫 쪽에 지금 흐르는 배경 음악의 제목이 뜹니다.": "The first page of the settings shows the title of the music now playing.",
  "일본어와 중국어를 고를 수 있습니다(설정의 첫 쪽). \"바뀐 것\" 쪽도 고른 언어로 나옵니다.": "You can choose Japanese or Chinese (the first page of the settings). The \"Changes\" page comes in the chosen language too.",
- "영어를 고를 수 있습니다(설정의 첫 쪽). 화면 글자와 이야기 글이 모두 영어로 나옵니다.": "You can choose English (the first page of the settings). Every word on screen and every story is in English."
+ "영어를 고를 수 있습니다(설정의 첫 쪽). 화면 글자와 이야기 글이 모두 영어로 나옵니다.": "You can choose English (the first page of the settings). Every word on screen and every story is in English.",
+ "켜짐": "On",
+ "꺼짐": "Off"
 }

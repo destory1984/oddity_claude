@@ -6778,3 +6778,110 @@ dialog#shareSheet > #shareClose {
 #practiceOffer::backdrop {
   cursor:auto;
 }
+
+/* ---- Fewer values (the user, 2026-10-19: "다 해", of "값을 줄이기") ----
+   Corners: 12px for every key, 18px for every sheet. (The journal is paper and keeps its
+   own: 9px keys and a 14px cover. The keys of the name plate were 8px, the scanner's
+   switch 9px, the goal line's and the reading's fold 10px, the sheets' ✕ 8px.) */
+#hud #targetPanel #targetName button,
+#scannerButton,
+#guide button,
+#inspectInfo #inspectFold,
+dialog:not(#journal) > .backKey {
+  border-radius:12px;
+}
+
+/* Heights in three steps: 44px for a sheet's main keys (and the keys at a sheet's head:
+   the settings' were 40px, the journal's 44px), 36px for the others and for tabs (the
+   settings' tabs were 38px, the ✕ of the journal 40px), 32px for small chips (the
+   journal's folds were 30px; the big map's names 32px). */
+dialog .sheetHead :is(.soundKeys, .textSize) button,
+dialog#settings .sheetHead .soundKeys button {
+  height:44px;
+  min-height:44px;
+}
+
+#settings #settingsTabs button {
+  height:36px;
+  min-height:36px;
+}
+
+dialog#journal > .backKey {
+  width:36px;
+  height:36px;
+  min-height:0;
+}
+
+#journal #journalNotes #noteFold,
+#journal #journalSky #skyFold {
+  min-height:32px;
+}
+
+/* A sheet on a phone is the screen less 16px a side, with 20px inside (they were 364px
+   wide on a 402px screen by the browser's own limit, some 18px inside). The journal and
+   the photo page fill the screen; the map keeps its 18px for its strip of sky. */
+@media (max-width: 480px) {
+  dialog:is(#settings, #storyCard, #noteCard, #gateScene, #pair, #shareSheet, #lookBack, #practiceOffer, #practiceWhy, #practiceDone, #bigMap) {
+    width:calc(100vw - 32px);
+    max-width:none;
+  }
+
+  dialog:is(#settings, #storyCard, #noteCard, #gateScene, #pair, #shareSheet, #lookBack, #practiceOffer, #practiceWhy, #practiceDone) {
+    padding-left:20px;
+    padding-right:20px;
+  }
+}
+
+/* One title: 20px, at the left, at the top (the settings' and the practice's were 24px,
+   the share sheet's 24px in the middle, the side by side photos' 22px in the middle). The
+   big map keeps its title in its corner. */
+dialog:not(#bigMap):not(#journal) h1 {
+  font-size:20px;
+  line-height:1.35;
+  text-align:left;
+}
+
+/* Not pressable now: one look everywhere, dimmed once (it was .4, .45 or .5, and the
+   pointer an hourglass). The answered choices of a question stay as they are. */
+:is(#hud, #guide, #photoTools, #inspectInfo, dialog) button:disabled:not(#storyQuizChoices button):not(#inspectQuizChoices button),
+#journal #journalText button:disabled,
+dialog .sheetHead .textSize button:disabled,
+#shareSheet #shareKakao:disabled {
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+/* On and off is one look: a key that says what it is now, lined in gold while on (the
+   settings' "속도의 느낌" and "별자리 이름" said "지금: 켜짐." and had a key "끄기" beside;
+   main.js). */
+#settings dd button[aria-pressed="true"] {
+  border-color:var(--gold);
+  color:#fff;
+}
+
+#settings dd:not(.langRow) button[aria-pressed]::before {
+  content:"";
+  display:inline-block;
+  width:8px;
+  height:8px;
+  margin-right:8px;
+  border:1.5px solid currentColor;
+  border-radius:50%;
+  vertical-align:1px;
+}
+
+#settings dd:not(.langRow) button[aria-pressed="true"]::before {
+  border-color:var(--gold);
+  background:var(--gold);
+}
+
+/* The title takes the focus as a sheet opens, so a keyboard starts at its top. */
+dialog h1:focus,
+dialog:focus {
+  outline:none;
+}
+
+/* (The side by side photos and looking back: 20px under the key too, as over it.) */
+dialog:is(#pair, #lookBack) {
+  padding-bottom:20px;
+}

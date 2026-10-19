@@ -40,6 +40,17 @@ export function addBackKeys() {
       $(way).click();
     });
     dialog.prepend(key);
+    // As it opens, the focus goes to its title (or, with none, to the sheet itself), so a
+    // keyboard starts at the top and a key still held does not press a button (the user,
+    // 2026-10-19: "다 해"). The browser alone gave it to the first button, this ✕, where
+    // the title held autofocus but was hidden, or there was none.
+    const showModal = dialog.showModal;
+    dialog.showModal = function showAtTop(...args) {
+      showModal.apply(this, args);
+      const title = [...this.querySelectorAll('[autofocus]')].find((el) => el.getClientRects().length);
+      if (title) title.focus({ preventScroll: true });
+      else if (this.hasAttribute('tabindex')) this.focus({ preventScroll: true });
+    };
     // A press outside the sheet's edge goes back the same way; a press on its own margin,
     // beside what is in it, does nothing (the user, 2026-10-19: "다 해", of "바깥 누르기는
     // 한 규칙으로"). Outside is told by where the press fell, not by its target: the

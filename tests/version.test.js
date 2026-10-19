@@ -22,7 +22,7 @@ test('the settings have a place for both at their head, and the build fills it',
   const settings = html.slice(html.indexOf('<dialog id="settings"'));
   const head = settings.slice(0, settings.indexOf('settingsTabs'));
   // (Under the title since 2026-10-19: the sound and music keys took its place beside it.)
-  assert.ok(head.includes('<h1 id="settingsTitle">설정</h1>') && head.includes('<small id="appVersion">{{version}} · {{updated}}</small>'));
+  assert.ok(head.includes('<h1 id="settingsTitle" tabindex="-1" autofocus>설정</h1>') && head.includes('<small id="appVersion">{{version}} · {{updated}}</small>'));
   // Nowhere else: neither the loading screen nor the note sheet carries it now.
   assert.equal(html.split('{{version}}').length, 2);
   const filled = fillVersion('<small>{{version}} · {{updated}}</small>', '0.1.2', new Date('2026-10-03T12:00:00Z'));

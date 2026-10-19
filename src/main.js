@@ -1953,10 +1953,24 @@ ${STORY_MORE[target.id]}` : told };
   showMusicButton();
   $('musicButton').addEventListener('click', toggleMusic);
   $('bgmButton').addEventListener('click', toggleMusic);
+  // The tune that is playing, beside the button, while the settings are open (the user,
+  // 2026-10-19: "설정 -> 옵션에 지금 흐르고 있는 BGM 제목 넣어줘"). A tune just chosen by
+  // the button shows at once, before its first bar sounds.
+  let tuneAsked = null;
+  function showTune() {
+    const playing = sound.tuneName();
+    if (tuneAsked && playing === tuneAsked) tuneAsked = null;
+    const name = tuneAsked ?? playing;
+    const words = name ? `♪ ${name}${sound.musicOn() ? '' : t(' (배경 음악이 꺼져 있습니다)')}` : '';
+    if ($('tuneNow').textContent !== words) $('tuneNow').textContent = words;
+  }
+  setInterval(() => { if ($('settings').open) showTune(); }, 1000);
+  $('settingsButton').addEventListener('click', () => requestAnimationFrame(showTune));
   $('tuneButton').addEventListener('click', () => {
     sound.unlock();
     // Told beside the button: a notice would be hidden behind the settings.
-    $('tuneNow').textContent = `♪ ${sound.nextTune()}${sound.musicOn() ? '' : t(' (배경 음악이 꺼져 있습니다)')}`;
+    tuneAsked = sound.nextTune();
+    showTune();
   });
 
   $('brake').addEventListener('click', brake);

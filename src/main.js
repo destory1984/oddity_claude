@@ -12,6 +12,7 @@ import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/cra
 import { CURIOS, curiosAt, hiddenCurios, carryingCurio, curiosNear, curioHead, setCurioDay, CURIO_ABOUT, BRIDGE_KM, groundSpot } from './core/curios.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
+import { createVanish, cutOut } from './ui/vanish.js';
 import { realCloudMap } from './render/realClouds.js';
 import { createInput } from './ui/input.js';
 import { createHud } from './ui/hud.js';
@@ -2464,11 +2465,41 @@ ${STORY_MORE[target.id]}` : told };
       gazeFlight(false).then((whole) => { if (whole && !gazing) gazeClear(); });
     }
   };
+  // Sora leaves as star dust or in a soap bubble (ui/vanish.js), and comes back the same
+  // way; while it plays she is not drawn, the picture of her stands in. The two take turns
+  // for now, for the user to choose ("2,6 만들어줘").
+  const vanish = createVanish();
+  let vanishKind = 'dust';
+  let herPicture = null;
+  let heroHeld = false;
+  const stillMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   $('gazeButton').addEventListener('click', () => {
     if (!gazing) return setGaze(true);
-    if (gazeBare) return setGaze(false);
+    if (gazeBare) {
+      setGaze(false);
+      if (herPicture && !stillMotion()) {
+        heroHeld = true;
+        vanish.play(vanishKind, herPicture, false, () => {
+          heroHeld = false;
+          gazeFade = 1;
+          vanishKind = vanishKind === 'dust' ? 'bubble' : 'dust';
+        });
+      }
+      return undefined;
+    }
     gazeBare = true;
     gazeWords();
+    if (!stillMotion()) {
+      // Her picture as she is now: drawn this moment, then read off her sheet.
+      world.render();
+      herPicture = cutOut($('heroSheet'));
+      if (herPicture) {
+        heroHeld = true;
+        gazeFade = 0;
+        vanish.play(vanishKind, herPicture, true, () => {});
+      }
+    }
+    return undefined;
   });
   $('pauseButton').addEventListener('click', () => setPaused(!paused));
   $('photoButton').addEventListener('click', () => photo.toggle());
@@ -3519,6 +3550,8 @@ ${STORY_MORE[target.id]}` : told };
     const fadeStep = Math.min(1, (fadeNow - gazeFadeAt) / GAZE_FADE_MS);
     gazeFadeAt = fadeNow;
     gazeFade = gazeBare ? Math.max(0, gazeFade - fadeStep) : Math.min(1, gazeFade + fadeStep);
+    // (Leaving or coming back as dust or a bubble: the picture of her stands in.)
+    if (heroHeld) gazeFade = 0;
     const view = world.update({
       trail,
       replay: replayNow && replayForWorld(replayNow),

@@ -6914,3 +6914,34 @@ dialog:is(#pair, #lookBack) {
   font-weight:600;
   line-height:1.2;
 }
+
+/* The settings fill the screen, as the journal does on a phone (the user, 2026-10-19:
+   "설정 메뉴도 전체 화면으로 띄워줘"), on a phone, in the PC's phone frame and on a wide
+   screen alike. The ✕ stays 8px from the corner, the head, the tabs and what they show
+   scroll in a column at most 640px wide in the middle, and "비행으로 돌아가기" stays at
+   the foot. There is no outside to press any more. */
+dialog#settings[open] {
+  width:100vw;
+  max-width:100vw;
+  height:100vh;
+  height:100dvh;
+  max-height:100vh;
+  max-height:100dvh;
+  margin:0;
+  border:0;
+  border-radius:0;
+  padding:calc(54px + env(safe-area-inset-top)) max(20px, calc((100vw - 640px) / 2)) 0;
+  background:#0d1a3a;
+}
+
+dialog#settings > .backKey {
+  top:max(8px, env(safe-area-inset-top));
+  left:max(8px, env(safe-area-inset-left));
+}
+
+dialog#settings[open] #closeSettings {
+  background:#0d1a3a;
+  bottom:max(20px, env(safe-area-inset-bottom));
+  margin-bottom:max(20px, env(safe-area-inset-bottom));
+  box-shadow:0 -14px 14px #0d1a3a, 0 0 0 8px #0d1a3a, 0 40px 0 12px #0d1a3a;
+}

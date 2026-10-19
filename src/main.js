@@ -37,7 +37,7 @@ import {
 } from './core/progress.js';
 import { STORIES, storySitesAt, completedStories, siteHidden, siteFar } from './core/stories.js';
 import {
-  loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadLayout, saveLayout, loadAlbum, saveAlbum,
+  loadProgress, saveProgress, loadGuideDone, saveGuideDone, loadAlbum, saveAlbum,
   loadDaily, saveDaily, loadTold, saveTold, loadScreen, saveScreen, saveResume, takeResume, loadStunts, saveStunts, loadViews, saveViews, loadFeel, saveFeel, loadExo, saveExo, loadEclipses, saveEclipses, loadPractice, savePractice,
 } from './ui/storage.js';
 import { todayData, startAbove } from './core/ephemeris.js';
@@ -171,12 +171,16 @@ const START_NEAR = import.meta.env.DEV ? { id: 'earth', fromCentreKm: 20000 } : 
 // under. This sitting opens there under that sky (their layout, the moment they opened
 // the game, their game clock); the player's own layout setting is left as it is.
 const shared = decodePlace(new URLSearchParams(location.search).get('p'), BODIES.map((b) => b.id));
-const layout = shared?.sky?.layout ?? loadLayout();
+// One layout for everyone, the travel layout: with the shared clock every player then sees
+// the worlds in the same places (the user, 2026-10-19: "행성배치는 없애자.. 그래야 모든 사람이
+// 동일한 별 위치를 보게 되니"; of the two, "여행 배치"). Today's sky was a choice in the
+// settings till then; a link sent from it opens in this one.
+const layout = 'tour';
 // The game clock is everyone's (core/clock.js): the real time since the anchor, fifty times
 // as fast. A shared place runs on from the moment it was sent: its anchor, and the gap
 // between its clock and this one kept for the sitting.
-const anchorMs = shared?.sky?.openedAt ?? skyAnchor(layout, Date.now());
-const clockOffset = shared?.sky ? shared.sky.simTime - clockTime(anchorMs, Date.now()) : 0;
+const anchorMs = shared?.sky?.layout === 'tour' ? shared.sky.openedAt : skyAnchor(layout, Date.now());
+const clockOffset = shared?.sky?.layout === 'tour' ? shared.sky.simTime - clockTime(anchorMs, Date.now()) : 0;
 const clockNow = () => clockTime(anchorMs, Date.now()) + clockOffset;
 // (A test may set the day: sessionStorage 'oddity.day', as 2027-08-02.)
 const openedAt = (() => {
@@ -2484,9 +2488,6 @@ ${STORY_MORE[target.id]}` : told };
     onLeave: () => saveResume({ position: [...state.position], orientation: [...state.orientation], simTime, selectedId, tab: 'about', until: Date.now() + 30 * 60 * 1000 }),
     reopen: resume ? resume.tab ?? true : false,
   });
-  // Switching the layout moves every planet, so the game starts over (the log is kept).
-  $('layoutNow').textContent = layout === 'today' ? t('지금: 오늘의 하늘(오늘 날짜의 실제 위치).') : t('지금: 여행 배치(행성을 태양 둘레에 고루 흩어 놓음).');
-  $('layoutButton').textContent = layout === 'today' ? t('여행 배치로 바꾸기') : t('오늘의 하늘로 바꾸기');
   // On a PC the game is in a phone-shaped frame (src/shell.js) unless the wide view was
   // chosen; a phone has neither, and is not offered the switch.
   const inFrame = window.self !== window.top;
@@ -2501,10 +2502,6 @@ ${STORY_MORE[target.id]}` : told };
       window.top.location.reload();
     });
   }
-  $('layoutButton').addEventListener('click', () => {
-    saveLayout(layout === 'today' ? 'tour' : 'today');
-    location.reload();
-  });
   // The feel of speed: switched at once, no restart.
   const showFeel = () => {
     $('feelNow').textContent = feel ? t('지금: 켜짐.') : t('지금: 꺼짐.');
@@ -3713,8 +3710,6 @@ ${STORY_MORE[target.id]}` : told };
     if (undockKey) $('dockTarget').hidden = true;
     if (thenKey) $('replayButton').hidden = true;
     hud.plateKeys({ undock: undockKey, then: thenKey });
-    // In today's sky the game clock's date rides along with the flight state.
-    if (layout === 'today') flightLabel += ` · ${dateText(new Date(openedAt.getTime() + simTime * 1000))}`;
     hud.update({
       view,
       local: nearestLocalBody(state.position, bodies),

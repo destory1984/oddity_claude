@@ -165,7 +165,7 @@
  "P 키 / 사진 모드 버튼": "The P key / the photo mode button",
  "고른 천체나 탐사선, 이야기 장소를 화면 가운데에 두고 가까이에서 봅니다. 드래그하면 그 둘레를 360도 돌아가며 봅니다. 화면 위쪽에 읽을거리가 뜨고, 수첩에 있는 천체와 탐사선이면 글 아래에 문제 하나가 붙습니다. 이때 찍은 사진은 사진첩에는 들어가지만 사진 임무로는 치지 않습니다.": "Puts the chosen body, spacecraft or story place in the middle of the screen and looks at it from close by. Drag to go all the way round it. Something to read shows at the top, and for a body or a spacecraft that is in the notebook there is one question under it. Photos taken here go into the album but do not count for photo missions.",
  "J 키 / 수첩 버튼. 위쪽의 \"가−\", \"가+\"로 글자 크기를 다섯 단계(85% → 150%)로 바꿉니다(수첩, 설정, 이 도움말이 함께 바뀝니다). 새 천체를 발견하고, 표면에 내려앉고, 사진 임무를 달성하면 기록됩니다. 위쪽 갈래(천체, 임무, 사진첩, 이야기, 탐사선, 코스)를 눌러 넘겨 보고(사진첩에서는 사진을 엽서 그림으로 저장할 수 있고, 코스 갈래 아래에는 하고 싶을 때만 하는 묘기 비행이 있습니다), 오른쪽 위 ✕나 Esc, J 키, 수첩 바깥을 누르면 닫힙니다.": "The J key / the notebook button. \"A−\" and \"A+\" at the top change the text size in five steps (85% → 150%) for the notebook, the settings and this help together. Finding a new body, touching down on a surface and completing a photo mission are written down. Press the tabs at the top (Bodies, Tasks, Album, Stories, Craft, Tours) to turn the pages (in the album a photo can be saved as a postcard picture, and under the tours is stunt flying for when you feel like it). The ✕ at the top right, Esc, the J key or a press outside the notebook closes it.",
- "태양, 여덟 행성, 위성 21개, 왜행성 둘, 핼리 혜성의 실제 표면 바로 앞까지 접근할 수 있습니다. 천체 내부로는 들어갈 수 없습니다. 천체 표면 사이의 빈 거리만 1/100(위성은 1/10)로 줄였습니다. 기본인 여행 배치는 오늘의 실제 천문 위치가 아닙니다. 다른 앱이나 탭으로 갔다 오면 그동안 멈춰 있다가 돌아오는 대로 이어집니다.": "You can go right up to the real surfaces of the Sun, the eight planets, 21 moons, two dwarf planets and Halley's Comet. You cannot go inside a body. Only the empty distances between surfaces are cut to 1/100 (1/10 for moons). The default tour layout is not where things really are in the sky today. If you go to another app or tab, the game waits and carries on when you come back.",
+ "태양, 여덟 행성, 위성 21개, 왜행성 둘, 핼리 혜성의 실제 표면 바로 앞까지 접근할 수 있습니다. 천체 내부로는 들어갈 수 없습니다. 천체 표면 사이의 빈 거리만 1/100(위성은 1/10)로 줄였습니다. 행성의 배치는 오늘의 실제 천문 위치가 아니며, 모두에게 같습니다. 다른 앱이나 탭으로 갔다 오면 그동안 멈춰 있다가 돌아오는 대로 이어집니다.": "You can go right up to the real surfaces of the Sun, the eight planets, 21 moons, two dwarf planets and Halley's Comet. You cannot go inside a body. Only the empty distances between surfaces are cut to 1/100 (1/10 for moons). The planets are not where they really are in the sky today, and they are where they are for everyone alike. If you go to another app or tab, the game waits and carries on when you come back.",
  "만든 이유": "Why I made this",
  "만든 사람": "Made by",
  "칼 세이건(1934 → 1996)을 기억하며": "In memory of Carl Sagan (1934 → 1996)",
@@ -2725,7 +2725,7 @@
  "이름을 Space Oddity로 정했습니다.": "The name was settled: Space Oddity.",
  "만들기 시작한 날: {}년 {}월 {}일": "Making began: {1}/{2}/{0}",
  "우주 탐험 오늘로 {}일째": "Day {0} of exploring space",
- "위쪽 맨 오른쪽의 톱니 버튼. 첫 쪽 \"Options\"에서 화면 비율, 행성 배치, 소리를 바꿉니다. 둘째 쪽이 이 도움말이고, 셋째 쪽에서 바뀐 것들을 봅니다. 앱으로 설치하는 방법도 거기에 있습니다.": "The gear button at the far right of the top. The first page, \"Options\", changes the language, the screen shape, the planet layout and the sounds. The second page is this help, and the third shows what has changed. How to install the game as an app is there too.",
+ "위쪽 맨 오른쪽의 톱니 버튼. 첫 쪽 \"Options\"에서 화면 비율, 별자리 이름, 소리를 바꿉니다. 둘째 쪽이 이 도움말이고, 셋째 쪽에서 바뀐 것들을 봅니다. 앱으로 설치하는 방법도 거기에 있습니다.": "The gear button at the far right of the top. The first page, \"Options\", changes the language, the screen shape, the constellation names and the sounds. The second page is this help, and the third shows what has changed. How to install the game as an app is there too.",
  "영어를 고를 수 있습니다(설정의 Options). 화면 글자와 이야기 글이 모두 영어로 나옵니다.": "You can choose English (Settings, Options). Every word on screen and every story is in English.",
  "설정의 \"Changes\"가 만들기 시작한 날부터의 기록을 모두 보여 줍니다.": "\"Changes\" in the settings shows everything since the day the making began.",
  "일본어와 중국어를 고를 수 있습니다(설정의 Options). \"Changes\" 쪽도 고른 언어로 나옵니다.": "You can choose Japanese or Chinese (Settings, Options). The \"Changes\" page comes in the chosen language too.",
@@ -4659,5 +4659,6 @@
  "배경 음악이 서른 곡 늘어 쉰 곡이 되었습니다.": "Thirty new tunes: the music now has fifty.",
  "별자리 이름": "Constellation names",
  "하늘에 별자리와 은하, 성운의 이름을 띄웁니다. 꺼도 이름을 누르던 자리를 누르면 그 이야기가 뜹니다.": "Shows the names of constellations, galaxies and nebulae on the sky. Off, a press where a name stood still tells its story.",
- "설정에서 하늘의 별자리 이름을 켜고 끌 수 있습니다.": "Constellation names on the sky can be turned on and off in the settings."
+ "설정에서 하늘의 별자리 이름을 켜고 끌 수 있습니다.": "Constellation names on the sky can be turned on and off in the settings.",
+ "행성 배치 설정을 없앴습니다. 모두가 같은 여행 배치에서 같은 자리의 행성을 봅니다.": "The planet layout setting is gone: everyone sees the travel layout, the planets in the same places."
 }

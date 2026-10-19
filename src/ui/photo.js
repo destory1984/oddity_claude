@@ -86,7 +86,7 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
           // With a link to the place, so the friend it goes to can stand there too (the user,
           // 2026-10-19: "사진도 찰칵하고, SNS나 카톡에 공유하는 기능도 만들자").
           const info = shareInfo();
-          await navigator.share({ files: [file], title: 'Space Oddity', ...(info ? { text: `${info.text} ${info.url}` } : {}) });
+          await navigator.share({ files: [file], title: 'Space Oddity', ...(info ? { text: `${info.text}\n${info.url}` } : {}) });
         } catch (e) {
           if (e.name !== 'AbortError') throw e;
         }

@@ -24,7 +24,7 @@ import { addPhoto, removePhoto, photoPlace, photoCaption } from './core/album.js
 import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } from './core/postcard.js';
 import { isLocalHost } from './core/count.js';
 import { pickSpot, fromSpot, toSpot, NEAR_EARTH_ONLY } from './core/startSpots.js';
-import { encodeSpot, decodeSpot, encodeSky, decodeSky } from './core/sharePlace.js';
+import { encodePlace, decodePlace, SHARE_BASE } from './core/sharePlace.js';
 import { teleportSpot, visited } from './core/teleport.js';
 import { behindBody, skyBehind, lostInGlare, nearestBodies, nearbyMoons } from './core/markers.js';
 import { FACTS } from './core/facts.js';
@@ -165,14 +165,10 @@ const START_NEAR = import.meta.env.DEV ? { id: 'earth', fromCentreKm: 20000 } : 
 
 // Two layouts: 'tour' is the hand-made one (planets spread round the Sun); 'today' puts
 // the planets where they really are on the day the game is opened.
-// A place a friend sent (core/sharePlace.js): ?at= where they stood and ?sky= the sky they
-// saw it under. This sitting opens there under that sky (their layout, the day they
-// opened the game, their game clock); the player's own layout setting is left as it is.
-const shared = (() => {
-  const query = new URLSearchParams(location.search);
-  const spot = decodeSpot(query.get('at'), BODIES.map((b) => b.id));
-  return spot ? { spot, sky: decodeSky(query.get('sky')) } : null;
-})();
+// A place a friend sent (core/sharePlace.js): ?p= where they stood and the sky they saw it
+// under. This sitting opens there under that sky (their layout, the moment they opened
+// the game, their game clock); the player's own layout setting is left as it is.
+const shared = decodePlace(new URLSearchParams(location.search).get('p'), BODIES.map((b) => b.id));
 const layout = shared?.sky?.layout ?? loadLayout();
 // (A test may set the day: sessionStorage 'oddity.day', as 2027-08-02.)
 const openedAt = (() => {
@@ -3751,9 +3747,12 @@ ${STORY_MORE[target.id]}` : told };
   function placeShare() {
     if (inExo(state.position)) return null;
     const body = nearestSurface(state.position, bodies.filter((b) => !b.exo)).body;
-    const spot = encodeSpot(toSpot(state, body, bodyById('sun', bodies)));
-    const sky = encodeSky({ layout, openedAt: (shared?.sky ? new Date(shared.sky.openedAt) : openedAt).getTime(), simTime });
-    const url = `${location.origin}${import.meta.env.BASE_URL}?at=${spot}&sky=${sky}`;
+    // (Always the published game: a link from the dev server went out as localhost.)
+    const line = encodePlace({
+      spot: toSpot(state, body, bodyById('sun', bodies)),
+      sky: { layout, openedAt: (shared?.sky ? new Date(shared.sky.openedAt) : openedAt).getTime(), simTime },
+    });
+    const url = `${SHARE_BASE}?p=${line}`;
     return { url, text: t`${named(body.id)?.name ?? body.name} 곁에서 보내는 내 자리야. 열면 같은 하늘, 같은 자리에서 시작해.` };
   }
   $('shareButton').addEventListener('click', async () => {
@@ -3768,7 +3767,7 @@ ${STORY_MORE[target.id]}` : told };
       }
     }
     try {
-      await navigator.clipboard.writeText(`${info.text} ${info.url}`);
+      await navigator.clipboard.writeText(`${info.text}\n${info.url}`);
       toast.show(t('자리 링크를 복사했습니다.\n카톡이나 SNS에 붙여 넣으세요.'));
     } catch {
       toast.show(info.url);

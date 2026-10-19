@@ -1,32 +1,36 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { encodeSpot, decodeSpot, encodeSky, decodeSky } from '../src/core/sharePlace.js';
+import { encodePlace, decodePlace, SHARE_BASE } from '../src/core/sharePlace.js';
 
 const IDS = ['earth', 'moon', 'saturn'];
+const PLACE = {
+  spot: { body: 'earth', at: [18640.1, 7248.9, 4.3], ahead: [-0.932, -0.362, 0], above: [-0.362, 0.932, 0] },
+  sky: { layout: 'tour', openedAt: 1792379325451, simTime: 1227.4 },
+};
 
-test('a place goes into one short line and comes back out of it', () => {
-  const spot = { body: 'moon', at: [26.31, 1833.24, -150.4], ahead: [0.16843, -0.19991, 0.96521], above: [0.0344, 0.97982, 0.197] };
-  const line = encodeSpot(spot);
-  assert.equal(line, 'moon_26.3_1833.2_-150.4_0.168_-0.2_0.965_0.034_0.98_0.197');
-  assert.match(line, /^[a-z0-9._-]+$/i);
-  const back = decodeSpot(line, IDS);
-  assert.equal(back.body, 'moon');
-  assert.deepEqual(back.at, [26.3, 1833.2, -150.4]);
-  assert.ok(Math.abs(Math.hypot(...back.ahead) - 1) < 1e-9 && Math.abs(Math.hypot(...back.above) - 1) < 1e-9);
-  assert.ok(back.ahead.every((n, i) => Math.abs(n - spot.ahead[i]) < 0.002));
+test('a place and its sky go into one short line and come back out of it', () => {
+  const line = encodePlace(PLACE);
+  assert.match(line, /^[a-z0-9.-]+$/);
+  // (The first try took 107 characters, two lines of a chat bubble.)
+  assert.ok(line.length <= 50, `${line.length}: ${line}`);
+  const back = decodePlace(line, IDS);
+  assert.equal(back.spot.body, 'earth');
+  assert.deepEqual(back.spot.at, [18640, 7249, 4]);
+  assert.ok(back.spot.ahead.every((n, i) => Math.abs(n - PLACE.spot.ahead[i]) < 0.002));
+  assert.ok(back.spot.above.every((n, i) => Math.abs(n - PLACE.spot.above[i]) < 0.002));
+  assert.deepEqual(back.sky, { layout: 'tour', openedAt: 1792379325000, simTime: 1227 });
+  assert.equal(decodePlace(encodePlace({ ...PLACE, sky: { ...PLACE.sky, layout: 'today' } }), IDS).sky.layout, 'today');
 });
 
 test('a line that is not a place is turned away', () => {
-  for (const line of [null, '', 'moon', 'pluto_1_2_3_0_0_1_0_1_0', 'moon_1_2_3_0_0_1_0_1', 'moon_1_2_x_0_0_1_0_1_0',
-    'moon_1_2_3_0_0_0_0_1_0', 'moon_1_2_3_0_0_1_0_0_1', 'moon_1e12_2_3_0_0_1_0_1_0', 'moon_1__3_0_0_1_0_1_0', 'x'.repeat(300)]) {
-    assert.equal(decodeSpot(line, IDS), null, String(line));
+  const good = encodePlace(PLACE).split('.');
+  const bad = (i, value) => good.map((p, j) => (j === i ? value : p)).join('.');
+  for (const line of [null, '', 'earth', bad(0, 'pluto'), bad(2, 'x!'), bad(2, ''), good.map((p, j) => (j >= 4 && j <= 6 ? '0' : p)).join('.'),
+    bad(10, 'q'), bad(11, '-5'), good.slice(1).join('.'), 'x'.repeat(300)]) {
+    assert.equal(decodePlace(line, IDS), null, String(line));
   }
 });
 
-test('the sky goes along: the layout, when the game was opened, the game clock', () => {
-  const line = encodeSky({ layout: 'today', openedAt: 1797600000123, simTime: 3190.04 });
-  assert.equal(line, 'd.1797600000123.3190');
-  assert.deepEqual(decodeSky(line), { layout: 'today', openedAt: 1797600000123, simTime: 3190 });
-  assert.deepEqual(decodeSky(encodeSky({ layout: 'tour', openedAt: 5, simTime: 12.5 })), { layout: 'tour', openedAt: 5, simTime: 12.5 });
-  for (const bad of [null, '', 'x.1.2', 'd.1', 'd.-1.2', 'd.1.2.3.4', 'd.1.e5']) assert.equal(decodeSky(bad), null, String(bad));
+test('the link is the published game, whatever page it is sent from', () => {
+  assert.equal(SHARE_BASE, 'https://destory1984.github.io/oddity_claude/');
 });

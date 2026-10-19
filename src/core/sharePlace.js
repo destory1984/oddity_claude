@@ -1,59 +1,67 @@
 // A place to send to a friend (the user, 2026-10-19: "게임 상에서 내 위치를 다른 플레이어에게
-// 공유할 수 있는 기능 만들자"): where she stands and the way she looks, as one line for a
-// link's address. There is no server: the place goes in the link itself, and the game
-// opened by it starts there. Nothing else goes in it.
+// 공유할 수 있는 기능 만들자"): where she stands and the way she looks, and the sky she saw
+// it under, as one short line for a link's address. There is no server: the place goes in
+// the link itself, and the game opened by it starts there. Nothing else goes in it.
 //
-// The line is a spot of core/startSpots.js (toSpot / fromSpot): the body measured from,
-// then `at` (km, toward the Sun, up, aside), `ahead` and `above`, all joined by "_":
-//   moon_26.3_1833.2_150.4_0.168_-0.2_0.965_0.034_0.98_0.197
-// Only letters, digits, ".", "-" and "_", so it needs no escaping in an address.
+// The worlds stand where the layout, the moment the game was opened and the game clock
+// put them, and those differ from one player to another ("그런데 사람마다 천체 위치가 다를
+// 수 있잖아"), so the sky goes along with the place.
+//
+// One line, ?p=, parts joined by ".", numbers as whole numbers in base 36 with a "-" for
+// those under zero (the first try, written out in decimals, filled two lines of a
+// KakaoTalk bubble: "이렇게 나오는데?"):
+//   body . at (3, km) . ahead (3) . above (3, both in thousandths) . t|d . opened (s) . clock (s)
+//   earth.ec4.5lx.4.-pw.-a2.0.-a2.pw.0.t.u2h1e9.y3
 
-const SEP = '_';
+// The game as published: a link sent from anywhere (a phone's app, the dev server) opens
+// it, and its page gives KakaoTalk and the rest a picture card (index.html og:image).
+export const SHARE_BASE = 'https://destory1984.github.io/oddity_claude/';
+
+const SEP = '.';
 // No place of the game is farther than this from the body it is measured from (km).
 const FAR_KM = 1e10;
 
-const short = (n, digits) => String(Number(n.toFixed(digits)));
+const b36 = (n) => Math.round(n).toString(36);
+const from36 = (s) => {
+  if (!/^-?[0-9a-z]{1,12}$/.test(s)) return NaN;
+  return parseInt(s, 36);
+};
 
-// The sky she saw it under (the user, the same day: "그런데 사람마다 천체 위치가 다를 수
-// 있잖아"): the worlds stand where the layout, the day the game was opened and the game
-// clock put them, and those differ from one player to another. So the link carries them
-// too, "t" or "d" (the travel layout, today's sky), the opening time in ms and the game
-// clock in seconds: d.1797600000000.3190.5. The game opened by it lays the sky out so.
-export function encodeSky({ layout, openedAt, simTime }) {
-  return [layout === 'today' ? 'd' : 't', Math.round(openedAt), short(simTime, 1)].join('.');
+// place: { spot: { body, at, ahead, above }, sky: { layout, openedAt (ms), simTime (s) } }.
+export function encodePlace({ spot, sky }) {
+  return [
+    spot.body,
+    ...spot.at.map(b36),
+    ...spot.ahead.map((n) => b36(n * 1000)),
+    ...spot.above.map((n) => b36(n * 1000)),
+    sky.layout === 'today' ? 'd' : 't',
+    b36(sky.openedAt / 1000),
+    b36(sky.simTime),
+  ].join(SEP);
 }
 
-// { layout, openedAt, simTime }, or null when the line is not one.
-export function decodeSky(line) {
-  if (typeof line !== 'string' || line.length > 60) return null;
-  const match = line.match(/^([td])\.(\d{1,15})\.(\d{1,12}(?:\.\d)?)$/);
-  if (!match) return null;
-  const simTime = Number(match[3]);
-  if (!Number.isFinite(simTime)) return null;
-  return { layout: match[1] === 'd' ? 'today' : 'tour', openedAt: Number(match[2]), simTime };
-}
-
-export function encodeSpot({ body, at, ahead, above }) {
-  return [body, ...at.map((n) => short(n, 1)), ...ahead.map((n) => short(n, 3)), ...above.map((n) => short(n, 3))].join(SEP);
-}
-
-// The spot in a line, or null when it is not one: a body not in `bodyIds`, a number
+// The place in a line, or null when it is not one: a body not in `bodyIds`, a number
 // missing or not a number, a place too far, a way of looking that is no way.
-export function decodeSpot(line, bodyIds) {
-  if (typeof line !== 'string' || line.length > 200) return null;
+export function decodePlace(line, bodyIds) {
+  if (typeof line !== 'string' || line.length > 160) return null;
   const parts = line.split(SEP);
-  if (parts.length !== 10 || !bodyIds.includes(parts[0])) return null;
-  const numbers = parts.slice(1).map(Number);
-  if (numbers.some((n) => !Number.isFinite(n)) || parts.slice(1).some((p) => p.trim() === '')) return null;
-  const at = numbers.slice(0, 3);
+  if (parts.length !== 13 || !bodyIds.includes(parts[0]) || !['t', 'd'].includes(parts[10])) return null;
+  const numbers = [...parts.slice(1, 10), ...parts.slice(11)].map(from36);
+  if (numbers.some((n) => !Number.isFinite(n))) return null;
   const unit = (v) => {
     const length = Math.hypot(...v);
     return length > 1e-6 ? v.map((n) => n / length) : null;
   };
+  const at = numbers.slice(0, 3);
   const ahead = unit(numbers.slice(3, 6));
   const above = unit(numbers.slice(6, 9));
   if (!ahead || !above || Math.hypot(...at) > FAR_KM) return null;
   // (The top of the view must not lie along the way she looks.)
   if (Math.abs(ahead.reduce((sum, n, i) => sum + n * above[i], 0)) > 0.99) return null;
-  return { body: parts[0], at, ahead, above };
+  const [opened, clock] = numbers.slice(9);
+  if (opened < 0 || clock < 0) return null;
+  return {
+    spot: { body: parts[0], at, ahead, above },
+    sky: { layout: parts[10] === 'd' ? 'today' : 'tour', openedAt: opened * 1000, simTime: clock },
+  };
 }

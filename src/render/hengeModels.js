@@ -20,7 +20,7 @@ const GRASS = [[0.025, 0.04, 0.05], [0.16, 0.2, 0.15], [0.3, 0.42, 0.2]];
 const STONE = [[0.05, 0.055, 0.08], [0.3, 0.29, 0.31], [0.55, 0.53, 0.5]];
 const stage = (colours, dawn, day) => (day > 0 ? mix(colours[1], colours[2], day) : mix(colours[0], colours[1], dawn));
 
-const lit = (scene, name) => {
+export const lit = (scene, name) => {
   const m = new StandardMaterial(name, scene);
   m.disableLighting = true;
   m.diffuseColor = new Color3(0, 0, 0);
@@ -28,7 +28,7 @@ const lit = (scene, name) => {
   return m;
 };
 // Light added over what is behind it (the Sun, its glow, the light on the grass).
-const glowing = (scene, name, texture) => {
+export const glowing = (scene, name, texture) => {
   const m = lit(scene, name);
   m.emissiveTexture = texture;
   m.opacityTexture = texture;
@@ -38,7 +38,7 @@ const glowing = (scene, name, texture) => {
   return m;
 };
 // A soft round spot of light: white in the middle, gone at the edge.
-function spotTexture(scene, name, stops) {
+export function spotTexture(scene, name, stops) {
   const tex = new DynamicTexture(name, { width: 128, height: 128 }, scene, true);
   const ctx = tex.getContext();
   const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);

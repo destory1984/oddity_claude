@@ -7,6 +7,7 @@ import { LANDER_TEXTS } from '../core/landerTexts.js';
 import { huygensPieces } from './huygensStage.js';
 import { DINO_BUILD, dinoGround } from './dinoModels.js';
 import { hengePieces } from './hengeModels.js';
+import { cheomPieces } from './cheomModels.js';
 import {
   QUARTER, part, cyl, group, aim, box, drum, rod, dish, wing, rtg, nozzle, truss, fuse,
 } from './craftParts.js';
@@ -1153,7 +1154,8 @@ const landmarkPieces = (id, { kind, by, body, say, say2, dinos }) => {
     const pieces = kind === 'sunrise' ? sunrisePieces(scene, name)
       : kind === 'huygens' ? huygensPieces(scene, name)
         : kind === 'solstice' ? hengePieces(scene, name)
-          : { photo: printOf(scene, `${name}Photo`, `stories/${id}.jpg`, 1.05) };
+          : kind === 'starNight' ? cheomPieces(scene, name)
+            : { photo: printOf(scene, `${name}Photo`, `stories/${id}.jpg`, 1.05) };
     if (kind === 'photo' || kind === 'impact') {
       const flash = new TransformNode(`${name}Flash`, scene);
       part(CreateSphere(`${name}FlashBall`, { diameter: 1, segments: 14 }, scene), flash, mats.white, [0, 0, 0]);
@@ -1183,7 +1185,8 @@ const landmarkPieces = (id, { kind, by, body, say, say2, dinos }) => {
       }
     }
     if (say) pieces.bubble = sayBubble(scene, `${name}Bubble`, say);
-    // (Stonehenge's second, once the light has reached the middle.)
+    // (A second bubble later on: Stonehenge's once the light has reached the middle,
+    // Cheomseongdae's as the stars' trails have grown.)
     if (say2) pieces.bubble2 = sayBubble(scene, `${name}Bubble2`, say2);
     return { pieces, flames: {}, lit: pieces.flash ? ['flash'] : [] };
   };

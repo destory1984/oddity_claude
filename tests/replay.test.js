@@ -112,7 +112,7 @@ test('Curiosity has a scene of its own day, told in four lines', () => {
   assert.equal(replayFor('curiosity').day, '2012년 8월 6일');
   assert.equal(replayFor('curiosity').lines.length, 4);
   assert.match(replayFrame('curiosity', 17).text, /게일 분화구/);
-  assert.equal(Object.keys(REPLAYS).length, 151);
+  assert.equal(Object.keys(REPLAYS).length, 152);
   assert.equal(replayFor('viking1').day, '1976년 7월 20일');
   assert.match(replayFrame('viking1', 17).text, /25초/);
 });
@@ -528,4 +528,16 @@ test('Stonehenge at midsummer dawn: thirty sarsens, five trilithons open to the 
   assert.ok(at(2).sky.dawn < 0.1 && at(14).sky.dawn === 1);
   assert.ok(at(7).bubble.shown && !at(7).bubble2.shown && at(24).bubble2.shown && !at(24).bubble.shown);
   assert.deepEqual(scene.sounds, [[19, 'discovered']]);
+});
+
+test('Cheomseongdae on a clear night: 27 courses narrowing upward, a lamp in the window, the stars wheeling round the north star with growing trails, a shooting star', async () => {
+  const { CHEOM, cheomCourse } = await import('../src/core/landmarkStages.js');
+  const radii = Array.from({ length: CHEOM.courses }, (_, k) => cheomCourse(k).r);
+  assert.ok(radii.every((r, k) => k === 0 || r < radii[k - 1]));
+  assert.ok(Math.abs(cheomCourse(CHEOM.courses - 1).y + cheomCourse(CHEOM.courses - 1).h - CHEOM.base - CHEOM.height) < 1e-9);
+  const at = (t) => replayFrame('cheomseongdae', t).stage;
+  assert.ok(at(10).stars.wheel > at(2).stars.wheel && at(25).stars.trail > at(8).stars.trail);
+  assert.ok(at(8).tower.lamp > 0.8);
+  assert.ok(!at(15).meteor.shown && at(16.4).meteor.shown && !at(17).meteor.shown);
+  assert.ok(at(7).bubble.shown && at(24).bubble2.shown && !at(24).bubble.shown);
 });

@@ -31,6 +31,9 @@ export const LANDMARK_TIMES = {
   // Stonehenge's midsummer dawn: the sky pales, the Sun comes up by the Heel Stone, and
   // its first light runs down the axis to the middle of the ring at downAt.
   solstice: { seconds: 30, downAt: 19, lines: [0, 7, 13, 20], sounds: [[19, 'discovered']] },
+  // Cheomseongdae on a clear night: the stars wheel round the north star, leaving trails,
+  // a lamp burns in the window, and a shooting star crosses at downAt.
+  starNight: { seconds: 30, downAt: 16.5, lines: [0, 7, 14, 21], sounds: [[16.5, 'discovered']] },
 };
 
 // Huygens's night (render/huygensStage.js): Mars turns in the eyepiece once every
@@ -192,6 +195,53 @@ function solsticeStage(t) {
   };
 }
 
+// Cheomseongdae in Gyeongju, built in Queen Seondeok's time (about 632 → 647; the user,
+// 2026-10-20: "첨성대 장면도 같이 만들어"; render/cheomModels.js builds it). In the model's
+// units, x across, z away from the eye, which looks north at its south window: a unit
+// is about 9.5 m. 27 courses of granite rising 0.9 from a base 0.27 across at the foot
+// to 0.15 at the top, curving in like a bottle; a square platform of two tiers under it;
+// the window, about 1 m square, at courses 13 to 15; the frame of long stones laid two
+// deep in the shape of 井 on top. (The real tower is 9.17 m tall, 5.17 m across at the
+// foot.) The tower stands right of the middle; the north star is up to its left, lower
+// than its true 36 degrees so that it is in a phone's view under the telling.
+export const CHEOM = {
+  x: 0.3,
+  courses: 27,
+  base: 0.07,
+  height: 0.9,
+  foot: 0.27,
+  top: 0.15,
+  window: { from: 12, to: 15, width: 0.1 },
+  pole: { x: -0.55, y: 1.05, z: 3 },
+};
+// The radius of course k (0 at the foot), its bottom (y) and its height.
+export function cheomCourse(k) {
+  const { courses, base, height, foot, top } = CHEOM;
+  const u = k / (courses - 1);
+  const h = height / courses;
+  return { r: top / 2 + ((foot - top) / 2) * (1 - u) ** 1.7, y: base + k * h, h };
+}
+// How far the sky has turned round the north star, t seconds in (radians; anticlockwise,
+// as the northern sky turns seen facing north), and how long the trails behind each star
+// are: drawn faster than the true quarter of a degree a minute, about 2 hours in 30 s.
+export const cheomTurn = (t) => 0.018 * t;
+export const cheomTrail = (t) => 0.35 * ease(t, 4, 26);
+function starNightStage(t) {
+  const said = up(t, 4.5, 11);
+  const said2 = up(t, 21.5, 28.5);
+  // The shooting star: across the upper left in under a second.
+  const fall = clamp((t - 16) / 0.9);
+  const { pole } = CHEOM;
+  return {
+    night: { x: 0, y: 0, z: 0 },
+    tower: { x: CHEOM.x, y: 0, z: 0, lamp: ease(t, 1, 4) * (0.88 + 0.08 * Math.sin(t * 7.3) + 0.04 * Math.sin(t * 17.1)) },
+    stars: { x: pole.x, y: pole.y, z: pole.z, wheel: cheomTurn(t), trail: cheomTrail(t), fade: ease(t, 0, 2.5) },
+    meteor: { x: -0.2 - 1.3 * fall, y: 1.25 - 0.45 * fall, z: 2.9, fade: Math.sin(Math.PI * fall), shown: t > 16 && t < 16.9 },
+    bubble: { x: -0.55, y: 0.75, scale: Math.max(0.01, 0.8 * said), shown: said > 0.01 },
+    bubble2: { x: -0.55, y: 0.75, scale: Math.max(0.01, 0.8 * said2), shown: said2 > 0.01 },
+  };
+}
+
 // sayBy: 'craft' (the bubble goes along with what flies or falls) or 'place' (it stands
 // by the picture). dinos: Chicxulub's three stand and watch (DINOS).
 export function landmarkStage(kind, sayBy = 'craft', { dinos = false } = {}) {
@@ -240,6 +290,7 @@ export function landmarkStage(kind, sayBy = 'craft', { dinos = false } = {}) {
     };
   }
   if (kind === 'solstice') return solsticeStage;
+  if (kind === 'starNight') return starNightStage;
   if (kind === 'sunrise') {
     return (t) => {
       // The Sun's middle over the ground: up till most of its disc is over the rim, a

@@ -701,6 +701,21 @@ export const LANDMARKS = {
     say: t('태양이 저 돌 옆으로 뜰 거야'),
     say2: t('이 아침에 맞춰 돌을 세웠구나'),
   },
+  // Cheomseongdae on a clear night (2026-10-20, the user: "첨성대 장면도 같이 만들어"):
+  // stones again, not drawings (render/cheomModels.js).
+  cheomseongdae: {
+    kind: 'starNight', by: '', body: 'earth', sayBy: 'place',
+    name: t('첨성대의 맑은 밤'),
+    day: t('7세기 중엽'),
+    lines: [
+      t('7세기 중엽, 선덕여왕 때의 경주. 맑은 밤, 왕궁 가까운 들판에 돌을 쌓아 올린 탑이 서 있습니다.'),
+      t('높이 9.17m, 아래 지름 5.17m. 화강암을 27단으로 쌓아, 아래는 넓고 위로 갈수록 좁아지는 병 모양입니다.'),
+      t('남쪽으로 난 네모난 창은 꼭 중간 높이에 있습니다. 꼭대기에는 긴 돌을 井 자 모양으로 두 겹 얹었습니다.'),
+      t('별들은 북극성을 가운데 두고 밤새 천천히 돕니다. 신라 사람들은 여기서 하늘의 일을 살폈다고 전합니다.'),
+    ],
+    say: t('신라 사람들도 이 별을 봤겠지'),
+    say2: t('별들이 북극성을 돌고 있어'),
+  },
 };
 
 export const LANDMARK_SCENES = Object.fromEntries(Object.entries(LANDMARKS).map(([id, told]) => [id, landmarkScene(told)]));

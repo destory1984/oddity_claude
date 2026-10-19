@@ -1787,11 +1787,26 @@ ${STORY_MORE[target.id]}` : told };
     // Coming back: drawn once unseen, and that picture gathers out of the dust.
     scanner.setOn(true);
     canvas.style.visibility = 'hidden';
-    requestAnimationFrame(() => requestAnimationFrame(() => {
+    // (It may take some frames to be drawn again: the first time after a start it was
+    // still blank two frames on, and nothing gathered. Waited for, up to twenty.)
+    const drawn = () => {
+      const pen = canvas.getContext('2d');
+      const row = pen.getImageData(0, Math.floor(canvas.height * 0.62), canvas.width, 1).data;
+      for (let i = 3; i < row.length; i += 4) if (row[i] > 0) return true;
+      return false;
+    };
+    let tries = 0;
+    const gather = () => {
+      if (!scanner.on()) return;
+      if (!drawn() && tries++ < 20) {
+        requestAnimationFrame(gather);
+        return;
+      }
       scannerDust.play('dust', pictureOf(canvas), false, () => {
         if (scanner.on()) canvas.style.visibility = '';
       });
-    }));
+    };
+    requestAnimationFrame(gather);
   }
   try {
     showScanner(localStorage.getItem(SCANNER_KEY) !== '0');

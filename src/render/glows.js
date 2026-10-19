@@ -11,7 +11,7 @@ import { SPIN_DAY_S, EARTH_START_SPIN, spinAngle, cloudSpin } from '../core/surf
 import { cometActivity } from '../core/comet.js';
 import { meteorSpot } from '../core/meteors.js';
 import {
-  AURORAS, auroraBand, auroraStorm, STEVE, PEARL_CLOUDS, PULSE, STORMS, LIGHTNING_LIFE_S, lightningGap, lightningGlow, TYPHOON, typhoonUp, typhoonStrike,
+  AURORAS, auroraBand, auroraStorm, STEVE, PEARL_CLOUDS, PULSE, STORMS, LIGHTNING_LIFE_S, lightningGap, lightningGlow,
   PLUMES, PLUME_DAY_S, PLUME_RANGE_RADII, plumeUp,
   IMPACT_RANGE_KM, IMPACT_LIFE_S, IMPACT_SIZE_KM, impactGap, impactGlow,
   NIGHT_CLOUDS, sheetBand, FOOTPRINT, footprintUp, SODIUM_TAIL, JETS, jetDirections, SPRITE, spriteGlow, ELVES, elvesRing, BLUE_JET, blueJetGlow, E_RING, FAR_PAIR,
@@ -492,8 +492,6 @@ export function createGlows(scene, bodies) {
     // coming: strokes still to come in the storm that last flashed, [{ in: seconds, up }].
     return { storm, flashes, coming: [], wait: 1 };
   });
-  // Seconds until the typhoon's next stroke (core/glows.js TYPHOON).
-  let typhoonWait = 1;
 
   // Impact flashes on the Moon: a white point in a small warm glow.
   const spark = new DynamicTexture('impactSpark', { width: 64, height: 64 }, scene, true);
@@ -810,21 +808,6 @@ export function createGlows(scene, bodies) {
         for (const stroke of set.coming) {
           stroke.in -= dt;
           if (stroke.in <= 0) strike(stroke.up);
-        }
-        // The typhoon's own lightning, while it is in the dark and on the side she sees.
-        if (storm.body === TYPHOON.body) {
-          const eye = typhoonUp(cloudSpin(spinAngle(SPIN_DAY_S.earth, elapsed * TIME_SCALE, EARTH_START_SPIN)));
-          const toSun = sunFrom(world);
-          const dark = eye[0] * toSun.x + eye[1] * toSun.y + eye[2] * toSun.z < -0.05;
-          const seen = (eye[0] * out[0] + eye[1] * out[1] + eye[2] * out[2]) / distance > 0.1;
-          typhoonWait -= dt;
-          if (typhoonWait <= 0) {
-            typhoonWait = TYPHOON.gapS[0] + Math.random() * (TYPHOON.gapS[1] - TYPHOON.gapS[0]);
-            if (dark && seen) {
-              strike(typhoonStrike(Math.random, eye, world.radiusKm), TYPHOON.sizeKm);
-              lit = storm.id;
-            }
-          }
         }
         set.coming = set.coming.filter((stroke) => stroke.in > 0);
       } else {

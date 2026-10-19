@@ -484,7 +484,6 @@ export function glowsNear(bodies, position, elapsedS = null) {
   // Three on Earth (v0.1.192): the typhoon and the volcano's ash from over the day
   // side, the fishing lamps of the East Sea from over the night side. (Where on the
   // globe each is, the notice says: the turn of the Earth is not known here.)
-  if (near('earth', TELL_RADII.typhoon) && sun && side('earth', sun.position) > 0.2) found.push('typhoon:earth');
   if (near('earth', TELL_RADII.ash) && sun && side('earth', sun.position) > 0.2) found.push('ash:earth');
   if (near('earth', TELL_RADII.boats) && sun && side('earth', sun.position) < -0.2) found.push('boats:earth');
   // Earth's weather (v0.2.36; the vortex street behind Jeju was taken out in v0.2.76): ship tracks and

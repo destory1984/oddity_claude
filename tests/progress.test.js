@@ -116,10 +116,10 @@ test('a log saved when there were 75 slots still reads, as 75 of 89', () => {
   };
   const read = sanitizeProgress(JSON.parse(JSON.stringify(old)), BODIES, MISSIONS);
   const summary = summarize(read, BODIES, MISSIONS);
-  assert.deepEqual(score(summary), { done: 75, total: 103 });
+  assert.deepEqual(score(summary), { done: 75, total: 107 });
   assert.equal(isComplete(summary), false);
-  // With the 127 story places, 21 missions and 41 bodies the same log is 75 of 230.
-  assert.deepEqual(score(summarize(sanitizeProgress(old, BODIES, MISSIONS, STORIES), BODIES, MISSIONS, STORIES)), { done: 75, total: 230 });
+  // With the 127 story places, 21 missions and 43 bodies the same log is 75 of 234.
+  assert.deepEqual(score(summarize(sanitizeProgress(old, BODIES, MISSIONS, STORIES), BODIES, MISSIONS, STORIES)), { done: 75, total: 234 });
 });
 
 test('recordStories keeps the first visit only', () => {

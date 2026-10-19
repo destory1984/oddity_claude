@@ -10,9 +10,13 @@ const dist = (a, b) => Math.hypot(...sub(a, b));
 const near = (a, b, eps) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 const at = (t, id) => bodyById(id, bodiesAt(t));
 
-test('four new bodies with real radii and kinds, two more comets, then six small bodies: 41 in all', () => {
-  assert.equal(BODIES.length, 41);
-  assert.deepEqual(BODIES.slice(-6).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
+test('four new bodies with real radii and kinds, two more comets, six small bodies and two visitors from between the stars: 43 in all', () => {
+  assert.equal(BODIES.length, 43);
+  assert.deepEqual(BODIES.slice(-2).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
+    ['oumuamua', 'interstellar', 0.08, 'sun'],
+    ['atlas3i', 'comet', 1, 'sun'],
+  ]);
+  assert.deepEqual(BODIES.slice(-8, -2).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
     ['vesta', 'asteroid', 262.7, 'sun'],
     ['bennu', 'asteroid', 0.245, 'sun'],
     ['ryugu', 'asteroid', 0.448, 'sun'],
@@ -20,11 +24,11 @@ test('four new bodies with real radii and kinds, two more comets, then six small
     ['dimorphos', 'moon', 0.075, 'didymos'],
     ['apophis', 'asteroid', 0.17, 'sun'],
   ]);
-  assert.deepEqual(BODIES.slice(-8, -6).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
+  assert.deepEqual(BODIES.slice(-10, -8).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
     ['haleBopp', 'comet', 30, 'sun'],
     ['churyumov', 'comet', 2, 'sun'],
   ]);
-  assert.deepEqual(BODIES.slice(-12, -8).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
+  assert.deepEqual(BODIES.slice(-14, -10).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
     ['ceres', 'dwarf', 469.7, 'sun'],
     ['pluto', 'dwarf', 1188.3, 'sun'],
     ['charon', 'moon', 606, 'pluto'],
@@ -108,4 +112,14 @@ test('Ceres lives inside the asteroid belt, all the way round its orbit', () => 
   for (const t of [0, 400 * DAY, 800 * DAY, 1200 * DAY]) {
     assert.equal(inBelt(at(t, 'ceres').position, at(t, 'sun').position), true, `day ${t / DAY}`);
   }
+});
+
+test('the visitors from between the stars pass the Sun on open paths, again every three game years', () => {
+  near(at(-200 * DAY, 'atlas3i').sunKm / AU_KM, 1.357, 0.001);
+  near(at(300 * DAY, 'oumuamua').sunKm / AU_KM, 0.2559, 0.001);
+  // 500 days after perihelion 'Oumuamua is far out, still going.
+  assert.ok(at(800 * DAY, 'oumuamua').sunKm / AU_KM > 5);
+  assert.ok(at(800 * DAY, 'oumuamua').sunKm > at(700 * DAY, 'oumuamua').sunKm);
+  // One pass later it is there again.
+  near(at(300 * DAY + 3 * 365.25 * DAY, 'oumuamua').sunKm, at(300 * DAY, 'oumuamua').sunKm, 1);
 });

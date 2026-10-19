@@ -47,6 +47,8 @@ export const LANDED = {
   didymos: t('작은 달이 머리 위로 휙 지나가.'),
   dimorphos: t('여기가 다트가 부딪친 곳이구나.'),
   apophis: t('2029년엔 이 돌이 지구 곁을 지나간대.'),
+  oumuamua: t('다른 별에서 온 돌 위에 섰어!'),
+  atlas3i: t('이 얼음은 태양보다 나이가 많을지도 몰라.'),
 };
 
 // Coasting a long while with nothing to do. She is never in a hurry.

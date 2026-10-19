@@ -10,7 +10,7 @@ import { recordQuiz, createProgress, sanitizeProgress } from '../src/core/progre
 
 test('every reading has one question, answered by a phrase in the reading itself', () => {
   assert.deepEqual(Object.keys(READING_QUIZ), Object.keys(READINGS));
-  assert.equal(Object.keys(READING_QUIZ).length, 75);
+  assert.equal(Object.keys(READING_QUIZ).length, 77);
   for (const [id, quiz] of Object.entries(READING_QUIZ)) {
     const text = READINGS[id];
     assert.ok(quiz.question.endsWith('?') && quiz.question.length <= 40, id);

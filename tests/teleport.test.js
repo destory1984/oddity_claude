@@ -96,7 +96,8 @@ test('a body is seen from five radii, mostly sunlit, a little from above, clear 
       if (other.id !== body.id) assert.ok(gap(spot, other.position) > other.radiusKm + Math.min(100, other.radiusKm / 2), `${body.id} vista inside ${other.id}`);
     }
     // (Halley's orbit is steeply tilted, so its sunward side can point below the plane.)
-    if (body.kind !== 'comet') assert.ok(out[1] > 0, `${body.id} from above`);
+    // ('Oumuamua's path is tipped over too.)
+    if (body.kind !== 'comet' && body.kind !== 'interstellar') assert.ok(out[1] > 0, `${body.id} from above`);
     if (body.kind === 'star') continue;
     // The Sun is behind the traveler's shoulder: between 30 and 55 degrees off the line.
     const toSun = sub(sun.position, body.position);

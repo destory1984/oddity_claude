@@ -234,6 +234,8 @@ export const MEMOS = {
   didymos: { memo: t('1996년 발견. 이름은 그리스 말로 쌍둥이라고 읽었다.'), line: t('작은 달이 붙어 다녀. 쌍둥이네.') },
   dimorphos: { memo: t('2022.9.27 우주선을 소행성에 부딪쳐 길을 바꿨다고 신문에서 읽었다.'), line: t('지구를 지키는 연습을 한 곳이야.') },
   apophis: { memo: t('2004년 발견. 2029년에 지구에 부딪칠지 모른다고 신문에서 읽었다. 꼭 볼 것.'), line: t('아포피스다! 2029년에 지구 곁을 지나가.') },
+  oumuamua: { memo: t('2017.10. 하와이 망원경이 찾은 별 사이 손님이라고 신문에서 읽었다.'), line: t('하와이 말로 먼 데서 온 심부름꾼이래.') },
+  atlas3i: { memo: t('2025.7. 세 번째 별 사이 손님. 이번엔 꼬리 달린 혜성이라고 읽었다.'), line: t('다른 별에서 온 혜성이야! 엄청 빨라.') },
 };
 
 // The probes left alone out there: on reaching one, Sora says a word to it (story

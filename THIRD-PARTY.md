@@ -300,6 +300,8 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `didymos.jpg` | [Dimorphos and Didymos as seen by DART.webp](https://commons.wikimedia.org/wiki/File:Dimorphos_and_Didymos_as_seen_by_DART.webp) | NASA/Johns Hopkins APL; R. T. Daly et al., Nature 616 (2023), cropped | CC BY 4.0 |
 | `dimorphos.jpg` | [All dimorphos dart 0401930040 12262 01 iof imagedisplay-final.png](https://commons.wikimedia.org/wiki/File:All_dimorphos_dart_0401930040_12262_01_iof_imagedisplay-final.png) | NASA/Johns Hopkins APL | Public domain |
 | `apophis.jpg` | [PIA24168-Asteroid-99942Apophis-RadarImages-20210326.jpg](https://commons.wikimedia.org/wiki/File:PIA24168-Asteroid-99942Apophis-RadarImages-20210326.jpg) | NASA/JPL-Caltech and NSF/AUI/GBO | Public domain |
+| `oumuamua.jpg` | [Combined deep image of `Oumuamua from the VLT and other telescopes (annotated) (eso1737b).jpg](https://commons.wikimedia.org/wiki/File:Combined_deep_image_of_%60Oumuamua_from_the_VLT_and_other_telescopes_(annotated)_(eso1737b).jpg) | ESO/K. Meech et al. | CC BY 4.0 |
+| `atlas3i.jpg` | [3I-ATLAS Hubble 2025 Nov 30.jpg](https://commons.wikimedia.org/wiki/File:3I-ATLAS_Hubble_2025_Nov_30.jpg) | NASA, ESA, STScI, D. Jewitt (UCLA), M.-T. Hui; processing J. DePasquale (STScI), cropped | Public domain |
 | `goldenRecord.jpg` | [Voyager Golden Record.jpg](https://commons.wikimedia.org/wiki/File:The_Sounds_of_Earth_Record_Cover_-_GPN-2000-001978.jpg) | NASA/JPL | Public domain |
 
 ## "그날로" 장면에 쓴 옛 그림

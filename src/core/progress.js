@@ -16,7 +16,8 @@ export const DISCOVERY_KM = 50000;
 // Returns [{ body, moon }].
 export function journalOrder(bodies) {
   const data = (b) => BODY_DATA.find((d) => d.id === b.id) ?? b;
-  const reach = (b) => data(b).orbitKm ?? data(b).ellipse?.semiMajorKm ?? 0;
+  // (A visitor from between the stars, on an open path, comes last.)
+  const reach = (b) => (data(b).ellipse?.eccentricity > 1 ? Infinity : data(b).orbitKm ?? data(b).ellipse?.semiMajorKm ?? 0);
   const out = [];
   for (const body of bodies.filter((b) => b.kind === 'star')) out.push({ body, moon: false });
   const round = bodies.filter((b) => b.kind !== 'star' && b.kind !== 'moon').sort((a, b) => reach(a) - reach(b));

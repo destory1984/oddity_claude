@@ -950,7 +950,7 @@ async function init() {
 
   // What there is to read about the target being looked at closely: a body found, a
   // craft met, a place been to. Before that, only how to open it.
-  const KIND = { star: t('별'), planet: t('행성'), moon: t('위성'), dwarf: t('왜행성'), asteroid: t('소행성'), comet: t('혜성') };
+  const KIND = { star: t('별'), planet: t('행성'), moon: t('위성'), dwarf: t('왜행성'), asteroid: t('소행성'), comet: t('혜성'), interstellar: t('성간 천체') };
   function readingFor(target) {
     const head = { name: target.name, nameEn: target.nameEn };
     if (target.kind === 'craft') {
@@ -1527,7 +1527,7 @@ ${STORY_MORE[target.id]}` : told };
   let mapPick = null;
   const mapBodies = () => {
     const away = inExo(state.position);
-    return bodies.filter((b) => (away ? b.exo : !b.exo && ['star', 'planet', 'dwarf', 'asteroid', 'comet'].includes(b.kind)));
+    return bodies.filter((b) => (away ? b.exo : !b.exo && ['star', 'planet', 'dwarf', 'asteroid', 'comet', 'interstellar'].includes(b.kind)));
   };
   // The jump from the map goes only to where she has been, as a name tag's does (the
   // user, 2026-10-12: "큰 지도도 가 본 곳만 가게 되돌려"; from v0.1.60 it went anywhere,

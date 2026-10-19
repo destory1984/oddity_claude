@@ -93,6 +93,10 @@ export const READINGS = {
     + t('2022년 9월 26일 무게 570kg의 다트 탐사선이 초속 약 6km로 부딪쳤습니다. 지구로 다가오는 소행성의 길을 바꿀 수 있는지 시험한 것입니다. 공전 주기가 11시간 55분에서 11시간 23분으로 32분 줄었고, 뿜어져 나온 돌과 먼지가 꼬리처럼 1만km 넘게 늘어졌습니다. 사람이 천체의 움직임을 바꾼 첫 일입니다.'),
   apophis: t('아포피스는 지름 약 340m의 소행성입니다. 2004년 발견된 직후 2029년에 지구에 부딪칠 확률이 2.7%까지 올라 큰 걱정을 샀습니다. 이름은 이집트 신화에서 태양신을 삼키려는 혼돈의 뱀에서 왔습니다.\n\n')
     + t('더 지켜본 끝에 앞으로 100년 넘게 부딪칠 일은 없다고 밝혀졌습니다. 2029년 4월 13일에는 지구 표면에서 약 3만 2천km 곁을 지나가는데, 정지 위성보다 가깝습니다. 그날 밤 유럽과 아프리카에서는 맨눈으로 보입니다. 베누에 다녀온 오시리스-렉스가 오시리스-에이펙스로 이름을 바꾸고 그 뒤를 따라가 살필 예정입니다.'),
+  oumuamua: t('오우무아무아는 2017년 10월 19일 하와이의 판스타스 망원경이 찾은, 태양계 밖에서 온 첫 천체입니다. 이름은 하와이 말로 "먼 곳에서 먼저 온 심부름꾼"이라는 뜻입니다. 태양에 묶이지 않는 길(쌍곡선)을 따라 초속 26km로 들어왔다가 떠났습니다.\n\n')
+    + t('밝기가 8시간쯤마다 열 배쯤 오르내려, 길쭉한 막대나 납작한 접시 모양으로 봅니다. 길이는 100m에서 400m쯤입니다. 꼬리는 보이지 않았는데 태양의 중력만으로는 설명되지 않을 만큼 조금 더 빨리 멀어져, 사람들이 오래 궁금해했습니다. 게임에서는 이 손님이 들렀다 떠나는 길을 게임 시간 3년마다 되풀이해 보여 줍니다.'),
+  atlas3i: t('3I/아틀라스는 2025년 7월 1일 칠레에 있는 아틀라스 망원경이 찾았습니다. 오우무아무아(2017), 보리소프 혜성(2019)에 이어 세 번째로 찾은 별 사이 손님입니다. 얼음과 먼지를 뿜는 혜성이고, 초속 58km로 들어와 지금까지 본 손님 가운데 가장 빠릅니다.\n\n')
+    + t('2025년 10월 29일 화성 궤도 바로 안쪽에서 태양에 가장 가까이 왔고, 그 무렵 화성 곁을 지나 화성 궤도선들이 사진을 찍었습니다. 핵의 지름은 0.4km에서 5.6km 사이로 짐작합니다. 태양계보다 오래된 별 무리에서 왔을지 모르며, 나이가 70억 년이 넘을 수도 있습니다. 게임에서는 이 손님이 지나가는 길을 게임 시간 3년마다 되풀이해 보여 줍니다.'),
 
   voyager1: t('보이저 1호는 1977년 9월 5일에 떠났습니다. 1979년 목성을 지나며 이오의 화산을 찾았고, 1980년 토성과 타이탄을 지났습니다. 타이탄을 가까이 보려고 길을 꺾은 탓에 행성들의 면을 벗어나 더는 다른 행성에 가지 못했습니다.\n\n')
     + t('1990년 2월 14일 60억km 밖에서 뒤돌아 태양계 가족사진을 찍었고, 그 안의 지구가 "창백한 푸른 점"입니다. 2012년 8월 태양풍이 닿는 범위를 벗어나 별 사이 공간에 들어선 첫 탐사선이 되었습니다. 지구의 소리와 55개 말의 인사를 담은 금빛 레코드를 싣고 있습니다. 플루토늄 전지의 힘이 줄어 장치를 하나씩 끄고 있습니다.'),
@@ -185,9 +189,12 @@ function distance(km) {
 // parentName: the name of what it goes round. Rows without data are left out.
 export function bodyFacts(body, parentName = null) {
   const facts = [[t('지름'), `${round(body.radiusKm * 2)}${english() ? ' km' : 'km'}`]];
+  const open = body.ellipse?.eccentricity > 1;
   const orbit = body.orbitKm ?? body.ellipse?.semiMajorKm;
-  if (orbit && parentName) facts.push([t`${parentName}에서`, distance(orbit)]);
-  const period = body.periodS ?? body.ellipse?.periodS;
+  // A visitor from between the stars does not go round: how near the Sun it comes.
+  if (open) facts.push([t('태양에 가장 가까울 때'), distance(orbit * (body.ellipse.eccentricity - 1))]);
+  else if (orbit && parentName) facts.push([t`${parentName}에서`, distance(orbit)]);
+  const period = open ? null : body.periodS ?? body.ellipse?.periodS;
   if (period) facts.push([t('한 바퀴 도는 데'), duration(period)]);
   const day = SPIN_DAY_S[body.id];
   if (day) facts.push([t('하루(자전)'), `${duration(Math.abs(day))}${day < 0 ? t(' (거꾸로 돈다)') : ''}`]);

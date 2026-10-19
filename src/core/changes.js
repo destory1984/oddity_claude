@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-19', text: t('별 사이에서 온 손님 둘, 오우무아무아와 3I/아틀라스 혜성이 게임 시간 3년마다 태양 곁을 지나갑니다.') },
   { day: '2026-10-19', text: t('작은 천체 여섯이 생겼습니다. 베스타, 베누, 류구, 디디모스와 디모르포스, 아포피스입니다.') },
   { day: '2026-10-19', text: t('스캐너를 끄고 켤 때 별빛 가루로 흩어지고 모입니다.') },
   { day: '2026-10-19', text: t('About에 이 게임의 공개 코드로 가는 깃허브 링크가 생겼습니다.') },

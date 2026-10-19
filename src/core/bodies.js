@@ -234,6 +234,26 @@ export const BODY_DATA = [
       perihelionAtS: 60 * DAY_S, perihelionDirection: [-0.3, 0, -0.95], tiltRad: 0.0583, retrograde: false,
     },
   },
+  // Two visitors from between the stars, on open paths (eccentricity over 1; the pass
+  // is shown again every three game years, core/kepler.js hyperbolaPoint).
+  // 'Oumuamua (2017): perihelion 0.256 AU, e 1.201, its path tipped 122.7 degrees, so
+  // it goes round backwards; 100 to 400 m long.
+  {
+    id: 'oumuamua', name: '오우무아무아', nameEn: 'ʻOumuamua', kind: 'interstellar', radiusKm: 0.08, parent: 'sun',
+    ellipse: {
+      semiMajorKm: (0.2559 / 0.2011) * AU_KM, eccentricity: 1.2011, periodS: 3 * 365.25 * DAY_S,
+      perihelionAtS: 300 * DAY_S, perihelionDirection: [0.2, 0, 0.98], tiltRad: 1.0, retrograde: true,
+    },
+  },
+  // 3I/ATLAS (2025), a comet: perihelion 1.357 AU on 29 October 2025, e 6.14, tipped 175
+  // degrees (backwards, nearly in the planets' plane); the nucleus 0.4 to 5.6 km across.
+  {
+    id: 'atlas3i', name: '3I/아틀라스', nameEn: '3I/ATLAS', kind: 'comet', radiusKm: 1, parent: 'sun',
+    ellipse: {
+      semiMajorKm: (1.357 / 5.139) * AU_KM, eccentricity: 6.139, periodS: 3 * 365.25 * DAY_S,
+      perihelionAtS: -200 * DAY_S, perihelionDirection: [-0.5, 0, 0.87], tiltRad: 0.0855, retrograde: true,
+    },
+  },
 ];
 
 const sub = (a, b) => a.map((n, i) => n - b[i]);

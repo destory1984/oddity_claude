@@ -304,6 +304,8 @@ const LOOKS = {
   didymos: { shader: 'rocky', colorA: [0.2, 0.19, 0.18], colorB: [0.42, 0.4, 0.37], cap: 0, haze: 0, contrast: 0.7, craters: 0.4, dayS: SPIN_DAY_S.didymos },
   dimorphos: { shader: 'rocky', colorA: [0.22, 0.21, 0.2], colorB: [0.45, 0.43, 0.4], cap: 0, haze: 0, contrast: 0.8, craters: 0.2, dayS: SPIN_DAY_S.dimorphos },
   apophis: { shader: 'rocky', colorA: [0.25, 0.22, 0.19], colorB: [0.5, 0.45, 0.4], cap: 0, haze: 0, contrast: 0.6, craters: 0.5, dayS: SPIN_DAY_S.apophis },
+  oumuamua: { shader: 'rocky', colorA: [0.3, 0.17, 0.12], colorB: [0.55, 0.36, 0.27], cap: 0, haze: 0, contrast: 0.6, craters: 0.1, dayS: SPIN_DAY_S.oumuamua },
+  atlas3i: { shader: 'rocky', colorA: [0.06, 0.06, 0.07], colorB: [0.2, 0.2, 0.22], cap: 0, haze: 0, contrast: 0.6, craters: 0.3, dayS: 16.2 * 3600 },
 };
 
 // Rings are a flat square plane; the shader keeps only the annulus between the radii.

@@ -45,5 +45,7 @@ export const OBJECT_PHOTOS = {
   didymos: { file: 'didymos.jpg', caption: t('부딪치기 몇 분 전 다트가 찍은 디디모스와 오른쪽의 작은 디모르포스.'), credit: 'NASA/Johns Hopkins APL; Daly et al., Nature 2023 (CC BY 4.0)' },
   dimorphos: { file: 'dimorphos.jpg', caption: t('부딪치기 2초 전 다트가 마지막으로 온전히 찍은 디모르포스. 돌무더기가 그대로 보입니다.'), credit: 'NASA/Johns Hopkins APL (public domain)' },
   apophis: { file: 'apophis.jpg', caption: t('2021년 3월 미국의 전파 망원경이 1,700만km 밖에서 찍은 아포피스의 레이더 영상(동그라미 안).'), credit: 'NASA/JPL-Caltech and NSF/AUI/GBO (public domain)' },
+  oumuamua: { file: 'oumuamua.jpg', caption: t('2017년 10월 유럽 남천 천문대의 VLT 등 여러 망원경 사진을 겹친 오우무아무아(파란 동그라미 안의 점). 점선은 망원경이 손님을 따라가는 동안 늘어진 별들입니다.'), credit: 'ESO/K. Meech et al. (CC BY 4.0)' },
+  atlas3i: { file: 'atlas3i.jpg', caption: t('2025년 11월 30일 허블 우주망원경이 찍은 3I/아틀라스. 가운데 핵을 기체와 먼지가 감싸고 있습니다.'), credit: 'NASA, ESA, STScI, D. Jewitt (UCLA), M.-T. Hui (public domain)' },
   goldenRecord: { file: 'goldenRecord.jpg', caption: t('보이저 1호와 2호에 실려 간 금빛 음반의 덮개. 음반을 트는 법이 그림으로 새겨져 있습니다.'), credit: 'NASA/JPL' },
 };

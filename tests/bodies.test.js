@@ -19,7 +19,7 @@ test('the table holds the Sun, eight planets, twenty-two moons, two dwarf planet
       'saturn', 'mimas', 'enceladus', 'tethys', 'dione', 'rhea', 'titan', 'iapetus',
       'uranus', 'miranda', 'ariel', 'umbriel', 'titania', 'oberon', 'neptune', 'triton',
       'ceres', 'pluto', 'charon', 'halley', 'haleBopp', 'churyumov',
-      'vesta', 'bennu', 'ryugu', 'didymos', 'dimorphos', 'apophis',
+      'vesta', 'bennu', 'ryugu', 'didymos', 'dimorphos', 'apophis', 'oumuamua', 'atlas3i',
     ],
   );
   assert.equal(bodyById('ganymede').radiusKm, 2634.1);

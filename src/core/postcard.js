@@ -95,6 +95,8 @@ const HEARTS = {
   ryugu: t('용궁에 다녀왔구나. 보물 상자는 함부로 열지 말거라.'),
   didymos: t('쌍둥이 소행성이구나. 작은 쪽이 꼭 동생 같다.'),
   apophis: t('2029년 봄에 그 돌이 지나가는 걸 꼭 같이 보자꾸나.'),
+  oumuamua: t('다른 별에서 온 손님을 만났구나. 할머니 평생에 그런 날이 올 줄 몰랐다.'),
+  atlas3i: t('별 사이에서 온 혜성이라니. 꼬리에 먼 별의 먼지가 묻어 있겠구나.'),
 };
 // A photo of no body in particular.
 const PLAIN = [
@@ -146,6 +148,8 @@ const AGAIN = {
   ryugu: t('류구를 또 찍었구나. 이번엔 무슨 보물을 찾았니?'),
   didymos: t('쌍둥이를 또 찍었구나. 둘이 사이좋게 도는구나.'),
   apophis: t('아포피스를 또 찍었구나. 이름은 무서워도 얌전한 돌이란다.'),
+  oumuamua: t('그 손님을 또 찍었구나. 멀리 가기 전에 많이 봐 두렴.'),
+  atlas3i: t('아틀라스를 또 찍었구나. 이번엔 꼬리가 어땠니?'),
   eclipse: t('개기일식을 또 봤구나. 부럽기도 하지.'),
   earthrise: t('지구가 뜨는 걸 또 찍었구나. 몇 번을 봐도 곱다.'),
   paleBlueDot: t('또 그 점이구나. 이번에도 손 흔들었단다.'),
@@ -186,7 +190,7 @@ export function cardWords(entry, missions = []) {
 export const starText = (stars) => '★'.repeat(stars) + '☆'.repeat(3 - stars);
 
 // The stamp on a postcard, by what the photo is of: public/assets/notebook/postage-*.png.
-const COMETS = ['halley', 'haleBopp', 'churyumov'];
+const COMETS = ['halley', 'haleBopp', 'churyumov', 'atlas3i'];
 export function postageFile(entry) {
   const subject = entry.rate?.subject ?? null;
   let stamp = 'seora';

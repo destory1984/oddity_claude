@@ -32,6 +32,8 @@ export const SPIN_DAY_S = {
   // Dimorphos keeps one face to Didymos: its day is its orbit.
   dimorphos: 40920,
   apophis: 30.56 * 3600,
+  // 'Oumuamua tumbles once in about 8 hours.
+  oumuamua: 8 * 3600,
 };
 
 // Earth alone starts part-way through its turn, so the opening view shows it half lit

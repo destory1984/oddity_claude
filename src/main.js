@@ -1576,14 +1576,8 @@ ${STORY_MORE[target.id]}` : told };
     $('bigMap').addEventListener('close', () => { mapSky.stop(); setPaused(prior); }, { once: true });
   }
   $('bigMapClose').addEventListener('click', () => $('bigMap').close());
-  // A press outside the sheet closes it too, as the journal's does (the user, 2026-10-19:
-  // "지도에서 고르기,에서 메뉴 이외의 곳을 누르면, 메인으로 돌아가기"). Only outside its
-  // edge: a press on its own margin, beside the map, is a miss, not a wish to leave.
-  $('bigMap').addEventListener('click', (e) => {
-    if (e.target !== $('bigMap')) return;
-    const box = $('bigMap').getBoundingClientRect();
-    if (e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom) $('bigMap').close();
-  });
+  // (A press outside the sheet closes it too, as for every sheet: ui/backKeys.js. The
+  // user, 2026-10-19: "지도에서 고르기,에서 메뉴 이외의 곳을 누르면, 메인으로 돌아가기".)
   $('bigMapGo').addEventListener('click', () => {
     if (!mapPick) return;
     const body = here(mapPick);
@@ -3929,6 +3923,11 @@ ${STORY_MORE[target.id]}` : told };
     $('shareWhere').textContent = info.text;
     $('shareKakao').disabled = true;
     $('shareKakao').hidden = false;
+    // The game waits while the sheet is open, as it does under the other sheets (the
+    // user, 2026-10-19: "다 해"). (The photo of the view above was taken before.)
+    const prior = paused;
+    setPaused(true);
+    $('shareSheet').addEventListener('close', () => setPaused(prior), { once: true });
     $('shareSheet').showModal();
     loadKakao().then(() => { $('shareKakao').disabled = false; }, () => { $('shareKakao').hidden = true; });
     return undefined;
@@ -3997,9 +3996,6 @@ ${STORY_MORE[target.id]}` : told };
     toast.show(copied ? t('링크를 복사했습니다.') : url);
   });
   $('shareClose').addEventListener('click', () => $('shareSheet').close());
-  $('shareSheet').addEventListener('click', (e) => {
-    if (e.target === $('shareSheet')) $('shareSheet').close();
-  });
   $('shareOther').addEventListener('click', async () => {
     const info = shareNow;
     const files = withPhoto() ? [info.photo] : null;

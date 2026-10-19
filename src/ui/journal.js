@@ -44,12 +44,10 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   // The same at its foot, as the settings have (the user, 2026-10-19: "비행 수첩도 아래에 비행으로
   // 돌아가기 버튼 추가").
   $('journalBack').addEventListener('click', () => dialog.close());
-  // Ways out besides the ✕ and Esc: the J key that opened it, and a press outside it.
+  // Ways out besides the ✕ and Esc: the J key that opened it, and a press outside it
+  // (ui/backKeys.js, as for every sheet).
   dialog.addEventListener('keydown', (e) => {
     if (e.code === 'KeyJ' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) dialog.close();
-  });
-  dialog.addEventListener('click', (e) => {
-    if (e.target === dialog) dialog.close();
   });
 
   // One part of the journal shows at a time (the whole of it was fourteen screens long

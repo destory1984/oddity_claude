@@ -40,5 +40,20 @@ export function addBackKeys() {
       $(way).click();
     });
     dialog.prepend(key);
+    // A press outside the sheet's edge goes back the same way; a press on its own margin,
+    // beside what is in it, does nothing (the user, 2026-10-19: "다 해", of "바깥 누르기는
+    // 한 규칙으로"). Outside is told by where the press fell, not by its target: the
+    // sheet's margin and scroll bar are the dialog too. (The settings and the map did so
+    // already; the journal and the share sheet closed on a press on their margin; the
+    // cards and the practice's sheets did not close at all, and the practice's offer
+    // began the practice on a press anywhere.) Not the photo page: the photo is the whole
+    // screen, and a press on it closes it (ui/photoView.js).
+    if (sheet === 'photoView') continue;
+    dialog.addEventListener('click', (event) => {
+      if (event.target !== dialog) return;
+      const box = dialog.getBoundingClientRect();
+      const outside = event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom;
+      if (outside) $(way).click();
+    });
   }
 }

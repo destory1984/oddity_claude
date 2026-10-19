@@ -29,13 +29,14 @@ export function createPracticeView({ onTag, onOffer, onDone }) {
     $(dialog).close();
     fn(value);
   };
-  // The offer: a press anywhere on it (or beside it) begins the practice; only the small
-  // key to skip does not (the user, 2026-10-10: "사용자가 클릭하면 비행 연습 화면으로
-  // 넘어가게 해"). Not in its first moment: a finger already tapping the game as the
-  // sheet came up would begin it unread.
+  // The offer begins the practice by its own key only. (Until 2026-10-19 a press anywhere
+  // on it or beside it began it, the user, 2026-10-10: "사용자가 클릭하면 비행 연습 화면으로
+  // 넘어가게 해"; now a press outside it means "건너뛰기", as outside every sheet means its
+  // way back, ui/backKeys.js: "다 해".) Not in its first moment: a finger already tapping
+  // the game as the sheet came up would begin it unread.
   let offeredAt = 0;
-  $('practiceOffer').addEventListener('click', (event) => {
-    if (answered || event.target.closest('#practicePass') || performance.now() - offeredAt < OFFER_WAIT_MS) return;
+  $('practiceGo').addEventListener('click', () => {
+    if (answered || performance.now() - offeredAt < OFFER_WAIT_MS) return;
     answer('practiceOffer', onOffer, true);
   });
   $('practicePass').addEventListener('click', () => answer('practiceOffer', onOffer, false));

@@ -1486,7 +1486,10 @@ ${STORY_MORE[target.id]}` : told };
     if (locked) return unlock();
     // Where the lock would be set and do nothing, it says why instead (the user,
     // 2026-10-19: "맴돌기가 안 먹는건? 안 먹으면, 안 먹는 이유를 화면에 잠시 띄워줘").
-    if (warp.busy()) return toast.show(t('순간 이동 중에는 맴돌 수 없습니다.\n도착한 뒤에 다시 누르세요.'));
+    // Only while the flash is still going out: once she has been moved (white at 2.8 s of
+    // the 6 s) the new place is fading in and can be gone round (the user, 2026-10-19:
+    // "워프 직후에는 맴돌기 버튼이 안 먹네": it waited for the whole 6 s).
+    if (warp.phase()?.phase === 'out') return toast.show(t('순간 이동 중에는 맴돌 수 없습니다.\n도착한 뒤에 다시 누르세요.'));
     if (visit) return toast.show(t('이야기 장소에 머무는 동안에는 맴돌 수 없습니다.\n움직이면 풀려납니다.'));
     const ground = sites.some((x) => x.id === selectedId) ? here(selectedId).parent : selectedId;
     if (state.restingOn && state.restingOn === ground) return toast.show(t('그 위에 내려앉아 있어 맴돌 수 없습니다.\n떠오른 뒤에 다시 누르세요.'));

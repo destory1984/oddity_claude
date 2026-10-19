@@ -6181,3 +6181,48 @@ dialog#photoView::backdrop {
 #photoView #photoViewDots i.on {
   background:#fff;
 }
+
+/* Sharing her place (main.js): KakaoTalk in its own yellow, as its makers ask, and the
+   phone's share sheet (or a copy) for the rest. */
+#shareSheet {
+  width:min(340px, calc(100vw - 32px));
+  text-align:center;
+}
+
+#shareSheet h1 {
+  margin:0 0 8px;
+}
+
+#shareSheet #shareWhere {
+  margin:0 0 14px;
+  font-size:13px;
+  line-height:1.5;
+}
+
+#shareSheet .shareKeys {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+#shareSheet .shareKeys button {
+  min-height:44px;
+  margin:0;
+  font-weight:600;
+}
+
+#shareSheet #shareKakao {
+  border-color:#fee500;
+  background:#fee500;
+  color:#191919;
+}
+
+#shareSheet #shareKakao:disabled {
+  opacity:.5;
+}
+
+#shareSheet #shareClose {
+  width:100%;
+  margin:0;
+}

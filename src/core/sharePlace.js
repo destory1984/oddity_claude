@@ -17,6 +17,18 @@
 // it, and its page gives KakaoTalk and the rest a picture card (index.html og:image).
 export const SHARE_BASE = 'https://destory1984.github.io/oddity_claude/';
 
+// KakaoTalk's own sharing, a picture card with a key and no address written out (the user,
+// of the link in a bubble: "저런식으로 나오면, 사람들이 질겁해"). The JavaScript key of the
+// app "Space Oddity" (ID 1613524) on developers.kakao.com is made to stand in a web page:
+// it works only on the domains written down there (destory1984.github.io, localhost:4417).
+// It is not the REST API or admin key, which must never be in the code. The SDK is fetched
+// only when a player opens the share sheet.
+export const KAKAO_JS_KEY = '893c2d83d29ad7790e8499d45d974ecb';
+export const KAKAO_SDK = {
+  src: 'https://t1.kakaocdn.net/kakao_js_sdk/2.8.3/kakao.min.js',
+  integrity: 'sha384-oroumrnFVE0xtgqyDZJARgERibXg2C28380uaUZz2kHDS5CR7tu20eGiOU6GkTpy',
+};
+
 const SEP = '.';
 // No place of the game is farther than this from the body it is measured from (km).
 const FAR_KM = 1e10;

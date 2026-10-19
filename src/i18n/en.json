@@ -4615,5 +4615,9 @@
  "다른 별 둘레에서는 자리를 나눌 수 없습니다.": "A place round another star can't be shared.",
  "자리 링크를 복사했습니다.\n카톡이나 SNS에 붙여 넣으세요.": "The link to your place is copied.\nPaste it into a chat or a post.",
  "친구가 보낸 자리입니다.\n그때의 하늘 그대로, 같은 곳에서 같은 쪽을 봅니다.": "A place a friend sent.\nThe same sky, the same spot, looking the same way.",
- "자리 공유 단추가 생겼습니다. 보낸 링크를 열면 같은 하늘, 같은 자리에서 시작합니다.": "A Share place button: a friend who opens the link starts in the same spot under the same sky."
+ "자리 공유 단추가 생겼습니다. 보낸 링크를 열면 같은 하늘, 같은 자리에서 시작합니다.": "A Share place button: a friend who opens the link starts in the same spot under the same sky.",
+ "다른 앱으로": "Other apps",
+ "카카오톡": "KakaoTalk",
+ "같은 자리에서 보기": "See it from there",
+ "카카오톡을 열지 못했습니다.\n다른 앱으로 보내 주세요.": "KakaoTalk didn't open.\nPlease send it with another app."
 }

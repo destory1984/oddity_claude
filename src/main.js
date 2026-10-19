@@ -24,7 +24,7 @@ import { addPhoto, removePhoto, photoPlace, photoCaption } from './core/album.js
 import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } from './core/postcard.js';
 import { isLocalHost } from './core/count.js';
 import { pickSpot, fromSpot, toSpot, NEAR_EARTH_ONLY } from './core/startSpots.js';
-import { encodePlace, decodePlace, SHARE_BASE } from './core/sharePlace.js';
+import { encodePlace, decodePlace, SHARE_BASE, KAKAO_JS_KEY, KAKAO_SDK } from './core/sharePlace.js';
 import { teleportSpot, visited } from './core/teleport.js';
 import { behindBody, skyBehind, lostInGlare, nearestBodies, nearbyMoons } from './core/markers.js';
 import { FACTS } from './core/facts.js';
@@ -3755,9 +3755,63 @@ ${STORY_MORE[target.id]}` : told };
     const url = `${SHARE_BASE}?p=${line}`;
     return { url, text: t`${named(body.id)?.name ?? body.name} 곁에서 보내는 내 자리야. 열면 같은 하늘, 같은 자리에서 시작해.` };
   }
-  $('shareButton').addEventListener('click', async () => {
+  // The key opens a small sheet: KakaoTalk (a picture card with a key, through Kakao's own
+  // SDK, fetched only now) or the phone's share sheet for every other app.
+  let kakaoReady = null;
+  function loadKakao() {
+    if (!kakaoReady) {
+      kakaoReady = new Promise((resolve, reject) => {
+        if (window.Kakao) return resolve(window.Kakao);
+        const script = document.createElement('script');
+        script.src = KAKAO_SDK.src;
+        script.integrity = KAKAO_SDK.integrity;
+        script.crossOrigin = 'anonymous';
+        script.onload = () => (window.Kakao ? resolve(window.Kakao) : reject(new Error('Kakao SDK')));
+        script.onerror = () => reject(new Error('Kakao SDK'));
+        document.head.append(script);
+        return undefined;
+      }).then((kakao) => {
+        if (!kakao.isInitialized()) kakao.init(KAKAO_JS_KEY);
+        return kakao;
+      });
+      // (Tried again next time: the phone may have been offline.)
+      kakaoReady.catch(() => { kakaoReady = null; });
+    }
+    return kakaoReady;
+  }
+  let shareNow = null;
+  $('shareButton').addEventListener('click', () => {
     const info = placeShare();
     if (!info) return toast.show(t('다른 별 둘레에서는 자리를 나눌 수 없습니다.'));
+    shareNow = info;
+    $('shareWhere').textContent = info.text;
+    $('shareKakao').disabled = true;
+    $('shareKakao').hidden = false;
+    $('shareSheet').showModal();
+    loadKakao().then(() => { $('shareKakao').disabled = false; }, () => { $('shareKakao').hidden = true; });
+    return undefined;
+  });
+  $('shareKakao').addEventListener('click', () => {
+    const { text, url } = shareNow;
+    const link = { mobileWebUrl: url, webUrl: url };
+    try {
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: { title: `Space Oddity — ${t('할머니의 수첩')}`, description: text, imageUrl: `${SHARE_BASE}og.jpg`, link },
+        buttons: [{ title: t('같은 자리에서 보기'), link }],
+      });
+      $('shareSheet').close();
+    } catch {
+      toast.show(t('카카오톡을 열지 못했습니다.\n다른 앱으로 보내 주세요.'));
+    }
+  });
+  $('shareClose').addEventListener('click', () => $('shareSheet').close());
+  $('shareSheet').addEventListener('click', (e) => {
+    if (e.target === $('shareSheet')) $('shareSheet').close();
+  });
+  $('shareOther').addEventListener('click', async () => {
+    const info = shareNow;
+    $('shareSheet').close();
     if (navigator.share) {
       try {
         await navigator.share({ title: 'Space Oddity', text: info.text, url: info.url });

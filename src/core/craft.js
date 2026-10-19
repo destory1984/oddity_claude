@@ -20,6 +20,7 @@ export const JWST_FROM_EARTH_KM = 150000;
 // Kepler follows Earth round the Sun, falling slowly behind. When it retired in 2018 it
 // was 151 million km from Earth, which is 60 degrees round the orbit.
 const KEPLER_BEHIND = rad(60);
+const GAIA_BEHIND = rad(3);
 // Chandra's real orbit round Earth: 16,000 km up at its lowest, 133,000 km at its
 // highest, once in 63.5 hours. Heights shrink 1/10 here, as for moons.
 const EARTH_RADIUS_KM = 6371;
@@ -257,6 +258,20 @@ export const CRAFT = [
     launched: 2018,
     intro: t('케플러를 이어 외계 행성을 찾는 위성입니다. 카메라 네 대로 하늘을 조각조각 훑으며, 별빛이 살짝 어두워지는 순간을 잡습니다.'),
   },
+  // Two more (the user, 2026-10-19: "다 넣어"). Gaia was moved off L2 in March 2025 and
+  // switched off; it drifts round the Sun near Earth's path, here 3 degrees behind it.
+  // Psyche roams the Sun on its way to the asteroid Psyche (2029), as Lucy does.
+  {
+    id: 'gaia', name: t('가이아'), nameEn: 'Gaia', kind: 'craft', parent: null,
+    launched: 2013,
+    intro: t('하늘의 천체 18억 개의 자리와 거리를 잰 유럽의 별 지도 위성입니다. 2025년 3월 일을 마치고 지구에서 멀어지는 길로 옮겨진 뒤 꺼졌습니다.'),
+  },
+  {
+    id: 'psyche', name: t('프시케'), nameEn: 'Psyche', kind: 'craft', parent: null,
+    loop: { lowKm: 1.0 * AU_KM, highKm: 3.0 * AU_KM, periodS: 900 * 86400, lowAtS: -300 * 86400, tiltDeg: 3, turnDeg: 30, squeeze: 100 },
+    launched: 2023,
+    intro: t('금속 소행성 프시케로 가는 미국 탐사선입니다. 푸른 빛을 내는 이온 엔진으로 날며, 2029년 8월에 닿습니다.'),
+  },
 ];
 named(CRAFT);
 
@@ -339,11 +354,12 @@ export function craftAt(timeS, bodies) {
         const side = Math.hypot(away[2], away[0]);
         position = [position[0] - (away[2] / side) * EUCLID_FROM_WEBB_KM, position[1], position[2] + (away[0] / side) * EUCLID_FROM_WEBB_KM];
       }
-    } else if (craft.id === 'kepler') {
+    } else if (craft.id === 'kepler' || craft.id === 'gaia') {
       // Earth's place, turned back round the Sun (the planets go from +x toward +z).
       const [x, y, z] = earth.position.map((n, i) => n - sun.position[i]);
-      const c = Math.cos(KEPLER_BEHIND);
-      const k = Math.sin(KEPLER_BEHIND);
+      const behind = craft.id === 'kepler' ? KEPLER_BEHIND : GAIA_BEHIND;
+      const c = Math.cos(behind);
+      const k = Math.sin(behind);
       position = [sun.position[0] + x * c + z * k, sun.position[1] + y, sun.position[2] - x * k + z * c];
     } else if (craft.id === 'chandra') {
       const { x, y, r } = ellipsePoint(CHANDRA_ORBIT, timeS);

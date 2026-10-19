@@ -15,7 +15,7 @@ test('every story place has a longer telling of three sentences or more', () => 
   }
 });
 
-test('all 127 have a picture on file, with a caption and a credit (119 photographs and eight drawings made for the game)', () => {
+test('all 131 have a picture on file, with a caption and a credit (123 photographs and eight drawings made for the game)', () => {
   const without = STORIES.filter((s) => !STORY_DETAILS[s.id].photo).map((s) => s.id);
   assert.deepEqual(without, []);
   assert.equal(storyPhotoFile('wadiRum'), 'stories/wadiRum.jpg');
@@ -35,10 +35,11 @@ test('all 127 have a picture on file, with a caption and a credit (119 photograp
     // Where it came from and its licence are written down.
     assert.ok(credits.includes(`| \`${story.id}.jpg\` |`), `${story.id} is not in THIRD-PARTY.md`);
   }
-  assert.equal(readdirSync('public/assets/stories').length, 127);
+  assert.equal(readdirSync('public/assets/stories').length, 131);
   // (4 MB until the four of Mercury came, 2026-10-12; 4.2 MB until the two of Venus,
   // 2026-10-13; 4.3 MB until the three round Jupiter, 2026-10-14; 4.45 MB until Osiris, the
   // same day; 4.55 MB until Inktomi, the same day: 117 pictures, 39 KB each on average;
-  // 4.65 MB until Rubin, MeerKAT and SALT, 2026-10-18; 5 MB until Lowell, Palomar and the VLA, the same day.)
-  assert.ok(bytes < 5e6, `${bytes} bytes of pictures`);
+  // 4.65 MB until Rubin, MeerKAT and SALT, 2026-10-18; 5 MB until Lowell, Palomar and the VLA, the same day;
+  // 5.2 MB until Luna 3, Cheomseongdae, Stonehenge and Arecibo, 2026-10-19.)
+  assert.ok(bytes < 5.2e6, `${bytes} bytes of pictures`);
 });

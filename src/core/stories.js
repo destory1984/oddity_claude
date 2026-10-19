@@ -502,6 +502,35 @@ STORIES.push(
     text: t('1980년 10월 10일 문을 열었습니다. 지름 25m 접시 27개가 Y자 레일 위에서 하나의 망원경처럼 일합니다.'),
   },
 );
+// Four more (the user, 2026-10-19: "다 넣어"): Luna 3's look at the Moon's far side
+// (it burned up in 1960, so it is a place, not a craft: within 6,200 km of the Moon on
+// the side away from Earth, `farSideOf`), and three on Earth.
+STORIES.push(
+  {
+    id: 'luna3', name: t('루나 3호의 달 뒷면 사진'), nameEn: 'Luna 3', year: 1959,
+    type: 'near', target: 'moon', withinKm: 6200, farSideOf: 'earth',
+    hint: t('달 뒤쪽(지구 반대편)에서 달 표면 6,200km 안을 지나기'),
+    text: t('1959년 10월 7일 소련의 루나 3호가 달 뒤쪽을 돌며, 사람이 한 번도 본 적 없던 달의 뒷면을 처음 찍었습니다.'),
+  },
+  {
+    id: 'cheomseongdae', name: t('경주 첨성대'), nameEn: 'Cheomseongdae', type: 'surface', body: 'earth',
+    latDeg: 35.8347, lonDeg: 129.219, withinKm: 40, landmark: false,
+    hint: t('지구 경주의 첨성대(북위 35.8도, 동경 129.2도) 40km 안에 내려앉기'),
+    text: t('신라 선덕여왕 때 경주에 세운 돌탑입니다. 동아시아에서 가장 오래된 천문대로 꼽히며, 높이는 9.17m입니다.'),
+  },
+  {
+    id: 'stonehenge', name: t('스톤헨지'), nameEn: 'Stonehenge', type: 'surface', body: 'earth',
+    latDeg: 51.1789, lonDeg: -1.8262, withinKm: 40, landmark: false,
+    hint: t('지구 영국의 스톤헨지(북위 51.2도, 서경 1.8도) 40km 안에 내려앉기'),
+    text: t('영국 솔즈베리 평원에 큰 돌을 둥글게 세운 유적입니다. 하짓날 해가 돌 사이로 떠오르도록 놓였습니다.'),
+  },
+  {
+    id: 'arecibo', name: t('아레시보 전파망원경'), nameEn: 'Arecibo Telescope', year: 1974, type: 'surface', body: 'earth',
+    latDeg: 18.3464, lonDeg: -66.7528, withinKm: 40, landmark: false,
+    hint: t('지구 푸에르토리코의 아레시보 전파망원경(북위 18.3도, 서경 66.8도) 40km 안에 내려앉기'),
+    text: t('1974년 11월 16일 이곳에서 외계에 보내는 전파 편지를 쏘았습니다. 지름 305m의 접시는 2020년 무너졌습니다.'),
+  },
+);
 named(STORIES);
 
 // A place's label shows only from within this many of its body's radii above the
@@ -542,6 +571,10 @@ export function completedStories({ position, restingOn, bodies, craft = [], site
     }
     const target = bodies.find((b) => b.id === s.target) ?? craft.find((c) => c.id === s.target);
     if (s.type === 'far') return Boolean(target) && gap(position, target.position) >= s.beyondKm;
+    // Only on the side of the target away from that body (Luna 3, behind the Moon).
+    const away = s.farSideOf && bodies.find((b) => b.id === s.farSideOf);
+    if (s.farSideOf && !away) return false;
+    if (away && target && target.position.reduce((sum, n, i) => sum + (position[i] - n) * (away.position[i] - n), 0) >= 0) return false;
     return Boolean(target) && gap(position, target.position) - target.radiusKm <= s.withinKm;
   }).map((s) => s.id);
 }

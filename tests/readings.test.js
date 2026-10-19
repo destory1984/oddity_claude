@@ -9,7 +9,7 @@ import { STORY_MORE } from '../src/core/storyMore.js';
 
 test('every body and every craft has something to read: two paragraphs, plain sentences', () => {
   const ids = [...BODY_DATA.map((b) => b.id), ...CRAFT.map((c) => c.id)];
-  assert.equal(ids.length, 77);
+  assert.equal(ids.length, 79);
   assert.deepEqual(Object.keys(READINGS).sort(), [...ids].sort());
   for (const id of ids) {
     const text = READINGS[id];
@@ -47,7 +47,7 @@ test("a body's numbers come from the table the game flies by", () => {
 });
 
 test('every story place has a second paragraph to read, which does not repeat its card', () => {
-  assert.equal(STORIES.length, 127);
+  assert.equal(STORIES.length, 131);
   assert.deepEqual(Object.keys(STORY_MORE).sort(), STORIES.map((s) => s.id).sort());
   for (const story of STORIES) {
     const more = STORY_MORE[story.id];

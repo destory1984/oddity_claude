@@ -166,6 +166,10 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | `lowell.jpg` | [Lowell Observatory NRIS-66000172-Clark Telescope1-Flagstaff Arizona.jpg](https://commons.wikimedia.org/wiki/File:Lowell_Observatory_NRIS-66000172-Clark_Telescope1-Flagstaff_Arizona.jpg) | Packbj | CC BY-SA 4.0 |
 | `palomar.jpg` | [Palomar Observatory 2012 01.jpg](https://commons.wikimedia.org/wiki/File:Palomar_Observatory_2012_01.jpg) | Mike Peel | CC BY-SA 4.0 |
 | `vla.jpg` | [NRAO Very Large Array, New Mexico, USA 2024 2.jpg](https://commons.wikimedia.org/wiki/File:NRAO_Very_Large_Array,_New_Mexico,_USA_2024_2.jpg) | dconvertini | CC BY-SA 2.0 |
+| `luna3.jpg` | [Luna 3 moon.jpg](https://commons.wikimedia.org/wiki/File:Luna_3_moon.jpg) | OKB-1 (Luna 3, 1959) | Public domain |
+| `cheomseongdae.jpg` | [Cheomseongdae Observatory 02.jpg](https://commons.wikimedia.org/wiki/File:Cheomseongdae_Observatory_02.jpg) | Bernard Gagnon | CC0 |
+| `stonehenge.jpg` | [Summer Solstice Sunrise over Stonehenge 2005.jpg](https://commons.wikimedia.org/wiki/File:Summer_Solstice_Sunrise_over_Stonehenge_2005.jpg) | Andrew Dunn | CC BY-SA 2.0 |
+| `arecibo.jpg` | [Arecibo Radio Telescope Arecibo Observatory.jpg](https://commons.wikimedia.org/wiki/File:Arecibo_Radio_Telescope_Arecibo_Observatory.jpg) | EgorovaSvetlana | CC BY-SA 4.0 |
 
 CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수 있고, 고친 것은 같은 조건으로 내야 한다. 이 저장소의 MIT 라이선스는 이 사진들에 미치지 않는다.
 
@@ -215,6 +219,7 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `euclid-shot1.jpg` | [Euclid’s view of the Perseus cluster of galaxies ESA25170535.jpg](https://commons.wikimedia.org/wiki/File:Euclid%E2%80%99s_view_of_the_Perseus_cluster_of_galaxies_ESA25170535.jpg) | ESA/Euclid/Euclid Consortium/NASA, J.-C. Cuillandre, E. Bertin, G. Anselmi (CC BY-SA 3.0 IGO) | CC BY-SA 3.0 IGO |
 | `europaClipper-craft.jpg` | [Europa Clipper.jpg](https://commons.wikimedia.org/wiki/File:Europa_Clipper.jpg) | NASA/JPL-Caltech | Public domain |
 | `hera-craft.jpg` | [Hera in orbit.jpg](https://commons.wikimedia.org/wiki/File:Hera_in_orbit.jpg) | ESA (CC BY-SA 3.0 IGO) | CC BY-SA 3.0 IGO |
+| `psyche-craft.jpg` | [Psyche Spacecraft Unwrapped (KSC-20220503-PH-ILW01 0062).jpg](https://commons.wikimedia.org/wiki/File:Psyche_Spacecraft_Unwrapped_(KSC-20220503-PH-ILW01_0062).jpg) | NASA/Isaac Watson | Public domain |
 | `hubble-craft.jpg` | [View of Hubble after Being Released from the Shuttle Atlantis (28223588012).jpg](https://commons.wikimedia.org/wiki/File:View_of_Hubble_after_Being_Released_from_the_Shuttle_Atlantis_(28223588012).jpg) | NASA | Public domain |
 | `hubble-shot1.jpg` | [Pillars of creation 2014 HST WFC3-UVIS full-res denoised.jpg](https://commons.wikimedia.org/wiki/File:Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg) | NASA, ESA, Hubble Heritage Team (STScI/AURA) | Public domain |
 | `iss-craft.jpg` | [International Space Station after undocking of STS-132.jpg](https://commons.wikimedia.org/wiki/File:International_Space_Station_after_undocking_of_STS-132.jpg) | NASA | Public domain |

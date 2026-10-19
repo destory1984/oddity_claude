@@ -10,12 +10,12 @@ import { createState, step } from '../src/core/game.js';
 const dist = (a, b) => Math.hypot(...a.map((n, i) => n - b[i]));
 const near = (a, b, eps) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 
-test('thirty-four craft: probes, telescopes, space stations, the first satellite and a car', () => {
+test('thirty-six craft: probes, telescopes, space stations, the first satellite and a car', () => {
   assert.deepEqual(CRAFT.map((c) => c.id), [
     'voyager1', 'voyager2', 'hubble', 'jwst', 'kepler', 'chandra', 'euclid',
     'iss', 'tiangong', 'sputnik', 'mro', 'juno', 'cassini', 'parker', 'roadster', 'newHorizons', 'pioneer10',
     'danuri', 'lro', 'europaClipper', 'lucy', 'pioneer11', 'bepiColombo', 'akatsuki', 'mangalyaan', 'dawn', 'juice',
-    'hayabusa2', 'soho', 'solarOrbiter', 'tianwen1', 'osirisRex', 'hera', 'tess',
+    'hayabusa2', 'soho', 'solarOrbiter', 'tianwen1', 'osirisRex', 'hera', 'tess', 'gaia', 'psyche',
   ]);
   assert.equal(new Set(CRAFT.map((c) => c.name)).size, CRAFT.length);
   for (const c of CRAFT) assert.ok(c.name && c.nameEn && c.kind === 'craft');

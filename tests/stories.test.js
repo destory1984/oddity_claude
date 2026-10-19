@@ -15,10 +15,10 @@ const done = (position, restingOn = null, t = 0) => {
   return completedStories({ position, restingOn, bodies, craft: craftAt(t, bodies), sites: storySitesAt(t, bodies) });
 };
 
-test('there are 127 story places, each with a name, a hint and a short story; events have a year', () => {
-  assert.equal(STORIES.length, 127);
-  assert.equal(new Set(STORIES.map((s) => s.id)).size, 127);
-  assert.equal(new Set(STORIES.map((s) => s.name)).size, 127);
+test('there are 131 story places, each with a name, a hint and a short story; events have a year', () => {
+  assert.equal(STORIES.length, 131);
+  assert.equal(new Set(STORIES.map((s) => s.id)).size, 131);
+  assert.equal(new Set(STORIES.map((s) => s.name)).size, 131);
   for (const s of STORIES) {
     assert.ok(s.name && s.nameEn && s.hint, s.id);
     // (1900 until Jantar Mantar, finished in 1734, 2026-10-18.)
@@ -91,7 +91,7 @@ test("a place's label shows only from within four radii of its body's surface", 
 
 test('the places sit on the surface of their body and move as it spins', () => {
   const sites = storySitesAt(0, BODIES);
-  assert.equal(sites.length, 116);
+  assert.equal(sites.length, 119);
   assert.deepEqual(sites.slice(0, 4).map((s) => s.id), ['apollo11', 'viking1', 'huygens', 'dokdo']);
   for (const site of sites) {
     const body = bodyById(site.parent);
@@ -113,7 +113,8 @@ test('Apollo 11: landed on the Moon within 150 km of Tranquility Base', () => {
   assert.deepEqual(done(site.position, null), []);
   const moon = bodyById('moon');
   const farSide = add(moon.position, sub(moon.position, site.position));
-  assert.deepEqual(done(farSide, 'moon'), []);
+  // (There, behind the Moon, is where Luna 3 first saw its far side.)
+  assert.deepEqual(done(farSide, 'moon'), ['luna3']);
   // 100 km along the ground still counts; 300 km does not.
   const along = (km) => {
     const up = unit(sub(site.position, moon.position));

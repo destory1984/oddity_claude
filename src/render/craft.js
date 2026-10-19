@@ -63,6 +63,8 @@ const RULES = {
   hera: { visibleKm: 400000, maxKm: 4000 },
   // Round Earth on a long loop, as Chandra.
   tess: { visibleKm: 100000, maxKm: 600 },
+  gaia: { visibleKm: 400000, maxKm: 4000 },
+  psyche: { visibleKm: 400000, maxKm: 4000 },
   // The two curios between Jupiter and Io (core/curios.js curioSizeKm sizes them the same).
   monolith: { visibleKm: 2e6, maxKm: 4000 },
   unknown: { visibleKm: 2e6, maxKm: 4000 },

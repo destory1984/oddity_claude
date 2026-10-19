@@ -1115,11 +1115,41 @@ function tess(scene, name, mats) {
   return fuse(scene, root);
 }
 
+// Gaia: a wide round sunshield, solar cells beneath and gold foil above, and on it a
+// gold drum holding the two telescopes, their windows side by side.
+function gaia(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  drum(scene, `${name}Shield`, root, mats.goldFoil, { height: 0.012, diameter: 1.0, tessellation: 12 }, [0, -0.12, 0]);
+  drum(scene, `${name}Cells`, root, mats.cells, { height: 0.004, diameter: 0.98, tessellation: 12 }, [0, -0.128, 0]);
+  drum(scene, `${name}Bus`, root, mats.goldFoil, { height: 0.22, diameter: 0.34, tessellation: 12 });
+  drum(scene, `${name}Top`, root, mats.foil, { height: 0.02, diameter: 0.3, tessellation: 12 }, [0, 0.12, 0]);
+  for (const s of [-1, 1]) box(scene, `${name}Window${s}`, root, mats.black, [0.07, 0.05, 0.02], [s * 0.06, 0.04, 0.165]);
+  return fuse(scene, root);
+}
+
+// Psyche: a box with a dish on top and the ion engine below, and on each side a big
+// X-shaped wing of five panels.
+function psyche(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  box(scene, `${name}Bus`, root, mats.goldFoil, [0.22, 0.26, 0.22]);
+  dish(scene, `${name}Dish`, root, mats, { at: [0, 0.14, 0], toward: [0, 1, 0], diameter: 0.2 });
+  nozzle(scene, `${name}Engine`, root, mats.dark, [0, -0.13, 0], [0, -1, 0], 0.04, 0.07);
+  for (const s of [-1, 1]) {
+    rod(scene, `${name}Yoke${s}`, root, mats.grey, [s * 0.11, 0, 0], [s * 0.24, 0, 0], 0.015);
+    const c = s * 0.42;
+    box(scene, `${name}Mid${s}`, root, mats.cells, [0.2, 0.006, 0.2], [c, 0, 0]);
+    for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+      box(scene, `${name}Petal${s}${dx}${dz}`, root, mats.cells, [0.17, 0.006, 0.17], [c + dx * 0.15, 0, dz * 0.15], [0, Math.PI / 4, 0]);
+    }
+  }
+  return fuse(scene, root);
+}
+
 export const CRAFT_BUILD = {
   voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid,
   iss, tiangong, sputnik, mro, juno, cassini, parker, roadster, newHorizons, pioneer10: pioneer,
   danuri, lro, europaClipper, lucy, pioneer11: pioneer, bepiColombo, akatsuki, mangalyaan, dawn, juice,
-  hayabusa2, soho, solarOrbiter, tianwen1, osirisRex, hera, tess,
+  hayabusa2, soho, solarOrbiter, tianwen1, osirisRex, hera, tess, gaia, psyche,
 };
 
 // Craft that are not flown beside (one fell on Mercury, one is long silent): shown as the

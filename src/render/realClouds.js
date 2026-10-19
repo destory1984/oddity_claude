@@ -75,7 +75,7 @@ function pixels(image, w = W, h = H) {
   return pen.getImageData(0, 0, w, h).data;
 }
 
-// The cloud map (a canvas, white clouds on black, as public/assets/earth-clouds.jpg), or
+// The cloud map (a canvas, white clouds on black, as public/assets/earth-clouds.webp), or
 // null. groundUrl: the day map (its ice and snow are not clouds); ownUrl: the game's own
 // cloud map, for the gaps.
 export async function realCloudMap({ nowMs = Date.now(), groundUrl, ownUrl }) {

@@ -574,7 +574,7 @@ async function init() {
   // for nothing; the game's own map stays where they cannot be had.
   setTimeout(() => {
     const assets = `${import.meta.env.BASE_URL}assets/`;
-    realCloudMap({ groundUrl: `${assets}earth-day.jpg`, ownUrl: `${assets}earth-clouds.jpg` })
+    realCloudMap({ groundUrl: `${assets}earth-day.webp`, ownUrl: `${assets}earth-clouds.webp` })
       .then((map) => { if (map) world.setEarthClouds(map.toDataURL('image/jpeg', 0.9)); })
       .catch(() => {});
   }, 1500);

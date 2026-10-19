@@ -58,8 +58,8 @@ function createEarth(scene, body, sunDir) {
   const surface = shader(scene, 'planet', planetFrag, ['sun', 'eye', 'cloudShift', 'time'], ['day', 'night', 'cloudMap']);
   surface.setFloat('time', 0);
   surface.setFloat('cloudShift', 0);
-  surface.setTexture('day', texture(scene, 'earth-day.jpg'));
-  surface.setTexture('night', texture(scene, 'earth-night.jpg'));
+  surface.setTexture('day', texture(scene, 'earth-day.webp'));
+  surface.setTexture('night', texture(scene, 'earth-night.webp'));
   surface.setVector3('sun', sunDir);
   surface.setVector3('eye', Vector3.Zero());
   earth.material = surface;
@@ -67,7 +67,7 @@ function createEarth(scene, body, sunDir) {
   const clouds = CreateSphere('clouds', { diameter: diameter * CLOUD_SCALE, segments: 96 }, scene);
   const cloudMaterial = shader(scene, 'cloudLayer', cloudsFrag, ['sun', 'time'], ['cloudMap']);
   cloudMaterial.setFloat('time', 0);
-  const cloudMap = texture(scene, 'earth-clouds.jpg');
+  const cloudMap = texture(scene, 'earth-clouds.webp');
   cloudMaterial.setTexture('cloudMap', cloudMap);
   // The ground shader reads the same map, to lay the clouds' shadows on the ground.
   surface.setTexture('cloudMap', cloudMap);
@@ -130,7 +130,7 @@ function createEarth(scene, body, sunDir) {
 const LOOKS = {
   // The Moon is tidally locked: one turn per 27.3-day orbit keeps one face toward Earth.
   moon: {
-    shader: 'textured', map: 'moon.jpg', saturation: 0.9, tint: [1, 1, 1], base: [0.6, 0.6, 0.6],
+    shader: 'textured', map: 'moon.webp', saturation: 0.9, tint: [1, 1, 1], base: [0.6, 0.6, 0.6],
     mapWeight: 1, haze: 0, detail: 0.1, dayS: SPIN_DAY_S.moon,
     // The horizon glow: seen from behind, a thin line of light along its edge (dust
     // lifted off the ground, as the Surveyors and Apollo 17 saw at sunrise).
@@ -143,32 +143,32 @@ const LOOKS = {
   // Small moons: plain cratered rock or ice in each one's own shade. All keep one face
   // to their planet, so a day lasts one orbit.
   phobos: {
-    shader: 'textured', map: 'phobos.jpg', saturation: 0, tint: [0.72, 0.66, 0.6], base: [0.4, 0.36, 0.33],
+    shader: 'textured', map: 'phobos.webp', saturation: 0, tint: [0.72, 0.66, 0.6], base: [0.4, 0.36, 0.33],
     mapWeight: 1, haze: 0, detail: 0.1, dayS: 0.31891 * 86400,
   },
   deimos: { shader: 'rocky', colorA: [0.24, 0.22, 0.2], colorB: [0.48, 0.44, 0.4], cap: 0, haze: 0, contrast: 0.4, craters: 0.8, dayS: 1.263 * 86400 },
   mimas: {
-    shader: 'textured', map: 'mimas.jpg', saturation: 0.3, tint: [1, 1, 1], base: [0.75, 0.75, 0.76],
+    shader: 'textured', map: 'mimas.webp', saturation: 0.3, tint: [1, 1, 1], base: [0.75, 0.75, 0.76],
     mapWeight: 1, haze: 0, detail: 0.1, dayS: SPIN_DAY_S.mimas,
   },
   enceladus: {
-    shader: 'textured', map: 'enceladus.jpg', saturation: 0.25, tint: [1.04, 1.04, 1.07], base: [0.9, 0.92, 0.95],
+    shader: 'textured', map: 'enceladus.webp', saturation: 0.25, tint: [1.04, 1.04, 1.07], base: [0.9, 0.92, 0.95],
     mapWeight: 1, haze: 0, detail: 0.06, dayS: SPIN_DAY_S.enceladus,
   },
   tethys: {
-    shader: 'textured', map: 'tethys.jpg', saturation: 0.3, tint: [1, 1, 1], base: [0.8, 0.8, 0.81],
+    shader: 'textured', map: 'tethys.webp', saturation: 0.3, tint: [1, 1, 1], base: [0.8, 0.8, 0.81],
     mapWeight: 1, haze: 0, detail: 0.1, dayS: 1.887802 * 86400,
   },
   dione: {
-    shader: 'textured', map: 'dione.jpg', saturation: 0.3, tint: [1, 1, 1], base: [0.75, 0.75, 0.76],
+    shader: 'textured', map: 'dione.webp', saturation: 0.3, tint: [1, 1, 1], base: [0.75, 0.75, 0.76],
     mapWeight: 1, haze: 0, detail: 0.1, dayS: 2.736915 * 86400,
   },
   rhea: {
-    shader: 'textured', map: 'rhea.jpg', saturation: 0.3, tint: [1, 1, 1], base: [0.75, 0.75, 0.76],
+    shader: 'textured', map: 'rhea.webp', saturation: 0.3, tint: [1, 1, 1], base: [0.75, 0.75, 0.76],
     mapWeight: 1, haze: 0, detail: 0.1, dayS: SPIN_DAY_S.rhea,
   },
   iapetus: {
-    shader: 'textured', map: 'iapetus.jpg', saturation: 0.4, tint: [1, 1, 1], base: [0.6, 0.58, 0.55],
+    shader: 'textured', map: 'iapetus.webp', saturation: 0.4, tint: [1, 1, 1], base: [0.6, 0.58, 0.55],
     mapWeight: 1, haze: 0, detail: 0.1, dayS: 79.3215 * 86400,
   },
   miranda: { shader: 'rocky', colorA: [0.45, 0.46, 0.48], colorB: [0.78, 0.78, 0.8], cap: 0, haze: 0, contrast: 0.8, craters: 0.7, dayS: 1.413479 * 86400 },
@@ -177,15 +177,15 @@ const LOOKS = {
   titania: { shader: 'rocky', colorA: [0.42, 0.4, 0.4], colorB: [0.7, 0.68, 0.66], cap: 0, haze: 0, contrast: 0.5, craters: 0.7, dayS: 8.705872 * 86400 },
   oberon: { shader: 'rocky', colorA: [0.36, 0.33, 0.32], colorB: [0.64, 0.6, 0.58], cap: 0, haze: 0, contrast: 0.5, craters: 0.9, dayS: 13.463239 * 86400 },
   triton: {
-    shader: 'textured', map: 'triton.jpg', saturation: 0.6, tint: [1.05, 0.98, 0.95], base: [0.75, 0.68, 0.66],
+    shader: 'textured', map: 'triton.webp', saturation: 0.6, tint: [1.05, 0.98, 0.95], base: [0.75, 0.68, 0.66],
     mapWeight: 1, haze: 0, detail: 0.08, dayS: -5.876854 * 86400,
   },
   mercury: {
-    shader: 'textured', map: 'mercury.jpg', saturation: 0.6, tint: [1, 0.99, 0.97], base: [0.55, 0.53, 0.5],
+    shader: 'textured', map: 'mercury.webp', saturation: 0.6, tint: [1, 0.99, 0.97], base: [0.55, 0.53, 0.5],
     mapWeight: 1, haze: 0, detail: 0.12, dayS: SPIN_DAY_S.mercury,
   },
   venus: {
-    shader: 'textured', map: 'venus.jpg', saturation: 0.9, tint: [1.02, 0.98, 0.9], base: [0.92, 0.82, 0.6],
+    shader: 'textured', map: 'venus.webp', saturation: 0.9, tint: [1.02, 0.98, 0.9], base: [0.92, 0.82, 0.6],
     mapWeight: 1, haze: 1.1, detail: 0.03, dayS: SPIN_DAY_S.venus,
     rim: [1, 0.9, 0.7], rimLight: 1.2,
     // The ashen light: its night side glows faintly, seen since 1643 and never explained.
@@ -201,7 +201,7 @@ const LOOKS = {
     glory: [0.8, 4, 3],
   },
   mars: {
-    shader: 'textured', map: 'mars.jpg', saturation: 0.85, tint: [1, 0.98, 0.95], base: [0.72, 0.42, 0.26],
+    shader: 'textured', map: 'mars.webp', saturation: 0.85, tint: [1, 0.98, 0.95], base: [0.72, 0.42, 0.26],
     mapWeight: 1, haze: 0.4, detail: 0.14, dayS: SPIN_DAY_S.mars,
     // Seen from behind, the dust in its air glows blue (the blue sunsets the rovers photograph).
     rim: [0.4, 0.58, 1], rimLight: 0.9,
@@ -213,7 +213,7 @@ const LOOKS = {
     polarCap: 1,
   },
   jupiter: {
-    shader: 'textured', map: 'jupiter.jpg', saturation: 1.1, tint: [1.03, 1, 0.96], base: [0.82, 0.7, 0.54],
+    shader: 'textured', map: 'jupiter.webp', saturation: 1.1, tint: [1.03, 1, 0.96], base: [0.82, 0.7, 0.54],
     mapWeight: 1, haze: 0.2, detail: 0.2, dayS: SPIN_DAY_S.jupiter,
     // Its belts slide past each other: the fastest gains a turn on the slowest in about
     // ten minutes (the real winds differ by some hundred m/s: speeded up to be seen).
@@ -225,31 +225,31 @@ const LOOKS = {
     rings: { innerKm: 100000, outerKm: 129000, tilt: 0.05, style: 2 },
   },
   saturn: {
-    shader: 'textured', map: 'saturn.jpg', saturation: 1.15, tint: [1.03, 0.99, 0.9], base: [0.9, 0.8, 0.6],
+    shader: 'textured', map: 'saturn.webp', saturation: 1.15, tint: [1.03, 0.99, 0.9], base: [0.9, 0.8, 0.6],
     mapWeight: 1, haze: 0.15, detail: 0.12, dayS: SPIN_DAY_S.saturn, hexagon: 1, rings: { innerKm: 74500, outerKm: 136775, tilt: 0.47 },
     // The rain of the rings on its middle latitudes (textured.frag `sights`).
     sights: [1, 0, 0, 0],
   },
   io: {
-    shader: 'textured', map: 'io.jpg', saturation: 1.25, tint: [1.06, 1, 0.9], base: [0.82, 0.72, 0.38],
+    shader: 'textured', map: 'io.webp', saturation: 1.25, tint: [1.06, 1, 0.9], base: [0.82, 0.72, 0.38],
     mapWeight: 1, haze: 0, detail: 0.12, dayS: SPIN_DAY_S.io,
     // Its lakes of lava, glowing on the night side.
     sights: [0, 1, 0, 0],
   },
   europa: {
-    shader: 'textured', map: 'europa.jpg', saturation: 1, tint: [1.03, 0.97, 0.88], base: [0.82, 0.76, 0.68],
+    shader: 'textured', map: 'europa.webp', saturation: 1, tint: [1.03, 0.97, 0.88], base: [0.82, 0.76, 0.68],
     mapWeight: 1, haze: 0, detail: 0.1, dayS: SPIN_DAY_S.europa,
   },
   ganymede: {
-    shader: 'textured', map: 'ganymede.jpg', saturation: 1, tint: [1, 1, 1], base: [0.55, 0.5, 0.45],
+    shader: 'textured', map: 'ganymede.webp', saturation: 1, tint: [1, 1, 1], base: [0.55, 0.5, 0.45],
     mapWeight: 1, haze: 0, detail: 0.12, dayS: SPIN_DAY_S.ganymede,
   },
   callisto: {
-    shader: 'textured', map: 'callisto.jpg', saturation: 1, tint: [0.8, 0.72, 0.62], base: [0.35, 0.32, 0.28],
+    shader: 'textured', map: 'callisto.webp', saturation: 1, tint: [0.8, 0.72, 0.62], base: [0.35, 0.32, 0.28],
     mapWeight: 1, haze: 0, detail: 0.14, dayS: SPIN_DAY_S.callisto,
   },
   titan: {
-    shader: 'textured', map: 'titan.jpg', saturation: 0.5, tint: [1, 0.88, 0.72], base: [0.82, 0.6, 0.32],
+    shader: 'textured', map: 'titan.webp', saturation: 0.5, tint: [1, 0.88, 0.72], base: [0.82, 0.6, 0.32],
     mapWeight: 1, haze: 1.2, detail: 0.03, dayS: SPIN_DAY_S.titan,
     // Backlit, its thick haze is an orange ring; sunlight glints off its northern lakes.
     rim: [1, 0.62, 0.25], rimLight: 2, glint: 1,
@@ -266,7 +266,7 @@ const LOOKS = {
     rings: { innerKm: 41000, outerKm: 52000, tilt: 1.43, style: 1 },
   },
   neptune: {
-    shader: 'textured', map: 'neptune.jpg', saturation: 1, tint: [0.9, 1, 1.1], base: [0.25, 0.42, 0.85],
+    shader: 'textured', map: 'neptune.webp', saturation: 1, tint: [0.9, 1, 1.1], base: [0.25, 0.42, 0.85],
     mapWeight: 1, haze: 0.35, detail: 0.12, dayS: SPIN_DAY_S.neptune,
     // The Great Dark Spot is in the map (Voyager 2, 1989); its bright companion clouds
     // are drawn over it and shift. storm: [u, v] of the spot on the map, v counted from
@@ -277,19 +277,19 @@ const LOOKS = {
   },
   // Ceres, Pluto and Charon: grey USGS maps; the tint gives each its real cast.
   ceres: {
-    shader: 'textured', map: 'ceres.jpg', saturation: 1, tint: [0.62, 0.6, 0.57], base: [0.3, 0.29, 0.28],
+    shader: 'textured', map: 'ceres.webp', saturation: 1, tint: [0.62, 0.6, 0.57], base: [0.3, 0.29, 0.28],
     mapWeight: 1, haze: 0, detail: 0.12, dayS: SPIN_DAY_S.ceres,
   },
   // Pluto turns backwards once in 6.387 days, the same time Charon takes to circle it,
   // so each keeps one face toward the other.
   pluto: {
-    shader: 'textured', map: 'pluto.jpg', saturation: 1, tint: [1.12, 0.96, 0.8], base: [0.62, 0.52, 0.42],
+    shader: 'textured', map: 'pluto.webp', saturation: 1, tint: [1.12, 0.96, 0.8], base: [0.62, 0.52, 0.42],
     mapWeight: 1, haze: 0.15, detail: 0.08, dayS: SPIN_DAY_S.pluto,
     // The blue ring New Horizons saw looking back at Pluto with the Sun behind it.
     rim: [0.3, 0.52, 1], rimLight: 1.8,
   },
   charon: {
-    shader: 'textured', map: 'charon.jpg', saturation: 1, tint: [0.92, 0.9, 0.88], base: [0.45, 0.44, 0.43],
+    shader: 'textured', map: 'charon.webp', saturation: 1, tint: [0.92, 0.9, 0.88], base: [0.45, 0.44, 0.43],
     mapWeight: 1, haze: 0, detail: 0.1, dayS: SPIN_DAY_S.charon,
   },
   // The comet's nucleus reflects 4% of sunlight: nearly black.
@@ -303,7 +303,7 @@ const LOOKS = {
   // brightness (Vesta gives back three times the Moon's share of light), given its pale
   // grey-brown here.
   vesta: {
-    shader: 'textured', map: 'vesta.jpg', saturation: 1, tint: [1.02, 0.95, 0.86], base: [0.5, 0.46, 0.41],
+    shader: 'textured', map: 'vesta.webp', saturation: 1, tint: [1.02, 0.95, 0.86], base: [0.5, 0.46, 0.41],
     mapWeight: 1, haze: 0, detail: 0.12, dayS: SPIN_DAY_S.vesta,
   },
   bennu: { shader: 'rocky', colorA: [0.05, 0.05, 0.05], colorB: [0.17, 0.165, 0.16], cap: 0, haze: 0, contrast: 0.8, craters: 0.3, dayS: SPIN_DAY_S.bennu },

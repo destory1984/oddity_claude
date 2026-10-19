@@ -1361,7 +1361,7 @@ ${STORY_MORE[target.id]}` : told };
     skyLabels: skyLabels(),
     onSelect: selectBody,
     onFace: () => facePicked(),
-    onPhoto: () => photoView.show(photoSlides(named(hud.plateId()))),
+    onPhoto: () => photoView.show(photoSlides(named(hud.plateId())), readingFor(named(hud.plateId()))),
     // A press on the name plate turns her to what it names: the craft she flies with or
     // the place she stands at, after she has looked about, and otherwise what is chosen
     // (the user, 2026-10-12: "망원경 도킹 -> 사용자가 화면 회전을 함 -> 이름을 누르면 ->

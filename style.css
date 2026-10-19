@@ -6336,3 +6336,66 @@ html.noSkyNames .skyLabel {
   padding:0 8px;
   font-size:12px;
 }
+
+/* The photo page scrolls: the picture fills most of the screen, its words follow on
+   black, and under them what there is to read about it (ui/photoView.js; the user,
+   2026-10-19: "사진버튼을 누르면, 해당 물체의 좀 더 자세한 설명을 붙여줘. 필요하면, 페이지
+   스크롤도 넣고.."). The ✕ stays put while the page moves under it. */
+dialog#photoView {
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+
+#photoView #photoViewPicture {
+  height:68dvh;
+}
+
+#photoView #photoViewClose {
+  position:fixed;
+  z-index:2;
+}
+
+#photoView #photoViewBand {
+  position:static;
+  padding:14px 18px 10px;
+  background:#000;
+}
+
+#photoView #photoViewHint {
+  display:block;
+  margin-top:12px;
+  color:#9fb4d9;
+  font-size:12px;
+  text-align:center;
+}
+
+#photoView #photoViewHint::after {
+  content:" ▾";
+}
+
+#photoView #photoViewHint[hidden],
+#photoView #photoViewMore[hidden] {
+  display:none;
+}
+
+#photoView #photoViewMore {
+  max-width:640px;
+  margin:0 auto;
+  padding:8px 18px max(32px, env(safe-area-inset-bottom));
+  border-top:1px solid #ffffff1f;
+}
+
+#photoView #photoViewKicker {
+  display:block;
+  margin:10px 0 2px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+#photoView #photoViewText p {
+  margin:10px 0;
+  color:#dfe7f5;
+  font-size:15px;
+  line-height:1.75;
+}

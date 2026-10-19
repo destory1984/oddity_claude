@@ -7,6 +7,9 @@ const $ = (id) => document.getElementById(id);
 // (the user, 2026-10-16, of three looks: "3"). A press anywhere puts it away, as ✕ does
 // (the user, 2026-10-17: "그냥 화면 아무데나 눌러도, 이전 화면으로 보내줘").
 // slides: [{ file, title, caption, credit }] (core/photoSlides.js).
+// Under the photo, the page goes on with what there is to read about it (main.js
+// readingFor: { kicker, text }), scrolled to (the user, 2026-10-19: "사진버튼을 누르면,
+// 해당 물체의 좀 더 자세한 설명을 붙여줘. 필요하면, 페이지 스크롤도 넣고..").
 export function createPhotoView({ onOpen, onClose }) {
   const dialog = $('photoView');
   const picture = $('photoViewPicture');
@@ -35,6 +38,8 @@ export function createPhotoView({ onOpen, onClose }) {
     draw();
   }
 
+  // A press on the words is for reading them, not for leaving.
+  $('photoViewMore').addEventListener('click', (event) => event.stopPropagation());
   dialog.addEventListener('click', () => {
     // (The press that ends a swipe has moved it on instead.)
     if (swiped) {
@@ -67,11 +72,22 @@ export function createPhotoView({ onOpen, onClose }) {
   dialog.addEventListener('close', () => onClose?.());
 
   return {
-    show(list) {
+    show(list, about = null) {
       if (!list.length) return;
       slides = list;
       at = 0;
       draw();
+      const text = about?.text ?? '';
+      $('photoViewMore').hidden = !text;
+      $('photoViewHint').hidden = !text;
+      $('photoViewHint').textContent = t('아래로 내리면 자세한 설명이 있습니다');
+      $('photoViewKicker').textContent = about?.kicker ?? '';
+      $('photoViewText').replaceChildren(...text.split('\n\n').map((part) => {
+        const p = document.createElement('p');
+        p.textContent = part;
+        return p;
+      }));
+      dialog.scrollTop = 0;
       onOpen?.();
       dialog.showModal();
     },

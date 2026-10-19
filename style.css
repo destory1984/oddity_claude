@@ -6638,3 +6638,80 @@ footer .throttle output,
 #journal #journalDaily #dailyKeys button::after {
   font-size:10px;
 }
+
+/* Every key takes a finger: at least 40px that a press finds (the user, 2026-10-19: "다 해",
+   of "누르는 자리는 40px 이상"). Where the layout needs a smaller drawing (the name plate's
+   keys and the scanner's switch 30px, the goal line's keys 32px tall, the fold of the
+   reading 34px), a clear band round it takes the press too; what is drawn, and the 8px
+   between keys, stay as they were. */
+#hud #targetPanel #targetName button,
+#guide button,
+#inspectInfo #inspectFold {
+  position:relative;
+}
+
+#hud #targetPanel #targetName button::after,
+#scannerButton::after,
+#guide button::after,
+#inspectInfo #inspectFold::after {
+  content:"";
+  position:absolute;
+  inset:-4px;
+}
+
+/* (30px keys: 5px round them; 32px tall: 4px above and under; 34px: 3px.) */
+#hud #targetPanel #targetName button::after,
+#scannerButton::after,
+#guide :is(#guideBack, #guideNext)::after {
+  inset:-5px;
+}
+
+#guide :is(#guideJump, #guideSkip)::after {
+  inset:-4px -2px;
+}
+
+#inspectInfo #inspectFold::after {
+  inset:-3px;
+}
+
+/* The map's names are 32px tall (they were 26px), 4px apart, and a press anywhere in the
+   gap round one finds it: 36px from row to row (it was 31px). Forty, as the other keys
+   have, took eight rows of 40px for the 28 names and left the dial 164px wide on a 657px
+   screen: here the dial matters more. The dial gives up what the names need, so the
+   sheet still fits without scrolling. */
+#bigMap #bigMapList {
+  gap:4px;
+  padding:2px 0;
+}
+
+#bigMap #bigMapList button {
+  position:relative;
+  min-height:32px;
+}
+
+#bigMap #bigMapList button::after {
+  content:"";
+  position:absolute;
+  inset:-2px;
+}
+
+#bigMap #bigMapStage {
+  --side:min(300px, 78vw, 100vh - 425px);
+}
+
+/* (Narrower than 380px the names take eight rows: there they are 28px tall, 32px from row
+   to row, so that the dial need not shrink further.) */
+@media (max-width: 380px) {
+  #bigMap #bigMapStage {
+    --side:min(300px, 78vw, 100vh - 425px);
+  }
+
+  #bigMap #bigMapList {
+    padding:0;
+    row-gap:3px;
+  }
+
+  #bigMap #bigMapList button {
+    min-height:28px;
+  }
+}

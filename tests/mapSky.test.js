@@ -22,12 +22,12 @@ test('each star swells and falls at its own pace, never quite out', () => {
   assert.notEqual(twinkle(a, 3), twinkle(b, 3));
 });
 
-test('a comet goes by every seven to twelve seconds, across a corner, falling, clear of the circle', () => {
+test('a comet goes by every two and a half to five seconds, across a corner, falling, clear of the circle', () => {
   const [w, h, r] = [363, 288, 134];
   const corners = new Set();
   for (let n = 0; n < 40; n += 1) {
     const gap = cometStart(n + 1) - cometStart(n);
-    assert.ok(gap >= 7 && gap <= 12, `gap ${gap}`);
+    assert.ok(gap >= 2.5 && gap <= 5, `gap ${gap}`);
     const at = cometStart(n);
     const begin = cometAt(at + 0.01, w, h);
     const end = cometAt(at + COMET_S - 0.01, w, h);

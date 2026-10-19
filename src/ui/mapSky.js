@@ -64,6 +64,75 @@ export function createMapSky(canvas, map) {
     ctx.stroke();
   }
 
+  // A falling star: a soft glow round a tail that narrows from the head to nothing, a
+  // bright head with a halo, and a few sparks left behind it (the user, 2026-10-19:
+  // "날아가는 별똥별 조금 더 예쁘게").
+  function drawComet(comet) {
+    const [x, y] = comet.head;
+    const [wx, wy] = comet.way;
+    const [nx, ny] = [-wy, wx];
+    const TAIL = 80;
+    const end = [x - wx * TAIL, y - wy * TAIL];
+    ctx.lineCap = 'round';
+    ctx.globalAlpha = comet.light * 0.35;
+    const glow = ctx.createLinearGradient(x, y, end[0], end[1]);
+    glow.addColorStop(0, '#bcd8ffcc');
+    glow.addColorStop(1, '#bcd8ff00');
+    ctx.strokeStyle = glow;
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - wx * TAIL * 0.7, y - wy * TAIL * 0.7);
+    ctx.stroke();
+    // The tail: a thin wedge, widest at the head.
+    const body = ctx.createLinearGradient(x, y, end[0], end[1]);
+    body.addColorStop(0, '#ffffff');
+    body.addColorStop(0.2, '#fff3c9ee');
+    body.addColorStop(0.6, '#f3d27a66');
+    body.addColorStop(1, '#f3d27a00');
+    ctx.globalAlpha = comet.light;
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.moveTo(x + nx * 1.8, y + ny * 1.8);
+    ctx.lineTo(end[0], end[1]);
+    ctx.lineTo(x - nx * 1.8, y - ny * 1.8);
+    ctx.closePath();
+    ctx.fill();
+    // Sparks dropped along the way, dimmer the older; they flicker as it goes.
+    ctx.fillStyle = '#fff6dd';
+    for (let k = 1; k <= 6; k += 1) {
+      const back = k * 13 + 5 * Math.sin(comet.u * 40 + k * 2.1);
+      const off = 3.2 * Math.sin(k * 1.7 + comet.u * 9);
+      ctx.globalAlpha = comet.light * (0.75 - k * 0.11) * (0.6 + 0.4 * Math.sin(comet.u * 55 + k));
+      ctx.beginPath();
+      ctx.arc(x - wx * back + nx * off, y - wy * back + ny * off, 0.9 - k * 0.07, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // The head: a halo, a white point and a short cross of light.
+    const halo = ctx.createRadialGradient(x, y, 0, x, y, 9);
+    halo.addColorStop(0, '#ffffffcc');
+    halo.addColorStop(0.35, '#dbe9ff66');
+    halo.addColorStop(1, '#dbe9ff00');
+    ctx.globalAlpha = comet.light;
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(x, y, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(x, y, 1.9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = comet.light * 0.7;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(x - 6, y);
+    ctx.lineTo(x + 6, y);
+    ctx.moveTo(x, y - 6);
+    ctx.lineTo(x, y + 6);
+    ctx.stroke();
+  }
+
   function draw(now) {
     fit();
     const [w, h, r] = size;
@@ -108,27 +177,7 @@ export function createMapSky(canvas, map) {
       }
     }
     const comet = still ? null : cometAt(t, w, h);
-    if (comet) {
-      const [x, y] = comet.head;
-      const tail = 46;
-      const end = [x - comet.way[0] * tail, y - comet.way[1] * tail];
-      const fade = ctx.createLinearGradient(x, y, end[0], end[1]);
-      fade.addColorStop(0, '#ffffff');
-      fade.addColorStop(0.25, '#f3d27aaa');
-      fade.addColorStop(1, '#f3d27a00');
-      ctx.globalAlpha = comet.light;
-      ctx.strokeStyle = fade;
-      ctx.lineCap = 'round';
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(end[0], end[1]);
-      ctx.stroke();
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(x, y, 1.9, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    if (comet) drawComet(comet);
     ctx.restore();
     ctx.globalAlpha = 1;
     if (!still) frame = requestAnimationFrame(draw);

@@ -37,12 +37,13 @@ export function twinkle(star, t) {
   return 0.15 + 0.85 * wave * wave;
 }
 
-export const COMET_S = 1.1;
-// A comet every seven to twelve seconds: the n-th one begins at cometStart(n).
+export const COMET_S = 1.3;
+// A comet every two and a half to five seconds (it was seven to twelve; the user,
+// 2026-10-19: "날아가는 별똥별 조금 더 예쁘게 & 자주"): the n-th one begins at cometStart(n).
 export function cometStart(n, seed = 11) {
   const random = seeded(seed);
-  let at = 2.5;
-  for (let i = 0; i < n; i += 1) at += 7 + 5 * random();
+  let at = 1;
+  for (let i = 0; i < n; i += 1) at += 2.5 + 2.5 * random();
   return at;
 }
 

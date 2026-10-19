@@ -1675,7 +1675,9 @@ ${STORY_MORE[target.id]}` : told };
     if (!coming || coming.hidden || wasShown || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     pageMove?.cancel();
     // Options and Help come out turning clockwise (the user: "options, help는 시계 방향으로 회전").
-    const spin = ['options', 'help'].includes(next.dataset.tab) ? -1 : 1;
+    // The two in the middle turn less, as a fan below their key: turned as far as the two
+    // at the ends, their tails crossed over the row of tabs ("help, changes는 궤적이 안 예뻐").
+    const spin = { options: -1, help: -0.4, news: 0.4, about: 1 }[next.dataset.tab] ?? 1;
     const { move } = swirl(coming, next, { inward: false, lasts: PAGE_OUT_MS, ink: '#cfe0ff', rim: MENU_RIM, onTop: true, spin });
     pageMove = move;
     move.finished.then(() => { if (pageMove === move) { move.cancel(); pageMove = null; } }, () => {});

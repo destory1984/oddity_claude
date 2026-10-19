@@ -44,6 +44,28 @@ function picture(url) {
   });
 }
 
+// GIBS answered its first request for a day's picture with "504 Gateway Time-out" (and
+// without the header that lets the page read it) on 2026-10-19 at night; a minute later
+// the same address gave the picture. So a picture that could not be had is asked for once
+// more, about a minute later, and no more; the game's own clouds stay meanwhile.
+export const RETRY_MS = 60000;
+
+// The pictures that could be had (in the order of urls; those not had are left out), each
+// asked for again once after `wait` ms if the first try failed.
+export async function picturesWithRetry(urls, { load = picture, wait = RETRY_MS, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) } = {}) {
+  const first = await Promise.allSettled(urls.map((url) => load(url)));
+  const missed = urls.filter((_, i) => first[i].status !== 'fulfilled');
+  let again = [];
+  if (missed.length) {
+    await sleep(wait);
+    again = await Promise.allSettled(missed.map((url) => load(url)));
+  }
+  let next = 0;
+  return first.map((shot) => (shot.status === 'fulfilled' ? shot : again[next++]))
+    .filter((shot) => shot.status === 'fulfilled')
+    .map((shot) => shot.value);
+}
+
 function pixels(image, w = W, h = H) {
   const canvas = document.createElement('canvas');
   canvas.width = w;
@@ -58,8 +80,7 @@ function pixels(image, w = W, h = H) {
 // cloud map, for the gaps.
 export async function realCloudMap({ nowMs = Date.now(), groundUrl, ownUrl }) {
   const day = cloudDay(nowMs);
-  const shots = await Promise.allSettled(LAYERS.map((layer) => picture(gibsUrl(layer, day))));
-  const got = shots.filter((s) => s.status === 'fulfilled').map((s) => pixels(s.value));
+  const got = (await picturesWithRetry(LAYERS.map((layer) => gibsUrl(layer, day)))).map((image) => pixels(image));
   if (!got.length) return null;
   const [ground, own] = await Promise.all([picture(groundUrl), picture(ownUrl)]).then((both) => both.map((image) => pixels(image)));
   const n = W * H;

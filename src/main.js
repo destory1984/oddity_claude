@@ -1657,43 +1657,26 @@ ${STORY_MORE[target.id]}` : told };
       dialog.close();
     });
   }
-  // Turning the settings' pages, the page shown goes down into its own tab and the one
-  // asked for comes up out of its tab (the user, 2026-10-19: "설정 화면에서 다른 탭으로
-  // 옮겨갈 때에도 혜성 효과"). The press is held back here and let through between the two.
-  const PAGE_IN_MS = 380;
+  // Turning the settings' pages, the one asked for comes up out of its tab (the user,
+  // 2026-10-19: "설정 화면에서 다른 탭으로 옮겨갈 때에도 혜성 효과"; only that way, not the
+  // page shown going down first: "왔다갔다 하니까 정신 없네"). Heard after ui/settings.js
+  // has shown it.
   const PAGE_OUT_MS = 550;
-  let pageTurning = false;
-  let pagePass = false;
+  let pageMove = null;
+  let wasShown = null;
   $('settingsTabs').addEventListener('click', (e) => {
     const next = e.target.closest('button[data-tab]');
-    if (!next || pagePass) return;
-    const page = (name) => $('settings').querySelector(`section[data-tab="${name}"]`);
-    const shown = [...$('settings').querySelectorAll('section[data-tab]')].find((part) => !part.hidden);
-    if (!shown || shown.dataset.tab === next.dataset.tab || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    e.stopPropagation();
-    if (pageTurning) return;
-    pageTurning = true;
-    const from = $('settingsTabs').querySelector(`button[data-tab="${shown.dataset.tab}"]`);
-    const away = swirl(shown, from, { inward: true, lasts: PAGE_IN_MS, ink: '#cfe0ff', rim: MENU_RIM, onTop: true });
-    const turn = () => {
-      away.move.cancel();
-      pagePass = true;
-      next.click();
-      pagePass = false;
-      const coming = page(next.dataset.tab);
-      if (!coming || !$('settings').open) {
-        pageTurning = false;
-        return;
-      }
-      const { move } = swirl(coming, next, { inward: false, lasts: PAGE_OUT_MS, ink: '#cfe0ff', rim: MENU_RIM, onTop: true });
-      const done = () => {
-        move.cancel();
-        pageTurning = false;
-      };
-      move.finished.then(done, done);
-    };
-    away.move.finished.then(turn, turn);
+    wasShown = next ? !$('settings').querySelector(`section[data-tab="${next.dataset.tab}"]`)?.hidden : null;
   }, true);
+  $('settingsTabs').addEventListener('click', (e) => {
+    const next = e.target.closest('button[data-tab]');
+    const coming = next && $('settings').querySelector(`section[data-tab="${next.dataset.tab}"]`);
+    if (!coming || coming.hidden || wasShown || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    pageMove?.cancel();
+    const { move } = swirl(coming, next, { inward: false, lasts: PAGE_OUT_MS, ink: '#cfe0ff', rim: MENU_RIM, onTop: true });
+    pageMove = move;
+    move.finished.then(() => { if (pageMove === move) { move.cancel(); pageMove = null; } }, () => {});
+  });
   function showScanner(on, swirl = false) {
     const words = on ? t('스캐너 끄기') : t('스캐너 켜기');
     $('scannerButton').setAttribute('aria-pressed', String(on));

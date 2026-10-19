@@ -1,4 +1,4 @@
-import { TIME_SCALE } from './bodies.js';
+import { TIME_SCALE, TOUR_EPOCH_MS } from './bodies.js';
 
 // One game clock for everyone (the user, 2026-10-19: "모든 사람이 언제나 같은 행성 위치를
 // 갖는다.. 가능?", "핸드폰 시간을 가지고 수학적으로 가능하게 할 수 있어? timestamp", "4. 해"):
@@ -7,8 +7,8 @@ import { TIME_SCALE } from './bodies.js';
 // (It was a clock started at nought each time the game was opened.) A phone's clock is
 // set by its network, to within a second or so: some fifty seconds of game time.
 
-// The travel layout counts from here.
-export const TOUR_EPOCH_MS = Date.UTC(2026, 9, 1);
+// The travel layout counts from here (defined beside the bodies' own schedules).
+export { TOUR_EPOCH_MS };
 const DAY_MS = 86400000;
 // Korea's midnight, the same for everyone wherever they are.
 const KST_MS = 9 * 3600000;

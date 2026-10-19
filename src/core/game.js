@@ -1,5 +1,5 @@
 import { rotateLocal, forward, right, up } from './orientation.js';
-import { BODIES, nearestSurface } from './bodies.js';
+import { BODIES, nearestSurface, surfaceRadius } from './bodies.js';
 import { speedLimit, accelerateSpeed, brakeSpeed, firstSphereHit, MAX_SPEED } from './flight.js';
 
 export const TURN_RATE = 0.7;
@@ -61,9 +61,11 @@ function pushOut(position, bodies) {
   for (const body of bodies) {
     const offset = position.map((n, i) => n - body.position[i]);
     const distance = Math.hypot(...offset);
-    if (distance < body.radiusKm - 1e-9) {
-      const up = distance > 0 ? offset.map((n) => n / distance) : [0, 1, 0];
-      return { body, position: body.position.map((n, i) => n + up[i] * body.radiusKm) };
+    const up = distance > 0 ? offset.map((n) => n / distance) : [0, 1, 0];
+    // (The ground of a squat body, core/bodies.js surfaceRadius, is nearer at its poles.)
+    const ground = surfaceRadius(body, up);
+    if (distance < ground - 1e-9) {
+      return { body, position: body.position.map((n, i) => n + up[i] * ground) };
     }
   }
   return null;

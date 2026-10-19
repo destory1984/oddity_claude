@@ -196,3 +196,19 @@ test('Haumea is an egg and Arrokoth a snowman: their sizes are three lengths', (
   assert.deepEqual(bodyFacts(BODY_DATA.find((d) => d.id === 'arrokoth'), '태양')[0], ['크기', '36 × 20 × 10km']);
   assert.deepEqual(bodyFacts(BODY_DATA.find((d) => d.id === 'eris'), '태양')[0], ['지름', '2,326km']);
 });
+
+test('a squat body\'s ground follows its shape: Vesta\'s poles are 223.2 km from its middle, its middle 286.3 km', async () => {
+  const { BODIES, surfaceRadius, surfaceDistance } = await import('../src/core/bodies.js');
+  const { firstSphereHit } = await import('../src/core/flight.js');
+  const vesta = BODIES.find((b) => b.id === 'vesta');
+  assert.ok(Math.abs(surfaceRadius(vesta, [0, -1, 0]) - 223.2) < 1e-6);
+  assert.ok(Math.abs(surfaceRadius(vesta, [1, 0, 0]) - 286.3) < 1e-6);
+  const over = vesta.position.map((n, i) => n + (i === 1 ? -300 : 0));
+  assert.ok(Math.abs(surfaceDistance(over, vesta) - 76.8) < 1e-6);
+  // Falling on the south pole from 300 km out stops at the drawn ground.
+  const hit = firstSphereHit(over, [0, 1, 0], 200, [vesta]);
+  assert.ok(hit && Math.abs(hit.position[1] - (vesta.position[1] - 223.2)) < 1e-6);
+  // Hyperion tumbles: a ball as before.
+  const hyperion = BODIES.find((b) => b.id === 'hyperion');
+  assert.equal(surfaceRadius(hyperion, [0, 1, 0]), hyperion.radiusKm);
+});

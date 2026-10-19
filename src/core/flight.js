@@ -1,3 +1,5 @@
+import { bodyShape } from './bodies.js';
+
 export const C = 299792.458;
 
 export const MIN_SPEED = C * 0.01;
@@ -42,10 +44,31 @@ export function sweepSphere(start, direction, length, center, radius) {
   return t <= length ? t : null;
 }
 
+// The same against a squat ball (core/bodies.js bodyShape: [round the middle, along the
+// spin axis y]): squeezed along y until it is a ball, the way stays a line and its length
+// along it the same `t`.
+export function sweepSquat(start, direction, length, center, [round, axis]) {
+  const squeeze = round / axis;
+  const relative = start.map((n, i) => (n - center[i]) * (i === 1 ? squeeze : 1));
+  const way = direction.map((n, i) => n * (i === 1 ? squeeze : 1));
+  const a = way.reduce((sum, n) => sum + n * n, 0);
+  const b = relative.reduce((sum, n, i) => sum + n * way[i], 0);
+  if (b >= 0) return null;
+  const q = relative.reduce((sum, n) => sum + n * n, 0) - round * round;
+  if (q <= 0) return 0;
+  const discriminant = b * b - a * q;
+  if (discriminant < 0) return null;
+  const t = (-b - Math.sqrt(discriminant)) / a;
+  return t <= length ? t : null;
+}
+
 export function firstSphereHit(start, direction, length, bodies, margin = 0) {
   let best = null;
   for (const body of bodies) {
-    const t = sweepSphere(start, direction, length, body.position, body.radiusKm + margin);
+    const shape = bodyShape(body);
+    const t = shape
+      ? sweepSquat(start, direction, length, body.position, [shape[0] + margin, shape[1] + margin])
+      : sweepSphere(start, direction, length, body.position, body.radiusKm + margin);
     if (t !== null && (best === null || t < best.t)) best = { body, t };
   }
   if (!best) return null;

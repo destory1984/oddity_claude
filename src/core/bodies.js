@@ -22,12 +22,13 @@ export const TIME_SCALE = 50;
 // Planets are spread around the Sun so trips go in many directions.
 const SATURN_RING_EDGE_KM = 136775;
 const YEAR_S = 365.25 * DAY_S;
-// The travel layout's day nought (core/clock.js TOUR_EPOCH_MS, 1 October 2026): a body
+// The travel layout's day nought (1 October 2026; core/clock.js counts the game's time from
+// it and takes it from here, so the two cannot drift apart: code review, 2026-10-20): a body
 // on its real schedule passes perihelion this many seconds of game time after it. jd:
 // the date as a Julian day (JPL gives perihelion times so). onTime marks such an ellipse
 // (core/ephemeris.js moves it to today's clock).
-const EPOCH_MS = Date.UTC(2026, 9, 1);
-const fromJulianDay = (jd) => (jd - 2440587.5) * DAY_S - EPOCH_MS / 1000;
+export const TOUR_EPOCH_MS = Date.UTC(2026, 9, 1);
+const fromJulianDay = (jd) => (jd - 2440587.5) * DAY_S - TOUR_EPOCH_MS / 1000;
 const JUPITER_DIRECTION = [0.77, 0.01, -0.64];
 
 export const BODY_DATA = [
@@ -320,7 +321,7 @@ export const BODY_DATA = [
   // Two more moons of Saturn. Hyperion, a sponge-like lump of 360 by 266 by 205 km that
   // tumbles with no steady day, 1.48 million km out (once in 21.3 days).
   {
-    id: 'hyperion', name: '히페리온', nameEn: 'Hyperion', kind: 'moon', radiusKm: 180, shapeKm: [180, 102.5, 133], edgeKm: SATURN_RING_EDGE_KM,
+    id: 'hyperion', name: '히페리온', nameEn: 'Hyperion', kind: 'moon', radiusKm: 180, shapeKm: [180, 102.5, 133], tumbles: true, edgeKm: SATURN_RING_EDGE_KM,
     parent: 'saturn', orbitKm: 1481010, periodS: 21.276 * DAY_S, direction: [-0.95, 0.05, 0.3],
   },
   // Phoebe, 13 million km out, goes round backwards (once in 545 days), as Triton does.
@@ -449,8 +450,34 @@ export const START_POSITION = (() => {
   return [earth.position[0], earth.position[1], earth.position[2] - earth.radiusKm - START_ALTITUDE_KM];
 })();
 
+// The bodies drawn as stretched balls (shapeKm, render/planets.js shapedBall), whose ground
+// is not radiusKm (the longest half) away everywhere: over Vesta's flattened south pole she
+// stood 63 km above the drawn ground, over Haumea's poles 650 km (code review, 2026-10-20).
+// Their ground as a squat ball: the half along the spin axis (y) up and down, the longer
+// of the other two round the middle (the turn about the axis is not followed, so round the
+// middle she may stop short over a shorter side, never sink into a longer one). Not for
+// one that tumbles (Hyperion, whose axis wanders): a ball as before.
+const SHAPES = new Map(BODY_DATA.filter((d) => d.shapeKm && !d.tumbles).map((d) => [d.id, d.shapeKm]));
+
+// How far the ground is from a body's middle in the unit direction `way`.
+export function surfaceRadius(body, way) {
+  const shape = SHAPES.get(body.id);
+  if (!shape) return body.radiusKm;
+  const round = Math.max(shape[0], shape[2]);
+  return 1 / Math.sqrt((way[0] ** 2 + way[2] ** 2) / round ** 2 + way[1] ** 2 / shape[1] ** 2);
+}
+
+// The squat ball's half sizes [round the middle, along the axis], or null for a ball.
+export function bodyShape(body) {
+  const shape = SHAPES.get(body.id);
+  return shape ? [Math.max(shape[0], shape[2]), shape[1]] : null;
+}
+
 export function surfaceDistance(position, body) {
-  return Math.max(0, Math.hypot(...sub(position, body.position)) - body.radiusKm);
+  const out = sub(position, body.position);
+  const distance = Math.hypot(...out);
+  if (!SHAPES.has(body.id) || distance === 0) return Math.max(0, distance - body.radiusKm);
+  return Math.max(0, distance - surfaceRadius(body, out.map((n) => n / distance)));
 }
 
 export function nearestSurface(position, bodies = BODIES) {

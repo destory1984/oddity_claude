@@ -6945,3 +6945,8 @@ dialog#settings[open] #closeSettings {
   margin-bottom:max(20px, env(safe-area-inset-bottom));
   box-shadow:0 -14px 14px #0d1a3a, 0 0 0 8px #0d1a3a, 0 40px 0 12px #0d1a3a;
 }
+
+/* (The journal's title is 20px on a wide screen too, as every sheet's: it was 24px there.) */
+#journal .journalHead h1 {
+  font-size:20px;
+}

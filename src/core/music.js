@@ -1,7 +1,7 @@
 import { t } from './i18n.js';
 // Background music, decided here and played by ui/sound.js. No sound files: a slow pad
 // of three notes per bar under a few bell notes, different every bar but always the
-// same for a given bar number. Forty-nine tunes take turns, each with its own four chords,
+// same for a given bar number. Fifty tunes take turns, each with its own four chords,
 // five-note scale, beat and bell.
 
 export const BAR_S = 8;
@@ -456,6 +456,16 @@ export const TUNES = [
     slots: [0, 1, 2, 4, 5, 6], busy: 0.45,
     bell: { length: 1.6, overtone: 2, overtoneVolume: 0.2, wave: "triangle" },
     motif: [4, 3, 2, 1, 0, 1, 2, 3],
+  },
+  // One more, the fiftieth again (the user, 2026-10-19: "노래 한 곡 더 넣어").
+  {
+    // A flat lydian, slow and far: Earth seen from six billion km away.
+    id: 'paleBlueDot', name: t('창백한 푸른 점'),
+    chords: [chord('G#2', 'G#3', 'C4', 'D#4'), chord('A#2', 'F3', 'A#3', 'D4'), chord('G#2', 'G#3', 'C4', 'D#4'), chord('D#2', 'G3', 'A#3', 'D#4')],
+    melody: scale('G#4 A#4 C5 D#5 F5 G#5 A#5 C6'),
+    slots: [0, 2.5, 4, 6.5], busy: 0.62,
+    bell: { length: 2.7, overtone: 3, overtoneVolume: 0.12 },
+    motif: [4, 2, 0, 1, 3, 5, 7, 5],
   },
 ];
 

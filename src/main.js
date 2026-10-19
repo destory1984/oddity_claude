@@ -3780,10 +3780,38 @@ ${STORY_MORE[target.id]}` : told };
     return kakaoReady;
   }
   let shareNow = null;
+  // The view as it is when the key is pressed, Sora on it, for the share: a JPEG at most
+  // 1,080 px wide (a phone's picture is some 2,000 px tall otherwise), or null.
+  function viewPhoto() {
+    return new Promise((resolve) => {
+      try {
+        world.render();
+        const whole = world.picture();
+        const k = Math.min(1, 1080 / whole.width);
+        const small = document.createElement('canvas');
+        small.width = Math.round(whole.width * k);
+        small.height = Math.round(whole.height * k);
+        small.getContext('2d').drawImage(whole, 0, 0, small.width, small.height);
+        small.toBlob((blob) => resolve(blob ? new File([blob], 'space-oddity.jpg', { type: 'image/jpeg' }) : null), 'image/jpeg', 0.88);
+      } catch {
+        resolve(null);
+      }
+    });
+  }
   $('shareButton').addEventListener('click', () => {
     const info = placeShare();
     if (!info) return toast.show(t('다른 별 둘레에서는 자리를 나눌 수 없습니다.'));
     shareNow = info;
+    $('sharePic').hidden = true;
+    $('sharePhotoRow').hidden = true;
+    viewPhoto().then((photo) => {
+      if (!photo || shareNow !== info) return;
+      info.photo = photo;
+      info.picture = URL.createObjectURL(photo);
+      $('sharePic').src = info.picture;
+      $('sharePic').hidden = false;
+      $('sharePhotoRow').hidden = false;
+    });
     $('shareWhere').textContent = info.text;
     $('shareKakao').disabled = true;
     $('shareKakao').hidden = false;
@@ -3791,13 +3819,31 @@ ${STORY_MORE[target.id]}` : told };
     loadKakao().then(() => { $('shareKakao').disabled = false; }, () => { $('shareKakao').hidden = true; });
     return undefined;
   });
-  $('shareKakao').addEventListener('click', () => {
-    const { text, url } = shareNow;
+  const withPhoto = () => Boolean(shareNow?.photo) && $('sharePhoto').checked;
+  $('shareSheet').addEventListener('close', () => {
+    if (shareNow?.picture) URL.revokeObjectURL(shareNow.picture);
+  });
+  $('shareKakao').addEventListener('click', async () => {
+    const { text, url, photo } = shareNow;
     const link = { mobileWebUrl: url, webUrl: url };
+    // With the photo, the card shows it: put up on Kakao's server first (a card takes a
+    // picture by its address), else the game's own picture.
+    let image = { imageUrl: `${SHARE_BASE}og.jpg` };
+    if (withPhoto()) {
+      $('shareKakao').disabled = true;
+      try {
+        const up = await window.Kakao.Share.uploadImage({ file: [photo] });
+        const { url: imageUrl, width, height } = up.infos.original;
+        image = { imageUrl, imageWidth: width, imageHeight: height };
+      } catch {
+        // The game's own picture, then.
+      }
+      $('shareKakao').disabled = false;
+    }
     try {
       window.Kakao.Share.sendDefault({
         objectType: 'feed',
-        content: { title: `Space Oddity — ${t('할머니의 수첩')}`, description: text, imageUrl: `${SHARE_BASE}og.jpg`, link },
+        content: { title: `Space Oddity — ${t('할머니의 수첩')}`, description: text, ...image, link },
         buttons: [{ title: t('같은 자리에서 보기'), link }],
       });
       $('shareSheet').close();
@@ -3842,14 +3888,32 @@ ${STORY_MORE[target.id]}` : told };
   });
   $('shareOther').addEventListener('click', async () => {
     const info = shareNow;
+    const files = withPhoto() ? [info.photo] : null;
     $('shareSheet').close();
     if (navigator.share) {
+      // With the photo, for Instagram and the rest: the link goes in the words, as an app
+      // given a picture often drops a separate address.
+      const data = files && navigator.canShare?.({ files })
+        ? { title: 'Space Oddity', text: `${info.text}\n${info.url}`, files }
+        : { title: 'Space Oddity', text: info.text, url: info.url };
       try {
-        await navigator.share({ title: 'Space Oddity', text: info.text, url: info.url });
+        await navigator.share(data);
         return undefined;
       } catch (e) {
         if (e.name === 'AbortError') return undefined;
       }
+    }
+    // No share sheet (a computer): the photo is saved and the words and link copied, to be
+    // put on a post by hand.
+    if (files) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(info.photo);
+      a.download = info.photo.name;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+      await copyText(`${info.text}\n${info.url}`);
+      toast.show(t('사진을 저장하고 링크를 복사했습니다.\nSNS에 올릴 때 함께 붙여 넣으세요.'));
+      return undefined;
     }
     if (await copyText(`${info.text}\n${info.url}`)) toast.show(t('자리 링크를 복사했습니다.\n카톡이나 SNS에 붙여 넣으세요.'));
     else toast.show(info.url);

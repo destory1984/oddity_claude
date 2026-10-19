@@ -6229,3 +6229,25 @@ dialog#photoView::backdrop {
   width:100%;
   margin:0;
 }
+
+/* The view as it is now, sent with the place (the user, 2026-10-19: "사진도 공유 or sns
+   게시해보자"). */
+#shareSheet #sharePic {
+  display:block;
+  width:100%;
+  max-height:180px;
+  margin:0 0 10px;
+  border-radius:10px;
+  object-fit:cover;
+}
+
+#shareSheet #sharePic[hidden],
+#shareSheet #sharePhotoRow[hidden] {
+  display:none;
+}
+
+#shareSheet #sharePhotoRow {
+  justify-content:center;
+  margin:0 0 12px;
+  font-size:13px;
+}

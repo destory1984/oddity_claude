@@ -4621,5 +4621,8 @@
  "같은 자리에서 보기": "See it from there",
  "카카오톡을 열지 못했습니다.\n다른 앱으로 보내 주세요.": "KakaoTalk didn't open.\nPlease send it with another app.",
  "링크 복사": "Copy link",
- "링크를 복사했습니다.": "Link copied."
+ "링크를 복사했습니다.": "Link copied.",
+ "지금 화면 사진도 함께": "Send the view as a photo too",
+ "사진을 저장하고 링크를 복사했습니다.\nSNS에 올릴 때 함께 붙여 넣으세요.": "The photo is saved and the link copied.\nPaste it in when you post.",
+ "자리 공유에 지금 화면 사진을 함께 보낼 수 있습니다. 카톡 카드에도 그 사진이 실립니다.": "Share place can send the view as a photo too; the KakaoTalk card shows it."
 }

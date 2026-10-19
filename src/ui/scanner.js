@@ -1,15 +1,17 @@
 import { scannerPoints, scannerGround } from '../core/scanner.js';
 import { distanceText } from './messages.js';
 
-// The 3D scanner over the speed box (core/scanner.js says where each thing goes): a gold
+// The 3D scanner over the speed box (core/scanner.js says where each thing goes): an
 // ellipse lying flat round her, she a white wedge in its middle pointing ahead, each
 // thing a dot on her level and a stalk up or down to a round head with its name. The
 // look the user chose of three ("B", 2026-10-18). It stands where the speed box stood,
 // from its left edge to just before the flying keys, and the speed box goes up over it
 // (the user, the same day: "비행속도계와 스캐너 위치 바꿈").
-const GOLD = '#e9c46a';
-const FAINT = 'rgba(233, 196, 106, 0.35)';
-const KIND_COLOUR = { craft: '#9fd3ff', curio: '#f0a8ff', body: '#ffd27a' };
+// Its colour: an ice-blue line on a half-clear navy, like a hologram (the user's pick "C"
+// of five, 2026-10-19; it was gold).
+const LINE = '#a8dcff';
+const FAINT = 'rgba(168, 220, 255, 0.3)';
+const KIND_COLOUR = { craft: '#7fe3ff', curio: '#f0a8ff', body: '#ffd27a' };
 
 export function createScanner(canvas) {
   const ctx = canvas.getContext('2d');
@@ -120,8 +122,8 @@ export function createScanner(canvas) {
     const rx = w / 2 - 4;
     const ry = h * 0.3;
     ctx.lineWidth = 1;
-    ctx.fillStyle = 'rgba(8, 20, 40, 0.75)';
-    ctx.strokeStyle = GOLD;
+    ctx.fillStyle = 'rgba(10, 24, 48, 0.55)';
+    ctx.strokeStyle = LINE;
     ctx.beginPath();
     ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -179,7 +181,7 @@ export function createScanner(canvas) {
       ctx.arc(px, top, 3.5, 0, Math.PI * 2);
       ctx.fill();
       if (p.id === selectedId) {
-        ctx.strokeStyle = GOLD;
+        ctx.strokeStyle = LINE;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.arc(px, top, 6, 0, Math.PI * 2);

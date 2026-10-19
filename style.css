@@ -4686,7 +4686,8 @@ html[lang="zh-Hans"] * {
 }
 
 /* The "우주멍" button: the corner cell the key block left empty, at the right foot of the
-   screen, as large as the other keys. A crescent moon. */
+   screen, as large as the other keys. A crescent moon, yellow (the user's pick "B" of five,
+   2026-10-19), on the same navy as the keys beside it. */
 #gazeButton {
   position:absolute;
   right:0;

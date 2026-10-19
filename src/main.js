@@ -2160,11 +2160,10 @@ ${STORY_MORE[target.id]}` : told };
     seeUntil = performance.now() + SEE_S * 1000;
     say.show(t('쉬잇~'), SEE_S);
   }
+  // The two switches are in the settings now, not in the top bar (the user, 2026-10-19:
+  // "효과음, 음악 ON/OFF 버튼을 설정 화면으로 넣자"); M and B still work.
   function showSoundButton() {
-    $('soundButton').textContent = sound.muted() ? '🔇' : '🔊';
-    $('soundButton').classList.toggle('off', sound.muted());
-    $('soundButton').setAttribute('aria-label', sound.muted() ? t('효과음 켜기') : t('효과음 끄기'));
-    $('soundButton').title = sound.muted() ? t('효과음 꺼짐 (M)') : t('효과음 켜짐 (M)');
+    $('soundButton').textContent = sound.muted() ? t('효과음 켜기') : t('효과음 끄기');
   }
   function toggleSound() {
     sound.unlock();
@@ -2186,9 +2185,6 @@ ${STORY_MORE[target.id]}` : told };
   function showMusicButton() {
     const on = sound.musicOn();
     $('musicButton').textContent = on ? t('배경 음악 끄기') : t('배경 음악 켜기');
-    $('bgmButton').classList.toggle('off', !on);
-    $('bgmButton').setAttribute('aria-label', on ? t('배경 음악 끄기') : t('배경 음악 켜기'));
-    $('bgmButton').title = on ? t('배경 음악 켜짐 (B)') : t('배경 음악 꺼짐 (B)');
   }
   function toggleMusic() {
     sound.unlock();
@@ -2198,7 +2194,6 @@ ${STORY_MORE[target.id]}` : told };
   }
   showMusicButton();
   $('musicButton').addEventListener('click', toggleMusic);
-  $('bgmButton').addEventListener('click', toggleMusic);
   // The tune that is playing, beside the button, while the settings are open (the user,
   // 2026-10-19: "설정 -> 옵션에 지금 흐르고 있는 BGM 제목 넣어줘"). A tune just chosen by
   // the button shows at once, before its first bar sounds.

@@ -5311,24 +5311,26 @@ html.gaze #gazeButton {
   position:relative;
 }
 
-#hud nav #journalButton {
-  left:52px;
+/* The sound and music switches left the top row for the settings (2026-10-19): the
+   camera is taken out of the row and pinned where it stood, three keys in from the right
+   end and one row down, and the journal stands beside the settings. */
+#hud nav {
+  position:relative;
 }
 
 #hud nav #photoButton {
+  position:absolute;
   top:52px;
+  right:156px;
   z-index:6;
 }
 
 @media (max-width: 480px) {
-  #hud nav #journalButton {
-    left:calc(var(--top-key) + var(--gap));
-  }
-
   /* (Lower by the goal line's height while the first-visit guide shows it, as the
      target's keys are.) */
   #hud nav #photoButton {
     top:calc(var(--top-key) + var(--gap) + var(--guide));
+    right:calc(3 * (var(--top-key) + var(--gap)));
   }
 }
 
@@ -5857,15 +5859,8 @@ dialog .checkRow {
 
 /* (The notebook's key stands one place to the right of where it flows, and the camera's
    a row down: the practice key takes the place the notebook's left, as they do.) */
-#hud nav #practiceButton {
-  position:relative;
-  left:52px;
-}
-@media (max-width: 480px) {
-  #hud nav #practiceButton {
-    left:calc(var(--top-key) + var(--gap));
-  }
-}
+/* (It was moved one key right, to stand beside the journal across the camera's empty
+   place; the camera is out of the row since 2026-10-19, so it stands there itself.) */
 
 /* It stands out from the keys beside it (the user, 2026-10-10: "비행 연습 버튼은
    강조해"): a gold rim, and a soft glow that swells and fades. Not once the practice

@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-19', text: t('설정의 쪽을 바꾸면 보던 쪽이 제 단추로 들어가고 고른 쪽이 혜성 꼬리를 그리며 나옵니다.') },
   { day: '2026-10-19', text: t('사진 모드에서 소라가 화면 왼쪽 아래 귀퉁이에 섭니다. 시야를 돌리거나 확대해도 그 자리에 있습니다.') },
   { day: '2026-10-19', text: t('메뉴가 닫힐 때도 혜성 꼬리를 그리며 단추로 돌아 들어갑니다.') },
   { day: '2026-10-19', text: t('설정, 탐험 수첩, 큰 지도가 우주멍처럼 단추에서 돌며 펼쳐져 열립니다.') },

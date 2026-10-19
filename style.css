@@ -6546,3 +6546,47 @@ dialog#practiceOffer .journalActions button {
 dialog .journalActions {
   gap:8px;
 }
+
+/* The map sheet's keys are the flight screen's keys (the user, 2026-10-19: "태양계 가족 화면의
+   아이콘들도 금색 테두리 -> 메인화면의 아이콘들과 통일", "가장자리 곡률이 다른 아이콘과 다르네.
+   역시 통일"): the names, the three keys at the foot and the ✕ take the same dark glass, pale
+   line, white letters and 12px corners (they were brass-lined on navy, brass letters, 8px
+   for the ✕). The sheet's brass frame, rim and dial stay. A name picked is lined in gold
+   only, as a chosen tab is (it was filled gold like the jump beside it, "다 해"); "순간 이동"
+   stays the one key filled gold, once there is somewhere to go. */
+#bigMap :is(#bigMapList button, #bigMapActions button),
+#bigMap > .backKey {
+  border:1px solid var(--glass-line);
+  border-radius:12px;
+  background:var(--glass-fill);
+  box-shadow:0 2px 10px #0006;
+  color:#eef3ff;
+}
+
+@media (hover: hover) {
+  #bigMap :is(#bigMapList button, #bigMapActions button):not(:disabled):hover,
+  #bigMap > .backKey:hover {
+    border-color:#c3d0ffaa;
+    background:#182a5ccc;
+  }
+}
+
+#bigMap #bigMapList button[aria-pressed="true"] {
+  border-color:var(--gold);
+  background:#1c2f6ae6;
+  color:#fff;
+}
+
+#bigMap #bigMapActions #bigMapJump:not(:disabled) {
+  border-color:#fff3c4;
+  background:var(--gold);
+  color:#081725;
+}
+
+/* (Not pressable yet: dimmed once, by the same rule as any key, not dimmed and greyed.) */
+#bigMap #bigMapActions button:disabled {
+  border-color:var(--glass-line);
+  color:#eef3ff;
+  opacity:.45;
+  cursor:not-allowed;
+}

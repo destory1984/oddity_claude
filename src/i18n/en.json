@@ -4585,5 +4585,7 @@
  "스캐너 끄기": "Turn the scanner off",
  "스캐너 켜기": "Turn the scanner on",
  "스캐너 왼쪽 아래 귀퉁이에 스캐너를 켜고 끄는 단추가 생겼습니다.": "A button in the scanner's lower left corner turns it on and off.",
- "설정, 탐험 수첩, 큰 지도가 우주멍처럼 단추에서 돌며 펼쳐져 열립니다.": "The settings, the journal and the big map now whirl open out of their buttons, like just-looking."
+ "설정, 탐험 수첩, 큰 지도가 우주멍처럼 단추에서 돌며 펼쳐져 열립니다.": "The settings, the journal and the big map now whirl open out of their buttons, like just-looking.",
+ "메뉴가 닫힐 때도 혜성 꼬리를 그리며 단추로 돌아 들어갑니다.": "Menus now whirl back into their buttons with comet tails when they close.",
+ "사진 모드에서 소라가 화면 왼쪽 아래 귀퉁이에 섭니다. 시야를 돌리거나 확대해도 그 자리에 있습니다.": "In photo mode Sora stands in the lower left corner of the screen and stays there however you turn or zoom."
 }

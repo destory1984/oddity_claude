@@ -1615,26 +1615,47 @@ ${STORY_MORE[target.id]}` : told };
   }
   // The settings, the journal and the big map whirl up out of the key that opens them
   // (the user, 2026-10-19: "옵션이나 탐험수첩 메뉴 같은것을 열 때에도 우주멍 버튼과 같은
-  // 효과를 내면서 열어줘"). Closing is at once, as before.
+  // 효과를 내면서 열어줘") and back down into it when they close, by whatever way ("메뉴
+  // 없어지는 것도 똑같이 혜성 효과"): their close() waits for the whirl, and Esc is made
+  // to go through it.
   const MENU_OUT_MS = 800;
+  const MENU_IN_MS = 650;
+  const MENU_RIM = [[0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0], [0.5, 1], [0, 0.5], [1, 0.5]];
+  const closeNow = HTMLDialogElement.prototype.close;
   for (const [dialogId, keyId] of [['settings', 'settingsButton'], ['journal', 'journalButton'], ['bigMap', 'minimap']]) {
     const dialog = $(dialogId);
+    const key = $(keyId);
     let shown = dialog.open;
+    let opening = null;
+    let closing = null;
+    const canWhirl = () => !matchMedia('(prefers-reduced-motion: reduce)').matches
+      && key.getClientRects().length > 0 && getComputedStyle(key).visibility !== 'hidden';
     new MutationObserver(() => {
       const opened = dialog.open && !shown;
       shown = dialog.open;
-      if (!opened || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      const key = $(keyId);
-      if (!key.getClientRects().length || getComputedStyle(key).visibility === 'hidden') return;
-      const { move } = swirl(dialog, key, {
-        inward: false,
-        lasts: MENU_OUT_MS,
-        ink: '#cfe0ff',
-        rim: [[0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0], [0.5, 1], [0, 0.5], [1, 0.5]],
-        onTop: true,
-      });
-      move.finished.then(() => move.cancel(), () => {});
+      if (!opened || !canWhirl()) return;
+      const { move } = swirl(dialog, key, { inward: false, lasts: MENU_OUT_MS, ink: '#cfe0ff', rim: MENU_RIM, onTop: true });
+      opening = move;
+      move.finished.then(() => { if (opening === move) { move.cancel(); opening = null; } }, () => {});
     }).observe(dialog, { attributes: true, attributeFilter: ['open'] });
+    dialog.close = (value) => {
+      if (closing) return;
+      if (!dialog.open || !canWhirl()) return closeNow.call(dialog, value);
+      opening?.cancel();
+      opening = null;
+      const { move } = swirl(dialog, key, { inward: true, lasts: MENU_IN_MS, ink: '#cfe0ff', rim: MENU_RIM, onTop: true });
+      closing = move;
+      const done = () => {
+        closing = null;
+        closeNow.call(dialog, value);
+        move.cancel();
+      };
+      move.finished.then(done, done);
+    };
+    dialog.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      dialog.close();
+    });
   }
   function showScanner(on, swirl = false) {
     const words = on ? t('스캐너 끄기') : t('스캐너 켜기');
@@ -3375,6 +3396,8 @@ ${STORY_MORE[target.id]}` : told };
         boost: Boolean(state.boost),
         warp: warp.phase(),
         photo: photo.active() && photo.heroVisible(),
+        // Where the photo keys' bar begins, from the foot of the view: she stands on it.
+        photoFloor: photo.active() ? photoFloor() : 0,
         cheer: performance.now() < cheerUntil,
         // Pointing at a sight just told of, and speaking while her bubble is up.
         see: performance.now() < seeUntil ? seeKind : null,
@@ -3596,6 +3619,11 @@ ${STORY_MORE[target.id]}` : told };
     $('lockTarget').setAttribute('aria-pressed', String(locked));
     $('lockTarget').textContent = locked ? t('맴돌기 풀기') : t('맴돌며 보기');
   });
+
+  function photoFloor() {
+    const bar = $('photoTools').getBoundingClientRect();
+    return bar.height ? Math.max(0, Math.min(0.5, (window.innerHeight - bar.top + 6) / window.innerHeight)) : 0;
+  }
 
   // As an app, the phone's back key puts away what is open before it leaves the game.
   createBackKey({ isView: () => photo.active(), leaveView: () => $('exitPhoto').click(), watch: [$('photoTools')] });

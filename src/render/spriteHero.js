@@ -12,6 +12,8 @@ import { PAL_FPS, PAL_FRAMES, palFile } from '../core/pal.js';
 // folded-paper model this replaced stood about 2.9 tall. (At 3.4 she covered too much of the view.)
 const CARD_HEIGHT = 2.4;
 const CARD_AT = [0, -0.75, 6];
+// The plain view's field (ui/photo.js DEFAULT_FOV_DEG): her size in the photo corner.
+const PLAIN_FOV = (60 * Math.PI) / 180;
 // The companion beside her (core/pal.js): 64 x 64 drawings on a card of its own, up by
 // her left shoulder as the camera sees her.
 const PAL_SIZE = (CARD_HEIGHT * 64) / 256;
@@ -103,16 +105,34 @@ export function createSpriteHero(engine, { own = false } = {}) {
     const lit = light ? 0.45 + 0.55 * light.sun.strength : 1;
     material.emissiveColor = new Color3(lit, lit, lit);
     card.scaling.setAll(heroScaleFor(aspect) / 1.3);
+    // In photo mode she stands in the lower left corner of the screen, on the photo keys'
+    // bar (move.photoFloor, a share of the view's height), as large as at the plain view
+    // and there however the view is turned or zoomed (the user, 2026-10-19: "사진 모드에서는
+    // 소라가 화면 왼쪽 아래에 위치하게 해줘").
+    const posed = Boolean(photoOrientation) && Boolean(move.photo);
+    const half = CARD_AT[2] * Math.tan(fov / 2);
+    if (posed) card.scaling.scaleInPlace(Math.tan(fov / 2) / Math.tan(PLAIN_FOV / 2));
     // Sitting beside something on her left, the drawing (which looks right) is turned over.
     if (state.sheet === 'sit' && move.mirror) card.scaling.x = -card.scaling.x;
     // A slow bob while hovering.
     const afloat = state.mode === 'hover';
-    card.position.y = CARD_AT[1] + (afloat ? Math.sin(elapsed * 1.5) * 0.04 : 0);
+    const bob = afloat ? Math.sin(elapsed * 1.5) * 0.04 : 0;
+    const pal = move.pal ?? null;
+    if (posed) {
+      const tall = CARD_HEIGHT * card.scaling.y;
+      const wide = tall * (192 / 256);
+      // (Room on her left for the companion by her shoulder.)
+      const aside = pal ? PAL_SIZE * card.scaling.y * 0.7 : 0;
+      card.position.x = -half * aspect + wide / 2 + aside;
+      card.position.y = -half + 2 * half * (move.photoFloor ?? 0) + tall / 2 + bob;
+    } else {
+      card.position.x = CARD_AT[0];
+      card.position.y = CARD_AT[1] + bob;
+    }
     card.setEnabled(visible);
     material.alpha = alpha;
     palMaterial.alpha = alpha;
     // The companion keeps its place by her shoulder and is hidden with her.
-    const pal = move.pal ?? null;
     const palNow = pal ? palDrawing(pal, Math.floor(elapsed * PAL_FPS) % PAL_FRAMES) : null;
     palCard.setEnabled(Boolean(pal) && visible && palNow.isReady());
     if (palNow?.isReady()) {
@@ -122,7 +142,7 @@ export function createSpriteHero(engine, { own = false } = {}) {
       palMaterial.emissiveColor = new Color3(lit, lit, lit);
       const scale = card.scaling.y;
       palCard.scaling.setAll(scale);
-      palCard.position.set(CARD_AT[0] + PAL_OFFSET[0] * scale, card.position.y + PAL_OFFSET[1] * scale, CARD_AT[2]);
+      palCard.position.set(card.position.x + PAL_OFFSET[0] * scale, card.position.y + PAL_OFFSET[1] * scale, CARD_AT[2]);
     }
     // As shares of the view's height: the card's height, and how far its middle is
     // above the middle of the view. (The card faces the camera, 6 units ahead.)
@@ -131,7 +151,7 @@ export function createSpriteHero(engine, { own = false } = {}) {
       ? { file: shownFile, height: (CARD_HEIGHT * card.scaling.y) / span, up: card.position.y / span, shape: 192 / 256 }
       : null;
     camera.fov = fov;
-    camera.rotationQuaternion = new Quaternion(...(photoOrientation || [0, 0, 0, 1]));
+    camera.rotationQuaternion = new Quaternion(...(photoOrientation && !posed ? photoOrientation : [0, 0, 0, 1]));
   }
 
   return { scene, camera, root: card, update, sheet: () => state.sheet, card: () => shown };

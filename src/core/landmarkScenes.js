@@ -685,6 +685,22 @@ export const LANDMARKS = {
     ],
     say: t('태양이 졌다가 또 떴어'),
   },
+  // Stonehenge's midsummer dawn (2026-10-20, the user: "스톤헨지 장면 만들어"): stones,
+  // not drawings (render/hengeModels.js). Two bubbles, Sora's: as the sky pales, and once
+  // the light has reached the middle (say2).
+  stonehenge: {
+    kind: 'solstice', by: '', body: 'earth', sayBy: 'place',
+    name: t('하짓날 아침의 첫 빛'),
+    day: t('4,500년 전'),
+    lines: [
+      t('4,500년쯤 전, 하짓날 새벽. 영국 솔즈베리 평원의 둥근 도랑 안에 큰 돌들이 서 있습니다.'),
+      t('높이 4m쯤의 돌 30개가 지름 33m의 원을 이루고, 안쪽에는 7m에 이르는 문 모양 돌 다섯이 말굽처럼 섭니다.'),
+      t('북동쪽, 바깥에 홀로 선 힐 스톤 곁으로 태양이 떠오릅니다. 한 해 가운데 가장 북쪽에서 뜨는 날입니다.'),
+      t('태양의 첫 빛이 말굽의 열린 쪽으로 곧장 들어와 한가운데에 닿습니다. 돌들은 이 아침에 맞춰 놓였습니다.'),
+    ],
+    say: t('태양이 저 돌 옆으로 뜰 거야'),
+    say2: t('이 아침에 맞춰 돌을 세웠구나'),
+  },
 };
 
 export const LANDMARK_SCENES = Object.fromEntries(Object.entries(LANDMARKS).map(([id, told]) => [id, landmarkScene(told)]));

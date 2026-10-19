@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-20', text: t('스톤헨지에 "그날로" 장면이 생겼습니다. 하짓날 아침, 태양의 첫 빛이 돌들 한가운데에 닿습니다.') },
   { day: '2026-10-19', text: t('사진 보기 화면을 아래로 내리면 그것의 자세한 설명이 이어집니다.') },
   { day: '2026-10-19', text: t('오늘 들어온 천체와 탐사선, 장소의 읽을거리가 길어지고 사진이 늘었습니다.') },
   { day: '2026-10-19', text: t('임무를 마친 탐사선 셋의 기념 모형이 생겼습니다. 혜성의 로제타, 목성의 갈릴레오, 수성의 메신저입니다.') },

@@ -28,6 +28,9 @@ export const LANDMARK_TIMES = {
   impact: { seconds: 24, downAt: 9, lines: [0, 5, 9, 15], sounds: [[9, 'impact'], [12.5, 'discovered']] },
   sunrise: { seconds: 21, downAt: 12.8, lines: [0, 6, 11, 15.5], sounds: [[12.8, 'discovered']] },
   huygens: { seconds: 24, downAt: 16, lines: [0, 5, 10, 16], sounds: [[16, 'discovered']] },
+  // Stonehenge's midsummer dawn: the sky pales, the Sun comes up by the Heel Stone, and
+  // its first light runs down the axis to the middle of the ring at downAt.
+  solstice: { seconds: 30, downAt: 19, lines: [0, 7, 13, 20], sounds: [[19, 'discovered']] },
 };
 
 // Huygens's night (render/huygensStage.js): Mars turns in the eyepiece once every
@@ -83,6 +86,112 @@ function dinoPieces(t) {
   return out;
 }
 
+// Stonehenge about 2500 BC (render/hengeModels.js builds it from these; the user,
+// 2026-10-20: "스톤헨지 장면 만들어"). In the model's units: x across the view, z away
+// from the eye, the middle of the ring at 0. The real ring of sarsens is 33 m across:
+// here 1.2 units, so a unit is about 27 m, and the stones stand a little taller than that
+// would make them (4 m uprights 0.17, the 7 m trilithon 0.3). The bank and ditch (about
+// 55 m out) and the Heel Stone (about 77 m) are drawn nearer in, so that all of it, the
+// Sun on the horizon too, is in a phone's view.
+// axis: the way to the midsummer sunrise, in radians from straight away (+z) toward +x:
+// the stage is turned so that it runs up and to the right (seen along it, the horseshoe
+// of trilithons hid the middle). sky: how far away the horizon is drawn.
+export const HENGE = {
+  axis: 0.5,
+  sky: 2.6,
+  ring: { radius: 0.6, count: 30, size: [0.075, 0.17, 0.045], lintel: 0.032 },
+  // The five trilithons (two uprights and a lintel), by the angle from the axis (rad) and
+  // the distance from the middle: highest at the closed end, open toward the sunrise.
+  trilithons: [[-1.2, 0.34, 0.22], [-2.15, 0.32, 0.26], [Math.PI, 0.3, 0.3], [2.15, 0.32, 0.26], [1.2, 0.34, 0.22]],
+  // A ring of small bluestones between the two, and a few inside the horseshoe.
+  blue: { radius: 0.47, count: 18, inner: 0.2, innerCount: 7, height: 0.065 },
+  ditch: 1.12,
+  heel: { along: 1.5, aside: 0.08, size: [0.1, 0.16, 0.08], lean: 0.18 },
+};
+// A point `r` out from the middle, `angle` (rad) round from the axis.
+export const hengeAt = (r, angle) => [r * Math.sin(HENGE.axis + angle), r * Math.cos(HENGE.axis + angle)];
+// Every stone as it stands: where (x, z), how wide across the ring (w), how tall (h), how
+// thick (d), its turn about the upright (rad), its lean and what it is. Each is a little
+// unlike the next (a seeded wobble, the same every time).
+export function hengeStones() {
+  let seed = 11;
+  const wobble = (n) => { seed = (seed * 16807) % 2147483647; return (seed / 2147483647 - 0.5) * 2 * n; };
+  const stones = [];
+  const { ring, trilithons, blue, heel } = HENGE;
+  // (The axis runs between two uprights: the first is half a step round from it.)
+  for (let k = 0; k < ring.count; k += 1) {
+    const angle = ((k + 0.5) / ring.count) * 2 * Math.PI;
+    const [x, z] = hengeAt(ring.radius, angle);
+    stones.push({ kind: 'sarsen', x, z, w: ring.size[0] * (1 + wobble(0.12)), h: ring.size[1], d: ring.size[2] * (1 + wobble(0.15)), turn: HENGE.axis + angle + wobble(0.06), lean: wobble(0.03) });
+  }
+  for (const [angle, r, h] of trilithons) {
+    const [x, z] = hengeAt(r, angle);
+    // The two uprights side by side across the radius, a narrow slot between them.
+    const across = [Math.cos(HENGE.axis + angle), -Math.sin(HENGE.axis + angle)];
+    for (const side of [-1, 1]) {
+      stones.push({ kind: 'trilithon', x: x + side * 0.042 * across[0], z: z + side * 0.042 * across[1], w: 0.068 * (1 + wobble(0.08)), h, d: 0.055, turn: HENGE.axis + angle + wobble(0.04), lean: wobble(0.02) });
+    }
+  }
+  for (let k = 0; k < blue.count; k += 1) {
+    const angle = ((k + 0.5) / blue.count) * 2 * Math.PI + wobble(0.06);
+    const [x, z] = hengeAt(blue.radius, angle);
+    stones.push({ kind: 'blue', x, z, w: 0.035, h: blue.height * (1 + wobble(0.25)), d: 0.028, turn: HENGE.axis + angle, lean: wobble(0.08) });
+  }
+  // (Inside the horseshoe, not across its open end.)
+  for (let k = 0; k < blue.innerCount; k += 1) {
+    const angle = 1.15 + (k / (blue.innerCount - 1)) * (2 * Math.PI - 2.3);
+    const [x, z] = hengeAt(blue.inner, angle);
+    stones.push({ kind: 'blue', x, z, w: 0.03, h: blue.height * 1.2, d: 0.025, turn: HENGE.axis + angle, lean: wobble(0.05) });
+  }
+  // The Heel Stone stands alone outside, a little to the right of the axis, leaning in.
+  const [hx, hz] = hengeAt(heel.along, Math.atan2(heel.aside, heel.along));
+  stones.push({ kind: 'heel', x: hx, z: hz, w: heel.size[0], h: heel.size[1], d: heel.size[2], turn: HENGE.axis, lean: heel.lean });
+  return stones;
+}
+// The lintels on the ring and on each trilithon: from where to where (x, z), how high
+// their underside is.
+export function hengeLintels() {
+  const { ring, trilithons } = HENGE;
+  const out = [];
+  for (let k = 0; k < ring.count; k += 1) {
+    out.push({ from: hengeAt(ring.radius, ((k + 0.5) / ring.count) * 2 * Math.PI), to: hengeAt(ring.radius, ((k + 1.5) / ring.count) * 2 * Math.PI), y: ring.size[1], h: ring.lintel, d: ring.size[2] * 1.1 });
+  }
+  for (const [angle, r, h] of trilithons) {
+    const [x, z] = hengeAt(r, angle);
+    const across = [Math.cos(HENGE.axis + angle), -Math.sin(HENGE.axis + angle)];
+    out.push({ from: [x - 0.085 * across[0], z - 0.085 * across[1]], to: [x + 0.085 * across[0], z + 0.085 * across[1]], y: h, h: 0.04, d: 0.06 });
+  }
+  return out;
+}
+// Where the Sun is, t seconds in: a little to the left of the axis as it comes up (its
+// disc, 0.08 to its edge, first shows over the horizon at about 10.7 s and is clear of it
+// at 15.5 s), drifting right as it climbs. x, y, z in the model's units, on the far sky.
+export const HENGE_SUN = { disc: 0.08 };
+export function hengeSun(t) {
+  const along = HENGE.sky - 0.05;
+  const angle = HENGE.axis - 0.05 + 0.004 * Math.max(0, t - 10);
+  return { x: Math.tan(angle) * along, y: -0.1 + 0.035 * Math.max(0, t - 10), z: along, angle };
+}
+function solsticeStage(t) {
+  const sun = hengeSun(t);
+  const said = up(t, 4, 10.5);
+  const said2 = up(t, 20.5, 28.5);
+  // The shadows: from when the Sun's disc is half up, thrown away from it, shortening as it climbs.
+  const shade = ease(t, 12, 15);
+  return {
+    // The sky (and the stones and grass with it) goes from night to dawn, then to morning.
+    sky: { x: 0, y: 0, z: 0, dawn: ease(t, 1, 13), day: ease(t, 15, 28), sunX: sun.x, sunY: sun.y },
+    henge: { x: 0, y: 0, z: 0, dawn: ease(t, 1, 13), day: ease(t, 15, 28) },
+    sun: { x: sun.x, y: sun.y, z: sun.z, glow: ease(t, 8, 13) },
+    shadows: { x: 0, y: 0, z: 0, angle: sun.angle + Math.PI, length: 1.3 - 0.55 * ease(t, 16, 30), fade: shade, shown: shade > 0 },
+    // The first light down the axis, from the horizon to the middle (reach 0 → 1), and
+    // the middle lit once it is there.
+    beam: { x: 0, y: 0, z: 0, reach: ease(t, 12.5, 19), glow: ease(t, 12.5, 13.5), middle: ease(t, 18.6, 19.8) * (0.85 + 0.15 * Math.sin(t * 3)), shown: t > 12.5 },
+    bubble: { x: -0.62, y: 1.05, scale: Math.max(0.01, 0.8 * said), shown: said > 0.01 },
+    bubble2: { x: -0.5, y: 1.05, scale: Math.max(0.01, 0.8 * said2), shown: said2 > 0.01 },
+  };
+}
+
 // sayBy: 'craft' (the bubble goes along with what flies or falls) or 'place' (it stands
 // by the picture). dinos: Chicxulub's three stand and watch (DINOS).
 export function landmarkStage(kind, sayBy = 'craft', { dinos = false } = {}) {
@@ -130,6 +239,7 @@ export function landmarkStage(kind, sayBy = 'craft', { dinos = false } = {}) {
       return stage;
     };
   }
+  if (kind === 'solstice') return solsticeStage;
   if (kind === 'sunrise') {
     return (t) => {
       // The Sun's middle over the ground: up till most of its disc is over the rim, a

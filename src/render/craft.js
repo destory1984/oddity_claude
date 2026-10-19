@@ -561,6 +561,9 @@ export function createSiteModels(scene, siteList) {
           piece.rotation.y = at.turn ?? 0;
           piece.scaling.setAll(at.scale ?? 1);
           old.stage.flames[name]?.setEnabled(Boolean(at.burn));
+          // (A piece that changes more than where it stands, Stonehenge's sky going from
+          // night to dawn, is told the rest itself: render/hengeModels.js.)
+          piece.metadata?.pose?.(at);
         }
       }
       if (old?.fire) {

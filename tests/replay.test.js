@@ -112,7 +112,7 @@ test('Curiosity has a scene of its own day, told in four lines', () => {
   assert.equal(replayFor('curiosity').day, '2012년 8월 6일');
   assert.equal(replayFor('curiosity').lines.length, 4);
   assert.match(replayFrame('curiosity', 17).text, /게일 분화구/);
-  assert.equal(Object.keys(REPLAYS).length, 150);
+  assert.equal(Object.keys(REPLAYS).length, 151);
   assert.equal(replayFor('viking1').day, '1976년 7월 20일');
   assert.match(replayFrame('viking1', 17).text, /25초/);
 });
@@ -507,4 +507,25 @@ test('the slab on the Moon has a made-up scene: they come, one touches it, the S
   assert.equal(at(24).signal, 0);
   assert.ok(at(30).signal > 0 && at(30).cower === 1 && at(30).sun === 1);
   assert.deepEqual(replaySounds('moonSlab', 24, 30), ['signal', 'signal']);
+});
+
+test('Stonehenge at midsummer dawn: thirty sarsens, five trilithons open to the sunrise, the Heel Stone; the Sun comes up by it and its light reaches the middle at 19 s', async () => {
+  const { hengeStones, hengeSun, HENGE } = await import('../src/core/landmarkStages.js');
+  const stones = hengeStones();
+  const count = (kind) => stones.filter((s) => s.kind === kind).length;
+  assert.deepEqual([count('sarsen'), count('trilithon'), count('heel')], [30, 10, 1]);
+  // The trilithons stand on the side away from the sunrise; the Heel Stone outside the ditch, on it.
+  const along = (s) => s.x * Math.sin(HENGE.axis) + s.z * Math.cos(HENGE.axis);
+  assert.ok(stones.filter((s) => s.kind === 'trilithon').every((s) => along(s) < 0.2));
+  const heel = stones.find((s) => s.kind === 'heel');
+  assert.ok(along(heel) > HENGE.ditch);
+  const scene = replayFor('stonehenge');
+  assert.equal(scene.downAt, 19);
+  const at = (t) => replayFrame('stonehenge', t).stage;
+  assert.ok(hengeSun(9).y < 0 && hengeSun(16).y > 0.08);
+  assert.equal(at(5).beam.shown, false);
+  assert.ok(at(19).beam.reach === 1 && at(25).beam.middle > 0.5);
+  assert.ok(at(2).sky.dawn < 0.1 && at(14).sky.dawn === 1);
+  assert.ok(at(7).bubble.shown && !at(7).bubble2.shown && at(24).bubble2.shown && !at(24).bubble.shown);
+  assert.deepEqual(scene.sounds, [[19, 'discovered']]);
 });

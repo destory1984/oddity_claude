@@ -6747,3 +6747,28 @@ dialog#bigMap #bigMapActions button {
   white-space:normal;
   word-break:keep-all;
 }
+
+/* The keys at the foot of every sheet stay in sight (the user, 2026-10-19: "다 해", of
+   "아래 단추는 늘 보이게"): as the settings', the journal's, the note's and the map's do,
+   a story card's, the side by side photos', the share sheet's and the practice's stay at
+   the sheet's foot while a long text scrolls under them, fading out just above. A sheet
+   that fits looks as it did. */
+dialog:is(#storyCard, #practiceOffer, #practiceWhy, #practiceDone) > .journalActions,
+dialog#pair > #closePair,
+dialog#shareSheet > #shareClose {
+  position:sticky;
+  bottom:0;
+  z-index:1;
+}
+
+dialog:is(#storyCard, #practiceOffer, #practiceWhy, #practiceDone) > .journalActions {
+  padding-top:8px;
+  background:#0d1a3a;
+  box-shadow:0 -14px 14px #0d1a3a, 0 26px 0 #0d1a3a;
+}
+
+dialog#pair > #closePair,
+dialog#shareSheet > #shareClose {
+  background:#0d1a3a;
+  box-shadow:0 -14px 14px #0d1a3a, 0 0 0 8px #0d1a3a, 0 26px 0 #0d1a3a;
+}

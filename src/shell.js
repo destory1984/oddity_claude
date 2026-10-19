@@ -7,8 +7,18 @@ export function startShell() {
   const frame = document.createElement('iframe');
   frame.id = 'phoneFrame';
   frame.title = 'Space Oddity';
-  frame.allow = 'fullscreen; autoplay; web-share';
+  // (clipboard-write: "링크 복사" of the share sheet did nothing on a wide screen without it.)
+  frame.allow = 'fullscreen; autoplay; web-share; clipboard-write';
   frame.src = location.href;
+  // A shared place's link (?p=) is handed to the game in the frame; the outer address is
+  // put back to the game's own, so that a reload starts as any other day.
+  if (location.search) {
+    try {
+      history.replaceState(null, '', location.pathname);
+    } catch {
+      // The address stays; the game in the frame cleans its own.
+    }
+  }
 
   function layout() {
     const fit = phoneFrame({ width: innerWidth, height: innerHeight });

@@ -6212,7 +6212,10 @@ dialog#photoView::backdrop {
   font-weight:600;
 }
 
+/* KakaoTalk across the top row, the other two under it (the user, 2026-10-19: "카톡 공유
+   기능에 링크 복사 기능 넣어줘"). */
 #shareSheet #shareKakao {
+  grid-column:1 / -1;
   border-color:#fee500;
   background:#fee500;
   color:#191919;

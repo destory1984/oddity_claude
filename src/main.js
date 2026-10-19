@@ -3805,6 +3805,37 @@ ${STORY_MORE[target.id]}` : told };
       toast.show(t('카카오톡을 열지 못했습니다.\n다른 앱으로 보내 주세요.'));
     }
   });
+  // Into the clipboard: the clipboard API, and where it is refused (a frame, a webview) the
+  // old way, a hidden text box selected and copied. True when either took.
+  async function copyText(words) {
+    try {
+      await navigator.clipboard.writeText(words);
+      return true;
+    } catch {
+      const box = document.createElement('textarea');
+      box.value = words;
+      box.setAttribute('readonly', '');
+      box.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+      // (Inside the open sheet, which holds the focus as a modal.)
+      ($('shareSheet').open ? $('shareSheet') : document.body).append(box);
+      box.select();
+      let done = false;
+      try {
+        done = document.execCommand('copy');
+      } catch {
+        done = false;
+      }
+      box.remove();
+      return done;
+    }
+  }
+  // The link alone, to paste anywhere.
+  $('shareCopy').addEventListener('click', async () => {
+    const { url } = shareNow;
+    const copied = await copyText(url);
+    $('shareSheet').close();
+    toast.show(copied ? t('링크를 복사했습니다.') : url);
+  });
   $('shareClose').addEventListener('click', () => $('shareSheet').close());
   $('shareSheet').addEventListener('click', (e) => {
     if (e.target === $('shareSheet')) $('shareSheet').close();
@@ -3820,12 +3851,8 @@ ${STORY_MORE[target.id]}` : told };
         if (e.name === 'AbortError') return undefined;
       }
     }
-    try {
-      await navigator.clipboard.writeText(`${info.text}\n${info.url}`);
-      toast.show(t('자리 링크를 복사했습니다.\n카톡이나 SNS에 붙여 넣으세요.'));
-    } catch {
-      toast.show(info.url);
-    }
+    if (await copyText(`${info.text}\n${info.url}`)) toast.show(t('자리 링크를 복사했습니다.\n카톡이나 SNS에 붙여 넣으세요.'));
+    else toast.show(info.url);
     return undefined;
   });
   // Opened from such a link: said once, and the address put back to the game's own, so

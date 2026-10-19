@@ -1662,7 +1662,7 @@ ${STORY_MORE[target.id]}` : told };
   // 2026-10-19: "설정 화면에서 다른 탭으로 옮겨갈 때에도 혜성 효과"; only that way, not the
   // page shown going down first: "왔다갔다 하니까 정신 없네"). Heard after ui/settings.js
   // has shown it.
-  const PAGE_OUT_MS = 800;
+  const PAGE_OUT_MS = 900;
   let pageMove = null;
   let wasShown = null;
   $('settingsTabs').addEventListener('click', (e) => {

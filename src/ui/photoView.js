@@ -51,7 +51,9 @@ export function createPhotoView({ onOpen, onClose }) {
   let downX = null;
   let swiped = false;
   dialog.addEventListener('pointerdown', (event) => {
-    downX = event.clientX;
+    // A press on a key (the ✕, the key at the foot) is never the start of a swipe: a thumb
+    // that slid on the ✕ turned the photo instead of closing (code review, 2026-10-20).
+    downX = event.target.closest?.('button') ? null : event.clientX;
     swiped = false;
   });
   dialog.addEventListener('pointerup', (event) => {

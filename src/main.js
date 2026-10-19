@@ -961,6 +961,9 @@ async function init() {
     }
     if (target.kind === 'site') {
       const story = STORIES.find((s) => s.id === target.id);
+      // A place that is no story (the eclipse's spot, the ground of a day played again):
+      // nothing more to read (code review, 2026-10-20: the photo key asks for this too).
+      if (!story) return head;
       const kicker = `${story.year ? t`${story.year}년 · ` : ''}${here(target.parent).name}`;
       if (!progress.stories.includes(target.id)) return { ...head, kicker, text: t`아직 수첩에 없는 곳입니다. ${story.hint}.` };
       const told = STORY_DETAILS[target.id]?.detail ?? story.text;

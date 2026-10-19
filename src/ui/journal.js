@@ -85,16 +85,34 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     dialog.close();
     daily().go();
   });
+  // A jump to it (an errand only sends her where she has been), and the errands before
+  // and after the one shown (the user, 2026-10-19: "미션을 완성했을 때에 다음 미션, 이전 미션").
+  $('dailyJump').addEventListener('click', () => {
+    dialog.close();
+    daily().jump();
+  });
+  $('dailyNext').addEventListener('click', () => {
+    daily().step(1);
+    renderDaily();
+  });
+  $('dailyPrev').addEventListener('click', () => {
+    daily().step(-1);
+    renderDaily();
+  });
   function renderDaily() {
     const today = daily ? daily() : null;
     $('journalDaily').hidden = !today;
     if (!today) return;
-    $('dailyText').textContent = t`${today.done ? '★' : '☆'} 오늘의 부탁: ${today.text}`;
+    const label = today.index ? t`부탁 ${today.index + 1}` : t('오늘의 부탁');
+    $('dailyText').textContent = `${today.done ? '★' : '☆'} ${label}: ${today.text}`;
     // The last seven days, today last.
     $('dailyWeek').setAttribute('aria-label', t`지난 7일 가운데 ${today.week.filter(Boolean).length}일 해냄`);
     $('dailyWeek').replaceChildren(...today.week.map((did) => (did ? picture('notebook/day-star.png', '') : document.createElement('i'))));
     $('dailyCount').textContent = t`해낸 날 ${today.days}일${today.streak > 1 ? t` · ${today.streak}일째 이어서` : ''}`;
     $('dailyGo').hidden = today.done;
+    $('dailyJump').hidden = today.done || !today.canJump;
+    $('dailyNext').hidden = !today.done;
+    $('dailyPrev').hidden = !today.index;
   }
 
   // Sky news (core/forecast.js): sky() gives [{ text, planet: { id, name }, toward }]. A planet

@@ -1818,7 +1818,10 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   font-size:12px;
 }
 
-#journal #dailyGo {
+#journal #dailyGo,
+#journal #dailyJump,
+#journal #dailyPrev,
+#journal #dailyNext {
   width:auto;
   min-height:30px;
   margin:0;
@@ -2476,6 +2479,9 @@ input[type=range] {
 #journal #journalTabs button,
 #journal #journalNotes button,
 #journal #dailyGo,
+#journal #dailyJump,
+#journal #dailyPrev,
+#journal #dailyNext,
 #journal #closeJournal {
   border:1.5px solid #6b4a26;
   border-radius:9px;
@@ -5127,6 +5133,9 @@ html.gaze #gazeButton {
 
 #journal #journalNotes button,
 #journal #dailyGo,
+#journal #dailyJump,
+#journal #dailyPrev,
+#journal #dailyNext,
 #journal #journalBodies li button,
 #journal #journalMissions li button,
 #journal #journalStories li button,
@@ -5143,6 +5152,9 @@ html.gaze #gazeButton {
 }
 
 #journal #dailyGo,
+#journal #dailyJump,
+#journal #dailyPrev,
+#journal #dailyNext,
 #journal #journalBodies li button,
 #journal #journalMissions li button,
 #journal #journalStories li button,

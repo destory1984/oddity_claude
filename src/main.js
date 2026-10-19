@@ -57,7 +57,7 @@ import { feelFovDeg, easeFovDeg, streakAmount, BASE_FOV_DEG } from './core/speed
 import { famousFor } from './core/famous.js';
 import { bindTextSize } from './ui/textSize.js';
 import { shadowSpot } from './core/shadows.js';
-import { dailyRequest, requestTarget, requestMet, recordDay, streak, lastWeek } from './core/daily.js';
+import { dailyRequest, dayAfter, requestTarget, requestMet, recordDay, streak, lastWeek } from './core/daily.js';
 import { palFor } from './core/pal.js';
 import { seeFor, SEE_S } from './core/sprite.js';
 import {
@@ -452,6 +452,21 @@ let ringHit = null;
 // A jump happened this frame: the straight line of the jump is not a flight through rings.
 let ringSkip = false;
 const requestDone = () => daily.days.includes(today);
+// The errands after today's, taken up from the journal once today's is done (the user,
+// 2026-10-19: "미션을 완성했을 때에 다음 미션, 이전 미션"): the n-th is the request of the
+// day n days on. `errand` is the one shown (0, today's); those done are kept for the day.
+let errand = 0;
+const ERRANDS_KEY = 'oddity.errands';
+let errandsDone = (() => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(ERRANDS_KEY) ?? 'null');
+    return saved?.day === today && Array.isArray(saved.done) ? saved.done.filter(Number.isInteger) : [];
+  } catch {
+    return [];
+  }
+})();
+const errandAt = (n) => (n ? dailyRequest(dayAfter(today, n), progress) : request);
+const errandDone = (n) => (n ? errandsDone.includes(n) : requestDone());
 
 // Until when (performance.now()) the sprite character cheers a completed journal.
 let cheerUntil = 0;
@@ -2013,13 +2028,27 @@ ${STORY_MORE[target.id]}` : told };
       })),
     ],
     daily: () => ({
-      text: request.text,
-      done: requestDone(),
+      text: errandAt(errand).text,
+      index: errand,
+      done: errandDone(errand),
+      canJump: (() => {
+        const target = here(requestTarget(errandAt(errand)));
+        return Boolean(target) && visited(target, progress);
+      })(),
+      jump() {
+        const id = requestTarget(errandAt(errand));
+        selectedId = id;
+        hud.showSelection(named(id));
+        teleport(id, true);
+      },
+      step(way) {
+        errand = Math.max(0, errand + way);
+      },
       days: daily.days.length,
       streak: streak(daily, today),
       week: lastWeek(daily, today),
       go() {
-        selectedId = requestTarget(request);
+        selectedId = requestTarget(errandAt(errand));
         hud.showSelection(named(selectedId));
         const target = here(selectedId);
         state = { ...state, orientation: faceToward(target.position.map((n, i) => n - state.position[i])) };
@@ -3128,6 +3157,18 @@ ${STORY_MORE[target.id]}` : told };
       say.show(run > 0 && run % 7 === 0 ? t('일주일 내내 했어! 대단하지?') : t('부탁 끝! 할머니 좋아하시겠다.'));
       // Seven days running: a stamp of seven stars.
       if (run > 0 && run % 7 === 0) stampDown('notebook/stamp-week.png');
+      sound.cue('discovered');
+    }
+    // One of the errands after it, done.
+    if (errand && !errandDone(errand) && requestMet(errandAt(errand), { storiesNow, position: state.position, bodies, craft, photoSubject })) {
+      errandsDone = [...errandsDone, errand];
+      try {
+        localStorage.setItem(ERRANDS_KEY, JSON.stringify({ day: today, done: errandsDone }));
+      } catch {
+        // Not remembered in this window; still done now.
+      }
+      toast.show(t`부탁 ${errand + 1}을 해냈습니다. 수첩의 다음 미션으로 이어 갈 수 있습니다.`);
+      say.show(t('하나 더 끝! 다음은 뭐지?'));
       sound.cue('discovered');
     }
     photoSubject = null;

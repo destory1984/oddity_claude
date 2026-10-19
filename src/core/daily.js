@@ -38,6 +38,23 @@ const dayNumber = (day) => {
 };
 const pick = (list, n) => list[((n % list.length) + list.length) % list.length];
 const nameOf = (id) => (BODIES.find((b) => b.id === id) ?? CRAFT.find((c) => c.id === id) ?? STORIES.find((s) => s.id === id)).name;
+// The name with where it is, for a player who does not know (the user, 2026-10-19:
+// "이아페투스? 사람들이 이아페투스가 어디에 있는지 모르잖아"): another planet's moon by its
+// planet, a craft by the world it goes round, a story place by its world.
+export function whereOf(id) {
+  const body = BODIES.find((b) => b.id === id);
+  if (body) return body.kind === 'moon' && body.parent !== 'earth' ? t`${nameOf(body.parent)}의 위성 ${body.name}` : body.name;
+  const craft = CRAFT.find((c) => c.id === id);
+  if (craft) return craft.parent && craft.parent !== 'sun' && BODIES.some((b) => b.id === craft.parent) ? t`${nameOf(craft.parent)} 궤도의 ${craft.name}` : craft.name;
+  const story = STORIES.find((s) => s.id === id);
+  return story.body && BODIES.some((b) => b.id === story.body) ? t`${nameOf(story.body)}의 ${story.name}` : story.name;
+}
+// The day `k` days after `day` ('YYYY-MM-DD'): the errands after today's are those of
+// the days to come (the "다음 미션" key).
+export function dayAfter(day, k) {
+  const [y, m, d] = day.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + k)).toISOString().slice(0, 10);
+}
 
 // The request for a day ('YYYY-MM-DD'). Except on an anniversary it sends her somewhere
 // she has already been (a body found, a craft met), so that it takes a few minutes;
@@ -50,23 +67,23 @@ export function dailyRequest(day, progress) {
   const event = events[Number(day.slice(0, 4)) % events.length];
   if (event) {
     const [, , year, id] = event;
-    return { kind: 'day', id, year, text: t`${year}년 오늘이 그날이란다. ${nameOf(id)}에 다녀와 다오.` };
+    return { kind: 'day', id, year, text: t`${year}년 오늘이 그날이란다. ${whereOf(id)}에 다녀와 다오.` };
   }
   const n = dayNumber(day);
   const found = progress.discovered.filter((id) => id !== 'earth' && id !== 'sun');
   const kind = pick(['visit', 'photo', 'craft'], n);
   if (kind === 'visit') {
     const id = pick(found.length ? found : ['moon'], Math.floor(n / 3));
-    return { kind, id, text: t`오늘은 ${nameOf(id)}에 들러 다오. 잘 있는지 궁금하구나.` };
+    return { kind, id, text: t`오늘은 ${whereOf(id)}에 들러 다오. 잘 있는지 궁금하구나.` };
   }
   if (kind === 'photo') {
     const seen = found.filter((id) => PHOTO_BODIES.includes(id));
     const id = pick(seen.length ? seen : ['moon'], Math.floor(n / 3));
-    return { kind, id, text: t`오늘은 ${nameOf(id)} 사진을 한 장 찍어 다오. 벽에 붙여 두마.` };
+    return { kind, id, text: t`오늘은 ${whereOf(id)} 사진을 한 장 찍어 다오. 벽에 붙여 두마.` };
   }
   const met = (progress.craft ?? []).filter((id) => CRAFT.some((c) => c.id === id));
   const id = pick(met.length ? met : NEAR_CRAFT, Math.floor(n / 3));
-  return { kind, id, text: t`${nameOf(id)} 곁에 가서 안부 좀 전해 다오.` };
+  return { kind, id, text: t`${whereOf(id)} 곁에 가서 안부 좀 전해 다오.` };
 }
 
 // What to point at for a request: the place itself on a surface, else the body or craft.

@@ -2882,6 +2882,7 @@ ${STORY_MORE[target.id]}` : told };
     world.setFov((BASE_FOV_DEG * Math.PI) / 180);
     const goal = practiceGoal(practice.run, aimedAt(practice.run, pose), pose.speed > 100);
     const view = world.update({
+      clockS: simTime,
       bodies,
       craft,
       sites,
@@ -3552,6 +3553,7 @@ ${STORY_MORE[target.id]}` : told };
     // (Leaving or coming back as dust or a bubble: the picture of her stands in.)
     if (heroHeld) gazeFade = 0;
     const view = world.update({
+      clockS: simTime,
       trail,
       replay: replayNow && replayForWorld(replayNow),
       bodies,

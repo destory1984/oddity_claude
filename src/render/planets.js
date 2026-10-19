@@ -99,8 +99,8 @@ function createEarth(scene, body, sunDir) {
         real = true;
       });
     },
-    spin(elapsed) {
-      const turn = (elapsed * SPIN_SPEEDUP * 2 * Math.PI) / SIDEREAL_DAY_S;
+    spin(elapsed, spinS = elapsed) {
+      const turn = (spinS * SPIN_SPEEDUP * 2 * Math.PI) / SIDEREAL_DAY_S;
       // Negative rotation turns counterclockwise seen from the north: the ground moves east.
       earth.rotation.y = EARTH_START_SPIN - turn;
       // (For the typhoon's turning, the fishing lamps' flicker and the volcano's ash.)
@@ -471,8 +471,8 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     // For the rings: the plane's normal and its edges, to notice the traveler flying through.
     // (Not Jupiter's: there is nothing there to fly through and be told of.)
     rings: ring && look.rings.style !== 2 ? { normal: [ring.normal.x, ring.normal.y, ring.normal.z], innerKm: look.rings.innerKm, outerKm: look.rings.outerKm } : null,
-    spin(elapsed) {
-      sphere.rotation.y = (START_SPIN[body.id] ?? 0) - (elapsed * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
+    spin(elapsed, spinS = elapsed) {
+      sphere.rotation.y = (START_SPIN[body.id] ?? 0) - (spinS * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
       if (ring) ring.setTime(elapsed);
       if (look.storm || look.nightGlow || look.flow || look.sights || look.clouds || look.shader === 'ember') material.setFloat('time', elapsed);
     },

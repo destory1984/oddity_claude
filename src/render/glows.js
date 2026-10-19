@@ -534,7 +534,7 @@ export function createGlows(scene, bodies) {
   // now: this frame's bodies (km); position: the traveler (km); elapsed: seconds of
   // play (the bodies' spin runs off the same clock). Returns what flashed in this frame
   // ('lightning', 'lightning:earth', 'sprite', 'elves', 'bluejet', 'impact'), else null.
-  function update(dt, elapsed, now, sunPosition, position) {
+  function update(dt, elapsed, now, sunPosition, position, spinS = elapsed) {
     const find = (id) => now.find((b) => b.id === id);
     const sunFrom = (body) => new Vector3(...sunPosition.map((n, i) => n - body.position[i])).normalize();
 
@@ -693,7 +693,7 @@ export function createGlows(scene, bodies) {
       mesh.setEnabled(on);
       shadow?.setEnabled(false);
       if (!on) continue;
-      const up = plumeUp(plume, -(elapsed * TIME_SCALE * 2 * Math.PI) / PLUME_DAY_S[plume.body]);
+      const up = plumeUp(plume, -(spinS * TIME_SCALE * 2 * Math.PI) / PLUME_DAY_S[plume.body]);
       // A dust devil is raised by the Sun warming the ground: none at night.
       // (The polar jets burst out at the first low sunlight of spring: for them the Sun
       // need only be at the horizon.)

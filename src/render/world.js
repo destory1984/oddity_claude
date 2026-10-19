@@ -1,7 +1,7 @@
 import {
   Engine, Scene, FreeCamera, Vector3, Color4, Quaternion, HemisphericLight, DirectionalLight,
 } from './babylon.js';
-import { BODIES, KM_PER_UNIT } from '../core/bodies.js';
+import { BODIES, KM_PER_UNIT, TIME_SCALE } from '../core/bodies.js';
 import { multiply } from '../core/orientation.js';
 import { sunVisibility, eclipseDepth, sunBead } from '../core/occlusion.js';
 import { heroLighting } from '../core/heroLight.js';
@@ -103,8 +103,13 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
   // now: where every body is this frame (they orbit); defaults to the starting layout.
   // seen: { position, orientation } when the view is from somewhere other than where
   // the traveler is (looking round a target, ui/photo.js); she herself stays put.
-  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, heroAlpha = 1, ring = null, turn, move = {}, seen = null, lamp = null, trail = null, replay = null, eclipsed = null }) {
+  function update({ bodies: now = bodies, craft = [], hiddenCraft = [], sites = [], jolt = null, position: traveler, orientation, dt, speed, photoOrientation, heroVisible, heroAlpha = 1, ring = null, turn, move = {}, seen = null, lamp = null, trail = null, replay = null, eclipsed = null, clockS = null }) {
     elapsed += dt;
+    // How far the worlds have turned goes by the game's own clock (core/clock.js), the same
+    // for every player and the one the places on their ground are found by; `elapsed`, the
+    // seconds drawn, still moves what only shows (cloud bands, lightning, the rings' shine).
+    // (In real seconds, as `elapsed` is: the spin is fifty times that.)
+    const spinS = clockS === null ? elapsed : clockS / TIME_SCALE;
     // Draw from a point just above the ground when standing on it, and pull the near
     // plane in as the ground gets close; otherwise the planet under the feet is cut away
     // and looks transparent (core/eye.js).
@@ -138,7 +143,7 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
         lastByRings.set(body.id, from);
       }
       for (const mesh of item.meshes) mesh.position.set(rel[0], rel[1], rel[2]);
-      item.spin(elapsed);
+      item.spin(elapsed, spinS);
       item.setClose?.(Math.max(0, (Math.hypot(...rel) * KM_PER_UNIT) / body.radiusKm - 1));
       // lamp: { id, direction } lights one body from elsewhere than the Sun, while a
       // place in its night is being looked at closely (core/lamp.js).
@@ -172,7 +177,7 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
     for (const { id, glow } of comets) glow.update(now.find((b) => b.id === id), position, sunNow.position);
     practiceRing.update(ring, position);
     const meteorLit = meteors.update(dt, now.find((b) => b.id === 'earth'), sunNow.position, position);
-    const flashed = glows.update(dt, elapsed, now, sunNow.position, position);
+    const flashed = glows.update(dt, elapsed, now, sunNow.position, position, spinS);
     belt.update(position, sunNow.position, directions[sunNow.id]);
 
     // (Nothing of another star's hides the Sun: from there it is one point among the stars.)

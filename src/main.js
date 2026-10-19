@@ -2899,7 +2899,7 @@ ${STORY_MORE[target.id]}` : told };
         input.clear();
         dragTurn = [0, 0];
         practice.turning = false;
-        sound.cue('topple');
+        sound.cue('practiceBack');
         const flash = $('practiceFlash');
         flash.classList.remove('on');
         void flash.offsetWidth;

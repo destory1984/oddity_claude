@@ -287,6 +287,13 @@ export function createSound() {
     // noise under a falling note; two music-box notes; a shoe skid with two squeaks; a
     // low thump of 0.2 s, then of 0.1 s.)
     brake: () => noise({ length: 0.14, volume: 0.2, type: 'lowpass', freq: 380, to: 140, attack: 0.02 }),
+    // The flight practice puts her back where the try began: two soft notes falling, half a
+    // second (the user, 2026-10-20: "여기에서 무서운 소리가 왜 이리 길어"; it borrowed the
+    // lander's topple, a groan and a thud 2.6 s long).
+    practiceBack: () => {
+      pluck(784, 0, 0.12, 0.5);
+      pluck(587, 0.14, 0.12, 0.5);
+    },
     click: () => pluck(1319, 0, 0.05, 0.2),
     // Docking: air rushing up as the approach begins, a tick for each count, then the
     // latch: a low clunk and two rising bells. Letting go plays the bells falling.

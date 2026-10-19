@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-19', text: t('맴돌기가 들지 않는 자리에서 누르면 그 까닭을 잠시 알려 줍니다. 한국이 보이는 자리에서도 맴돌 수 있습니다.') },
   { day: '2026-10-19', text: t('큰 지도 바깥을 누르면 지도가 닫히고 비행으로 돌아갑니다.') },
   { day: '2026-10-19', text: t('큰 지도 둘레의 별똥별이 더 자주(2.5 → 5초마다) 지나가고, 빛무리와 반짝이 꼬리가 생겼습니다.') },
   { day: '2026-10-19', text: t('탐험 수첩 맨 아래에 "비행으로 돌아가기" 단추가 생겼습니다.') },

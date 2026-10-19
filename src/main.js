@@ -1436,6 +1436,15 @@ ${STORY_MORE[target.id]}` : told };
   }
   $('lockTarget').addEventListener('click', () => {
     if (locked) return unlock();
+    // Where the lock would be set and do nothing, it says why instead (the user,
+    // 2026-10-19: "맴돌기가 안 먹는건? 안 먹으면, 안 먹는 이유를 화면에 잠시 띄워줘").
+    if (warp.busy()) return toast.show(t('순간 이동 중에는 맴돌 수 없습니다.\n도착한 뒤에 다시 누르세요.'));
+    if (visit) return toast.show(t('이야기 장소에 머무는 동안에는 맴돌 수 없습니다.\n움직이면 풀려납니다.'));
+    const ground = sites.some((x) => x.id === selectedId) ? here(selectedId).parent : selectedId;
+    if (state.restingOn && state.restingOn === ground) return toast.show(t('그 위에 내려앉아 있어 맴돌 수 없습니다.\n떠오른 뒤에 다시 누르세요.'));
+    // Held at a view (home, a best view, an aurora): the hold gives way to the lock, which
+    // the hold kept from working.
+    if (home) home = null;
     // Docked, she goes round the craft she held, not the world on the plate: she lets
     // go of it and the lock takes it (the user, 2026-10-18, docked with Hubble: "맴돌기
     // 버튼을 누르면 지구를 맴돌게 되.. 허블을 맴도는거야").

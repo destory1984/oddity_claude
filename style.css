@@ -6478,3 +6478,71 @@ dialog > .backKey {
 #hud #targetPanel #targetName #auroraButton:last-child {
   margin-right:0;
 }
+
+/* ---- One look for the keys at the foot of every sheet and card (the user, 2026-10-19:
+   "다 해", of "시트 아래 버튼을 한 규칙으로"). A phone's rule for every button (12px, about
+   the top of this file) made them 12px, the journal's 14px bold, the practice's 17px: now
+   44px tall at least, 15px, weight 600, on a PC and a phone alike. */
+dialog :is(#settings #closeSettings, #journal #journalBack, #storyCard #closeStoryCard, #noteCard #closeNoteCard,
+  #gateScene #closeGate, #bigMap #bigMapActions button, #shareSheet .shareKeys button, #shareSheet #shareClose,
+  #pair #closePair, #lookBack #lookClose, #practiceOffer #practiceGo, #practiceOffer #practicePass,
+  #practiceWhy #practiceWhyOk, #practiceDone #practiceKeep, #practiceDone #practiceHide) {
+  min-height:44px;
+  padding:10px 16px;
+  font-size:15px;
+  font-weight:600;
+  line-height:1.2;
+  text-decoration:none;
+}
+
+/* Gold means one thing each (the same "다 해", of "금색은 한 가지 뜻만"): a gold FILL is the one
+   main thing to do on a sheet (the practice's "연습하기", the map's "순간 이동", the photo's
+   "사진 저장", "그날로", letting go of a craft); a gold LINE is what is chosen or on (a tab, the
+   language in use, 맴돌기 while on); the ways back to flying are plain glass, as the flight
+   screen's keys are (they were lined and lettered in gold; the journal's was filled gold). */
+dialog :is(#settings #closeSettings, #storyCard #closeStoryCard, #noteCard #closeNoteCard, #gateScene #closeGate,
+  #pair #closePair, #lookBack #lookClose, #shareSheet #shareClose, #practiceWhy #practiceWhyOk,
+  #practiceDone #practiceKeep, #practiceDone #practiceHide, #practiceOffer #practicePass) {
+  border:1px solid var(--glass-line);
+  background:var(--glass-fill);
+  box-shadow:0 2px 10px #0006;
+  color:#eef3ff;
+}
+
+#settings #closeSettings {
+  background:#0d1a3a;
+  box-shadow:0 -14px 14px #0d1a3a, 0 26px 0 #0d1a3a;
+}
+
+/* (The journal is paper: its way back is the paper's own plain key.) */
+dialog#journal #journalBack {
+  border:1.5px solid #6b4a26;
+  background:#fbf4e0;
+  color:#3b2a1a;
+}
+
+/* The practice's "연습하기": filled gold with dark letters, as "사진 저장" is; its slow glow
+   stays. "건너뛰기" beside it is a plain key of the same size. */
+dialog#practiceOffer #practiceGo {
+  border:1px solid #fff3c4;
+  background:var(--gold);
+  color:#081725;
+}
+
+dialog#practiceOffer .journalActions {
+  flex-direction:row;
+  align-items:stretch;
+  gap:8px;
+}
+
+dialog#practiceOffer .journalActions button {
+  flex:1;
+  width:auto;
+  margin:0;
+}
+
+/* (Two keys side by side at a sheet's foot stand 8px apart: "그대로 두기" and "버튼 치우기"
+   touched.) */
+dialog .journalActions {
+  gap:8px;
+}

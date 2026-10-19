@@ -54,6 +54,7 @@ import { createNoteCard } from './ui/noteCard.js';
 import { createSay } from './ui/say.js';
 import { createMapSky } from './ui/mapSky.js';
 import { skyNews, newsLine } from './core/forecast.js';
+import { skyEventNews } from './core/skyEvents.js';
 import { createSettings } from './ui/settings.js';
 import { createLookBack } from './ui/lookBack.js';
 import { createPair } from './ui/pair.js';
@@ -2077,9 +2078,11 @@ ${STORY_MORE[target.id]}` : told };
     notes: NOTES,
     memos: MEMOS,
     exo: () => exo,
-    // The next real eclipse first (core/eclipses.js), then the shadows of moons.
+    // The next real eclipse first (core/eclipses.js), the next meteor shower, planet
+    // pairing or Apophis (core/skyEvents.js), then the shadows of moons.
     sky: () => [
       ...(eclipseNews(openedAt) ? [{ text: eclipseNews(openedAt), planet: null, toward: null }] : []),
+      ...(skyEventNews(openedAt) ? [{ text: skyEventNews(openedAt), planet: null, toward: null }] : []),
       ...skyNews(bodiesAt, simTime).map((news) => ({ text: newsLine(news), planet: bodyById(news.planet, bodies),
         toward: shadowSpot(bodyById(news.planet, bodies), bodyById(news.moon, bodies), bodyById('sun', bodies).position),
       })),

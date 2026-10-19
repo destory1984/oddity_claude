@@ -4828,5 +4828,20 @@
  "아레시보 메시지가 향한 별 무리는?": "Which star cluster was the Arecibo message sent toward?",
  "M13": "M13",
  "플레이아데스": "The Pleiades",
- "이야기 장소 넷이 생겼습니다. 루나 3호가 달 뒷면을 처음 찍은 곳, 경주 첨성대, 스톤헨지, 아레시보 전파망원경입니다.": "Four new story places: where Luna 3 first saw the Moon's far side, Cheomseongdae in Gyeongju, Stonehenge and the Arecibo Telescope."
+ "이야기 장소 넷이 생겼습니다. 루나 3호가 달 뒷면을 처음 찍은 곳, 경주 첨성대, 스톤헨지, 아레시보 전파망원경입니다.": "Four new story places: where Luna 3 first saw the Moon's far side, Cheomseongdae in Gyeongju, Stonehenge and the Arecibo Telescope.",
+ "사분의자리 유성우가 가장 많은 밤": "the Quadrantid meteor shower at its peak",
+ "거문고자리 유성우가 가장 많은 밤": "the Lyrid meteor shower at its peak",
+ "물병자리 에타 유성우가 가장 많은 밤": "the Eta Aquariid meteor shower at its peak",
+ "페르세우스자리 유성우가 가장 많은 밤": "the Perseid meteor shower at its peak",
+ "오리온자리 유성우가 가장 많은 밤": "the Orionid meteor shower at its peak",
+ "사자자리 유성우가 가장 많은 밤": "the Leonid meteor shower at its peak",
+ "쌍둥이자리 유성우가 가장 많은 밤": "the Geminid meteor shower at its peak",
+ "화성과 목성이 나란히 보이는 날": "Mars and Jupiter side by side",
+ "금성과 토성이 나란히 보이는 날": "Venus and Saturn side by side",
+ "금성과 화성이 나란히 보이는 날": "Venus and Mars side by side",
+ "금성과 목성이 나란히 보이는 날": "Venus and Jupiter side by side",
+ "아포피스가 지구 곁 3만 2천km를 지나가는 날": "Apophis passes 32,000 km from Earth",
+ "{}: 오늘 밤입니다.": "{0}: tonight.",
+ "다음 하늘 소식: {} {}. {}일 남았습니다.": "Next in the sky: {0} {1}. {2} days to go.",
+ "하늘 소식에 유성우, 행성이 나란히 서는 날, 아포피스가 지나가는 날이 뜹니다.": "The sky news in the journal now tells, by the real calendar, the peak nights of meteor showers, the days planets stand side by side, and Apophis passing in 2029."
 }

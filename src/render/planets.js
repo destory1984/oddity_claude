@@ -298,7 +298,12 @@ const LOOKS = {
   churyumov: { shader: 'rocky', colorA: [0.05, 0.05, 0.05], colorB: [0.15, 0.14, 0.13], cap: 0, haze: 0, contrast: 0.7, craters: 0.6, dayS: 44640 },
   // Vesta is pale grey-brown; Bennu and Ryugu are carbon-dark rubble; Didymos, Dimorphos
   // and Apophis are stony grey.
-  vesta: { shader: 'rocky', colorA: [0.36, 0.34, 0.31], colorB: [0.62, 0.58, 0.52], cap: 0, haze: 0, contrast: 0.6, craters: 0.8, dayS: SPIN_DAY_S.vesta },
+  // Vesta wears Dawn's own map (the user, 2026-10-19: "실제 지도로 바꿔"): DLR's HAMO global
+  // mosaic, grey, given Vesta's pale grey-brown here.
+  vesta: {
+    shader: 'textured', map: 'vesta.jpg', saturation: 1, tint: [1.02, 0.95, 0.86], base: [0.5, 0.46, 0.41],
+    mapWeight: 1, haze: 0, detail: 0.12, dayS: SPIN_DAY_S.vesta,
+  },
   bennu: { shader: 'rocky', colorA: [0.05, 0.05, 0.05], colorB: [0.17, 0.165, 0.16], cap: 0, haze: 0, contrast: 0.8, craters: 0.3, dayS: SPIN_DAY_S.bennu },
   ryugu: { shader: 'rocky', colorA: [0.05, 0.045, 0.04], colorB: [0.16, 0.14, 0.12], cap: 0, haze: 0, contrast: 0.8, craters: 0.4, dayS: SPIN_DAY_S.ryugu },
   didymos: { shader: 'rocky', colorA: [0.2, 0.19, 0.18], colorB: [0.42, 0.4, 0.37], cap: 0, haze: 0, contrast: 0.7, craters: 0.4, dayS: SPIN_DAY_S.didymos },
@@ -434,7 +439,7 @@ LOOKS[EXO_STAR.id] = { shader: 'ember', dayS: 3.3 * 86400 };
 const CRATERS = {
   moon: 1, mercury: 1, mars: 0.35, phobos: 1, callisto: 1, ganymede: 0.6, europa: 0.08, io: 0.1,
   mimas: 0.9, enceladus: 0.3, tethys: 0.8, dione: 0.7, rhea: 0.8, iapetus: 0.8, triton: 0.25,
-  ceres: 0.9, pluto: 0.35, charon: 0.7,
+  ceres: 0.9, vesta: 0.8, pluto: 0.35, charon: 0.7,
 };
 
 // Worlds seen closely by one fly-by only: half the map is sharp and half is a blur.

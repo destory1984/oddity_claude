@@ -6257,3 +6257,56 @@ dialog#photoView::backdrop {
 html.noSkyNames .skyLabel {
   display:none !important;
 }
+
+/* Today's errand: its keys are picture squares with a word under each, as large as the
+   buttons on the main screen (--tap, a phone's --top-key), in one row at the
+   right (the user, 2026-10-19: "아이콘 크기를 메인 화면에 있는 아이콘과 같게"). */
+#journal #dailyKeys {
+  display:flex;
+  gap:var(--gap, 8px);
+  margin-left:auto;
+}
+
+#journal #journalDaily #dailyKeys button {
+  display:inline-flex;
+  flex:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  width:var(--top-key, var(--tap));
+  height:var(--top-key, var(--tap));
+  min-width:0;
+  min-height:0;
+  margin:0;
+  padding:0;
+  font-size:0;
+}
+
+#journal #journalDaily #dailyKeys button[hidden] {
+  display:none;
+}
+
+#journal #journalDaily #dailyKeys button::before {
+  content:"";
+  flex:none;
+  width:19px;
+  height:19px;
+  background:currentColor;
+  -webkit-mask:center / contain no-repeat;
+  mask:center / contain no-repeat;
+}
+
+#journal #journalDaily #dailyKeys button::after {
+  content:attr(data-label);
+  font-size:9px;
+  font-weight:600;
+  line-height:1;
+  letter-spacing:-.02em;
+  white-space:nowrap;
+}
+
+#journal #journalDaily #dailyKeys #dailyGo::before { -webkit-mask-image:url("/assets/ui/icon-goal.svg"); mask-image:url("/assets/ui/icon-goal.svg"); }
+#journal #journalDaily #dailyKeys #dailyJump::before { -webkit-mask-image:url("/assets/ui/icon-jump.svg"); mask-image:url("/assets/ui/icon-jump.svg"); }
+#journal #journalDaily #dailyKeys #dailyPrev::before { -webkit-mask-image:url("/assets/ui/icon-prev.svg"); mask-image:url("/assets/ui/icon-prev.svg"); }
+#journal #journalDaily #dailyKeys #dailyNext::before { -webkit-mask-image:url("/assets/ui/icon-next.svg"); mask-image:url("/assets/ui/icon-next.svg"); }

@@ -927,6 +927,22 @@ body.touch #reticle span {
   color: #091627;
 }
 
+/* Back to flying, at the foot of the journal under the part that scrolls: the gold
+   closing key of the other dialogs, on the journal's own paper. */
+#journal #journalBack {
+  flex:none;
+  width:auto;
+  min-height:44px;
+  margin:8px 16px 14px;
+  padding:8px 16px;
+  border:2px solid #8a5428;
+  border-radius:10px;
+  background:#e8cf8a;
+  color:#3b2a1a;
+  font-size:14px;
+  font-weight:700;
+}
+
 #journalScroll {
   flex: 1;
   min-height: 0;

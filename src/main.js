@@ -25,6 +25,7 @@ import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } f
 import { isLocalHost } from './core/count.js';
 import { pickSpot, fromSpot, toSpot, NEAR_EARTH_ONLY } from './core/startSpots.js';
 import { encodePlace, decodePlace, SHARE_BASE, KAKAO_JS_KEY, KAKAO_SDK } from './core/sharePlace.js';
+import { skyAnchor, clockTime } from './core/clock.js';
 import { teleportSpot, visited } from './core/teleport.js';
 import { behindBody, skyBehind, lostInGlare, nearestBodies, nearbyMoons } from './core/markers.js';
 import { FACTS } from './core/facts.js';
@@ -170,6 +171,12 @@ const START_NEAR = import.meta.env.DEV ? { id: 'earth', fromCentreKm: 20000 } : 
 // the game, their game clock); the player's own layout setting is left as it is.
 const shared = decodePlace(new URLSearchParams(location.search).get('p'), BODIES.map((b) => b.id));
 const layout = shared?.sky?.layout ?? loadLayout();
+// The game clock is everyone's (core/clock.js): the real time since the anchor, fifty times
+// as fast. A shared place runs on from the moment it was sent: its anchor, and the gap
+// between its clock and this one kept for the sitting.
+const anchorMs = shared?.sky?.openedAt ?? skyAnchor(layout, Date.now());
+const clockOffset = shared?.sky ? shared.sky.simTime - clockTime(anchorMs, Date.now()) : 0;
+const clockNow = () => clockTime(anchorMs, Date.now()) + clockOffset;
 // (A test may set the day: sessionStorage 'oddity.day', as 2027-08-02.)
 const openedAt = (() => {
   try {
@@ -182,13 +189,13 @@ const openedAt = (() => {
 })();
 // (The Magpie Bridge is up on Chilseok of that day: core/curios.js.)
 setCurioDay(openedAt);
-const bodyData = layout === 'today' ? todayData(shared?.sky ? new Date(shared.sky.openedAt) : openedAt) : BODY_DATA;
+const bodyData = layout === 'today' ? todayData(new Date(anchorMs)) : BODY_DATA;
 const bodiesAt = (timeS) => placeBodies(bodyData, timeS);
 // Everything that is flown among and drawn: the Solar System, and far off TRAPPIST-1
 // with its seven planets (core/exo.js), which have no slot in the journal (it lists
 // the ones she has been to at the foot of its bodies, uncounted).
 const allAt = (timeS) => withTime([...bodiesAt(timeS), ...exoBodiesAt(timeS)], timeS);
-let bodies = allAt(shared?.sky?.simTime ?? 0);
+let bodies = allAt(clockNow());
 // The trip there: whether she has been, and which planets she has seen from close by.
 let exo = loadExo();
 
@@ -247,6 +254,9 @@ const startSpot = pickSpot(Math.random(), new URLSearchParams(location.search).g
 
 // After a change of language the game carries on where she was (ui/storage.js).
 const resume = takeResume();
+// (Carried on after a change of language: the worlds as she left them; the clock catches
+// up on the first frame and carries her along.)
+if (resume?.simTime !== undefined) bodies = allAt(resume.simTime);
 let state = resume ? createState(resume.position, resume.orientation) : shared ? startAtSpot(shared.spot) : START_NEAR ? startNear(START_NEAR) : startAtSpot(startSpot);
 let paused = false;
 // Flight practice (core/practice.js): while it runs, `state` is her flight in the empty
@@ -319,7 +329,9 @@ let guide = createGuide(progress, !loadPractice().moon || Boolean(START_NEAR));
 // A newcomer: nobody has been welcomed on this device yet (they are offered the flight
 // practice once; the guide's old mark in the storage is the mark of having been).
 let newcomer = !(loadGuideDone() || Boolean(START_NEAR) || progress.landed.includes('moon'));
-let simTime = resume?.simTime ?? shared?.sky?.simTime ?? 0;
+let simTime = resume?.simTime ?? clockNow();
+// How far the clock went this frame (s of game time): a catch-up after a pause is large.
+let stepS = 0;
 // The note on entering the asteroid belt shows once per visit to the game.
 // Lights and plumes already told about (core/glows.js), with 'belt', 'meteor' and
 // 'start' (how to look round). Kept on the device for the day: each is told once a day,
@@ -2885,15 +2897,20 @@ ${STORY_MORE[target.id]}` : told };
     if (replay && elapsed > 0 && sceneWaits) replay.startedAt += elapsed * 1000;
 
     // Advance the orbits, carry the traveler with a nearby body, then fly.
+    stepS = 0;
     if (dt > 0) {
       const before = bodies;
       const craftBefore = craft;
-      simTime += dt * TIME_SCALE;
+      // Up to the shared clock: after the game stood still (a pause, a card, a hidden tab)
+      // the sky catches up at once, and she is carried along with the world she is by.
+      stepS = Math.max(0, clockNow() - simTime);
+      simTime += stepS;
+      const stepDt = stepS / TIME_SCALE;
       bodies = allAt(simTime);
       craft = craftAt(simTime, bodies);
       if (docked) {
-        rideKmS = rideSpeed(docked.id, craftBefore, craft, before, bodies, dt);
-        rideDrift = releaseDrift(docked.id, craftBefore, craft, before, bodies, state.position, dt);
+        rideKmS = rideSpeed(docked.id, craftBefore, craft, before, bodies, stepDt || dt);
+        rideDrift = releaseDrift(docked.id, craftBefore, craft, before, bodies, state.position, stepDt || dt);
       }
       sites = storySitesAt(simTime, bodies, world.elapsed());
       if (eventPlace) Object.assign(eventPlace, eclipseSpotAt(simTime, bodies));
@@ -2984,7 +3001,7 @@ ${STORY_MORE[target.id]}` : told };
         const went = visitStep(state, visit, dt, {
           spot: standBeside(visit.id),
           body: here(place.parent),
-          spun: spinOf(place.parent, simTime) - spinOf(place.parent, simTime - dt * TIME_SCALE),
+          spun: spinOf(place.parent, simTime) - spinOf(place.parent, simTime - stepS),
         });
         ({ state, visit } = went);
         visitKmS = hasArrived(visit) ? 0 : Math.hypot(...state.position.map((n, i) => n - from[i])) / dt;
@@ -3003,7 +3020,7 @@ ${STORY_MORE[target.id]}` : told };
         const went = homeStep(state, home, dt, {
           spot: home.spot(),
           body: here(home.bodyId),
-          spun: home.hold ? spinOf(home.bodyId, simTime) - spinOf(home.bodyId, simTime - dt * TIME_SCALE) : 0,
+          spun: home.hold ? spinOf(home.bodyId, simTime) - spinOf(home.bodyId, simTime - stepS) : 0,
         });
         ({ state, home } = went);
         if (went.arrived) toast.show(home.told);
@@ -3090,7 +3107,7 @@ ${STORY_MORE[target.id]}` : told };
       const ground = sites.some((s) => s.id === aim.id) ? here(aim.parent) : bodyById(aim.id, bodies);
       if (ground && state.restingOn !== ground.id) {
         const far = Math.hypot(...state.position.map((n, i) => n - ground.position[i]));
-        const spun = spinOf(ground.id, simTime) - spinOf(ground.id, simTime - dt * TIME_SCALE);
+        const spun = spinOf(ground.id, simTime) - spinOf(ground.id, simTime - stepS);
         if (spun && far <= ground.radiusKm * LOCK_CARRY_RADII) state = { ...state, ...carriedRound(state.position, state.orientation, ground.position, spun) };
       }
     }
@@ -3100,7 +3117,7 @@ ${STORY_MORE[target.id]}` : told };
     // 2026-10-12: "케네디 발사대에 착륙했는데, 지구는 계속 돌고있네").
     if (state.restingOn && dt > 0 && !docked && !visit && !home && !photo.active()) {
       const ground = bodyById(state.restingOn, bodies);
-      const spun = ground ? spinOf(ground.id, simTime) - spinOf(ground.id, simTime - dt * TIME_SCALE) : 0;
+      const spun = ground ? spinOf(ground.id, simTime) - spinOf(ground.id, simTime - stepS) : 0;
       if (spun) state = { ...state, ...carriedRound(state.position, state.orientation, ground.position, spun) };
     }
     // The journal is of the Solar System: another star's planets are kept apart (below).
@@ -3750,7 +3767,7 @@ ${STORY_MORE[target.id]}` : told };
     // (Always the published game: a link from the dev server went out as localhost.)
     const line = encodePlace({
       spot: toSpot(state, body, bodyById('sun', bodies)),
-      sky: { layout, openedAt: (shared?.sky ? new Date(shared.sky.openedAt) : openedAt).getTime(), simTime },
+      sky: { layout, openedAt: anchorMs, simTime },
     });
     const url = `${SHARE_BASE}?p=${line}`;
     return { url, text: t`${named(body.id)?.name ?? body.name} 곁에서 보내는 내 자리야. 열면 같은 하늘, 같은 자리에서 시작해.` };

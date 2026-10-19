@@ -3,6 +3,7 @@ import { STORY_DETAILS, storyPhotoFile, DRAWN } from './storyDetails.js';
 import { FAMOUS } from './famous.js';
 import { CRAFT_PHOTOS } from './craftPhotos.js';
 import { OBJECT_PHOTOS } from './objectPhotos.js';
+import { PLACE_PHOTOS } from './placePhotos.js';
 
 // What the "사진 보기" key on the name plate shows (ui/photoView.js), one picture after
 // another: a place's card photo; for a craft, the photos it is best known for (the user,
@@ -38,8 +39,10 @@ function storySlide(id, title) {
 export function photoSlides(thing) {
   if (!thing) return [];
   if (thing.kind === 'site') {
+    // Its card photo, then any more of it (core/placePhotos.js).
     const slide = storySlide(thing.id, thing.name);
-    return slide ? [slide] : [];
+    const more = (PLACE_PHOTOS[thing.id] ?? []).map(({ file, title, caption, credit }) => ({ file: `placePhotos/${file}`, title, caption, credit: t`사진: ${credit}` }));
+    return slide ? [slide, ...more] : [];
   }
   if (thing.kind === 'craft') {
     // Its own photo first, then what it took (core/craftPhotos.js), then the game's own
@@ -53,8 +56,10 @@ export function photoSlides(thing) {
       return { file: famous.file, title: famous.name, caption: famous.note, credit: `${famous.by} · ${famous.credit}` };
     }).filter(Boolean)];
   }
-  // A body, or the golden record: its one photo (core/objectPhotos.js).
+  // A body, or the golden record: its own photo, then any more of it, each with its own
+  // title (core/objectPhotos.js).
   const own = OBJECT_PHOTOS[thing.id];
-  if (own) return [{ file: `objectPhotos/${own.file}`, title: thing.name, caption: own.caption, credit: t`사진: ${own.credit}` }];
-  return [];
+  if (!own) return [];
+  return [{ ...own, title: thing.name }, ...(own.shots ?? [])]
+    .map(({ file, title, caption, credit }) => ({ file: `objectPhotos/${file}`, title, caption, credit: t`사진: ${credit}` }));
 }

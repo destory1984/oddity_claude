@@ -3,6 +3,9 @@ import { t } from './i18n.js';
 // One real photo of each body and of the golden record, for the "사진 보기" key (core/photoSlides.js;
 // the user, 2026-10-19: "이런 탐사선들도 모두 실제 사진 한 장씩 넣자. 모든 오브젝트들").
 // file: under public/assets/objectPhotos/. Sources and licences: THIRD-PARTY.md.
+// shots: more real photos of it, after its own, each with its own title, as a craft's
+// (the user, 2026-10-19, of the little-known bodies added that day: "사람들이 읽을거리나
+// 볼 거리 좀 보강해줘").
 export const OBJECT_PHOTOS = {
   sun: { file: 'sun.jpg', caption: t('2010년 8월, 태양 관측 위성 SDO가 자외선으로 찍은 태양. 가장자리에 홍염이 솟아 있습니다.'), credit: 'NASA/SDO' },
   mercury: { file: 'mercury.jpg', caption: t('2008년, 메신저호가 수성을 지나가며 찍은 사진. 땅의 차이가 잘 보이도록 색을 강조했습니다.'), credit: 'NASA/JHUAPL/Carnegie Institution' },
@@ -39,11 +42,21 @@ export const OBJECT_PHOTOS = {
   halley: { file: 'halley.jpg', caption: t('1986년 3월, 유럽의 조토 탐사선이 찍은 핼리 혜성의 핵. 혜성의 핵을 처음으로 가까이서 찍은 사진입니다.'), credit: 'ESA/MPS (CC BY-SA 3.0 IGO)' },
   haleBopp: { file: 'haleBopp.jpg', caption: t('1997년 3월 29일, 땅에서 찍은 헤일-밥 혜성. 푸른 이온 꼬리와 흰 먼지 꼬리가 갈라져 보입니다.'), credit: 'Philipp Salzgeber (CC BY-SA 2.0 AT)' },
   churyumov: { file: 'churyumov.jpg', caption: t('2014년 9월, 로제타가 찍은 67P 혜성. 작은 덩이와 큰 덩이가 붙은 오리 모양입니다.'), credit: 'ESA/Rosetta/NAVCAM (CC BY-SA 3.0 IGO)' },
-  vesta: { file: 'vesta.jpg', caption: t('돈 탐사선이 2011년 찍은 사진으로 만든 베스타. 아래쪽 남극에 레아실비아 분지가 있습니다.'), credit: 'NASA/JPL-Caltech/UCLA/MPS/DLR/IDA, Björn Jónsson (public domain)' },
-  bennu: { file: 'bennu.jpg', caption: t('2018년 12월 오시리스-렉스가 24km 거리에서 찍은 사진 12장을 이은 베누.'), credit: 'NASA/Goddard/University of Arizona (public domain)' },
+  vesta: { file: 'vesta.jpg', caption: t('돈 탐사선이 2011년 찍은 사진으로 만든 베스타. 아래쪽 남극에 레아실비아 분지가 있습니다.'), credit: 'NASA/JPL-Caltech/UCLA/MPS/DLR/IDA, Björn Jónsson (public domain)',
+    shots: [
+      { file: 'vesta-shot1.jpg', title: t('레아실비아 분지'), caption: t('돈 탐사선이 찍은 사진을 실제 높낮이 자료 위에 입혀, 남극의 레아실비아 분지를 비스듬히 바라보게 만든 모습. 사진 한 장이 아니라 자료로 다시 그린 풍경입니다.'), credit: 'NASA/JPL-Caltech/UCLA/MPS/DLR/IDA/PSI (public domain)' },
+    ] },
+  bennu: { file: 'bennu.jpg', caption: t('2018년 12월 오시리스-렉스가 24km 거리에서 찍은 사진 12장을 이은 베누.'), credit: 'NASA/Goddard/University of Arizona (public domain)',
+    shots: [
+      { file: 'bennu-shot1.jpg', title: t('베누에 닿는 순간'), caption: t('2020년 10월 20일, 오시리스-렉스의 카메라가 찍은 채집 팔. 왼쪽은 땅에 닿기 직전, 오른쪽은 닿은 직후입니다.'), credit: 'NASA/Goddard/University of Arizona (public domain)' },
+      { file: 'bennu-shot2.jpg', title: t('베누에서 가져온 흙'), caption: t('2023년 9월 26일, 지구에 돌아온 시료 통의 뚜껑을 연 모습. 가운데의 채집 머리와 그 둘레에 검은 먼지와 모래알이 묻어 있습니다.'), credit: 'NASA/Erika Blumenfeld & Joseph Aebersold (public domain)' },
+    ] },
   ryugu: { file: 'ryugu.jpg', caption: t('하야부사2가 찍은 류구. 적도를 따라 불룩한 능선이 둘러 있습니다.'), credit: 'JAXA and partners, colour by Meli thev (CC BY 4.0)' },
   didymos: { file: 'didymos.jpg', caption: t('부딪치기 몇 분 전 다트가 찍은 디디모스와 오른쪽의 작은 디모르포스.'), credit: 'NASA/Johns Hopkins APL; Daly et al., Nature 2023 (CC BY 4.0)' },
-  dimorphos: { file: 'dimorphos.jpg', caption: t('부딪치기 2초 전 다트가 마지막으로 온전히 찍은 디모르포스. 돌무더기가 그대로 보입니다.'), credit: 'NASA/Johns Hopkins APL (public domain)' },
+  dimorphos: { file: 'dimorphos.jpg', caption: t('부딪치기 2초 전 다트가 마지막으로 온전히 찍은 디모르포스. 돌무더기가 그대로 보입니다.'), credit: 'NASA/Johns Hopkins APL (public domain)',
+    shots: [
+      { file: 'dimorphos-shot1.jpg', title: t('허블이 본 두 갈래 꼬리'), caption: t('2022년 10월 허블 우주망원경이 찍은 디디모스와 디모르포스. 다트가 부딪친 뒤 뿜어진 먼지가 두 갈래 꼬리로 뻗어 있습니다.'), credit: 'NASA, ESA, Jian-Yang Li (PSI), Joe DePasquale (STScI) (CC BY 4.0)' },
+    ] },
   apophis: { file: 'apophis.jpg', caption: t('2021년 3월 미국의 전파 망원경이 1,700만km 밖에서 찍은 아포피스의 레이더 영상(동그라미 안).'), credit: 'NASA/JPL-Caltech and NSF/AUI/GBO (public domain)' },
   oumuamua: { file: 'oumuamua.jpg', caption: t('2017년 10월 유럽 남천 천문대의 VLT 등 여러 망원경 사진을 겹친 오우무아무아(파란 동그라미 안의 점). 점선은 망원경이 손님을 따라가는 동안 늘어진 별들입니다.'), credit: 'ESO/K. Meech et al. (CC BY 4.0)' },
   atlas3i: { file: 'atlas3i.jpg', caption: t('2025년 11월 30일 허블 우주망원경이 찍은 3I/아틀라스. 가운데 핵을 기체와 먼지가 감싸고 있습니다.'), credit: 'NASA, ESA, STScI, D. Jewitt (UCLA), M.-T. Hui (public domain)' },
@@ -51,9 +64,18 @@ export const OBJECT_PHOTOS = {
   haumea: { file: 'haumea.jpg', caption: t('하우메아를 그린 그림. 2017년에 잰 크기와 고리를 바탕으로 그렸습니다. 가까이서 찍은 사진은 아직 없습니다.'), credit: 'Kevin Gill (CC BY 2.0)' },
   makemake: { file: 'makemake.jpg', caption: t('2015년 4월 허블 우주망원경이 찍은 마케마케. 밝은 빛 바로 위에 아주 희미한 위성이 숨어 있습니다.'), credit: 'NASA, ESA, A. Parker and M. Buie (SwRI), W. Grundy, K. Noll (public domain)' },
   sedna: { file: 'sedna.jpg', caption: t('세드나의 땅에서 본 한낮의 하늘을 상상해 그린 그림. 태양은 밝은 별 하나만큼 작습니다. 실제 사진에서는 점 하나로만 보입니다.'), credit: 'NASA, ESA and Adolf Schaller (public domain)' },
-  arrokoth: { file: 'arrokoth.jpg', caption: t('2019년 1월 1일 뉴허라이즌스가 곁을 지나며 찍은 아로코스. 흑백 사진에 색을 입혔습니다.'), credit: 'NASA/JHUAPL/SwRI, Roman Tkachenko (public domain)' },
-  hyperion: { file: 'hyperion.jpg', caption: t('2005년 9월 카시니가 찍은 히페리온. 실제 색에 가깝게 맞춘 사진입니다.'), credit: 'NASA/JPL/SSI, Gordan Ugarkovic (public domain)' },
-  phoebe: { file: 'phoebe.jpg', caption: t('2004년 6월 카시니가 토성에 닿기 전에 찍은 포에베. 충돌구가 가득합니다.'), credit: 'NASA/JPL/Space Science Institute (public domain)' },
+  arrokoth: { file: 'arrokoth.jpg', caption: t('2019년 1월 1일 뉴허라이즌스가 곁을 지나며 찍은 아로코스. 흑백 사진에 색을 입혔습니다.'), credit: 'NASA/JHUAPL/SwRI, Roman Tkachenko (public domain)',
+    shots: [
+      { file: 'arrokoth-shot1.jpg', title: t('떠나며 본 아로코스'), caption: t('2019년 1월 1일 곁을 지나 멀어지던 뉴허라이즌스가 찍은 아로코스. 햇빛을 받은 가장자리만 초승달처럼 빛나, 두 덩이가 생각보다 납작하다는 것이 드러났습니다.'), credit: 'NASA/JHUAPL/SwRI/NOAO (public domain)' },
+    ] },
+  hyperion: { file: 'hyperion.jpg', caption: t('2005년 9월 카시니가 찍은 히페리온. 실제 색에 가깝게 맞춘 사진입니다.'), credit: 'NASA/JPL/SSI, Gordan Ugarkovic (public domain)',
+    shots: [
+      { file: 'hyperion-shot1.jpg', title: t('카시니가 가까이서 본 히페리온'), caption: t('2005년 9월 26일 약 500km 거리에서 찍은 사진 다섯 장을 이은 히페리온의 땅. 스펀지 구멍 같은 충돌구가 빽빽합니다. 검은 띠는 사진이 비어 있는 곳입니다.'), credit: 'NASA/JPL/Space Science Institute (public domain)' },
+    ] },
+  phoebe: { file: 'phoebe.jpg', caption: t('2004년 6월 카시니가 토성에 닿기 전에 찍은 포에베. 충돌구가 가득합니다.'), credit: 'NASA/JPL/Space Science Institute (public domain)',
+    shots: [
+      { file: 'phoebe-shot1.jpg', title: t('카시니가 가까이서 본 포에베'), caption: t('2004년 6월 11일 카시니가 곁을 지나며 찍은 포에베. 크고 작은 충돌구의 벽이 밝게 빛납니다.'), credit: 'NASA/JPL/Space Science Institute (public domain)' },
+    ] },
   proteus: { file: 'proteus.jpg', caption: t('1989년 8월 보이저 2호가 찍은 프로테우스. 둥글지 않은 각진 모양이 보입니다.'), credit: 'NASA/JPL (public domain)' },
   eurybates: { file: 'eurybates.jpg', caption: t('2020년 1월 허블 우주망원경이 찍은 에우리바테스. 동그라미 안에 작은 위성 퀘타가 있습니다.'), credit: 'NASA/SwRI/Keith S. Noll (public domain)' },
   patroclus: { file: 'patroclus.jpg', caption: t('2018년 2월 허블 우주망원경이 찍은 파트로클로스와 메노이티오스. 너무 멀어 붙은 듯한 두 점으로 보입니다.'), credit: 'Hubble Space Telescope/SwRI (public domain)' },

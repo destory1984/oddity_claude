@@ -174,6 +174,17 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 
 CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수 있고, 고친 것은 같은 조건으로 내야 한다. 이 저장소의 MIT 라이선스는 이 사진들에 미치지 않는다.
 
+## 이야기 장소의 사진 더 보기
+
+`public/assets/placePhotos/` 의 사진 4장은 이야기 장소의 "사진 보기" 단추에서 카드 사진 다음에 보인다. 위키미디어 공용에서 받아 560×420 안에 들도록 줄였다(2026-10-19).
+
+| 파일 | 원본 | 만든 이 | 라이선스 |
+|---|---|---|---|
+| `luna3-2.jpg` | [Luna-3 (Memorial Museum of Astronautics).JPG](https://commons.wikimedia.org/wiki/File:Luna-3_(Memorial_Museum_of_Astronautics).JPG) | Armael | CC0 |
+| `cheomseongdae-2.jpg` | [Cheomseongdae Night Blue.jpg](https://commons.wikimedia.org/wiki/File:Cheomseongdae_Night_Blue.jpg) | Brinacor | CC BY-SA 4.0 |
+| `stonehenge-2.jpg` | [Stonehenge and Aerodrome 1928.jpg](https://commons.wikimedia.org/wiki/File:Stonehenge_and_Aerodrome_1928.jpg) | Royal Air Force | Public domain |
+| `arecibo-2.jpg` | [Arecibo Telescope, December 2021.jpg](https://commons.wikimedia.org/wiki/File:Arecibo_Telescope,_December_2021.jpg) | Tedder | CC BY-SA 4.0 |
+
 ## 사진 임무가 따라 찍는 실제 사진
 
 `public/assets/famous/` 의 사진 6장도 위키미디어 공용에서 받아 560×420 안에 들도록 줄였다(태양계 가족사진만 1120×336). 모두 저작권이 없다. 창백한 푸른 점과 핼리 혜성은 위 표의 `paleBlueDot.jpg`, `giotto.jpg` 를 같이 쓴다.
@@ -204,7 +215,7 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 
 ## 탐사선 사진과 탐사선이 찍은 사진
 
-`public/assets/craftPhotos/` 의 사진 56장은 이름표의 "사진 보기" 단추가 보인다. 모두 위키미디어 공용에서 받아 가로 1024px, 세로 1400px 안에 들도록 줄였다(2026-10-17). CC BY-SA 사진은 줄인 것도 같은 조건으로 쓸 수 있다. 일본 JAXA(상업 이용에 사전 허락이 필요하다)와 중국 국가항천국(다시 쓰는 조건을 밝히지 않았다)의 사진은 넣지 않았다.
+`public/assets/craftPhotos/` 의 사진 60장은 이름표의 "사진 보기" 단추가 보인다. 모두 위키미디어 공용에서 받아 가로 1024px, 세로 1400px 안에 들도록 줄였다(2026-10-17). CC BY-SA 사진은 줄인 것도 같은 조건으로 쓸 수 있다. 일본 JAXA(상업 이용에 사전 허락이 필요하다)와 중국 국가항천국(다시 쓰는 조건을 밝히지 않았다)의 사진은 넣지 않았다.
 
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
@@ -227,6 +238,10 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `galileoCraft-shot1.jpg` | [PIA19048 realistic color Europa mosaic edited.jpg](https://commons.wikimedia.org/wiki/File:PIA19048_realistic_color_Europa_mosaic_edited.jpg) | NASA/JPL-Caltech/SETI Institute | Public domain |
 | `messengerCraft-craft.jpg` | [MESSENGER Assembly.jpg](https://commons.wikimedia.org/wiki/File:MESSENGER_Assembly.jpg) | NASA | Public domain |
 | `messengerCraft-shot1.jpg` | [PIA19449-PlanetMercury-MESSENGER-Images-First-20110329-Last-20150430.jpg](https://commons.wikimedia.org/wiki/File:PIA19449-PlanetMercury-MESSENGER-Images-First-20110329-Last-20150430.jpg) | NASA/JHUAPL/Carnegie Institution of Washington | Public domain |
+| `messengerCraft-shot2.jpg` | [Mercury MESSENGER MDIS Basemap EnhancedColor Mosaic Global 32ppd.jpg](https://commons.wikimedia.org/wiki/File:Mercury_MESSENGER_MDIS_Basemap_EnhancedColor_Mosaic_Global_32ppd.jpg) | NASA/JHUAPL/Carnegie Institution of Washington, mosaic by Applied Coherent Technology Corporation | Public domain |
+| `galileoCraft-shot2.jpg` | [Volcano Erupts on Io (Galileo) (2020-38-4721-Image).png](https://commons.wikimedia.org/wiki/File:Volcano_Erupts_on_Io_(Galileo)_(2020-38-4721-Image).png) | NASA/JPL/DLR | Public domain |
+| `gaia-shot1.jpg` | [Gaia's all-sky view (ESA Gaia DR2 AllSky Brightness Colour black bg 8k).jpg](https://commons.wikimedia.org/wiki/File:Gaia%27s_all-sky_view_(ESA_Gaia_DR2_AllSky_Brightness_Colour_black_bg_8k).jpg) | ESA/Gaia/DPAC | CC BY-SA 3.0 IGO (ESA; CC BY 4.0 on Commons) |
+| `psyche-shot1.jpg` | [Psyche Launch (NHQ202310130003).jpg](https://commons.wikimedia.org/wiki/File:Psyche_Launch_(NHQ202310130003).jpg) | NASA/Aubrey Gemignani | Public domain |
 | `hubble-craft.jpg` | [View of Hubble after Being Released from the Shuttle Atlantis (28223588012).jpg](https://commons.wikimedia.org/wiki/File:View_of_Hubble_after_Being_Released_from_the_Shuttle_Atlantis_(28223588012).jpg) | NASA | Public domain |
 | `hubble-shot1.jpg` | [Pillars of creation 2014 HST WFC3-UVIS full-res denoised.jpg](https://commons.wikimedia.org/wiki/File:Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg) | NASA, ESA, Hubble Heritage Team (STScI/AURA) | Public domain |
 | `iss-craft.jpg` | [International Space Station after undocking of STS-132.jpg](https://commons.wikimedia.org/wiki/File:International_Space_Station_after_undocking_of_STS-132.jpg) | NASA | Public domain |
@@ -267,7 +282,7 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 
 ## 천체 사진과 금빛 음반
 
-`public/assets/objectPhotos/` 의 사진 36장은 천체 35개와 보이저의 금빛 음반의 "사진 보기" 단추가 보인다. 모두 위키미디어 공용에서 가로 960px 판(원본이 더 작으면 원본)을 받아 960px 안에 들도록 줄이고, 한 장이 160KB를 넘지 않게 눌러 담았다(2026-10-19).
+`public/assets/objectPhotos/` 의 사진과 그림 62장은 천체 54개와 보이저의 금빛 음반의 "사진 보기" 단추가 보인다. 그 가운데 7장(`*-shot1.jpg`, `bennu-shot2.jpg`)은 베스타, 베누, 디모르포스, 아로코스, 히페리온, 포에베의 두 번째, 세 번째 사진이고, 가로 1024px 안에 들도록 줄였다(2026-10-19). 베스타의 것은 사진을 높낮이 자료 위에 입혀 다시 그린 풍경이라 설명에 그렇게 적었다. 모두 위키미디어 공용에서 가로 960px 판(원본이 더 작으면 원본)을 받아 960px 안에 들도록 줄이고, 한 장이 160KB를 넘지 않게 눌러 담았다(2026-10-19).
 
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
@@ -325,6 +340,13 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `eurybates.jpg` | [Eurybates-satellite.gif](https://commons.wikimedia.org/wiki/File:Eurybates-satellite.gif) | NASA/SwRI/Keith S. Noll, first frame | Public domain |
 | `patroclus.jpg` | [617 Patroclus Hubble.jpg](https://commons.wikimedia.org/wiki/File:617_Patroclus_Hubble.jpg) | Hubble Space Telescope/SwRI | Public domain |
 | `menoetius.jpg` | [PatroclusMenoetius-artists-impression.png](https://commons.wikimedia.org/wiki/File:PatroclusMenoetius-artists-impression.png) | NASA/SwRI/D. Durda, illustration | Public domain |
+| `vesta-shot1.jpg` | [PIA15667 Vesta south pole oblique.jpg](https://commons.wikimedia.org/wiki/File:PIA15667_Vesta_south_pole_oblique.jpg) | NASA/JPL-Caltech/UCLA/MPS/DLR/IDA/PSI, grey view cut out | Public domain |
+| `bennu-shot1.jpg` | [OSIRIS-REX SamCam TAGSAM Event 2020-10-20 two frames at touchdown.gif](https://commons.wikimedia.org/wiki/File:OSIRIS-REX_SamCam_TAGSAM_Event_2020-10-20_two_frames_at_touchdown.gif) | NASA/Goddard/University of Arizona, the two frames side by side | Public domain |
+| `bennu-shot2.jpg` | [OSIRIS-REx sample canister with lid open (jsc2024e023024).jpg](https://commons.wikimedia.org/wiki/File:OSIRIS-REx_sample_canister_with_lid_open_(jsc2024e023024).jpg) | NASA/Erika Blumenfeld & Joseph Aebersold | Public domain |
+| `dimorphos-shot1.jpg` | [Twin Tail Revealed in New Hubble Image of Didymos-Dimorphos System Following DART Impact (opo22056a).jpg](https://commons.wikimedia.org/wiki/File:Twin_Tail_Revealed_in_New_Hubble_Image_of_Didymos-Dimorphos_System_Following_DART_Impact_(opo22056a).jpg) | NASA, ESA, Jian-Yang Li (PSI), Joe DePasquale (STScI) | CC BY 4.0 |
+| `arrokoth-shot1.jpg` | [Mu69 only ca07 linear 0 to 50 extras.png](https://commons.wikimedia.org/wiki/File:Mu69_only_ca07_linear_0_to_50_extras.png) | NASA/JHUAPL/SwRI/NOAO | Public domain |
+| `hyperion-shot1.jpg` | [Hyperion surface.jpg](https://commons.wikimedia.org/wiki/File:Hyperion_surface.jpg) | NASA/JPL/Space Science Institute (PIA07741) | Public domain |
+| `phoebe-shot1.jpg` | [Phoebe closeup cassini NASA.jpg](https://commons.wikimedia.org/wiki/File:Phoebe_closeup_cassini_NASA.jpg) | NASA/JPL/Space Science Institute | Public domain |
 | `goldenRecord.jpg` | [Voyager Golden Record.jpg](https://commons.wikimedia.org/wiki/File:The_Sounds_of_Earth_Record_Cover_-_GPN-2000-001978.jpg) | NASA/JPL | Public domain |
 
 ## "그날로" 장면에 쓴 옛 그림

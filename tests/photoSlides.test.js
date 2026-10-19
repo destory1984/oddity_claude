@@ -41,6 +41,19 @@ describe('the "사진 보기" key', () => {
     expect(photoSlides({ id: 'goldenRecord', kind: 'curio', name: 'x' })).toHaveLength(1);
   });
 
+  it('shows a body or a place its own photo first, then the more it has, each titled', () => {
+    const bennu = photoSlides({ id: 'bennu', kind: 'asteroid', name: '베누' });
+    expect(bennu.map((s) => s.file)).toEqual(['objectPhotos/bennu.jpg', 'objectPhotos/bennu-shot1.jpg', 'objectPhotos/bennu-shot2.jpg']);
+    expect(bennu.map((s) => s.title)).toEqual(['베누', '베누에 닿는 순간', '베누에서 가져온 흙']);
+    for (const slide of bennu) expect(slide.credit).toMatch(/^사진: /);
+    for (const { id } of BODIES) {
+      for (const slide of photoSlides({ id, kind: 'body', name: id })) expect(existsSync(`public/assets/${slide.file}`), slide.file).toBe(true);
+    }
+    const stonehenge = photoSlides({ id: 'stonehenge', kind: 'site', name: '스톤헨지' });
+    expect(stonehenge.map((s) => s.file)).toEqual(['stories/stonehenge.jpg', 'placePhotos/stonehenge-2.jpg']);
+    expect(stonehenge[1].title).toBe('하늘에서 본 스톤헨지');
+  });
+
   it("finds every place's photo on disk", () => {
     for (const story of STORIES) {
       for (const slide of photoSlides({ id: story.id, kind: 'site', name: story.name })) expect(existsSync(`public/assets/${slide.file}`), slide.file).toBe(true);

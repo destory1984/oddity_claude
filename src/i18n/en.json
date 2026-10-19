@@ -4661,5 +4661,9 @@
  "하늘에 별자리와 은하, 성운의 이름을 띄웁니다. 꺼도 이름을 누르던 자리를 누르면 그 이야기가 뜹니다.": "Shows the names of constellations, galaxies and nebulae on the sky. Off, a press where a name stood still tells its story.",
  "설정에서 하늘의 별자리 이름을 켜고 끌 수 있습니다.": "Constellation names on the sky can be turned on and off in the settings.",
  "행성 배치 설정을 없앴습니다. 모두가 같은 여행 배치에서 같은 자리의 행성을 봅니다.": "The planet layout setting is gone: everyone sees the travel layout, the planets in the same places.",
- "우주멍에서 소라가 별가루로 흩어져 사라지고, 별가루가 모여 돌아옵니다.": "In just-looking, Sora breaks into star dust and drifts away, and the dust gathers to bring her back."
+ "우주멍에서 소라가 별가루로 흩어져 사라지고, 별가루가 모여 돌아옵니다.": "In just-looking, Sora breaks into star dust and drifts away, and the dust gathers to bring her back.",
+ "만든 코드": "The code",
+ "이 게임의 코드는 모두 공개되어 있습니다.": "All of this game's code is open to read.",
+ "깃허브에서 보기": "See it on GitHub",
+ "About에 이 게임의 공개 코드로 가는 깃허브 링크가 생겼습니다.": "About has a link to the game's open code on GitHub."
 }

@@ -22,7 +22,9 @@ export function createScanner(canvas, button = null) {
 
   // In the speed box's own place; the speed box goes over the flying keys, its right edge
   // on theirs (the user, 2026-10-18, a picture with an arrow from the box to that corner).
-  const GAP = 16;
+  // 8px, the space between two keys (the user, 2026-10-19: "아이콘 간격과 아이콘과 가장자리의
+  // 간격도 모두 통일"; it was 16).
+  const GAP = 8;
   let moved = [0, 0];
   function place() {
     const box = document.querySelector('#hud footer .speedBox');
@@ -35,8 +37,10 @@ export function createScanner(canvas, button = null) {
     // edge to just before the keys, and as tall as their three rows.
     // (Where the box stands before it is moved.)
     const natural = { left: speed.left - moved[0], right: speed.right - moved[0], bottom: speed.bottom - moved[1] };
-    const left = Math.max(4, natural.left - 10);
-    const end = keys.length ? Math.min(...keys.map((r) => r.left)) - 6 : left + 260;
+    // 8px from the screen's edge and from the keys, as every key is from the next (it was
+    // 6px from both).
+    const left = Math.max(8, natural.left - 8);
+    const end = keys.length ? Math.min(...keys.map((r) => r.left)) - 8 : left + 260;
     // At most 440 px: on a wide screen the room up to the keys is the whole width and the
     // ellipse lay over half the view (the user, 2026-10-19: "큰화면으로 보면 스캐너가 너무 크네").
     const MAX = 440;
@@ -67,8 +71,9 @@ export function createScanner(canvas, button = null) {
     // (Over the line of key hints a wide screen shows along the bottom, not under it.)
     if (button) {
       const hint = document.getElementById('hint')?.getBoundingClientRect();
-      const foot = hint && hint.width > 0 && hint.top < bottom ? hint.top - 4 : bottom - 2;
-      button.style.left = `${left + 2}px`;
+      // (Its foot on the keys' foot and its side on the screen's, 8px in like them.)
+      const foot = hint && hint.width > 0 && hint.top < bottom ? hint.top - 4 : bottom;
+      button.style.left = `${left}px`;
       button.style.top = `${foot - button.offsetHeight}px`;
     }
     const ratio = window.devicePixelRatio || 1;

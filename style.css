@@ -6406,8 +6406,8 @@ dialog#photoView {
    big map's title move right of it; the old ✕ at the right of each give way to it. */
 dialog > .backKey {
   position:absolute;
-  top:10px;
-  left:10px;
+  top:8px;
+  left:8px;
   z-index:3;
   display:grid;
   place-items:center;
@@ -6453,8 +6453,28 @@ dialog > .backKey {
 
 #photoView > .backKey {
   position:fixed;
-  top:max(12px, env(safe-area-inset-top));
-  left:12px;
+  top:max(8px, env(safe-area-inset-top));
+  left:max(8px, env(safe-area-inset-left));
   width:40px;
   height:40px;
+}
+
+/* The keys inside the name plate stand as far from its right edge as from its top and
+   foot (the user, 2026-10-19: "아이콘 간격과 아이콘과 가장자리의 간격도 모두 통일"): the
+   plate is one key high, the keys 30px, so (key - 30px) / 2 all round (they were 6px
+   from the top and 9px from the right). */
+#hud #targetPanel > #targetName:has(button) {
+  padding-right:calc((44px - 30px) / 2 - 1px);
+}
+
+@media (max-width: 480px) {
+  #hud #targetPanel > #targetName:has(button) {
+    padding-right:calc((var(--top-key) - 30px) / 2 - 1px);
+  }
+}
+
+/* (The last key of the plate leant 4px past its padding: no longer.) */
+#hud #targetPanel #targetName button:is(#homeButton, #vistaButton, #auroraButton, #poleButton, #thenKey, #photoKey, #dockKey):last-of-type,
+#hud #targetPanel #targetName #auroraButton:last-child {
+  margin-right:0;
 }

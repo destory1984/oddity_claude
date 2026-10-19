@@ -4772,6 +4772,10 @@ html.gaze #testBar {
   inset:0;
   width:100%;
   height:100%;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
   pointer-events:none;
 }
 

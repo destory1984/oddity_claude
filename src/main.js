@@ -1544,21 +1544,14 @@ ${STORY_MORE[target.id]}` : told };
   // 사라졌다하게 해줘"); the switch turns and sends out a ring.
   const SCANNER_IN_MS = 1100;
   const SCANNER_OUT_MS = 900;
-  let scannerMove = null;
-  let scannerInkStop = () => {};
-  function swirlScanner(on) {
-    scannerMove?.cancel();
-    scannerMove = null;
-    scannerInkStop();
-    scannerInkStop = () => {};
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve(true);
-    const canvas = $('scanner');
-    const box = canvas.getBoundingClientRect();
-    const key = $('scannerButton').getBoundingClientRect();
+  // Whirls `el` down into the key `from` (inward) or up out of it, as the 우주멍 pieces
+  // go (gazeFlight): slow to start, quick at the drain, turning as it goes, with ink
+  // tails from its middle and from points `rim` (parts of its box) and rings round the
+  // key. onTop: the tails are drawn over an open dialog. Returns { move, stop }.
+  function swirl(el, from, { inward, lasts, ink, rim, onTop = false }) {
+    const box = el.getBoundingClientRect();
+    const key = from.getBoundingClientRect();
     const [mx, my] = [key.left + key.width / 2, key.top + key.height / 2];
-    const lasts = on ? SCANNER_OUT_MS : SCANNER_IN_MS;
-    // Along the same whirl as the 우주멍 pieces (gazeFlight): slow to start, quick at the
-    // drain, turning as it goes. `x` is the part of the way in.
     const whirl = (at, reach) => {
       const [dx, dy] = [at[0] - mx, at[1] - my];
       const far = Math.hypot(dx, dy);
@@ -1570,13 +1563,10 @@ ${STORY_MORE[target.id]}` : told };
         return { fall, turn, size: 1 - 0.93 * fall, px: mx + radius * Math.cos(bearing + turn), py: my + radius * Math.sin(bearing + turn) };
       };
     };
-    // The scanner goes as one piece; ink tails come from round its ellipse as well.
     const middle = [box.left + box.width / 2, box.top + box.height / 2];
-    const rim = [[0.04, 0.62], [0.96, 0.62], [0.5, 0.33], [0.5, 0.9], [0.22, 0.42], [0.78, 0.42], [0.25, 0.84], [0.75, 0.84]]
-      .map(([u, v]) => [box.left + u * box.width, box.top + v * box.height]);
-    const reach = Math.max(1, ...[middle, ...rim].map(([x, y]) => Math.hypot(x - mx, y - my)));
+    const edge = rim.map(([u, v]) => [box.left + u * box.width, box.top + v * box.height]);
+    const reach = Math.max(1, ...[middle, ...edge].map(([x, y]) => Math.hypot(x - mx, y - my)));
     const spot = whirl(middle, reach);
-    canvas.style.transformOrigin = '';
     const frames = [];
     const STEPS = 28;
     for (let i = 0; i <= STEPS; i += 1) {
@@ -1589,19 +1579,62 @@ ${STORY_MORE[target.id]}` : told };
         filter: `blur(${(2.2 * fall).toFixed(2)}px)`,
       });
     }
-    const move = canvas.animate(on ? frames.reverse() : frames, { duration: lasts, fill: 'both', easing: 'linear' });
-    scannerMove = move;
+    const move = el.animate(inward ? frames : frames.reverse(), { duration: lasts, fill: 'both', easing: 'linear' });
     const when = (passed) => {
       const part = Math.min(1, Math.max(0, passed / lasts));
-      return on ? 1 - part : part;
+      return inward ? part : 1 - part;
     };
-    const ink = [
-      { spot, when, thick: 16, shown: 1, ink: '#a8dcff' },
-      ...rim.map((at) => ({ spot: whirl(at, reach), when, thick: 5, shown: 1, ink: '#a8dcff' })),
+    const tails = [
+      { spot, when, thick: 16, shown: 1, ink },
+      ...edge.map((at) => ({ spot: whirl(at, reach), when, thick: 5, shown: 1, ink })),
     ];
-    scannerInkStop = gazeInk(ink, key, lasts);
-    $('scannerButton').animate([{ rotate: '0deg', scale: '1' }, { rotate: on ? '-50deg' : '50deg', scale: on ? '0.92' : '1.12' }, { rotate: '0deg', scale: '1' }], { duration: lasts, easing: 'ease-in-out' });
+    const stop = gazeInk(tails, key, lasts, onTop);
+    from.animate([{ rotate: '0deg', scale: '1' }, { rotate: inward ? '50deg' : '-50deg', scale: inward ? '1.12' : '0.92' }, { rotate: '0deg', scale: '1' }], { duration: lasts, easing: 'ease-in-out' });
+    return { move, stop };
+  }
+  let scannerMove = null;
+  let scannerInkStop = () => {};
+  function swirlScanner(on) {
+    scannerMove?.cancel();
+    scannerMove = null;
+    scannerInkStop();
+    scannerInkStop = () => {};
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve(true);
+    const canvas = $('scanner');
+    canvas.style.transformOrigin = '';
+    const { move, stop } = swirl(canvas, $('scannerButton'), {
+      inward: !on,
+      lasts: on ? SCANNER_OUT_MS : SCANNER_IN_MS,
+      ink: '#a8dcff',
+      // Round its ellipse.
+      rim: [[0.04, 0.62], [0.96, 0.62], [0.5, 0.33], [0.5, 0.9], [0.22, 0.42], [0.78, 0.42], [0.25, 0.84], [0.75, 0.84]],
+    });
+    scannerMove = move;
+    scannerInkStop = stop;
     return move.finished.then(() => move === scannerMove, () => false);
+  }
+  // The settings, the journal and the big map whirl up out of the key that opens them
+  // (the user, 2026-10-19: "옵션이나 탐험수첩 메뉴 같은것을 열 때에도 우주멍 버튼과 같은
+  // 효과를 내면서 열어줘"). Closing is at once, as before.
+  const MENU_OUT_MS = 800;
+  for (const [dialogId, keyId] of [['settings', 'settingsButton'], ['journal', 'journalButton'], ['bigMap', 'minimap']]) {
+    const dialog = $(dialogId);
+    let shown = dialog.open;
+    new MutationObserver(() => {
+      const opened = dialog.open && !shown;
+      shown = dialog.open;
+      if (!opened || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const key = $(keyId);
+      if (!key.getClientRects().length || getComputedStyle(key).visibility === 'hidden') return;
+      const { move } = swirl(dialog, key, {
+        inward: false,
+        lasts: MENU_OUT_MS,
+        ink: '#cfe0ff',
+        rim: [[0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0], [0.5, 1], [0, 0.5], [1, 0.5]],
+        onTop: true,
+      });
+      move.finished.then(() => move.cancel(), () => {});
+    }).observe(dialog, { attributes: true, attributeFilter: ['open'] });
   }
   function showScanner(on, swirl = false) {
     const words = on ? t('스캐너 끄기') : t('스캐너 켜기');
@@ -2128,13 +2161,21 @@ ${STORY_MORE[target.id]}` : told };
     const all = `#hud header nav button, #hud header .brand, #hud .telemetry, #minimap, #scanner, #scannerButton, #reticle, #markers > *, ${panel}, #hud footer .speedBox, #hud footer .throttle, #hud footer button:not(#gazeButton), #hint, #guide, #toast, #heroSay, #skyTold, #testBar button`;
     return [...document.querySelectorAll(all)].filter((el) => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden' && Number(getComputedStyle(el).opacity) > 0.02);
   };
-  const gazeInk = (pieces, moon, lasts) => {
+  // onTop: over an open dialog, in the top layer as a popover (where there is none,
+  // under it as before).
+  const gazeInk = (pieces, moon, lasts, onTop = false) => {
     const ratio = Math.min(2, window.devicePixelRatio || 1);
     const canvas = document.createElement('canvas');
     canvas.id = 'gazeInk';
     canvas.width = Math.round(window.innerWidth * ratio);
     canvas.height = Math.round(window.innerHeight * ratio);
-    $('hud').before(canvas);
+    if (onTop && canvas.showPopover) {
+      canvas.popover = 'manual';
+      document.body.append(canvas);
+      canvas.showPopover();
+    } else {
+      $('hud').before(canvas);
+    }
     const pen = canvas.getContext('2d');
     pen.scale(ratio, ratio);
     const [mx, my] = [moon.left + moon.width / 2, moon.top + moon.height / 2];

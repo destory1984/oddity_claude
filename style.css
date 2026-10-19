@@ -1232,6 +1232,37 @@ nav button {
   pointer-events:none;
 }
 
+/* The scanner's switch, in its lower left corner, outside the ellipse (ui/scanner.js
+   places it; the user, 2026-10-19: "왼쪽 아래에 스캐너 on/off 아이콘 넣자"). It stays
+   when the scanner is off, to bring it back. */
+#scannerButton {
+  position:fixed;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  min-height:30px;
+  margin:0;
+  padding:0;
+  border:1px solid var(--glass-line);
+  border-radius:9px;
+  background:var(--glass-fill);
+  box-shadow:0 2px 10px #0006;
+  font-size:0;
+}
+
+#scannerButton::before {
+  content:"";
+  width:20px;
+  height:20px;
+  background:url("/assets/ui/icon-scanner-on.svg") center / contain no-repeat;
+}
+
+#scannerButton[aria-pressed="false"]::before {
+  background-image:url("/assets/ui/icon-scanner-off.svg");
+}
+
 #minimap {
   position:absolute;
   top:250px;
@@ -5606,6 +5637,7 @@ body.practicing #hud header,
 body.practicing #hud .telemetry,
 body.practicing #minimap,
 body.practicing #scanner,
+body.practicing #scannerButton,
 body.practicing #markers,
 body.practicing #targetPanel,
 body.practicing #hud footer .throttle,

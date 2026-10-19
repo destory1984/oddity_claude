@@ -13,8 +13,9 @@ const LINE = '#a8dcff';
 const FAINT = 'rgba(168, 220, 255, 0.3)';
 const KIND_COLOUR = { craft: '#7fe3ff', curio: '#f0a8ff', body: '#ffd27a' };
 
-export function createScanner(canvas) {
+export function createScanner(canvas, button = null) {
   const ctx = canvas.getContext('2d');
+  let on = true;
   let size = [0, 0];
   // On a wide screen, where the ellipse stands in the canvas: [middle, half height].
   let tall = null;
@@ -62,6 +63,14 @@ export function createScanner(canvas) {
     }
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
+    // Its switch in the lower left corner, where the ellipse leaves room.
+    // (Over the line of key hints a wide screen shows along the bottom, not under it.)
+    if (button) {
+      const hint = document.getElementById('hint')?.getBoundingClientRect();
+      const foot = hint && hint.width > 0 && hint.top < bottom ? hint.top - 4 : bottom - 2;
+      button.style.left = `${left + 2}px`;
+      button.style.top = `${foot - button.offsetHeight}px`;
+    }
     const ratio = window.devicePixelRatio || 1;
     if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
       canvas.width = Math.round(width * ratio);
@@ -127,6 +136,7 @@ export function createScanner(canvas) {
     const [w, h] = size;
     if (!w) return;
     ctx.clearRect(0, 0, w, h);
+    if (!on) return;
     const cx = w / 2;
     const cy = tall ? tall[0] : h * 0.62;
     const rx = w / 2 - 4;
@@ -221,5 +231,13 @@ export function createScanner(canvas) {
     }
   }
 
-  return { draw };
+  return {
+    draw,
+    on: () => on,
+    // Off: nothing is drawn, the switch stays to bring it back.
+    setOn(value) {
+      on = value;
+      canvas.style.visibility = on ? '' : 'hidden';
+    },
+  };
 }

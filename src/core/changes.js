@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-19', text: t('스캐너 왼쪽 아래 귀퉁이에 스캐너를 켜고 끄는 단추가 생겼습니다.') },
   { day: '2026-10-19', text: t('설정의 Options 쪽에 지금 흐르는 배경 음악의 제목이 뜹니다.') },
   { day: '2026-10-19', text: t('멀리 있는 탐사선 모형을 눌러도 이름표를 누른 것처럼 됩니다. 가 본 탐사선이면 건너가 도킹합니다.') },
   { day: '2026-10-19', text: t('스캐너에 가까운 행성이나 위성의 땅이 지평선처럼 차오릅니다. 왼쪽 위에 그 이름과 거리가 뜹니다.') },

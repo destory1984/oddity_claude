@@ -557,11 +557,19 @@ async function init() {
       // A craft near enough to dock with: a press on the craft itself docks, as its
       // button does (the user, 2026-10-12, with Chandra filling the view: "물체를 클릭해도
       // 도킹하게 해줘").
-      if (!docked && !onGround() && !warp.busy()) {
+      // Out of docking reach (a craft is drawn larger than it is, and looks near from
+      // 5,000 km), the press does what its name tag does: a jump if she has met it, else
+      // it is chosen and the tag's word says why (the user, 2026-10-19, of Hubble beside
+      // her: "이 상태에서는 도킹 안 되네. .클릭도 안 되고").
+      if (!onGround() && !warp.busy()) {
         const id = world.craftAt(x, y);
-        const target = id ? dockable(state.position, craft.filter((c) => c.id === id)) : null;
+        const target = id && !docked ? dockable(state.position, craft.filter((c) => c.id === id)) : null;
         if (target) {
           dock(target);
+          return;
+        }
+        if (id && docked?.id !== id) {
+          selectBody(id);
           return;
         }
       }

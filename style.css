@@ -4574,7 +4574,17 @@ dialog .sheetHead .textSize button:disabled {
   flex:1;
   display:flex;
   justify-content:flex-end;
-  gap:6px;
+  gap:8px;
+}
+
+/* The four keys one gap apart (the user, 2026-10-19: "아이콘 간격이 엉망이다": 6, 10 and
+   6 px). */
+#settings .sheetHead {
+  gap:8px;
+}
+
+#settings .sheetHead .textSize {
+  gap:8px;
 }
 
 dialog .sheetHead .soundKeys button {

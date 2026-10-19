@@ -6885,3 +6885,32 @@ dialog:focus {
 dialog:is(#pair, #lookBack) {
   padding-bottom:20px;
 }
+
+/* The photo page ends with a key to leave, under the reading (the user, 2026-10-19:
+   "스크롤 내용 가장 밑 부분에 \"닫기\" 버튼 추가"): the sheets' foot key, 44px, 15px. */
+#photoView #photoViewFoot {
+  max-width:640px;
+  margin:0 auto;
+  padding:8px 18px max(24px, env(safe-area-inset-bottom));
+  background:#000;
+}
+
+#photoView #photoViewMore:not([hidden]) {
+  padding-bottom:8px;
+}
+
+#photoView #photoViewBack {
+  display:block;
+  width:100%;
+  min-height:44px;
+  margin:0;
+  padding:10px 16px;
+  border:1px solid var(--glass-line);
+  border-radius:12px;
+  background:var(--glass-fill);
+  box-shadow:0 2px 10px #0006;
+  color:#eef3ff;
+  font-size:15px;
+  font-weight:600;
+  line-height:1.2;
+}

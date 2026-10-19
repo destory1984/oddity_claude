@@ -68,6 +68,15 @@ export function createPhotoView({ onOpen, onClose }) {
     if (event.key === 'ArrowLeft') go(-1);
   });
   $('photoViewClose').addEventListener('click', () => dialog.close());
+  // At the very end of the page, under the reading (or under the words when there is
+  // none), a key to leave, as the ✕ does (the user, 2026-10-19: "스크롤 내용 가장 밑 부분에
+  // \"닫기\" 버튼 추가"; named as every way back to flying is). Its press is its own: not a
+  // press on the page, nor the end of a swipe.
+  $('photoViewBack').addEventListener('click', (event) => {
+    event.stopPropagation();
+    swiped = false;
+    $('photoViewClose').click();
+  });
   $('photoViewClose').setAttribute('aria-label', t('닫기'));
   dialog.addEventListener('close', () => onClose?.());
 

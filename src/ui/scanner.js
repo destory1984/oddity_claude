@@ -16,6 +16,8 @@ const KIND_COLOUR = { craft: '#7fe3ff', curio: '#f0a8ff', body: '#ffd27a' };
 export function createScanner(canvas) {
   const ctx = canvas.getContext('2d');
   let size = [0, 0];
+  // On a wide screen, where the ellipse stands in the canvas: [middle, half height].
+  let tall = null;
 
   // In the speed box's own place; the speed box goes over the flying keys, its right edge
   // on theirs (the user, 2026-10-18, a picture with an arrow from the box to that corner).
@@ -34,10 +36,18 @@ export function createScanner(canvas) {
     const natural = { left: speed.left - moved[0], right: speed.right - moved[0], bottom: speed.bottom - moved[1] };
     const left = Math.max(4, natural.left - 10);
     const end = keys.length ? Math.min(...keys.map((r) => r.left)) - 6 : left + 260;
-    const width = Math.max(120, end - left);
+    // At most 440 px: on a wide screen the room up to the keys is the whole width and the
+    // ellipse lay over half the view (the user, 2026-10-19: "큰화면으로 보면 스캐너가 너무 크네").
+    const MAX = 440;
+    const width = Math.min(MAX, Math.max(120, end - left));
     const rows = keys.length ? Math.max(...keys.map((r) => r.bottom)) - Math.min(...keys.map((r) => r.top)) : 0;
-    const height = Math.round(Math.max(width * 0.42, Math.min(width * 0.7, rows || width * 0.5)));
-    const bottom = Math.max(natural.bottom, ...keys.map((r) => r.bottom));
+    // There the ellipse is as tall as the keys' three rows, its top and foot on theirs
+    // (the user: "높이는 왼쪽 아이콘 묶음과 같게"), with room above it for the heads.
+    const wide = end - left > MAX && rows > 0;
+    const above = Math.round(rows * 0.45);
+    const height = wide ? rows + above : Math.round(Math.max(width * 0.42, Math.min(width * 0.7, rows || width * 0.5)));
+    tall = wide ? [above + rows / 2, rows / 2 - 1] : null;
+    const bottom = wide ? Math.max(...keys.map((r) => r.bottom)) : Math.max(natural.bottom, ...keys.map((r) => r.bottom));
     canvas.style.left = `${left}px`;
     canvas.style.top = `${bottom - height}px`;
     const pad = ['reverseButton', 'flyButton', 'slideUp', 'slideRight', 'gazeButton']
@@ -118,9 +128,9 @@ export function createScanner(canvas) {
     if (!w) return;
     ctx.clearRect(0, 0, w, h);
     const cx = w / 2;
-    const cy = h * 0.62;
+    const cy = tall ? tall[0] : h * 0.62;
     const rx = w / 2 - 4;
-    const ry = h * 0.3;
+    const ry = tall ? tall[1] : h * 0.3;
     ctx.lineWidth = 1;
     ctx.fillStyle = 'rgba(10, 24, 48, 0.55)';
     ctx.strokeStyle = LINE;

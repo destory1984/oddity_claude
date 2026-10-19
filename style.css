@@ -2210,6 +2210,7 @@ footer button:active,
 #hud nav #pauseButton.paused::before { background-image:url("/assets/ui/icon-play.svg"); }
 #hud nav #journalButton::before { background-image:url("/assets/ui/icon-journal.svg"); }
 #hud nav #photoButton::before { background-image:url("/assets/ui/icon-camera.svg"); }
+#hud nav #shareButton::before { background-image:url("/assets/ui/icon-share.svg"); }
 #hud nav #settingsButton::before { background-image:url("/assets/ui/icon-settings.svg"); }
 
 /* Switched off: the icon says so itself (a cross, a stroke); the button only dims a little. */
@@ -5731,6 +5732,7 @@ body.practicing #markers,
 body.practicing #targetPanel,
 body.practicing #hud footer .throttle,
 body.practicing #rearButton,
+body.practicing #shareButton,
 body.practicing #gazeButton,
 body.practicing #hint,
 body.practicing #toast,

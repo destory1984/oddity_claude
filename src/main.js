@@ -24,6 +24,7 @@ import { addPhoto, removePhoto, photoPlace, photoCaption } from './core/album.js
 import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } from './core/postcard.js';
 import { isLocalHost } from './core/count.js';
 import { pickSpot, fromSpot, toSpot, NEAR_EARTH_ONLY } from './core/startSpots.js';
+import { encodeSpot, decodeSpot, encodeSky, decodeSky } from './core/sharePlace.js';
 import { teleportSpot, visited } from './core/teleport.js';
 import { behindBody, skyBehind, lostInGlare, nearestBodies, nearbyMoons } from './core/markers.js';
 import { FACTS } from './core/facts.js';
@@ -164,7 +165,15 @@ const START_NEAR = import.meta.env.DEV ? { id: 'earth', fromCentreKm: 20000 } : 
 
 // Two layouts: 'tour' is the hand-made one (planets spread round the Sun); 'today' puts
 // the planets where they really are on the day the game is opened.
-const layout = loadLayout();
+// A place a friend sent (core/sharePlace.js): ?at= where they stood and ?sky= the sky they
+// saw it under. This sitting opens there under that sky (their layout, the day they
+// opened the game, their game clock); the player's own layout setting is left as it is.
+const shared = (() => {
+  const query = new URLSearchParams(location.search);
+  const spot = decodeSpot(query.get('at'), BODIES.map((b) => b.id));
+  return spot ? { spot, sky: decodeSky(query.get('sky')) } : null;
+})();
+const layout = shared?.sky?.layout ?? loadLayout();
 // (A test may set the day: sessionStorage 'oddity.day', as 2027-08-02.)
 const openedAt = (() => {
   try {
@@ -177,13 +186,13 @@ const openedAt = (() => {
 })();
 // (The Magpie Bridge is up on Chilseok of that day: core/curios.js.)
 setCurioDay(openedAt);
-const bodyData = layout === 'today' ? todayData(openedAt) : BODY_DATA;
+const bodyData = layout === 'today' ? todayData(shared?.sky ? new Date(shared.sky.openedAt) : openedAt) : BODY_DATA;
 const bodiesAt = (timeS) => placeBodies(bodyData, timeS);
 // Everything that is flown among and drawn: the Solar System, and far off TRAPPIST-1
 // with its seven planets (core/exo.js), which have no slot in the journal (it lists
 // the ones she has been to at the foot of its bodies, uncounted).
 const allAt = (timeS) => withTime([...bodiesAt(timeS), ...exoBodiesAt(timeS)], timeS);
-let bodies = allAt(0);
+let bodies = allAt(shared?.sky?.simTime ?? 0);
 // The trip there: whether she has been, and which planets she has seen from close by.
 let exo = loadExo();
 
@@ -242,7 +251,7 @@ const startSpot = pickSpot(Math.random(), new URLSearchParams(location.search).g
 
 // After a change of language the game carries on where she was (ui/storage.js).
 const resume = takeResume();
-let state = resume ? createState(resume.position, resume.orientation) : START_NEAR ? startNear(START_NEAR) : startAtSpot(startSpot);
+let state = resume ? createState(resume.position, resume.orientation) : shared ? startAtSpot(shared.spot) : START_NEAR ? startNear(START_NEAR) : startAtSpot(startSpot);
 let paused = false;
 // Flight practice (core/practice.js): while it runs, `state` is her flight in the empty
 // place and this holds the lesson and the flight she left ({ run, back, first }).
@@ -264,7 +273,7 @@ let faceTurn = null;
 let platedFor = null;
 // The craft or the place she was with a frame ago (an id), or null.
 let wasWith = null;
-let selectedId = START_NEAR ? START_NEAR.id : resume?.selectedId && BODIES.some((b) => b.id === resume.selectedId) ? resume.selectedId : resume ? 'earth' : startSpot.target ?? 'earth';
+let selectedId = shared && !resume ? shared.spot.body : START_NEAR ? START_NEAR.id : resume?.selectedId && BODIES.some((b) => b.id === resume.selectedId) ? resume.selectedId : resume ? 'earth' : startSpot.target ?? 'earth';
 let dragTurn = [0, 0];
 // Target lock: the chosen target is held in the middle of the view; the slide buttons
 // then take her round it, and forward and back bring her nearer and farther. Dragging
@@ -314,7 +323,7 @@ let guide = createGuide(progress, !loadPractice().moon || Boolean(START_NEAR));
 // A newcomer: nobody has been welcomed on this device yet (they are offered the flight
 // practice once; the guide's old mark in the storage is the mark of having been).
 let newcomer = !(loadGuideDone() || Boolean(START_NEAR) || progress.landed.includes('moon'));
-let simTime = resume?.simTime ?? 0;
+let simTime = resume?.simTime ?? shared?.sky?.simTime ?? 0;
 // The note on entering the asteroid belt shows once per visit to the game.
 // Lights and plumes already told about (core/glows.js), with 'belt', 'meteor' and
 // 'start' (how to look round). Kept on the device for the day: each is told once a day,
@@ -635,6 +644,7 @@ async function init() {
     world,
     canvas,
     toast,
+    shareInfo: () => placeShare(),
     setPaused,
     isPaused: () => paused,
     clearInput: () => input.clear(),
@@ -3732,6 +3742,49 @@ ${STORY_MORE[target.id]}` : told };
 
   // As an app, the phone's back key puts away what is open before it leaves the game.
   createBackKey({ isView: () => photo.active(), leaveView: () => $('exitPhoto').click(), watch: [$('photoTools')] });
+
+  // "자리 공유", where the flight practice's key stood (the user, 2026-10-19: "게임 상에서 내
+  // 위치를 다른 플레이어에게 공유할 수 있는 기능 만들자", "\"자리 공유\" 단추는 지금 비행연습
+  // 위치에"): a link that opens the game where she is, looking the same way, under the
+  // same sky. A phone's own share sheet sends it (KakaoTalk, messages, SNS); where there is
+  // none, it is copied to be pasted. The photo shared from photo mode carries it too.
+  function placeShare() {
+    if (inExo(state.position)) return null;
+    const body = nearestSurface(state.position, bodies.filter((b) => !b.exo)).body;
+    const spot = encodeSpot(toSpot(state, body, bodyById('sun', bodies)));
+    const sky = encodeSky({ layout, openedAt: (shared?.sky ? new Date(shared.sky.openedAt) : openedAt).getTime(), simTime });
+    const url = `${location.origin}${import.meta.env.BASE_URL}?at=${spot}&sky=${sky}`;
+    return { url, text: t`${named(body.id)?.name ?? body.name} 곁에서 보내는 내 자리야. 열면 같은 하늘, 같은 자리에서 시작해.` };
+  }
+  $('shareButton').addEventListener('click', async () => {
+    const info = placeShare();
+    if (!info) return toast.show(t('다른 별 둘레에서는 자리를 나눌 수 없습니다.'));
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Space Oddity', text: info.text, url: info.url });
+        return undefined;
+      } catch (e) {
+        if (e.name === 'AbortError') return undefined;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(`${info.text} ${info.url}`);
+      toast.show(t('자리 링크를 복사했습니다.\n카톡이나 SNS에 붙여 넣으세요.'));
+    } catch {
+      toast.show(info.url);
+    }
+    return undefined;
+  });
+  // Opened from such a link: said once, and the address put back to the game's own, so
+  // that a reload starts as any other day.
+  if (shared && !resume) {
+    toast.show(t('친구가 보낸 자리입니다.\n그때의 하늘 그대로, 같은 곳에서 같은 쪽을 봅니다.'));
+    try {
+      history.replaceState(null, '', location.pathname);
+    } catch {
+      // The address stays; nothing else changes.
+    }
+  }
 
   // Read-only diagnostics for verification. No travel shortcuts.
   window.oddity = {

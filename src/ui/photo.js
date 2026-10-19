@@ -7,7 +7,9 @@ const DEFAULT_FOV_DEG = 60;
 // How far the view swings round a target for a drag, against how far it turns in plain photo mode.
 const ORBIT_RATE = 1.6;
 
-export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearInput, onCaptured }) {
+// shareInfo: () => { text, url } of where she is (main.js placeShare), sent along with a
+// photo shared from a phone, or null.
+export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearInput, onCaptured, shareInfo = () => null }) {
   let active = false;
   let priorPause = false;
   let orientation = [0, 0, 0, 1];
@@ -81,7 +83,10 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
       const touch = document.body.classList.contains('touch');
       if (touch && navigator.canShare?.({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: 'Space Oddity' });
+          // With a link to the place, so the friend it goes to can stand there too (the user,
+          // 2026-10-19: "사진도 찰칵하고, SNS나 카톡에 공유하는 기능도 만들자").
+          const info = shareInfo();
+          await navigator.share({ files: [file], title: 'Space Oddity', ...(info ? { text: `${info.text} ${info.url}` } : {}) });
         } catch (e) {
           if (e.name !== 'AbortError') throw e;
         }

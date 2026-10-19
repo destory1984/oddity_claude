@@ -4608,5 +4608,12 @@
  "하나 더 끝! 다음은 뭐지?": "One more done! What's next?",
  "오늘의 부탁을 해내면 수첩의 다음 미션으로 부탁을 더 할 수 있습니다.": "Once today's request is done, Next in the notebook gives another.",
  "효과음은 이 단추나 M 키로, 배경 음악은 아래 단추나 B 키로 따로 켜고 끕니다.": "Sound effects go on and off with this button or the M key, the music with the button below or the B key.",
- "맨 위 두 단추로 효과음과 배경 음악을 따로 켜고 끕니다(M 키, B 키도 됩니다).": "The two buttons at the top turn sound effects and music on and off (the M and B keys too)."
+ "맨 위 두 단추로 효과음과 배경 음악을 따로 켜고 끕니다(M 키, B 키도 됩니다).": "The two buttons at the top turn sound effects and music on and off (the M and B keys too).",
+ "내 자리 공유": "Share my place",
+ "자리 공유": "Share place",
+ "{} 곁에서 보내는 내 자리야. 열면 같은 하늘, 같은 자리에서 시작해.": "My place by {0}. Open it and you start under the same sky, in the same spot.",
+ "다른 별 둘레에서는 자리를 나눌 수 없습니다.": "A place round another star can't be shared.",
+ "자리 링크를 복사했습니다.\n카톡이나 SNS에 붙여 넣으세요.": "The link to your place is copied.\nPaste it into a chat or a post.",
+ "친구가 보낸 자리입니다.\n그때의 하늘 그대로, 같은 곳에서 같은 쪽을 봅니다.": "A place a friend sent.\nThe same sky, the same spot, looking the same way.",
+ "자리 공유 단추가 생겼습니다. 보낸 링크를 열면 같은 하늘, 같은 자리에서 시작합니다.": "A Share place button: a friend who opens the link starts in the same spot under the same sky."
 }

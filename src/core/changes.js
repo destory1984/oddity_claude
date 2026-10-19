@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-19', text: t('자리 공유 단추가 생겼습니다. 보낸 링크를 열면 같은 하늘, 같은 자리에서 시작합니다.') },
   { day: '2026-10-19', text: t('오늘의 부탁을 해내면 수첩의 다음 미션으로 부탁을 더 할 수 있습니다.') },
   { day: '2026-10-19', text: t('달 쪽지를 접으면 소라가 다음 갈 길(오늘의 부탁)을 일러 줍니다.') },
   { day: '2026-10-19', text: t('맴돌기가 들지 않는 자리에서 누르면 그 까닭을 잠시 알려 줍니다. 한국이 보이는 자리에서도 맴돌 수 있습니다.') },

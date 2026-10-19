@@ -16,13 +16,13 @@ test('a bar lasts eight seconds and the four chords come round in order', () => 
   assert.deepEqual(MELODY, [440, 523.25, 587.33, 659.26, 783.99, 880, 1046.5, 1174.66]);
 });
 
-test('fifty tunes take turns, sixteen bars each, and come round again', () => {
-  assert.equal(TUNES.length, 50);
+test('forty-nine tunes take turns, sixteen bars each, and come round again', () => {
+  assert.equal(TUNES.length, 49);
   assert.equal(BARS_PER_TUNE, 16);
   assert.deepEqual(TUNES.map((t) => t.name), ['오르골', '새벽', '먼 바다', '자장가', '별무리', '깊은 밤', '유영', '빗방울', '가야금', '오로라', '회전목마',
-    '눈송이', '등불', '달빛 왈츠', '풀밭', '밀물', '시계탑', '모닥불', '은하수', '반딧불',
+    '눈송이', '등불', '달빛 왈츠', '풀밭', '시계탑', '모닥불', '은하수', '반딧불',
     '샛별', '꼬리별', '고래자리', '은빛 비', '목성의 띠', '토성 고리', '얼음 달', '모래바람', '등대', '종이학', '바람개비', '별똥비', '오솔길', '물수제비', '할머니 마루', '수첩 한 장', '해바라기', '첫눈', '봄비', '저녁놀', '연못', '나비', '고요의 바다', '붉은 행성', '우주정거장', '별자리', '은하 건너', '꿈길', '소라 껍데기', '귀갓길']);
-  assert.equal(new Set(TUNES.map((t) => t.id)).size, 50);
+  assert.equal(new Set(TUNES.map((t) => t.id)).size, 49);
   assert.equal(tuneFor(0).id, 'box');
   assert.equal(tuneFor(15).id, 'box');
   assert.equal(tuneFor(16).id, 'dawn');
@@ -30,7 +30,7 @@ test('fifty tunes take turns, sixteen bars each, and come round again', () => {
   assert.equal(tuneFor(6 * 16).id, 'drift');
   assert.equal(tuneFor(10 * 16).id, 'carousel');
   assert.equal(tuneFor(11 * 16).id, 'snow');
-  assert.equal(tuneFor(20 * 16 - 1).id, 'firefly');
+  assert.equal(tuneFor(19 * 16 - 1).id, 'firefly');
   assert.equal(tuneFor(BARS - 1).id, 'wayHome');
   assert.equal(tuneFor(BARS).id, 'box');
   // Skipping ahead lands on the first bar of the following tune.
@@ -62,7 +62,7 @@ test('every tune has four chords, eight melody notes of its own and a bell', () 
 
 test('a tune with a figure walks along it; the notes of a bar are not all the same', () => {
   const withFigure = TUNES.filter((t) => t.motif);
-  assert.deepEqual(withFigure.map((t) => t.id), ['drift', 'gayageum', 'aurora', 'carousel', 'lantern', 'waltz', 'meadow', 'tide', 'clock', 'campfire', 'firefly',
+  assert.deepEqual(withFigure.map((t) => t.id), ['drift', 'gayageum', 'aurora', 'carousel', 'lantern', 'waltz', 'meadow', 'clock', 'campfire', 'firefly',
     'comet', 'jupiterBands', 'saturnRings', 'dustStorm', 'paperCrane', 'pinwheel', 'path', 'skippingStone', 'notebookPage', 'sunset', 'butterfly', 'station', 'constellations', 'dreamPath', 'wayHome']);
   for (const tune of withFigure) {
     assert.ok(tune.motif.length >= 8 && tune.motif.every((n) => Number.isInteger(n) && n >= 0 && n < 8), tune.id);
@@ -137,7 +137,7 @@ test('each sitting the tunes go round in a chance order, every tune once a round
   for (let k = 0; k < 200; k++) firsts.add(tuneOrder()[0]);
   assert.ok(firsts.size >= 8, `${firsts.size}`);
 
-  const order = [3, 0, 10, 1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, ...TUNES.slice(20).map((_, i) => 20 + i)];
+  const order = [3, 0, 10, 1, 2, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, ...TUNES.slice(19).map((_, i) => 19 + i)];
   assert.equal(tuneFor(barInOrder(0, order)).id, TUNES[3].id);
   assert.equal(tuneFor(barInOrder(15, order)).id, TUNES[3].id);
   assert.equal(tuneFor(barInOrder(16, order)).id, TUNES[0].id);

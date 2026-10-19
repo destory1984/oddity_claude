@@ -1,7 +1,7 @@
 import { t } from './i18n.js';
 // Background music, decided here and played by ui/sound.js. No sound files: a slow pad
 // of three notes per bar under a few bell notes, different every bar but always the
-// same for a given bar number. Fifty tunes take turns, each with its own four chords,
+// same for a given bar number. Forty-nine tunes take turns, each with its own four chords,
 // five-note scale, beat and bell.
 
 export const BAR_S = 8;
@@ -164,15 +164,6 @@ export const TUNES = [
     motif: [0, 2, 4, 3, 2, 4, 5, 7, 5, 4, 2, 1],
   },
   {
-    // A minor: all the way up the scale and all the way down, as the tide comes in.
-    id: 'tide', name: t('밀물'),
-    chords: [chord('A2', 'A3', 'C4', 'E4'), chord('E2', 'G3', 'B3', 'E4'), chord('F2', 'A3', 'C4', 'F4'), chord('G2', 'G3', 'B3', 'D4')],
-    melody: scale('E4 G4 A4 C5 D5 E5 G5 A5'),
-    slots: [0, 1, 2, 3, 4, 5, 6, 7], busy: 0.5,
-    bell: { length: 2.2, overtone: 2, overtoneVolume: 0.15 },
-    motif: [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1],
-  },
-  {
     // C major, a short bright bell on every beat, always coming back to the same note.
     id: 'clock', name: t('시계탑'),
     chords: [chord('C3', 'G3', 'C4', 'E4'), chord('G2', 'G3', 'B3', 'D4'), chord('A2', 'A3', 'C4', 'E4'), chord('F2', 'A3', 'C4', 'F4')],
@@ -207,7 +198,8 @@ export const TUNES = [
     bell: { length: 0.8, overtone: 3, overtoneVolume: 0.2 },
     motif: [5, 4, 2, 4, 5, 7, 6, 4, 2, 1, 2, 4],
   },
-  // The thirty below made it fifty (the user, 2026-10-19: "음악을 30곡 더 만들어"): other
+  // (밀물, "the tide", stood among the twenty above till the user said "노래 밀물은 빼줘".)
+  // The thirty below made it forty-nine (the user, 2026-10-19: "음악을 30곡 더 만들어"): other
   // keys and modes (lydian, mixolydian, phrygian among them), other progressions, beats
   // and bells, made by a script that checked each against the rules in tests/music.test.js.
   {

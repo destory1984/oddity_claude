@@ -6251,3 +6251,9 @@ dialog#photoView::backdrop {
   margin:0 0 12px;
   font-size:13px;
 }
+
+/* The names of constellations, galaxies and nebulae on the sky, put away from the settings
+   (the user, 2026-10-19: "설정 -> 옵션 -> 별자리 이름 on/off 가능하게 해줘"). */
+html.noSkyNames .skyLabel {
+  display:none !important;
+}

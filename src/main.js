@@ -2516,6 +2516,30 @@ ${STORY_MORE[target.id]}` : told };
     saveFeel(feel);
     showFeel();
   });
+  // The names on the sky (constellations, galaxies, nebulae): on or off, remembered on the
+  // device (the user, 2026-10-19: "설정 -> 옵션 -> 별자리 이름 on/off 가능하게 해줘").
+  const SKY_NAMES_KEY = 'oddity.skyNames';
+  let skyNames = true;
+  try {
+    skyNames = localStorage.getItem(SKY_NAMES_KEY) !== '0';
+  } catch {
+    // Shown, then.
+  }
+  const showSkyNames = () => {
+    document.documentElement.classList.toggle('noSkyNames', !skyNames);
+    $('skyNamesNow').textContent = skyNames ? t('지금: 켜짐.') : t('지금: 꺼짐.');
+    $('skyNamesButton').textContent = skyNames ? t('끄기') : t('켜기');
+  };
+  showSkyNames();
+  $('skyNamesButton').addEventListener('click', () => {
+    skyNames = !skyNames;
+    try {
+      localStorage.setItem(SKY_NAMES_KEY, skyNames ? '1' : '0');
+    } catch {
+      // Not remembered in this window; still applies now.
+    }
+    showSkyNames();
+  });
   // Another window in front: the keys held are let go (their keyups never arrive), and
   // the flight goes on.
   window.addEventListener('blur', () => input.clear());

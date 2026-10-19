@@ -8,6 +8,19 @@
 - 아이폰: 앱은 시간이 좀 더 걸린다. 그때까지는 위 주소를 사파리로 열어 홈 화면에 추가하면 앱처럼 쓸 수 있다.
 - 홍보 동영상(유튜브 쇼츠, 30초): https://www.youtube.com/shorts/Bx5qOGBql-k
 
+## 안드로이드 테스터를 찾습니다
+
+이제 구글 플레이스토어에 정식으로 올리려면, 테스터 12명이 14일 동안 앱을 폰에 꼭 유지하고 있어야 한다고 한다. 안드로이드 폰을 쓰고 계신 분들이 있다면 조금만 도와주시면 정말 감사! (아쉽게도 아이폰은 아직 지원하지 않는다 ㅠㅠ 안드로이드용이 어느 정도 완성되면, 그 때 아이폰용도 개발하겠다)
+
+참여 방법은 아래 순서대로 누르시기만 하면 된다.
+
+1. 테스터 그룹 가입하기 (아래 링크 누르고 '그룹 가입' 클릭)
+   - 👉 구글 그룹스 가입 링크 https://groups.google.com/g/space-oddity-testers/about
+2. 테스트 참여하기 (링크 누르고 'Become a tester' 클릭. 구글 페이지라 영어로 나와도 당황하지 말 것!)
+   - 👉 플레이스토어 테스트 페이지 https://play.google.com/apps/testing/io.github.destory1984.spaceoddity
+3. 스토어에서 앱 설치하기
+   - 👉 구글 플레이스토어 다운로드 https://play.google.com/store/apps/details?id=io.github.destory1984.spaceoddity
+
 <a href="https://www.youtube.com/shorts/Bx5qOGBql-k"><img src="docs/promo-cover.jpg" width="220" alt="홍보 동영상의 마지막 장면. 소라 그림 아래에 Space Oddity, 할머니의 수첩, 본격 우주멍 힐링 비행 게임, 구글 플레이에서 찾아보세요. 누르면 유튜브에서 열린다"></a>
 
 2편 [Time Oddity — 시간 한량](https://github.com/destory1984/time-oddity_claude)을 만들고 있다. 같은 수첩을 들고 지난 날로 가서 그날 그 거리를 걷는 게임이다. 이 게임이 "못 가는 곳"이라면 2편은 "못 가는 때"다.

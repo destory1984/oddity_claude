@@ -1946,6 +1946,8 @@ ${STORY_MORE[target.id]}` : told };
       noteWait = NOTE_GAP_S;
       // The last line was spoken at the gate.
       if (!note.gate && note.line) say.show(note.line);
+      // (A second word after it, in its own bubble: core/story.js `then`.)
+      if (note.then) say.show(note.then);
       // One of grandmother's notes (not a reply): she reads it over once more.
       if (note.id && !note.gate) readUntil = performance.now() + READ_MS;
     },

@@ -86,6 +86,9 @@ export const NOTES = [
       + t('그래도 사람이 달에 내려섰다는 건 알았지. 그날 밤 달을 한참 올려다보고 이 수첩 첫 장을 적었단다.'),
     button: t('쪽지를 접는다'),
     line: t('할머니가 본 달에 나 서 있어!'),
+    // Said after the line: where to go next, which no note says (the user, 2026-10-19,
+    // asked what comes after the Moon; the next note waits for forty slots).
+    then: t('다음은 수첩의 오늘의 부탁부터 해 볼까?'),
   }, [t('어, 뭐가 떨어졌네?'), t('할머니가 열다섯 살이었대.'), t('온 동네가 한 마당에? 좋겠다.')]),
   paged({
     id: 'y1979',

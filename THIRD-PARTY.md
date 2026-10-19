@@ -220,6 +220,7 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `europaClipper-craft.jpg` | [Europa Clipper.jpg](https://commons.wikimedia.org/wiki/File:Europa_Clipper.jpg) | NASA/JPL-Caltech | Public domain |
 | `hera-craft.jpg` | [Hera in orbit.jpg](https://commons.wikimedia.org/wiki/File:Hera_in_orbit.jpg) | ESA (CC BY-SA 3.0 IGO) | CC BY-SA 3.0 IGO |
 | `psyche-craft.jpg` | [Psyche Spacecraft Unwrapped (KSC-20220503-PH-ILW01 0062).jpg](https://commons.wikimedia.org/wiki/File:Psyche_Spacecraft_Unwrapped_(KSC-20220503-PH-ILW01_0062).jpg) | NASA/Isaac Watson | Public domain |
+| `gaia-craft.jpg` | [Maquette de Gaia salon du Bourget 2013 DSC 0191.JPG](https://commons.wikimedia.org/wiki/File:Maquette_de_Gaia_salon_du_Bourget_2013_DSC_0191.JPG) | Pline | CC BY-SA 3.0 |
 | `hubble-craft.jpg` | [View of Hubble after Being Released from the Shuttle Atlantis (28223588012).jpg](https://commons.wikimedia.org/wiki/File:View_of_Hubble_after_Being_Released_from_the_Shuttle_Atlantis_(28223588012).jpg) | NASA | Public domain |
 | `hubble-shot1.jpg` | [Pillars of creation 2014 HST WFC3-UVIS full-res denoised.jpg](https://commons.wikimedia.org/wiki/File:Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg) | NASA, ESA, Hubble Heritage Team (STScI/AURA) | Public domain |
 | `iss-craft.jpg` | [International Space Station after undocking of STS-132.jpg](https://commons.wikimedia.org/wiki/File:International_Space_Station_after_undocking_of_STS-132.jpg) | NASA | Public domain |

@@ -127,7 +127,7 @@ export const CRAFT_PHOTOS = {
     craft: { file: 'hera-craft.jpg', caption: t('쌍둥이 소행성 디디모스 곁을 도는 헤라를 그린 그림.'), credit: 'ESA (CC BY-SA 3.0 IGO)' },
   },
   gaia: {
-    craft: { file: 'gaia-craft.jpg', caption: t('가이아의 모형. 아래의 둥근 판이 햇빛 가리개이고, 그 위 금빛 몸에 망원경 둘이 들어 있습니다.'), credit: 'Pline (CC BY-SA 3.0)' },
+    craft: { file: 'gaia-craft.jpg', caption: t('2013년 파리 에어쇼에 전시된 가이아 모형. 둥글게 펼친 판이 햇빛 가리개이고, 가운데 원통에 망원경 둘이 들어 있습니다.'), credit: 'Pline (CC BY-SA 3.0)' },
   },
   psyche: {
     craft: { file: 'psyche-craft.jpg', caption: t('2022년 5월, 날개를 접은 채 떠날 준비를 하던 프시케.'), credit: 'NASA/Isaac Watson' },

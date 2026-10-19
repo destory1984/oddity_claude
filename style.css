@@ -4572,6 +4572,7 @@ dialog .sheetHead .textSize button:disabled {
 #settings .sheetHead .soundKeys {
   flex:1;
   display:flex;
+  justify-content:flex-end;
   gap:6px;
 }
 

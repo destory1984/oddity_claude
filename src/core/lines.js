@@ -41,6 +41,12 @@ export const LANDED = {
   halley: t('혜성 위야! 작은 감자 같아.'),
   haleBopp: t('얼음 먼지가 폴폴 날려.'),
   churyumov: t('필레처럼 통통 튈 뻔했어.'),
+  vesta: t('거대한 분지 가장자리야. 끝이 안 보여.'),
+  bennu: t('바닥이 공 풀장 같아. 푹 빠지겠어.'),
+  ryugu: t('하야부사2가 콕 찍고 간 자리일까?'),
+  didymos: t('작은 달이 머리 위로 휙 지나가.'),
+  dimorphos: t('여기가 다트가 부딪친 곳이구나.'),
+  apophis: t('2029년엔 이 돌이 지구 곁을 지나간대.'),
 };
 
 // Coasting a long while with nothing to do. She is never in a hurry.

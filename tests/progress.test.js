@@ -17,8 +17,11 @@ test('the journal lists the Sun, then each world by distance with its moons unde
   const order = journalOrder(BODIES);
   assert.equal(order.length, BODIES.length);
   const ids = order.map((o) => o.body.id);
+  const where0 = (id) => ids.indexOf(id);
   assert.equal(new Set(ids).size, BODIES.length);
-  assert.deepEqual(ids.slice(0, 8), ['sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'phobos', 'deimos']);
+  // Apophis (0.92 AU on average) comes between Venus and Earth.
+  assert.deepEqual(ids.slice(0, 9), ['sun', 'mercury', 'venus', 'apophis', 'earth', 'moon', 'bennu', 'ryugu', 'mars']);
+  assert.deepEqual(ids.slice(where0('didymos'), where0('didymos') + 2), ['didymos', 'dimorphos']);
   const where = (id) => ids.indexOf(id);
   assert.deepEqual(ids.slice(where('jupiter'), where('jupiter') + 5), ['jupiter', 'ganymede', 'callisto', 'io', 'europa']);
   assert.deepEqual(ids.slice(where('saturn') + 1, where('saturn') + 3), ['titan', 'rhea']);
@@ -113,10 +116,10 @@ test('a log saved when there were 75 slots still reads, as 75 of 89', () => {
   };
   const read = sanitizeProgress(JSON.parse(JSON.stringify(old)), BODIES, MISSIONS);
   const summary = summarize(read, BODIES, MISSIONS);
-  assert.deepEqual(score(summary), { done: 75, total: 91 });
+  assert.deepEqual(score(summary), { done: 75, total: 103 });
   assert.equal(isComplete(summary), false);
-  // With the 127 story places, 21 missions and 35 bodies the same log is 75 of 218.
-  assert.deepEqual(score(summarize(sanitizeProgress(old, BODIES, MISSIONS, STORIES), BODIES, MISSIONS, STORIES)), { done: 75, total: 218 });
+  // With the 127 story places, 21 missions and 41 bodies the same log is 75 of 230.
+  assert.deepEqual(score(summarize(sanitizeProgress(old, BODIES, MISSIONS, STORIES), BODIES, MISSIONS, STORIES)), { done: 75, total: 230 });
 });
 
 test('recordStories keeps the first visit only', () => {

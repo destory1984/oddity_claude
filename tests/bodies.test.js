@@ -10,7 +10,7 @@ const sub = (a, b) => a.map((n, i) => n - b[i]);
 const dot = (a, b) => a.reduce((s, n, i) => s + n * b[i], 0);
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
-test('the table holds the Sun, eight planets, twenty-one moons, two dwarf planets and three comets at real radii', () => {
+test('the table holds the Sun, eight planets, twenty-two moons, two dwarf planets, three comets and five asteroids at real radii', () => {
   assert.deepEqual(
     BODIES.map((b) => b.id),
     [
@@ -19,6 +19,7 @@ test('the table holds the Sun, eight planets, twenty-one moons, two dwarf planet
       'saturn', 'mimas', 'enceladus', 'tethys', 'dione', 'rhea', 'titan', 'iapetus',
       'uranus', 'miranda', 'ariel', 'umbriel', 'titania', 'oberon', 'neptune', 'triton',
       'ceres', 'pluto', 'charon', 'halley', 'haleBopp', 'churyumov',
+      'vesta', 'bennu', 'ryugu', 'didymos', 'dimorphos', 'apophis',
     ],
   );
   assert.equal(bodyById('ganymede').radiusKm, 2634.1);

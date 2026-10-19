@@ -294,6 +294,12 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `halley.jpg` | [Comet Halley close up.jpg](https://commons.wikimedia.org/wiki/File:Comet_Halley_close_up.jpg) | ESA/MPS | CC BY-SA 3.0 IGO |
 | `haleBopp.jpg` | [Comet-Hale-Bopp-29-03-1997 hires adj.jpg](https://commons.wikimedia.org/wiki/File:Comet-Hale-Bopp-29-03-1997_hires_adj.jpg) | Philipp Salzgeber | CC BY-SA 2.0 AT |
 | `churyumov.jpg` | [Comet 67P on 19 September 2014 NavCam mosaic.jpg](https://commons.wikimedia.org/wiki/File:Comet_67P_on_19_September_2014_NavCam_mosaic.jpg) | ESA/Rosetta/NAVCAM, CC BY-SA IGO 3.0 | CC BY-SA 3.0 IGO |
+| `vesta.jpg` | [Vesta in natural color.jpg](https://commons.wikimedia.org/wiki/File:Vesta_in_natural_color.jpg) | NASA/JPL-Caltech/UCLA/MPS/DLR/IDA, Björn Jónsson | Public domain |
+| `bennu.jpg` | [Bennu mosaic OSIRIS-REx.jpg](https://commons.wikimedia.org/wiki/File:Bennu_mosaic_OSIRIS-REx.jpg) | NASA/Goddard/University of Arizona | Public domain |
+| `ryugu.jpg` | [Ryugu colored.jpg](https://commons.wikimedia.org/wiki/File:Ryugu_colored.jpg) | JAXA, University of Tokyo and collaborators; colour by Meli thev | CC BY 4.0 |
+| `didymos.jpg` | [Dimorphos and Didymos as seen by DART.webp](https://commons.wikimedia.org/wiki/File:Dimorphos_and_Didymos_as_seen_by_DART.webp) | NASA/Johns Hopkins APL; R. T. Daly et al., Nature 616 (2023), cropped | CC BY 4.0 |
+| `dimorphos.jpg` | [All dimorphos dart 0401930040 12262 01 iof imagedisplay-final.png](https://commons.wikimedia.org/wiki/File:All_dimorphos_dart_0401930040_12262_01_iof_imagedisplay-final.png) | NASA/Johns Hopkins APL | Public domain |
+| `apophis.jpg` | [PIA24168-Asteroid-99942Apophis-RadarImages-20210326.jpg](https://commons.wikimedia.org/wiki/File:PIA24168-Asteroid-99942Apophis-RadarImages-20210326.jpg) | NASA/JPL-Caltech and NSF/AUI/GBO | Public domain |
 | `goldenRecord.jpg` | [Voyager Golden Record.jpg](https://commons.wikimedia.org/wiki/File:The_Sounds_of_Earth_Record_Cover_-_GPN-2000-001978.jpg) | NASA/JPL | Public domain |
 
 ## "그날로" 장면에 쓴 옛 그림

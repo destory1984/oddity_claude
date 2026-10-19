@@ -188,6 +188,52 @@ export const BODY_DATA = [
       perihelionAtS: 40 * DAY_S, perihelionDirection: [0.9, 0, 0.44], tiltRad: 0.123, retrograde: false,
     },
   },
+  // Six small bodies (the user, 2026-10-19: "다 넣어"). Vesta, the belt's second largest
+  // (Dawn went round it in 2011-12): 2.36 AU, once in 3.63 years; nearly round, so a
+  // circle as Ceres's. Mean radius 262.7 km.
+  {
+    id: 'vesta', name: '베스타', nameEn: 'Vesta', kind: 'asteroid', radiusKm: 262.7,
+    parent: 'sun', orbitKm: 2.3615 * AU_KM, periodS: 1325.75 * DAY_S, direction: [-0.62, -0.004, -0.78],
+  },
+  // Bennu, where OSIRIS-REx took its soil: 0.90 to 1.36 AU, once in 436.6 days, 490 m across.
+  {
+    id: 'bennu', name: '베누', nameEn: 'Bennu', kind: 'asteroid', radiusKm: 0.245, parent: 'sun',
+    ellipse: {
+      semiMajorKm: 1.1264 * AU_KM, eccentricity: 0.2037, periodS: 436.65 * DAY_S,
+      perihelionAtS: 120 * DAY_S, perihelionDirection: [0.3, 0, -0.95], tiltRad: 0.105, retrograde: false,
+    },
+  },
+  // Ryugu, Hayabusa2's: 0.96 to 1.42 AU, once in 474 days, 900 m across.
+  {
+    id: 'ryugu', name: '류구', nameEn: 'Ryugu', kind: 'asteroid', radiusKm: 0.448, parent: 'sun',
+    ellipse: {
+      semiMajorKm: 1.1896 * AU_KM, eccentricity: 0.1902, periodS: 473.9 * DAY_S,
+      perihelionAtS: -80 * DAY_S, perihelionDirection: [-0.85, 0, 0.5], tiltRad: 0.1026, retrograde: false,
+    },
+  },
+  // Didymos and its moon Dimorphos, which DART struck in 2022: 1.01 to 2.27 AU, once in
+  // 770 days. Dimorphos goes round 1.15 km from Didymos's centre once in 11 h 23 min
+  // (since the impact) and keeps one face to it.
+  {
+    id: 'didymos', name: '디디모스', nameEn: 'Didymos', kind: 'asteroid', radiusKm: 0.39, parent: 'sun',
+    ellipse: {
+      semiMajorKm: 1.6427 * AU_KM, eccentricity: 0.3839, periodS: 770.1 * DAY_S,
+      perihelionAtS: 200 * DAY_S, perihelionDirection: [0.7, 0, 0.7], tiltRad: 0.0595, retrograde: false,
+    },
+  },
+  {
+    id: 'dimorphos', name: '디모르포스', nameEn: 'Dimorphos', kind: 'moon', radiusKm: 0.075,
+    parent: 'didymos', orbitKm: 1.152, periodS: 40920, direction: [0.6, 0.05, -0.8],
+  },
+  // Apophis, which passes 32,000 km over Earth on 13 April 2029: 0.75 to 1.10 AU, once in
+  // 323.6 days, 340 m across.
+  {
+    id: 'apophis', name: '아포피스', nameEn: 'Apophis', kind: 'asteroid', radiusKm: 0.17, parent: 'sun',
+    ellipse: {
+      semiMajorKm: 0.9224 * AU_KM, eccentricity: 0.1914, periodS: 323.6 * DAY_S,
+      perihelionAtS: 60 * DAY_S, perihelionDirection: [-0.3, 0, -0.95], tiltRad: 0.0583, retrograde: false,
+    },
+  },
 ];
 
 const sub = (a, b) => a.map((n, i) => n - b[i]);

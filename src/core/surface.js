@@ -25,6 +25,13 @@ export const SPIN_DAY_S = {
   ceres: 9.074 * 3600,
   pluto: -6.387 * 86400,
   charon: -6.387 * 86400,
+  vesta: 5.342 * 3600,
+  bennu: 4.296 * 3600,
+  ryugu: 7.63 * 3600,
+  didymos: 2.26 * 3600,
+  // Dimorphos keeps one face to Didymos: its day is its orbit.
+  dimorphos: 40920,
+  apophis: 30.56 * 3600,
 };
 
 // Earth alone starts part-way through its turn, so the opening view shows it half lit

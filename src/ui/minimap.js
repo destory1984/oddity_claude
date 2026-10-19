@@ -70,7 +70,8 @@ export function createMinimap(canvas, { onPick = () => {}, onTap = null, big = f
     const radius = size / 2 - EDGE_PX;
     const sun = bodies.find((b) => b.kind === (away ? 'exostar' : 'star'));
     const planets = bodies.filter((b) => (away ? b.kind === 'exoplanet' : b.kind === 'planet' || b.kind === 'dwarf'));
-    const comets = away ? [] : bodies.filter((b) => b.kind === 'comet');
+    // Comets and the small asteroids are dots without a ring.
+    const comets = away ? [] : bodies.filter((b) => b.kind === 'comet' || b.kind === 'asteroid');
     const dist = (b) => Math.hypot(b.position[0] - sun.position[0], b.position[2] - sun.position[2]);
     const outerKm = Math.max(...planets.map(dist));
     const at = (p) => mapPoint(p, sun.position, outerKm, radius);

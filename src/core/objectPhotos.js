@@ -39,5 +39,11 @@ export const OBJECT_PHOTOS = {
   halley: { file: 'halley.jpg', caption: t('1986년 3월, 유럽의 조토 탐사선이 찍은 핼리 혜성의 핵. 혜성의 핵을 처음으로 가까이서 찍은 사진입니다.'), credit: 'ESA/MPS (CC BY-SA 3.0 IGO)' },
   haleBopp: { file: 'haleBopp.jpg', caption: t('1997년 3월 29일, 땅에서 찍은 헤일-밥 혜성. 푸른 이온 꼬리와 흰 먼지 꼬리가 갈라져 보입니다.'), credit: 'Philipp Salzgeber (CC BY-SA 2.0 AT)' },
   churyumov: { file: 'churyumov.jpg', caption: t('2014년 9월, 로제타가 찍은 67P 혜성. 작은 덩이와 큰 덩이가 붙은 오리 모양입니다.'), credit: 'ESA/Rosetta/NAVCAM (CC BY-SA 3.0 IGO)' },
+  vesta: { file: 'vesta.jpg', caption: t('돈 탐사선이 2011년 찍은 사진으로 만든 베스타. 아래쪽 남극에 레아실비아 분지가 있습니다.'), credit: 'NASA/JPL-Caltech/UCLA/MPS/DLR/IDA, Björn Jónsson (public domain)' },
+  bennu: { file: 'bennu.jpg', caption: t('2018년 12월 오시리스-렉스가 24km 거리에서 찍은 사진 12장을 이은 베누.'), credit: 'NASA/Goddard/University of Arizona (public domain)' },
+  ryugu: { file: 'ryugu.jpg', caption: t('하야부사2가 찍은 류구. 적도를 따라 불룩한 능선이 둘러 있습니다.'), credit: 'JAXA and partners, colour by Meli thev (CC BY 4.0)' },
+  didymos: { file: 'didymos.jpg', caption: t('부딪치기 몇 분 전 다트가 찍은 디디모스와 오른쪽의 작은 디모르포스.'), credit: 'NASA/Johns Hopkins APL; Daly et al., Nature 2023 (CC BY 4.0)' },
+  dimorphos: { file: 'dimorphos.jpg', caption: t('부딪치기 2초 전 다트가 마지막으로 온전히 찍은 디모르포스. 돌무더기가 그대로 보입니다.'), credit: 'NASA/Johns Hopkins APL (public domain)' },
+  apophis: { file: 'apophis.jpg', caption: t('2021년 3월 미국의 전파 망원경이 1,700만km 밖에서 찍은 아포피스의 레이더 영상(동그라미 안).'), credit: 'NASA/JPL-Caltech and NSF/AUI/GBO (public domain)' },
   goldenRecord: { file: 'goldenRecord.jpg', caption: t('보이저 1호와 2호에 실려 간 금빛 음반의 덮개. 음반을 트는 법이 그림으로 새겨져 있습니다.'), credit: 'NASA/JPL' },
 };

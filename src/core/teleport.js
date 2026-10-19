@@ -120,6 +120,17 @@ export function bodyVista(body, bodies, ringNormal = null, toward = null) {
       spots.push(body.position.map((n, i) => n + out[i] * radii * shrink * body.radiusKm));
     }
   }
+  // A moon of a small body (Dimorphos, 0.5 km from Didymos's centre) can have every one
+  // of those spots inside its partner: then it is seen from the side away from it.
+  const partner = bodies.find((b) => b.id === body.parent && b.kind !== 'star');
+  if (partner && gap(body.position, partner.position) < radii * body.radiusKm + partner.radiusKm) {
+    // The sunniest of them that is clear: from half toward the Sun to straight away.
+    const from = unit(sub(body.position, partner.position));
+    for (const w of [0.6, 0.45, 0.3, 0.15, 0]) {
+      const away = mix(unit(from.map((n, i) => n * (1 - w) + toLight[i] * w)), [0, 1, 0], liftDeg);
+      spots.push(body.position.map((n, i) => n + away[i] * radii * body.radiusKm));
+    }
+  }
   // Well clear of every other body if possible; a moon that hugs its planet (Phobos,
   // 600 km over Mars) settles for staying above the ground.
   const clear = (margin) => (spot) => bodies.every((b) => b.id === body.id || gap(spot, b.position) > margin(b));

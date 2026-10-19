@@ -296,6 +296,14 @@ const LOOKS = {
   halley: { shader: 'rocky', colorA: [0.05, 0.05, 0.05], colorB: [0.16, 0.15, 0.14], cap: 0, haze: 0, contrast: 0.6, craters: 0.5, dayS: 2.2 * 86400 },
   haleBopp: { shader: 'rocky', colorA: [0.06, 0.06, 0.06], colorB: [0.2, 0.19, 0.18], cap: 0, haze: 0, contrast: 0.6, craters: 0.4, dayS: 40860 },
   churyumov: { shader: 'rocky', colorA: [0.05, 0.05, 0.05], colorB: [0.15, 0.14, 0.13], cap: 0, haze: 0, contrast: 0.7, craters: 0.6, dayS: 44640 },
+  // Vesta is pale grey-brown; Bennu and Ryugu are carbon-dark rubble; Didymos, Dimorphos
+  // and Apophis are stony grey.
+  vesta: { shader: 'rocky', colorA: [0.36, 0.34, 0.31], colorB: [0.62, 0.58, 0.52], cap: 0, haze: 0, contrast: 0.6, craters: 0.8, dayS: SPIN_DAY_S.vesta },
+  bennu: { shader: 'rocky', colorA: [0.05, 0.05, 0.05], colorB: [0.17, 0.165, 0.16], cap: 0, haze: 0, contrast: 0.8, craters: 0.3, dayS: SPIN_DAY_S.bennu },
+  ryugu: { shader: 'rocky', colorA: [0.05, 0.045, 0.04], colorB: [0.16, 0.14, 0.12], cap: 0, haze: 0, contrast: 0.8, craters: 0.4, dayS: SPIN_DAY_S.ryugu },
+  didymos: { shader: 'rocky', colorA: [0.2, 0.19, 0.18], colorB: [0.42, 0.4, 0.37], cap: 0, haze: 0, contrast: 0.7, craters: 0.4, dayS: SPIN_DAY_S.didymos },
+  dimorphos: { shader: 'rocky', colorA: [0.22, 0.21, 0.2], colorB: [0.45, 0.43, 0.4], cap: 0, haze: 0, contrast: 0.8, craters: 0.2, dayS: SPIN_DAY_S.dimorphos },
+  apophis: { shader: 'rocky', colorA: [0.25, 0.22, 0.19], colorB: [0.5, 0.45, 0.4], cap: 0, haze: 0, contrast: 0.6, craters: 0.5, dayS: SPIN_DAY_S.apophis },
 };
 
 // Rings are a flat square plane; the shader keeps only the annulus between the radii.

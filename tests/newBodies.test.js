@@ -10,13 +10,21 @@ const dist = (a, b) => Math.hypot(...sub(a, b));
 const near = (a, b, eps) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 const at = (t, id) => bodyById(id, bodiesAt(t));
 
-test('four new bodies with real radii and kinds, then two more comets: 35 in all', () => {
-  assert.equal(BODIES.length, 35);
-  assert.deepEqual(BODIES.slice(-2).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
+test('four new bodies with real radii and kinds, two more comets, then six small bodies: 41 in all', () => {
+  assert.equal(BODIES.length, 41);
+  assert.deepEqual(BODIES.slice(-6).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
+    ['vesta', 'asteroid', 262.7, 'sun'],
+    ['bennu', 'asteroid', 0.245, 'sun'],
+    ['ryugu', 'asteroid', 0.448, 'sun'],
+    ['didymos', 'asteroid', 0.39, 'sun'],
+    ['dimorphos', 'moon', 0.075, 'didymos'],
+    ['apophis', 'asteroid', 0.17, 'sun'],
+  ]);
+  assert.deepEqual(BODIES.slice(-8, -6).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
     ['haleBopp', 'comet', 30, 'sun'],
     ['churyumov', 'comet', 2, 'sun'],
   ]);
-  assert.deepEqual(BODIES.slice(-6, -2).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
+  assert.deepEqual(BODIES.slice(-12, -8).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
     ['ceres', 'dwarf', 469.7, 'sun'],
     ['pluto', 'dwarf', 1188.3, 'sun'],
     ['charon', 'moon', 606, 'pluto'],

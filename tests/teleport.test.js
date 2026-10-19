@@ -93,7 +93,7 @@ test('a body is seen from five radii, mostly sunlit, a little from above, clear 
     const most = body.id === 'saturn' ? 9 : 5;
     assert.ok(km <= most * body.radiusKm * 1.0001 && km >= most * 0.4 * body.radiusKm * 0.9999, `${body.id} ${km / body.radiusKm}`);
     for (const other of bodies) {
-      if (other.id !== body.id) assert.ok(gap(spot, other.position) > other.radiusKm + 100, `${body.id} vista inside ${other.id}`);
+      if (other.id !== body.id) assert.ok(gap(spot, other.position) > other.radiusKm + Math.min(100, other.radiusKm / 2), `${body.id} vista inside ${other.id}`);
     }
     // (Halley's orbit is steeply tilted, so its sunward side can point below the plane.)
     if (body.kind !== 'comet') assert.ok(out[1] > 0, `${body.id} from above`);
@@ -103,6 +103,12 @@ test('a body is seen from five radii, mostly sunlit, a little from above, clear 
     const cos = dot(out, toSun) / (km * Math.hypot(...toSun));
     // (Jupiter is met from where the user stood, 2026-10-14: 3.1 radii out, nearly on the
     // line to the Sun, the whole lit face before her.)
+    // (Dimorphos hugs Didymos, 0.5 km away: when every sunward spot is inside its partner
+    // it is seen from the side away from it, still not from its night side.)
+    if (body.id === 'dimorphos') {
+      assert.ok(cos > -0.2, `dimorphos ${cos}`);
+      continue;
+    }
     if (body.id === 'jupiter') {
       near(km, 3.1 * body.radiusKm, 1);
       assert.ok(cos > Math.cos((12 * Math.PI) / 180), `jupiter ${cos}`);

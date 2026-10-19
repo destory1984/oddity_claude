@@ -1553,6 +1553,8 @@ ${STORY_MORE[target.id]}` : told };
     const prior = paused;
     setPaused(true);
     mapPick = null;
+    // Named for the family of worlds it shows (the user, 2026-10-19: "태양계 가족으로 하자").
+    $('bigMapTitle').textContent = inExo(state.position) ? t('트라피스트-1 가족') : t('태양계 가족');
     $('bigMapInfo').textContent = t('갈 곳을 지도나 이름에서 고르세요.');
     $('bigMapGo').disabled = true;
     $('bigMapJump').disabled = true;

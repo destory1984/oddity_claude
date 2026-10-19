@@ -6310,3 +6310,29 @@ html.noSkyNames .skyLabel {
 #journal #journalDaily #dailyKeys #dailyJump::before { -webkit-mask-image:url("/assets/ui/icon-jump.svg"); mask-image:url("/assets/ui/icon-jump.svg"); }
 #journal #journalDaily #dailyKeys #dailyPrev::before { -webkit-mask-image:url("/assets/ui/icon-prev.svg"); mask-image:url("/assets/ui/icon-prev.svg"); }
 #journal #journalDaily #dailyKeys #dailyNext::before { -webkit-mask-image:url("/assets/ui/icon-next.svg"); mask-image:url("/assets/ui/icon-next.svg"); }
+
+/* The map sheet's names fit without scrolling (the user, 2026-10-19, with the list's scroll
+   bar circled: "스크롤이 생기지않도록, 아이콘 폰트를 작게 조절해. 너무 작아질 것 같으면, 화면
+   상단 제목을 옆으로 옮겨"). 28 names at 13px took eight rows; at 12px with tighter keys
+   they take six or seven. The title leaves its own row for the free corner of the sky strip
+   at the upper left, beside the dial, which gives the names its 50px. */
+#bigMap #bigMapTitle {
+  position:absolute;
+  top:14px;
+  left:16px;
+  z-index:1;
+  margin:0;
+  font-size:16px;
+  text-align:left;
+  pointer-events:none;
+}
+
+#bigMapList {
+  gap:5px 4px;
+}
+
+#bigMapList button {
+  min-height:26px;
+  padding:0 8px;
+  font-size:12px;
+}

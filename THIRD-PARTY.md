@@ -5,6 +5,7 @@
 | `public/assets/earth-day.jpg` | NASA Visible Earth, Blue Marble (2004년 7월). https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74092/world.200407.3x5400x2700.jpg 를 가로 4096px로 줄였다. | 미국 정부 저작물, 저작권 없음 |
 | `public/assets/earth-night.jpg` | NASA Visible Earth, Black Marble 2016. https://eoimages.gsfc.nasa.gov/images/imagerecords/144000/144898/BlackMarble_2016_01deg.jpg | 미국 정부 저작물, 저작권 없음 |
 | `public/assets/earth-clouds.jpg` | NASA Visible Earth, 구름 합성 지도. https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg | 미국 정부 저작물, 저작권 없음 |
+| 실제 구름 (게임이 열릴 때마다 받아 옴, `src/render/realClouds.js`) | NASA GIBS, VIIRS Suomi NPP / NOAA-20 Corrected Reflectance (True Color), 어제의 지구 전체. https://gibs.earthdata.nasa.gov | NASA 영상, 저작권 없음 |
 | `public/assets/planets/mars.jpg` | Solar System Scope 지도(8K 원본을 4096×2048로 줄임). https://www.solarsystemscope.com/textures/ | CC BY 4.0 (출처 표시) |
 | `public/assets/planets/venus.jpg` | Solar System Scope 금성 대기 지도(4K 원본을 2048×1024로 줄임). https://www.solarsystemscope.com/textures/ | CC BY 4.0 (출처 표시) |
 | `public/assets/planets/jupiter.jpg` | Solar System Scope 지도(8K 원본을 4096×2048로 줄임). https://www.solarsystemscope.com/textures/ | CC BY 4.0 (출처 표시) |

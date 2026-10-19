@@ -12,6 +12,7 @@ import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/cra
 import { CURIOS, curiosAt, hiddenCurios, carryingCurio, curiosNear, curioHead, setCurioDay, CURIO_ABOUT, BRIDGE_KM, groundSpot } from './core/curios.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
+import { realCloudMap } from './render/realClouds.js';
 import { createInput } from './ui/input.js';
 import { createHud } from './ui/hud.js';
 import { createMinimap } from './ui/minimap.js';
@@ -562,6 +563,14 @@ async function init() {
     $('loadError').textContent = t`${e.message} 최신 Chrome이나 Edge에서 하드웨어 가속을 켜고 다시 열어 주세요.`;
     return;
   }
+  // Yesterday's real clouds (render/realClouds.js), made after the start so the game waits
+  // for nothing; the game's own map stays where they cannot be had.
+  setTimeout(() => {
+    const assets = `${import.meta.env.BASE_URL}assets/`;
+    realCloudMap({ groundUrl: `${assets}earth-day.jpg`, ownUrl: `${assets}earth-clouds.jpg` })
+      .then((map) => { if (map) world.setEarthClouds(map.toDataURL('image/jpeg', 0.9)); })
+      .catch(() => {});
+  }, 1500);
 
   input = createInput({
     canvas,

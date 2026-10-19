@@ -86,9 +86,19 @@ function createEarth(scene, body, sunDir) {
   airMaterial.backFaceCulling = false;
   air.material = airMaterial;
 
+  // Yesterday's real clouds, once laid on (setClouds): they stay over the ground where they
+  // were, instead of drifting ahead of it as the game's own map does.
+  let real = false;
   return {
     body,
     meshes: [earth, clouds, air],
+    setClouds(url) {
+      const map = new Texture(url, scene, false, false, Texture.TRILINEAR_SAMPLINGMODE, () => {
+        cloudMaterial.setTexture('cloudMap', map);
+        surface.setTexture('cloudMap', map);
+        real = true;
+      });
+    },
     spin(elapsed) {
       const turn = (elapsed * SPIN_SPEEDUP * 2 * Math.PI) / SIDEREAL_DAY_S;
       // Negative rotation turns counterclockwise seen from the north: the ground moves east.
@@ -96,7 +106,7 @@ function createEarth(scene, body, sunDir) {
       // (For the typhoon's turning, the fishing lamps' flicker and the volcano's ash.)
       surface.setFloat('time', elapsed);
       cloudMaterial.setFloat('time', elapsed);
-      clouds.rotation.y = cloudSpin(earth.rotation.y);
+      clouds.rotation.y = real ? earth.rotation.y : cloudSpin(earth.rotation.y);
       // How far the cloud map stands east of the ground map, in turns (a larger
       // rotation.y carries a map eastward past a fixed place).
       surface.setFloat('cloudShift', (clouds.rotation.y - earth.rotation.y) / (2 * Math.PI));

@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-19', text: t('지구에 어제의 실제 구름이 덮입니다. NASA 기상 위성 사진에서 구름만 골라 입힙니다.') },
   { day: '2026-10-19', text: t('게임 시계가 실제 시각을 따라 흘러, 같은 순간에는 누구나 같은 자리에서 행성을 봅니다.') },
   { day: '2026-10-19', text: t('자리 공유에 지금 화면 사진을 함께 보낼 수 있습니다. 카톡 카드에도 그 사진이 실립니다.') },
   { day: '2026-10-19', text: t('자리 공유 단추가 생겼습니다. 보낸 링크를 열면 같은 하늘, 같은 자리에서 시작합니다.') },

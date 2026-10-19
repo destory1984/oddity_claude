@@ -253,6 +253,10 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
     // The picture's own clock: seconds drawn since the game opened (the clouds of
     // Jupiter slide by it, core/vista.js).
     elapsed: () => elapsed,
+    // Earth's clouds from a picture (render/realClouds.js), at its address.
+    setEarthClouds(url) {
+      rendered.find((item) => item.body.id === 'earth')?.setClouds?.(url);
+    },
     ringNormal(id) {
       return rendered.find((item) => item.body.id === id)?.rings?.normal ?? null;
     },

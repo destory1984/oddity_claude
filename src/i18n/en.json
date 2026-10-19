@@ -4590,5 +4590,6 @@
  "사진 모드에서 소라가 화면 왼쪽 아래 귀퉁이에 섭니다. 시야를 돌리거나 확대해도 그 자리에 있습니다.": "In photo mode Sora stands in the lower left corner of the screen and stays there however you turn or zoom.",
  "설정의 쪽을 바꾸면 고른 쪽이 제 단추에서 혜성 꼬리를 그리며 펼쳐져 나옵니다.": "Turning to another page of the settings, the new page whirls out of its tab with comet tails.",
  "탐험 수첩 맨 아래에 \"비행으로 돌아가기\" 단추가 생겼습니다.": "The journal has a \"Back to flight\" button at its foot.",
- "큰 지도 둘레의 별똥별이 더 자주(2.5 → 5초마다) 지나가고, 빛무리와 반짝이 꼬리가 생겼습니다.": "Shooting stars round the big map now pass more often (every 2.5 to 5 seconds), with a glow and a sparkling tail."
+ "큰 지도 둘레의 별똥별이 더 자주(2.5 → 5초마다) 지나가고, 빛무리와 반짝이 꼬리가 생겼습니다.": "Shooting stars round the big map now pass more often (every 2.5 to 5 seconds), with a glow and a sparkling tail.",
+ "큰 지도 바깥을 누르면 지도가 닫히고 비행으로 돌아갑니다.": "Pressing outside the big map closes it and takes you back to flying."
 }

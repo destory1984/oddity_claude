@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-19', text: t('큰 지도 바깥을 누르면 지도가 닫히고 비행으로 돌아갑니다.') },
   { day: '2026-10-19', text: t('큰 지도 둘레의 별똥별이 더 자주(2.5 → 5초마다) 지나가고, 빛무리와 반짝이 꼬리가 생겼습니다.') },
   { day: '2026-10-19', text: t('탐험 수첩 맨 아래에 "비행으로 돌아가기" 단추가 생겼습니다.') },
   { day: '2026-10-19', text: t('설정의 쪽을 바꾸면 고른 쪽이 제 단추에서 혜성 꼬리를 그리며 펼쳐져 나옵니다.') },

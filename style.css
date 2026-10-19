@@ -6399,3 +6399,62 @@ dialog#photoView {
   font-size:15px;
   line-height:1.75;
 }
+
+/* One way back: a square ✕ in the upper left corner of every sheet and card
+   (ui/backKeys.js; the user, 2026-10-19: "이전 메뉴로...는 화면 왼쪽위 네모난 X 아이콘
+   버튼으로 통일"). The sheets give it its own row at the top; the journal's head and the
+   big map's title move right of it; the old ✕ at the right of each give way to it. */
+dialog > .backKey {
+  position:absolute;
+  top:10px;
+  left:10px;
+  z-index:3;
+  display:grid;
+  place-items:center;
+  box-sizing:border-box;
+  width:36px;
+  min-width:0;
+  height:36px;
+  min-height:0;
+  margin:0;
+  padding:0;
+  border:1px solid #9fb4ff66;
+  border-radius:8px;
+  background:#0b1630d9;
+  color:#fff;
+}
+
+#settings,
+#shareSheet,
+#pair,
+#lookBack,
+#storyCard,
+#noteCard,
+#gateScene,
+#practiceOffer,
+#practiceWhy,
+#practiceDone {
+  padding-top:54px;
+}
+
+#journal .journalHead {
+  padding-left:58px;
+}
+
+#journal #closeJournal,
+#photoView #photoViewClose {
+  display:none;
+}
+
+#bigMap #bigMapTitle {
+  left:56px;
+  top:16px;
+}
+
+#photoView > .backKey {
+  position:fixed;
+  top:max(12px, env(safe-area-inset-top));
+  left:12px;
+  width:40px;
+  height:40px;
+}

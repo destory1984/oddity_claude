@@ -48,6 +48,7 @@ import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimed
 import { createPracticeView } from './ui/practice.js';
 import { createJournal } from './ui/journal.js';
 import { createPhotoView } from './ui/photoView.js';
+import { addBackKeys } from './ui/backKeys.js';
 import { photoSlides } from './core/photoSlides.js';
 import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
@@ -2058,6 +2059,7 @@ ${STORY_MORE[target.id]}` : told };
 
   // The photo of what the plate names: the game waits behind it, as behind a card.
   let photoPriorPause = false;
+  addBackKeys();
   const photoView = createPhotoView({
     onOpen() {
       photoPriorPause = paused;

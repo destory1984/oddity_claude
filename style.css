@@ -6590,3 +6590,51 @@ dialog .journalActions {
   opacity:.45;
   cursor:not-allowed;
 }
+
+/* Each row of keys at the top says things one way (the user, 2026-10-19: "다 해", of "한 줄의
+   단추는 같은 모양으로"): every key there is a picture with a word under it. The second
+   row's camera stood bare beside "바라보기 / 맴돌기 / 확대"; in the first row only the
+   journal had words (its count). Now the camera says "사진", the first row "연습", "공유",
+   the count, "설정". No word on the flight screen is under 10px (the labels were 9px, as
+   were the speed box's name and unit, the thrust line, "비행 방향" and the errand's keys). */
+#hud nav :is(#practiceButton, #shareButton, #journalButton, #photoButton, #settingsButton),
+#hud #targetRow :is(#faceTarget, #lockTarget, #inspectTarget) {
+  flex-direction:column;
+  gap:2px;
+  padding:0;
+  line-height:1;
+  white-space:nowrap;
+}
+
+#hud nav :is(#practiceButton, #shareButton, #journalButton, #photoButton, #settingsButton)::before {
+  display:block;
+  width:19px;
+  height:19px;
+}
+
+#hud nav :is(#practiceButton, #shareButton, #photoButton, #settingsButton)::after,
+#hud #targetRow :is(#faceTarget, #lockTarget, #inspectTarget)::after {
+  content:attr(data-label);
+  font-size:10px;
+  font-weight:600;
+  line-height:1;
+  letter-spacing:-.03em;
+  white-space:nowrap;
+  text-shadow:none;
+}
+
+#hud nav #journalButton {
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:-.03em;
+}
+
+#reticle span,
+.marker.inView:before,
+#hud footer .speedBox > span,
+#hud footer .speedBox small,
+footer .throttle > div:first-child,
+footer .throttle output,
+#journal #journalDaily #dailyKeys button::after {
+  font-size:10px;
+}

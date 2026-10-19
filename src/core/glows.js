@@ -486,13 +486,8 @@ export function glowsNear(bodies, position, elapsedS = null) {
   // globe each is, the notice says: the turn of the Earth is not known here.)
   if (near('earth', TELL_RADII.ash) && sun && side('earth', sun.position) > 0.2) found.push('ash:earth');
   if (near('earth', TELL_RADII.boats) && sun && side('earth', sun.position) < -0.2) found.push('boats:earth');
-  // Earth's weather (v0.2.36; the vortex street behind Jeju was taken out in v0.2.76): ship tracks and
-  // honeycomb cloud from low over the day side; the thunderheads lit orange from over
-  // the edge of day; the glory from between the Sun and Earth, looking straight down.
-  if (sun && side('earth', sun.position) > 0.2) {
-    for (const sight of ['shiptracks', 'honeycomb']) if (near('earth', TELL_RADII[sight])) found.push(`${sight}:earth`);
-  }
-  if (near('earth', TELL_RADII.anvils) && sun && Math.abs(side('earth', sun.position)) < 0.3) found.push('anvils:earth');
+  // Earth's weather: the glory from between the Sun and Earth, looking straight down. (The
+  // drawn ship tracks, honeycomb cloud and thunderheads went with the real clouds, v0.3.158.)
   if (near('earth', TELL_RADII.glory) && sun && side('earth', sun.position) > 0.8) found.push('glory:earth');
   // The dark jets of Mars's south polar cap, from over the south.
   const mars = bodies.find((b) => b.id === 'mars');

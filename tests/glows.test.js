@@ -103,8 +103,9 @@ test('where several sights are in reach they are all listed, the nearest thing f
     const b = bodyById(id);
     return [b.position[0], b.position[1] + b.radiusKm * (1 + radii), b.position[2]];
   };
-  // (Over the pole she stands over the edge of day: the thunderheads' last light is told.)
-  assert.deepEqual(glowsNear(BODIES, above('earth', 1)), ['aurora:earth', 'clouds:earth', 'flare:sun', 'anvils:earth']);
+  // (The thunderheads' last light was told over the pole too, till the drawn weather went
+  // with the real clouds, v0.3.158.)
+  assert.deepEqual(glowsNear(BODIES, above('earth', 1)), ['aurora:earth', 'clouds:earth', 'flare:sun']);
   assert.deepEqual(glowsNear(BODIES, above('earth', 2.5)), ['aurora:earth', 'flare:sun']);
   assert.deepEqual(glowsNear(BODIES, above('jupiter', 1)), ['aurora:jupiter', 'footprint:io', 'flow:jupiter', 'cyclones:jupiter']);
   assert.deepEqual(glowsNear(BODIES, above('saturn', 1)), ['aurora:saturn', 'spokes:saturn', 'hexagon:saturn', 'rain:saturn']);
@@ -170,22 +171,21 @@ test("a comet's jets leave the day side, each its own way, none toward the night
   assert.ok(JETS.heightKm > 0 && JETS.widthKm > 0);
 });
 
-test('the weather of Earth: three sights from low over the day side, the glory from straight down-Sun, the anvils from the edge of day', () => {
+// (Ship tracks, honeycomb cloud and thunderheads were drawn on the clouds and told here till
+// v0.3.158: the real clouds came, and the user had them taken out, "모두 빼".)
+test('the weather of Earth: the glory from straight down-Sun, from low over the day side only', () => {
   const earth = BODIES.find((b) => b.id === 'earth');
   const sun = BODIES.find((b) => b.kind === 'star');
   const toSun = sun.position.map((n, i) => n - earth.position[i]);
   const far = Math.hypot(...toSun);
   const from = (share, radii) => earth.position.map((n, i) => n + (toSun[i] / far) * share * earth.radiusKm * (1 + radii));
   const day = glowsNear(BODIES, from(1, 0.8));
-  for (const id of ['shiptracks:earth', 'honeycomb:earth', 'glory:earth']) assert.ok(day.includes(id), id);
-  assert.ok(!day.includes('anvils:earth'));
-  // Farther off than two radii the glory is not told, nor the three in the cloud.
-  const off = glowsNear(BODIES, from(1, 2.2));
-  for (const id of ['shiptracks:earth', 'honeycomb:earth', 'glory:earth']) assert.ok(!off.includes(id), id);
-  // From the night side none of them.
-  const night = glowsNear(BODIES, from(-1, 0.8));
-  for (const id of ['shiptracks:earth', 'honeycomb:earth', 'glory:earth', 'anvils:earth']) assert.ok(!night.includes(id), id);
-  for (const id of ['shiptracks:earth', 'honeycomb:earth', 'glory:earth', 'anvils:earth', 'elves', 'bluejet']) {
+  assert.ok(day.includes('glory:earth'));
+  for (const id of ['shiptracks:earth', 'honeycomb:earth', 'anvils:earth']) assert.ok(!day.includes(id), id);
+  // Farther off than two radii it is not told, nor from the night side.
+  assert.ok(!glowsNear(BODIES, from(1, 2.2)).includes('glory:earth'));
+  assert.ok(!glowsNear(BODIES, from(-1, 0.8)).includes('glory:earth'));
+  for (const id of ['glory:earth', 'elves', 'bluejet']) {
     assert.ok(eventMessage({ type: 'glow', id }).length > 20, id);
   }
 });

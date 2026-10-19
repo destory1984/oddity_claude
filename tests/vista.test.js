@@ -24,7 +24,7 @@ test('the Moon\'s view: low over the ground, Earth a little above the level and 
   assert.ok(Math.abs(Math.hypot(...sub(spot.position, moon.position)) - moon.radiusKm - EARTHRISE.heightKm) < 1e-6);
   const toEarth = unit(sub(earth.position, spot.position));
   const lift = Math.asin(dot(toEarth, spot.up)) * 180 / Math.PI;
-  assert.ok(lift > 5 && lift < 15, String(lift));
+  assert.ok(lift > 3 && lift < 15, String(lift));
   // She looks toward Earth and a little under it, head up.
   const ahead = forward(spot.facing);
   assert.ok(dot(ahead, toEarth) > 0.95);

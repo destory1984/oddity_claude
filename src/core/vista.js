@@ -38,8 +38,10 @@ const mix = (...parts) => parts.reduce((sum, [k, v]) => sum.map((n, i) => n + k 
 const squareTo = (v, n) => unit(sub(v, n.map((x) => x * dot(v, n))));
 
 // The Moon: this high, with Earth this far above the level; she looks a little under
-// Earth, so it stands over her head and the Moon's edge runs under her feet.
-export const EARTHRISE = { heightKm: 90, earthUpDeg: 10, lookDown: 0.2 };
+// Earth, so it stands over her head and the Moon's edge runs under her feet. Where the
+// user stood and said "달의 명당 자리는 여기로" (2026-10-19): 102 km up, Earth 5 degrees
+// above the level (it was 90 km and 10 degrees).
+export const EARTHRISE = { heightKm: 102, earthUpDeg: 5, lookDown: 0.2 };
 // Jupiter's Great Red Spot on the map (public/assets/planets/jupiter.jpg): its
 // latitude and its east longitude when the clouds have not slid. Its belt slides with
 // the rest (render/shaders/textured.frag: belt 8 of fourteen, `flow` turns a second

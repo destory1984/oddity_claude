@@ -42,7 +42,7 @@ export const LANDED = {
   haleBopp: t('얼음 먼지가 폴폴 날려.'),
   churyumov: t('필레처럼 통통 튈 뻔했어.'),
   vesta: t('거대한 분지 가장자리야. 끝이 안 보여.'),
-  bennu: t('바닥이 공 풀장 같아. 푹 빠지겠어.'),
+  bennu: t('자갈이 발밑에서 푹푹 꺼져. 빠지겠어.'),
   ryugu: t('하야부사2가 콕 찍고 간 자리일까?'),
   didymos: t('작은 달이 머리 위로 휙 지나가.'),
   dimorphos: t('여기가 다트가 부딪친 곳이구나.'),

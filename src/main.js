@@ -2465,11 +2465,11 @@ ${STORY_MORE[target.id]}` : told };
       gazeFlight(false).then((whole) => { if (whole && !gazing) gazeClear(); });
     }
   };
-  // Sora leaves as star dust or in a soap bubble (ui/vanish.js), and comes back the same
-  // way; while it plays she is not drawn, the picture of her stands in. The two take turns
-  // for now, for the user to choose ("2,6 만들어줘").
+  // Sora leaves as star dust (ui/vanish.js), and comes back the same way; while it plays
+  // she is not drawn, the picture of her stands in. (A soap bubble took turns with it till
+  // the user chose: "별가루로 가자".)
   const vanish = createVanish();
-  let vanishKind = 'dust';
+  const vanishKind = 'dust';
   let herPicture = null;
   let heroHeld = false;
   const stillMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2482,7 +2482,6 @@ ${STORY_MORE[target.id]}` : told };
         vanish.play(vanishKind, herPicture, false, () => {
           heroHeld = false;
           gazeFade = 1;
-          vanishKind = vanishKind === 'dust' ? 'bubble' : 'dust';
         });
       }
       return undefined;

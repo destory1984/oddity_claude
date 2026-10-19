@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-19', text: t('우주멍에서 소라가 별가루로 흩어져 사라지고, 별가루가 모여 돌아옵니다.') },
   { day: '2026-10-19', text: t('행성 배치 설정을 없앴습니다. 모두가 같은 여행 배치에서 같은 자리의 행성을 봅니다.') },
   { day: '2026-10-19', text: t('설정에서 하늘의 별자리 이름을 켜고 끌 수 있습니다.') },
   { day: '2026-10-19', text: t('배경 음악이 서른 곡 늘어 쉰 곡이 되었습니다.') },

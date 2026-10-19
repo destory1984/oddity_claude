@@ -1549,10 +1549,16 @@ ${STORY_MORE[target.id]}` : told };
   // tails from its middle and from points `rim` (parts of its box) and rings round the
   // key. onTop: the tails are drawn over an open dialog. spin -1: the other way round
   // (coming out, clockwise). Returns { move, stop }.
-  function swirl(el, from, { inward, lasts, ink, rim, onTop = false, spin = 1 }) {
+  function swirl(el, from, { inward, lasts, ink, rim, onTop = false, spin = 1, pivot = null }) {
     const box = el.getBoundingClientRect();
     const key = from.getBoundingClientRect();
-    const [mx, my] = [key.left + key.width / 2, key.top + key.height / 2];
+    const [kx, ky] = [key.left + key.width / 2, key.top + key.height / 2];
+    // pivot: another key to whirl round, as that key's own page would; the way is then
+    // moved over, more as it nears the drain, so it still ends in this key (the two tabs
+    // in the middle of the settings, whirled round themselves, spread their tails nearly
+    // straight: "휘어지는 궤적의 반지름이 달라. 직선처럼 퍼져감").
+    const round = pivot ? pivot.getBoundingClientRect() : key;
+    const [mx, my] = [round.left + round.width / 2, round.top + round.height / 2];
     const whirl = (at, reach) => {
       const [dx, dy] = [at[0] - mx, at[1] - my];
       const far = Math.hypot(dx, dy);
@@ -1561,11 +1567,19 @@ ${STORY_MORE[target.id]}` : told };
         const fall = x * x * (0.35 + 0.65 * x);
         const radius = far * (1 - fall);
         const turn = spin * GAZE_TURN * (0.35 + 0.65 * (far / reach)) * fall * (0.4 + 0.6 * fall);
-        return { fall, turn, size: 1 - 0.93 * fall, px: mx + radius * Math.cos(bearing + turn), py: my + radius * Math.sin(bearing + turn) };
+        return { fall, turn, size: 1 - 0.93 * fall, px: mx + radius * Math.cos(bearing + turn) + (kx - mx) * fall, py: my + radius * Math.sin(bearing + turn) + (ky - my) * fall };
       };
     };
-    const middle = [box.left + box.width / 2, box.top + box.height / 2];
-    const edge = rim.map(([u, v]) => [box.left + u * box.width, box.top + v * box.height]);
+    // Only the part that shows: a long page in a dialog (Help is 2,140 px) whirled about
+    // its own middle, far below the dialog, swung its tails off the screen.
+    const frame = el.parentElement?.closest('dialog')?.getBoundingClientRect();
+    const seen = frame
+      ? { left: Math.max(box.left, frame.left), top: Math.max(box.top, frame.top), right: Math.min(box.right, frame.right), bottom: Math.min(box.bottom, frame.bottom) }
+      : box;
+    const [sw, sh] = [Math.max(1, seen.right - seen.left), Math.max(1, seen.bottom - seen.top)];
+    const middle = [seen.left + sw / 2, seen.top + sh / 2];
+    const edge = rim.map(([u, v]) => [seen.left + u * sw, seen.top + v * sh]);
+    el.style.transformOrigin = `${middle[0] - box.left}px ${middle[1] - box.top}px`;
     const reach = Math.max(1, ...[middle, ...edge].map(([x, y]) => Math.hypot(x - mx, y - my)));
     const spot = whirl(middle, reach);
     const frames = [];
@@ -1675,10 +1689,15 @@ ${STORY_MORE[target.id]}` : told };
     if (!coming || coming.hidden || wasShown || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     pageMove?.cancel();
     // Options and Help come out turning clockwise (the user: "options, help는 시계 방향으로 회전").
-    // The two in the middle turn less (40%, then 65%: "궤적을 좀 더 휘어봐"): turned as far as the two
-    // at the ends, their tails crossed over the row of tabs ("help, changes는 궤적이 안 예뻐").
-    const spin = { options: -1, help: -0.65, news: 0.65, about: 1 }[next.dataset.tab] ?? 1;
-    const { move } = swirl(coming, next, { inward: false, lasts: PAGE_OUT_MS, ink: '#cfe0ff', rim: MENU_RIM, onTop: true, spin });
+    // Whirled round their key as far as the two at the ends, the two in the middle crossed
+    // their tails over the row of tabs ("help, changes는 궤적이 안 예뻐"); turned less, they
+    // spread as near straight lines.
+    const spin = { options: -1, help: -1, news: 1, about: 1 }[next.dataset.tab] ?? 1;
+    // The two in the middle whirl as the end ones do, round the end key on their side,
+    // and come out of their own (see swirl's `pivot`).
+    const end = { help: 'options', news: 'about' }[next.dataset.tab];
+    const pivot = end ? $('settingsTabs').querySelector(`button[data-tab="${end}"]`) : null;
+    const { move } = swirl(coming, next, { inward: false, lasts: PAGE_OUT_MS, ink: '#cfe0ff', rim: MENU_RIM, onTop: true, spin, pivot });
     pageMove = move;
     move.finished.then(() => { if (pageMove === move) { move.cancel(); pageMove = null; } }, () => {});
   });

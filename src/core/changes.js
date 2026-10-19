@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-19', text: t('스캐너를 끄고 켤 때 별빛 가루로 흩어지고 모입니다.') },
   { day: '2026-10-19', text: t('About에 이 게임의 공개 코드로 가는 깃허브 링크가 생겼습니다.') },
   { day: '2026-10-19', text: t('우주멍에서 소라가 별가루로 흩어져 사라지고, 별가루가 모여 돌아옵니다.') },
   { day: '2026-10-19', text: t('행성 배치 설정을 없앴습니다. 모두가 같은 여행 배치에서 같은 자리의 행성을 봅니다.') },

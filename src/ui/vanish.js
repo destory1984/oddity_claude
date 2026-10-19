@@ -47,7 +47,20 @@ export function cutOut(sheet) {
   return { picture, x: x0, y: y0, w: bw, h: bh };
 }
 
-// Star dust: a speck for every two pixels of her, each with its own drift, twinkle and
+// The picture of something drawn on a canvas of its own (the scanner), where it stands.
+export function pictureOf(canvas) {
+  const box = canvas.getBoundingClientRect();
+  const w = Math.max(1, Math.round(box.width));
+  const h = Math.max(1, Math.round(box.height));
+  const picture = document.createElement('canvas');
+  picture.width = w;
+  picture.height = h;
+  picture.getContext('2d').drawImage(canvas, 0, 0, w, h);
+  return { picture, x: box.left, y: box.top, w, h };
+}
+
+// Star dust: a speck for every two pixels of her (three of a large picture, as the
+// scanner, so that it does not drag), each with its own drift, twinkle and
 // moment to leave (from the top of her down).
 function specks(her) {
   const { picture, x, y, w, h } = her;
@@ -60,8 +73,9 @@ function specks(her) {
       return s / 2147483647;
     };
   })();
-  for (let py = 0; py < h; py += 2) {
-    for (let px = 0; px < w; px += 2) {
+  const step = w * h > 40000 ? 3 : 2;
+  for (let py = 0; py < h; py += step) {
+    for (let px = 0; px < w; px += step) {
       const k = (py * w + px) * 4;
       if (data[k + 3] < 60) continue;
       out.push({

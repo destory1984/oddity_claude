@@ -12,7 +12,7 @@ import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/cra
 import { CURIOS, curiosAt, hiddenCurios, carryingCurio, curiosNear, curioHead, setCurioDay, CURIO_ABOUT, BRIDGE_KM, groundSpot } from './core/curios.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
-import { createVanish, cutOut } from './ui/vanish.js';
+import { createVanish, cutOut, pictureOf } from './ui/vanish.js';
 import { realCloudMap } from './render/realClouds.js';
 import { createInput } from './ui/input.js';
 import { createHud } from './ui/hud.js';
@@ -1765,23 +1765,33 @@ ${STORY_MORE[target.id]}` : told };
     pageMove = move;
     move.finished.then(() => { if (pageMove === move) { move.cancel(); pageMove = null; } }, () => {});
   });
+  const scannerDust = createVanish();
   function showScanner(on, swirl = false) {
     const words = on ? t('스캐너 끄기') : t('스캐너 켜기');
     $('scannerButton').setAttribute('aria-pressed', String(on));
     $('scannerButton').setAttribute('aria-label', words);
     $('scannerButton').title = words;
-    if (!swirl) {
+    if (!swirl || matchMedia('(prefers-reduced-motion: reduce)').matches) {
       scanner.setOn(on);
       return;
     }
-    // On: shown first, then it comes out. Off: put away once it has gone down.
-    if (on) scanner.setOn(true);
-    swirlScanner(on).then((whole) => {
-      if (!whole) return;
-      if (!on) scanner.setOn(false);
-      scannerMove?.cancel();
-      scannerMove = null;
-    });
+    // It breaks into star dust and gathers again, as Sora does in 우주멍 (the user,
+    // 2026-10-19: "스캐너 on/off 효과를 소라처럼 별빛으로"; it whirled into its switch before).
+    const canvas = $('scanner');
+    if (!on) {
+      const picture = pictureOf(canvas);
+      scanner.setOn(false);
+      scannerDust.play('dust', picture, true, () => {});
+      return;
+    }
+    // Coming back: drawn once unseen, and that picture gathers out of the dust.
+    scanner.setOn(true);
+    canvas.style.visibility = 'hidden';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      scannerDust.play('dust', pictureOf(canvas), false, () => {
+        if (scanner.on()) canvas.style.visibility = '';
+      });
+    }));
   }
   try {
     showScanner(localStorage.getItem(SCANNER_KEY) !== '0');

@@ -1547,8 +1547,9 @@ ${STORY_MORE[target.id]}` : told };
   // Whirls `el` down into the key `from` (inward) or up out of it, as the 우주멍 pieces
   // go (gazeFlight): slow to start, quick at the drain, turning as it goes, with ink
   // tails from its middle and from points `rim` (parts of its box) and rings round the
-  // key. onTop: the tails are drawn over an open dialog. Returns { move, stop }.
-  function swirl(el, from, { inward, lasts, ink, rim, onTop = false }) {
+  // key. onTop: the tails are drawn over an open dialog. spin -1: the other way round
+  // (coming out, clockwise). Returns { move, stop }.
+  function swirl(el, from, { inward, lasts, ink, rim, onTop = false, spin = 1 }) {
     const box = el.getBoundingClientRect();
     const key = from.getBoundingClientRect();
     const [mx, my] = [key.left + key.width / 2, key.top + key.height / 2];
@@ -1559,7 +1560,7 @@ ${STORY_MORE[target.id]}` : told };
       return (x) => {
         const fall = x * x * (0.35 + 0.65 * x);
         const radius = far * (1 - fall);
-        const turn = GAZE_TURN * (0.35 + 0.65 * (far / reach)) * fall * (0.4 + 0.6 * fall);
+        const turn = spin * GAZE_TURN * (0.35 + 0.65 * (far / reach)) * fall * (0.4 + 0.6 * fall);
         return { fall, turn, size: 1 - 0.93 * fall, px: mx + radius * Math.cos(bearing + turn), py: my + radius * Math.sin(bearing + turn) };
       };
     };
@@ -1673,7 +1674,9 @@ ${STORY_MORE[target.id]}` : told };
     const coming = next && $('settings').querySelector(`section[data-tab="${next.dataset.tab}"]`);
     if (!coming || coming.hidden || wasShown || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     pageMove?.cancel();
-    const { move } = swirl(coming, next, { inward: false, lasts: PAGE_OUT_MS, ink: '#cfe0ff', rim: MENU_RIM, onTop: true });
+    // Options and Help come out turning clockwise (the user: "options, help는 시계 방향으로 회전").
+    const spin = ['options', 'help'].includes(next.dataset.tab) ? -1 : 1;
+    const { move } = swirl(coming, next, { inward: false, lasts: PAGE_OUT_MS, ink: '#cfe0ff', rim: MENU_RIM, onTop: true, spin });
     pageMove = move;
     move.finished.then(() => { if (pageMove === move) { move.cancel(); pageMove = null; } }, () => {});
   });

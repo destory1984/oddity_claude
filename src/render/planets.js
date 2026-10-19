@@ -14,7 +14,7 @@ import noiseGlsl from './shaders/noise.glsl?raw';
 import ringsGlsl from './shaders/rings.glsl?raw';
 import texturedFrag from './shaders/textured.frag?raw';
 import lunarGlowFrag from './shaders/lunarGlow.frag?raw';
-import { KM_PER_UNIT, TIME_SCALE } from '../core/bodies.js';
+import { KM_PER_UNIT, TIME_SCALE, BODY_DATA } from '../core/bodies.js';
 import { normalize } from './math.js';
 import { SPIN_DAY_S, EARTH_START_SPIN, START_SPIN, cloudSpin, surfaceDirection } from '../core/surface.js';
 import { SPOKES } from '../core/glows.js';
@@ -306,7 +306,67 @@ const LOOKS = {
   apophis: { shader: 'rocky', colorA: [0.25, 0.22, 0.19], colorB: [0.5, 0.45, 0.4], cap: 0, haze: 0, contrast: 0.6, craters: 0.5, dayS: SPIN_DAY_S.apophis },
   oumuamua: { shader: 'rocky', colorA: [0.3, 0.17, 0.12], colorB: [0.55, 0.36, 0.27], cap: 0, haze: 0, contrast: 0.6, craters: 0.1, dayS: SPIN_DAY_S.oumuamua },
   atlas3i: { shader: 'rocky', colorA: [0.06, 0.06, 0.07], colorB: [0.2, 0.2, 0.22], cap: 0, haze: 0, contrast: 0.6, craters: 0.3, dayS: 16.2 * 3600 },
+  // Eris is one of the whitest things in the solar system (it reflects 96%); Haumea is
+  // white crystalline ice with one dark red patch, drawn as its egg (core/bodies.js
+  // shapeKm) inside its thin dark ring; Makemake is pale with a reddish cast; Sedna is
+  // one of the reddest bodies known.
+  eris: { shader: 'rocky', colorA: [0.82, 0.82, 0.84], colorB: [0.97, 0.97, 0.98], cap: 0, haze: 0, contrast: 0.25, craters: 0.1, dayS: SPIN_DAY_S.eris },
+  haumea: {
+    shader: 'rocky', colorA: [0.72, 0.72, 0.76], colorB: [0.93, 0.93, 0.95], cap: 0, haze: 0, contrast: 0.35, craters: 0.15, dayS: SPIN_DAY_S.haumea,
+    // 2,287 km from its middle, about 70 km wide (Ortiz et al. 2017), in the plane it spins in.
+    rings: { innerKm: 2252, outerKm: 2322, tilt: 0, style: 1 },
+  },
+  makemake: { shader: 'rocky', colorA: [0.6, 0.45, 0.38], colorB: [0.9, 0.8, 0.7], cap: 0, haze: 0, contrast: 0.5, craters: 0.15, dayS: SPIN_DAY_S.makemake },
+  sedna: { shader: 'rocky', colorA: [0.42, 0.16, 0.1], colorB: [0.66, 0.3, 0.2], cap: 0, haze: 0, contrast: 0.5, craters: 0.2, dayS: SPIN_DAY_S.sedna },
+  // Arrokoth: two flat red lobes touching, the large one (Wenu, 21 by 20 by 9 km) and the
+  // small one (Weeyo, 15 by 14 by 10). lobes: centre and half-sizes in km, the spin
+  // axis (y) through their thin side.
+  arrokoth: {
+    shader: 'rocky', colorA: [0.36, 0.17, 0.1], colorB: [0.6, 0.33, 0.22], cap: 0, haze: 0, contrast: 0.5, craters: 0.2, dayS: SPIN_DAY_S.arrokoth,
+    lobes: [{ at: [-7.4, 0, 0], half: [10.6, 4.7, 10] }, { at: [10.3, 0, 0], half: [7.7, 4.9, 6.9] }],
+  },
+  // Hyperion: a sponge of deep dark-floored pits; it tumbles with no steady day, so it is
+  // turned about all three ways at once (tumble), about once in five days.
+  hyperion: { shader: 'rocky', colorA: [0.3, 0.26, 0.21], colorB: [0.66, 0.6, 0.52], cap: 0, haze: 0, contrast: 0.8, craters: 1, dayS: 5.1 * 86400, tumble: true },
+  phoebe: { shader: 'rocky', colorA: [0.06, 0.06, 0.06], colorB: [0.2, 0.19, 0.18], cap: 0, haze: 0, contrast: 0.7, craters: 1, dayS: SPIN_DAY_S.phoebe },
+  proteus: { shader: 'rocky', colorA: [0.12, 0.12, 0.12], colorB: [0.3, 0.29, 0.28], cap: 0, haze: 0, contrast: 0.6, craters: 0.8, dayS: SPIN_DAY_S.proteus },
+  // The Trojans are dark (they reflect about 5%), grey-brown.
+  eurybates: { shader: 'rocky', colorA: [0.08, 0.08, 0.08], colorB: [0.24, 0.23, 0.22], cap: 0, haze: 0, contrast: 0.6, craters: 0.7, dayS: SPIN_DAY_S.eurybates },
+  patroclus: { shader: 'rocky', colorA: [0.1, 0.085, 0.07], colorB: [0.27, 0.23, 0.2], cap: 0, haze: 0, contrast: 0.6, craters: 0.6, dayS: SPIN_DAY_S.patroclus },
+  menoetius: { shader: 'rocky', colorA: [0.11, 0.08, 0.065], colorB: [0.29, 0.22, 0.18], cap: 0, haze: 0, contrast: 0.6, craters: 0.6, dayS: SPIN_DAY_S.menoetius },
 };
+
+// A body that is not round (core/bodies.js shapeKm: half-sizes along x, y and z in km,
+// y the spin axis; or a look's lobes) as one mesh of stretched balls, the stretch baked
+// into it and its normals worked out for that shape, so the shaders draw it as any ball.
+function shapedBall(scene, body, look, segments) {
+  const shapeKm = BODY_DATA.find((d) => d.id === body.id)?.shapeKm;
+  const parts = look.lobes ?? (shapeKm ? [{ at: [0, 0, 0], half: shapeKm }] : null);
+  if (!parts) return CreateSphere(body.id, { diameter: (2 * body.radiusKm) / KM_PER_UNIT, segments }, scene);
+  const pieces = parts.map(({ at, half }, i) => {
+    const piece = CreateSphere(`${body.id}Part${i}`, { diameter: 2, segments }, scene);
+    const unit = half.map((n) => n / KM_PER_UNIT);
+    const centre = at.map((n) => n / KM_PER_UNIT);
+    const ball = piece.getVerticesData('position');
+    const position = [];
+    const normal = [];
+    for (let k = 0; k < ball.length; k += 3) {
+      const d = [ball[k], ball[k + 1], ball[k + 2]];
+      position.push(...d.map((n, j) => centre[j] + n * unit[j]));
+      // Square to the stretched ball: (x / a, y / b, z / c) for a point (a x, b y, c z) of it.
+      const out = d.map((n, j) => n / unit[j]);
+      const length = Math.hypot(...out) || 1;
+      normal.push(...out.map((n) => n / length));
+    }
+    piece.setVerticesData('position', position);
+    piece.setVerticesData('normal', normal);
+    return piece;
+  });
+  const mesh = pieces.length === 1 ? pieces[0] : Mesh.MergeMeshes(pieces, true, true);
+  mesh.name = body.id;
+  mesh.id = body.id;
+  return mesh;
+}
 
 // Rings are a flat square plane; the shader keeps only the annulus between the radii.
 // Babylon applies rotation z, then x, then y: x lays the plane flat and tilts it,
@@ -382,7 +442,7 @@ const PATCHY = ['pluto', 'charon', 'triton'];
 
 function createProceduralPlanet(scene, body, look, sunDir) {
   const diameter = (2 * body.radiusKm) / KM_PER_UNIT;
-  const sphere = CreateSphere(body.id, { diameter, segments: body.radiusKm > 20000 ? 96 : 64 }, scene);
+  const sphere = shapedBall(scene, body, look, body.radiusKm > 20000 ? 96 : 64);
   const color = (v) => new Color3(...v);
   let material;
   if (look.shader === 'textured') {
@@ -483,6 +543,12 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     rings: ring && look.rings.style !== 2 ? { normal: [ring.normal.x, ring.normal.y, ring.normal.z], innerKm: look.rings.innerKm, outerKm: look.rings.outerKm } : null,
     spin(elapsed, spinS = elapsed) {
       sphere.rotation.y = (START_SPIN[body.id] ?? 0) - (spinS * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
+      // A tumbling body also rocks about the other two ways, at paces that never line up.
+      if (look.tumble) {
+        const turns = (spinS * SPIN_SPEEDUP * 2 * Math.PI) / look.dayS;
+        sphere.rotation.x = 1.1 * Math.sin(turns * 0.61);
+        sphere.rotation.z = 0.8 * Math.sin(turns * 0.37 + 1);
+      }
       if (ring) ring.setTime(elapsed);
       if (look.storm || look.nightGlow || look.flow || look.sights || look.clouds || look.shader === 'ember') material.setFloat('time', elapsed);
     },

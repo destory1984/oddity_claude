@@ -34,6 +34,20 @@ export const SPIN_DAY_S = {
   apophis: 30.56 * 3600,
   // 'Oumuamua tumbles once in about 8 hours.
   oumuamua: 8 * 3600,
+  // Eris keeps one face to its moon Dysnomia (Szakats et al. 2023).
+  eris: 15.786 * 86400,
+  haumea: 3.9155 * 3600,
+  makemake: 22.8266 * 3600,
+  sedna: 10.273 * 3600,
+  arrokoth: 15.938 * 3600,
+  // (Hyperion tumbles with no steady day: render/planets.js tumble.)
+  phoebe: 9.2735 * 3600,
+  // Proteus keeps one face to Neptune.
+  proteus: 1.122315 * 86400,
+  eurybates: 8.711 * 3600,
+  // Patroclus and Menoetius keep one face to each other.
+  patroclus: 4.283 * 86400,
+  menoetius: 4.283 * 86400,
 };
 
 // Earth alone starts part-way through its turn, so the opening view shows it half lit

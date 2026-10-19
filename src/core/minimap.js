@@ -1,6 +1,7 @@
 // Top-down solar-system map, seen from north (+y): x to the right, z up the map.
 // Distances from the Sun shrink by their square root so the inner planets do not
 // huddle in the middle next to Neptune's far orbit.
+import { BODY_DATA } from './bodies.js';
 
 export function mapPoint(position, sunPosition, outerKm, radiusPx) {
   const dx = position[0] - sunPosition[0];
@@ -31,6 +32,19 @@ export function pickNearest([px, py], dots, within = 12) {
   return best;
 }
 
+// What a body is on the map: 'ring' for a planet, or a dwarf planet on a circle (Ceres,
+// Pluto): its orbit is drawn, and the farthest of them, Pluto, sets the map's scale.
+// 'dot' for the comets and the small bodies, and for the dwarf planets on long tilted
+// ellipses far past Pluto (Eris, Haumea, Makemake): only a dot, and one beyond Pluto
+// stays pinned on the rim (mapPoint), so the planets do not shrink into the middle.
+// null for the rest (the Sun is drawn apart; moons are not on the map).
+const ON_ELLIPSE = new Set(BODY_DATA.filter((d) => d.ellipse).map((d) => d.id));
+export function mapRole(body) {
+  if (body.kind === 'planet' || body.kind === 'exoplanet') return 'ring';
+  if (body.kind === 'dwarf') return ON_ELLIPSE.has(body.id) ? 'dot' : 'ring';
+  return ['comet', 'asteroid', 'interstellar', 'tno'].includes(body.kind) ? 'dot' : null;
+}
+
 // The one letter beside a planet's dot on the map: the first of its English name
 // (Saturn: S). The Sun in the middle and the comets get none; nor do the planets inside
 // Earth's orbit, Mercury and Venus: on a map this small there is no room for letters
@@ -40,7 +54,7 @@ const NO_LETTER = ['mercury', 'venus'];
 export function mapLetter(body) {
   if (NO_LETTER.includes(body.id)) return null;
   if (body.kind === 'exoplanet') return (body.nameEn || body.name).slice(-1);
-  return body.kind === 'planet' || body.kind === 'dwarf' ? (body.nameEn || body.name)[0].toUpperCase() : null;
+  return mapRole(body) === 'ring' ? (body.nameEn || body.name)[0].toUpperCase() : null;
 }
 
 // Where that letter goes: `gap` pixels from the dot, on the side away from the Sun

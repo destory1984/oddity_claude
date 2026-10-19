@@ -1,6 +1,8 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { BODIES, BODY_DATA, AU_KM, bodiesAt, bodyById, nearestLocalBody } from '../src/core/bodies.js';
+import { BODIES, BODY_DATA, AU_KM, bodiesAt, bodyById, nearestLocalBody, placeBodies } from '../src/core/bodies.js';
+import { todayData } from '../src/core/ephemeris.js';
+import { bodyFacts } from '../src/core/readings.js';
 import { carryAlong, createState } from '../src/core/game.js';
 import { inBelt } from '../src/core/belt.js';
 
@@ -10,13 +12,26 @@ const dist = (a, b) => Math.hypot(...sub(a, b));
 const near = (a, b, eps) => assert.ok(Math.abs(a - b) <= eps, `${a} != ${b}`);
 const at = (t, id) => bodyById(id, bodiesAt(t));
 
-test('four new bodies with real radii and kinds, two more comets, six small bodies and two visitors from between the stars: 43 in all', () => {
-  assert.equal(BODIES.length, 43);
-  assert.deepEqual(BODIES.slice(-2).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
+test('four new bodies with real radii and kinds, two more comets, six small bodies, two visitors from between the stars and eleven more: 54 in all', () => {
+  assert.equal(BODIES.length, 54);
+  assert.deepEqual(BODIES.slice(-11).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
+    ['eris', 'dwarf', 1163, 'sun'],
+    ['haumea', 'dwarf', 1161, 'sun'],
+    ['makemake', 'dwarf', 715, 'sun'],
+    ['sedna', 'tno', 500, 'sun'],
+    ['arrokoth', 'tno', 18, 'sun'],
+    ['hyperion', 'moon', 180, 'saturn'],
+    ['phoebe', 'moon', 106.5, 'saturn'],
+    ['proteus', 'moon', 210, 'neptune'],
+    ['eurybates', 'asteroid', 31.9, 'sun'],
+    ['patroclus', 'asteroid', 56.5, 'sun'],
+    ['menoetius', 'moon', 52, 'patroclus'],
+  ]);
+  assert.deepEqual(BODIES.slice(-13, -11).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
     ['oumuamua', 'interstellar', 0.08, 'sun'],
     ['atlas3i', 'comet', 1, 'sun'],
   ]);
-  assert.deepEqual(BODIES.slice(-8, -2).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
+  assert.deepEqual(BODIES.slice(-19, -13).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
     ['vesta', 'asteroid', 262.7, 'sun'],
     ['bennu', 'asteroid', 0.245, 'sun'],
     ['ryugu', 'asteroid', 0.448, 'sun'],
@@ -24,11 +39,11 @@ test('four new bodies with real radii and kinds, two more comets, six small bodi
     ['dimorphos', 'moon', 0.075, 'didymos'],
     ['apophis', 'asteroid', 0.17, 'sun'],
   ]);
-  assert.deepEqual(BODIES.slice(-10, -8).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
+  assert.deepEqual(BODIES.slice(-21, -19).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
     ['haleBopp', 'comet', 30, 'sun'],
     ['churyumov', 'comet', 2, 'sun'],
   ]);
-  assert.deepEqual(BODIES.slice(-14, -10).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
+  assert.deepEqual(BODIES.slice(-25, -21).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
     ['ceres', 'dwarf', 469.7, 'sun'],
     ['pluto', 'dwarf', 1188.3, 'sun'],
     ['charon', 'moon', 606, 'pluto'],
@@ -122,4 +137,62 @@ test('the visitors from between the stars pass the Sun on open paths, again ever
   assert.ok(at(800 * DAY, 'oumuamua').sunKm > at(700 * DAY, 'oumuamua').sunKm);
   // One pass later it is there again.
   near(at(300 * DAY + 3 * 365.25 * DAY, 'oumuamua').sunKm, at(300 * DAY, 'oumuamua').sunKm, 1);
+});
+
+// The Trojans, 60 degrees either side of Jupiter round the Sun (seen from north).
+const lonFromSun = (bodies, id) => {
+  const sun = bodyById('sun', bodies).position;
+  const p = bodyById(id, bodies).position;
+  return Math.atan2(p[2] - sun[2], p[0] - sun[0]) * 180 / Math.PI;
+};
+const turn = (deg) => ((deg % 360) + 540) % 360 - 180;
+
+test('Eurybates goes round 60 degrees ahead of Jupiter and Patroclus 60 behind, in both layouts', () => {
+  const jupiterYear = BODY_DATA.find((d) => d.id === 'jupiter').periodS;
+  for (const t of [0, 100 * DAY, jupiterYear / 3, 5000 * DAY]) {
+    const bodies = bodiesAt(t);
+    near(turn(lonFromSun(bodies, 'eurybates') - lonFromSun(bodies, 'jupiter')), 60, 0.01);
+    near(turn(lonFromSun(bodies, 'patroclus') - lonFromSun(bodies, 'jupiter')), -60, 0.01);
+    // Ahead: where Jupiter will be a sixth of its year later.
+    near(turn(lonFromSun(bodiesAt(t + jupiterYear / 6), 'jupiter') - lonFromSun(bodies, 'eurybates')), 0, 0.01);
+  }
+  for (const date of [Date.UTC(2026, 9, 19), Date.UTC(2031, 1, 2)]) {
+    const bodies = placeBodies(todayData(new Date(date)), 3e7);
+    near(turn(lonFromSun(bodies, 'eurybates') - lonFromSun(bodies, 'jupiter')), 60, 0.01);
+    near(turn(lonFromSun(bodies, 'patroclus') - lonFromSun(bodies, 'jupiter')), -60, 0.01);
+  }
+});
+
+test('Menoetius goes round Patroclus 680 km out, squeezed as a moon: 165.7 km centre to centre', () => {
+  near(dist(at(0, 'menoetius').position, at(0, 'patroclus').position), 108.5 + (680 - 108.5) / 10, 0.01);
+});
+
+test('Phoebe goes round Saturn backwards, Hyperion the way Titan does', () => {
+  const swirl = (id) => {
+    const s = (t) => sub(at(t, id).position, at(t, 'saturn').position);
+    const a = s(0);
+    const b = s(DAY);
+    return a[2] * (b[0] - a[0]) - a[0] * (b[2] - a[2]);
+  };
+  assert.ok(swirl('phoebe') * swirl('titan') < 0);
+  assert.ok(swirl('hyperion') * swirl('titan') > 0);
+});
+
+test('the far ones start about where they really are: Eris near its farthest, Sedna coming in', () => {
+  near(at(0, 'eris').sunKm / AU_KM, 95.2, 1);
+  near(at(0, 'sedna').sunKm / AU_KM, 82.7, 1);
+  near(at(0, 'haumea').sunKm / AU_KM, 49.9, 1);
+  near(at(0, 'makemake').sunKm / AU_KM, 52.7, 1);
+  // Sedna's long year: nearest the Sun in 2076, 76 AU.
+  near(at(Date.UTC(2076, 0, 1) / 1000 - Date.UTC(2026, 9, 1) / 1000, 'sedna').sunKm / AU_KM, 76.2, 0.3);
+  // Today's sky counts from today: the same place on the same day.
+  const day = Date.UTC(2027, 4, 1);
+  const today = placeBodies(todayData(new Date(day)), 0);
+  near(bodyById('eris', today).sunKm, at((day - Date.UTC(2026, 9, 1)) / 1000, 'eris').sunKm, 1);
+});
+
+test('Haumea is an egg and Arrokoth a snowman: their sizes are three lengths', () => {
+  assert.deepEqual(bodyFacts(BODY_DATA.find((d) => d.id === 'haumea'), '태양')[0], ['크기', '2,322 × 1,704 × 1,026km']);
+  assert.deepEqual(bodyFacts(BODY_DATA.find((d) => d.id === 'arrokoth'), '태양')[0], ['크기', '36 × 20 × 10km']);
+  assert.deepEqual(bodyFacts(BODY_DATA.find((d) => d.id === 'eris'), '태양')[0], ['지름', '2,326km']);
 });

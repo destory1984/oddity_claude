@@ -147,7 +147,7 @@ test('near a planet all its moons keep an arrow; far from any, none', () => {
   const between = (a, b, t) => bodyById(a).position.map((n, i) => n + (bodyById(b).position[i] - n) * t);
   const over = (id, km) => { const b = bodyById(id); return [b.position[0], b.position[1] + b.radiusKm + km, b.position[2]]; };
   assert.deepEqual(nearbyMoons(over('jupiter', 20000), BODIES).sort(), ['callisto', 'europa', 'ganymede', 'io']);
-  assert.equal(nearbyMoons(over('saturn', 50000), BODIES).length, 7);
+  assert.equal(nearbyMoons(over('saturn', 50000), BODIES).length, 9);
   assert.deepEqual(nearbyMoons(over('earth', 9000), BODIES), ['moon']);
   // Beside a moon, its planet's moons: Io's neighbours are Jupiter's four.
   assert.equal(nearbyMoons(over('io', 500), BODIES).length, 4);

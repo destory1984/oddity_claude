@@ -308,6 +308,17 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `apophis.jpg` | [PIA24168-Asteroid-99942Apophis-RadarImages-20210326.jpg](https://commons.wikimedia.org/wiki/File:PIA24168-Asteroid-99942Apophis-RadarImages-20210326.jpg) | NASA/JPL-Caltech and NSF/AUI/GBO | Public domain |
 | `oumuamua.jpg` | [Combined deep image of `Oumuamua from the VLT and other telescopes (annotated) (eso1737b).jpg](https://commons.wikimedia.org/wiki/File:Combined_deep_image_of_%60Oumuamua_from_the_VLT_and_other_telescopes_(annotated)_(eso1737b).jpg) | ESO/K. Meech et al. | CC BY 4.0 |
 | `atlas3i.jpg` | [3I-ATLAS Hubble 2025 Nov 30.jpg](https://commons.wikimedia.org/wiki/File:3I-ATLAS_Hubble_2025_Nov_30.jpg) | NASA, ESA, STScI, D. Jewitt (UCLA), M.-T. Hui; processing J. DePasquale (STScI), cropped | Public domain |
+| `eris.jpg` | [Eris and Dysnomia (captured by the Hubble Space Telescope).jpg](https://commons.wikimedia.org/wiki/File:Eris_and_Dysnomia_(captured_by_the_Hubble_Space_Telescope).jpg) | NASA, ESA and M. Brown (Caltech) | Public domain |
+| `haumea.jpg` | [Haumea with rings (37641832331).jpg](https://commons.wikimedia.org/wiki/File:Haumea_with_rings_(37641832331).jpg) | Kevin Gill, illustration, 960 px | CC BY 2.0 |
+| `makemake.jpg` | [Makemake moon Hubble image only.jpg](https://commons.wikimedia.org/wiki/File:Makemake_moon_Hubble_image_only.jpg) | NASA, ESA, A. Parker and M. Buie (SwRI), W. Grundy (Lowell Observatory), K. Noll (NASA GSFC) | Public domain |
+| `sedna.jpg` | [Sedna mystery deepens as Hubble offers best look at farthest planetoid (artist's impression) (opo0414e).jpg](https://commons.wikimedia.org/wiki/File:Sedna_mystery_deepens_as_Hubble_offers_best_look_at_farthest_planetoid_(artist's_impression)_(opo0414e).jpg) | NASA, ESA and Adolf Schaller, illustration | Public domain |
+| `arrokoth.jpg` | [UltimaThule CA06 color 20190516.png](https://commons.wikimedia.org/wiki/File:UltimaThule_CA06_color_20190516.png) | NASA/JHUAPL/SwRI, Roman Tkachenko | Public domain |
+| `hyperion.jpg` | [Hyperion true.jpg](https://commons.wikimedia.org/wiki/File:Hyperion_true.jpg) | NASA/JPL/SSI, Gordan Ugarkovic | Public domain |
+| `phoebe.jpg` | [Phoebe cassini.jpg](https://commons.wikimedia.org/wiki/File:Phoebe_cassini.jpg) | NASA/JPL/Space Science Institute (PIA06064) | Public domain |
+| `proteus.jpg` | [Proteus (Voyager 2).jpg](https://commons.wikimedia.org/wiki/File:Proteus_(Voyager_2).jpg) | NASA/JPL (Voyager 2) | Public domain |
+| `eurybates.jpg` | [Eurybates-satellite.gif](https://commons.wikimedia.org/wiki/File:Eurybates-satellite.gif) | NASA/SwRI/Keith S. Noll, first frame | Public domain |
+| `patroclus.jpg` | [617 Patroclus Hubble.jpg](https://commons.wikimedia.org/wiki/File:617_Patroclus_Hubble.jpg) | Hubble Space Telescope/SwRI | Public domain |
+| `menoetius.jpg` | [PatroclusMenoetius-artists-impression.png](https://commons.wikimedia.org/wiki/File:PatroclusMenoetius-artists-impression.png) | NASA/SwRI/D. Durda, illustration | Public domain |
 | `goldenRecord.jpg` | [Voyager Golden Record.jpg](https://commons.wikimedia.org/wiki/File:The_Sounds_of_Earth_Record_Cover_-_GPN-2000-001978.jpg) | NASA/JPL | Public domain |
 
 ## "그날로" 장면에 쓴 옛 그림

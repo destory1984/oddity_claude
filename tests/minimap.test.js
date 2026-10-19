@@ -1,6 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { mapPoint, mapHeading, pickNearest, mapLetter, letterPoint } from '../src/core/minimap.js';
+import { mapPoint, mapHeading, pickNearest, mapLetter, letterPoint, mapRole } from '../src/core/minimap.js';
+import { BODIES } from '../src/core/bodies.js';
 
 const near = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
@@ -83,4 +84,21 @@ test('the letter stands outward of its dot, away from the middle of the map', ()
   // On the rim of a map 60 px in radius, the letter goes inside.
   assert.deepEqual(letterPoint([52, 0], 7, 54), [45, 0]);
   assert.deepEqual(letterPoint([40, 0], 7, 54), [47, 0]);
+});
+
+test('the far dwarf planets and the bodies beyond Neptune are dots; the scale stays with Pluto', () => {
+  const role = (id) => mapRole(BODIES.find((b) => b.id === id));
+  assert.deepEqual(['earth', 'ceres', 'pluto'].map(role), ['ring', 'ring', 'ring']);
+  assert.deepEqual(['eris', 'haumea', 'makemake', 'sedna', 'arrokoth', 'eurybates', 'halley'].map(role), Array(7).fill('dot'));
+  assert.deepEqual(['sun', 'moon', 'menoetius'].map(role), [null, null, null]);
+  // The farthest ring is Pluto's, so the planets stay where they were.
+  const sun = BODIES[0].position;
+  const far = (b) => Math.hypot(b.position[0] - sun[0], b.position[2] - sun[2]);
+  const rings = BODIES.filter((b) => mapRole(b) === 'ring');
+  assert.equal(rings.reduce((a, b) => (far(b) > far(a) ? b : a)).id, 'pluto');
+  // Eris, out beyond, is pinned on the rim.
+  const [x, y] = mapPoint(BODIES.find((b) => b.id === 'eris').position, sun, Math.max(...rings.map(far)), 100);
+  near(Math.hypot(x, y), 100, 1e-9);
+  assert.equal(mapLetter(BODIES.find((b) => b.id === 'eris')), null);
+  assert.equal(mapLetter(BODIES.find((b) => b.id === 'pluto')), 'P');
 });

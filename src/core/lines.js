@@ -49,6 +49,17 @@ export const LANDED = {
   apophis: t('2029년엔 이 돌이 지구 곁을 지나간대.'),
   oumuamua: t('다른 별에서 온 돌 위에 섰어!'),
   atlas3i: t('이 얼음은 태양보다 나이가 많을지도 몰라.'),
+  eris: t('눈밭처럼 하얘. 눈이 부셔.'),
+  haumea: t('팽글팽글 돌아서 어지러워.'),
+  makemake: t('메탄 얼음이 바스락거려.'),
+  sedna: t('태양이 별처럼 작아 보여.'),
+  arrokoth: t('눈사람 목에 앉았어.'),
+  hyperion: t('구멍 속으로 빠질 것 같아.'),
+  phoebe: t('토성이 저 멀리 콩알만 해.'),
+  proteus: t('해왕성이 하늘을 꽉 채웠어.'),
+  eurybates: t('목성이 저 뒤에서 따라와.'),
+  patroclus: t('짝꿍 메노이티오스가 떠 있어.'),
+  menoetius: t('파트로클로스가 하늘에 커다래.'),
 };
 
 // Coasting a long while with nothing to do. She is never in a hurry.

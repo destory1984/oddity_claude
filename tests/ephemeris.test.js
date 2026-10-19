@@ -57,7 +57,7 @@ test("today's layout keeps every body, radius and period; only the starting dire
     assert.equal(d.periodS, BODY_DATA[i].periodS);
   }
   const changed = data.filter((d, i) => d.direction && d.direction.join() !== BODY_DATA[i].direction.join()).map((d) => d.id);
-  assert.deepEqual(changed, ['mercury', 'venus', 'earth', 'moon', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']);
+  assert.deepEqual(changed, ['mercury', 'venus', 'earth', 'moon', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'eurybates', 'patroclus']);
   // BODY_DATA itself is untouched.
   assert.deepEqual(BODY_DATA.find((d) => d.id === 'earth').direction, [-1, -0.12, 0]);
 });

@@ -21,6 +21,14 @@ export const TIME_SCALE = 50;
 // distance (semi-major axis); directions are fixed, not today's positions.
 // Planets are spread around the Sun so trips go in many directions.
 const SATURN_RING_EDGE_KM = 136775;
+const YEAR_S = 365.25 * DAY_S;
+// The travel layout's day nought (core/clock.js TOUR_EPOCH_MS, 1 October 2026): a body
+// on its real schedule passes perihelion this many seconds of game time after it. jd:
+// the date as a Julian day (JPL gives perihelion times so). onTime marks such an ellipse
+// (core/ephemeris.js moves it to today's clock).
+const EPOCH_MS = Date.UTC(2026, 9, 1);
+const fromJulianDay = (jd) => (jd - 2440587.5) * DAY_S - EPOCH_MS / 1000;
+const JUPITER_DIRECTION = [0.77, 0.01, -0.64];
 
 export const BODY_DATA = [
   { id: 'sun', name: '태양', nameEn: 'Sun', kind: 'star', radiusKm: 696340, parent: null },
@@ -56,7 +64,7 @@ export const BODY_DATA = [
   },
   {
     id: 'jupiter', name: '목성', nameEn: 'Jupiter', kind: 'planet', radiusKm: 69911,
-    parent: 'sun', orbitKm: 778570000, periodS: 4332.59 * DAY_S, direction: [0.77, 0.01, -0.64],
+    parent: 'sun', orbitKm: 778570000, periodS: 4332.59 * DAY_S, direction: JUPITER_DIRECTION,
   },
   // Jupiter's four Galilean moons, spread around it.
   {
@@ -254,6 +262,94 @@ export const BODY_DATA = [
       perihelionAtS: -200 * DAY_S, perihelionDirection: [-0.5, 0, 0.87], tiltRad: 0.0855, retrograde: true,
     },
   },
+  // Eleven more (the user, 2026-10-19: "다 넣어"). Numbers: JPL's Small-Body Database and
+  // the papers named; where a body is on its real schedule, perihelionAtS is the real
+  // date (JPL), so in the travel layout it starts about where it really is.
+  // The three dwarf planets past Pluto, on their real tilted ellipses. The maps keep
+  // their scale from Pluto and pin these on the rim (core/minimap.js mapRing).
+  // Eris: 38.3 to 97.5 AU, tipped 44 degrees, once in 559 years; near its farthest now
+  // (about 96 AU). 2,326 km across (an occultation in 2010). It keeps one face to its
+  // moon Dysnomia and turns once in 15.79 days (Szakats et al. 2023).
+  {
+    id: 'eris', name: '에리스', nameEn: 'Eris', kind: 'dwarf', radiusKm: 1163, parent: 'sun',
+    ellipse: {
+      semiMajorKm: 67.864 * AU_KM, eccentricity: 0.43607, periodS: 559.07 * YEAR_S,
+      perihelionAtS: fromJulianDay(2545407.72), onTime: true, perihelionDirection: [-0.3, 0, -0.95], tiltRad: 0.7686, retrograde: false,
+    },
+  },
+  // Haumea: 34.6 to 51.6 AU, tipped 28 degrees, once in 283 years. An egg of 2,322 by
+  // 1,704 by 1,026 km (Ortiz et al. 2017) spinning once in 3.9 hours, with a ring 2,287 km
+  // from its middle. shapeKm: its half-sizes along x, y (the spin axis) and z, drawn so by
+  // render/planets.js shapedBall. radiusKm is the longest half: nothing comes nearer its
+  // middle than the long end (so over its flat sides a traveler stops short of the ground).
+  {
+    id: 'haumea', name: '하우메아', nameEn: 'Haumea', kind: 'dwarf', radiusKm: 1161, shapeKm: [1161, 513, 852], parent: 'sun',
+    ellipse: {
+      semiMajorKm: 43.116 * AU_KM, eccentricity: 0.19642, periodS: 283.12 * YEAR_S,
+      perihelionAtS: fromJulianDay(2500416.6), onTime: true, perihelionDirection: [-0.95, 0, 0.3], tiltRad: 0.4924, retrograde: false,
+    },
+  },
+  // Makemake: 38.1 to 52.8 AU, tipped 29 degrees, once in 306 years; 1,430 km across.
+  {
+    id: 'makemake', name: '마케마케', nameEn: 'Makemake', kind: 'dwarf', radiusKm: 715, parent: 'sun',
+    ellipse: {
+      semiMajorKm: 45.43 * AU_KM, eccentricity: 0.16126, periodS: 306.21 * YEAR_S,
+      perihelionAtS: fromJulianDay(2408158.69), onTime: true, perihelionDirection: [0.2, 0, 0.98], tiltRad: 0.5059, retrograde: false,
+    },
+  },
+  // Beyond Neptune, a new kind. Sedna: 76 AU at its nearest (in 2076) and about 940 at
+  // its farthest, once in some 11,400 years (its path round the solar system's centre of
+  // mass: 506 AU, e 0.85); about 83 AU now. About 1,000 km across.
+  {
+    id: 'sedna', name: '세드나', nameEn: 'Sedna', kind: 'tno', radiusKm: 500, parent: 'sun',
+    ellipse: {
+      semiMajorKm: 506 * AU_KM, eccentricity: 0.8496, periodS: 11390 * YEAR_S,
+      perihelionAtS: fromJulianDay(2479264.75), onTime: true, perihelionDirection: [0.98, 0, 0.2], tiltRad: 0.2082, retrograde: false,
+    },
+  },
+  // Arrokoth, the "snowman" New Horizons passed on 1 January 2019: 44.6 AU, nearly round
+  // (e 0.04), so a circle as Vesta's, near where New Horizons is now (core/craft.js). Two
+  // flat lobes 36 by 20 by 10 km in all (render/planets.js lobes); radiusKm is half its
+  // length.
+  {
+    id: 'arrokoth', name: '아로코스', nameEn: 'Arrokoth', kind: 'tno', radiusKm: 18, shapeKm: [18, 5, 10], parent: 'sun',
+    orbitKm: 44.581 * AU_KM, periodS: 297.67 * YEAR_S, direction: [0.342, 0.02, -0.94],
+  },
+  // Two more moons of Saturn. Hyperion, a sponge-like lump of 360 by 266 by 205 km that
+  // tumbles with no steady day, 1.48 million km out (once in 21.3 days).
+  {
+    id: 'hyperion', name: '히페리온', nameEn: 'Hyperion', kind: 'moon', radiusKm: 180, shapeKm: [180, 102.5, 133], edgeKm: SATURN_RING_EDGE_KM,
+    parent: 'saturn', orbitKm: 1481010, periodS: 21.276 * DAY_S, direction: [-0.95, 0.05, 0.3],
+  },
+  // Phoebe, 13 million km out, goes round backwards (once in 545 days), as Triton does.
+  {
+    id: 'phoebe', name: '포에베', nameEn: 'Phoebe', kind: 'moon', radiusKm: 106.5, retrograde: true, edgeKm: SATURN_RING_EDGE_KM,
+    parent: 'saturn', orbitKm: 12960000, periodS: 545.09 * DAY_S, direction: [0.42, -0.05, -0.9],
+  },
+  // Proteus, Neptune's second largest moon, found by Voyager 2 in 1989: 117,647 km out,
+  // once in 26.9 hours.
+  {
+    id: 'proteus', name: '프로테우스', nameEn: 'Proteus', kind: 'moon', radiusKm: 210,
+    parent: 'neptune', orbitKm: 117647, periodS: 1.122315 * DAY_S, direction: [-0.5, 0.02, -0.87],
+  },
+  // Two of the Trojans Lucy is to pass, which share Jupiter's orbit 60 degrees ahead of it
+  // (L4, Eurybates, 64 km across) and 60 behind (L5, Patroclus, 113 km, with Menoetius,
+  // 104 km, 680 km from it, the pair going round each other once in 4.28 days). Each goes
+  // round once in Jupiter's time, so they stay there; their own tilts (8 and 22 degrees)
+  // are left out. trojanDeg: how far ahead of Jupiter (core/ephemeris.js keeps it so in
+  // today's sky).
+  {
+    id: 'eurybates', name: '에우리바테스', nameEn: 'Eurybates', kind: 'asteroid', radiusKm: 31.9, trojanDeg: 60,
+    parent: 'sun', orbitKm: 5.22 * AU_KM, periodS: 4332.59 * DAY_S, direction: aheadOf(JUPITER_DIRECTION, 60),
+  },
+  {
+    id: 'patroclus', name: '파트로클로스', nameEn: 'Patroclus', kind: 'asteroid', radiusKm: 56.5, trojanDeg: -60,
+    parent: 'sun', orbitKm: 5.21 * AU_KM, periodS: 4332.59 * DAY_S, direction: aheadOf(JUPITER_DIRECTION, -60),
+  },
+  {
+    id: 'menoetius', name: '메노이티오스', nameEn: 'Menoetius', kind: 'moon', radiusKm: 52,
+    parent: 'patroclus', orbitKm: 680, periodS: 4.283 * DAY_S, direction: [0.6, 0.1, 0.8],
+  },
 ];
 
 const sub = (a, b) => a.map((n, i) => n - b[i]);
@@ -274,6 +370,12 @@ function turnAboutY([x, y, z], angle) {
   const c = Math.cos(angle);
   const s = Math.sin(angle);
   return [x * c + z * s, y, -x * s + z * c];
+}
+
+// A direction turned `deg` degrees the way the planets go round (from +x toward +z): where
+// a body on the same circle stands that far ahead.
+export function aheadOf(direction, deg) {
+  return turnAboutY(direction, (-deg * Math.PI) / 180);
 }
 
 const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];

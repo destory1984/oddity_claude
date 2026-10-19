@@ -1,4 +1,4 @@
-import { mapPoint, mapHeading, pickNearest, mapLetter, letterPoint } from '../core/minimap.js';
+import { mapPoint, mapHeading, pickNearest, mapLetter, letterPoint, mapRole } from '../core/minimap.js';
 import { BELT } from '../core/belt.js';
 import { t } from '../core/i18n.js';
 
@@ -69,9 +69,9 @@ export function createMinimap(canvas, { onPick = () => {}, onTap = null, big = f
 
     const radius = size / 2 - EDGE_PX;
     const sun = bodies.find((b) => b.kind === (away ? 'exostar' : 'star'));
-    const planets = bodies.filter((b) => (away ? b.kind === 'exoplanet' : b.kind === 'planet' || b.kind === 'dwarf'));
-    // Comets and the small asteroids are dots without a ring.
-    const comets = away ? [] : bodies.filter((b) => ['comet', 'asteroid', 'interstellar'].includes(b.kind));
+    const planets = bodies.filter((b) => (away ? b.kind === 'exoplanet' : b.kind !== 'exoplanet' && mapRole(b) === 'ring'));
+    // Comets, the small bodies and the far dwarf planets are dots without a ring.
+    const comets = away ? [] : bodies.filter((b) => mapRole(b) === 'dot');
     const dist = (b) => Math.hypot(b.position[0] - sun.position[0], b.position[2] - sun.position[2]);
     const outerKm = Math.max(...planets.map(dist));
     const at = (p) => mapPoint(p, sun.position, outerKm, radius);

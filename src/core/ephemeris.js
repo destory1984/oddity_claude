@@ -1,7 +1,8 @@
 // "Today's sky": where the planets really are on a given date, for a layout that
 // starts from today instead of the hand-made tour layout in bodies.js.
-import { BODY_DATA, START_ALTITUDE_KM } from './bodies.js';
+import { BODY_DATA, START_ALTITUDE_KM, aheadOf } from './bodies.js';
 import { eccentricAnomaly } from './kepler.js';
+import { TOUR_EPOCH_MS } from './clock.js';
 
 const RAD = Math.PI / 180;
 const J2000_MS = Date.UTC(2000, 0, 1, 12);
@@ -79,9 +80,17 @@ function direction(lonDeg, latDeg) {
 
 // The table of bodies with the planets, Pluto and the Moon turned to where they are on
 // `date`, and Halley on its real schedule. Orbits stay circles of the real mean size;
-// moons other than ours, and Ceres, keep the tour layout's places.
+// moons other than ours, and Ceres, keep the tour layout's places. The Trojans keep their
+// places 60 degrees either side of Jupiter; the far dwarf planets and Sedna keep their
+// real schedules.
 export function todayData(date, data = BODY_DATA) {
+  const jupiter = heliocentric('jupiter', date);
   return data.map((item) => {
+    // (Its clock counts from `date`, the travel layout's from TOUR_EPOCH_MS.)
+    if (item.ellipse?.onTime) {
+      return { ...item, ellipse: { ...item.ellipse, perihelionAtS: item.ellipse.perihelionAtS - (date - TOUR_EPOCH_MS) / 1000 } };
+    }
+    if (item.trojanDeg) return { ...item, direction: aheadOf(direction(jupiter.lonDeg, jupiter.latDeg), item.trojanDeg) };
     if (ELEMENTS[item.id]) {
       const { lonDeg, latDeg } = heliocentric(item.id, date);
       return { ...item, direction: direction(lonDeg, latDeg) };

@@ -679,7 +679,7 @@ async function init() {
       if (shot.orbit) {
         if (shot.thumb) {
           album = saveAlbum(addPhoto(album, {
-            at: new Date().toISOString(), where: t`${here(shot.orbit.id).name} 확대 관찰`, missions: [], image: shot.thumb,
+            at: new Date().toISOString(), where: t`${here(shot.orbit.id).name} 확대`, missions: [], image: shot.thumb,
           }));
           journal.setAlbum(album);
         }
@@ -1481,7 +1481,7 @@ ${STORY_MORE[target.id]}` : told };
   }
   function unlock() {
     locked = false;
-    toast.show(t('맴돌며 보기를 풀었습니다.'));
+    toast.show(t('맴돌기를 풀었습니다.'));
   }
   $('lockTarget').addEventListener('click', () => {
     if (locked) return unlock();
@@ -1523,7 +1523,7 @@ ${STORY_MORE[target.id]}` : told };
     // wanted it kept for going round small things and named it "맴돌며 보기".)
     // Three short lines, what to press for what (the user, 2026-10-18: "고정을 누를 때에
     // 나오는 도움말 개선"): it was four long ones, under her bubble on a phone.
-    toast.show(t`${body.name} 둘레를 맴돌며 봅니다.\n화살표 단추를 누르면 그 둘레를 돕니다.\n자물쇠를 다시 누르면 풀립니다.`);
+    toast.show(t`${body.name} 둘레를 맴돕니다.\n화살표 단추를 누르면 그 둘레를 돕니다.\n맴돌기를 다시 누르면 풀립니다.`);
     return undefined;
   });
 
@@ -1593,7 +1593,7 @@ ${STORY_MORE[target.id]}` : told };
     locked = true;
     lockAim = AIM_LINE;
     $('bigMap').close();
-    toast.show(t`${body.name} 쪽을 바라보고 맴돌며 보기를 켰습니다. 전진을 누르면 다가갑니다.`);
+    toast.show(t`${body.name} 쪽을 바라보고 맴돌기를 켰습니다. 전진을 누르면 다가갑니다.`);
   });
   $('bigMapJump').addEventListener('click', () => {
     const id = mapPick;
@@ -3842,7 +3842,7 @@ ${STORY_MORE[target.id]}` : told };
     });
     if ($('bigMap').open) bigMap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId: mapPick ?? selectedId, away });
     $('lockTarget').setAttribute('aria-pressed', String(locked));
-    $('lockTarget').textContent = locked ? t('맴돌기 풀기') : t('맴돌며 보기');
+    $('lockTarget').textContent = locked ? t('맴돌기 풀기') : t('맴돌기');
   });
 
   function photoFloor() {

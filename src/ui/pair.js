@@ -22,6 +22,8 @@ export function createPair() {
       $('pairRealCaption').textContent = t`실제 사진 · ${famous.by}`;
       $('pairNote').textContent = famous.note;
       $('pairCredit').textContent = t`사진: ${famous.credit}`;
+      // Its way out says where it goes back to: the album, when opened from it.
+      $('closePair').textContent = $('journal').open ? t('수첩으로 돌아가기') : t('비행으로 돌아가기');
       dialog.showModal();
       dialog.scrollTop = 0;
     },

@@ -96,7 +96,7 @@ export function createPracticeView({ onTag, onOffer, onDone }) {
       answered = false;
       $('practiceDoneAsk').hidden = !ask;
       $('practiceHide').hidden = !ask;
-      $('practiceKeep').textContent = ask ? t('그대로 두기') : t('확인');
+      $('practiceKeep').textContent = ask ? t('그대로 두기') : t('비행으로 돌아가기');
       $('practiceDone').showModal();
     },
     // Why a lesson is learnt: a sheet held until its OK (goal: practiceGoal()).

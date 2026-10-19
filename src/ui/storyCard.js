@@ -60,6 +60,8 @@ export function createStoryCard({ onOpen, onClose, onSolve = () => {}, isSolved 
         if (solved) buttons[quiz.right].classList.add('right');
         $('storyQuizChoices').replaceChildren(...buttons);
       }
+      // Its way out says where it goes back to: the journal, when opened from it.
+      $('closeStoryCard').textContent = $('journal').open ? t('수첩으로 돌아가기') : t('비행으로 돌아가기');
       onOpen();
       dialog.showModal();
       // It opens at its top. (Opening gives the closing button at the foot the focus,

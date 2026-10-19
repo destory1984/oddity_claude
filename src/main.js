@@ -1697,7 +1697,7 @@ ${STORY_MORE[target.id]}` : told };
   // 없어지는 것도 똑같이 혜성 효과"): their close() waits for the whirl, and Esc is made
   // to go through it.
   const MENU_OUT_MS = 800;
-  const MENU_IN_MS = 650;
+  const MENU_IN_MS = 800;
   const MENU_RIM = [[0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0], [0.5, 1], [0, 0.5], [1, 0.5]];
   const closeNow = HTMLDialogElement.prototype.close;
   for (const [dialogId, keyId] of [['settings', 'settingsButton'], ['journal', 'journalButton'], ['bigMap', 'minimap']]) {

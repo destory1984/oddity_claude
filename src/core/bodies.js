@@ -198,9 +198,11 @@ export const BODY_DATA = [
   },
   // Six small bodies (the user, 2026-10-19: "다 넣어"). Vesta, the belt's second largest
   // (Dawn went round it in 2011-12): 2.36 AU, once in 3.63 years; nearly round, so a
-  // circle as Ceres's. Mean radius 262.7 km.
+  // circle as Ceres's. Not round: 572.6 by 557.2 by 446.4 km (Dawn), squashed at the south
+  // pole by the Rheasilvia blow (the user, 2026-10-19, beside its photo: "왜 사진과 천체가 많이
+  // 달라?"); radiusKm is the longest half, as for Haumea.
   {
-    id: 'vesta', name: '베스타', nameEn: 'Vesta', kind: 'asteroid', radiusKm: 262.7,
+    id: 'vesta', name: '베스타', nameEn: 'Vesta', kind: 'asteroid', radiusKm: 286.3, shapeKm: [286.3, 223.2, 278.6],
     parent: 'sun', orbitKm: 2.3615 * AU_KM, periodS: 1325.75 * DAY_S, direction: [-0.62, -0.004, -0.78],
   },
   // Bennu, where OSIRIS-REx took its soil: 0.90 to 1.36 AU, once in 436.6 days, 490 m across.

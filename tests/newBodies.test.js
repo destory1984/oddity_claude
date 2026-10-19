@@ -32,7 +32,7 @@ test('four new bodies with real radii and kinds, two more comets, six small bodi
     ['atlas3i', 'comet', 1, 'sun'],
   ]);
   assert.deepEqual(BODIES.slice(-19, -13).map((b) => [b.id, b.kind, b.radiusKm, b.parent]), [
-    ['vesta', 'asteroid', 262.7, 'sun'],
+    ['vesta', 'asteroid', 286.3, 'sun'],
     ['bennu', 'asteroid', 0.245, 'sun'],
     ['ryugu', 'asteroid', 0.448, 'sun'],
     ['didymos', 'asteroid', 0.39, 'sun'],

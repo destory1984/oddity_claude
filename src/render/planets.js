@@ -299,7 +299,9 @@ const LOOKS = {
   // Vesta is pale grey-brown; Bennu and Ryugu are carbon-dark rubble; Didymos, Dimorphos
   // and Apophis are stony grey.
   // Vesta wears Dawn's own map (the user, 2026-10-19: "실제 지도로 바꿔"): DLR's HAMO global
-  // mosaic, grey, given Vesta's pale grey-brown here.
+  // mosaic, grey and darkened by the shadows of its pictures: lifted to the Moon map's
+  // brightness (Vesta gives back three times the Moon's share of light), given its pale
+  // grey-brown here.
   vesta: {
     shader: 'textured', map: 'vesta.jpg', saturation: 1, tint: [1.02, 0.95, 0.86], base: [0.5, 0.46, 0.41],
     mapWeight: 1, haze: 0, detail: 0.12, dayS: SPIN_DAY_S.vesta,

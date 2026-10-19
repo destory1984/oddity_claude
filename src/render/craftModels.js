@@ -1145,13 +1145,71 @@ function psyche(scene, name, mats) {
   return fuse(scene, root);
 }
 
+// Rosetta: a box in black foil (2.8 x 2.1 x 2.0 m), a 2.2 m dish on one side and two
+// very long wings of five panels each, 32 m from tip to tip (drawn shorter, as Dawn's).
+// The face where Philae rode is bare: it was let go on 12 November 2014.
+function rosetta(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  box(scene, `${name}Bus`, root, mats.blackFoil, [0.16, 0.13, 0.13]);
+  box(scene, `${name}Top`, root, mats.goldFoil, [0.12, 0.01, 0.1], [0, 0.07, 0]);
+  for (const s of [-1, 1]) wing(scene, `${name}Wing${s}`, root, mats, { from: [s * 0.08, 0, 0], to: [s * 0.62, 0, 0], width: 0.12, panels: 5, face: Z, yoke: 0.05 });
+  rod(scene, `${name}DishArm`, root, mats.grey, [0, 0.065, -0.03], [0, 0.13, -0.06], 0.012, 5);
+  dish(scene, `${name}Dish`, root, mats, { at: [0, 0.14, -0.07], toward: [0, 0.4, -1], diameter: 0.2 });
+  // The cameras and spectrometers look out of one face, at the comet.
+  drum(scene, `${name}Camera`, root, mats.white, { height: 0.05, diameter: 0.035 }, [0.03, -0.09, 0.02], [0, -1, 0]);
+  drum(scene, `${name}Wide`, root, mats.white, { height: 0.035, diameter: 0.025 }, [-0.03, -0.085, 0.03], [0, -1, 0]);
+  thrusters(scene, `${name}Jet`, root, mats, ring(4, 0.08, 0, 0.78).map(([x, z]) => [[x, -0.065, z], [x * 1.3, -0.1, z * 1.3]]), 0.014);
+  return fuse(scene, root);
+}
+
+// Galileo: a round spinning body with, on top, the 4.8 m umbrella of an antenna that
+// never opened all the way (three of its eighteen ribs stuck, and it hung lopsided);
+// two power units out on booms to either side, the 11 m magnetometer boom, and the
+// turned-down part below that held the probe and the cameras. The antenna faces the Sun
+// (+z), as the craft flew near the Sun to keep it in shade.
+function galileo(scene, name, mats) {
+  const root = new TransformNode(name, scene);
+  drum(scene, `${name}Bus`, root, mats.goldFoil, { height: 0.12, diameter: 0.26, tessellation: 10 }, [0, 0, 0], Z);
+  drum(scene, `${name}Band`, root, mats.blackFoil, { height: 0.04, diameter: 0.27, tessellation: 10 }, [0, 0, 0.03], Z);
+  drum(scene, `${name}Shade`, root, mats.blackFoil, { height: 0.02, diameter: 0.34, tessellation: 12 }, [0, 0, 0.07], Z);
+  // The umbrella: a mast, and eighteen ribs from its foot; fifteen spread unevenly, three
+  // still folded against the mast.
+  rod(scene, `${name}Mast`, root, mats.white, [0, 0, 0.08], [0, 0, 0.38], 0.02, 6);
+  const foot = [0, 0, 0.1];
+  for (let k = 0; k < 18; k++) {
+    const a = (k * 2 * Math.PI) / 18;
+    const stuck = k >= 6 && k <= 8;
+    const out = stuck ? 0.035 : 0.17 + 0.07 * Math.cos(a - 4.2);
+    const tip = [Math.cos(a) * out, Math.sin(a) * out, stuck ? 0.36 : 0.22 + 0.06 * Math.sin(a)];
+    rod(scene, `${name}Rib${k}`, root, mats.white, foot, tip, 0.01, 4);
+  }
+  drum(scene, `${name}Low`, root, mats.white, { height: 0.03, diameter: 0.05 }, [0, 0, 0.4], Z);
+  // Two power units on booms, opposite each other.
+  for (const s of [-1, 1]) {
+    rod(scene, `${name}RtgBoom${s}`, root, mats.grey, [s * 0.12, 0, 0], [s * 0.34, 0, -0.08], 0.014, 5);
+    rtg(scene, `${name}Rtg${s}`, root, mats, [s * 0.34, 0, -0.08], [s * 0.44, 0, -0.12], 0.06);
+  }
+  // The magnetometer boom, a thin lattice square to the others.
+  truss(scene, `${name}MagBoom`, root, mats.grey, [0, 0.12, 0], [0, 0.66, -0.04], 0.022, 8, 0.003);
+  box(scene, `${name}Mag`, root, mats.goldFoil, [0.03, 0.03, 0.03], [0, 0.67, -0.04]);
+  // Below: the part that did not spin, with the scan platform and its cameras.
+  drum(scene, `${name}Despun`, root, mats.blackFoil, { height: 0.08, diameter: 0.18, tessellation: 10 }, [0, 0, -0.1], Z);
+  rod(scene, `${name}ScanArm`, root, mats.grey, [0, -0.08, -0.12], [0, -0.2, -0.16], 0.014, 5);
+  box(scene, `${name}Scan`, root, mats.white, [0.08, 0.06, 0.06], [0, -0.22, -0.17]);
+  drum(scene, `${name}Lens`, root, mats.black, { height: 0.01, diameter: 0.04 }, [0, -0.255, -0.17], [0, -1, 0]);
+  return fuse(scene, root);
+}
+
 export const CRAFT_BUILD = {
   voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid,
   iss, tiangong, sputnik, mro, juno, cassini, parker, roadster, newHorizons, pioneer10: pioneer,
   danuri, lro, europaClipper, lucy, pioneer11: pioneer, bepiColombo, akatsuki, mangalyaan, dawn, juice,
   hayabusa2, soho, solarOrbiter, tianwen1, osirisRex, hera, tess, gaia, psyche,
+  // MESSENGER's memorial over Mercury is the same model as the camera of its place.
+  rosettaCraft: rosetta, galileoCraft: galileo, messengerCraft: messengerProbe,
 };
 
-// Craft that are not flown beside (one fell on Mercury, one is long silent): shown as the
-// camera of a place's scene (render/siteModels.js probeFor).
+// Craft shown as the camera of a place's scene (render/siteModels.js probeFor): MESSENGER
+// (it fell on Mercury; its memorial also goes round it, above) and Mariner 10 (long
+// silent).
 export const PROBE_BUILD = { messengerProbe, mariner10 };

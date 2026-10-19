@@ -21,6 +21,8 @@ export const CRAFT_SHOTS = {
   lro: [{ story: 'tycho' }],
   danuri: [{ story: 'shackleton' }],
   iss: [{ story: 'yiSoyeon' }],
+  rosettaCraft: [{ story: 'rosetta' }],
+  galileoCraft: [{ story: 'galileoRegio' }],
 };
 
 // The slide of a place's card photo; its title is the place's name, or the caption's

@@ -260,4 +260,8 @@ export const GREETINGS = {
   voyager1: t('제일 멀리 온 친구야. 안녕!'),
   voyager2: t('너는 아직도 가는 중이구나.'),
   danuri: t('다누리다! 할머니, 우리 것도 왔어.'),
+  // The three memorials of 2026-10-19: each ended on the body it had studied.
+  rosettaCraft: t('필레가 있는 혜성에 내려앉았대. 잘 자.'),
+  galileoCraft: t('목성 속으로 뛰어들었대. 고마워.'),
+  messengerCraft: t('수성에 분화구를 남겼대. 수고했어.'),
 };

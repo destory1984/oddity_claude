@@ -65,6 +65,13 @@ const RULES = {
   tess: { visibleKm: 100000, maxKm: 600 },
   gaia: { visibleKm: 400000, maxKm: 4000 },
   psyche: { visibleKm: 400000, maxKm: 4000 },
+  // 300 km over a comet 4 km long: drawn smaller than the others, so as not to dwarf it
+  // more than it must (a jump to the comet ends 10 km from its middle).
+  rosettaCraft: { visibleKm: 60000, minKm: 6, maxKm: 30 },
+  // Round Jupiter, as Cassini round Saturn.
+  galileoCraft: { visibleKm: 400000, maxKm: 4000 },
+  // Over Mercury, with BepiColombo.
+  messengerCraft: { visibleKm: 60000, maxKm: 200 },
   // The two curios between Jupiter and Io (core/curios.js curioSizeKm sizes them the same).
   monolith: { visibleKm: 2e6, maxKm: 4000 },
   unknown: { visibleKm: 2e6, maxKm: 4000 },

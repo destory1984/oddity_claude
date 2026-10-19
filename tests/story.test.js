@@ -177,7 +177,7 @@ test('a log that already had the last slot keeps it, and is told nothing more', 
 
 test('Sora has a word for each probe left alone, and each is a real place or craft', () => {
   const known = new Set([...STORIES.map((s) => s.id), ...CRAFT.map((c) => c.id)]);
-  assert.deepEqual(Object.keys(GREETINGS).sort(), ['danuri', 'lunokhod1', 'opportunity', 'phoenix', 'spirit', 'voyager1', 'voyager2']);
+  assert.deepEqual(Object.keys(GREETINGS).sort(), ['danuri', 'galileoCraft', 'lunokhod1', 'messengerCraft', 'opportunity', 'phoenix', 'rosettaCraft', 'spirit', 'voyager1', 'voyager2']);
   for (const [id, line] of Object.entries(GREETINGS)) {
     assert.ok(known.has(id), id);
     assert.ok(line.length <= 25 && (line.match(/!/g) ?? []).length <= 1, id);

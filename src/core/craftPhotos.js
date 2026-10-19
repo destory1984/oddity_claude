@@ -132,4 +132,15 @@ export const CRAFT_PHOTOS = {
   psyche: {
     craft: { file: 'psyche-craft.jpg', caption: t('2022년 5월, 날개를 접은 채 떠날 준비를 하던 프시케.'), credit: 'NASA/Isaac Watson' },
   },
+  rosettaCraft: {
+    craft: { file: 'rosettaCraft-craft.jpg', caption: t('독일 다름슈타트의 유럽우주국 관제 센터에 놓인, 로제타와 똑같이 만든 시험용 모형. 앞의 큰 접시가 안테나입니다.'), credit: 'Summerbrize (CC BY-SA 4.0)' },
+  },
+  galileoCraft: {
+    craft: { file: 'galileoCraft-craft.jpg', caption: t('1989년 발사 전, 조립을 마친 갈릴레오. 맨 위에 접혀 있는 것이 우산 모양 안테나입니다.'), credit: 'NASA' },
+    shots: [{ file: 'galileoCraft-shot1.jpg', title: t('갈릴레오가 찍은 유로파'), caption: t('1990년대 후반 갈릴레오가 찍은 사진을 2014년에 다시 이어 붙인 유로파. 얼음 껍질에 금이 가득합니다.'), credit: 'NASA/JPL-Caltech/SETI Institute' }],
+  },
+  messengerCraft: {
+    craft: { file: 'messengerCraft-craft.jpg', caption: t('2004년 발사 전, 조립 중인 메신저. 양옆에 태양 전지판이 달려 있습니다.'), credit: 'NASA' },
+    shots: [{ file: 'messengerCraft-shot1.jpg', title: t('메신저가 찍은 처음과 마지막 사진'), caption: t('2011년 3월 29일 수성 궤도에서 처음 찍은 사진(왼쪽)과, 2015년 4월 30일 떨어지기 직전에 찍은 마지막 사진(오른쪽).'), credit: 'NASA/JHUAPL/Carnegie Institution of Washington' }],
+  },
 };

@@ -272,6 +272,35 @@ export const CRAFT = [
     launched: 2023,
     intro: t('금속 소행성 프시케로 가는 미국 탐사선입니다. 푸른 빛을 내는 이온 엔진으로 날며, 2029년 8월에 닿습니다.'),
   },
+  // Three whose missions ended on the body they studied (the user, 2026-10-19: "다 넣어"),
+  // shown as memorials going round it, as Cassini is. Their ids are not the story places'
+  // ('rosetta', 'messenger', 'galileoProbe') nor the photo mission 'galileo'.
+  // Rosetta flew 10 to 1,500 km from 67P (2014 → 2016) and came down on it on
+  // 30 September 2016. The comet is 4 km long: the ring is drawn 300 km up, far enough
+  // that a jump to the craft (core/teleport.js, 300 km off) still sees it.
+  {
+    id: 'rosettaCraft', name: t('로제타'), nameEn: 'Rosetta', kind: 'craft', parent: 'churyumov',
+    ring: { altitudeKm: 300, lapPlayS: 5400, tiltDeg: 50, phaseDeg: 30 },
+    launched: 2004,
+    intro: t('유럽의 혜성 탐사선입니다. 2014년부터 2년 동안 이 혜성 곁을 돌며 착륙선 필레를 내려보냈고, 2016년 9월 30일 혜성에 내려앉아 임무를 마쳤습니다. 여기 있는 것은 그 기념입니다.'),
+  },
+  // Galileo went round Jupiter 35 times (1995 → 2003) on long loops near the equator;
+  // drawn as a ring between Io and Europa. It was sent into Jupiter on 21 September 2003.
+  {
+    id: 'galileoCraft', name: t('갈릴레오'), nameEn: 'Galileo', kind: 'craft', parent: 'jupiter',
+    ring: { altitudeKm: 120000 - 69911, lapPlayS: 6480, tiltDeg: 4, phaseDeg: 250 },
+    launched: 1989,
+    intro: t('목성 둘레를 처음 돈 미국 탐사선입니다. 목성의 공기 속으로 탐사구를 내려보냈고, 8년 동안 목성을 35바퀴 돈 뒤 2003년 목성으로 뛰어들어 임무를 마쳤습니다. 여기 있는 것은 그 기념입니다.'),
+  },
+  // MESSENGER went round Mercury over the poles (2011 → 2015), 200 km to 15,000 km up,
+  // tilted 82.5 degrees; drawn as a ring lower than BepiColombo's. It fell on Mercury on
+  // 30 April 2015 (the story place 'messenger').
+  {
+    id: 'messengerCraft', name: t('메신저'), nameEn: 'MESSENGER', kind: 'craft', parent: 'mercury',
+    ring: { altitudeKm: 500, lapPlayS: 4000, tiltDeg: 82.5, phaseDeg: 220 },
+    launched: 2004,
+    intro: t('수성 둘레를 처음 돈 미국 탐사선입니다. 4년 동안 수성 전체의 지도를 만들었고, 2015년 4월 30일 수성에 떨어져 임무를 마쳤습니다. 여기 있는 것은 그 기념입니다.'),
+  },
 ];
 named(CRAFT);
 

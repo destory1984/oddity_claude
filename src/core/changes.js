@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-19', text: t('임무를 마친 탐사선 셋의 기념 모형이 생겼습니다. 혜성의 로제타, 목성의 갈릴레오, 수성의 메신저입니다.') },
   { day: '2026-10-19', text: t('하늘 소식에 유성우, 행성이 나란히 서는 날, 아포피스가 지나가는 날이 뜹니다.') },
   { day: '2026-10-19', text: t('이야기 장소 넷이 생겼습니다. 루나 3호가 달 뒷면을 처음 찍은 곳, 경주 첨성대, 스톤헨지, 아레시보 전파망원경입니다.') },
   { day: '2026-10-19', text: t('탐사선 둘이 생겼습니다. 일을 마친 별 지도 위성 가이아와, 금속 소행성으로 가는 프시케입니다.') },

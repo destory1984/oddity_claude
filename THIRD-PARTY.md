@@ -203,7 +203,7 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 
 ## 탐사선 사진과 탐사선이 찍은 사진
 
-`public/assets/craftPhotos/` 의 사진 49장은 이름표의 "사진 보기" 단추가 보인다. 모두 위키미디어 공용에서 받아 가로 1024px, 세로 1400px 안에 들도록 줄였다(2026-10-17). CC BY-SA 사진은 줄인 것도 같은 조건으로 쓸 수 있다. 일본 JAXA(상업 이용에 사전 허락이 필요하다)와 중국 국가항천국(다시 쓰는 조건을 밝히지 않았다)의 사진은 넣지 않았다.
+`public/assets/craftPhotos/` 의 사진 56장은 이름표의 "사진 보기" 단추가 보인다. 모두 위키미디어 공용에서 받아 가로 1024px, 세로 1400px 안에 들도록 줄였다(2026-10-17). CC BY-SA 사진은 줄인 것도 같은 조건으로 쓸 수 있다. 일본 JAXA(상업 이용에 사전 허락이 필요하다)와 중국 국가항천국(다시 쓰는 조건을 밝히지 않았다)의 사진은 넣지 않았다.
 
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
@@ -221,6 +221,11 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `hera-craft.jpg` | [Hera in orbit.jpg](https://commons.wikimedia.org/wiki/File:Hera_in_orbit.jpg) | ESA (CC BY-SA 3.0 IGO) | CC BY-SA 3.0 IGO |
 | `psyche-craft.jpg` | [Psyche Spacecraft Unwrapped (KSC-20220503-PH-ILW01 0062).jpg](https://commons.wikimedia.org/wiki/File:Psyche_Spacecraft_Unwrapped_(KSC-20220503-PH-ILW01_0062).jpg) | NASA/Isaac Watson | Public domain |
 | `gaia-craft.jpg` | [Maquette de Gaia salon du Bourget 2013 DSC 0191.JPG](https://commons.wikimedia.org/wiki/File:Maquette_de_Gaia_salon_du_Bourget_2013_DSC_0191.JPG) | Pline | CC BY-SA 3.0 |
+| `rosettaCraft-craft.jpg` | [ESA Raumsonde Rosetta, ESOC, Darmstadt, 04.09.2009.jpg](https://commons.wikimedia.org/wiki/File:ESA_Raumsonde_Rosetta,_ESOC,_Darmstadt,_04.09.2009.jpg) | Summerbrize | CC BY-SA 4.0 |
+| `galileoCraft-craft.jpg` | [Galileo Preparations - GPN-2000-000672.jpg](https://commons.wikimedia.org/wiki/File:Galileo_Preparations_-_GPN-2000-000672.jpg) | NASA | Public domain |
+| `galileoCraft-shot1.jpg` | [PIA19048 realistic color Europa mosaic edited.jpg](https://commons.wikimedia.org/wiki/File:PIA19048_realistic_color_Europa_mosaic_edited.jpg) | NASA/JPL-Caltech/SETI Institute | Public domain |
+| `messengerCraft-craft.jpg` | [MESSENGER Assembly.jpg](https://commons.wikimedia.org/wiki/File:MESSENGER_Assembly.jpg) | NASA | Public domain |
+| `messengerCraft-shot1.jpg` | [PIA19449-PlanetMercury-MESSENGER-Images-First-20110329-Last-20150430.jpg](https://commons.wikimedia.org/wiki/File:PIA19449-PlanetMercury-MESSENGER-Images-First-20110329-Last-20150430.jpg) | NASA/JHUAPL/Carnegie Institution of Washington | Public domain |
 | `hubble-craft.jpg` | [View of Hubble after Being Released from the Shuttle Atlantis (28223588012).jpg](https://commons.wikimedia.org/wiki/File:View_of_Hubble_after_Being_Released_from_the_Shuttle_Atlantis_(28223588012).jpg) | NASA | Public domain |
 | `hubble-shot1.jpg` | [Pillars of creation 2014 HST WFC3-UVIS full-res denoised.jpg](https://commons.wikimedia.org/wiki/File:Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg) | NASA, ESA, Hubble Heritage Team (STScI/AURA) | Public domain |
 | `iss-craft.jpg` | [International Space Station after undocking of STS-132.jpg](https://commons.wikimedia.org/wiki/File:International_Space_Station_after_undocking_of_STS-132.jpg) | NASA | Public domain |

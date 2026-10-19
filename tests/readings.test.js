@@ -9,7 +9,7 @@ import { STORY_MORE } from '../src/core/storyMore.js';
 
 test('every body and every craft has something to read: two paragraphs, plain sentences', () => {
   const ids = [...BODY_DATA.map((b) => b.id), ...CRAFT.map((c) => c.id)];
-  assert.equal(ids.length, 90);
+  assert.equal(ids.length, 93);
   assert.deepEqual(Object.keys(READINGS).sort(), [...ids].sort());
   for (const id of ids) {
     const text = READINGS[id];

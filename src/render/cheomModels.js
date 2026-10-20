@@ -113,11 +113,12 @@ function nightPiece(scene, name) {
   const grass = lit(scene, `${name}Grass`);
   grass.emissiveColor = new Color3(0.035, 0.055, 0.05);
   grass.backFaceCulling = false;
-  const field = CreatePlane(`${name}Field`, { width: 10, height: 5.6 }, scene);
+  // (To the hills and far nearer than the tower: Earth's own map showed at the view's foot.)
+  const field = CreatePlane(`${name}Field`, { width: 40, height: 23.2 }, scene);
   field.parent = root;
   field.material = grass;
   field.rotation.x = Math.PI / 2;
-  field.position.set(0, 0, 0.4);
+  field.position.set(0, 0, -8.4);
   field.isPickable = false;
   const hill = lit(scene, `${name}Hill`);
   hill.emissiveColor = new Color3(0.025, 0.035, 0.05);

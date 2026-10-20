@@ -89,11 +89,13 @@ function hengeStonesPiece(scene, name) {
   // chalky earth, and a darker trench just outside it, both open where the axis runs out.
   const grass = lit(scene, `${name}Grass`);
   grass.backFaceCulling = false;
-  const field = CreatePlane(`${name}Field`, { width: 9, height: HENGE.sky + 2.4 }, scene);
+  // (Far wider and nearer than the stones: its edge showed Earth's own map beyond it, a
+  // pale band at the foot of the view that slanted the ground.)
+  const field = CreatePlane(`${name}Field`, { width: 40, height: HENGE.sky + 20 }, scene);
   field.parent = root;
   field.material = grass;
   field.rotation.x = Math.PI / 2;
-  field.position.set(0, 0, (HENGE.sky - 2.4) / 2);
+  field.position.set(0, 0, (HENGE.sky - 20) / 2);
   field.isPickable = false;
   const bank = lit(scene, `${name}Bank`);
   const ditch = lit(scene, `${name}Ditch`);

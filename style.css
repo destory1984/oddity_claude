@@ -7219,15 +7219,3 @@ dialog#storyCard[open] > .backKey,
 dialog#settings[open] > .backKey {
   position:fixed;
 }
-
-/* The journal's way back is the same blue key as every sheet's, not paper (the user,
-   2026-10-20, of the back arrow drawn on a blue key and on the paper one: "파란색 4"). */
-#journal > .backKey,
-#journal > .backKey:hover,
-#journal > .backKey:active {
-  border:1px solid #9fb4ff66;
-  border-radius:12px;
-  background:#0b1630d9;
-  box-shadow:none;
-  color:#fff;
-}

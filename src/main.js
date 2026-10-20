@@ -1769,7 +1769,8 @@ ${STORY_MORE[target.id]}` : told };
     pageMove = move;
     move.finished.then(() => { if (pageMove === move) { move.cancel(); pageMove = null; } }, () => {});
   });
-  const scannerDust = createVanish();
+  const dustHeard = (going) => sound.cue(going ? 'dustAway' : 'dustBack');
+  const scannerDust = createVanish({ heard: dustHeard });
   function showScanner(on, swirl = false) {
     const words = on ? t('스캐너 끄기') : t('스캐너 켜기');
     $('scannerButton').setAttribute('aria-pressed', String(on));
@@ -2500,7 +2501,7 @@ ${STORY_MORE[target.id]}` : told };
   // Sora leaves as star dust (ui/vanish.js), and comes back the same way; while it plays
   // she is not drawn, the picture of her stands in. (A soap bubble took turns with it till
   // the user chose: "별가루로 가자".)
-  const vanish = createVanish();
+  const vanish = createVanish({ heard: dustHeard });
   const vanishKind = 'dust';
   let herPicture = null;
   let heroHeld = false;

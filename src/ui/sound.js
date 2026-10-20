@@ -212,6 +212,29 @@ export function createSound() {
     noise({ start, length: 0.015, volume: volume * 0.5, freq: 4000 });
   }
 
+  // Star dust, 1.9 s as ui/vanish.js's DUST_S. Going: most specks leave in the first
+  // second, so the glints come thick at first and thin out, a little higher as they
+  // rise. Coming back: the same backwards, gathering to a soft chime as she is whole.
+  function stardust(going) {
+    const glints = 26;
+    for (let i = 0; i < glints; i += 1) {
+      // 0 → 1.6 s, more of them early (going); mirrored when coming back.
+      const u = (i + Math.random()) / glints;
+      const at = 1.6 * u * u;
+      const start = going ? at : 1.85 - at;
+      const note = DUST_NOTES[Math.floor(Math.random() * DUST_NOTES.length)];
+      const climb = going ? 1 + 0.25 * u : 1.25 - 0.25 * u;
+      tone({ freq: note * climb, start, length: 0.07 + 0.12 * Math.random(), volume: (0.03 + 0.035 * Math.random()) * (1 - 0.5 * u), attack: 0.004 });
+    }
+    noise(going
+      ? { start: 0, length: 1.5, volume: 0.035, type: 'highpass', freq: 4500, to: 9000, attack: 0.08 }
+      : { start: 0.35, length: 1.5, volume: 0.035, type: 'highpass', freq: 9000, to: 4500, attack: 1.2 });
+    if (!going) {
+      bell(2093, 1.8, 0.035);
+      bell(3136, 1.88, 0.025);
+    }
+  }
+
   // Music box: high, bell-like, with a third-harmonic shimmer.
   function bell(freq, start = 0, volume = 0.1) {
     tone({ freq, start, length: 1.1, volume });
@@ -219,6 +242,8 @@ export function createSound() {
   }
 
   const PENTATONIC = [523, 587, 659, 784, 880, 1047, 1175, 1319];
+  // Star dust's glints: the scale two octaves up (2 → 3.5 kHz).
+  const DUST_NOTES = PENTATONIC.slice(0, 5).map((f) => f * 4);
 
   // The long sounds of a scene played again (a rocket's roar runs ten seconds) go
   // through a bus of their own, so that leaving the scene can still them at once.
@@ -294,6 +319,11 @@ export function createSound() {
       pluck(784, 0, 0.12, 0.5);
       pluck(587, 0.14, 0.12, 0.5);
     },
+    // Star dust (ui/vanish.js: Sora in 우주멍, the scanner switched on or off): a shower
+    // of tiny high glints over a soft hiss, as if powder were scattered (the user,
+    // 2026-10-20: "별빛 효과(스캐너, 소라)가 날 때에는 가루가 뿌려지는 듯한 효과음 넣어줘").
+    dustAway: () => stardust(true),
+    dustBack: () => stardust(false),
     click: () => pluck(1319, 0, 0.05, 0.2),
     // Docking: air rushing up as the approach begins, a tick for each count, then the
     // latch: a low clunk and two rising bells. Letting go plays the bells falling.

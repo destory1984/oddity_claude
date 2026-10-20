@@ -90,7 +90,8 @@ function specks(her) {
 }
 
 // sheetFor: () => a canvas over the view and under the words, made and put away here.
-export function createVanish() {
+// heard(going): called as the dust starts, for its sound (ui/sound.js dustAway, dustBack).
+export function createVanish({ heard } = {}) {
   let frame = 0;
   let canvas = null;
   function sheet() {
@@ -239,7 +240,9 @@ export function createVanish() {
     play(kind, her, going, done) {
       stop();
       if (!her) return done();
-      return kind === 'bubble' ? bubble(her, going, done) : dust(her, going, done);
+      if (kind === 'bubble') return bubble(her, going, done);
+      heard?.(going);
+      return dust(her, going, done);
     },
     stop,
   };

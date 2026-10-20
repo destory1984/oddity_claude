@@ -1,5 +1,6 @@
-// Synthesized game sounds (Web Audio). No sound files: every cue is built from
-// oscillators and a noise buffer, so nothing is downloaded and nothing is licensed.
+// Synthesized game sounds (Web Audio): every cue is built from oscillators and a noise
+// buffer, but one: star dust's sprinkle is a wave breaking on a shore, a recording
+// (public/assets/sounds/stardust.mp3, 1.9 s, 24 KB; CC BY, THIRD-PARTY.md).
 
 import { callFor } from '../core/voice.js';
 import { BAR_S, barPlan, tuneFor, nextTuneBar, tuneOrder, barInOrder } from '../core/music.js';
@@ -85,6 +86,7 @@ export function createSound() {
     noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const data = noiseBuffer.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    loadDust();
 
     // Flight: a quiet wind and nothing else (there is no air out here; it is a game).
     // A soft band of noise with a lower one under it, swelling slowly like gusts.
@@ -215,6 +217,30 @@ export function createSound() {
   // Star dust, 1.9 s as ui/vanish.js's DUST_S. Going: most specks leave in the first
   // second, so the glints come thick at first and thin out, a little higher as they
   // rise. Coming back: the same backwards, gathering to a soft chime as she is whole.
+  // The sprinkle under the glints (the user, 2026-10-20, of 공유마당's "잔잔히 밀려오는
+  // 파도소리": "여기에 있는 소리 써보자"): the 1.9 s of a wave breaking, 19.1 s into it,
+  // its low roar taken out (high-pass at 1.2 kHz) so that it is sand or powder thrown
+  // rather than the sea. Played forward as she scatters, backward as she gathers.
+  // Till it has come (or if it cannot), the soft hiss of before stands in.
+  let dustBuffers = null;
+  function loadDust() {
+    if (typeof fetch !== 'function') return;
+    fetch(`${import.meta.env.BASE_URL}assets/sounds/stardust.mp3`)
+      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
+      // (The callback form: older Safari has no promise from decodeAudioData.)
+      .then((bytes) => new Promise((done, fail) => ctx.decodeAudioData(bytes, done, fail)))
+      .then((ahead) => {
+        const back = ctx.createBuffer(1, ahead.length, ahead.sampleRate);
+        const from = ahead.getChannelData(0);
+        const to = back.getChannelData(0);
+        for (let i = 0; i < from.length; i += 1) to[i] = from[from.length - 1 - i];
+        dustBuffers = [ahead, back];
+      })
+      .catch(() => {});
+  }
+  // (At 0.6 it was as loud as the 'discovered' tune; it comes far more often.)
+  const DUST_VOLUME = 0.4;
+
   function stardust(going) {
     const glints = 26;
     for (let i = 0; i < glints; i += 1) {
@@ -226,9 +252,18 @@ export function createSound() {
       const climb = going ? 1 + 0.25 * u : 1.25 - 0.25 * u;
       tone({ freq: note * climb, start, length: 0.07 + 0.12 * Math.random(), volume: (0.03 + 0.035 * Math.random()) * (1 - 0.5 * u), attack: 0.004 });
     }
-    noise(going
-      ? { start: 0, length: 1.5, volume: 0.035, type: 'highpass', freq: 4500, to: 9000, attack: 0.08 }
-      : { start: 0.35, length: 1.5, volume: 0.035, type: 'highpass', freq: 9000, to: 4500, attack: 1.2 });
+    if (dustBuffers) {
+      const src = ctx.createBufferSource();
+      src.buffer = dustBuffers[going ? 0 : 1];
+      const level = ctx.createGain();
+      level.gain.value = DUST_VOLUME;
+      src.connect(level).connect(sfx);
+      src.start(ctx.currentTime);
+    } else {
+      noise(going
+        ? { start: 0, length: 1.5, volume: 0.035, type: 'highpass', freq: 4500, to: 9000, attack: 0.08 }
+        : { start: 0.35, length: 1.5, volume: 0.035, type: 'highpass', freq: 9000, to: 4500, attack: 1.2 });
+    }
     if (!going) {
       bell(2093, 1.8, 0.035);
       bell(3136, 1.88, 0.025);

@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-20', text: t('천체, 탐사선, 이야기 장소 224곳의 읽을거리에 한 문단씩 더 썼습니다.') },
   { day: '2026-10-20', text: t('사진 보기의 읽을거리가 적어도 화면 한 쪽을 채웁니다.') },
   { day: '2026-10-20', text: t('사진 모드의 "사진 저장" 단추가 사진기 그림과 함께 "사진 찍기"가 되었습니다.') },
   { day: '2026-10-20', text: t('수첩 제목 옆의 소라 그림이 글자 크기에 맞춰 작아졌습니다.') },

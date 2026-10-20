@@ -86,6 +86,7 @@ import {
 } from './core/dock.js';
 import { inspectLight } from './core/lamp.js';
 import { READINGS, bodyFacts } from './core/readings.js';
+import { PHOTO_MORE } from './core/photoMore.js';
 import { readingQuizFor, readingKey } from './core/readingQuiz.js';
 import { STUNTS, startStunt, stepStunt, stuntStatus, recordStunt, recordText, valueText, stuntById } from './core/stunts.js';
 import { STORY_DETAILS } from './core/storyDetails.js';
@@ -954,11 +955,15 @@ async function init() {
   // What there is to read about the target being looked at closely: a body found, a
   // craft met, a place been to. Before that, only how to open it.
   const KIND = { star: t('별'), planet: t('행성'), moon: t('위성'), dwarf: t('왜행성'), asteroid: t('소행성'), comet: t('혜성'), interstellar: t('성간 천체'), tno: t('해왕성 바깥 천체') };
+  // (A third paragraph, core/photoMore.js, so that the photo page's reading fills a screen.)
+  const withMore = (id, text) => (PHOTO_MORE[id] ? `${text}
+
+${PHOTO_MORE[id]}` : text);
   function readingFor(target) {
     const head = { name: target.name, nameEn: target.nameEn };
     if (target.kind === 'craft') {
       if (!(progress.craft ?? []).includes(target.id)) return { ...head, kicker: t('탐사선'), text: t('아직 수첩에 없는 탐사선입니다. 3,000km 안까지 다가가면 읽을거리가 열립니다.') };
-      return { ...head, kicker: t`${target.launched}년 발사`, text: READINGS[target.id] ?? target.intro, quiz: readingQuiz(target.id) };
+      return { ...head, kicker: t`${target.launched}년 발사`, text: withMore(target.id, READINGS[target.id] ?? target.intro), quiz: readingQuiz(target.id) };
     }
     if (target.kind === 'site') {
       const story = STORIES.find((s) => s.id === target.id);
@@ -968,9 +973,10 @@ async function init() {
       const kicker = `${story.year ? t`${story.year}년 · ` : ''}${here(target.parent).name}`;
       if (!progress.stories.includes(target.id)) return { ...head, kicker, text: t`아직 수첩에 없는 곳입니다. ${story.hint}.` };
       const told = STORY_DETAILS[target.id]?.detail ?? story.text;
-      return { ...head, kicker, text: STORY_MORE[target.id] ? `${told}
+      // (A place that shares its id with a craft, cassini, has its own as "place:cassini".)
+      return { ...head, kicker, text: withMore(PHOTO_MORE[`place:${target.id}`] ? `place:${target.id}` : target.id, STORY_MORE[target.id] ? `${told}
 
-${STORY_MORE[target.id]}` : told };
+${STORY_MORE[target.id]}` : told) };
     }
     // A curio (core/curios.js): no journal slot; where it comes from and its notice (the
     // ship by Jupiter's slab, the slab's).
@@ -980,7 +986,7 @@ ${STORY_MORE[target.id]}` : told };
     const parent = target.parent ? bodyById(target.parent) : null;
     const kicker = `${KIND[target.kind] ?? t('천체')}${parent && target.kind === 'moon' ? t` · ${parent.name}의 위성` : ''}`;
     if (!progress.discovered.includes(target.id)) return { ...head, kicker, text: t('아직 수첩에 없는 천체입니다. 표면에서 5만km 안까지 다가가면 읽을거리가 열립니다.') };
-    return { ...head, kicker, facts: bodyFacts(BODY_DATA.find((b) => b.id === target.id), parent?.name), text: READINGS[target.id] ?? FACTS[target.id] ?? '', quiz: readingQuiz(target.id) };
+    return { ...head, kicker, facts: bodyFacts(BODY_DATA.find((b) => b.id === target.id), parent?.name), text: withMore(target.id, READINGS[target.id] ?? FACTS[target.id] ?? ''), quiz: readingQuiz(target.id) };
   }
   function readingQuiz(id) {
     const quiz = READINGS[id] ? readingQuizFor(id) : null;

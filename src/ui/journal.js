@@ -140,7 +140,12 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     $('journalDaily').hidden = !today;
     if (!today) return;
     const label = today.index ? t`부탁 ${today.index + 1}` : t('오늘의 부탁');
-    $('dailyText').textContent = `${today.done ? '★' : '☆'} ${label}: ${today.text}`;
+    // One done has grandmother's red ring and "해냄" before it, in a paler ink (the user,
+    // 2026-10-20: "해낸 부탁은 표시를 해줘. 헷갈리네": a ★ for the ☆ was all that told it).
+    const text = $('dailyText');
+    text.classList.toggle('done', today.done);
+    if (today.done) text.replaceChildren(picture('notebook/mark-right.png', ''), t`${label} · 해냄: ${today.text}`);
+    else text.textContent = `☆ ${label}: ${today.text}`;
     // The last seven days, today last.
     $('dailyWeek').setAttribute('aria-label', t`지난 7일 가운데 ${today.week.filter(Boolean).length}일 해냄`);
     $('dailyWeek').replaceChildren(...today.week.map((did) => (did ? picture('notebook/day-star.png', '') : document.createElement('i'))));
@@ -399,7 +404,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     $('lookBackButton').hidden = album.length < 2;
     $('albumNote').textContent = album.length
       ? t`사진 모드에서 저장한 사진 ${album.length}장입니다(최근 ${ALBUM_MAX}장까지). 사진을 누르면 크게 보입니다. 할머니께 엽서로 보내면 다음 날 답장과 별이 옵니다.`
-      : t('사진 모드에서 "사진 저장"을 누르면 여기에 모입니다.');
+      : t('사진 모드에서 "사진 찍기"를 누르면 여기에 모입니다.');
     album.forEach((entry, index) => {
       const caption = photoCaption(entry, missions);
       const figure = document.createElement('figure');

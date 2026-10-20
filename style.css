@@ -7162,3 +7162,43 @@ dialog#bigMap[open] #bigMapActions {
     background-color:#f2c14e40;
   }
 }
+
+/* A request done (ui/journal.js renderDaily): grandmother's red ring before it, its words
+   in the paler ink of what is behind her. */
+#dailyText img {
+  width:22px;
+  height:22px;
+  margin-right:6px;
+  vertical-align:-5px;
+  image-rendering:pixelated;
+}
+
+#dailyText.done {
+  color:#7a5a36;
+}
+
+/* Sora's picture beside the journal's title is the title's own height (the user,
+   2026-10-20: "탐험수첩의 소라 아이콘을 글자크기게 맞춰서 작게"; it was 48 x 64px beside 20px
+   letters): 1.4 times the letters, so it grows and shrinks with them; drawn smooth, as
+   pixels this far down would break up. */
+#journal #journalPortrait {
+  width:auto;
+  height:1.4em;
+  margin-right:6px;
+  vertical-align:-0.3em;
+  image-rendering:auto;
+}
+
+/* Photo mode's key says what it does, "사진 찍기", with a camera before it (the user,
+   2026-10-20: "사진 저장 버튼 -> 사진 찍기로 변경. 앞에 사진기 아이콘도 넣어"): the top
+   row's camera, drawn in the key's own dark ink. */
+#photoTools #capture {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+
+#photoTools #capture svg {
+  flex:none;
+}

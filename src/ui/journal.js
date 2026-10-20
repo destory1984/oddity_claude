@@ -50,9 +50,47 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     if (e.code === 'KeyJ' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) dialog.close();
   });
 
+  // What was done last (the user, 2026-10-20: "탐험 수첩 펼치면.. 마지막으로 해낸 것
+  // 열어줘"): a body found or landed on, a photo mission, a story place, a craft met, a
+  // curio, a tour gone round: its part and its row. Kept in the browser, so that a new
+  // day opens the journal there too. { tab, id, at, seen }: seen once the journal has
+  // opened on it.
+  const LAST_KEY = 'oddity.journal.last';
+  const DONE_TABS = [['discovered', 'bodies'], ['landed', 'bodies'], ['photos', 'missions'], ['stories', 'stories'], ['craft', 'craft'], ['curios', 'curios'], ['tours', 'tours']];
+  let lastDone = null;
+  try {
+    lastDone = JSON.parse(localStorage.getItem(LAST_KEY) ?? 'null');
+  } catch {
+    // Not kept here: the journal opens as it did.
+  }
+  function keepLastDone() {
+    try {
+      localStorage.setItem(LAST_KEY, JSON.stringify(lastDone));
+    } catch {
+      // Not kept; it still holds for this sitting.
+    }
+  }
+  function noteDone(before, after) {
+    // (Called every frame: a log that has not changed is the same object.)
+    if (!before || !after || before === after) return;
+    // The log wiped: nothing was done last.
+    if (after.discovered.length < before.discovered.length) {
+      lastDone = null;
+      keepLastDone();
+      return;
+    }
+    for (const [key, part] of DONE_TABS) {
+      const had = before[key] ?? [];
+      const newly = (after[key] ?? []).filter((id) => !had.includes(id));
+      if (newly.length) lastDone = { tab: part, id: newly.at(-1), at: Date.now(), seen: false };
+    }
+    if (lastDone && !lastDone.seen) keepLastDone();
+  }
+
   // One part of the journal shows at a time (the whole of it was fourteen screens long
-  // on a phone). The part last looked at is the one it opens on.
-  let tab = 'bodies';
+  // on a phone). It opens on the part of what was done last, when that is new since it
+  // was last opened, and else on the part last looked at.
+  let tab = lastDone?.tab ?? 'bodies';
   function showTab(name) {
     tab = name;
     for (const button of $('journalTabs').children) button.setAttribute('aria-selected', String(button.dataset.tab === name));
@@ -192,6 +230,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const found = progress.discovered.includes(body.id);
       const landed = progress.landed.includes(body.id);
       const li = document.createElement('li');
+      li.dataset.id = body.id;
       const name = document.createElement('strong');
       // Its small drawing before its name; one not yet found is a dark shape, and a moon
       // sits under its planet, a little way in (style.css).
@@ -280,6 +319,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const shut = !done && mission.id === lastSlot && lastShut(progress);
       if (shut) continue;
       const li = document.createElement('li');
+      li.dataset.id = mission.id;
       li.className = done ? 'done' : '';
       const title = document.createElement('strong');
       title.textContent = `${done ? '✓' : '○'} ${mission.name}`;
@@ -321,6 +361,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     for (const story of members) {
       const done = (lastProgress.stories ?? []).includes(story.id);
       const li = document.createElement('li');
+      li.dataset.id = story.id;
       const last = !done && story.id === lastSlot;
       const shut = last && lastShut(lastProgress);
       const solved = done && (lastProgress.quiz ?? []).includes(story.id);
@@ -456,6 +497,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     for (const c of craft) {
       const met = (lastProgress.craft ?? []).includes(c.id);
       const li = document.createElement('li');
+      li.dataset.id = c.id;
       li.className = met ? 'done' : '';
       const title = document.createElement('strong');
       const solved = met && (lastProgress.quiz ?? []).includes(readingKey(c.id));
@@ -484,6 +526,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     for (const c of CURIOS.filter((x) => !x.group)) {
       const found = (lastProgress.curios ?? []).includes(c.id);
       const li = document.createElement('li');
+      li.dataset.id = c.id;
       li.className = found ? 'done' : '';
       const art = document.createElement('span');
       art.className = 'craftArt curioArt';
@@ -516,6 +559,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const isGoing = going?.id === tour.id;
       const isDone = done.includes(tour.id);
       const li = document.createElement('li');
+      li.dataset.id = tour.id;
       li.className = isGoing ? 'going' : isDone ? 'done' : '';
       const title = document.createElement('strong');
       title.textContent = `${isDone ? '✓' : '○'} ${tour.name}${isGoing ? t` · 가는 중 ${going.step}/${tour.stops.length}` : ''}`;
@@ -630,7 +674,19 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     renderViews();
     renderAlbum();
     dialog.showModal();
-    showTab(tab);
+    if (lastDone && !lastDone.seen && DONE_TABS.some(([, part]) => part === lastDone.tab)) {
+      showTab(lastDone.tab);
+      lastDone.seen = true;
+      keepLastDone();
+      // Its row in the middle of the part, lit for a moment.
+      const row = $('journalScroll').querySelector(`section[data-tab="${lastDone.tab}"] li[data-id="${CSS.escape(lastDone.id)}"]`);
+      if (row) {
+        row.scrollIntoView({ block: 'center' });
+        row.classList.remove('lastDone');
+        void row.offsetWidth;
+        row.classList.add('lastDone');
+      }
+    } else showTab(tab);
   }
 
   return {
@@ -641,6 +697,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     },
     // Remembered for the next open; the open list is not rebuilt so focus stays put.
     update(progress, position, current = bodies) {
+      noteDone(lastProgress, progress);
       lastProgress = progress;
       lastPosition = position;
       lastBodies = current;

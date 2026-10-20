@@ -7144,3 +7144,21 @@ dialog#bigMap[open] #bigMapStage {
 dialog#bigMap[open] #bigMapActions {
   margin-top:auto;
 }
+
+/* What was done last, as the journal opens on it (ui/journal.js): its row lit in gold for
+   a moment, fading back to the paper. */
+#journal li.lastDone {
+  animation:lastDone 2.6s ease-out;
+}
+
+@keyframes lastDone {
+  0%, 35% { background-color:#f2c14e80; }
+  100% { background-color:transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #journal li.lastDone {
+    animation:none;
+    background-color:#f2c14e40;
+  }
+}

@@ -8,6 +8,10 @@ const $ = (id) => document.getElementById(id);
 // whatever that one also does on leaving (saving, sounds, the next lesson) is not lost.
 // The words at the foot stay (the user: "남기기"); the round ✕ of the photo view and the
 // ✕ at the right of the journal's head give way to it (style.css).
+// The way back is drawn as an arrow that bends back on itself, "to where you were" (the
+// user, 2026-10-20: "메뉴의 X 아이콘을 모두 왼쪽 화살표 아이콘으로 바꾸자", of five drawn:
+// "파란색 4"; it was a ✕). (Moved up 2.25 so that it sits in the middle of the key.)
+const BACK_ARROW = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(0.25 -2.25)"><path d="M9 7L4.5 11.5 9 16"/><path d="M5 11.5h9a5 5 0 0 1 0 10h-2"/></g></svg>';
 const BACK = {
   settings: 'closeSettings',
   journal: 'closeJournal',
@@ -34,7 +38,7 @@ export function addBackKeys() {
     key.type = 'button';
     key.setAttribute('aria-label', t('이전 화면으로'));
     key.title = t('이전 화면으로');
-    key.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    key.innerHTML = BACK_ARROW;
     key.addEventListener('click', (event) => {
       // (Not also a press on the sheet, which some sheets take as "close" or "next".)
       event.stopPropagation();
@@ -84,7 +88,7 @@ export function addViewBackKey(view, way, sheet = null) {
   key.type = 'button';
   key.setAttribute('aria-label', t('이전 화면으로'));
   key.title = t('이전 화면으로');
-  key.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  key.innerHTML = BACK_ARROW;
   key.addEventListener('click', (event) => {
     event.stopPropagation();
     way.click();

@@ -17,6 +17,13 @@
 // it, and its page gives KakaoTalk and the rest a picture card (index.html og:image).
 export const SHARE_BASE = 'https://destory1984.github.io/oddity_claude/';
 
+// The game's Android app, and an address that opens a link in it from Chrome (ui/openInApp.js):
+// with no app, Chrome goes on to `fallback` instead.
+export const APP_PACKAGE = 'io.github.destory1984.spaceoddity';
+export function appIntent(link, fallback = link) {
+  return `intent://${link.replace(/^https:\/\//, '')}#Intent;scheme=https;package=${APP_PACKAGE};S.browser_fallback_url=${encodeURIComponent(fallback)};end`;
+}
+
 // KakaoTalk's own sharing, a picture card with a key and no address written out (the user,
 // of the link in a bubble: "저런식으로 나오면, 사람들이 질겁해"). The JavaScript key of the
 // app "Space Oddity" (ID 1613524) on developers.kakao.com is made to stand in a web page:

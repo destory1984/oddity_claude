@@ -34,3 +34,10 @@ test('a line that is not a place is turned away', () => {
 test('the link is the published game, whatever page it is sent from', () => {
   assert.equal(SHARE_BASE, 'https://destory1984.github.io/oddity_claude/');
 });
+
+test('a shared place opens in the Android app by an intent address that falls back to the page', async () => {
+  const { appIntent, APP_PACKAGE } = await import('../src/core/sharePlace.js');
+  const link = `${SHARE_BASE}?p=earth.eh7.5cc`;
+  assert.equal(appIntent(link), `intent://destory1984.github.io/oddity_claude/?p=earth.eh7.5cc#Intent;scheme=https;package=${APP_PACKAGE};S.browser_fallback_url=${encodeURIComponent(link)};end`);
+  assert.equal(APP_PACKAGE, 'io.github.destory1984.spaceoddity');
+});

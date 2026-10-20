@@ -20,6 +20,7 @@ const BACK = {
   noteCard: 'closeNoteCard',
   gateScene: 'closeGate',
   practiceOffer: 'practicePass',
+  appOffer: 'appOfferStay',
   practiceWhy: 'practiceWhyOk',
   practiceDone: 'practiceKeep',
 };

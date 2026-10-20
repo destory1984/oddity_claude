@@ -5868,6 +5868,7 @@ body.practicing #testBar {
 }
 
 #practiceOffer,
+#appOffer,
 #practiceDone {
   width:min(420px,90vw);
 }
@@ -5884,15 +5885,19 @@ dialog .checkRow {
    out in gold as the practice's key at the top does, and "건너뛰기" is small and quiet
    under it (the user, 2026-10-10: "건너뛰기 버튼은 작게", "연습하기 버튼은 강조"). */
 #practiceOffer,
-#practiceOffer::backdrop {
+#appOffer,
+#practiceOffer::backdrop,
+#appOffer::backdrop {
   cursor:pointer;
 }
-#practiceOffer .journalActions {
+#practiceOffer .journalActions,
+#appOffer .journalActions {
   flex-direction:column;
   align-items:center;
   gap:14px;
 }
-#practiceGo {
+#practiceGo,
+#appOfferGo {
   margin-top:0;
   padding:12px 24px;
   font-size:17px;
@@ -5902,7 +5907,8 @@ dialog .checkRow {
   background-color:#3a2f1ccc;
   animation:practiceGlow 1.8s ease-in-out infinite;
 }
-#practicePass {
+#practicePass,
+#appOfferStay {
   width:auto;
   margin-top:0;
   padding:4px 10px;
@@ -5914,12 +5920,13 @@ dialog .checkRow {
   text-decoration:underline;
 }
 @media (prefers-reduced-motion: reduce) {
-  #practiceGo { animation:none; box-shadow:0 0 0 1px #ffd98a, 0 0 10px 3px #ffd98a88; }
+  #practiceGo, #appOfferGo { animation:none; box-shadow:0 0 0 1px #ffd98a, 0 0 10px 3px #ffd98a88; }
 }
 
 /* (The sheets' headings take the focus as they open, not a button: a flight key still
    held when the practice ends pressed "그대로 두기" at once.) */
 #practiceOffer h1:focus,
+#appOffer h1:focus,
 #practiceDone h1:focus {
   outline:none;
 }
@@ -6432,6 +6439,7 @@ dialog > .backKey {
 #noteCard,
 #gateScene,
 #practiceOffer,
+#appOffer,
 #practiceWhy,
 #practiceDone {
   padding-top:54px;
@@ -6486,6 +6494,7 @@ dialog > .backKey {
 dialog :is(#settings #closeSettings, #journal #journalBack, #storyCard #closeStoryCard, #noteCard #closeNoteCard,
   #gateScene #closeGate, #bigMap #bigMapActions button, #shareSheet .shareKeys button, #shareSheet #shareClose,
   #pair #closePair, #lookBack #lookClose, #practiceOffer #practiceGo, #practiceOffer #practicePass,
+  #appOffer #appOfferGo, #appOffer #appOfferStay,
   #practiceWhy #practiceWhyOk, #practiceDone #practiceKeep, #practiceDone #practiceHide) {
   min-height:44px;
   padding:10px 16px;
@@ -6502,7 +6511,7 @@ dialog :is(#settings #closeSettings, #journal #journalBack, #storyCard #closeSto
    screen's keys are (they were lined and lettered in gold; the journal's was filled gold). */
 dialog :is(#settings #closeSettings, #storyCard #closeStoryCard, #noteCard #closeNoteCard, #gateScene #closeGate,
   #pair #closePair, #lookBack #lookClose, #shareSheet #shareClose, #practiceWhy #practiceWhyOk,
-  #practiceDone #practiceKeep, #practiceDone #practiceHide, #practiceOffer #practicePass) {
+  #practiceDone #practiceKeep, #practiceDone #practiceHide, #practiceOffer #practicePass, #appOffer #appOfferStay) {
   border:1px solid var(--glass-line);
   background:var(--glass-fill);
   box-shadow:0 2px 10px #0006;
@@ -6523,19 +6532,22 @@ dialog#journal #journalBack {
 
 /* The practice's "연습하기": filled gold with dark letters, as "사진 저장" is; its slow glow
    stays. "건너뛰기" beside it is a plain key of the same size. */
-dialog#practiceOffer #practiceGo {
+dialog#practiceOffer #practiceGo,
+dialog#appOffer #appOfferGo {
   border:1px solid #fff3c4;
   background:var(--gold);
   color:#081725;
 }
 
-dialog#practiceOffer .journalActions {
+dialog#practiceOffer .journalActions,
+dialog#appOffer .journalActions {
   flex-direction:row;
   align-items:stretch;
   gap:8px;
 }
 
-dialog#practiceOffer .journalActions button {
+dialog#practiceOffer .journalActions button,
+dialog#appOffer .journalActions button {
   flex:1;
   width:auto;
   margin:0;
@@ -6753,7 +6765,7 @@ dialog#bigMap #bigMapActions button {
    a story card's, the side by side photos', the share sheet's and the practice's stay at
    the sheet's foot while a long text scrolls under them, fading out just above. A sheet
    that fits looks as it did. */
-dialog:is(#storyCard, #practiceOffer, #practiceWhy, #practiceDone) > .journalActions,
+dialog:is(#storyCard, #practiceOffer, #appOffer, #practiceWhy, #practiceDone) > .journalActions,
 dialog#pair > #closePair,
 dialog#shareSheet > #shareClose {
   position:sticky;
@@ -6761,7 +6773,7 @@ dialog#shareSheet > #shareClose {
   z-index:1;
 }
 
-dialog:is(#storyCard, #practiceOffer, #practiceWhy, #practiceDone) > .journalActions {
+dialog:is(#storyCard, #practiceOffer, #appOffer, #practiceWhy, #practiceDone) > .journalActions {
   padding-top:8px;
   background:#0d1a3a;
   box-shadow:0 -14px 14px #0d1a3a, 0 26px 0 #0d1a3a;
@@ -6775,7 +6787,9 @@ dialog#shareSheet > #shareClose {
 
 /* (The practice's offer begins by its own key only now: no hand over the whole sheet.) */
 #practiceOffer,
-#practiceOffer::backdrop {
+#appOffer,
+#practiceOffer::backdrop,
+#appOffer::backdrop {
   cursor:auto;
 }
 
@@ -6821,12 +6835,12 @@ dialog#journal > .backKey {
    wide on a 402px screen by the browser's own limit, some 18px inside). The journal and
    the photo page fill the screen; the map keeps its 18px for its strip of sky. */
 @media (max-width: 480px) {
-  dialog:is(#settings, #storyCard, #noteCard, #gateScene, #pair, #shareSheet, #lookBack, #practiceOffer, #practiceWhy, #practiceDone, #bigMap) {
+  dialog:is(#settings, #storyCard, #noteCard, #gateScene, #pair, #shareSheet, #lookBack, #practiceOffer, #appOffer, #practiceWhy, #practiceDone, #bigMap) {
     width:calc(100vw - 32px);
     max-width:none;
   }
 
-  dialog:is(#settings, #storyCard, #noteCard, #gateScene, #pair, #shareSheet, #lookBack, #practiceOffer, #practiceWhy, #practiceDone) {
+  dialog:is(#settings, #storyCard, #noteCard, #gateScene, #pair, #shareSheet, #lookBack, #practiceOffer, #appOffer, #practiceWhy, #practiceDone) {
     padding-left:20px;
     padding-right:20px;
   }
@@ -6991,6 +7005,7 @@ dialog > .backKey,
 #noteCard,
 #gateScene,
 #practiceOffer,
+#appOffer,
 #practiceWhy,
 #practiceDone {
   padding-top:62px;

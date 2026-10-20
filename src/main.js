@@ -49,6 +49,7 @@ import { createPracticeView } from './ui/practice.js';
 import { createJournal } from './ui/journal.js';
 import { createPhotoView } from './ui/photoView.js';
 import { addBackKeys, addViewBackKey } from './ui/backKeys.js';
+import { offerApp } from './ui/openInApp.js';
 import { photoSlides } from './core/photoSlides.js';
 import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
@@ -662,7 +663,7 @@ async function init() {
       if (paused) toast.show(t('멈췄습니다. Esc나 비행 키를 누르면 이어집니다.'), 'pause', 4);
     },
     onWheel: (deltaY) => photo.zoom(deltaY),
-    isBlocked: () => $('settings').open || $('journal').open || $('noteCard').open || $('bigMap').open || $('practiceOffer').open || $('practiceDone').open || $('practiceWhy').open,
+    isBlocked: () => $('settings').open || $('journal').open || $('noteCard').open || $('bigMap').open || $('practiceOffer').open || $('practiceDone').open || $('practiceWhy').open || $('appOffer').open,
   });
   photo = createPhoto({
     world,
@@ -2058,6 +2059,8 @@ ${STORY_MORE[target.id]}` : told };
   // The photo of what the plate names: the game waits behind it, as behind a card.
   let photoPriorPause = false;
   addBackKeys();
+  // A friend's place opened in a phone's browser goes to the game's app when it is there.
+  offerApp();
   const photoView = createPhotoView({
     onOpen() {
       photoPriorPause = paused;

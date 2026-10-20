@@ -241,8 +241,17 @@ export function createSound() {
   // halved, the user, 2026-10-20: "음량을 절반으로".)
   const DUST_VOLUME = 0.2;
   const DUST_FADE = 0.5;
+  const DUST_SHELF_HZ = 6000;
+  const DUST_SHELF_DB = -4;
 
   function stardust(going) {
+    // Its highs a little softer: 4 dB off above 6 kHz (the user, 2026-10-20: "소리 중에서
+    // 고음을 약간만 줄여봐").
+    const soft = ctx.createBiquadFilter();
+    soft.type = 'highshelf';
+    soft.frequency.value = DUST_SHELF_HZ;
+    soft.gain.value = DUST_SHELF_DB;
+    soft.connect(sfx);
     if (dustBuffers) {
       const src = ctx.createBufferSource();
       src.buffer = dustBuffers[going ? 0 : 1];
@@ -255,12 +264,12 @@ export function createSound() {
       level.gain.setValueAtTime(DUST_VOLUME, t);
       level.gain.setValueAtTime(DUST_VOLUME, end - DUST_FADE);
       level.gain.linearRampToValueAtTime(0, end);
-      src.connect(level).connect(sfx);
+      src.connect(level).connect(soft);
       src.start(t);
     } else {
       noise(going
-        ? { start: 0, length: 1.5, volume: 0.0175, type: 'highpass', freq: 4500, to: 9000, attack: 0.08 }
-        : { start: 0.35, length: 1.5, volume: 0.0175, type: 'highpass', freq: 9000, to: 4500, attack: 1.2 });
+        ? { start: 0, length: 1.5, volume: 0.0175, type: 'highpass', freq: 4500, to: 9000, attack: 0.08, out: soft }
+        : { start: 0.35, length: 1.5, volume: 0.0175, type: 'highpass', freq: 9000, to: 4500, attack: 1.2, out: soft });
     }
   }
 

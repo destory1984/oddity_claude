@@ -1,5 +1,6 @@
 import { TransformNode, CreateSphere, CreateLathe, DynamicTexture, StandardMaterial, Color3, Vector3, Quaternion } from './babylon.js';
 import { part, box, rod, nozzle, fuse, drum, aim } from './craftParts.js';
+import { seeded } from '../core/seeded.js';
 
 // The two curios near Jupiter (core/curios.js), built as craft are: about one unit
 // across, local +z toward the Sun (render/craft.js turns them so).
@@ -12,8 +13,7 @@ function marble(scene) {
   const c = map.getContext();
   c.fillStyle = '#efece6';
   c.fillRect(0, 0, 256, 512);
-  let seed = 7;
-  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const rnd = seeded(7);
   for (let v = 0; v < 22; v++) {
     const grey = 105 + Math.round(rnd() * 40);
     c.strokeStyle = `rgba(${grey}, ${grey}, ${grey + 12}, ${0.12 + rnd() * 0.35})`;

@@ -1,10 +1,15 @@
+import { seeded } from './seeded.js';
+
 // "그날로" at the landmarks: the craters, seas and mountains that have no machine standing
-// on them (the user, 2026-10-07: "시르티스는 애니가 없네", "다른 명소도 다 애니 넣자"). Three
+// on them (the user, 2026-10-07: "시르티스는 애니가 없네", "다른 명소도 다 애니 넣자"). Seven
 // kinds of stage, each made of the same few pieces (render/siteModels.js landmarkPieces):
 //   photo: a craft crosses the sky, its shutter sounds, the place's picture comes up.
 //   look: nothing flies: the picture comes up (seen from the ground, or a drawing).
 //   impact: something falls out of the sky and hits; then the picture of the place now.
 //   sunrise: no picture: the Sun comes up behind a ridge, goes back down, comes up again.
+//   huygens: no picture: Huygens at his telescope, Mars turning (render/huygensStage.js).
+//   solstice: no picture: Stonehenge at midsummer dawn (render/hengeModels.js).
+//   starNight: no picture: Cheomseongdae under wheeling stars (render/cheomModels.js).
 // The picture is the story's own (public/assets/stories/<id>.jpg). What each scene tells
 // is in core/landmarkScenes.js. Pieces are placed as in core/moonScenes.js: x to the
 // side, y up, in the model's units; a narrow phone's view ends about 1.45 to either side,
@@ -117,8 +122,8 @@ export const hengeAt = (r, angle) => [r * Math.sin(HENGE.axis + angle), r * Math
 // thick (d), its turn about the upright (rad), its lean and what it is. Each is a little
 // unlike the next (a seeded wobble, the same every time).
 export function hengeStones() {
-  let seed = 11;
-  const wobble = (n) => { seed = (seed * 16807) % 2147483647; return (seed / 2147483647 - 0.5) * 2 * n; };
+  const next = seeded(11);
+  const wobble = (n) => (next() - 0.5) * 2 * n;
   const stones = [];
   const { ring, trilithons, blue, heel } = HENGE;
   // (The axis runs between two uprights: the first is half a step round from it.)

@@ -1,6 +1,7 @@
 import { TransformNode, CreateSphere, CreatePlane, DynamicTexture, Texture, StandardMaterial, Color3 } from './babylon.js';
 import { part, box, drum, rod, fuse } from './craftParts.js';
 import { HUYGENS } from '../core/landmarkStages.js';
+import { seeded } from '../core/seeded.js';
 
 // Syrtis Major's scene (core/landmarkStages.js 'huygens'): a night in 1659, Christiaan
 // Huygens at his long telescope, what he sees in it drawn large in the middle (Mars
@@ -80,8 +81,7 @@ function stars(ctx, w, h) {
   g.addColorStop(1, '#16244a');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
-  let seed = 7;
-  const next = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const next = seeded(7);
   for (let i = 0; i < 220; i += 1) {
     ctx.fillStyle = `rgba(255,255,240,${0.3 + next() * 0.7})`;
     const r = next() < 0.08 ? 2.4 : 1.2;

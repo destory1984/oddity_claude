@@ -8,6 +8,7 @@ import { huygensPieces } from './huygensStage.js';
 import { DINO_BUILD, dinoGround } from './dinoModels.js';
 import { hengePieces } from './hengeModels.js';
 import { cheomPieces } from './cheomModels.js';
+import { seeded } from '../core/seeded.js';
 import {
   QUARTER, part, cyl, group, aim, box, drum, rod, dish, wing, rtg, nozzle, truss, fuse,
 } from './craftParts.js';
@@ -1126,8 +1127,7 @@ function sunrisePieces(scene, name) {
   const ctx = dots.getContext();
   ctx.fillStyle = '#04050c';
   ctx.fillRect(0, 0, 256, 256);
-  let seed = 7;
-  const next = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const next = seeded(7);
   for (let i = 0; i < 46; i += 1) {
     ctx.fillStyle = `rgba(255,255,255,${0.35 + 0.6 * next()})`;
     const size = next() < 0.2 ? 2 : 1;

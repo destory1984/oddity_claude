@@ -13,4 +13,6 @@ coverage/
 .superpowers/
 # promo video frames and films (build/promo)
 assets/promo/
+# screenshots, reference pictures and downloads kept beside the game (5.6 GB); the game's own pictures are in public/assets/
+/assets/
 .claude/worktrees/

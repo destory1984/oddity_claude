@@ -2,6 +2,7 @@ import {
   TransformNode, CreateBox, CreatePlane, CreateLathe, DynamicTexture, StandardMaterial, Color3, Color4, Constants, Mesh, VertexData, Vector3,
 } from './babylon.js';
 import { fuse } from './craftParts.js';
+import { seeded } from '../core/seeded.js';
 import { HENGE, HENGE_SUN, hengeStones, hengeLintels } from '../core/landmarkStages.js';
 
 // Stonehenge at dawn on midsummer's day, about 2500 BC (core/landmarkStages.js 'solstice'
@@ -69,8 +70,7 @@ function stone(scene, name, parent, material, { x, z, w, h, d, turn, lean }, gre
 function hengeStonesPiece(scene, name) {
   const root = new TransformNode(name, scene);
   const rock = lit(scene, `${name}Rock`);
-  let seed = 5;
-  const next = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const next = seeded(5);
   // Sarsen is grey with a little brown; bluestone a little bluer and darker.
   const greyOf = (kind) => {
     const n = 0.9 + 0.2 * next();
@@ -159,8 +159,7 @@ function skyPiece(scene, name) {
   const ctx = stars.getContext();
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, 512, 256);
-  let seed = 3;
-  const next = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const next = seeded(3);
   for (let i = 0; i < 90; i += 1) {
     ctx.fillStyle = `rgba(255,255,255,${0.4 + 0.6 * next()})`;
     const size = next() < 0.2 ? 2 : 1;
@@ -178,8 +177,14 @@ function skyPiece(scene, name) {
   sheet.position.set(0, (SKY_H + 0.3) / 2, HENGE.sky - 0.01);
   sheet.isPickable = false;
   const colours = new Float32Array((positions.length / 3) * 4);
+  // (The colours are worked out and sent again only when the light has changed: not in
+  // the dark first second, nor once the morning has come.)
+  let last = '';
   root.metadata = {
     pose: ({ dawn = 0, day = 0, sunX = 0, sunY = 0 }) => {
+      const now = `${dawn} ${day} ${sunX} ${sunY}`;
+      if (now === last) return;
+      last = now;
       const top = stage(SKY.top, dawn, day);
       const low = stage(SKY.low, dawn, day);
       for (let j = 0; j <= ROWS; j += 1) {
@@ -262,7 +267,11 @@ function shadowsPiece(scene, name) {
 // middle, and a spot of light in the middle once it is there.
 function beamPiece(scene, name) {
   const root = new TransformNode(name, scene);
-  root.rotation.y = HENGE.axis;
+  // (Turned to the axis on a node of its own: render/craft.js sets the root's turn from
+  // the scene every moment, and the scene gives the beam none.)
+  const along = new TransformNode(`${name}Along`, scene);
+  along.parent = root;
+  along.rotation.y = HENGE.axis;
   const tex = new DynamicTexture(`${name}Band`, { width: 64, height: 256 }, scene, true);
   const ctx = tex.getContext();
   const g = ctx.createLinearGradient(0, 0, 64, 0);
@@ -276,7 +285,7 @@ function beamPiece(scene, name) {
   const light = glowing(scene, `${name}Light`, tex);
   const far = HENGE.sky / Math.cos(HENGE.axis);
   const strip = CreatePlane(`${name}Strip`, { width: 0.12, height: 1 }, scene);
-  strip.parent = root;
+  strip.parent = along;
   strip.material = light;
   strip.rotation.x = Math.PI / 2;
   strip.position.y = 0.006;

@@ -1,7 +1,11 @@
 import {
   TransformNode, CreateBox, CreateCylinder, CreatePlane, CreateSphere, DynamicTexture, Color3, Color4, Constants, Mesh, VertexData,
+  ShaderMaterial, Effect, Texture,
 } from './babylon.js';
+import glowVert from './shaders/glow.vert?raw';
+import starTrailFrag from './shaders/starTrail.frag?raw';
 import { fuse } from './craftParts.js';
+import { seeded } from '../core/seeded.js';
 import { lit, glowing, spotTexture } from './hengeModels.js';
 import { CHEOM, cheomCourse } from '../core/landmarkStages.js';
 
@@ -18,8 +22,7 @@ function towerPiece(scene, name) {
   const root = new TransformNode(name, scene);
   const stone = lit(scene, `${name}Stone`);
   stone.emissiveColor = new Color3(...GRANITE);
-  let seed = 9;
-  const next = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const next = seeded(9);
   const shade = (f) => {
     const n = (0.88 + 0.2 * next()) * f;
     return new Color4(n, n * 0.98, n * 0.94, 1);
@@ -159,10 +162,10 @@ function nightPiece(scene, name) {
   return root;
 }
 
-// The stars, on a disc centred on the north star that the scene turns; behind the stars
-// a few fainter copies of the disc, turned back a little each, so that every star draws
-// a trail as the sky goes round. The Milky Way is a faint band across the disc.
-const TRAILS = 7;
+// The stars, on a disc centred on the north star that the scene turns; with the stars
+// seven fainter copies of the disc, turned back a little each, so that every star draws
+// a trail as the sky goes round (shaders/starTrail.frag adds them in one pass). The Milky
+// Way is a faint band across the disc.
 function starsPiece(scene, name) {
   const root = new TransformNode(name, scene);
   const size = 1024;
@@ -174,8 +177,7 @@ function starsPiece(scene, name) {
   ctx.save();
   ctx.translate(size / 2, size / 2);
   ctx.rotate(-0.9);
-  let seed = 21;
-  const next = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const next = seeded(21);
   for (let i = 0; i < 70; i += 1) {
     const x = (next() - 0.5) * size;
     const y = 150 + (next() - 0.5) * 90;
@@ -199,30 +201,31 @@ function starsPiece(scene, name) {
     ctx.fillRect(x, y, s, s);
   }
   tex.update();
-  const sheets = [];
-  for (let k = 0; k <= TRAILS; k += 1) {
-    const light = lit(scene, `${name}Light${k}`);
-    light.emissiveTexture = tex;
-    light.alphaMode = Constants.ALPHA_ADD;
-    light.disableDepthWrite = true;
-    light.backFaceCulling = false;
-    const sheet = CreatePlane(`${name}Sheet${k}`, { size: 7 }, scene);
-    sheet.parent = root;
-    sheet.material = light;
-    sheet.position.z = 0.002 * k;
-    sheet.isPickable = false;
-    sheets.push({ sheet, light });
-  }
+  tex.wrapU = Texture.CLAMP_ADDRESSMODE;
+  tex.wrapV = Texture.CLAMP_ADDRESSMODE;
+  Effect.ShadersStore.starTrailVertexShader = glowVert;
+  Effect.ShadersStore.starTrailFragmentShader = starTrailFrag;
+  const light = new ShaderMaterial(`${name}Light`, scene, { vertex: 'starTrail', fragment: 'starTrail' }, {
+    attributes: ['position', 'uv'], uniforms: ['worldViewProjection', 'wheel', 'trail', 'fade'], samplers: ['field'],
+  });
+  light.setTexture('field', tex);
+  light.alphaMode = Constants.ALPHA_ADD;
+  light.needAlphaBlending = () => true;
+  light.disableDepthWrite = true;
+  light.backFaceCulling = false;
+  const sheet = CreatePlane(`${name}Sheet`, { size: 7 }, scene);
+  sheet.parent = root;
+  sheet.material = light;
+  sheet.isPickable = false;
   root.metadata = {
     pose: ({ wheel = 0, trail = 0, fade = 1 }) => {
       // (The disc turns in its own plane, about z; a piece's `turn` is about the upright.)
-      sheets.forEach(({ sheet, light }, k) => {
-        sheet.rotation.z = wheel - (trail * k) / TRAILS;
-        light.alpha = fade * (k === 0 ? 1 : 0.42 * (1 - k / (TRAILS + 1)));
-        sheet.setEnabled(k === 0 || trail > 0.01);
-      });
+      light.setFloat('wheel', wheel);
+      light.setFloat('trail', trail);
+      light.setFloat('fade', fade);
     },
   };
+  root.metadata.pose({});
   return root;
 }
 
@@ -243,9 +246,11 @@ function meteorPiece(scene, name) {
   const streak = CreatePlane(`${name}Plane`, { width: 0.6, height: 0.04 }, scene);
   streak.parent = root;
   streak.material = light;
-  // Its head at the piece's origin, the tail up and to the right (where it came from).
-  streak.position.x = 0.3;
-  streak.rotation.z = Math.atan2(0.45, 1.3);
+  // Its head at the piece's origin, the tail up and to the right (where it came from):
+  // turned about its own middle, so the middle goes half its length up the slope.
+  const slope = Math.atan2(0.45, 1.3);
+  streak.position.set(0.3 * Math.cos(slope), 0.3 * Math.sin(slope), 0);
+  streak.rotation.z = slope;
   streak.isPickable = false;
   root.metadata = { pose: ({ fade = 1 }) => { light.alpha = fade; } };
   return root;

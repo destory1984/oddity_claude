@@ -556,6 +556,9 @@ export function createSiteModels(scene, siteList) {
           const at = replay.stage[name];
           piece.setEnabled(Boolean(at) && at.shown !== false);
           if (!piece.isEnabled()) continue;
+          // (Where a piece's root stands, its turn, lean and size are the scene's, set
+          // again every moment: a turn a model needs for good goes on a node under the
+          // root, as Stonehenge's beam's does, render/hengeModels.js.)
           piece.position.set(at.x ?? 0, at.y ?? 0, at.z ?? 0);
           piece.rotation.z = at.lean ?? 0;
           piece.rotation.y = at.turn ?? 0;

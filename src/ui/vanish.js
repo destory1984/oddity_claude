@@ -4,6 +4,7 @@
 // bubble closes round her and floats off and pops. Coming back runs the same backwards.
 // The picture of her is taken from her own sheet as she goes, and used again to bring her
 // back (she is not drawn while away).
+import { seeded } from '../core/seeded.js';
 
 const DUST_S = 1.9;
 const BUBBLE_S = 2.1;
@@ -66,13 +67,7 @@ function specks(her) {
   const { picture, x, y, w, h } = her;
   const { data } = picture.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, w, h);
   const out = [];
-  const random = (() => {
-    let s = 7;
-    return () => {
-      s = (s * 16807) % 2147483647;
-      return s / 2147483647;
-    };
-  })();
+  const random = seeded(7);
   const step = w * h > 40000 ? 3 : 2;
   for (let py = 0; py < h; py += step) {
     for (let px = 0; px < w; px += step) {

@@ -7106,3 +7106,41 @@ dialog#storyCard[open] > * {
 dialog#storyCard[open] > .journalActions {
   margin-top:auto;
 }
+
+/* The map ("태양계 가족") fills the screen, as the settings and the story card do (the user,
+   2026-10-20: "태양계 가족 메뉴로 전체 화면으로"): its night blue to every edge, the ✕ 8px
+   from the corner with the title beside it, the dial larger where the screen allows (up
+   to 560px; on a phone it is as it was), the names and the three keys in a column at most
+   640px wide, the keys at the screen's foot. The strip of sky still runs edge to edge. */
+dialog#bigMap[open] {
+  --edge:max(18px, calc((100vw - 640px) / 2));
+  width:100vw;
+  max-width:100vw;
+  height:100vh;
+  height:100dvh;
+  max-height:100vh;
+  max-height:100dvh;
+  margin:0;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  padding:calc(18px + env(safe-area-inset-top)) var(--edge) max(20px, env(safe-area-inset-bottom));
+}
+
+dialog#bigMap > .backKey {
+  top:max(8px, env(safe-area-inset-top));
+  left:max(8px, env(safe-area-inset-left));
+}
+
+dialog#bigMap #bigMapTitle {
+  top:calc(max(8px, env(safe-area-inset-top)) + 22px);
+}
+
+dialog#bigMap[open] #bigMapStage {
+  --side:min(560px, 100vw - 40px, 100dvh - 425px);
+  margin:0 calc(-1 * var(--edge));
+}
+
+dialog#bigMap[open] #bigMapActions {
+  margin-top:auto;
+}

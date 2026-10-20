@@ -240,15 +240,23 @@ export function createSound() {
   // (At 0.6 it was as loud as the 'discovered' tune; it comes far more often. 0.4 was
   // halved, the user, 2026-10-20: "음량을 절반으로".)
   const DUST_VOLUME = 0.2;
+  const DUST_FADE = 0.5;
 
   function stardust(going) {
     if (dustBuffers) {
       const src = ctx.createBufferSource();
       src.buffer = dustBuffers[going ? 0 : 1];
       const level = ctx.createGain();
-      level.gain.value = DUST_VOLUME;
+      // Faded out over its last half second: played backward it ended on the loudest
+      // moment of the wave's break, cut off (the user, 2026-10-20: "끝 소리가 딱
+      // 끊어진다. fade out 되게").
+      const t = ctx.currentTime;
+      const end = t + src.buffer.duration;
+      level.gain.setValueAtTime(DUST_VOLUME, t);
+      level.gain.setValueAtTime(DUST_VOLUME, end - DUST_FADE);
+      level.gain.linearRampToValueAtTime(0, end);
       src.connect(level).connect(sfx);
-      src.start(ctx.currentTime);
+      src.start(t);
     } else {
       noise(going
         ? { start: 0, length: 1.5, volume: 0.0175, type: 'highpass', freq: 4500, to: 9000, attack: 0.08 }

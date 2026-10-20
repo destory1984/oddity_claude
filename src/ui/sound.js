@@ -214,10 +214,9 @@ export function createSound() {
     noise({ start, length: 0.015, volume: volume * 0.5, freq: 4000 });
   }
 
-  // Star dust, 1.9 s as ui/vanish.js's DUST_S. Going: most specks leave in the first
-  // second, so the glints come thick at first and thin out, a little higher as they
-  // rise. Coming back: the same backwards, gathering to a soft chime as she is whole.
-  // The sprinkle under the glints (the user, 2026-10-20, of 공유마당's "잔잔히 밀려오는
+  // Star dust, 1.9 s as ui/vanish.js's DUST_S: a sprinkle and nothing else (the high
+  // glints and the closing chime it had at first were taken out, the user, 2026-10-20:
+  // "원래 있던 벨 소리 같은건 없애줘"). The sprinkle (the user, of 공유마당's "잔잔히 밀려오는
   // 파도소리": "여기에 있는 소리 써보자"): the 1.9 s of a wave breaking, 19.1 s into it,
   // its low roar taken out (high-pass at 1.2 kHz) so that it is sand or powder thrown
   // rather than the sea. Played forward as she scatters, backward as she gathers.
@@ -242,16 +241,6 @@ export function createSound() {
   const DUST_VOLUME = 0.4;
 
   function stardust(going) {
-    const glints = 26;
-    for (let i = 0; i < glints; i += 1) {
-      // 0 → 1.6 s, more of them early (going); mirrored when coming back.
-      const u = (i + Math.random()) / glints;
-      const at = 1.6 * u * u;
-      const start = going ? at : 1.85 - at;
-      const note = DUST_NOTES[Math.floor(Math.random() * DUST_NOTES.length)];
-      const climb = going ? 1 + 0.25 * u : 1.25 - 0.25 * u;
-      tone({ freq: note * climb, start, length: 0.07 + 0.12 * Math.random(), volume: (0.03 + 0.035 * Math.random()) * (1 - 0.5 * u), attack: 0.004 });
-    }
     if (dustBuffers) {
       const src = ctx.createBufferSource();
       src.buffer = dustBuffers[going ? 0 : 1];
@@ -264,10 +253,6 @@ export function createSound() {
         ? { start: 0, length: 1.5, volume: 0.035, type: 'highpass', freq: 4500, to: 9000, attack: 0.08 }
         : { start: 0.35, length: 1.5, volume: 0.035, type: 'highpass', freq: 9000, to: 4500, attack: 1.2 });
     }
-    if (!going) {
-      bell(2093, 1.8, 0.035);
-      bell(3136, 1.88, 0.025);
-    }
   }
 
   // Music box: high, bell-like, with a third-harmonic shimmer.
@@ -277,9 +262,6 @@ export function createSound() {
   }
 
   const PENTATONIC = [523, 587, 659, 784, 880, 1047, 1175, 1319];
-  // Star dust's glints: the scale two octaves up (2 → 3.5 kHz).
-  const DUST_NOTES = PENTATONIC.slice(0, 5).map((f) => f * 4);
-
   // The long sounds of a scene played again (a rocket's roar runs ten seconds) go
   // through a bus of their own, so that leaving the scene can still them at once.
   let sceneBus = null;
@@ -354,8 +336,8 @@ export function createSound() {
       pluck(784, 0, 0.12, 0.5);
       pluck(587, 0.14, 0.12, 0.5);
     },
-    // Star dust (ui/vanish.js: Sora in 우주멍, the scanner switched on or off): a shower
-    // of tiny high glints over a soft hiss, as if powder were scattered (the user,
+    // Star dust (ui/vanish.js: Sora in 우주멍, the scanner switched on or off): a wave's
+    // wash with its roar taken out, as if powder were scattered (the user,
     // 2026-10-20: "별빛 효과(스캐너, 소라)가 날 때에는 가루가 뿌려지는 듯한 효과음 넣어줘").
     dustAway: () => stardust(true),
     dustBack: () => stardust(false),

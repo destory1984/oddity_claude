@@ -7,7 +7,11 @@ import { CURIO_ABOUT } from '../core/curios.js';
 const HANGUL_START = 0xac00;
 const HANGUL_END = 0xd7a3;
 
+// (A number is read: 1 일, 2 이, 3 삼 ... 0 영, 10 십; only 2, 4, 5 and 9 end in a vowel. "부탁
+// 2을" was written so.)
 function hasFinalConsonant(word) {
+  const last = word.at(-1);
+  if (/\d/.test(last)) return !'2459'.includes(last);
   const code = word.charCodeAt(word.length - 1);
   if (code < HANGUL_START || code > HANGUL_END) return true;
   return (code - HANGUL_START) % 28 !== 0;

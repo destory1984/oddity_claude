@@ -13,6 +13,11 @@ test('object particle follows the final consonant', () => {
   assert.equal(objectParticle('Moon'), '을');
 });
 
+test('object particle after a number follows how the number is read', () => {
+  assert.deepEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '12'].map(objectParticle),
+    ['을', '를', '을', '를', '를', '을', '을', '을', '를', '을', '를']);
+});
+
 test('surface arrival message', () => {
   assert.equal(
     eventMessage({ type: 'surfaceReached', bodyId: 'earth' }),

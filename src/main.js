@@ -3289,7 +3289,9 @@ ${STORY_MORE[target.id]}` : told };
       } catch {
         // Not remembered in this window; still done now.
       }
-      toast.show(t`부탁 ${errand + 1}을 해냈습니다. 수첩의 다음 미션으로 이어 갈 수 있습니다.`);
+      // (Whose request it is said in full, the user, 2026-10-20: "부탁 2를 해냈습니다. ->
+      // 할머니의 부탁 2를..".)
+      toast.show(t`할머니의 부탁 ${errand + 1}${objectParticle(String(errand + 1))} 해냈습니다. 수첩의 다음 미션으로 이어 갈 수 있습니다.`);
       say.show(t('하나 더 끝! 다음은 뭐지?'));
       sound.cue('discovered');
     }

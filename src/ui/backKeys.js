@@ -68,3 +68,32 @@ export function addBackKeys() {
     });
   }
 }
+
+// The same square ✕ while a view of its own is open (photo mode, which the close look at
+// a target, "확대", is): it presses that view's own way back (the user, 2026-10-20, of the
+// close look at the Moon: "화면 왼쪽 상단에 X 버튼 없다"; the only way out was "비행으로
+// 돌아가기" at the foot). It stands in the upper left of the reading's sheet when that is
+// up, as every sheet's does ("디자인 통일성을 완전히 무시했네": it stood alone beside it),
+// and in the screen's upper left when it is not. view: the element shown while the view is
+// open; way: its way back; sheet: the reading's sheet.
+export function addViewBackKey(view, way, sheet = null) {
+  if (!view || !way) return;
+  const key = document.createElement('button');
+  key.className = 'backKey viewBackKey';
+  key.type = 'button';
+  key.setAttribute('aria-label', t('이전 화면으로'));
+  key.title = t('이전 화면으로');
+  key.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  key.addEventListener('click', (event) => {
+    event.stopPropagation();
+    way.click();
+  });
+  const sync = () => {
+    key.hidden = view.hidden;
+    const home = sheet && !sheet.hidden ? sheet : document.body;
+    if (key.parentElement !== home) home.prepend(key);
+  };
+  const watch = new MutationObserver(sync);
+  for (const el of [view, sheet]) if (el) watch.observe(el, { attributes: true, attributeFilter: ['hidden'] });
+  sync();
+}

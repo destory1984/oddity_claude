@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-20', text: t('모든 창의 ✕ 단추가 같은 크기로 가장자리에서 8px에 섭니다. 확대해 볼 때도 ✕가 있습니다.') },
   { day: '2026-10-20', text: t('소라와 스캐너가 별가루로 흩어지고 모일 때 가루가 뿌려지는 소리가 납니다.') },
   { day: '2026-10-20', text: t('스톤헨지 장면에서 태양의 첫 빛이 해 뜨는 쪽에서 돌들 한가운데로 곧게 들어옵니다.') },
   { day: '2026-10-20', text: t('첨성대에 "그날로" 장면이 생겼습니다. 선덕여왕 때의 맑은 밤, 별들이 북극성을 돌며 자취를 남깁니다.') },

@@ -48,7 +48,7 @@ import { createPractice, updatePractice, practiceGoal, slideSide, tagSpot, aimed
 import { createPracticeView } from './ui/practice.js';
 import { createJournal } from './ui/journal.js';
 import { createPhotoView } from './ui/photoView.js';
-import { addBackKeys } from './ui/backKeys.js';
+import { addBackKeys, addViewBackKey } from './ui/backKeys.js';
 import { photoSlides } from './core/photoSlides.js';
 import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
@@ -3854,6 +3854,8 @@ ${STORY_MORE[target.id]}` : told };
 
   // As an app, the phone's back key puts away what is open before it leaves the game.
   createBackKey({ isView: () => photo.active(), leaveView: () => $('exitPhoto').click(), watch: [$('photoTools')] });
+  // And a ✕ that does the same, as every sheet has: in the reading's sheet when it is up.
+  addViewBackKey($('photoTools'), $('exitPhoto'), $('inspectInfo'));
 
   // "자리 공유", where the flight practice's key stood (the user, 2026-10-19: "게임 상에서 내
   // 위치를 다른 플레이어에게 공유할 수 있는 기능 만들자", "\"자리 공유\" 단추는 지금 비행연습

@@ -6950,3 +6950,102 @@ dialog#settings[open] #closeSettings {
 #journal .journalHead h1 {
   font-size:20px;
 }
+
+/* The journal's three keys at its head, the ✕ and "가−" / "가+", are one size (44px, as the
+   other two were; the ✕ was 36px) and stand 8px from the paper's edge, the ✕ at the top
+   and left, the two at the top and right; all three on one line, whatever the height of
+   the title and its picture (the user, 2026-10-20: "아이콘 크기 및 X 위치 삐뚤", "여백..
+   가장자리 8px"; the two were 16px from the top and the right, below the ✕). */
+dialog#journal > .backKey {
+  top:max(8px, env(safe-area-inset-top));
+  left:max(8px, env(safe-area-inset-left));
+  width:44px;
+  height:44px;
+}
+
+#journal .journalHead {
+  padding:max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 0 calc(max(8px, env(safe-area-inset-left)) + 44px + 8px);
+}
+
+#journal .journalHead .textSize {
+  align-self:flex-start;
+}
+
+/* ---- Every ✕ is one key (the user, 2026-10-20: "X 버튼 크기가 다 다르네.. 모두 점검해",
+   "디자인 통일성을 완전히 무시했네"): 44px square, as the keys at a sheet's head are; 8px
+   from the top and left of what it closes; glass, 12px corners (the journal's paper ✕
+   keeps its paper look). They were 36px on the sheets, 40px on the photo page and 44px
+   on the journal. The sheets' row for it grows to match: 8 + 44 + 10px. */
+dialog > .backKey,
+#photoView > .backKey,
+.viewBackKey {
+  width:44px;
+  height:44px;
+}
+
+#settings,
+#shareSheet,
+#pair,
+#lookBack,
+#storyCard,
+#noteCard,
+#gateScene,
+#practiceOffer,
+#practiceWhy,
+#practiceDone {
+  padding-top:62px;
+}
+
+dialog#settings[open] {
+  padding-top:calc(62px + env(safe-area-inset-top));
+}
+
+/* (The map's title stands right of it, its middle level with the ✕'s.) */
+#bigMap #bigMapTitle {
+  top:30px;
+  left:60px;
+  transform:translateY(-50%);
+}
+
+/* Photo mode's ✕ (ui/backKeys.js addViewBackKey): inside the reading's sheet, in its
+   upper left as every sheet's is, with the sheet's name right of it and "접기" at the right,
+   the same 44px high, 8px from the edges; with no reading up, alone in the screen's upper
+   left, 8px from its edges. */
+.viewBackKey {
+  position:fixed;
+  top:max(8px, env(safe-area-inset-top));
+  left:max(8px, env(safe-area-inset-left));
+  z-index:7;
+  display:grid;
+  place-items:center;
+  box-sizing:border-box;
+  min-width:0;
+  min-height:0;
+  margin:0;
+  padding:0;
+  border:1px solid #9fb4ff66;
+  border-radius:12px;
+  background:#0b1630d9;
+  color:#fff;
+}
+
+.viewBackKey[hidden] {
+  display:none;
+}
+
+#inspectInfo > .viewBackKey {
+  position:absolute;
+  top:8px;
+  left:8px;
+}
+
+#inspectInfo .inspectHead {
+  min-height:44px;
+  padding:8px 8px 8px 60px;
+}
+
+#inspectInfo #inspectFold {
+  box-sizing:border-box;
+  height:44px;
+  min-height:44px;
+}

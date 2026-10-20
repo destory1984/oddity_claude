@@ -238,8 +238,8 @@ export function createSound() {
       .catch(() => {});
   }
   // (At 0.6 it was as loud as the 'discovered' tune; it comes far more often. 0.4 was
-  // halved, the user, 2026-10-20: "음량을 절반으로".)
-  const DUST_VOLUME = 0.2;
+  // halved, the user, 2026-10-20: "음량을 절반으로"; halved again to 0.1: "음량 다시 절반으로".)
+  const DUST_VOLUME = 0.1;
   const DUST_FADE = 0.5;
   const DUST_SHELF_HZ = 6000;
   const DUST_SHELF_DB = -4;
@@ -268,8 +268,8 @@ export function createSound() {
       src.start(t);
     } else {
       noise(going
-        ? { start: 0, length: 1.5, volume: 0.0175, type: 'highpass', freq: 4500, to: 9000, attack: 0.08, out: soft }
-        : { start: 0.35, length: 1.5, volume: 0.0175, type: 'highpass', freq: 9000, to: 4500, attack: 1.2, out: soft });
+        ? { start: 0, length: 1.5, volume: 0.00875, type: 'highpass', freq: 4500, to: 9000, attack: 0.08, out: soft }
+        : { start: 0.35, length: 1.5, volume: 0.00875, type: 'highpass', freq: 9000, to: 4500, attack: 1.2, out: soft });
     }
   }
 

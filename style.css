@@ -7211,3 +7211,11 @@ dialog#bigMap[open] #bigMapActions {
   box-sizing:border-box;
   min-height:calc(100dvh - 52px - max(24px, env(safe-area-inset-bottom)));
 }
+
+/* The ✕ of a sheet that fills the screen and scrolls stays put in its corner while what
+   is under it moves (the user, 2026-10-20, of the story card scrolled down: "여기 X 버튼이
+   고정이어야함"): the story card's and the settings'. */
+dialog#storyCard[open] > .backKey,
+dialog#settings[open] > .backKey {
+  position:fixed;
+}

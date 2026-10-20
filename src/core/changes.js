@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-20', text: t('이야기 카드와 설정을 아래로 내려도 ✕ 단추가 왼쪽 위에 그대로 있습니다.') },
   { day: '2026-10-20', text: t('설정의 네 쪽 이름이 어느 언어에서나 Settings, Help, Changes, About입니다.') },
   { day: '2026-10-20', text: t('스톤헨지와 첨성대 장면의 풀밭이 화면 아래까지 고르게 이어집니다.') },
   { day: '2026-10-20', text: t('천체, 탐사선, 이야기 장소 224곳의 읽을거리에 한 문단씩 더 썼습니다.') },

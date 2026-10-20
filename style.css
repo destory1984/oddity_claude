@@ -7202,3 +7202,12 @@ dialog#bigMap[open] #bigMapActions {
 #photoTools #capture svg {
   flex:none;
 }
+
+/* The reading under the photo is a page at least (the user, 2026-10-20: "사진보기 ->
+   읽을거리는 화면 1페이지까지 늘려줘"): with the key at its foot it fills the screen when
+   it is scrolled up, however short it is, so the page under the photo is all reading and
+   no photo is left showing over it. (The foot: 8 + 44 + 24px or the safe area.) */
+#photoView #photoViewMore:not([hidden]) {
+  box-sizing:border-box;
+  min-height:calc(100dvh - 52px - max(24px, env(safe-area-inset-bottom)));
+}

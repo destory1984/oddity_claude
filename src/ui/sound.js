@@ -237,8 +237,9 @@ export function createSound() {
       })
       .catch(() => {});
   }
-  // (At 0.6 it was as loud as the 'discovered' tune; it comes far more often.)
-  const DUST_VOLUME = 0.4;
+  // (At 0.6 it was as loud as the 'discovered' tune; it comes far more often. 0.4 was
+  // halved, the user, 2026-10-20: "음량을 절반으로".)
+  const DUST_VOLUME = 0.2;
 
   function stardust(going) {
     if (dustBuffers) {
@@ -250,8 +251,8 @@ export function createSound() {
       src.start(ctx.currentTime);
     } else {
       noise(going
-        ? { start: 0, length: 1.5, volume: 0.035, type: 'highpass', freq: 4500, to: 9000, attack: 0.08 }
-        : { start: 0.35, length: 1.5, volume: 0.035, type: 'highpass', freq: 9000, to: 4500, attack: 1.2 });
+        ? { start: 0, length: 1.5, volume: 0.0175, type: 'highpass', freq: 4500, to: 9000, attack: 0.08 }
+        : { start: 0.35, length: 1.5, volume: 0.0175, type: 'highpass', freq: 9000, to: 4500, attack: 1.2 });
     }
   }
 

@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-20', text: t('수첩의 갈래 탭이 그림 아래 글자로 바뀌고, 고른 갈래는 금빛 밑줄로 표시됩니다.') },
   { day: '2026-10-20', text: t('창을 닫는 ✕ 단추가 모두 되돌아가는 화살표가 되었습니다.') },
   { day: '2026-10-20', text: t('이야기 카드와 설정을 아래로 내려도 ✕ 단추가 왼쪽 위에 그대로 있습니다.') },
   { day: '2026-10-20', text: t('설정의 네 쪽 이름이 어느 언어에서나 Settings, Help, Changes, About입니다.') },

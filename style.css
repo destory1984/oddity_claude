@@ -7219,3 +7219,72 @@ dialog#storyCard[open] > .backKey,
 dialog#settings[open] > .backKey {
   position:fixed;
 }
+
+/* The journal's tabs: a picture over each word, as the flight screen's keys, and no boxes
+   (the user, 2026-10-20: "이 탭이 안 예쁜데.. 방법 없음?", of four drawn: "시안은 D로 가자").
+   The one chosen is lit in a pale gold with a gold line under it; the rest are quieter. */
+#journal #journalTabs {
+  gap:0;
+  padding:6px 6px 0;
+  border-bottom:2px solid #6b4a26;
+  justify-content:stretch;
+  overflow:visible;
+}
+
+#journal #journalTabs button,
+#journal #journalTabs button[aria-selected="true"] {
+  flex:1 1 0;
+  min-width:0;
+  height:50px;
+  min-height:50px;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  border:0;
+  border-radius:9px 9px 0 0;
+  background:none;
+  box-shadow:none;
+  color:#8a6a44;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:-0.2px;
+  white-space:nowrap;
+}
+
+#journal #journalTabs button::before {
+  content:"";
+  width:20px;
+  height:20px;
+  flex:none;
+  background:currentColor;
+  -webkit-mask:var(--tab-icon) center / contain no-repeat;
+  mask:var(--tab-icon) center / contain no-repeat;
+  opacity:.75;
+}
+
+#journal #journalTabs button[aria-selected="true"] {
+  background:#f2c14e55;
+  box-shadow:inset 0 -3px 0 #d9a13a;
+  color:#3b2a1a;
+  font-weight:800;
+}
+
+#journal #journalTabs button[aria-selected="true"]::before {
+  opacity:1;
+}
+
+#journal #journalTabs button:not([aria-selected="true"]):hover {
+  background:#f2c14e22;
+}
+
+#journal #journalTabs button[data-tab="bodies"] { --tab-icon:url("/assets/ui/tab-bodies.svg"); }
+#journal #journalTabs button[data-tab="missions"] { --tab-icon:url("/assets/ui/tab-missions.svg"); }
+#journal #journalTabs button[data-tab="album"] { --tab-icon:url("/assets/ui/tab-album.svg"); }
+#journal #journalTabs button[data-tab="stories"] { --tab-icon:url("/assets/ui/tab-stories.svg"); }
+#journal #journalTabs button[data-tab="craft"] { --tab-icon:url("/assets/ui/tab-craft.svg"); }
+#journal #journalTabs button[data-tab="tours"] { --tab-icon:url("/assets/ui/tab-tours.svg"); }
+#journal #journalTabs button[data-tab="curios"] { --tab-icon:url("/assets/ui/tab-curios.svg"); }

@@ -99,6 +99,7 @@ import { HOME, homeSpot, auroraSpot, AURORA_VIEWS, meteorSpot, poleSpot, POLES, 
 import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
+import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
 } from './core/eclipses.js';
@@ -859,8 +860,8 @@ async function init() {
   // free: somewhere not been to may be jumped to as well (the big map, an eclipse's place).
   function teleport(id, anywhere = false, known = false, toward = null, free = false) {
     if (warp.busy()) return;
-    // A jump lets go of a lock too (as facePicked).
-    locked = false;
+    // A jump lets go of a lock too (as facePicked), and says so.
+    if (locked) unlock('jump');
     sound.cue('warp');
     warp.play(() => {
       const target = here(id);
@@ -1041,10 +1042,17 @@ ${STORY_MORE[target.id]}` : told) };
 
   // Turn her to look at what is chosen (the "바라보기" key, and a body's name tag).
   function facePicked() {
-    // Looking somewhere lets go of a lock, without a word of its own (the user, 2026-10-16:
-    // "고정된 상태에서 워프, 바라보기 버튼을 누르면, 자동으로 고정 해제").
-    locked = false;
+    // Looking somewhere lets go of a lock (the user, 2026-10-16: "고정된 상태에서 워프,
+    // 바라보기 버튼을 누르면, 자동으로 고정 해제"), and says so. Looking at what it goes
+    // round (its own name tag pressed) keeps it and brings that to the middle: the tag
+    // let it go without a word (2026-10-21).
     const body = here(selectedId);
+    if (locked && lockFor === selectedId) {
+      lockAim = AIM_LINE;
+      toast.now(t`${body.name} 둘레를 맴도는 중입니다.\n가운데로 다시 맞췄습니다.`, 'lock');
+      return;
+    }
+    if (locked) unlock('look');
     // She comes round to it over half a second or so, not at a blow (the user,
     // 2026-10-10, of the flight practice's ring and then of this: "한번에 휙~ 돌리지말고,
     // 스무스하게 방향전환해줘"): the frame makes the turn (faceTurn), and a drag, a jump
@@ -1489,21 +1497,54 @@ ${STORY_MORE[target.id]}` : told) };
     });
     $('auroraKeys').append(key);
   }
-  function unlock() {
+  // The one way the lock lets go (core/orbitLock.js has the rules): it always says why,
+  // at once, over whatever notice is up, as setting it does (kind 'lock'). A reason that
+  // waited behind another notice let it look as if a press had done nothing.
+  function unlock(why = 'button') {
     locked = false;
-    toast.show(t('맴돌기를 풀었습니다.'));
+    const told = {
+      button: t('맴돌기를 풀었습니다.'),
+      jump: t('순간 이동해서 맴돌기를 풀었습니다.'),
+      look: t('다른 곳을 바라봐서 맴돌기를 풀었습니다.'),
+      other: t('다른 것을 골라서 맴돌기를 풀었습니다.'),
+      away: t('맴돌던 것이 화면 밖인데 앞으로 날아가서\n맴돌기를 풀었습니다.'),
+    }[why];
+    toast.now(told, 'lock');
+    showLockKey();
+  }
+  // Set, but doing nothing for now (core/orbitLock.js lockWaiting).
+  const lockWaitingNow = () => lockWaiting({ docked: Boolean(docked), visiting: Boolean(visit), home: Boolean(home), rear, photo: photo.active() });
+  // The key shows whether it goes round now (filled gold, "맴도는 중"), waits ("대기"),
+  // or is off: it only had a gold edge, and its word stayed "맴돌기" (the user, 2026-10-21:
+  // "맴돌기 안 잘 되는 버그는 여전하네..", "지금도 안 켜짐"). Written only on a change.
+  let lockKeyShown = null;
+  function showLockKey() {
+    const now = lockKeyState(locked, lockWaitingNow());
+    if (now === lockKeyShown) return;
+    lockKeyShown = now;
+    const key = $('lockTarget');
+    const word = { off: t('맴돌기'), on: t('맴도는 중'), wait: t('대기') }[now];
+    key.setAttribute('aria-pressed', String(now !== 'off'));
+    key.dataset.state = now;
+    key.dataset.label = word;
+    key.textContent = now === 'off' ? word : t('맴돌기 풀기');
   }
   $('lockTarget').addEventListener('click', () => {
-    if (locked) return unlock();
+    if (locked) return unlock('button');
     // Where the lock would be set and do nothing, it says why instead (the user,
     // 2026-10-19: "맴돌기가 안 먹는건? 안 먹으면, 안 먹는 이유를 화면에 잠시 띄워줘").
     // Only while the flash is still going out: once she has been moved (white at 2.8 s of
     // the 6 s) the new place is fading in and can be gone round (the user, 2026-10-19:
     // "워프 직후에는 맴돌기 버튼이 안 먹네": it waited for the whole 6 s).
-    if (warp.phase()?.phase === 'out') return toast.show(t('순간 이동 중에는 맴돌 수 없습니다.\n도착한 뒤에 다시 누르세요.'));
-    if (visit) return toast.show(t('이야기 장소에 머무는 동안에는 맴돌 수 없습니다.\n움직이면 풀려납니다.'));
     const ground = sites.some((x) => x.id === selectedId) ? here(selectedId).parent : selectedId;
-    if (state.restingOn && state.restingOn === ground) return toast.show(t('그 위에 내려앉아 있어 맴돌 수 없습니다.\n떠오른 뒤에 다시 누르세요.'));
+    const refused = lockRefusal({ warping: warp.phase()?.phase === 'out', visiting: Boolean(visit), restingOnTarget: Boolean(state.restingOn) && state.restingOn === ground });
+    if (refused) {
+      return toast.now({
+        warp: t('순간 이동 중에는 맴돌 수 없습니다.\n도착한 뒤에 다시 누르세요.'),
+        visit: t('이야기 장소에 머무는 동안에는 맴돌 수 없습니다.\n움직이면 풀려납니다.'),
+        resting: t('그 위에 내려앉아 있어 맴돌 수 없습니다.\n떠오른 뒤에 다시 누르세요.'),
+      }[refused], 'lock');
+    }
     // Held at a view (home, a best view, an aurora): the hold gives way to the lock, which
     // the hold kept from working.
     if (home) home = null;
@@ -1521,6 +1562,11 @@ ${STORY_MORE[target.id]}` : told) };
       hud.showSelection(named(held));
     }
     locked = true;
+    // Set on this target now, not on the next frame: a choice made in between would
+    // otherwise count as its own (lockLetGo 'other').
+    lockFor = selectedId;
+    // A face turn under way (a tag pressed a moment before) would pull against the lock.
+    faceTurn = null;
     const body = here(selectedId);
     // In sight already: the view stays as it is. Else it turns to the target.
     const seen = aimNow();
@@ -1533,7 +1579,8 @@ ${STORY_MORE[target.id]}` : told) };
     // wanted it kept for going round small things and named it "맴돌며 보기".)
     // Three short lines, what to press for what (the user, 2026-10-18: "고정을 누를 때에
     // 나오는 도움말 개선"): it was four long ones, under her bubble on a phone.
-    toast.show(t`${body.name} 둘레를 맴돕니다.\n화살표 단추를 누르면 그 둘레를 돕니다.\n맴돌기를 다시 누르면 풀립니다.`);
+    toast.now(t`${body.name} 둘레를 맴돕니다.\n화살표 단추를 누르면 그 둘레를 돕니다.\n맴돌기를 다시 누르면 풀립니다.`, 'lock');
+    showLockKey();
     return undefined;
   });
 
@@ -1595,9 +1642,14 @@ ${STORY_MORE[target.id]}` : told) };
     hud.showSelection(named(mapPick));
     state = { ...state, orientation: faceToward(body.position.map((n, i) => n - state.position[i])) };
     locked = true;
+    // On this one at once: already going round another, the next frame took the new
+    // choice for "something else chosen" and let go of it (2026-10-21).
+    lockFor = mapPick;
+    faceTurn = null;
     lockAim = AIM_LINE;
     $('bigMap').close();
-    toast.show(t`${body.name} 쪽을 바라보고 맴돌기를 켰습니다. 전진을 누르면 다가갑니다.`);
+    toast.now(t`${body.name} 쪽을 바라보고 맴돌기를 켰습니다. 전진을 누르면 다가갑니다.`, 'lock');
+    showLockKey();
   });
   $('bigMapJump').addEventListener('click', () => {
     const id = mapPick;
@@ -3142,8 +3194,10 @@ ${STORY_MORE[target.id]}` : told) };
     // turned off the screen: she means to go elsewhere, and the lock lets go (the user,
     // 2026-10-18, having forgotten the lock: "화면이 미친듯이 움직이는데"). Forward and back with the target
     // in view still go straight at it and away, to see it near or far.
-    if (locked && lockFor && lockFor !== selectedId) unlock();
-    else if (locked && !docked && !visit && !home && !photo.active() && intent.drive > 0 && hud.offScreen(selectedId)) unlock();
+    if (locked) {
+      const letGo = lockLetGo({ lockFor, selectedId, driving: intent.drive > 0, targetOffScreen: intent.drive > 0 && hud.offScreen(selectedId), waiting: lockWaitingNow() });
+      if (letGo) unlock(letGo);
+    }
     if (locked && lockFor !== selectedId) {
       const seen = aimNow();
       lockAim = Math.acos(Math.max(-1, Math.min(1, seen[2]))) <= LOCK_KEEP_VIEW ? seen : AIM_LINE;
@@ -3854,8 +3908,7 @@ ${STORY_MORE[target.id]}` : told) };
       ].map((thing) => ({ ...thing, name: named(thing.id)?.name ?? thing.id })),
     });
     if ($('bigMap').open) bigMap.draw({ bodies, position: state.position, heading: forward(state.orientation), selectedId: mapPick ?? selectedId, away });
-    $('lockTarget').setAttribute('aria-pressed', String(locked));
-    $('lockTarget').textContent = locked ? t('맴돌기 풀기') : t('맴돌기');
+    showLockKey();
   });
 
   function photoFloor() {

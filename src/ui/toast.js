@@ -65,5 +65,17 @@ export function createToast(element) {
       // the existing deadline so a steady stream cannot hold a message up forever.
       if (wasEmpty && queue.length) schedule();
     },
+    // Shown at once over whatever is up, which waits to come back after it: the answer to
+    // a press (the orbit lock set, let go, or why not). Behind another notice it came up
+    // seconds late, and the press seemed to do nothing (the user, 2026-10-21: "지금도 안
+    // 켜짐"). Waiting notices of the same kind are dropped: this one is newer.
+    now(text, kind = null) {
+      for (let i = queue.length - 1; i >= 0; i -= 1) if (kind && queue[i].kind === kind) queue.splice(i, 1);
+      const showing = element.classList.contains('on');
+      if (showing && element.textContent !== text && !(kind && kind === currentKind)) {
+        queue.unshift({ text: element.textContent, kind: currentKind, until: Infinity });
+      }
+      display(text, kind);
+    },
   };
 }

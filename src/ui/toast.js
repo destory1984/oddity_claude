@@ -12,10 +12,14 @@ const HURRIED_LONG_EXTRA_MS = 1000;
 export function createToast(element) {
   let timer = null;
   let currentKind = null;
+  // How long the notice up now stays true (a notice of the moment: show's keepS), so that
+  // one put back behind a `now` is still dropped once it is no longer so.
+  let currentUntil = Infinity;
   const queue = [];
 
-  function display(text, kind = null) {
+  function display(text, kind = null, until = Infinity) {
     currentKind = kind;
+    currentUntil = until;
     element.textContent = text;
     element.classList.add('on');
     schedule();
@@ -34,7 +38,7 @@ export function createToast(element) {
     while (queue.length && queue[0].until < Date.now()) queue.shift();
     if (queue.length) {
       const item = queue.shift();
-      display(item.text, item.kind);
+      display(item.text, item.kind, item.until);
     }
     else element.classList.remove('on');
   }
@@ -52,13 +56,13 @@ export function createToast(element) {
         if (!queue.length) schedule();
         return;
       }
+      const until = Date.now() + keepS * 1000;
       if (!showing || (kind && kind === currentKind)) {
-        display(text, kind);
+        display(text, kind, until);
         return;
       }
       const wasEmpty = queue.length === 0;
       const same = kind ? queue.findIndex((item) => item.kind === kind) : -1;
-      const until = Date.now() + keepS * 1000;
       if (same >= 0) queue[same] = { text, kind, until };
       else if (!queue.some((item) => item.text === text)) queue.push({ text, kind, until });
       // Only the first waiting message shortens the current one; later ones keep
@@ -73,7 +77,7 @@ export function createToast(element) {
       for (let i = queue.length - 1; i >= 0; i -= 1) if (kind && queue[i].kind === kind) queue.splice(i, 1);
       const showing = element.classList.contains('on');
       if (showing && element.textContent !== text && !(kind && kind === currentKind)) {
-        queue.unshift({ text: element.textContent, kind: currentKind, until: Infinity });
+        queue.unshift({ text: element.textContent, kind: currentKind, until: currentUntil });
       }
       display(text, kind);
     },

@@ -5313,7 +5313,7 @@
  "{} 둘레를 맴도는 중입니다.\n가운데로 다시 맞췄습니다.": "Orbiting {}.\nBrought it back to the middle.",
  "순간 이동해서 맴돌기를 풀었습니다.": "Stopped orbiting: you jumped away.",
  "다른 곳을 바라봐서 맴돌기를 풀었습니다.": "Stopped orbiting: you looked somewhere else.",
- "다른 것을 골라서 맴돌기를 풀었습니다.": "Stopped orbiting: you chose something else.",
+ "고른 것이 바뀌어 맴돌기를 풀었습니다.": "Stopped orbiting: the chosen target changed.",
  "맴돌던 것이 화면 밖인데 앞으로 날아가서\n맴돌기를 풀었습니다.": "Stopped orbiting: you flew forward\nwith it off the screen.",
  "맴도는 중": "Orbiting",
  "대기": "Waiting",

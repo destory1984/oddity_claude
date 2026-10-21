@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-21', text: t('지구에 이야기 장소 "사하라의 눈"이 생겼습니다. 모리타니 사막의 지름 40km 고리입니다.') },
   { day: '2026-10-21', text: t('맴돌기를 누르면 바로 알려 주고, 켜지면 단추에 "맴도는 중"이 뜨며, 풀릴 때는 까닭을 말합니다.') },
   { day: '2026-10-20', text: t('수첩의 갈래 탭이 그림 아래 글자로 바뀌고, 고른 갈래는 금빛 밑줄로 표시됩니다.') },
   { day: '2026-10-20', text: t('창을 닫는 ✕ 단추가 모두 되돌아가는 화살표가 되었습니다.') },

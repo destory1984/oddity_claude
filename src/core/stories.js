@@ -531,6 +531,16 @@ STORIES.push(
     text: t('1974년 11월 16일 이곳에서 외계에 보내는 전파 편지를 쏘았습니다. 지름 305m의 접시는 2020년 무너졌습니다.'),
   },
 );
+// The Eye of the Sahara (the user, 2026-10-21: "사하라의 눈도 넣자"): the Richat
+// Structure in Mauritania, a ring 40 km across that astronauts steer by.
+STORIES.push(
+  {
+    id: 'richat', name: t('사하라의 눈'), nameEn: 'Eye of the Sahara', type: 'surface', body: 'earth',
+    latDeg: 21.124, lonDeg: -11.402, withinKm: 40, landmark: false,
+    hint: t('지구 모리타니의 사하라의 눈(북위 21.1도, 서경 11.4도) 40km 안에 내려앉기'),
+    text: t('사하라 사막 한가운데에 있는 지름 40km의 둥근 고리 무늬입니다. 우주에서 보면 눈처럼 보여 우주비행사들이 길잡이로 삼았습니다.'),
+  },
+);
 named(STORIES);
 
 // A place's label shows only from within this many of its body's radii above the

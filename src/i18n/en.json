@@ -5317,5 +5317,19 @@
  "맴돌던 것이 화면 밖인데 앞으로 날아가서\n맴돌기를 풀었습니다.": "Stopped orbiting: you flew forward\nwith it off the screen.",
  "맴도는 중": "Orbiting",
  "대기": "Waiting",
- "맴돌기를 누르면 바로 알려 주고, 켜지면 단추에 \"맴도는 중\"이 뜨며, 풀릴 때는 까닭을 말합니다.": "Orbit now answers at once, shows \"Orbiting\" on its key while on, and says why when it lets go."
+ "맴돌기를 누르면 바로 알려 주고, 켜지면 단추에 \"맴도는 중\"이 뜨며, 풀릴 때는 까닭을 말합니다.": "Orbit now answers at once, shows \"Orbiting\" on its key while on, and says why when it lets go.",
+ "지구에 이야기 장소 \"사하라의 눈\"이 생겼습니다. 모리타니 사막의 지름 40km 고리입니다.": "A new story place on Earth: the \"Eye of the Sahara\", a ring 40 km across in the desert of Mauritania.",
+ "사진의 고리 사이 짙은 띠는 깎여 나간 골짜기이고, 밝은 띠는 단단한 바위가 남은 낮은 언덕입니다. 이 넓은 고리는 땅 위에서는 한눈에 들어오지 않아 비행기나 우주에서 보아야 눈 모양을 알 수 있습니다.": "The dark bands between the rings are valleys worn away; the light bands are low ridges of hard rock that stayed. The ring is too wide to take in from the ground: only from a plane or from space does it look like an eye.",
+ "땅에서 본 사하라의 눈": "The Eye of the Sahara from the ground",
+ "사하라의 눈 고리 안, 바위 언덕에서 내려다본 모습. 땅 위에서는 고리가 낮은 언덕과 모래 벌판으로만 보입니다.": "Inside the Eye of the Sahara, seen from a rocky hill. On the ground the rings look like nothing more than low hills and sandy plains.",
+ "사하라의 눈": "Eye of the Sahara",
+ "지구 모리타니의 사하라의 눈(북위 21.1도, 서경 11.4도) 40km 안에 내려앉기": "Land within 40 km of the Eye of the Sahara in Mauritania on Earth (21.1° N, 11.4° W)",
+ "사하라 사막 한가운데에 있는 지름 40km의 둥근 고리 무늬입니다. 우주에서 보면 눈처럼 보여 우주비행사들이 길잡이로 삼았습니다.": "A round pattern of rings 40 km across in the middle of the Sahara. From space it looks like an eye, and astronauts steer by it.",
+ "사하라의 눈은 서아프리카 모리타니의 아드라르 고원, 사하라 사막 한가운데에 있는 리샤트 구조입니다. 지름 40km쯤의 둥근 고리가 겹겹이 놓여 있습니다. 땅 위에서는 낮은 언덕이 이어질 뿐이라 알아보기 어렵고, 1960년대 우주비행사들이 궤도에서 내려다보고 널리 알려졌습니다. 처음에는 운석이 떨어진 구덩이로 여겼지만, 1억 년쯤 전 땅속에서 녹은 바위가 밀어 올려 둥글게 부푼 땅이 비바람에 깎이며, 단단한 바위층만 고리로 남은 것입니다.": "The Eye of the Sahara is the Richat Structure, on the Adrar plateau of Mauritania in West Africa, in the middle of the Sahara. Rings about 40 km across lie one inside another. On the ground it is only a run of low hills and hard to make out; it became widely known after astronauts in the 1960s looked down on it from orbit. It was first taken for a crater left by a meteorite, but about 100 million years ago molten rock pushed the ground up into a round dome, and as wind and rain wore the dome down, only the hard layers of rock were left standing as rings.",
+ "2011년 12월 국제우주정거장에서 내려다본 사하라의 눈. 왼쪽 위의 흰 것은 구름입니다.": "The Eye of the Sahara seen from the International Space Station in December 2011. The white at the upper left is cloud.",
+ "고리를 이룬 것은 비바람에 잘 깎이지 않는 단단한 규암층이고, 그 사이의 무른 층은 깎여 골짜기가 되었습니다. 가운데에서 바깥으로 갈수록 더 젊은 바위가 드러나는데, 둥글게 솟은 땅이 깎일 때 생기는 차례입니다. 고리 안에서는 수십만 년 전 사람들이 쓰던 돌도끼가 많이 나왔습니다.": "The rings are layers of hard quartzite that wind and rain wear down slowly; the softer layers between them were worn into valleys. From the middle outward the rocks get younger, the order you find when a round dome is worn down. Many stone hand axes used by people hundreds of thousands of years ago have been found inside the rings.",
+ "사하라의 눈은 무엇이 깎여서 생겼나?": "What was worn down to make the Eye of the Sahara?",
+ "둥글게 부푼 땅": "Ground pushed up into a dome",
+ "운석 구덩이": "A meteorite crater",
+ "화산 분화구": "A volcano's crater"
 }

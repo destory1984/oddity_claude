@@ -5317,5 +5317,5 @@
  "맴돌던 것이 화면 밖인데 앞으로 날아가서\n맴돌기를 풀었습니다.": "Stopped orbiting: you flew forward\nwith it off the screen.",
  "맴도는 중": "Orbiting",
  "대기": "Waiting",
- "맴돌기를 누르면 바로 알려 주고, 켜지면 단추가 금빛으로 차며, 풀릴 때는 까닭을 말합니다.": "Orbit now answers at once, fills gold while on, and says why when it lets go."
+ "맴돌기를 누르면 바로 알려 주고, 켜지면 단추에 \"맴도는 중\"이 뜨며, 풀릴 때는 까닭을 말합니다.": "Orbit now answers at once, shows \"Orbiting\" on its key while on, and says why when it lets go."
 }

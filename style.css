@@ -3789,23 +3789,10 @@ footer .throttle .rangeLabels {
   color:var(--gold);
 }
 
-/* Going round now: the key filled gold with a dark padlock and word, plain to see at a
-   glance (it only had a gold edge, and its word stayed "맴돌기"); set but waiting (docked,
-   at a story place, a held view, looking behind, the close view): a dashed gold edge
-   and "대기" (the user, 2026-10-21: "지금도 안 켜짐"). */
-#hud #targetRow #lockTarget[data-state="on"] {
-  border-color:var(--gold);
-  background:var(--gold);
-}
-
-#hud #targetRow #lockTarget[data-state="on"]::before {
-  filter:brightness(0) saturate(100%) invert(11%) sepia(40%) saturate(2000%) hue-rotate(210deg);
-}
-
-#hud #targetRow #lockTarget[data-state="on"]::after {
-  color:#14204a;
-}
-
+/* Going round now: the gold edge and word as before, the word "맴도는 중" (a gold fill
+   with a dark padlock was tried and taken back the same day: "아이콘 색은 원복"); set but
+   waiting (docked, at a story place, a held view, looking behind, the close view): a
+   dashed gold edge and "대기" (the user, 2026-10-21: "지금도 안 켜짐"). */
 #hud #targetRow #lockTarget[data-state="wait"] {
   border-color:var(--gold);
   border-style:dashed;

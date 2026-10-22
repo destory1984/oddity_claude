@@ -335,7 +335,7 @@ const LOCK_SWING_MAX = 1;
 let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT, NOTES, TOURS);
 // The radio friend's call sign was got in an earlier sitting: grandmother's note comes
 // at once, not after its ten minutes (core/radioFriend.js noteDue).
-const radioSignAtStart = progress.radio.callSign;
+let radioSignAtStart = progress.radio.callSign;
 // Small copies of saved photos, shown in the journal (core/album.js).
 let album = loadAlbum(MISSIONS);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
@@ -2087,7 +2087,7 @@ ${STORY_MORE[target.id]}` : told) };
       setPaused(true);
       input.clear();
     },
-    onClose(note, first) {
+    onClose(note, first, toEnd) {
       setPaused(notePriorPause);
       previous = null;
       if (noteFromJournal) {
@@ -2102,7 +2102,9 @@ ${STORY_MORE[target.id]}` : told) };
       }
       // A hidden place's telling: already written down when it opened.
       if (note.radioFound) return;
+      // (Shut before its last page, it is not heard: the key stays to hear it again.)
       if (note.radio) {
+        if (!toEnd) return;
         const heard = hear(progress.radio, note.radio);
         if (heard === progress.radio) return;
         const fresh = heard.clues.length > progress.radio.clues.length;
@@ -2318,6 +2320,7 @@ ${STORY_MORE[target.id]}` : told) };
     },
     onReset() {
       progress = createProgress();
+      radioSignAtStart = false;
       progressChanged(null);
       journal.update(progress, state.position, bodies);
       $('journal').close();
@@ -3380,7 +3383,8 @@ ${STORY_MORE[target.id]}` : told) };
     if (dt > 0 && !noteCard.isOpen() && !warp.busy()) {
       const reached = foundHidden({ radio: progress.radio, position: state.position, restingOn: state.restingOn, bodies, craft, sites: hiddenSitesAt(progress.radio, simTime, bodies) });
       if (reached.length) {
-        progress = { ...progress, radio: recordFound(progress.radio, reached, Date.now()) };
+        // One a frame, each with its card (two reached together: the second next frame).
+        progress = { ...progress, radio: recordFound(progress.radio, reached.slice(0, 1), Date.now()) };
         saveProgress(progress);
         noteCard.show(foundNote(reached[0]));
       }
@@ -3954,7 +3958,8 @@ ${STORY_MORE[target.id]}` : told) };
     if (undockKey) $('dockTarget').hidden = true;
     if (thenKey) $('replayButton').hidden = true;
     // Someone new to hear on the radio where she is docked or stays.
-    const radioHere = speakerAt({ docked, visit });
+    // (Only once the docking or the glide down is done: pressed halfway it paused her there.)
+    const radioHere = (!docked || isDocked(docked)) && (!visit || hasArrived(visit)) ? speakerAt({ docked, visit }) : null;
     hud.plateKeys({ undock: undockKey, then: thenKey, radio: Boolean(radioHere && nextVisit(progress.radio, radioHere)) });
     hud.update({
       view,

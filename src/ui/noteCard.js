@@ -2,18 +2,21 @@ import { t } from '../core/i18n.js';
 const $ = (id) => document.getElementById(id);
 
 // A note from grandmother, on paper (core/story.js NOTES). The game waits while it is
-// open. onClose gets the note and whether it was being read for the first time.
+// open. onClose gets the note, whether it was being read for the first time, and whether
+// it was read to its last page (a note of pages may be shut before it: the radio's meetings
+// then count as not heard).
 export function createNoteCard({ onOpen, onClose }) {
   const dialog = $('noteCard');
   const gate = $('gateScene');
   let shown = null;
-  const done = () => {
-    const was = shown;
-    shown = null;
-    onClose(was.note, was.first);
-  };
   // A note told over several pages (the opening): the button turns the page until the last.
   let page = 0;
+  const done = () => {
+    const was = shown;
+    const pages = was.first && was.note.pages;
+    shown = null;
+    onClose(was.note, was.first, !pages || page + 1 >= pages.length);
+  };
   const pagesOf = () => (shown?.first && shown.note.pages) || null;
   function picture(file, alt) {
     $('noteCardImage').hidden = !file;

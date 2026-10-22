@@ -322,9 +322,13 @@ export function sanitizeRadio(raw) {
       if (Number.isInteger(n) && n > 0) visits[speaker.id] = Math.min(n, speaker.visits.length);
     }
   }
+  // The clues of the meetings counted as heard are given back if they were lost (an id
+  // renamed in a later version): else those meetings would never come again and the
+  // story would stop there.
+  const given = SPEAKERS.flatMap((s) => s.visits.slice(0, visits[s.id] ?? 0).flatMap((v) => v.gives));
   return {
     visits,
-    clues: known(raw.clues, new Set(CLUES.map((c) => c.id))),
+    clues: [...new Set([...known(raw.clues, new Set(CLUES.map((c) => c.id))), ...given])],
     found: known(raw.found, new Set(HIDDEN.map((h) => h.id))),
     callSign: raw.callSign === true,
     noteAt: Number.isFinite(raw.noteAt) ? raw.noteAt : null,

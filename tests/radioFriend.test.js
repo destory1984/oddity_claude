@@ -80,7 +80,9 @@ test('a stored log is cleaned: unknown ids dropped, meetings held to how many th
   assert.deepEqual(sanitizeRadio('junk'), createRadio());
   const known = CLUES[0].id;
   const clean = sanitizeRadio({ clues: ['nowhere', known, known], visits: { issCrew: 99, nobody: 2 }, found: ['nowhere'], callSign: 'yes', noteAt: 'x', noteRead: 1 });
-  assert.deepEqual(clean.clues, [known]);
+  // The known one kept, and the clues of every meeting counted (all of the station's) given back.
+  const issGives = SPEAKERS.find((s) => s.id === 'issCrew').visits.flatMap((v) => v.gives);
+  assert.deepEqual([...clean.clues].sort(), [...new Set([known, ...issGives])].sort());
   assert.deepEqual(clean.visits, { issCrew: SPEAKERS.find((s) => s.id === 'issCrew').visits.length });
   assert.deepEqual(clean.found, []);
   assert.equal(clean.callSign, false);
@@ -220,4 +222,13 @@ test('a hidden place by a craft is found from where docking holds her', async ()
   const byCraft = HIDDEN.filter((h) => h.type === 'near' && craftIds.has(h.target));
   assert.ok(byCraft.length >= 2);
   for (const place of byCraft) assert.ok(place.withinKm > DOCK_GAP_KM, place.id);
+});
+
+// A save whose clues were lost (an id renamed in a later version) kept its meetings as
+// heard, and the story could not go on: the clues of the meetings counted are given back
+// (the whole-branch review, 2026-10-22).
+test('a stored log gets back the clues of the meetings it counts as heard', () => {
+  const clean = sanitizeRadio({ visits: { issCrew: 1 }, clues: [] });
+  const first = SPEAKERS.find((s) => s.id === 'issCrew').visits[0].gives;
+  for (const id of first) assert.ok(clean.clues.includes(id), id);
 });

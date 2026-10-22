@@ -27,57 +27,42 @@ test('on the day of a real event the errand is its place, with the year', () => 
   assert.deepEqual([dailyRequest('2027-02-18', fresh).id, dailyRequest('2027-02-18', fresh).year], ['lowell', 1930]);
 });
 
-test('every day of a year has an errand whose place exists, in grandmother\'s words', () => {
-  const kinds = new Set();
-  for (let i = 0; i < 366; i++) {
-    const date = new Date(Date.UTC(2028, 0, 1 + i));
-    const day = date.toISOString().slice(0, 10);
-    for (const progress of [fresh, far]) {
-      const request = dailyRequest(day, progress);
-      kinds.add(request.kind);
-      const known = BODIES.some((b) => b.id === request.id) || CRAFT.some((c) => c.id === request.id) || STORIES.some((s) => s.id === request.id);
-      assert.ok(known, `${day}: ${request.id}`);
-      assert.ok(/다오\.|두마\.|궁금하구나\.$/.test(request.text) && !request.text.includes('~'), request.text);
-      assert.ok(requestTarget(request), day);
-    }
-  }
-  assert.deepEqual([...kinds].sort(), ['craft', 'day', 'photo', 'visit']);
-});
-
-test('the same day gives the same errand; a new log is sent near home, a later one where it has been', () => {
-  assert.deepEqual(dailyRequest('2026-10-02', far), dailyRequest('2026-10-02', far));
-  // (5 to 9 October: the 10th has been the VLA's day since 2026-10-18, the 7th Luna 3's,
-  // near the Moon, since 2026-10-19.)
-  for (let d = 5; d <= 9; d++) {
-    const request = dailyRequest(`2026-10-${String(d).padStart(2, '0')}`, fresh);
-    // (Since 2026-10-22 a short log is also sent to the worlds and craft near home.)
-    assert.ok(['moon', 'venus', 'mars', 'mercury', 'jupiter', 'iss', 'hubble', 'tiangong', 'luna3'].includes(request.id), request.id);
-    const later = dailyRequest(`2026-10-${String(d).padStart(2, '0')}`, far);
-    assert.ok(['moon', 'mars', 'jupiter', 'io', 'venus', 'voyager1', 'iss', 'hubble', 'luna3'].includes(later.id), later.id);
+// Each place once (the user, 2026-10-22, of errands sent to Venus again and again: "수첩은
+// 한 장소에 한 번만 가게 해.. 반복하게 하지말구"): the errands are every world and craft
+// once, nearest home first, those done left out; an anniversary comes first on its day.
+test('the errands are every place once, nearest home first, those done left out', async () => {
+  const { errandList } = await import('../src/core/daily.js');
+  const all = errandList('2026-10-05', createDaily());
+  const ids = all.map((r) => r.id);
+  assert.equal(new Set(ids).size, ids.length);
+  assert.ok(ids.length > 80, String(ids.length));
+  assert.deepEqual(ids.slice(0, 3), ['moon', 'venus', 'iss']);
+  assert.ok(!ids.includes('earth') && !ids.includes('sun'));
+  for (const request of all) {
+    const known = BODIES.some((b) => b.id === request.id) || CRAFT.some((c) => c.id === request.id) || STORIES.some((s) => s.id === request.id);
+    assert.ok(known, request.id);
+    assert.ok(/다오\.|두마\.|궁금하구나\.$/.test(request.text) && !request.text.includes('~'), request.text);
+    assert.ok(requestTarget(request));
     // A photo of a moon of another planet would be rated as the planet: never asked for.
-    if (later.kind === 'photo') assert.notEqual(later.id, 'io');
+    if (request.kind === 'photo') assert.ok(BODIES.find((b) => b.id === request.id).kind !== 'moon' || request.id === 'moon', request.id);
   }
+  assert.deepEqual([...new Set(all.map((r) => r.kind))].sort(), ['craft', 'photo', 'visit']);
+  // Done once, never asked again; an anniversary first on its day, once.
+  const done = { ...createDaily(), places: ['moon', 'venus'] };
+  assert.equal(errandList('2026-10-05', done)[0].id, 'iss');
+  assert.equal(errandList('2026-07-21', done)[0].id, 'apollo11');
+  assert.equal(errandList('2026-07-21', { ...done, places: [...done.places, 'apollo11'] })[0].id, 'iss');
+  // All done: none left.
+  assert.deepEqual(errandList('2026-10-05', { ...createDaily(), places: ids }), []);
+  assert.equal(dailyRequest('2026-10-05', { ...createDaily(), places: ids }), null);
 });
 
-// The user, 2026-10-22, of a log that had found Venus only: "왜 수첩 미션이 겹치는게
-// 많지? 금성이 7, 13이네": two errands in three went to the one body found. Now no place
-// comes twice in seven days, and a short log is sent to the worlds near home besides.
-test('no errand repeats a place within seven days, however little has been found', async () => {
-  const { dayAfter } = await import('../src/core/daily.js');
-  const venusOnly = { ...fresh, discovered: ['earth', 'venus'] };
-  const wide = { ...fresh, discovered: BODIES.map((b) => b.id), craft: CRAFT.map((c) => c.id) };
-  for (const progress of [fresh, venusOnly, far, wide]) {
-    const ids = Array.from({ length: 400 }, (_, k) => dailyRequest(dayAfter('2026-01-01', k), progress).id);
-    for (let k = 0; k + 7 <= ids.length; k += 1) {
-      const week = ids.slice(k, k + 7);
-      assert.equal(new Set(week).size, 7, `${progress.discovered.length} found, from day ${k}: ${week}`);
-    }
-  }
-  // A photo is never asked of a moon of another planet (it would be rated as the planet).
-  for (let k = 0; k < 400; k += 1) {
-    const request = dailyRequest(dayAfter('2026-01-01', k), far);
-    if (request.kind === 'photo') assert.notEqual(request.id, 'io');
-  }
+test('a place done is kept in the log, once', async () => {
+  const { recordPlace } = await import('../src/core/daily.js');
+  let daily = recordPlace(createDaily(), 'moon');
+  daily = recordPlace(daily, 'moon');
+  assert.deepEqual(daily.places, ['moon']);
+  assert.deepEqual(sanitizeDaily({ days: [], places: ['moon', 3, 'moon', 'nowhere'] }).places, ['moon']);
 });
 
 test('an errand is met at the place, near the body, beside the craft, or by a photo of the body', () => {
@@ -112,6 +97,6 @@ test('days done are kept once, and the run of days counts back from today or yes
   assert.equal(streak(createDaily(), '2026-10-02'), 0);
   // 26 Sept to 2 Oct: the 28th, the 1st and the 2nd were done.
   assert.deepEqual(lastWeek(daily, '2026-10-02'), [false, false, true, false, false, true, true]);
-  assert.deepEqual(sanitizeDaily({ days: ['2026-10-02', 'junk', 3, '2026-10-02'] }), { days: ['2026-10-02'] });
+  assert.deepEqual(sanitizeDaily({ days: ['2026-10-02', 'junk', 3, '2026-10-02'] }), { days: ['2026-10-02'], places: [] });
   assert.deepEqual(sanitizeDaily(null), createDaily());
 });

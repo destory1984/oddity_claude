@@ -64,7 +64,7 @@ import { feelFovDeg, easeFovDeg, streakAmount, BASE_FOV_DEG } from './core/speed
 import { famousFor } from './core/famous.js';
 import { bindTextSize } from './ui/textSize.js';
 import { shadowSpot } from './core/shadows.js';
-import { dailyRequest, dayAfter, requestTarget, requestMet, recordDay, streak, lastWeek } from './core/daily.js';
+import { errandList, requestTarget, requestMet, recordDay, recordPlace, streak, lastWeek } from './core/daily.js';
 import { palFor } from './core/pal.js';
 import { seeFor, SEE_S } from './core/sprite.js';
 import {
@@ -476,8 +476,11 @@ function lastOpen() {
 // Today's request (core/daily.js): fixed when the game is opened, from the date and
 // from where she has been. `daily` keeps the days one was done.
 const today = dayOf(openedAt);
-const request = dailyRequest(today, progress);
 let daily = loadDaily();
+// Every place once (core/daily.js errandList): the list as the game is opened, those
+// done since staying in it marked done.
+const errands = errandList(today, daily);
+const request = errands[0] ?? null;
 // Stunt flights (core/stunts.js): the best of each, the one under way, and whether a
 // jump happened since the last frame (a jump starts a stunt over).
 let stuntRecords = loadStunts();
@@ -491,20 +494,11 @@ let ringHit = null;
 let ringSkip = false;
 const requestDone = () => daily.days.includes(today);
 // The errands after today's, taken up from the journal once today's is done (the user,
-// 2026-10-19: "미션을 완성했을 때에 다음 미션, 이전 미션"): the n-th is the request of the
-// day n days on. `errand` is the one shown (0, today's); those done are kept for the day.
+// 2026-10-19: "미션을 완성했을 때에 다음 미션, 이전 미션"). `errand` is the one shown (0,
+// today's); one is done once its place is in daily.places (each place asked for once).
 let errand = 0;
-const ERRANDS_KEY = 'oddity.errands';
-let errandsDone = (() => {
-  try {
-    const saved = JSON.parse(localStorage.getItem(ERRANDS_KEY) ?? 'null');
-    return saved?.day === today && Array.isArray(saved.done) ? saved.done.filter(Number.isInteger) : [];
-  } catch {
-    return [];
-  }
-})();
-const errandAt = (n) => (n ? dailyRequest(dayAfter(today, n), progress) : request);
-const errandDone = (n) => (n ? errandsDone.includes(n) : requestDone());
+const errandAt = (n) => errands[n] ?? null;
+const errandDone = (n) => Boolean(errandAt(n)) && (daily.places ?? []).includes(errandAt(n).id);
 
 // Until when (performance.now()) the sprite character cheers a completed journal.
 let cheerUntil = 0;
@@ -2087,7 +2081,7 @@ ${STORY_MORE[target.id]}` : told) };
   // answers the first reading with a line of her own.
   let notePriorPause = false;
   let noteWait = 0;
-  let dailyDue = !requestDone();
+  let dailyDue = Boolean(request) && !requestDone();
   let noteDueId = null;
   // A note read again from the journal: folding it brings the journal back (the user,
   // 2026-10-05; it went back to the flight).
@@ -2245,7 +2239,7 @@ ${STORY_MORE[target.id]}` : told) };
         toward: shadowSpot(bodyById(news.planet, bodies), bodyById(news.moon, bodies), bodyById('sun', bodies).position),
       })),
     ],
-    daily: () => ({
+    daily: () => (!errandAt(errand) ? null : {
       text: errandAt(errand).text,
       index: errand,
       done: errandDone(errand),
@@ -2260,7 +2254,7 @@ ${STORY_MORE[target.id]}` : told) };
         teleport(id, true);
       },
       step(way) {
-        errand = Math.max(0, errand + way);
+        errand = Math.max(0, Math.min(errands.length - 1, errand + way));
       },
       days: daily.days.length,
       streak: streak(daily, today),
@@ -3454,30 +3448,28 @@ ${STORY_MORE[target.id]}` : told) };
     }
     // A place reached for the first time opens its card, once she has settled.
     if (told.newly.length) cardDue = { id: told.newly[0], in: CARD_AFTER_S };
-    // Today's request, done: a star for the day. (A photo is looked at once, while the
-    // game is still stopped in photo mode.)
-    if (!requestDone() && requestMet(request, { storiesNow, position: state.position, bodies, craft, photoSubject })) {
-      daily = recordDay(daily, today);
+    // An errand done (today's, or the one the journal shows): its place is never asked
+    // for again, and the first of the day puts a star on the day. (A photo is looked at
+    // once, while the game is still stopped in photo mode.)
+    for (const n of new Set([0, errand])) {
+      const job = errandAt(n);
+      if (!job || errandDone(n) || !requestMet(job, { storiesNow, position: state.position, bodies, craft, photoSubject })) continue;
+      const firstToday = !requestDone();
+      daily = recordPlace(daily, job.id);
+      if (firstToday) daily = recordDay(daily, today);
       saveDaily(daily);
-      const run = streak(daily, today);
-      toast.show(t`오늘의 부탁을 해냈습니다. 수첩에 별이 붙었습니다(해낸 날 ${daily.days.length}일${run > 1 ? t`, ${run}일째 이어서` : ''}).`);
-      say.show(run > 0 && run % 7 === 0 ? t('일주일 내내 했어! 대단하지?') : t('부탁 끝! 할머니 좋아하시겠다.'));
-      // Seven days running: a stamp of seven stars.
-      if (run > 0 && run % 7 === 0) stampDown('notebook/stamp-week.png');
-      sound.cue('discovered');
-    }
-    // One of the errands after it, done.
-    if (errand && !errandDone(errand) && requestMet(errandAt(errand), { storiesNow, position: state.position, bodies, craft, photoSubject })) {
-      errandsDone = [...errandsDone, errand];
-      try {
-        localStorage.setItem(ERRANDS_KEY, JSON.stringify({ day: today, done: errandsDone }));
-      } catch {
-        // Not remembered in this window; still done now.
+      if (firstToday) {
+        const run = streak(daily, today);
+        toast.show(t`오늘의 부탁을 해냈습니다. 수첩에 별이 붙었습니다(해낸 날 ${daily.days.length}일${run > 1 ? t`, ${run}일째 이어서` : ''}).`);
+        say.show(run > 0 && run % 7 === 0 ? t('일주일 내내 했어! 대단하지?') : t('부탁 끝! 할머니 좋아하시겠다.'));
+        // Seven days running: a stamp of seven stars.
+        if (run > 0 && run % 7 === 0) stampDown('notebook/stamp-week.png');
+      } else {
+        // (Whose request it is said in full, the user, 2026-10-20: "부탁 2를 해냈습니다. ->
+        // 할머니의 부탁 2를..".)
+        toast.show(t`할머니의 부탁 ${n + 1}${objectParticle(String(n + 1))} 해냈습니다. 수첩의 다음 미션으로 이어 갈 수 있습니다.`);
+        say.show(t('하나 더 끝! 다음은 뭐지?'));
       }
-      // (Whose request it is said in full, the user, 2026-10-20: "부탁 2를 해냈습니다. ->
-      // 할머니의 부탁 2를..".)
-      toast.show(t`할머니의 부탁 ${errand + 1}${objectParticle(String(errand + 1))} 해냈습니다. 수첩의 다음 미션으로 이어 갈 수 있습니다.`);
-      say.show(t('하나 더 끝! 다음은 뭐지?'));
       sound.cue('discovered');
     }
     photoSubject = null;

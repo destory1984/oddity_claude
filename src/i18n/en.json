@@ -5435,5 +5435,9 @@
  "치익… 무전기에서 누군가의 목소리가 들린다.\n이름표 끝의 무전 단추를 눌러 보자.": "Crackle… a voice on the radio.\nPress the radio key on the name plate.",
  "처음 국제우주정거장에 도킹하면 무전이 들린다는 알림이 나오고, 수첩의 무전 탭도 첫 무전이 어디서 오는지 알려 줍니다.": "The first time you dock with the International Space Station, a notice says someone is on the radio, and the journal's Radio tab tells where the first call comes from.",
  "첫 무전은 국제우주정거장에 도킹하면 들린다.": "The first call comes when you dock with the International Space Station.",
- "할머니의 부탁이 일주일 안에 같은 곳을 두 번 보내지 않습니다. 가 본 곳이 적으면 가까운 행성과 탐사선으로도 보냅니다.": "Grandmother's requests no longer send you to the same place twice in a week. If you have been to only a few places, they also send you to the nearby planets and spacecraft."
+ "할머니의 부탁은 한 곳을 한 번만 보냅니다. 가까운 곳부터 모든 천체와 탐사선을 차례로 한 번씩 찾아갑니다.": "Grandmother's requests send you to each place only once: every world and spacecraft in turn, the nearest first.",
+ "무전으로 들은 말이 쌓이는 곳입니다. 수첩 칸에는 들지 않습니다. 그물을 누르면 화면 가득 펼쳐집니다.": "What you hear on the radio gathers here. It does not count toward the journal's slots. Press the web to open it over the whole screen.",
+ "무전 그물 크게 보기": "See the radio web large",
+ "점을 누르면 그 말이 보입니다.": "Press a point to see what was said.",
+ "수첩의 무전 탭에서 그물을 누르면 화면 가득 펼쳐져, 점을 눌러 들은 말을 볼 수 있습니다.": "In the journal's Radio tab, press the web to open it over the whole screen and press a point to see what was said."
 }

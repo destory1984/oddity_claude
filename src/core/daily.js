@@ -30,20 +30,33 @@ export const ANNIVERSARY_COUNT = ANNIVERSARIES.length;
 
 // Bodies she may be sent to photograph: a moon of another planet is rated as its planet.
 const PHOTO_BODIES = BODIES.filter((b) => b.kind !== 'star' && (b.kind !== 'moon' || b.id === 'moon')).map((b) => b.id);
-// A short log is sent to these besides (the worlds nearest home, then the craft near
-// Earth), so that seven days never send her to one place twice: in seven days there are
-// at most five days for a body and three for a craft (the user, 2026-10-22: "왜 수첩
-// 미션이 겹치는게 많지? 금성이 7, 13이네": two errands in three were the one body found).
-const NEAR_BODIES = ['moon', 'venus', 'mars', 'mercury', 'jupiter'];
-const NEAR_CRAFT = ['iss', 'hubble', 'tiangong'];
-// The list as far as it goes, filled up from `more` to `least` places.
-const filled = (list, more, least) => [...new Set([...list, ...more])].slice(0, Math.max(list.length, least));
+// Every world and craft is asked for once, those nearest home first (the user,
+// 2026-10-22, of errands that sent her to Venus again and again: "수첩은 한 장소에 한
+// 번만 가게 해.. 반복하게 하지말구"; they had taken turns among the places found, by date).
+const NEAR_BODIES = ['moon', 'venus', 'mars', 'mercury', 'jupiter', 'saturn', 'ceres', 'vesta', 'uranus', 'neptune', 'pluto'];
+const NEAR_CRAFT = ['iss', 'hubble', 'tiangong', 'jwst', 'lro', 'danuri', 'mro', 'juno', 'soho', 'tess'];
+const ERRAND_BODIES = [...new Set([...NEAR_BODIES, ...BODIES.filter((b) => b.kind !== 'star' && !b.exo && b.id !== 'earth').map((b) => b.id)])];
+const ERRAND_CRAFT = [...new Set([...NEAR_CRAFT, ...CRAFT.map((c) => c.id)])];
+// Two worlds, then a craft, while both last; a world's turn is a visit and a photo by
+// turns (another planet's moon, which a photo would rate as the planet, a visit always).
+const ERRANDS = (() => {
+  const out = [];
+  let b = 0;
+  let c = 0;
+  while (b < ERRAND_BODIES.length || c < ERRAND_CRAFT.length) {
+    for (let k = 0; k < 2 && b < ERRAND_BODIES.length; k += 1, b += 1) {
+      const id = ERRAND_BODIES[b];
+      out.push({ kind: b % 2 && PHOTO_BODIES.includes(id) ? 'photo' : 'visit', id });
+    }
+    if (c < ERRAND_CRAFT.length) out.push({ kind: 'craft', id: ERRAND_CRAFT[c++] });
+  }
+  return out;
+})();
 
 const dayNumber = (day) => {
   const [y, m, d] = day.split('-').map(Number);
   return Math.floor(Date.UTC(y, m - 1, d) / 86400000);
 };
-const pick = (list, n) => list[((n % list.length) + list.length) % list.length];
 const nameOf = (id) => (BODIES.find((b) => b.id === id) ?? CRAFT.find((c) => c.id === id) ?? STORIES.find((s) => s.id === id)).name;
 // The name with where it is, for a player who does not know (the user, 2026-10-19:
 // "이아페투스? 사람들이 이아페투스가 어디에 있는지 모르잖아"): another planet's moon by its
@@ -63,35 +76,32 @@ export function dayAfter(day, k) {
   return new Date(Date.UTC(y, m - 1, d + k)).toISOString().slice(0, 10);
 }
 
-// The request for a day ('YYYY-MM-DD'). Except on an anniversary it sends her somewhere
-// she has already been (a body found, a craft met), so that it takes a few minutes; a
-// short log gets the worlds and craft near home besides. The days take the places in
-// turn, the bodies' days and the craft's each counted on their own, so no place comes
-// back within seven days. A body that cannot be photographed (another planet's moon)
-// falls on a photo day as a visit.
-// Returns { kind, id, year?, text } with text in grandmother's words.
-export function dailyRequest(day, progress) {
+// The errands as of a day ('YYYY-MM-DD'), in order: the anniversary of a real event on
+// its day, then every world and craft (ERRANDS), each left out once done (daily.places).
+// None left: an empty list. Each is { kind, id, year?, text }, text in grandmother's words.
+export function errandList(day, daily) {
+  const done = new Set(daily?.places ?? []);
   const [, month, date] = day.split('-').map(Number);
   // Two events on one day (18 February: Perseverance, Lowell) take turns by year.
   const events = ANNIVERSARIES.filter(([m, d]) => m === month && d === date);
   const event = events[Number(day.slice(0, 4)) % events.length];
-  if (event) {
+  const out = [];
+  if (event && !done.has(event[3])) {
     const [, , year, id] = event;
-    return { kind: 'day', id, year, text: t`${year}년 오늘이 그날이란다. ${whereOf(id)}에 다녀와 다오.` };
+    out.push({ kind: 'day', id, year, text: t`${year}년 오늘이 그날이란다. ${whereOf(id)}에 다녀와 다오.` });
   }
-  const n = dayNumber(day);
-  const found = progress.discovered.filter((id) => id !== 'earth' && id !== 'sun');
-  const turn = ((n % 3) + 3) % 3;
-  const round = Math.floor(n / 3);
-  if (turn < 2) {
-    // The bodies' days: two in every three, counted one after another.
-    const id = pick(filled(found, NEAR_BODIES, 5), round * 2 + turn);
-    if (turn === 1 && PHOTO_BODIES.includes(id)) return { kind: 'photo', id, text: t`오늘은 ${whereOf(id)} 사진을 한 장 찍어 다오. 벽에 붙여 두마.` };
-    return { kind: 'visit', id, text: t`오늘은 ${whereOf(id)}에 들러 다오. 잘 있는지 궁금하구나.` };
+  for (const { kind, id } of ERRANDS) {
+    if (done.has(id) || out.some((r) => r.id === id)) continue;
+    if (kind === 'visit') out.push({ kind, id, text: t`오늘은 ${whereOf(id)}에 들러 다오. 잘 있는지 궁금하구나.` });
+    else if (kind === 'photo') out.push({ kind, id, text: t`오늘은 ${whereOf(id)} 사진을 한 장 찍어 다오. 벽에 붙여 두마.` });
+    else out.push({ kind, id, text: t`${whereOf(id)} 곁에 가서 안부 좀 전해 다오.` });
   }
-  const met = (progress.craft ?? []).filter((id) => CRAFT.some((c) => c.id === id));
-  const id = pick(filled(met, NEAR_CRAFT, 3), round);
-  return { kind: 'craft', id, text: t`${whereOf(id)} 곁에 가서 안부 좀 전해 다오.` };
+  return out;
+}
+
+// The first errand of a day, or null when every place has been done.
+export function dailyRequest(day, daily) {
+  return errandList(day, daily)[0] ?? null;
 }
 
 // What to point at for a request: the place itself on a surface, else the body or craft.
@@ -111,18 +121,26 @@ export function requestMet(request, { storiesNow, position, bodies, craft, photo
   return Boolean(target) && Math.hypot(...target.position.map((n, i) => n - position[i])) <= DOCK_RANGE_KM;
 }
 
-// The days an errand was done: { days: ['YYYY-MM-DD', ...] }, oldest first.
+// The days an errand was done, oldest first, and the places done (each asked for once):
+// { days: ['YYYY-MM-DD', ...], places: [id, ...] }.
 export function createDaily() {
-  return { days: [] };
+  return { days: [], places: [] };
 }
 
+const KNOWN = new Set([...ERRANDS.map((e) => e.id), ...ANNIVERSARIES.map(([, , , id]) => id)]);
 export function sanitizeDaily(raw) {
   const days = Array.isArray(raw?.days) ? raw.days.filter((d) => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)) : [];
-  return { days: [...new Set(days)].sort().slice(-400) };
+  const places = Array.isArray(raw?.places) ? raw.places.filter((id) => KNOWN.has(id)) : [];
+  return { days: [...new Set(days)].sort().slice(-400), places: [...new Set(places)] };
 }
 
 export function recordDay(daily, day) {
-  return daily.days.includes(day) ? daily : { days: [...daily.days, day].sort() };
+  return daily.days.includes(day) ? daily : { ...daily, days: [...daily.days, day].sort() };
+}
+
+export function recordPlace(daily, id) {
+  const places = daily.places ?? [];
+  return places.includes(id) ? daily : { ...daily, places: [...places, id] };
 }
 
 // How many days in a row up to today (or up to yesterday, when today's is not done

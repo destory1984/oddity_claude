@@ -137,7 +137,12 @@ export async function realCloudMap({ nowMs = Date.now(), groundUrl, ownUrl }) {
     // at the gap's edge: the satellites' share goes from nothing there to all some fifty
     // pixels in. (It was 0.8 at the edge and dropped to nothing across it: a straight
     // seam on the globe, the user, 2026-10-22, over the Pacific: "지구에 금이 생겼어".)
-    const w = seen[i] ? Math.min(1, Math.max(0, (weight[i * 4] / 255 - 0.5) * 2.5)) : 0;
+    // And at longitude 180°, where each day's picture changes its date and the blur does
+    // not wrap round, they give way to the game's own over the last 48 pixels (about 8°)
+    // each side (the review, 2026-10-22: a straight north-south line in the Pacific).
+    const x = i % W;
+    const dateline = Math.min(1, Math.min(x, W - 1 - x) / 48);
+    const w = seen[i] ? Math.min(1, Math.max(0, (weight[i * 4] / 255 - 0.5) * 2.5)) * dateline : 0;
     const v = (cloud[i] * w + (own[i * 4] / 255) * (1 - w)) ** 1.15;
     const byte = Math.round(Math.min(1, v) * 255);
     result.data[i * 4] = byte;

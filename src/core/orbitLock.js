@@ -19,8 +19,10 @@ export function lockRefusal({ warping = false, visiting = false, restingOnTarget
 // While set, why it does nothing for now: docked with a craft, at a story place, held
 // at a view (home, a best view, an aurora), looking behind, in the close view. It stays
 // set and goes on when that ends.
-export function lockWaiting({ docked = false, visiting = false, home = false, rear = false, photo = false } = {}) {
+// restingOnTarget: standing on what it goes round (flown straight at it, she lands).
+export function lockWaiting({ docked = false, visiting = false, home = false, rear = false, photo = false, restingOnTarget = false } = {}) {
   if (docked) return 'docked';
+  if (restingOnTarget) return 'resting';
   if (visiting) return 'visit';
   if (home) return 'home';
   if (rear) return 'rear';

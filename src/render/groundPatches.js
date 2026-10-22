@@ -107,6 +107,11 @@ export function createGroundPatches(scene) {
     material.zOffset = -4;
     material.backFaceCulling = false;
     mesh.material = material;
+    // Drawn before the clouds and the air (left at the highest index): blended things write
+    // no depth and go back to front by their middles, and the cloud and air spheres, their
+    // middles at Earth's, came first and were painted over (a clear hole in yesterday's
+    // clouds; the review, 2026-10-22).
+    mesh.alphaIndex = 1;
     node.setEnabled(false);
     Object.assign(patch, { node, mesh, material });
   }
@@ -117,6 +122,11 @@ export function createGroundPatches(scene) {
     const sun = bodies.find((b) => b.kind === 'star');
     const body = bodies.find((b) => b.id === ON);
     if (!body || !sun) return;
+    // Far from Earth (beyond where any picture is loaded) nothing is worked out each frame.
+    if (Math.hypot(...position.map((n, i) => n - body.position[i])) > body.radiusKm + LOAD_KM) {
+      for (const patch of patches) patch.node?.setEnabled(false);
+      return;
+    }
     const spin = spinOf(ON, timeS ?? 0);
     for (const patch of patches) {
       const dir = surfaceDirection(patch.latDeg, patch.lonDeg, spin);
@@ -143,9 +153,12 @@ export function createGroundPatches(scene) {
       patch.node.position.set(...site.position.map((n, i) => (n - position[i]) / KM_PER_UNIT));
       const toSun = new Vector3(...sun.position.map((n, i) => n - site.position[i])).normalize();
       // Full daylight from the Sun 12 degrees up; dusk below that (as Dokdo's card).
-      const lit = NIGHT + (1 - NIGHT) * Math.min(1, Math.max(0, Vector3.Dot(toSun, up) / 0.2 + 0.5));
+      const day = Math.min(1, Math.max(0, Vector3.Dot(toSun, up) / 0.2 + 0.5));
+      const lit = NIGHT + (1 - NIGHT) * day;
       patch.material.emissiveColor = new Color3(lit, lit, lit);
-      patch.mesh.visibility = Math.min(1, Math.max(0, (SHOWN_KM - distanceKm) / (SHOWN_KM - FADE_FROM_KM)));
+      // At night it fades out, and Earth's own night map shows its city lights (a dark
+      // disc lay over Cairo's).
+      patch.mesh.visibility = day * Math.min(1, Math.max(0, (SHOWN_KM - distanceKm) / (SHOWN_KM - FADE_FROM_KM)));
     }
   }
 

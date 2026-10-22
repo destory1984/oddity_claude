@@ -1529,7 +1529,15 @@ ${STORY_MORE[target.id]}` : told) };
     showLockKey();
   }
   // Set, but doing nothing for now (core/orbitLock.js lockWaiting).
-  const lockWaitingNow = () => lockWaiting({ docked: Boolean(docked), visiting: Boolean(visit), home: Boolean(home), rear, photo: photo.active() });
+  // (The ground under a story place it goes round is that place's world.)
+  const lockGround = () => (sites.some((x) => x.id === selectedId) ? here(selectedId).parent : selectedId);
+  const lockWaitingNow = () => lockWaiting({ docked: Boolean(docked), visiting: Boolean(visit), home: Boolean(home), rear, photo: photo.active(), restingOnTarget: Boolean(state.restingOn) && state.restingOn === lockGround() });
+  // Why the lock cannot be set, in words (core/orbitLock.js lockRefusal).
+  const lockRefusedText = (why) => ({
+    warp: t('순간 이동 중에는 맴돌 수 없습니다.\n도착한 뒤에 다시 누르세요.'),
+    visit: t('이야기 장소에 머무는 동안에는 맴돌 수 없습니다.\n움직이면 풀려납니다.'),
+    resting: t('그 위에 내려앉아 있어 맴돌 수 없습니다.\n떠오른 뒤에 다시 누르세요.'),
+  }[why]);
   // The key shows whether it goes round now (filled gold, "맴도는 중"), waits ("대기"),
   // or is off: it only had a gold edge, and its word stayed "맴돌기" (the user, 2026-10-21:
   // "맴돌기 안 잘 되는 버그는 여전하네..", "지금도 안 켜짐"). Written only on a change.
@@ -1552,15 +1560,8 @@ ${STORY_MORE[target.id]}` : told) };
     // Only while the flash is still going out: once she has been moved (white at 2.8 s of
     // the 6 s) the new place is fading in and can be gone round (the user, 2026-10-19:
     // "워프 직후에는 맴돌기 버튼이 안 먹네": it waited for the whole 6 s).
-    const ground = sites.some((x) => x.id === selectedId) ? here(selectedId).parent : selectedId;
-    const refused = lockRefusal({ warping: warp.phase()?.phase === 'out', visiting: Boolean(visit), restingOnTarget: Boolean(state.restingOn) && state.restingOn === ground });
-    if (refused) {
-      return toast.now({
-        warp: t('순간 이동 중에는 맴돌 수 없습니다.\n도착한 뒤에 다시 누르세요.'),
-        visit: t('이야기 장소에 머무는 동안에는 맴돌 수 없습니다.\n움직이면 풀려납니다.'),
-        resting: t('그 위에 내려앉아 있어 맴돌 수 없습니다.\n떠오른 뒤에 다시 누르세요.'),
-      }[refused], 'lock');
-    }
+    const refused = lockRefusal({ warping: warp.phase()?.phase === 'out', visiting: Boolean(visit), restingOnTarget: Boolean(state.restingOn) && state.restingOn === lockGround() });
+    if (refused) return toast.now(lockRefusedText(refused), 'lock');
     // Held at a view (home, a best view, an aurora): the hold gives way to the lock, which
     // the hold kept from working.
     if (home) home = null;
@@ -1653,6 +1654,14 @@ ${STORY_MORE[target.id]}` : told) };
   // user, 2026-10-19: "지도에서 고르기,에서 메뉴 이외의 곳을 누르면, 메인으로 돌아가기".)
   $('bigMapGo').addEventListener('click', () => {
     if (!mapPick) return;
+    // Where the lock key would refuse (a jump going out, a story place, standing on the
+    // world chosen), the map does too, with the same words (the review, 2026-10-22).
+    const refused = lockRefusal({ warping: warp.phase()?.phase === 'out', visiting: Boolean(visit), restingOnTarget: state.restingOn === mapPick });
+    if (refused) {
+      $('bigMap').close();
+      toast.now(lockRefusedText(refused), 'lock');
+      return;
+    }
     const body = here(mapPick);
     selectedId = mapPick;
     hud.showSelection(named(mapPick));
@@ -3372,7 +3381,12 @@ ${STORY_MORE[target.id]}` : told) };
     if (!locked && !state.restingOn && !practice && dt > 0 && !docked && !visit && !home && !photo.active() && !warp.busy()) {
       const ground = nearestSurface(state.position, bodies).body;
       const far = Math.hypot(...state.position.map((n, i) => n - ground.position[i])) / ground.radiusKm;
-      const share = Math.min(1, Math.max(0, (NEAR_CARRY_FROM - far) / (NEAR_CARRY_FROM - NEAR_CARRY_FULL)));
+      // Not by a world whose rings lie tilted from its turning: carried round the turning
+      // she crossed them, hundreds of km/s by Saturn, through them in a second or two
+      // while she hung still (the review, 2026-10-22).
+      const rings = world.ringNormal(ground.id);
+      const tiltedRings = Boolean(rings) && Math.abs(rings[1]) < 0.999;
+      const share = tiltedRings ? 0 : Math.min(1, Math.max(0, (NEAR_CARRY_FROM - far) / (NEAR_CARRY_FROM - NEAR_CARRY_FULL)));
       const spun = share > 0 ? spinOf(ground.id, simTime) - spinOf(ground.id, simTime - stepS) : 0;
       if (spun) state = { ...state, ...carriedRound(state.position, state.orientation, ground.position, spun * share) };
     }

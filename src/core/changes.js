@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-22', text: t('땅에 깐 위성 사진이 구름 위로 비치던 것과, 밤에 도시 불빛을 가리던 것을 고쳤습니다.') },
   { day: '2026-10-22', text: t('수첩에 "무전" 탭이 생겨, 무전으로 들은 말이 별자리처럼 이어집니다.') },
   { day: '2026-10-22', text: t('영어, 일본어, 중국어의 맴돌기 알림에서 천체 이름 대신 괄호가 보이던 것을 고쳤습니다.') },
   { day: '2026-10-22', text: t('국제우주정거장에 도킹하면 무전 단추로 승무원의 이야기를 들을 수 있습니다.') },

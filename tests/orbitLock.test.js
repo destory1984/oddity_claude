@@ -51,3 +51,10 @@ test('main.js lets go of the lock only through unlock() and gives every new lock
   assert.ok(sets.length >= 2);
   for (const after of sets) assert.match(after.slice(0, 400), /lockFor = /, 'each lock is set with its target');
 });
+
+// Locked on the Moon and flown straight at it, she lands: the lock does nothing on the
+// ground, and the key said "맴도는 중" (the review, 2026-10-22). It waits there.
+test('the lock waits while she stands on what it goes round', () => {
+  assert.equal(lockWaiting({ restingOnTarget: true }), 'resting');
+  assert.equal(lockKeyState(true, lockWaiting({ restingOnTarget: true })), 'wait');
+});

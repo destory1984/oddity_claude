@@ -17,6 +17,22 @@ test('heardNobody is true until the first meeting is heard', async () => {
   assert.equal(heardNobody({ ...createRadio(), visits: { issCrew: 1 } }), false);
 });
 
+// Where the story stands, for the line at the top of the journal (the user, 2026-10-22:
+// "무전 탭을 좀 더 비중 있게 다뤄주는게 맞지않음?").
+test('radioHint tells the places found and what to do next', async () => {
+  const { radioHint, openHidden } = await import('../src/core/radioFriend.js');
+  const fresh = createRadio();
+  assert.deepEqual(radioHint(fresh), { found: 0, total: HIDDEN.length, next: { kind: 'speaker', id: 'issCrew', at: 'iss' } });
+  // An open place not yet found comes before anyone to hear.
+  const clues = CLUES.map((c) => c.id);
+  const opened = { ...fresh, clues };
+  const first = openHidden(opened)[0];
+  assert.deepEqual(radioHint(opened).next, { kind: 'hidden', id: first });
+  assert.equal(radioHint({ ...opened, found: ['woomera'] }).found, 1);
+  assert.deepEqual(radioHint({ ...opened, callSign: true }).next, { kind: 'note' });
+  assert.deepEqual(radioHint({ ...opened, callSign: true, noteRead: true }).next, { kind: 'done' });
+});
+
 test('a fresh radio log has nothing heard or found', () => {
   assert.deepEqual(createRadio(), { visits: {}, clues: [], found: [], callSign: false, noteAt: null, noteRead: false });
 });

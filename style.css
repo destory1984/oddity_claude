@@ -7385,6 +7385,60 @@ dialog#settings[open] > .backKey {
   margin:4px 0 8px;
 }
 
+/* The radio's line at the top of the journal (ui/journal.js renderRadio), as the sky
+   news' folded line: "무전 2/5", what comes next, cut short, and a press opens the page. */
+#journalRadio {
+  margin:8px 22px 0;
+  font-size:13px;
+  color:#3b2a1a;
+}
+
+#journalRadio[hidden] {
+  display:none;
+}
+
+#journal #journalRadio #radioFold {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:100%;
+  min-height:32px;
+  margin:0;
+  padding:4px 12px;
+  text-align:left;
+}
+
+#journalRadio #radioFold b {
+  flex:none;
+  color:#7a5a36;
+}
+
+#journalRadio #radioFold span {
+  flex:1 1 0;
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-size:13px;
+}
+
+/* Till the story is told, the radio's tab has a small red mark, the red of grandmother's
+   ink. */
+#journal #journalTabs button[data-tab="radio"] {
+  position:relative;
+}
+
+#journal #journalTabs button[data-tab="radio"].live::after {
+  content:"";
+  position:absolute;
+  top:5px;
+  right:7px;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#b23133;
+}
+
 /* In the journal the chart is a picture to press: no key's frame round it (ui/journal.js). */
 #journal #radioOpen {
   display:block;

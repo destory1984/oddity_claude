@@ -266,6 +266,21 @@ export function openHidden(radio) {
   return HIDDEN.filter((h) => h.needs.every((id) => radio.clues.includes(id)) && (h.needsFound ?? []).every((id) => radio.found.includes(id))).map((h) => h.id);
 }
 
+// Where the story stands, for the line at the top of the journal (the user, 2026-10-22:
+// "무전 탭을 좀 더 비중 있게 다뤄주는게 맞지않음?"): the hidden places found of all, and
+// what comes next: an open place not yet reached, else the first speaker with a meeting
+// to hear (`at`: the craft or story place where), else grandmother's note, else done.
+export function radioHint(radio) {
+  const found = radio.found.length;
+  const total = HIDDEN.length;
+  if (radio.noteRead) return { found, total, next: { kind: 'done' } };
+  if (radio.callSign) return { found, total, next: { kind: 'note' } };
+  const place = openHidden(radio).find((id) => !radio.found.includes(id));
+  if (place) return { found, total, next: { kind: 'hidden', id: place } };
+  const speaker = SPEAKERS.find((s) => nextVisit(radio, s.id));
+  return { found, total, next: speaker ? { kind: 'speaker', id: speaker.id, at: speaker.at.craft ?? speaker.at.site } : null };
+}
+
 // The open hidden places on a body's ground, as storySitesAt (core/stories.js) gives the
 // story places: where they are at game time timeS, turning with their body.
 export function hiddenSitesAt(radio, timeS, bodies) {

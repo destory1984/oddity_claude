@@ -16,6 +16,8 @@ import { craftPicture } from '../core/craft.js';
 import { CURIOS, CURIO_ABOUT, nextChilseok } from '../core/curios.js';
 import { CURIO_HINTS } from '../core/lines.js';
 import { createRadioWeb } from './radioWeb.js';
+import { radioHint, HIDDEN } from '../core/radioFriend.js';
+import { whereOf } from '../core/daily.js';
 
 const $ = (id) => document.getElementById(id);
 // 로 after a vowel or ㄹ, 으로 after any other final consonant.
@@ -213,6 +215,28 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       if (planet && lastProgress.discovered.includes(planet.id)) line.append(jumpButton(planet.id, planet.name, toward));
       return line;
     }));
+  }
+
+  // The radio story's line under the sky news (the user, 2026-10-22: "무전 탭을 좀 더
+  // 비중 있게 다뤄주는게 맞지않음?"): the hidden places found, what comes next, and a
+  // press opens its page; the tab keeps a red mark till the story is told.
+  function renderRadio() {
+    if (!lastProgress) return;
+    const { found, total, next } = radioHint(lastProgress.radio);
+    const fold = document.createElement('button');
+    fold.id = 'radioFold';
+    const head = document.createElement('b');
+    head.textContent = t`무전 ${found}/${total}`;
+    const line = document.createElement('span');
+    if (next?.kind === 'hidden') line.textContent = t`가 볼 곳: ${HIDDEN.find((h) => h.id === next.id).name}`;
+    else if (next?.kind === 'speaker') line.textContent = t`다음 무전: ${whereOf(next.at)}`;
+    else if (next?.kind === 'note') line.textContent = t('할머니의 쪽지를 기다리는 중');
+    else if (next?.kind === 'done') line.textContent = t('오십 년 만에 이어졌다');
+    fold.append(head, line, t('펼치기'));
+    fold.addEventListener('click', openRadio);
+    $('journalRadio').replaceChildren(fold);
+    $('journalRadio').hidden = false;
+    document.querySelector('#journalTabs button[data-tab="radio"]').classList.toggle('live', next?.kind !== 'done');
   }
 
   let notesOpen = false;
@@ -697,6 +721,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     renderDaily();
     skyOpen = false;
     renderSky();
+    renderRadio();
     renderStories();
     renderCraft();
     renderCurios();
@@ -732,6 +757,10 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       if (progress.radio !== lastProgress?.radio) {
         radioChart.draw(progress.radio);
         if (radioSheet.open) radioBig.draw(progress.radio);
+      }
+      if (dialog.open && progress.radio !== lastProgress?.radio) {
+        lastProgress = progress;
+        renderRadio();
       }
       lastProgress = progress;
       lastPosition = position;

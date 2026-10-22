@@ -2171,8 +2171,18 @@ ${STORY_MORE[target.id]}` : told) };
     if (locked) unlock('jump');
     sound.cue('warp');
     warp.play(() => {
-      if (docked) undock();
+      // What a jump lets go of, as teleport does: the craft held, a stay at a story place
+      // (which pulled her straight back to it), a held view, the keys held down.
+      if (docked) {
+        docked = null;
+        showCraftCard(null);
+        sound.hush();
+      }
+      if (visit && !hasArrived(visit)) sound.hush();
+      visit = null;
+      stuntJumped = true;
       home = null;
+      input.clear();
       let spot;
       let toward;
       if (place.type === 'surface') {
@@ -3367,7 +3377,7 @@ ${STORY_MORE[target.id]}` : told) };
     const logged = updateProgress(progress, EXO_IDS.includes(state.restingOn) ? { ...state, restingOn: null } : state, bodies.filter((b) => !b.exo));
     // A hidden place of the radio friend's story (core/radioFriend.js), open and reached:
     // written down and told on the note card (only when the card is free to show it).
-    if (dt > 0 && !noteCard.isOpen()) {
+    if (dt > 0 && !noteCard.isOpen() && !warp.busy()) {
       const reached = foundHidden({ radio: progress.radio, position: state.position, restingOn: state.restingOn, bodies, craft, sites: hiddenSitesAt(progress.radio, simTime, bodies) });
       if (reached.length) {
         progress = { ...progress, radio: recordFound(progress.radio, reached, Date.now()) };
@@ -3558,16 +3568,15 @@ ${STORY_MORE[target.id]}` : told) };
       if (note) noteWait = Math.max(noteWait, NOTE_AFTER_S);
     }
     noteWait = Math.max(0, noteWait - dt);
-    const calm = dt > 0 && noteWait === 0 && !cardDue && !storyCard.isOpen() && !warp.busy()
+    // (Not under an open note card: a note shown then was marked read and never seen,
+    // the card being taken by a hidden place's telling that frame.)
+    const calm = dt > 0 && noteWait === 0 && !cardDue && !storyCard.isOpen() && !noteCard.isOpen() && !warp.busy()
       && !(docked && !isDocked(docked)) && !(visit && !hasArrived(visit));
     // Today's request comes on a sheet of its own as the day's play begins, and the
     // game waits until it is put away with its button (as a passing notice it was
     // gone in six seconds). Only the very first note, which opens the story, goes before it.
     const settled = dt > 0 && !noteCard.isOpen() && !cardDue && !storyCard.isOpen() && !warp.busy()
       && !(docked && !isDocked(docked)) && !(visit && !hasArrived(visit));
-    // Grandmother's note at the end of the radio friend's story, when she is at rest and
-    // none of the journal's own notes is waiting.
-    if (settled && noteWait === 0 && !note && noteDue(progress.radio, Date.now(), radioSignAtStart)) noteCard.show(FINAL_NOTE);
     // (After a note it waits out the gap between notes, so the first sitting does not
     // open sheet upon sheet.)
     // Nor does it come while one of her notes is due (landing on the Moon for the first
@@ -3587,6 +3596,10 @@ ${STORY_MORE[target.id]}` : told) };
       noteCard.show(note);
     } else if (!note && calm && repliesDue.length) {
       openReplies();
+    } else if (!note && calm && noteDue(progress.radio, Date.now(), radioSignAtStart)) {
+      // Grandmother's note at the end of the radio friend's story, last of the sheets:
+      // shown in the same frame as the day's request it took that one's place.
+      noteCard.show(FINAL_NOTE);
     }
     // A newcomer is offered the flight practice once, when grandmother's first note has
     // been read and put away, before the steps to the Moon are taken up.

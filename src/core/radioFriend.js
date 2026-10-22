@@ -193,7 +193,8 @@ export const CLUES = [
 // The hidden places, as story places are (core/stories.js): 'surface' on a body's ground
 // (latDeg, lonDeg), 'near' a body or a craft (target). needs: the clues that open one;
 // needsFound: hidden places to be found first (the Kibo window, the last). text: told when
-// she gets there.
+// she gets there. One by a craft reaches past DOCK_GAP_KM (core/dock.js, 60 km): docked
+// with Akatsuki or the station, she is there.
 export const HIDDEN = [
   {
     id: 'ryuguMarker', name: t('류구의 표적 표지'), nameEn: 'Target marker on Ryugu', type: 'near', target: 'ryugu', withinKm: 1,
@@ -206,7 +207,7 @@ export const HIDDEN = [
     text: t('2020년 12월 6일 새벽, 하야부사2의 캡슐이 낙하산을 펴고 이 붉은 사막에 내렸다. 류구의 흙과 함께, 그 부호도 지구로 돌아왔다.'),
   },
   {
-    id: 'akatsukiOrbit', name: t('아카쓰키의 금성 궤도'), nameEn: "Akatsuki's orbit of Venus", type: 'near', target: 'akatsuki', withinKm: 50,
+    id: 'akatsukiOrbit', name: t('아카쓰키의 금성 궤도'), nameEn: "Akatsuki's orbit of Venus", type: 'near', target: 'akatsuki', withinKm: 80,
     needs: ['akatsukiMark', 'akatsukiWait'], at: [0.44, 0.6],
     text: t('5년을 떠돈 끝에 아카쓰키가 들어선 금성의 궤도다. 탐사선 옆구리의 알루미늄 판에 "바다 건너 같은 별을 보던 HL에게"라는 글이 실려 있다.'),
   },
@@ -217,7 +218,7 @@ export const HIDDEN = [
     text: t('바다 건너 한국을 마주 보는 언덕이다. 1973년 여름, 열여덟 살 소년이 여기서 무전기를 켜고 바다 건너 처녀와 같은 별 이야기를 했다.'),
   },
   {
-    id: 'kiboWindow', name: t('기보의 창'), nameEn: "Kibo's window", type: 'near', target: 'iss', withinKm: 5,
+    id: 'kiboWindow', name: t('기보의 창'), nameEn: "Kibo's window", type: 'near', target: 'iss', withinKm: 80,
     needs: [], needsFound: ['ryuguMarker', 'woomera', 'akatsukiOrbit', 'shotaShore'], at: [0.5, 0.74],
     text: t('일본 실험실 기보의 작은 창 앞이다. 일지 맨 뒤 장, 번지지 않은 자리에 호출 부호가 끝까지 적혀 있다. 소라는 그 부호를 수첩에 옮겨 적는다. 할머니께 전해 드리자.'),
   },

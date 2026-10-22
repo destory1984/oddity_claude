@@ -210,3 +210,14 @@ test('every person met has a face on file; the logs have none', async () => {
   }
   assert.ok(existsSync('public/assets/notebook/radio-shota.png'));
 });
+
+// Docked, she stays DOCK_GAP_KM from the craft: a hidden place by a craft must take that
+// in, or docking there (Kibo's window at the station, Akatsuki's orbit) never finds it
+// (the whole-branch review, 2026-10-22).
+test('a hidden place by a craft is found from where docking holds her', async () => {
+  const { DOCK_GAP_KM } = await import('../src/core/dock.js');
+  const craftIds = new Set(CRAFT.map((c) => c.id));
+  const byCraft = HIDDEN.filter((h) => h.type === 'near' && craftIds.has(h.target));
+  assert.ok(byCraft.length >= 2);
+  for (const place of byCraft) assert.ok(place.withinKm > DOCK_GAP_KM, place.id);
+});

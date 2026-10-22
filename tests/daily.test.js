@@ -50,11 +50,33 @@ test('the same day gives the same errand; a new log is sent near home, a later o
   // near the Moon, since 2026-10-19.)
   for (let d = 5; d <= 9; d++) {
     const request = dailyRequest(`2026-10-${String(d).padStart(2, '0')}`, fresh);
-    assert.ok(['moon', 'iss', 'hubble', 'luna3'].includes(request.id), request.id);
+    // (Since 2026-10-22 a short log is also sent to the worlds and craft near home.)
+    assert.ok(['moon', 'venus', 'mars', 'mercury', 'jupiter', 'iss', 'hubble', 'tiangong', 'luna3'].includes(request.id), request.id);
     const later = dailyRequest(`2026-10-${String(d).padStart(2, '0')}`, far);
-    assert.ok(['moon', 'mars', 'jupiter', 'io', 'voyager1', 'luna3'].includes(later.id), later.id);
+    assert.ok(['moon', 'mars', 'jupiter', 'io', 'venus', 'voyager1', 'iss', 'hubble', 'luna3'].includes(later.id), later.id);
     // A photo of a moon of another planet would be rated as the planet: never asked for.
     if (later.kind === 'photo') assert.notEqual(later.id, 'io');
+  }
+});
+
+// The user, 2026-10-22, of a log that had found Venus only: "왜 수첩 미션이 겹치는게
+// 많지? 금성이 7, 13이네": two errands in three went to the one body found. Now no place
+// comes twice in seven days, and a short log is sent to the worlds near home besides.
+test('no errand repeats a place within seven days, however little has been found', async () => {
+  const { dayAfter } = await import('../src/core/daily.js');
+  const venusOnly = { ...fresh, discovered: ['earth', 'venus'] };
+  const wide = { ...fresh, discovered: BODIES.map((b) => b.id), craft: CRAFT.map((c) => c.id) };
+  for (const progress of [fresh, venusOnly, far, wide]) {
+    const ids = Array.from({ length: 400 }, (_, k) => dailyRequest(dayAfter('2026-01-01', k), progress).id);
+    for (let k = 0; k + 7 <= ids.length; k += 1) {
+      const week = ids.slice(k, k + 7);
+      assert.equal(new Set(week).size, 7, `${progress.discovered.length} found, from day ${k}: ${week}`);
+    }
+  }
+  // A photo is never asked of a moon of another planet (it would be rated as the planet).
+  for (let k = 0; k < 400; k += 1) {
+    const request = dailyRequest(dayAfter('2026-01-01', k), far);
+    if (request.kind === 'photo') assert.notEqual(request.id, 'io');
   }
 });
 

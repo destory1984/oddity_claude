@@ -273,7 +273,7 @@ STORIES.push({
   id: 'wadiRum', name: t('와디럼 사막'), nameEn: 'Wadi Rum', type: 'surface', body: 'earth',
   latDeg: 29.58, lonDeg: 35.42, withinKm: 150, landmark: true,
   hint: t('지구 요르단의 와디럼 사막(북위 29.6도, 동경 35.4도) 150km 안에 내려앉기'),
-  text: t('요르단 남쪽의 붉은 사막입니다. 화성과 닮아서 화성이 나오는 영화의 바깥 장면을 여러 편 이곳에서 찍었습니다.'),
+  text: t('요르단 남쪽의 붉은 사막입니다. 「마션」을 비롯해 화성이 나오는 영화의 바깥 장면을 여러 편 이곳에서 찍었습니다.'),
 });
 // Six more places on Earth (2026-10-04, by the user's pick from nine): where rockets
 // left from, where the sky fell, and where the sky is watched. None has a photograph yet.

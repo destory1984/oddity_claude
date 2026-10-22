@@ -55,9 +55,9 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 
 ## 이야기 장소의 사진
 
-`public/assets/stories/` 의 사진 107장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
+`public/assets/stories/` 의 사진 108장은 위키미디어 공용에서 가로 640px 판을 받아 560×420 안에 들도록 줄였다. 라이선스는 위키미디어 공용의 표시를 따랐다.
 
-같은 폴더의 그림 여덟 장(`acidalia.jpg`, `procellarum.jpg`, `schiaparelli.jpg`, `wadiRum.jpg`, `bohyunsan.jpg`, `tanegashima.jpg`, `wenchang.jpg`, `vega.jpg`, 420×420)은 쓸 수 있는 사진이 없어 이 게임을 위해 그린 것이다. 외부 자료가 아니고 권리를 보유한다(LICENSE).
+같은 폴더의 그림 일곱 장(`acidalia.jpg`, `procellarum.jpg`, `schiaparelli.jpg`, `bohyunsan.jpg`, `tanegashima.jpg`, `wenchang.jpg`, `vega.jpg`, 420×420)은 쓸 수 있는 사진이 없어 이 게임을 위해 그린 것이다. 외부 자료가 아니고 권리를 보유한다(LICENSE).
 
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
@@ -177,6 +177,7 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | `cheomseongdae.jpg` | [Cheomseongdae Observatory 02.jpg](https://commons.wikimedia.org/wiki/File:Cheomseongdae_Observatory_02.jpg) | Bernard Gagnon | CC0 |
 | `stonehenge.jpg` | [Summer Solstice Sunrise over Stonehenge 2005.jpg](https://commons.wikimedia.org/wiki/File:Summer_Solstice_Sunrise_over_Stonehenge_2005.jpg) | Andrew Dunn | CC BY-SA 2.0 |
 | `arecibo.jpg` | [Arecibo Radio Telescope Arecibo Observatory.jpg](https://commons.wikimedia.org/wiki/File:Arecibo_Radio_Telescope_Arecibo_Observatory.jpg) | EgorovaSvetlana | CC BY-SA 4.0 |
+| `wadiRum.jpg` | [Desert landscape in Wadi Rum.jpg](https://commons.wikimedia.org/wiki/File:Desert_landscape_in_Wadi_Rum.jpg) (가로 960px 판, 560×420으로 잘라 줄임. 2026-10-05에 그린 그림을 바꿈) | Daniel Case | CC BY-SA 3.0 |
 | `richat.jpg` | [Richat Structure ISS030-E-12516.jpg](https://commons.wikimedia.org/wiki/File:Richat_Structure_ISS030-E-12516.jpg) (가로 960px 판, 560×420으로 잘라 줄임) | NASA (ISS Expedition 30) | Public domain |
 
 CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝히면 쓸 수 있고, 고친 것은 같은 조건으로 내야 한다. 이 저장소의 MIT 라이선스는 이 사진들에 미치지 않는다.
@@ -227,7 +228,6 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `plutoCharon.jpg` | [Pluto-Charon-v2-10-1-15.jpg](https://commons.wikimedia.org/wiki/File:Pluto-Charon-v2-10-1-15.jpg) | NASA / Johns Hopkins University Applied Physics Laboratory / Southwest Research Institute | Public domain |
 | `procellarum.jpg` | 이 게임을 위해 그린 그림 (2026-10-05) | 이 저장소 | 권리 보유 (LICENSE) |
 | `schiaparelli.jpg` | 이 게임을 위해 그린 그림 (2026-10-05) | 이 저장소 | 권리 보유 (LICENSE) |
-| `wadiRum.jpg` | 이 게임을 위해 그린 그림 (2026-10-05) | 이 저장소 | 권리 보유 (LICENSE) |
 | `bohyunsan.jpg` | 이 게임을 위해 그린 그림 (2026-10-05) | 이 저장소 | 권리 보유 (LICENSE) |
 | `tanegashima.jpg` | 이 게임을 위해 그린 그림 (2026-10-07) | 이 저장소 | 권리 보유 (LICENSE) |
 | `wenchang.jpg` | 이 게임을 위해 그린 그림 (2026-10-07) | 이 저장소 | 권리 보유 (LICENSE) |

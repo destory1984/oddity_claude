@@ -15,13 +15,13 @@ test('every story place has a longer telling of three sentences or more', () => 
   }
 });
 
-test('all 132 have a picture on file, with a caption and a credit (124 photographs and eight drawings made for the game)', () => {
+test('all 132 have a picture on file, with a caption and a credit (125 photographs and seven drawings made for the game)', () => {
   const without = STORIES.filter((s) => !STORY_DETAILS[s.id].photo).map((s) => s.id);
   assert.deepEqual(without, []);
   assert.equal(storyPhotoFile('wadiRum'), 'stories/wadiRum.jpg');
   assert.equal(storyPhotoFile('nowhere'), null);
   // A drawing says that it is one.
-  for (const id of ['procellarum', 'acidalia', 'schiaparelli', 'wadiRum', 'bohyunsan', 'tanegashima', 'wenchang', 'vega']) assert.match(STORY_DETAILS[id].photo.caption, /^그림으로 그린 .*사진이 아닙니다\.$/);
+  for (const id of ['procellarum', 'acidalia', 'schiaparelli', 'bohyunsan', 'tanegashima', 'wenchang', 'vega']) assert.match(STORY_DETAILS[id].photo.caption, /^그림으로 그린 .*사진이 아닙니다\.$/);
   const credits = readFileSync('THIRD-PARTY.md', 'utf8');
   let bytes = 0;
   for (const story of STORIES) {

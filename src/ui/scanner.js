@@ -1,4 +1,4 @@
-import { scannerPoints, scannerGround } from '../core/scanner.js';
+import { scannerPoints, scannerGround, easePoints } from '../core/scanner.js';
 import { distanceText } from './messages.js';
 
 // The 3D scanner over the speed box (core/scanner.js says where each thing goes): an
@@ -136,6 +136,9 @@ export function createScanner(canvas, button = null) {
   }
 
   // things: [{ id, name, kind: 'craft'|'curio'|'body', position, radiusKm? }].
+  // The dots as last drawn, and when (core/scanner.js easePoints).
+  let shown = [];
+  let lastMs = null;
   function draw({ position, orientation, things, selectedId = null }) {
     place();
     const [w, h] = size;
@@ -179,14 +182,20 @@ export function createScanner(canvas, button = null) {
     ctx.lineTo(cx + 4, cy + 3);
     ctx.fill();
     const byId = new Map(things.map((thing) => [thing.id, thing]));
-    const points = scannerPoints(position, orientation, things);
+    // The dots glide to their places and fade in and out (core/scanner.js easePoints).
+    const nowMs = performance.now();
+    const dtS = lastMs === null ? 1 : Math.min(0.5, (nowMs - lastMs) / 1000);
+    lastMs = nowMs;
+    shown = easePoints(shown, scannerPoints(position, orientation, things), dtS);
     ctx.font = '600 10px "Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif';
     ctx.textBaseline = 'middle';
     // Farthest first, so the nearer stand in front. A name that would lie on one already
     // written moves a line up (down, at the top), never out of the box.
     const written = [];
-    for (const p of [...points].reverse()) {
+    for (const p of [...shown].reverse()) {
       const thing = byId.get(p.id);
+      if (!thing) continue;
+      ctx.globalAlpha = p.alpha;
       const colour = KIND_COLOUR[thing.kind] ?? KIND_COLOUR.body;
       const px = cx + p.x * rx;
       const py = cy - p.z * ry;
@@ -234,6 +243,7 @@ export function createScanner(canvas, button = null) {
       ctx.fillText(name, tx, ty);
       ctx.lineWidth = 1;
     }
+    ctx.globalAlpha = 1;
   }
 
   return {

@@ -95,3 +95,31 @@ export function spread(points, gap = 0.22, rounds = 60) {
   }
   return out;
 }
+
+// The dots as drawn, easing to where scannerPoints puts them now (the user, 2026-10-21,
+// of the scanner: "애들이 자꾸 도망가": as the five nearest changed, the scale was drawn
+// anew and every dot jumped at once). shown: last frame's [{ id, x, z, h, alpha }];
+// target: this frame's points; dtS: seconds since. A dot goes nine tenths of the way in
+// about a third of a second; a new one fades in where it belongs, one no longer among
+// the five fades out where it stood and is then dropped.
+const EASE_RATE = 8;
+const FADE_RATE = 6;
+export function easePoints(shown, target, dtS) {
+  const step = 1 - Math.exp(-Math.max(0, dtS) * EASE_RATE);
+  const fade = 1 - Math.exp(-Math.max(0, dtS) * FADE_RATE);
+  const was = new Map(shown.map((p) => [p.id, p]));
+  const now = target.map((p) => {
+    const old = was.get(p.id);
+    if (!old) return { ...p, alpha: fade };
+    return {
+      ...p,
+      x: old.x + (p.x - old.x) * step,
+      z: old.z + (p.z - old.z) * step,
+      h: old.h + (p.h - old.h) * step,
+      alpha: old.alpha + (1 - old.alpha) * fade,
+    };
+  });
+  const here = new Set(target.map((p) => p.id));
+  const going = shown.filter((p) => !here.has(p.id)).map((p) => ({ ...p, alpha: p.alpha * (1 - fade) })).filter((p) => p.alpha > 0.02);
+  return [...now, ...going];
+}

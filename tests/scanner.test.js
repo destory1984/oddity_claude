@@ -60,3 +60,25 @@ test('the world she is close to comes in as ground from its side, further the ne
   // Things with no size are never ground.
   assert.equal(scannerGround([0, 0, 0], still, [{ id: 'craft', position: [0, 10, 0] }]), null);
 });
+
+// The dots glide to where they now belong instead of jumping, and come and go by fading
+// (the user, 2026-10-21, of the scanner: "애들이 자꾸 도망가": when the five nearest
+// changed, every dot jumped at once as the scale was drawn anew).
+test('the scanner dots glide to their new places and fade in and out', async () => {
+  const { easePoints } = await import('../src/core/scanner.js');
+  const first = easePoints([], [{ id: 'a', x: 0.5, z: 0, h: 0 }], 0.016);
+  assert.equal(first[0].alpha < 0.5, true);
+  assert.equal(first[0].x, 0.5);
+  // Moved far: a little of the way in one frame, nearly all of it in half a second.
+  let shown = [{ id: 'a', x: 0.5, z: 0, h: 0, alpha: 1 }];
+  shown = easePoints(shown, [{ id: 'a', x: -0.5, z: 0, h: 0 }], 0.016);
+  assert.ok(shown[0].x < 0.5 && shown[0].x > 0.3, String(shown[0].x));
+  for (let i = 0; i < 30; i += 1) shown = easePoints(shown, [{ id: 'a', x: -0.5, z: 0, h: 0 }], 0.016);
+  assert.ok(Math.abs(shown[0].x + 0.5) < 0.02);
+  // Gone from the five: it fades where it stood, then is dropped.
+  shown = easePoints(shown, [], 0.016);
+  assert.equal(shown.length, 1);
+  assert.ok(shown[0].alpha < 1);
+  for (let i = 0; i < 60; i += 1) shown = easePoints(shown, [], 0.016);
+  assert.equal(shown.length, 0);
+});

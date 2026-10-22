@@ -194,6 +194,15 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `arecibo-2.jpg` | [Arecibo Telescope, December 2021.jpg](https://commons.wikimedia.org/wiki/File:Arecibo_Telescope,_December_2021.jpg) | Tedder | CC BY-SA 4.0 |
 | `richat-2.jpg` | [RichatStructure.jpg](https://commons.wikimedia.org/wiki/File:RichatStructure.jpg) | Clemens Schmillen | CC BY-SA 4.0 |
 
+## 무전 친구 이야기의 사진
+
+`public/assets/notebook/` 의 사진 2장은 무전 친구 이야기의 숨은 장소 카드에 보인다(2026-10-22). 위키미디어 공용에서 가로 960px 판을 받아 384×216으로 줄였다. 같은 이야기의 다른 그림(얼굴 여섯, 류구·우메라·규슈 바닷가)은 이 게임을 위해 그린 것이고 권리를 보유한다(LICENSE).
+
+| 파일 | 원본 | 만든 이 | 라이선스 |
+|---|---|---|---|
+| `radio-kibo.jpg` | [Kibo PM interior.jpg](https://commons.wikimedia.org/wiki/File:Kibo_PM_interior.jpg) (16:9로 잘라 줄임) | NASA | Public domain |
+| `radio-venus.jpg` | [Venus Mariner 10 true color.png](https://commons.wikimedia.org/wiki/File:Venus_Mariner_10_true_color.png) (검은 바탕 가운데에 놓음) | NASA / Mariner 10 (Omarius257 처리) | Public domain |
+
 ## 땅에 깐 위성 사진
 
 `public/assets/terrain/` 의 사진 13장은 지구 그림이 너무 거칠어(한 화소에 10km쯤) 보이지 않는 이름난 자리에, 가까이 갔을 때 땅에 얇게 덮어 보인다. 둥글게 잘라 가장자리를 투명하게 하고, 색을 둘레 지구 그림에 맞추고(채널마다 0.8 → 1.25배), 대기처럼 회색(137, 137, 140)을 28% 섞어 살짝 뿌옇게 했으며, WebP 품질 55로 작게 줄였다(8 → 20KB).

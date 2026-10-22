@@ -232,3 +232,14 @@ test('a stored log gets back the clues of the meetings it counts as heard', () =
   const first = SPEAKERS.find((s) => s.id === 'issCrew').visits[0].gives;
   for (const id of first) assert.ok(clean.clues.includes(id), id);
 });
+
+test('every hidden place is told with a picture on file, photos credited', async () => {
+  const { existsSync, readFileSync } = await import('node:fs');
+  const { foundNote } = await import('../src/core/radioFriend.js');
+  const credits = readFileSync('THIRD-PARTY.md', 'utf8');
+  for (const place of HIDDEN) {
+    assert.ok(place.picture && existsSync(`public/assets/notebook/${place.picture}`), place.id);
+    assert.equal(foundNote(place.id).pages[0].image, place.picture);
+    if (place.picture.endsWith('.jpg')) assert.ok(credits.includes(`| \`${place.picture}\` |`), `${place.picture} is not in THIRD-PARTY.md`);
+  }
+});

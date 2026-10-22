@@ -13,9 +13,18 @@ import { t } from './i18n.js';
 // comes in turn, once its `needs` are known, and `gives` its clues.
 export const SPEAKERS = [
   {
-    id: 'issCrew', kind: 'person', at: { craft: 'iss' }, name: t('국제우주정거장의 당번 우주비행사'), portrait: null,
+    // (Made up, as everyone met here is: no real astronaut is a speaker.)
+    id: 'issCrew', kind: 'person', at: { craft: 'iss' }, name: t('국제우주정거장 당번, 마야 린드'), portrait: null,
     visits: [
-      { needs: [], lines: [t('기보 실험실에 낡은 무전 일지가 한 권 있어.')], gives: ['kiboLog'] },
+      {
+        needs: [],
+        lines: [
+          t('안녕, 꼬마 손님. 이번 달 정거장 당번 마야야. 여기까지 날아오다니 대단한걸.'),
+          t('일본 실험실 "기보"의 서랍에 낡은 무전 일지가 한 권 있어. 몇 해 전 여기 올라왔던 일본 기술자가 두고 간 거래.'),
+          t('끝장에 호출 부호가 하나 적혀 있는데, 물이 번져서 앞의 두 글자 "JA"만 읽혀. 일본 무전가의 부호는 그렇게 시작하거든.'),
+        ],
+        gives: ['kiboLog'],
+      },
     ],
   },
 ];
@@ -23,7 +32,7 @@ export const SPEAKERS = [
 // A clue: one line in the journal. from: who told it; points: the hidden place or the
 // speaker it leads to; at: its place in the journal's web (0 → 1 across and down).
 export const CLUES = [
-  { id: 'kiboLog', text: t('기보 실험실에 남은 무전 일지: 호출 부호의 앞 두 글자만 읽힌다.'), from: 'issCrew', points: 'issCrew', at: [0.5, 0.2] },
+  { id: 'kiboLog', text: t('기보 실험실의 낡은 무전 일지: 일본 기술자가 두고 갔다. 호출 부호는 앞의 "JA"만 읽힌다.'), from: 'issCrew', points: 'issCrew', at: [0.5, 0.2] },
 ];
 
 // The hidden places, as story places are (core/stories.js): 'surface' on a body's ground,
@@ -115,4 +124,21 @@ export function speakerAt({ docked = null, visit = null } = {}) {
   const placeId = visit?.id;
   const speaker = SPEAKERS.find((s) => (craftId && s.at.craft === craftId) || (placeId && s.at.site === placeId));
   return speaker ? speaker.id : null;
+}
+
+// A meeting as the note card (ui/noteCard.js) shows it: the speaker's name and face on
+// the first page (the card's title is not shown on screen, so the name is in its words), then a line a page, told plainly above the paper (`scene`): there is
+// no paper, which is grandmother's hand. radio: who it was, for main.js when it closes.
+// (No id: it is not one of grandmother's notes, kept as read and read over.)
+export function talkNote(speakerId, visit) {
+  const speaker = speakerById(speakerId);
+  return {
+    radio: speakerId,
+    title: speaker.name,
+    button: t('무전을 끈다'),
+    pages: [
+      { image: speaker.portrait, scene: speaker.kind === 'log' ? t`${speaker.name}의 기록장이 열린다.` : t`${speaker.name}의 무전이 닿았다.` },
+      ...visit.lines.map((line) => ({ scene: line })),
+    ],
+  };
 }

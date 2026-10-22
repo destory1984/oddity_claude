@@ -35,7 +35,7 @@ function fitName() {
   plate.style.width = `${count * step - (step - key)}px`;
 }
 
-export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome, onAurora, onVista, onPole, onPhoto, vistas = [], auroras = ['earth'], poles = [], skyLabels = [] }) {
+export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome, onAurora, onVista, onPole, onPhoto, onRadio, vistas = [], auroras = ['earth'], poles = [], skyLabels = [] }) {
   // A press on the name itself (not on a key at its end, which keeps the press to itself).
   $('targetName').addEventListener('click', () => onName?.());
   // The way home (core/home.js): a key that stands at the end of the name plate while
@@ -88,6 +88,17 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
   // A clock's face with an arrow going back round it; two links of a chain come apart.
   const thenKey = momentKey('thenKey', '<path d="M4.2 12a7.8 7.8 0 1 0 2.5-5.7"/><path d="M4.2 4.4v4.2h4.2"/><path d="M12 8v4.3l2.9 1.8"/>', 'replayButton');
   const dockKey = momentKey('dockKey', '<path d="M9.2 8H7a4 4 0 0 0 0 8h2.2"/><path d="M14.8 8H17a4 4 0 0 1 0 8h-2.2"/><path d="M12 5v2.6M12 16.4V19"/>', 'dockTarget');
+  // Someone to hear on the radio here (core/radioFriend.js): an aerial with its waves,
+  // gold as the day's key; shown only while there is something new to hear.
+  const radioKey = document.createElement('button');
+  radioKey.id = 'radioKey';
+  radioKey.title = t('무전');
+  radioKey.setAttribute('aria-label', t('무전'));
+  radioKey.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-9"/><circle cx="12" cy="10" r="1.8"/><path d="M8.6 6.6a4.8 4.8 0 0 0 0 6.8"/><path d="M15.4 6.6a4.8 4.8 0 0 1 0 6.8"/><path d="M5.8 3.8a8.8 8.8 0 0 0 0 12.4"/><path d="M18.2 3.8a8.8 8.8 0 0 1 0 12.4"/></svg>';
+  radioKey.addEventListener('click', (event) => {
+    event.stopPropagation();
+    onRadio?.();
+  });
   // A photo of what the plate names (core/photoSlides.js), at the right end after the day's key: a
   // picture in a frame (the user, 2026-10-16: "여기에 새로운 버튼 "사진 보기"").
   const photoKey = document.createElement('button');
@@ -99,7 +110,7 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
     event.stopPropagation();
     onPhoto?.();
   });
-  let plateNow = { undock: false, then: null };
+  let plateNow = { undock: false, then: null, radio: false };
   let plateId = null;
   window.addEventListener('resize', fitName);
   document.fonts?.ready.then(fitName);
@@ -216,7 +227,7 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
       if (poles.includes(body.id)) $('targetName').append(poleKey);
       if (photoSlides(body).length) $('targetName').append(photoKey);
       // (The keys of the moment went out with the old name: the next frame puts them back.)
-      plateNow = { undock: false, then: null };
+      plateNow = { undock: false, then: null, radio: false };
       fitName();
       $('faceTarget').textContent = t`${faced.name} 바라보기`;
       // The button shows a picture only: its words are its name and its tip.
@@ -225,12 +236,13 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
     // Whose name stands on the plate now (an id), or null before the first.
     plateId: () => plateId,
     // The keys of the moment on the name plate. then: what the day's key is called
-    // ("그날로 · 1957년 10월 4일") or null; undock: whether the key to let go stands there.
+    // ("그날로 · 1957년 10월 4일") or null; undock: whether the key to let go stands there;
+    // radio: whether there is someone new to hear on the radio here.
     // Whether a target was off screen at the last update (not known: false).
     offScreen: (id) => offScreen.has(id),
-    plateKeys({ undock = false, then = null }) {
-      if (undock === plateNow.undock && then === plateNow.then) return;
-      plateNow = { undock, then };
+    plateKeys({ undock = false, then = null, radio = false }) {
+      if (undock === plateNow.undock && then === plateNow.then && radio === plateNow.radio) return;
+      plateNow = { undock, then, radio };
       // The key to let go comes first, then the day's gold key (the user, 2026-10-18,
       // docked with MRO: "두 아이콘 자리 바꿈").
       thenKey.remove();
@@ -244,6 +256,8 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
         thenKey.setAttribute('aria-label', then);
         $('targetName').append(thenKey);
       }
+      if (radio) $('targetName').append(radioKey);
+      else radioKey.remove();
       // The photo's key stays at the right end, after these (the user, 2026-10-17:
       // "버튼 위치를 서로 바꾸자.. 사진이 오른쪽").
       if (photoKey.isConnected) $('targetName').append(photoKey);

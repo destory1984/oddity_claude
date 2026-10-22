@@ -93,3 +93,18 @@ test('the speaker is found by the craft she is docked with, or the place she sta
   assert.equal(speakerAt({ docked: null, visit: null }), null);
   assert.equal(speakerAt({ docked: { id: 'hubble' }, visit: null }), null);
 });
+
+test('a meeting is shown on the note card as pages of plain telling, never on grandmother\'s paper', async () => {
+  const { talkNote } = await import('../src/core/radioFriend.js');
+  for (const speaker of SPEAKERS) {
+    speaker.visits.forEach((visit, index) => {
+      const note = talkNote(speaker.id, { index, lines: visit.lines, gives: visit.gives });
+      assert.equal(note.pages.length, visit.lines.length + 1);
+      assert.ok(note.pages.every((page) => !page.text), speaker.id);
+      assert.equal(note.radio, speaker.id);
+      // Not one of grandmother's notes: no id, so it is not kept as read nor read over.
+      assert.equal(note.id, undefined);
+      assert.ok(note.title && note.button);
+    });
+  }
+});

@@ -86,3 +86,15 @@ test('Japanese and Chinese have each their own dictionary, names and counting wo
   assert.equal(counted('4.2만km'), '4.2만km');
   assert.equal(pageLanguage(), 'ko');
 });
+
+// A value is put in as {0}, {1} (core/i18n.js t). "{}" in a translation was shown as it
+// stands: "Orbiting {}." on the orbit lock's notice in English, Japanese and Chinese
+// (found 2026-10-22 with the radio friend's first page).
+test('no translation writes a value as {} instead of {0}', async () => {
+  const { readFileSync } = await import('node:fs');
+  for (const lang of ['en', 'ja', 'zh']) {
+    const dict = JSON.parse(readFileSync(`src/i18n/${lang}.json`, 'utf8'));
+    const bad = Object.entries(dict).filter(([key, value]) => key.includes('{}') && value.includes('{}')).map(([key]) => key);
+    assert.deepEqual(bad, [], lang);
+  }
+});

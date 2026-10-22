@@ -100,6 +100,7 @@ import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
+import { nextVisit, hear, speakerAt, talkNote } from './core/radioFriend.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
 } from './core/eclipses.js';
@@ -1385,6 +1386,14 @@ ${STORY_MORE[target.id]}` : told) };
     onSelect: selectBody,
     onFace: () => facePicked(),
     onPhoto: () => photoView.show(photoSlides(named(hud.plateId())), readingFor(named(hud.plateId()))),
+    // Someone to hear on the radio where she is docked or stays (core/radioFriend.js):
+    // the meeting on the note card; what is heard is written down when it closes.
+    onRadio() {
+      if (noteCard.isOpen()) return;
+      const id = speakerAt({ docked, visit });
+      const meeting = id ? nextVisit(progress.radio, id) : null;
+      if (meeting) noteCard.show(talkNote(id, meeting));
+    },
     // A press on the name plate turns her to what it names: the craft she flies with or
     // the place she stands at, after she has looked about, and otherwise what is chosen
     // (the user, 2026-10-12: "망원경 도킹 -> 사용자가 화면 회전을 함 -> 이름을 누르면 ->
@@ -2081,6 +2090,16 @@ ${STORY_MORE[target.id]}` : told) };
       if (noteFromJournal) {
         noteFromJournal = false;
         journal.open();
+      }
+      // A meeting on the radio heard to its end: written down, once (core/radioFriend.js hear).
+      if (note.radio) {
+        const heard = hear(progress.radio, note.radio);
+        if (heard === progress.radio) return;
+        const fresh = heard.clues.length > progress.radio.clues.length;
+        progress = { ...progress, radio: heard };
+        saveProgress(progress);
+        if (fresh) toast.now(t('수첩의 무전 쪽에 적었습니다.'), 'radio');
+        return;
       }
       if (!first) return;
       noteWait = NOTE_GAP_S;
@@ -3862,7 +3881,9 @@ ${STORY_MORE[target.id]}` : told) };
     const thenKey = thenHere && !watchable && thenId === plateId ? t`그날로 · ${thenHere.day}` : null;
     if (undockKey) $('dockTarget').hidden = true;
     if (thenKey) $('replayButton').hidden = true;
-    hud.plateKeys({ undock: undockKey, then: thenKey });
+    // Someone new to hear on the radio where she is docked or stays.
+    const radioHere = speakerAt({ docked, visit });
+    hud.plateKeys({ undock: undockKey, then: thenKey, radio: Boolean(radioHere && nextVisit(progress.radio, radioHere)) });
     hud.update({
       view,
       local: nearestLocalBody(state.position, bodies),

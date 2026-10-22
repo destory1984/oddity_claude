@@ -5350,7 +5350,6 @@
  "기보 실험실의 낡은 무전 일지: 일본 기술자가 두고 갔다. 호출 부호는 앞의 \"JA\"만 읽힌다.": "An old radio logbook in the Kibo lab: left by a Japanese engineer. Only the \"JA\" at the start of the call sign can be read.",
  "무전을 끈다": "Switch off the radio",
  "무전": "Radio",
- "{}의 기록장이 열린다.": "The log of {0} opens.",
- "{}의 무전이 닿았다.": "The radio comes through: {0}.",
- "영어, 일본어, 중국어의 맴돌기 알림에서 천체 이름 대신 괄호가 보이던 것을 고쳤습니다.": "In English, Japanese and Chinese the orbit notice showed brackets instead of the name; mended."
+ "영어, 일본어, 중국어의 맴돌기 알림에서 천체 이름 대신 괄호가 보이던 것을 고쳤습니다.": "In English, Japanese and Chinese the orbit notice showed brackets instead of the name; mended.",
+ "치익… 여기는 국제우주정거장, 당번 마야 린드. 들리니?": "Ksshh… This is the International Space Station, Maya Lind on duty. Do you read me?"
 }

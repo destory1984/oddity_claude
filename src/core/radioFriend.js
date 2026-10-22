@@ -9,12 +9,14 @@ import { t } from './i18n.js';
 // orbit lock's are in core/orbitLock.js; main.js only asks.
 //
 // SPEAKERS: kind 'person' (a face and a few lines) or 'log' (a craft's log, short lines,
-// no talk); at: the craft she docks with or the story place she stays at. Each meeting
-// comes in turn, once its `needs` are known, and `gives` its clues.
+// no talk); at: the craft she docks with or the story place she stays at; hail: the
+// first page, the speaker's call or the log's heading. Each meeting comes in turn, once
+// its `needs` are known, and `gives` its clues.
 export const SPEAKERS = [
   {
     // (Made up, as everyone met here is: no real astronaut is a speaker.)
     id: 'issCrew', kind: 'person', at: { craft: 'iss' }, name: t('국제우주정거장 당번, 마야 린드'), portrait: null,
+    hail: t('치익… 여기는 국제우주정거장, 당번 마야 린드. 들리니?'),
     visits: [
       {
         needs: [],
@@ -127,7 +129,10 @@ export function speakerAt({ docked = null, visit = null } = {}) {
 }
 
 // A meeting as the note card (ui/noteCard.js) shows it: the speaker's name and face on
-// the first page (the card's title is not shown on screen, so the name is in its words), then a line a page, told plainly above the paper (`scene`): there is
+// the first page, with the speaker's own call, as a radio is answered (`hail`; a log's
+// is its heading, "하야부사2 기록장 · 2014년"). (The user, 2026-10-22, of a line of telling
+// there, "국제우주정거장 당번, 마야 린드의 무전이 닿았다": "문체가 이게 뭐냐", then of four
+// ways "1번으로 하자".) then a line a page, told plainly above the paper (`scene`): there is
 // no paper, which is grandmother's hand. radio: who it was, for main.js when it closes.
 // (No id: it is not one of grandmother's notes, kept as read and read over.)
 export function talkNote(speakerId, visit) {
@@ -137,7 +142,7 @@ export function talkNote(speakerId, visit) {
     title: speaker.name,
     button: t('무전을 끈다'),
     pages: [
-      { image: speaker.portrait, scene: speaker.kind === 'log' ? t`${speaker.name}의 기록장이 열린다.` : t`${speaker.name}의 무전이 닿았다.` },
+      { image: speaker.portrait, scene: speaker.hail },
       ...visit.lines.map((line) => ({ scene: line })),
     ],
   };

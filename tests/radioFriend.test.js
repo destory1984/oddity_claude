@@ -105,6 +105,9 @@ test('a meeting is shown on the note card as pages of plain telling, never on gr
       // Not one of grandmother's notes: no id, so it is not kept as read nor read over.
       assert.equal(note.id, undefined);
       assert.ok(note.title && note.button);
+      // The first page is the speaker's own call (or the log's heading), not a line of telling.
+      assert.equal(note.pages[0].scene, speaker.hail);
+      assert.ok(speaker.hail, speaker.id);
     });
   }
 });

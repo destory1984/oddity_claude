@@ -218,7 +218,7 @@ export const HIDDEN = [
   },
   {
     id: 'kiboWindow', name: t('기보의 창'), nameEn: "Kibo's window", type: 'near', target: 'iss', withinKm: 5,
-    needs: [], needsFound: ['ryuguMarker', 'woomera', 'akatsukiOrbit', 'shotaShore'], at: [0.5, 0.5],
+    needs: [], needsFound: ['ryuguMarker', 'woomera', 'akatsukiOrbit', 'shotaShore'], at: [0.5, 0.74],
     text: t('일본 실험실 기보의 작은 창 앞이다. 일지 맨 뒤 장, 번지지 않은 자리에 호출 부호가 끝까지 적혀 있다. 소라는 그 부호를 수첩에 옮겨 적는다. 할머니께 전해 드리자.'),
   },
 ];
@@ -358,4 +358,30 @@ export function talkNote(speakerId, visit) {
       ...visit.lines.map((line) => ({ scene: line })),
     ],
   };
+}
+
+// Where each speaker stands in the journal's web (0 → 1 across and down); the young
+// radio operator, Shota, is in the middle, known from the start.
+const SPEAKER_AT = {
+  issCrew: [0.5, 0.06], tanegashimaCrew: [0.86, 0.16], naroCrew: [0.08, 0.36], vlaCrew: [0.34, 0.32],
+  tiangongCrew: [0.06, 0.7], hayabusa2Log: [0.95, 0.5], akatsukiLog: [0.68, 0.4], bepiLog: [0.34, 0.96],
+};
+export const WEB_CENTRE = [0.5, 0.5];
+
+// The journal's web: a point for Shota, each speaker, clue and hidden place, and a line
+// from who told a clue to it and from it to where it points. A point is known once heard,
+// told of, or (the hidden places) open; lines only between known points.
+export function radioWeb(radio) {
+  const heard = new Set(radio.clues);
+  const known = CLUES.filter((c) => heard.has(c.id));
+  const toldOf = new Set(known.flatMap((c) => [c.from, c.points]));
+  const open = new Set(openHidden(radio));
+  const nodes = [
+    { id: 'shota', kind: 'centre', at: WEB_CENTRE, known: true },
+    ...SPEAKERS.map((s) => ({ id: s.id, kind: 'speaker', at: SPEAKER_AT[s.id], known: (radio.visits[s.id] ?? 0) > 0 || toldOf.has(s.id) })),
+    ...CLUES.map((c) => ({ id: c.id, kind: 'clue', at: c.at, known: heard.has(c.id) })),
+    ...HIDDEN.map((h) => ({ id: h.id, kind: 'hidden', at: h.at, known: open.has(h.id) || toldOf.has(h.id), open: open.has(h.id), found: radio.found.includes(h.id) })),
+  ];
+  const links = known.flatMap((c) => [[c.from, c.id], [c.id, c.points]]);
+  return { nodes, links };
 }

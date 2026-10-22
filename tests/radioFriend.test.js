@@ -165,3 +165,22 @@ test('a hidden place reached is told on the card without grandmother\'s paper', 
     assert.ok(note.pages.every((page) => !page.text && page.scene));
   }
 });
+
+test('the journal web: only the young radio operator is known at first; a clue brings its teller and where it points', async () => {
+  const { radioWeb } = await import('../src/core/radioFriend.js');
+  const fresh = radioWeb(createRadio());
+  assert.deepEqual(fresh.nodes.filter((n) => n.known).map((n) => n.id), ['shota']);
+  assert.deepEqual(fresh.links, []);
+  for (const node of fresh.nodes) assert.ok(node.at.every((v) => v >= 0 && v <= 1), node.id);
+  // Every speaker, clue and hidden place has a point.
+  assert.equal(fresh.nodes.length, 1 + SPEAKERS.length + CLUES.length + HIDDEN.length);
+  const heard = hear(createRadio(), 'issCrew');
+  const web = radioWeb(heard);
+  const known = new Set(web.nodes.filter((n) => n.known).map((n) => n.id));
+  assert.ok(known.has('issCrew') && known.has('kiboLog') && known.has('tanegashimaCrew'));
+  assert.deepEqual(web.links, [['issCrew', 'kiboLog'], ['kiboLog', 'tanegashimaCrew']]);
+  // An open hidden place says so.
+  const ryugu = HIDDEN.find((h) => h.id === 'ryuguMarker');
+  const opened = radioWeb({ ...createRadio(), clues: [...ryugu.needs] });
+  assert.equal(opened.nodes.find((n) => n.id === 'ryuguMarker').open, true);
+});

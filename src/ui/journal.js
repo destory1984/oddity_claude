@@ -15,6 +15,7 @@ import { t } from '../core/i18n.js';
 import { craftPicture } from '../core/craft.js';
 import { CURIOS, CURIO_ABOUT, nextChilseok } from '../core/curios.js';
 import { CURIO_HINTS } from '../core/lines.js';
+import { createRadioWeb } from './radioWeb.js';
 
 const $ = (id) => document.getElementById(id);
 // 로 after a vowel or ㄹ, 으로 after any other final consonant.
@@ -36,8 +37,10 @@ function picture(file, alt, className = '') {
 const CLIPPING = t('1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.');
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, views = null, sky = null, exo = null }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, views = null, sky = null, exo = null, onRadioJump = () => {} }) {
   const dialog = $('journal');
+  // The radio friend's page (ui/radioWeb.js): drawn again with each log.
+  const radioChart = createRadioWeb($('radioChart'), $('radioDetail'), { onJump: onRadioJump });
 
   $('journalButton').addEventListener('click', () => open());
   $('closeJournal').addEventListener('click', () => dialog.close());
@@ -703,6 +706,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     // Remembered for the next open; the open list is not rebuilt so focus stays put.
     update(progress, position, current = bodies) {
       noteDone(lastProgress, progress);
+      if (progress.radio !== lastProgress?.radio) radioChart.draw(progress.radio);
       lastProgress = progress;
       lastPosition = position;
       lastBodies = current;

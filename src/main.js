@@ -100,7 +100,7 @@ import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
-import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote } from './core/radioFriend.js';
+import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN } from './core/radioFriend.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
 } from './core/eclipses.js';
@@ -2154,7 +2154,43 @@ ${STORY_MORE[target.id]}` : told) };
   });
 
   let journalPriorPause = false;
+  // To an open hidden place of the radio friend's story, from the journal's radio page:
+  // behind a jump's flash, 80 km south of it and 60 km up, looking at it (on the ground),
+  // or just beside what it lies by (Ryugu, Akatsuki, the station).
+  function jumpToHidden(id) {
+    const place = HIDDEN.find((h) => h.id === id);
+    if (!place || warp.busy()) return;
+    if (locked) unlock('jump');
+    sound.cue('warp');
+    warp.play(() => {
+      if (docked) undock();
+      home = null;
+      let spot;
+      let toward;
+      if (place.type === 'surface') {
+        const site = hiddenSitesAt(progress.radio, simTime, bodies).find((s) => s.id === id);
+        const body = bodyById(place.body, bodies);
+        if (!site || !body) return;
+        const up = site.position.map((n, i) => (n - body.position[i]) / body.radiusKm);
+        const north = [-up[0] * up[1], 1 - up[1] * up[1], -up[2] * up[1]];
+        const length = Math.hypot(...north) || 1;
+        spot = site.position.map((n, i) => n + up[i] * 60 - (north[i] / length) * 80);
+        toward = site.position;
+      } else {
+        const target = bodyById(place.target, bodies) ?? craft.find((c) => c.id === place.target);
+        if (!target) return;
+        const reach = (target.radiusKm ?? 0) + place.withinKm * 0.5;
+        spot = target.position.map((n, i) => n + (i === 1 ? reach : 0));
+        toward = target.position;
+      }
+      state = createState(spot, lookAtDirection(toward.map((n, i) => n - spot[i])));
+    });
+  }
   const journal = createJournal({
+    onRadioJump(id) {
+      $('journal').close();
+      jumpToHidden(id);
+    },
     onSendPhoto(index) {
       album = saveAlbum(sendPostcard(album, index, dayOf(new Date())));
       sayAfterJournal = t('할머니, 이거 보면 깜짝 놀랄걸.');

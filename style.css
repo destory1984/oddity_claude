@@ -7299,3 +7299,75 @@ dialog#settings[open] > .backKey {
 #journal #journalTabs button[data-tab="craft"] { --tab-icon:url("/assets/ui/tab-craft.svg"); }
 #journal #journalTabs button[data-tab="tours"] { --tab-icon:url("/assets/ui/tab-tours.svg"); }
 #journal #journalTabs button[data-tab="curios"] { --tab-icon:url("/assets/ui/tab-curios.svg"); }
+#journal #journalTabs button[data-tab="radio"] { --tab-icon:url("/assets/ui/tab-radio.svg"); }
+
+/* The radio friend's page (ui/radioWeb.js): a star chart in ink on the paper, square,
+   as wide as the page; known points filled, the rest faint rings; under it what the
+   chosen point tells. */
+#journal #radioChart svg {
+  display:block;
+  width:100%;
+  max-width:420px;
+  margin:8px auto 4px;
+  aspect-ratio:1;
+}
+
+#journal #radioChart .radioLink {
+  stroke:#6b4a26;
+  stroke-width:0.6;
+  stroke-dasharray:1.6 1.2;
+}
+
+#journal #radioChart .radioPoint {
+  fill:none;
+  stroke:#6b4a2666;
+  stroke-width:0.5;
+  stroke-dasharray:1 1;
+}
+
+#journal #radioChart .radioPoint.known {
+  fill:#fbf4e0;
+  stroke:#6b4a26;
+  stroke-width:0.7;
+  stroke-dasharray:none;
+}
+
+#journal #radioChart .radioPoint.known.clue {
+  fill:#6b4a26;
+}
+
+#journal #radioChart .radioPoint.known.speaker,
+#journal #radioChart .radioPoint.centre {
+  fill:#f2c14e;
+  stroke:#6b4a26;
+  stroke-dasharray:none;
+}
+
+#journal #radioChart .radioPoint.open {
+  fill:#f2c14e;
+}
+
+#journal #radioChart .radioPoint.found {
+  fill:#c0392b;
+}
+
+#journal #radioChart .radioPoint.chosen {
+  stroke:#1a2894;
+  stroke-width:1.1;
+}
+
+#journal #radioChart .radioHit {
+  fill:transparent;
+  cursor:pointer;
+}
+
+#journal #radioDetail {
+  min-height:5.5em;
+  padding:4px 4px 10px;
+  color:#3b2a1a;
+}
+
+#journal #radioDetail p {
+  margin:4px 0 8px;
+}
+

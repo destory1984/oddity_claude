@@ -175,7 +175,7 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
     }
     craftMeshes.update(craft, position, sunNow.position, jolt, hiddenCraft, replay);
     siteModels.update(sites, now, position, replay);
-    groundPatches.update(sites, now, position);
+    groundPatches.update(now, position, clockS);
     // (A lamp lights the models by that ground too: a curio standing there, at night.)
     craftSun.direction = new Vector3(...(lamp ? lamp.direction : normalize(sunRel))).scale(-1);
     for (const { id, glow } of comets) glow.update(now.find((b) => b.id === id), position, sunNow.position);

@@ -195,11 +195,15 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 
 ## 땅에 깐 위성 사진
 
-`public/assets/terrain/` 의 사진 1장은 지구 그림이 너무 거칠어(한 화소에 10km쯤) 보이지 않는 이름난 자리에, 가까이 갔을 때 땅에 얇게 덮어 보인다. 둥글게 잘라 가장자리를 투명하게 하고, 색을 지구 그림에 맞춰 5 → 11% 밝게 하고, 둘레의 대기처럼 회색(137, 137, 140)을 28% 섞어 살짝 뿌옇게 했다.
+`public/assets/terrain/` 의 사진 5장은 지구 그림이 너무 거칠어(한 화소에 10km쯤) 보이지 않는 이름난 자리에, 가까이 갔을 때 땅에 얇게 덮어 보인다. 둥글게 잘라 가장자리를 투명하게 하고, 색을 지구 그림에 맞춰 5 → 11% 밝게 하고, 둘레의 대기처럼 회색(137, 137, 140)을 28% 섞어 살짝 뿌옇게 했다.
 
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
 | `richat.webp` | [Eyeing the Richat Structure (1212324).jpg](https://commons.wikimedia.org/wiki/File:Eyeing_the_Richat_Structure_(1212324).jpg) (Landsat 8 OLI, 가운데 820 × 820을 512 × 512로 줄임, 폭 73km) | NASA Earth Observatory / Lauren Dauphin | Public domain |
+| `grandCanyon.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (EOX WMS 레이어 `s2cloudless`, 위도 36.1, 경도 -112.12 둘레 70km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
+| `uluru.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (EOX WMS 레이어 `s2cloudless`, 위도 -25.33, 경도 130.92 둘레 50km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
+| `nileDelta.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (EOX WMS 레이어 `s2cloudless`, 위도 30.85, 경도 31.05 둘레 200km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
+| `uyuni.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (EOX WMS 레이어 `s2cloudless`, 위도 -20.2, 경도 -67.6 둘레 150km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
 
 ## 사진 임무가 따라 찍는 실제 사진
 

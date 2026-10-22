@@ -1,5 +1,6 @@
 import { Vector3, Quaternion, Color3, StandardMaterial, Texture, TransformNode, Mesh, VertexData } from './babylon.js';
 import { KM_PER_UNIT } from '../core/bodies.js';
+import { surfaceDirection, spinOf } from '../core/surface.js';
 
 // A real satellite picture laid on the ground at a few famous places, where Earth's own
 // map is far too coarse: 4,096 across, about 10 km a pixel at the equator, so the Eye
@@ -8,11 +9,20 @@ import { KM_PER_UNIT } from '../core/bodies.js';
 // One round patch each, curved to the ground, its edge fading into Earth's map. Its
 // picture is loaded only the first time she comes near, and it is drawn only while she
 // is near and the place is on her side of the world: away from it, it costs nothing.
-// id: the story place it lies on (core/stories.js); sizeKm: the picture's width;
-// file: public/assets/terrain/, north up, its alpha the round fade.
+// id: a name (the Eye of the Sahara's is its story place's); latDeg, lonDeg: the middle
+// of the picture on Earth; sizeKm: the picture's width; file: public/assets/terrain/,
+// north up, its alpha the round fade. The four after the first were added the same day
+// ("다른 것도 넣자"); the Great Barrier Reef and Everest were tried and left out (the
+// reef's picture ends in a dark line out at sea, Everest's is snow and white glare).
 export const GROUND_PATCHES = [
-  { id: 'richat', sizeKm: 73.2, file: 'richat.webp' },
+  { id: 'richat', latDeg: 21.124, lonDeg: -11.402, sizeKm: 73.2, file: 'richat.webp' },
+  { id: 'grandCanyon', latDeg: 36.1, lonDeg: -112.12, sizeKm: 70, file: 'grandCanyon.webp' },
+  { id: 'uluru', latDeg: -25.33, lonDeg: 130.92, sizeKm: 50, file: 'uluru.webp' },
+  { id: 'nileDelta', latDeg: 30.85, lonDeg: 31.05, sizeKm: 200, file: 'nileDelta.webp' },
+  { id: 'uyuni', latDeg: -20.2, lonDeg: -67.6, sizeKm: 150, file: 'uyuni.webp' },
 ];
+// All lie on Earth.
+const ON = 'earth';
 
 // Shown from within this far of the place (km), fading in over the outer part.
 const SHOWN_KM = 3000;
@@ -89,14 +99,16 @@ export function createGroundPatches(scene) {
     Object.assign(patch, { node, mesh, material });
   }
 
-  // sites: the story places this frame (core/stories.js storySitesAt); bodies: every
-  // body this frame; position: the eye (km).
-  function update(sites, bodies, position) {
+  // bodies: every body this frame; position: the eye (km); timeS: the game clock, which
+  // turns Earth (core/surface.js spinOf), as it does the story places.
+  function update(bodies, position, timeS) {
     const sun = bodies.find((b) => b.kind === 'star');
+    const body = bodies.find((b) => b.id === ON);
+    if (!body || !sun) return;
+    const spin = spinOf(ON, timeS ?? 0);
     for (const patch of patches) {
-      const site = sites.find((s) => s.id === patch.id);
-      const body = site && bodies.find((b) => b.id === site.parent);
-      if (!site || !body) continue;
+      const dir = surfaceDirection(patch.latDeg, patch.lonDeg, spin);
+      const site = { position: body.position.map((n, i) => n + dir[i] * body.radiusKm) };
       const fromSite = position.map((n, i) => n - site.position[i]);
       const distanceKm = Math.hypot(...fromSite);
       if (!patch.node && distanceKm < LOAD_KM) build(patch, body);

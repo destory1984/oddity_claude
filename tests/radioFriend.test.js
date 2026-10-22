@@ -111,3 +111,57 @@ test('a meeting is shown on the note card as pages of plain telling, never on gr
     });
   }
 });
+
+test('a hidden place is not logged before it opens, and is once it has', async () => {
+  const { foundHidden } = await import('../src/core/radioFriend.js');
+  const ryugu = BODIES.find((b) => b.id === 'ryugu');
+  const there = ryugu.position.map((n, i) => n + (i === 0 ? ryugu.radiusKm + 0.5 : 0));
+  const closed = createRadio();
+  assert.deepEqual(foundHidden({ radio: closed, position: there, restingOn: null, bodies: BODIES }), []);
+  const marker = HIDDEN.find((h) => h.id === 'ryuguMarker');
+  const open = { ...closed, clues: [...marker.needs] };
+  assert.deepEqual(foundHidden({ radio: open, position: there, restingOn: null, bodies: BODIES }), ['ryuguMarker']);
+});
+
+test('only the open hidden places on the ground stand among the sites', async () => {
+  const { hiddenSitesAt } = await import('../src/core/radioFriend.js');
+  assert.deepEqual(hiddenSitesAt(createRadio(), 0, BODIES), []);
+  const shore = HIDDEN.find((h) => h.id === 'shotaShore');
+  const sites = hiddenSitesAt({ ...createRadio(), clues: [...shore.needs] }, 0, BODIES);
+  assert.deepEqual(sites.map((s) => s.id), ['shotaShore']);
+  const earth = BODIES.find((b) => b.id === 'earth');
+  assert.ok(Math.abs(Math.hypot(...sites[0].position.map((n, i) => n - earth.position[i])) - earth.radiusKm) < 1e-6);
+});
+
+test('the Kibo window opens only once the other four are found, and finding it gives the call sign', async () => {
+  const { recordFound } = await import('../src/core/radioFriend.js');
+  const allClues = CLUES.map((c) => c.id);
+  const others = HIDDEN.filter((h) => h.id !== 'kiboWindow').map((h) => h.id);
+  assert.ok(!openHidden({ ...createRadio(), clues: allClues }).includes('kiboWindow'));
+  assert.ok(!openHidden({ ...createRadio(), clues: allClues, found: others.slice(1) }).includes('kiboWindow'));
+  const ready = { ...createRadio(), clues: allClues, found: others };
+  assert.ok(openHidden(ready).includes('kiboWindow'));
+  const done = recordFound(ready, ['kiboWindow'], 1000);
+  assert.equal(done.callSign, true);
+  assert.equal(done.noteAt, 1000);
+  // Found again (or another found later): the time stays the first.
+  assert.equal(recordFound(done, ['kiboWindow'], 5000), done);
+});
+
+test('there are eight speakers, five hidden places, and the logs speak in short dated lines', () => {
+  assert.equal(SPEAKERS.length, 8);
+  assert.equal(HIDDEN.length, 5);
+  for (const speaker of SPEAKERS.filter((s) => s.kind === 'log')) {
+    for (const visit of speaker.visits) for (const line of visit.lines) assert.match(line, /^\d{4}\.\d{2}\.\d{2} /, speaker.id);
+  }
+});
+
+test('a hidden place reached is told on the card without grandmother\'s paper', async () => {
+  const { foundNote } = await import('../src/core/radioFriend.js');
+  for (const place of HIDDEN) {
+    const note = foundNote(place.id);
+    assert.equal(note.radioFound, place.id);
+    assert.equal(note.id, undefined);
+    assert.ok(note.pages.every((page) => !page.text && page.scene));
+  }
+});

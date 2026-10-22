@@ -100,7 +100,7 @@ import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
-import { nextVisit, hear, speakerAt, talkNote } from './core/radioFriend.js';
+import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote } from './core/radioFriend.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
 } from './core/eclipses.js';
@@ -2092,6 +2092,8 @@ ${STORY_MORE[target.id]}` : told) };
         journal.open();
       }
       // A meeting on the radio heard to its end: written down, once (core/radioFriend.js hear).
+      // A hidden place's telling: already written down when it opened.
+      if (note.radioFound) return;
       if (note.radio) {
         const heard = hear(progress.radio, note.radio);
         if (heard === progress.radio) return;
@@ -3319,6 +3321,16 @@ ${STORY_MORE[target.id]}` : told) };
     }
     // The journal is of the Solar System: another star's planets are kept apart (below).
     const logged = updateProgress(progress, EXO_IDS.includes(state.restingOn) ? { ...state, restingOn: null } : state, bodies.filter((b) => !b.exo));
+    // A hidden place of the radio friend's story (core/radioFriend.js), open and reached:
+    // written down and told on the note card (only when the card is free to show it).
+    if (dt > 0 && !noteCard.isOpen()) {
+      const reached = foundHidden({ radio: progress.radio, position: state.position, restingOn: state.restingOn, bodies, craft, sites: hiddenSitesAt(progress.radio, simTime, bodies) });
+      if (reached.length) {
+        progress = { ...progress, radio: recordFound(progress.radio, reached, Date.now()) };
+        saveProgress(progress);
+        noteCard.show(foundNote(reached[0]));
+      }
+    }
     const away = inExo(state.position);
     if (away && dt > 0) {
       const seenNow = recordExo(exo, state.position, bodies);

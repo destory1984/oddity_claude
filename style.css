@@ -7456,6 +7456,13 @@ dialog#radioSheet > .backKey {
   flex:1 0 auto;
 }
 
+/* A point's words in the journal's dark ink: the sheets' own pale grey (meant for the
+   night-blue ones) did not show on the paper (the user, 2026-10-22: "글자 색깔.. 안 보여"). */
+#radioSheet .radioDetail p,
+#radioSheet .radioDetail strong {
+  color:#3b2a1a;
+}
+
 /* A point's picture smaller here, so that its words are seen without scrolling. */
 #radioSheet .radioDetail img {
   max-width:260px;

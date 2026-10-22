@@ -15,6 +15,7 @@ const BACK_ARROW = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden=
 const BACK = {
   settings: 'closeSettings',
   journal: 'closeJournal',
+  radioSheet: 'radioSheetClose',
   bigMap: 'bigMapClose',
   photoView: 'photoViewClose',
   shareSheet: 'shareClose',

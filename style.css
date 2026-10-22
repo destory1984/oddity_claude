@@ -7304,7 +7304,7 @@ dialog#settings[open] > .backKey {
 /* The radio friend's page (ui/radioWeb.js): a star chart in ink on the paper, square,
    as wide as the page; known points filled, the rest faint rings; under it what the
    chosen point tells. */
-#journal #radioChart svg {
+.radioChart svg {
   display:block;
   width:100%;
   max-width:420px;
@@ -7312,62 +7312,62 @@ dialog#settings[open] > .backKey {
   aspect-ratio:1;
 }
 
-#journal #radioChart .radioLink {
+.radioChart .radioLink {
   stroke:#6b4a26;
   stroke-width:0.6;
   stroke-dasharray:1.6 1.2;
 }
 
-#journal #radioChart .radioPoint {
+.radioChart .radioPoint {
   fill:none;
   stroke:#6b4a2666;
   stroke-width:0.5;
   stroke-dasharray:1 1;
 }
 
-#journal #radioChart .radioPoint.known {
+.radioChart .radioPoint.known {
   fill:#fbf4e0;
   stroke:#6b4a26;
   stroke-width:0.7;
   stroke-dasharray:none;
 }
 
-#journal #radioChart .radioPoint.known.clue {
+.radioChart .radioPoint.known.clue {
   fill:#6b4a26;
 }
 
-#journal #radioChart .radioPoint.known.speaker,
-#journal #radioChart .radioPoint.centre {
+.radioChart .radioPoint.known.speaker,
+.radioChart .radioPoint.centre {
   fill:#f2c14e;
   stroke:#6b4a26;
   stroke-dasharray:none;
 }
 
-#journal #radioChart .radioPoint.open {
+.radioChart .radioPoint.open {
   fill:#f2c14e;
 }
 
-#journal #radioChart .radioPoint.found {
+.radioChart .radioPoint.found {
   fill:#c0392b;
 }
 
-#journal #radioChart .radioPoint.chosen {
+.radioChart .radioPoint.chosen {
   stroke:#1a2894;
   stroke-width:1.1;
 }
 
-#journal #radioChart .radioHit {
+.radioChart .radioHit {
   fill:transparent;
   cursor:pointer;
 }
 
-#journal #radioDetail {
+.radioDetail {
   min-height:5.5em;
   padding:4px 4px 10px;
   color:#3b2a1a;
 }
 
-#journal #radioDetail img {
+.radioDetail img {
   display:block;
   width:100%;
   max-width:384px;
@@ -7377,11 +7377,104 @@ dialog#settings[open] > .backKey {
 }
 
 /* A hidden place's photo or drawing: smoothed, not the portraits' hard pixels. */
-#journal #radioDetail img.photo {
+.radioDetail img.photo {
   image-rendering:auto;
 }
 
-#journal #radioDetail p {
+.radioDetail p {
   margin:4px 0 8px;
+}
+
+/* In the journal the chart is a picture to press: no key's frame round it (ui/journal.js). */
+#journal #radioOpen {
+  display:block;
+  width:100%;
+  min-height:0;
+  margin:0;
+  padding:0;
+  border:0;
+  background:none;
+  box-shadow:none;
+  cursor:zoom-in;
+}
+
+#journal #radioOpen .radioChart {
+  display:block;
+  pointer-events:none;
+}
+
+/* The radio chart over the whole screen, on the journal's paper (the user, 2026-10-22:
+   "무전은.. 풀 화면으로 가는게 낫지않겠음?", "따로 전체 화면"): the way back 8px from the
+   corner as on every sheet, the chart as large as leaves room for what a point tells
+   under it, all in a column at most 640px wide. */
+dialog#radioSheet[open] {
+  display:flex;
+  flex-direction:column;
+  width:100vw;
+  max-width:100vw;
+  height:100vh;
+  height:100dvh;
+  max-height:100vh;
+  max-height:100dvh;
+  margin:0;
+  border:0;
+  border-radius:0;
+  padding:calc(54px + env(safe-area-inset-top)) max(16px, calc((100vw - 640px) / 2)) max(16px, env(safe-area-inset-bottom));
+  overflow-y:auto;
+  background:#f2e6c8;
+  color:#3b2a1a;
+}
+
+dialog#radioSheet > .backKey {
+  top:max(8px, env(safe-area-inset-top));
+  left:max(8px, env(safe-area-inset-left));
+  width:44px;
+  height:44px;
+  border:1.5px solid #6b4a26;
+  background:#fbf4e0;
+  color:#3b2a1a;
+}
+
+#radioSheet h2 {
+  margin:0 0 2px;
+  font-family:var(--hand);
+  font-size:24px;
+  color:#3b2a1a;
+}
+
+#radioSheet .muted {
+  margin:0;
+  color:#6b5236;
+}
+
+#radioSheet .radioChart svg {
+  width:min(100%, 58vh);
+  max-width:none;
+}
+
+#radioSheet .radioDetail {
+  flex:1 0 auto;
+}
+
+/* A point's picture smaller here, so that its words are seen without scrolling. */
+#radioSheet .radioDetail img {
+  max-width:260px;
+}
+
+#radioSheet button {
+  min-height:40px;
+  padding:6px 14px;
+  border:1.5px solid #6b4a26;
+  border-radius:9px;
+  background:#fbf4e0;
+  box-shadow:0 1px 0 #6b4a2640;
+  color:#3b2a1a;
+}
+
+#radioSheet #radioSheetClose {
+  align-self:center;
+  min-height:44px;
+  margin-top:8px;
+  font-weight:700;
 }
 

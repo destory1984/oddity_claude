@@ -39,8 +39,23 @@ const CLIPPING = t('1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구
 // The explorer's journal: bodies found and landed on, photo missions done.
 export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, views = null, sky = null, exo = null, onRadioJump = () => {} }) {
   const dialog = $('journal');
-  // The radio friend's page (ui/radioWeb.js): drawn again with each log.
-  const radioChart = createRadioWeb($('radioChart'), $('radioDetail'), { onJump: onRadioJump });
+  // The radio friend's page (ui/radioWeb.js): drawn again with each log. In the journal a
+  // small picture of it; a press opens it over the whole screen, where its points are
+  // pressed (the user, 2026-10-22: "무전은.. 풀 화면으로 가는게 낫지않겠음?", then "따로
+  // 전체 화면"). Its way back returns to the journal.
+  const radioChart = createRadioWeb($('radioChart'), document.createElement('div'), { onJump: onRadioJump });
+  const radioSheet = $('radioSheet');
+  const radioBig = createRadioWeb($('radioSheetChart'), $('radioSheetDetail'), {
+    onJump(id) {
+      radioSheet.close();
+      onRadioJump(id);
+    },
+  });
+  $('radioOpen').addEventListener('click', () => {
+    if (lastProgress) radioBig.draw(lastProgress.radio);
+    radioSheet.showModal();
+  });
+  $('radioSheetClose').addEventListener('click', () => radioSheet.close());
 
   $('journalButton').addEventListener('click', () => open());
   $('closeJournal').addEventListener('click', () => dialog.close());
@@ -707,7 +722,10 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     // Remembered for the next open; the open list is not rebuilt so focus stays put.
     update(progress, position, current = bodies) {
       noteDone(lastProgress, progress);
-      if (progress.radio !== lastProgress?.radio) radioChart.draw(progress.radio);
+      if (progress.radio !== lastProgress?.radio) {
+        radioChart.draw(progress.radio);
+        if (radioSheet.open) radioBig.draw(progress.radio);
+      }
       lastProgress = progress;
       lastPosition = position;
       lastBodies = current;

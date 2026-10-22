@@ -101,7 +101,7 @@ export function spread(points, gap = 0.22, rounds = 60) {
 // anew and every dot jumped at once). shown: last frame's [{ id, x, z, h, alpha }];
 // target: this frame's points; dtS: seconds since. A dot goes nine tenths of the way in
 // about a third of a second; a new one fades in where it belongs, one no longer among
-// the five fades out where it stood and is then dropped.
+// the five fades out where it stood and is then dropped, marked `leaving` meanwhile.
 const EASE_RATE = 8;
 const FADE_RATE = 6;
 export function easePoints(shown, target, dtS) {
@@ -120,6 +120,6 @@ export function easePoints(shown, target, dtS) {
     };
   });
   const here = new Set(target.map((p) => p.id));
-  const going = shown.filter((p) => !here.has(p.id)).map((p) => ({ ...p, alpha: p.alpha * (1 - fade) })).filter((p) => p.alpha > 0.02);
+  const going = shown.filter((p) => !here.has(p.id)).map((p) => ({ ...p, alpha: p.alpha * (1 - fade), leaving: true })).filter((p) => p.alpha > 0.02);
   return [...now, ...going];
 }

@@ -235,7 +235,8 @@ export function createScanner(canvas, button = null) {
         if (upY >= 7 && !clash(upY)) ty = upY;
         else if (downY <= h - 7 && !clash(downY)) ty = downY;
       }
-      written.push([tx, ty, tw]);
+      // A fading name takes no room: those staying would be pushed a line and snap back.
+      if (!p.leaving) written.push([tx, ty, tw]);
       ctx.lineWidth = 3;
       ctx.strokeStyle = 'rgba(0, 0, 0, 0.75)';
       ctx.strokeText(name, tx, ty);
@@ -253,6 +254,11 @@ export function createScanner(canvas, button = null) {
     setOn(value) {
       on = value;
       canvas.style.visibility = on ? '' : 'hidden';
+      // Back on after a flight, the dots start where they are, not where they were.
+      if (!on) {
+        shown = [];
+        lastMs = null;
+      }
     },
   };
 }

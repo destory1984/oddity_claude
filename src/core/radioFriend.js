@@ -307,7 +307,7 @@ export function foundNote(id) {
     radioFound: id,
     title: place.name,
     button: t('수첩을 덮는다'),
-    pages: [{ image: place.picture, scene: place.name }, { scene: place.text }],
+    pages: [{ image: place.picture, imageAlt: place.name, scene: place.name }, { scene: place.text }],
   };
 }
 

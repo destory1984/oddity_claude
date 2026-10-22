@@ -130,19 +130,18 @@ export async function realCloudMap({ nowMs = Date.now(), groundUrl, ownUrl }) {
     const ice = smooth(0.55, 0.8, Math.min(ground[k], ground[k + 1], ground[k + 2]) / 255);
     let sum = 0;
     let weights = 0;
-    let plain = 0;
     let count = 0;
     for (const { shot, seen: passed, soft } of passes) {
       // (Black where a satellite did not pass.)
       if (!passed[i]) continue;
       const white = whiteness(shot[k] / 255, shot[k + 1] / 255, shot[k + 2] / 255) * (1 - 0.85 * ice);
+      // Never quite nothing, so a pixel only one pass saw keeps that pass's clouds.
       const w = Math.max(0.001, Math.min(1, (soft[i] / 255 - 0.5) * 2.5));
       sum += white * w;
       weights += w;
-      plain += white;
       count += 1;
     }
-    cloud[i] = count ? (weights > 0 ? sum / weights : plain / count) : 0;
+    cloud[i] = count ? sum / weights : 0;
     seen[i] = count ? 255 : 0;
   }
   // The edge of the gaps feathered the same way.

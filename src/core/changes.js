@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-22', text: t('수첩의 무전 탭에서 찾아간 숨은 장소를 누르면 그곳의 사진이나 그림을 다시 볼 수 있습니다.') },
   { day: '2026-10-22', text: t('무전 이야기의 숨은 장소 다섯에 닿으면 카드에 그곳의 사진이나 그림이 함께 나옵니다.') },
   { day: '2026-10-22', text: t('스캐너의 점들이 갑자기 튀지 않고 새 자리로 부드럽게 옮겨 가며, 들고 날 때 서서히 나타나고 사라집니다.') },
   { day: '2026-10-22', text: t('땅에 깐 위성 사진이 구름 위로 비치던 것과, 밤에 도시 불빛을 가리던 것을 고쳤습니다.') },

@@ -240,6 +240,8 @@ test('every hidden place is told with a picture on file, photos credited', async
   for (const place of HIDDEN) {
     assert.ok(place.picture && existsSync(`public/assets/notebook/${place.picture}`), place.id);
     assert.equal(foundNote(place.id).pages[0].image, place.picture);
+    // Said in words for those who cannot see it (the review, 2026-10-22: alt was empty).
+    assert.equal(foundNote(place.id).pages[0].imageAlt, place.name);
     if (place.picture.endsWith('.jpg')) assert.ok(credits.includes(`| \`${place.picture}\` |`), `${place.picture} is not in THIRD-PARTY.md`);
   }
 });

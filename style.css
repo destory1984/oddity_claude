@@ -7376,6 +7376,11 @@ dialog#settings[open] > .backKey {
   image-rendering:pixelated;
 }
 
+/* A hidden place's photo or drawing: smoothed, not the portraits' hard pixels. */
+#journal #radioDetail img.photo {
+  image-rendering:auto;
+}
+
 #journal #radioDetail p {
   margin:4px 0 8px;
 }

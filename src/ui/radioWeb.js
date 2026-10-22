@@ -37,6 +37,15 @@ export function createRadioWeb(chart, detail, { onJump }) {
       face.alt = t('1973년, 진공관 무전기 앞에서 마이크를 든 소년');
       parts.unshift(face);
     }
+    // A found hidden place shows its card's picture again (the card is seen only once).
+    const place = node.kind === 'hidden' && node.found ? HIDDEN.find((h) => h.id === node.id) : null;
+    if (place?.picture) {
+      const photo = document.createElement('img');
+      photo.className = 'photo';
+      photo.src = `${import.meta.env.BASE_URL}assets/notebook/${place.picture}`;
+      photo.alt = place.name;
+      parts.unshift(photo);
+    }
     if (node.kind === 'hidden' && node.open) {
       const go = document.createElement('button');
       go.textContent = t('순간 이동');

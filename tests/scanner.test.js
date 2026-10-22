@@ -79,6 +79,10 @@ test('the scanner dots glide to their new places and fade in and out', async () 
   shown = easePoints(shown, [], 0.016);
   assert.equal(shown.length, 1);
   assert.ok(shown[0].alpha < 1);
+  // Marked as leaving, so its name takes no room from those staying (the review,
+  // 2026-10-22: a fading name pushed a live one a line up, then it snapped back).
+  assert.equal(shown[0].leaving, true);
+  assert.equal(easePoints([], [{ id: 'b', x: 0, z: 0, h: 0 }], 0.016)[0].leaving, undefined);
   for (let i = 0; i < 60; i += 1) shown = easePoints(shown, [], 0.016);
   assert.equal(shown.length, 0);
 });

@@ -25,7 +25,7 @@ import { surfaceDirection, spinOf } from './surface.js';
 export const SPEAKERS = [
   {
     // (Made up, as everyone met here is: no real astronaut is a speaker.)
-    id: 'issCrew', kind: 'person', at: { craft: 'iss' }, name: t('국제우주정거장 당번, 마야 린드'), portrait: null,
+    id: 'issCrew', kind: 'person', at: { craft: 'iss' }, name: t('국제우주정거장 당번, 마야 린드'), portrait: 'radio-iss.png',
     hail: t('치익… 여기는 국제우주정거장, 당번 마야 린드. 들리니?'),
     visits: [
       {
@@ -49,7 +49,7 @@ export const SPEAKERS = [
     ],
   },
   {
-    id: 'tiangongCrew', kind: 'person', at: { craft: 'tiangong' }, name: t('톈궁 승무원, 저우 린'), portrait: null,
+    id: 'tiangongCrew', kind: 'person', at: { craft: 'tiangong' }, name: t('톈궁 승무원, 저우 린'), portrait: 'radio-tiangong.png',
     hail: t('치익… 여기는 톈궁, 승무원 저우 린. 잘 들려.'),
     visits: [
       {
@@ -64,7 +64,7 @@ export const SPEAKERS = [
     ],
   },
   {
-    id: 'tanegashimaCrew', kind: 'person', at: { site: 'tanegashima' }, name: t('다네가시마의 은퇴한 발사 요원, 오카다 스미에'), portrait: null,
+    id: 'tanegashimaCrew', kind: 'person', at: { site: 'tanegashima' }, name: t('다네가시마의 은퇴한 발사 요원, 오카다 스미에'), portrait: 'radio-tanegashima.png',
     hail: t('치익… 다네가시마예요. 은퇴한 늙은이지만 무전기는 아직 켜 둔답니다.'),
     visits: [
       {
@@ -86,7 +86,7 @@ export const SPEAKERS = [
     ],
   },
   {
-    id: 'vlaCrew', kind: 'person', at: { site: 'vla' }, name: t('VLA 전파천문학자, 엘레나 루이스'), portrait: null,
+    id: 'vlaCrew', kind: 'person', at: { site: 'vla' }, name: t('VLA 전파천문학자, 엘레나 루이스'), portrait: 'radio-vla.png',
     hail: t('치익… VLA 관측실이야. 접시 스물일곱 개가 지금 하늘을 듣고 있어.'),
     visits: [
       {
@@ -108,7 +108,7 @@ export const SPEAKERS = [
     ],
   },
   {
-    id: 'naroCrew', kind: 'person', at: { site: 'naro' }, name: t('나로우주센터 발사 요원, 한도윤'), portrait: null,
+    id: 'naroCrew', kind: 'person', at: { site: 'naro' }, name: t('나로우주센터 발사 요원, 한도윤'), portrait: 'radio-naro.png',
     hail: t('치익… 나로우주센터입니다. 고흥 바닷바람이 세네요.'),
     visits: [
       {

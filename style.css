@@ -7367,6 +7367,15 @@ dialog#settings[open] > .backKey {
   color:#3b2a1a;
 }
 
+#journal #radioDetail img {
+  display:block;
+  width:100%;
+  max-width:384px;
+  margin:0 auto 8px;
+  border-radius:8px;
+  image-rendering:pixelated;
+}
+
 #journal #radioDetail p {
   margin:4px 0 8px;
 }

@@ -201,3 +201,12 @@ test("grandmother's note comes ten minutes after the call sign, or at the next s
   assert.ok(FINAL_NOTE.text.startsWith('어젯밤, 오십 년 만에 무전기를 켰단다.'));
   assert.ok(FINAL_NOTE.line.length <= 25);
 });
+
+test('every person met has a face on file; the logs have none', async () => {
+  const { existsSync } = await import('node:fs');
+  for (const speaker of SPEAKERS) {
+    if (speaker.kind === 'log') assert.equal(speaker.portrait, null, speaker.id);
+    else assert.ok(speaker.portrait && existsSync(`public/assets/notebook/${speaker.portrait}`), speaker.id);
+  }
+  assert.ok(existsSync('public/assets/notebook/radio-shota.png'));
+});

@@ -32,7 +32,7 @@ test('the journal lists the Sun, then each world by distance with its moons unde
 });
 
 test('a new log knows Earth only', () => {
-  assert.deepEqual(createProgress(), { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], curios: [], notes: [], tours: [], tour: null, quiz: [] });
+  assert.deepEqual(createProgress(), { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], curios: [], notes: [], tours: [], tour: null, quiz: [], radio: { visits: {}, clues: [], found: [], callSign: false, noteAt: null, noteRead: false } });
 });
 
 test('entering 50,000 km of a surface discovers the body once', () => {
@@ -89,7 +89,7 @@ test('summary counts against every body and mission', () => {
 
 test('sanitizeProgress drops junk from storage and keeps known ids', () => {
   const junk = { discovered: ['mars', 'vulcan', 3], landed: 'moon', photos: ['eclipse', 'eclipse', 'fake'] };
-  assert.deepEqual(sanitizeProgress(junk, BODIES, MISSIONS), { discovered: ['earth', 'mars'], landed: [], photos: ['eclipse'], stories: [], craft: [], curios: [], notes: [], tours: [], tour: null, quiz: [] });
+  assert.deepEqual(sanitizeProgress(junk, BODIES, MISSIONS), { discovered: ['earth', 'mars'], landed: [], photos: ['eclipse'], stories: [], craft: [], curios: [], notes: [], tours: [], tour: null, quiz: [], radio: { visits: {}, clues: [], found: [], callSign: false, noteAt: null, noteRead: false } });
   const kept = sanitizeProgress({ stories: ['giotto', 'giotto', 'atlantis', 7] }, BODIES, MISSIONS, STORIES);
   assert.deepEqual(kept.stories, ['giotto']);
   assert.deepEqual(sanitizeProgress(null, BODIES, MISSIONS), createProgress());
@@ -140,4 +140,22 @@ test('the tour is not complete until every story place is visited', () => {
   };
   assert.equal(isComplete(summarize(all, BODIES, MISSIONS, STORIES)), true);
   assert.equal(isComplete(summarize({ ...all, stories: all.stories.slice(1) }, BODIES, MISSIONS, STORIES)), false);
+});
+
+test("the radio friend's log is kept with the journal but not counted in it", async () => {
+  const { createRadio, CLUES } = await import('../src/core/radioFriend.js');
+  assert.deepEqual(createProgress().radio, createRadio());
+  // A log saved before the radio friend came, and one whose radio is junk: a fresh radio
+  // log, the rest as it was.
+  const old = { discovered: ['earth', 'moon'], landed: ['moon'] };
+  const read = sanitizeProgress(old, BODIES, MISSIONS, STORIES);
+  assert.deepEqual(read.radio, createRadio());
+  assert.deepEqual(read.landed, ['moon']);
+  assert.deepEqual(sanitizeProgress({ ...old, radio: 'junk' }, BODIES, MISSIONS, STORIES).radio, createRadio());
+  const heard = { ...old, radio: { clues: [CLUES[0].id], visits: {} } };
+  assert.deepEqual(sanitizeProgress(heard, BODIES, MISSIONS, STORIES).radio.clues, [CLUES[0].id]);
+  // Not counted among the slots.
+  const plain = summarize(sanitizeProgress(old, BODIES, MISSIONS, STORIES), BODIES, MISSIONS, STORIES);
+  const withRadio = summarize(sanitizeProgress(heard, BODIES, MISSIONS, STORIES), BODIES, MISSIONS, STORIES);
+  assert.deepEqual(score(withRadio), score(plain));
 });

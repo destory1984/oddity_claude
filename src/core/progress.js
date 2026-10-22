@@ -1,5 +1,6 @@
 import { surfaceDistance, BODY_DATA } from './bodies.js';
 import { CURIOS } from './curios.js';
+import { createRadio, sanitizeRadio } from './radioFriend.js';
 
 // The explorer's log: which bodies were discovered and landed on, which photo
 // missions were completed, which story places were visited, which craft were met (not
@@ -30,7 +31,8 @@ export function journalOrder(bodies) {
 }
 
 export function createProgress() {
-  return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], curios: [], notes: [], tours: [], tour: null, quiz: [] };
+  // radio: the radio friend's side story (core/radioFriend.js), kept here, counted apart.
+  return { discovered: ['earth'], landed: [], photos: [], stories: [], craft: [], curios: [], notes: [], tours: [], tour: null, quiz: [], radio: createRadio() };
 }
 
 // A question answered right: a story card's (core/storyQuiz.js) or the one under a
@@ -129,6 +131,7 @@ export function sanitizeProgress(raw, bodies, missions, stories = [], craft = []
     tour: underWay(raw.tour, tours),
     // A reading's question is kept as 'r:' and its id (core/readingQuiz.js readingKey).
     quiz: clean(raw.quiz, new Set([...storyIds, ...[...bodyIds, ...craftIds].map((id) => `r:${id}`)])),
+    radio: sanitizeRadio(raw.radio),
   };
 }
 

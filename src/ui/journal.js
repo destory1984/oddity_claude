@@ -51,10 +51,11 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       onRadioJump(id);
     },
   });
-  $('radioOpen').addEventListener('click', () => {
+  const openRadio = () => {
     if (lastProgress) radioBig.draw(lastProgress.radio);
     radioSheet.showModal();
-  });
+  };
+  $('radioOpen').addEventListener('click', openRadio);
   $('radioSheetClose').addEventListener('click', () => radioSheet.close());
 
   $('journalButton').addEventListener('click', () => open());
@@ -115,7 +116,11 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     for (const part of $('journalScroll').children) part.hidden = part.dataset.tab !== name;
     $('journalScroll').scrollTop = 0;
   }
-  for (const button of $('journalTabs').children) button.addEventListener('click', () => showTab(button.dataset.tab));
+  // The radio's tab opens its page over the whole screen at once, the part shown staying
+  // as it was (the user, 2026-10-22: "수첩 -> 무전은 풀 페이지로").
+  for (const button of $('journalTabs').children) {
+    button.addEventListener('click', () => (button.dataset.tab === 'radio' ? openRadio() : showTab(button.dataset.tab)));
+  }
   $('resetJournal').addEventListener('click', () => {
     if (window.confirm(t('탐험 기록을 모두 지울까요? 되돌릴 수 없습니다. 지금 가까이 있는 천체는 곧바로 다시 기록됩니다.'))) onReset();
   });

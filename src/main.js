@@ -119,6 +119,10 @@ const faceToward = (toward) => rotateLocal(lookAtDirection(toward), 0, AIM_OVER)
 // Locked on a turning body she is carried round with its ground from within this many
 // radii of its centre (the height of a geostationary satellite is 6.6 of Earth's).
 const LOCK_CARRY_RADII = 12;
+// Flying near a turning world she turns with its ground: in full within this many radii
+// of its centre (Earth: 3,200 km up), not at all from beyond NEAR_CARRY_FROM (6,400 km up).
+const NEAR_CARRY_FULL = 1.5;
+const NEAR_CARRY_FROM = 2;
 // Locked on a craft she rides along with it from within this far of it.
 const LOCK_RIDE_KM = 10000;
 const AIM_LINE = rotateVector(conjugate(faceToward([0, 0, 1])), [0, 0, 1]);
@@ -3280,6 +3284,19 @@ ${STORY_MORE[target.id]}` : told) };
       const ground = bodyById(state.restingOn, bodies);
       const spun = ground ? spinOf(ground.id, simTime) - spinOf(ground.id, simTime - stepS) : 0;
       if (spun) state = { ...state, ...carriedRound(state.position, state.orientation, ground.position, spun) };
+    }
+    // Flying near a turning world, she turns with its ground as well, so the land under
+    // her holds still and a place on it is reached without chasing it (the user,
+    // 2026-10-22: "지구 자전 속도가 빨라서 쫒아가기 힘드네", then of three ways "1번으로
+    // 해"): Earth's ground went by at 0.4 km a second. It comes in by degrees between
+    // NEAR_CARRY_FROM and NEAR_CARRY_FULL radii from the centre, so the view does not
+    // start turning at a blow; from farther the world is seen turning, as before.
+    if (!locked && !state.restingOn && !practice && dt > 0 && !docked && !visit && !home && !photo.active() && !warp.busy()) {
+      const ground = nearestSurface(state.position, bodies).body;
+      const far = Math.hypot(...state.position.map((n, i) => n - ground.position[i])) / ground.radiusKm;
+      const share = Math.min(1, Math.max(0, (NEAR_CARRY_FROM - far) / (NEAR_CARRY_FROM - NEAR_CARRY_FULL)));
+      const spun = share > 0 ? spinOf(ground.id, simTime) - spinOf(ground.id, simTime - stepS) : 0;
+      if (spun) state = { ...state, ...carriedRound(state.position, state.orientation, ground.position, spun * share) };
     }
     // The journal is of the Solar System: another star's planets are kept apart (below).
     const logged = updateProgress(progress, EXO_IDS.includes(state.restingOn) ? { ...state, restingOn: null } : state, bodies.filter((b) => !b.exo));

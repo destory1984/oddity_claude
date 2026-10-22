@@ -104,7 +104,7 @@ export async function realCloudMap({ nowMs = Date.now(), groundUrl, ownUrl }) {
     seen[i] = count ? 255 : 0;
   }
   // The edge of the gaps feathered: the mask of where a satellite passed, drawn small and
-  // drawn back large, comes out blurred some twelve pixels.
+  // drawn back large, comes out blurred some thirty pixels each way.
   const mask = document.createElement('canvas');
   mask.width = W;
   mask.height = H;
@@ -115,8 +115,8 @@ export async function realCloudMap({ nowMs = Date.now(), groundUrl, ownUrl }) {
   }
   mask.getContext('2d').putImageData(maskData, 0, 0);
   const small = document.createElement('canvas');
-  small.width = W / 16;
-  small.height = H / 16;
+  small.width = W / 32;
+  small.height = H / 32;
   const smallPen = small.getContext('2d');
   smallPen.imageSmoothingQuality = 'high';
   smallPen.drawImage(mask, 0, 0, small.width, small.height);
@@ -133,8 +133,11 @@ export async function realCloudMap({ nowMs = Date.now(), groundUrl, ownUrl }) {
   const outPen = out.getContext('2d');
   const result = outPen.createImageData(W, H);
   for (let i = 0; i < n; i += 1) {
-    // Inside a gap and close to its edge the game's own clouds.
-    const w = seen[i] ? Math.min(1, (weight[i * 4] / 255) * 1.6) : 0;
+    // Inside a gap and close to its edge the game's own clouds. The blurred mask is a half
+    // at the gap's edge: the satellites' share goes from nothing there to all some fifty
+    // pixels in. (It was 0.8 at the edge and dropped to nothing across it: a straight
+    // seam on the globe, the user, 2026-10-22, over the Pacific: "지구에 금이 생겼어".)
+    const w = seen[i] ? Math.min(1, Math.max(0, (weight[i * 4] / 255 - 0.5) * 2.5)) : 0;
     const v = (cloud[i] * w + (own[i * 4] / 255) * (1 - w)) ** 1.15;
     const byte = Math.round(Math.min(1, v) * 255);
     result.data[i * 4] = byte;

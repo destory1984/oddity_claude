@@ -143,11 +143,12 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     $('journalDaily').hidden = !today;
     if (!today) return;
     const label = today.index ? t`부탁 ${today.index + 1}` : t('오늘의 부탁');
-    // One done has grandmother's red ring and "해냄" before it, in a paler ink (the user,
-    // 2026-10-20: "해낸 부탁은 표시를 해줘. 헷갈리네": a ★ for the ☆ was all that told it).
+    // One done has grandmother's red tick and "해냄" before it, in a paler ink (the user,
+    // 2026-10-20: "해낸 부탁은 표시를 해줘. 헷갈리네": a ★ for the ☆ was all that told it;
+    // 2026-10-22, of the red ring it had: "동그라미가 아니라 체크 표시").
     const text = $('dailyText');
     text.classList.toggle('done', today.done);
-    if (today.done) text.replaceChildren(picture('notebook/mark-right.png', ''), t`${label} · 해냄: ${today.text}`);
+    if (today.done) text.replaceChildren(picture('notebook/mark-check.png', ''), t`${label} · 해냄: ${today.text}`);
     else text.textContent = `☆ ${label}: ${today.text}`;
     // The last seven days, today last.
     $('dailyWeek').setAttribute('aria-label', t`지난 7일 가운데 ${today.week.filter(Boolean).length}일 해냄`);

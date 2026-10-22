@@ -193,6 +193,14 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `arecibo-2.jpg` | [Arecibo Telescope, December 2021.jpg](https://commons.wikimedia.org/wiki/File:Arecibo_Telescope,_December_2021.jpg) | Tedder | CC BY-SA 4.0 |
 | `richat-2.jpg` | [RichatStructure.jpg](https://commons.wikimedia.org/wiki/File:RichatStructure.jpg) | Clemens Schmillen | CC BY-SA 4.0 |
 
+## 땅에 깐 위성 사진
+
+`public/assets/terrain/` 의 사진 1장은 지구 그림이 너무 거칠어(한 화소에 10km쯤) 보이지 않는 이름난 자리에, 가까이 갔을 때 땅에 얇게 덮어 보인다. 둥글게 잘라 가장자리를 투명하게 하고, 색을 지구 그림에 맞춰 5 → 11% 밝게 하고, 둘레의 대기처럼 회색(137, 137, 140)을 28% 섞어 살짝 뿌옇게 했다.
+
+| 파일 | 원본 | 만든 이 | 라이선스 |
+|---|---|---|---|
+| `richat.webp` | [Eyeing the Richat Structure (1212324).jpg](https://commons.wikimedia.org/wiki/File:Eyeing_the_Richat_Structure_(1212324).jpg) (Landsat 8 OLI, 가운데 820 × 820을 512 × 512로 줄임, 폭 73km) | NASA Earth Observatory / Lauren Dauphin | Public domain |
+
 ## 사진 임무가 따라 찍는 실제 사진
 
 `public/assets/famous/` 의 사진 6장도 위키미디어 공용에서 받아 560×420 안에 들도록 줄였다(태양계 가족사진만 1120×336). 모두 저작권이 없다. 창백한 푸른 점과 핼리 혜성은 위 표의 `paleBlueDot.jpg`, `giotto.jpg` 를 같이 쓴다.

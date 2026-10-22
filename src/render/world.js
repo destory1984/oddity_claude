@@ -11,6 +11,7 @@ import { createSun } from './sun.js';
 import { createStars } from './stars.js';
 import { createSpriteHero } from './spriteHero.js';
 import { createCraft, createSiteModels } from './craft.js';
+import { createGroundPatches } from './groundPatches.js';
 import { storySitesAt } from '../core/stories.js';
 import { createComet } from './comet.js';
 import { createPracticeRing } from './practiceRing.js';
@@ -84,6 +85,8 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
   craftSun.intensity = 1.1;
   const craftMeshes = createCraft(scene, [...CRAFT, ...CURIOS]);
   const siteModels = createSiteModels(scene, storySitesAt(0, bodies));
+  // Real satellite pictures laid on a few famous places of Earth's ground.
+  const groundPatches = createGroundPatches(scene);
   // A glow and a tail for each comet.
   const comets = bodies.filter((b) => b.kind === 'comet').map((b) => ({ id: b.id, glow: createComet(scene) }));
   const meteors = createMeteors(scene);
@@ -172,6 +175,7 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
     }
     craftMeshes.update(craft, position, sunNow.position, jolt, hiddenCraft, replay);
     siteModels.update(sites, now, position, replay);
+    groundPatches.update(sites, now, position);
     // (A lamp lights the models by that ground too: a curio standing there, at night.)
     craftSun.direction = new Vector3(...(lamp ? lamp.direction : normalize(sunRel))).scale(-1);
     for (const { id, glow } of comets) glow.update(now.find((b) => b.id === id), position, sunNow.position);

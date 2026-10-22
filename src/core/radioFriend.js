@@ -230,6 +230,12 @@ export function createRadio() {
   return { visits: {}, clues: [], found: [], callSign: false, noteAt: null, noteRead: false };
 }
 
+// No meeting heard yet: the game tells a newcomer once that someone is on the air, and
+// the journal's radio page says where the first call comes from.
+export function heardNobody(radio) {
+  return !Object.values(radio.visits).some((n) => n > 0);
+}
+
 const speakerById = (id) => SPEAKERS.find((s) => s.id === id);
 
 // The meeting to be heard now from this speaker, or null (all heard, or the next waits

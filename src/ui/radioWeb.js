@@ -13,7 +13,12 @@ export function createRadioWeb(chart, detail, { onJump }) {
   let chosen = 'shota';
 
   function tellOf(node) {
-    if (node.kind === 'centre') return { title: t('하야시 쇼타'), text: t('1973년, 바다 건너 무전기를 켜던 열여덟 살 소년. 무전으로 들은 말이 이 둘레에 쌓인다.') };
+    if (node.kind === 'centre') {
+      const text = t('1973년, 바다 건너 무전기를 켜던 열여덟 살 소년. 무전으로 들은 말이 이 둘레에 쌓인다.');
+      // Nothing heard yet: where the first call comes from.
+      const first = shown.nodes.some((n) => n.kind === 'speaker' && n.known) ? '' : ` ${t('첫 무전은 국제우주정거장에 도킹하면 들린다.')}`;
+      return { title: t('하야시 쇼타'), text: text + first };
+    }
     if (!node.known) return { title: t('아직 모르는 곳'), text: t('누군가에게 들으면 이어진다.') };
     if (node.kind === 'speaker') return { title: SPEAKERS.find((s) => s.id === node.id).name, text: t('무전으로 이야기를 들려준 이.') };
     if (node.kind === 'clue') return { title: t('들은 말'), text: CLUES.find((c) => c.id === node.id).text };

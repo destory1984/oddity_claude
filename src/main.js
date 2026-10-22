@@ -100,7 +100,7 @@ import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
-import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN, FINAL_NOTE, noteDue, readNote } from './core/radioFriend.js';
+import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN, FINAL_NOTE, noteDue, readNote, heardNobody } from './core/radioFriend.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
 } from './core/eclipses.js';
@@ -336,6 +336,8 @@ let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT, NOTES, TOURS);
 // The radio friend's call sign was got in an earlier sitting: grandmother's note comes
 // at once, not after its ten minutes (core/radioFriend.js noteDue).
 let radioSignAtStart = progress.radio.callSign;
+// Whether the newcomer's "someone is on the air" notice was shown this visit.
+let radioHinted = false;
 // Small copies of saved photos, shown in the journal (core/album.js).
 let album = loadAlbum(MISSIONS);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
@@ -3974,7 +3976,14 @@ ${STORY_MORE[target.id]}` : told) };
     // Someone new to hear on the radio where she is docked or stays.
     // (Only once the docking or the glide down is done: pressed halfway it paused her there.)
     const radioHere = (!docked || isDocked(docked)) && (!visit || hasArrived(visit)) ? speakerAt({ docked, visit }) : null;
-    hud.plateKeys({ undock: undockKey, then: thenKey, radio: Boolean(radioHere && nextVisit(progress.radio, radioHere)) });
+    const radioKeyNow = Boolean(radioHere && nextVisit(progress.radio, radioHere));
+    hud.plateKeys({ undock: undockKey, then: thenKey, radio: radioKeyNow });
+    // A newcomer is told once a visit that someone is on the air (a small key on the name
+    // plate was all that showed it).
+    if (radioKeyNow && !radioHinted && heardNobody(progress.radio)) {
+      radioHinted = true;
+      toast.show(t('치익… 무전기에서 누군가의 목소리가 들린다.\n이름표 끝의 무전 단추를 눌러 보자.'));
+    }
     hud.update({
       view,
       local: nearestLocalBody(state.position, bodies),

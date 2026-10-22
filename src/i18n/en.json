@@ -5431,5 +5431,8 @@
  "땅에 깐 위성 사진이 구름 위로 비치던 것과, 밤에 도시 불빛을 가리던 것을 고쳤습니다.": "The satellite pictures on the ground no longer show through clouds or hide city lights at night.",
  "스캐너의 점들이 갑자기 튀지 않고 새 자리로 부드럽게 옮겨 가며, 들고 날 때 서서히 나타나고 사라집니다.": "The scanner's dots now glide to their new places instead of jumping, and fade in and out as they come and go.",
  "무전 이야기의 숨은 장소 다섯에 닿으면 카드에 그곳의 사진이나 그림이 함께 나옵니다.": "Reach one of the radio story's five hidden places and its card shows a photo or a drawing of it.",
- "수첩의 무전 탭에서 찾아간 숨은 장소를 누르면 그곳의 사진이나 그림을 다시 볼 수 있습니다.": "In the journal's Radio tab, press a hidden place you have found to see its photo or drawing again."
+ "수첩의 무전 탭에서 찾아간 숨은 장소를 누르면 그곳의 사진이나 그림을 다시 볼 수 있습니다.": "In the journal's Radio tab, press a hidden place you have found to see its photo or drawing again.",
+ "치익… 무전기에서 누군가의 목소리가 들린다.\n이름표 끝의 무전 단추를 눌러 보자.": "Crackle… a voice on the radio.\nPress the radio key on the name plate.",
+ "처음 국제우주정거장에 도킹하면 무전이 들린다는 알림이 나오고, 수첩의 무전 탭도 첫 무전이 어디서 오는지 알려 줍니다.": "The first time you dock with the International Space Station, a notice says someone is on the radio, and the journal's Radio tab tells where the first call comes from.",
+ "첫 무전은 국제우주정거장에 도킹하면 들린다.": "The first call comes when you dock with the International Space Station."
 }

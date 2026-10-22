@@ -8,6 +8,15 @@ import {
   SPEAKERS, CLUES, HIDDEN, createRadio, nextVisit, hear, openHidden, sanitizeRadio, speakerAt,
 } from '../src/core/radioFriend.js';
 
+// Nobody heard yet: a newcomer is told once that someone is on the air (only a small key
+// on the name plate showed it, and the journal's radio page said nothing of where to go).
+test('heardNobody is true until the first meeting is heard', async () => {
+  const { heardNobody } = await import('../src/core/radioFriend.js');
+  assert.equal(heardNobody(createRadio()), true);
+  assert.equal(heardNobody({ ...createRadio(), visits: { issCrew: 0 } }), true);
+  assert.equal(heardNobody({ ...createRadio(), visits: { issCrew: 1 } }), false);
+});
+
 test('a fresh radio log has nothing heard or found', () => {
   assert.deepEqual(createRadio(), { visits: {}, clues: [], found: [], callSign: false, noteAt: null, noteRead: false });
 });

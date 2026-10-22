@@ -100,7 +100,7 @@ import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
-import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN } from './core/radioFriend.js';
+import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN, FINAL_NOTE, noteDue, readNote } from './core/radioFriend.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
 } from './core/eclipses.js';
@@ -333,6 +333,9 @@ const LOCK_RATE = 6;
 // way to it turned half round in a moment and the view whirled.
 const LOCK_SWING_MAX = 1;
 let progress = loadProgress(BODIES, MISSIONS, STORIES, CRAFT, NOTES, TOURS);
+// The radio friend's call sign was got in an earlier sitting: grandmother's note comes
+// at once, not after its ten minutes (core/radioFriend.js noteDue).
+const radioSignAtStart = progress.radio.callSign;
 // Small copies of saved photos, shown in the journal (core/album.js).
 let album = loadAlbum(MISSIONS);
 // Simulated seconds since the start; bodies orbit on this clock (TIME_SCALE x real time).
@@ -2092,6 +2095,11 @@ ${STORY_MORE[target.id]}` : told) };
         journal.open();
       }
       // A meeting on the radio heard to its end: written down, once (core/radioFriend.js hear).
+      // Grandmother's note at the end of the radio friend's story: read, it does not come again.
+      if (note.id === FINAL_NOTE.id) {
+        progress = { ...progress, radio: readNote(progress.radio) };
+        saveProgress(progress);
+      }
       // A hidden place's telling: already written down when it opened.
       if (note.radioFound) return;
       if (note.radio) {
@@ -3557,6 +3565,9 @@ ${STORY_MORE[target.id]}` : told) };
     // gone in six seconds). Only the very first note, which opens the story, goes before it.
     const settled = dt > 0 && !noteCard.isOpen() && !cardDue && !storyCard.isOpen() && !warp.busy()
       && !(docked && !isDocked(docked)) && !(visit && !hasArrived(visit));
+    // Grandmother's note at the end of the radio friend's story, when she is at rest and
+    // none of the journal's own notes is waiting.
+    if (settled && noteWait === 0 && !note && noteDue(progress.radio, Date.now(), radioSignAtStart)) noteCard.show(FINAL_NOTE);
     // (After a note it waits out the gap between notes, so the first sitting does not
     // open sheet upon sheet.)
     // Nor does it come while one of her notes is due (landing on the Moon for the first

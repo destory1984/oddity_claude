@@ -184,3 +184,20 @@ test('the journal web: only the young radio operator is known at first; a clue b
   const opened = radioWeb({ ...createRadio(), clues: [...ryugu.needs] });
   assert.equal(opened.nodes.find((n) => n.id === 'ryuguMarker').open, true);
 });
+
+test("grandmother's note comes ten minutes after the call sign, or at the next start, and once", async () => {
+  const { noteDue, readNote, FINAL_NOTE } = await import('../src/core/radioFriend.js');
+  const before = createRadio();
+  assert.equal(noteDue(before, 10 ** 9, true), false);
+  const got = { ...before, callSign: true, noteAt: 1000 };
+  assert.equal(noteDue(got, 1000 + 60000, false), false);
+  assert.equal(noteDue(got, 1000 + 600000, false), true);
+  assert.equal(noteDue(got, 1000 + 1, true), true);
+  const read = readNote(got);
+  assert.equal(read.noteRead, true);
+  assert.equal(noteDue(read, 10 ** 12, true), false);
+  // In grandmother's hand: on the paper, with Sora's word after it, kept as a note.
+  assert.ok(FINAL_NOTE.id && FINAL_NOTE.text && FINAL_NOTE.title && FINAL_NOTE.button);
+  assert.ok(FINAL_NOTE.text.startsWith('어젯밤, 오십 년 만에 무전기를 켰단다.'));
+  assert.ok(FINAL_NOTE.line.length <= 25);
+});

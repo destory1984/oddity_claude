@@ -385,3 +385,28 @@ export function radioWeb(radio) {
   const links = known.flatMap((c) => [[c.from, c.id], [c.id, c.points]]);
   return { nodes, links };
 }
+
+// Grandmother's note at the end, in her hand as her other notes are (core/story.js):
+// she switched the radio on and called the sign Sora brought. What was said is not told:
+// only that it was (her voice is never heard in the game).
+export const FINAL_NOTE = {
+  id: 'radioNote',
+  scene: t('수첩 사이에 할머니의 쪽지가 새로 끼워져 있다.'),
+  title: '2026',
+  text: t('어젯밤, 오십 년 만에 무전기를 켰단다.\n\n')
+    + t('네가 적어 온 부호를 불렀더니, 한참 만에 바다 건너에서 낯익은 말투가 돌아오더구나. 하늘 이야기를 하다 보니 날이 새는 줄도 몰랐어.\n\n')
+    + t('그 사람이 나를 찾느라 우주까지 갔더구나. 나는 망원경 앞에서 기다리기만 했는데. 고맙다, 소라야.'),
+  button: t('쪽지를 접는다'),
+  line: t('오십 년 만에 닿았구나!'),
+};
+
+// Whether grandmother's note is due: the call sign got and the note not yet read, and
+// either ten minutes gone since (nowMs, Date.now()) or the game opened anew (freshStart).
+export function noteDue(radio, nowMs, freshStart) {
+  if (!radio.callSign || radio.noteRead) return false;
+  return freshStart || (Number.isFinite(radio.noteAt) && nowMs - radio.noteAt >= 600000);
+}
+
+export function readNote(radio) {
+  return { ...radio, noteRead: true };
+}

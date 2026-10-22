@@ -2242,6 +2242,7 @@ ${STORY_MORE[target.id]}` : told) };
     daily: () => (!errandAt(errand) ? null : {
       text: errandAt(errand).text,
       index: errand,
+      hasNext: errand < errands.length - 1,
       done: errandDone(errand),
       canJump: (() => {
         const target = here(requestTarget(errandAt(errand)));

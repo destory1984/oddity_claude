@@ -176,7 +176,9 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     $('dailyCount').textContent = t`해낸 날 ${today.days}일${today.streak > 1 ? t` · ${today.streak}일째 이어서` : ''}`;
     $('dailyGo').hidden = today.done;
     $('dailyJump').hidden = today.done || !today.canJump;
-    $('dailyNext').hidden = !today.done;
+    // Free to walk the errands either way, done or not (the user, 2026-10-22: "왜 좌우로
+    // 이동하는 화살표 없어짐?": it waited on the shown one being done).
+    $('dailyNext').hidden = !today.hasNext;
     $('dailyPrev').hidden = !today.index;
   }
 

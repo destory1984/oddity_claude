@@ -13,13 +13,25 @@ import { surfaceDirection, spinOf } from '../core/surface.js';
 // of the picture on Earth; sizeKm: the picture's width; file: public/assets/terrain/,
 // north up, its alpha the round fade. The four after the first were added the same day
 // ("다른 것도 넣자"); the Great Barrier Reef and Everest were tried and left out (the
-// reef's picture ends in a dark line out at sea, Everest's is snow and white glare).
+// reef's picture ends in a dark line out at sea, Everest's is snow and white glare). Pictures kept
+// small (the user: "오늘 넣은 장소들은 압축 많이 해서 넣어"): 8 → 20 KB each.
 export const GROUND_PATCHES = [
   { id: 'richat', latDeg: 21.124, lonDeg: -11.402, sizeKm: 73.2, file: 'richat.webp' },
   { id: 'grandCanyon', latDeg: 36.1, lonDeg: -112.12, sizeKm: 70, file: 'grandCanyon.webp' },
   { id: 'uluru', latDeg: -25.33, lonDeg: 130.92, sizeKm: 50, file: 'uluru.webp' },
   { id: 'nileDelta', latDeg: 30.85, lonDeg: 31.05, sizeKm: 200, file: 'nileDelta.webp' },
   { id: 'uyuni', latDeg: -20.2, lonDeg: -67.6, sizeKm: 150, file: 'uyuni.webp' },
+  // Eight more the same day ("다 넣어"), of eight offered: Paektu's crater lake, Jeju,
+  // Fuji, the Namib's red dunes, where the Rio Negro meets the Amazon, the Mississippi's
+  // bends, Lake Natron, the dried Aral Sea.
+  { id: 'baekdu', latDeg: 41.99, lonDeg: 128.08, sizeKm: 40, file: 'baekdu.webp' },
+  { id: 'jeju', latDeg: 33.38, lonDeg: 126.55, sizeKm: 80, file: 'jeju.webp' },
+  { id: 'fuji', latDeg: 35.36, lonDeg: 138.73, sizeKm: 40, file: 'fuji.webp' },
+  { id: 'sossusvlei', latDeg: -24.75, lonDeg: 15.4, sizeKm: 60, file: 'sossusvlei.webp' },
+  { id: 'meetingOfWaters', latDeg: -3.13, lonDeg: -59.9, sizeKm: 60, file: 'meetingOfWaters.webp' },
+  { id: 'mississippi', latDeg: 33.4, lonDeg: -91.1, sizeKm: 60, file: 'mississippi.webp' },
+  { id: 'natron', latDeg: -2.42, lonDeg: 36.05, sizeKm: 60, file: 'natron.webp' },
+  { id: 'aral', latDeg: 45.3, lonDeg: 59.6, sizeKm: 200, file: 'aral.webp' },
 ];
 // All lie on Earth.
 const ON = 'earth';

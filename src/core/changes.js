@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-22', text: t('백두산 천지, 제주도, 후지산, 나미브 사막, 아마존 강, 미시시피 강, 나트론 호수, 아랄해에도 위성 사진이 깔립니다.') },
   { day: '2026-10-22', text: t('그랜드캐니언, 울루루, 나일강 삼각주, 우유니 소금사막에도 가까이 가면 실제 위성 사진이 깔립니다.') },
   { day: '2026-10-22', text: t('사하라의 눈 가까이 가면 실제 위성 사진이 땅에 깔려 고리 무늬가 또렷이 보입니다.') },
   { day: '2026-10-22', text: t('행성 가까이 날면 땅과 함께 돌아, 지구의 자리를 쫓아가지 않아도 됩니다.') },

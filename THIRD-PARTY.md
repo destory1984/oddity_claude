@@ -195,7 +195,7 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 
 ## 땅에 깐 위성 사진
 
-`public/assets/terrain/` 의 사진 5장은 지구 그림이 너무 거칠어(한 화소에 10km쯤) 보이지 않는 이름난 자리에, 가까이 갔을 때 땅에 얇게 덮어 보인다. 둥글게 잘라 가장자리를 투명하게 하고, 색을 지구 그림에 맞춰 5 → 11% 밝게 하고, 둘레의 대기처럼 회색(137, 137, 140)을 28% 섞어 살짝 뿌옇게 했다.
+`public/assets/terrain/` 의 사진 13장은 지구 그림이 너무 거칠어(한 화소에 10km쯤) 보이지 않는 이름난 자리에, 가까이 갔을 때 땅에 얇게 덮어 보인다. 둥글게 잘라 가장자리를 투명하게 하고, 색을 둘레 지구 그림에 맞추고(채널마다 0.8 → 1.25배), 대기처럼 회색(137, 137, 140)을 28% 섞어 살짝 뿌옇게 했으며, WebP 품질 55로 작게 줄였다(8 → 20KB).
 
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
@@ -204,6 +204,14 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `uluru.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (EOX WMS 레이어 `s2cloudless`, 위도 -25.33, 경도 130.92 둘레 50km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
 | `nileDelta.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (EOX WMS 레이어 `s2cloudless`, 위도 30.85, 경도 31.05 둘레 200km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
 | `uyuni.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (EOX WMS 레이어 `s2cloudless`, 위도 -20.2, 경도 -67.6 둘레 150km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
+| `baekdu.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (백두산 천지, EOX WMS 레이어 `s2cloudless`, 위도 41.99, 경도 128.08 둘레 40km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
+| `jeju.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (제주도, EOX WMS 레이어 `s2cloudless`, 위도 33.38, 경도 126.55 둘레 80km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
+| `fuji.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (후지산, EOX WMS 레이어 `s2cloudless`, 위도 35.36, 경도 138.73 둘레 40km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
+| `sossusvlei.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (나미브 사막 소서스블레이, EOX WMS 레이어 `s2cloudless`, 위도 -24.75, 경도 15.4 둘레 60km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
+| `meetingOfWaters.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (아마존 강 합류점, EOX WMS 레이어 `s2cloudless`, 위도 -3.13, 경도 -59.9 둘레 60km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
+| `mississippi.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (미시시피 강 굽이, EOX WMS 레이어 `s2cloudless`, 위도 33.4, 경도 -91.1 둘레 60km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
+| `natron.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (나트론 호수, EOX WMS 레이어 `s2cloudless`, 위도 -2.42, 경도 36.05 둘레 60km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
+| `aral.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (아랄해, EOX WMS 레이어 `s2cloudless`, 위도 45.3, 경도 59.6 둘레 200km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
 
 ## 사진 임무가 따라 찍는 실제 사진
 

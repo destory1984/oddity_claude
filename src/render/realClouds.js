@@ -75,6 +75,36 @@ function pixels(image, w = W, h = H) {
   return pen.getImageData(0, 0, w, h).data;
 }
 
+// A mask (0 or 255 a pixel) blurred some thirty pixels each way: drawn small and drawn
+// back large. One value a pixel.
+function blurred(mask) {
+  const sharp = document.createElement('canvas');
+  sharp.width = W;
+  sharp.height = H;
+  const data = new ImageData(W, H);
+  for (let i = 0; i < mask.length; i += 1) {
+    data.data[i * 4] = mask[i];
+    data.data[i * 4 + 3] = 255;
+  }
+  sharp.getContext('2d').putImageData(data, 0, 0);
+  const small = document.createElement('canvas');
+  small.width = W / 32;
+  small.height = H / 32;
+  const smallPen = small.getContext('2d');
+  smallPen.imageSmoothingQuality = 'high';
+  smallPen.drawImage(sharp, 0, 0, small.width, small.height);
+  const soft = document.createElement('canvas');
+  soft.width = W;
+  soft.height = H;
+  const softPen = soft.getContext('2d', { willReadFrequently: true });
+  softPen.imageSmoothingQuality = 'high';
+  softPen.drawImage(small, 0, 0, W, H);
+  const rgba = softPen.getImageData(0, 0, W, H).data;
+  const out = new Uint8ClampedArray(mask.length);
+  for (let i = 0; i < mask.length; i += 1) out[i] = rgba[i * 4];
+  return out;
+}
+
 // The cloud map (a canvas, white clouds on black, as public/assets/earth-clouds.webp), or
 // null. groundUrl: the day map (its ice and snow are not clouds); ownUrl: the game's own
 // cloud map, for the gaps.
@@ -84,49 +114,39 @@ export async function realCloudMap({ nowMs = Date.now(), groundUrl, ownUrl }) {
   if (!got.length) return null;
   const [ground, own] = await Promise.all([picture(groundUrl), picture(ownUrl)]).then((both) => both.map((image) => pixels(image)));
   const n = W * H;
+  // Where each satellite passed (255) or not (0), and the same blurred: each satellite's
+  // clouds fade out towards the edges of its own passes, so where one pass ends inside the
+  // other's the two meet softly (they are fifty minutes apart and the clouds have moved: a
+  // step showed along every edge; the review, 2026-10-22).
+  const passes = got.map((shot) => {
+    const seen = new Uint8ClampedArray(n);
+    for (let i = 0; i < n; i += 1) seen[i] = Math.max(shot[i * 4], shot[i * 4 + 1], shot[i * 4 + 2]) > 0.03 * 255 ? 255 : 0;
+    return { shot, seen, soft: blurred(seen) };
+  });
   const cloud = new Float32Array(n);
   const seen = new Uint8ClampedArray(n);
   for (let i = 0; i < n; i += 1) {
     const k = i * 4;
     const ice = smooth(0.55, 0.8, Math.min(ground[k], ground[k + 1], ground[k + 2]) / 255);
     let sum = 0;
+    let weights = 0;
+    let plain = 0;
     let count = 0;
-    for (const shot of got) {
-      const r = shot[k] / 255;
-      const g = shot[k + 1] / 255;
-      const b = shot[k + 2] / 255;
+    for (const { shot, seen: passed, soft } of passes) {
       // (Black where a satellite did not pass.)
-      if (Math.max(r, g, b) <= 0.03) continue;
-      sum += whiteness(r, g, b) * (1 - 0.85 * ice);
+      if (!passed[i]) continue;
+      const white = whiteness(shot[k] / 255, shot[k + 1] / 255, shot[k + 2] / 255) * (1 - 0.85 * ice);
+      const w = Math.max(0.001, Math.min(1, (soft[i] / 255 - 0.5) * 2.5));
+      sum += white * w;
+      weights += w;
+      plain += white;
       count += 1;
     }
-    cloud[i] = count ? sum / count : 0;
+    cloud[i] = count ? (weights > 0 ? sum / weights : plain / count) : 0;
     seen[i] = count ? 255 : 0;
   }
-  // The edge of the gaps feathered: the mask of where a satellite passed, drawn small and
-  // drawn back large, comes out blurred some thirty pixels each way.
-  const mask = document.createElement('canvas');
-  mask.width = W;
-  mask.height = H;
-  const maskData = new ImageData(W, H);
-  for (let i = 0; i < n; i += 1) {
-    maskData.data[i * 4] = seen[i];
-    maskData.data[i * 4 + 3] = 255;
-  }
-  mask.getContext('2d').putImageData(maskData, 0, 0);
-  const small = document.createElement('canvas');
-  small.width = W / 32;
-  small.height = H / 32;
-  const smallPen = small.getContext('2d');
-  smallPen.imageSmoothingQuality = 'high';
-  smallPen.drawImage(mask, 0, 0, small.width, small.height);
-  const soft = document.createElement('canvas');
-  soft.width = W;
-  soft.height = H;
-  const softPen = soft.getContext('2d', { willReadFrequently: true });
-  softPen.imageSmoothingQuality = 'high';
-  softPen.drawImage(small, 0, 0, W, H);
-  const weight = softPen.getImageData(0, 0, W, H).data;
+  // The edge of the gaps feathered the same way.
+  const weight = blurred(seen);
   const out = document.createElement('canvas');
   out.width = W;
   out.height = H;
@@ -142,7 +162,7 @@ export async function realCloudMap({ nowMs = Date.now(), groundUrl, ownUrl }) {
     // each side (the review, 2026-10-22: a straight north-south line in the Pacific).
     const x = i % W;
     const dateline = Math.min(1, Math.min(x, W - 1 - x) / 48);
-    const w = seen[i] ? Math.min(1, Math.max(0, (weight[i * 4] / 255 - 0.5) * 2.5)) * dateline : 0;
+    const w = seen[i] ? Math.min(1, Math.max(0, (weight[i] / 255 - 0.5) * 2.5)) * dateline : 0;
     const v = (cloud[i] * w + (own[i * 4] / 255) * (1 - w)) ** 1.15;
     const byte = Math.round(Math.min(1, v) * 255);
     result.data[i * 4] = byte;

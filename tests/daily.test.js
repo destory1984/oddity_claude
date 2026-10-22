@@ -35,7 +35,8 @@ test('the errands are every place once, nearest home first, those done left out'
   const all = errandList('2026-10-05', createDaily());
   const ids = all.map((r) => r.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.ok(ids.length > 80, String(ids.length));
+  // (Fewer moons since the same day: 75 then.)
+  assert.ok(ids.length > 70, String(ids.length));
   assert.deepEqual(ids.slice(0, 3), ['moon', 'venus', 'iss']);
   assert.ok(!ids.includes('earth') && !ids.includes('sun'));
   for (const request of all) {
@@ -55,6 +56,20 @@ test('the errands are every place once, nearest home first, those done left out'
   // All done: none left.
   assert.deepEqual(errandList('2026-10-05', { ...createDaily(), places: ids }), []);
   assert.equal(dailyRequest('2026-10-05', { ...createDaily(), places: ids }), null);
+});
+
+// Fewer moons (the user, 2026-10-22: "수첩에서 가야할 곳이 너무 많은데, 토성 1개, 목성은
+// 2개의 위성만 가자. 나머지는 모두 최대 1개씩").
+test('the errands go to one moon of Saturn, two of Jupiter, at most one of any other', async () => {
+  const { errandList } = await import('../src/core/daily.js');
+  const moons = {};
+  for (const { id } of errandList('2026-10-05', createDaily())) {
+    const body = BODIES.find((b) => b.id === id);
+    if (body?.kind === 'moon') (moons[body.parent] ??= []).push(id);
+  }
+  assert.equal(moons.saturn.length, 1);
+  assert.equal(moons.jupiter.length, 2);
+  for (const [parent, ids] of Object.entries(moons)) if (!['saturn', 'jupiter'].includes(parent)) assert.ok(ids.length <= 1, `${parent}: ${ids}`);
 });
 
 test('a place done is kept in the log, once', async () => {

@@ -35,7 +35,11 @@ const PHOTO_BODIES = BODIES.filter((b) => b.kind !== 'star' && (b.kind !== 'moon
 // 번만 가게 해.. 반복하게 하지말구"; they had taken turns among the places found, by date).
 const NEAR_BODIES = ['moon', 'venus', 'mars', 'mercury', 'jupiter', 'saturn', 'ceres', 'vesta', 'uranus', 'neptune', 'pluto'];
 const NEAR_CRAFT = ['iss', 'hubble', 'tiangong', 'jwst', 'lro', 'danuri', 'mro', 'juno', 'soho', 'tess'];
-const ERRAND_BODIES = [...new Set([...NEAR_BODIES, ...BODIES.filter((b) => b.kind !== 'star' && !b.exo && b.id !== 'earth').map((b) => b.id)])];
+// Of the moons only these (the user, the same day: "수첩에서 가야할 곳이 너무 많은데,
+// 토성 1개, 목성은 2개의 위성만 가자. 나머지는 모두 최대 1개씩"): Titan; Io and Europa;
+// one each elsewhere, the best known.
+const ERRAND_MOONS = ['moon', 'phobos', 'io', 'europa', 'titan', 'miranda', 'triton', 'charon', 'dimorphos', 'menoetius'];
+const ERRAND_BODIES = [...new Set([...NEAR_BODIES, ...BODIES.filter((b) => b.kind !== 'star' && !b.exo && b.id !== 'earth' && (b.kind !== 'moon' || ERRAND_MOONS.includes(b.id))).map((b) => b.id)])];
 const ERRAND_CRAFT = [...new Set([...NEAR_CRAFT, ...CRAFT.map((c) => c.id)])];
 // Two worlds, then a craft, while both last; a world's turn is a visit and a photo by
 // turns (another planet's moon, which a photo would rate as the planet, a visit always).

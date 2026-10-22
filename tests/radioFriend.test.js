@@ -229,11 +229,11 @@ test("grandmother's note comes ten minutes after the call sign, or at the next s
   assert.ok(FINAL_NOTE.line.length <= 25);
 });
 
-test('every person met has a face on file; the logs have none', async () => {
+test('every speaker has a picture on file: a face, or the book of a log', async () => {
   const { existsSync } = await import('node:fs');
   for (const speaker of SPEAKERS) {
-    if (speaker.kind === 'log') assert.equal(speaker.portrait, null, speaker.id);
-    else assert.ok(speaker.portrait && existsSync(`public/assets/notebook/${speaker.portrait}`), speaker.id);
+    // (A log's picture is its book on the craft's wall since 2026-10-22: "A, A, B".)
+    assert.ok(speaker.portrait && existsSync(`public/assets/notebook/${speaker.portrait}`), speaker.id);
   }
   assert.ok(existsSync('public/assets/notebook/radio-shota.png'));
 });

@@ -7489,6 +7489,16 @@ dialog#radioSheet > .backKey {
   color:#3b2a1a;
 }
 
+/* Its head: the attic radio of 1973 by the night sea, fading into the paper (the user's
+   pick "B" of two, 2026-10-22). */
+#radioSheet #radioSheetHead {
+  display:block;
+  width:100%;
+  height:auto;
+  margin:-6px 0 8px;
+  border-radius:8px 8px 0 0;
+}
+
 #radioSheet h2 {
   margin:0 0 2px;
   font-family:var(--hand);

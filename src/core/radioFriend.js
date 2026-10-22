@@ -10,7 +10,7 @@ import { surfaceDirection, spinOf } from './surface.js';
 // orbit lock's are in core/orbitLock.js; main.js only asks.
 //
 // SPEAKERS: kind 'person' (a face and a few lines) or 'log' (a craft's log, short lines,
-// no talk); at: the craft she docks with or the story place she stays at; hail: the
+// no talk; its picture is the book on the craft's wall); at: the craft she docks with or the story place she stays at; hail: the
 // first page, the speaker's call or the log's heading. Each meeting comes in turn, once
 // its `needs` are known, and `gives` its clues.
 // Facts used here, checked 2026-10-22: Hayabusa2 launched 2014-12-03; each target marker
@@ -122,7 +122,7 @@ export const SPEAKERS = [
     ],
   },
   {
-    id: 'hayabusa2Log', kind: 'log', at: { craft: 'hayabusa2' }, name: t('하야부사2 기록장'), portrait: null,
+    id: 'hayabusa2Log', kind: 'log', at: { craft: 'hayabusa2' }, name: t('하야부사2 기록장'), portrait: 'radio-log-hayabusa2.webp',
     hail: t('하야부사2 기록장 · 2014년'),
     visits: [
       {
@@ -144,7 +144,7 @@ export const SPEAKERS = [
     ],
   },
   {
-    id: 'akatsukiLog', kind: 'log', at: { craft: 'akatsuki' }, name: t('아카쓰키 기록장'), portrait: null,
+    id: 'akatsukiLog', kind: 'log', at: { craft: 'akatsuki' }, name: t('아카쓰키 기록장'), portrait: 'radio-log-akatsuki.webp',
     hail: t('아카쓰키 기록장 · 2010년'),
     visits: [
       {
@@ -158,7 +158,7 @@ export const SPEAKERS = [
     ],
   },
   {
-    id: 'bepiLog', kind: 'log', at: { craft: 'bepiColombo' }, name: t('베피콜롬보 기록장'), portrait: null,
+    id: 'bepiLog', kind: 'log', at: { craft: 'bepiColombo' }, name: t('베피콜롬보 기록장'), portrait: 'radio-log-bepi.webp',
     hail: t('베피콜롬보 기록장 · 2018년'),
     visits: [
       {

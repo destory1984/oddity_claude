@@ -29,6 +29,9 @@ const BACK = {
   practiceDone: 'practiceKeep',
 };
 
+// (The sheets that fill the screen hold their key fixed; the journal scrolls inside itself.)
+const BANDED = ['noteCard', 'gateScene', 'lookBack', 'pair', 'practiceOffer', 'appOffer', 'practiceWhy', 'practiceDone'];
+
 export function addBackKeys() {
   for (const [sheet, way] of Object.entries(BACK)) {
     const dialog = $(sheet);
@@ -44,7 +47,14 @@ export function addBackKeys() {
       event.stopPropagation();
       $(way).click();
     });
-    dialog.prepend(key);
+    // A card that scrolls whole keeps its key on a band stuck to its top (style.css
+    // .backBar; the user, 2026-10-23: "뒤로 가는 메뉴 고정").
+    if (BANDED.includes(sheet)) {
+      const bar = document.createElement('div');
+      bar.className = 'backBar';
+      bar.append(key);
+      dialog.prepend(bar);
+    } else dialog.prepend(key);
     // As it opens, the focus goes to its title (or, with none, to the sheet itself), so a
     // keyboard starts at the top and a key still held does not press a button (the user,
     // 2026-10-19: "다 해"). The browser alone gave it to the first button, this ✕, where

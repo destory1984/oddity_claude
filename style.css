@@ -6422,7 +6422,7 @@ dialog#photoView {
    (ui/backKeys.js; the user, 2026-10-19: "이전 메뉴로...는 화면 왼쪽위 네모난 X 아이콘
    버튼으로 통일"). The sheets give it its own row at the top; the journal's head and the
    big map's title move right of it; the old ✕ at the right of each give way to it. */
-dialog > .backKey {
+:is(dialog, .backBar) > .backKey {
   position:absolute;
   top:8px;
   left:8px;
@@ -6812,7 +6812,7 @@ dialog#shareSheet > #shareClose {
 #scannerButton,
 #guide button,
 #inspectInfo #inspectFold,
-dialog:not(#journal) > .backKey {
+:is(dialog:not(#journal), .backBar) > .backKey {
   border-radius:12px;
 }
 
@@ -7001,7 +7001,7 @@ dialog#journal > .backKey {
    from the top and left of what it closes; glass, 12px corners (the journal's paper ✕
    keeps its paper look). They were 36px on the sheets, 40px on the photo page and 44px
    on the journal. The sheets' row for it grows to match: 8 + 44 + 10px. */
-dialog > .backKey,
+:is(dialog, .backBar) > .backKey,
 #photoView > .backKey,
 .viewBackKey {
   width:44px;
@@ -7596,4 +7596,58 @@ html #journal #journalTabs > button[role="tab"] {
   background:#f1d99a;
   color:#3b2a1a;
   font-weight:800;
+}
+
+/* The share sheet fills the screen, as the settings do (the user, 2026-10-23: "공유 메뉴도
+   전체 화면으로"): its way back fixed 8px from the corner, what it holds in a column at
+   most 640px wide in the middle, "비행으로 돌아가기" at the foot. */
+dialog#shareSheet[open] {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  width:100vw;
+  max-width:100vw;
+  height:100vh;
+  height:100dvh;
+  max-height:100vh;
+  max-height:100dvh;
+  margin:0;
+  border:0;
+  border-radius:0;
+  padding:calc(62px + env(safe-area-inset-top)) max(20px, calc((100vw - 640px) / 2)) 0;
+  overflow-y:auto;
+  background:#0d1a3a;
+}
+
+dialog#shareSheet[open] > .backKey {
+  position:fixed;
+  top:max(8px, env(safe-area-inset-top));
+  left:max(8px, env(safe-area-inset-left));
+}
+
+dialog#shareSheet[open] #sharePic {
+  align-self:center;
+  max-width:100%;
+}
+
+dialog#shareSheet[open] > #shareClose {
+  margin-top:auto;
+  margin-bottom:max(20px, env(safe-area-inset-bottom));
+}
+
+/* In the cards that scroll whole, the way back stands on a band of the card's own colour
+   stuck to its top (ui/backKeys.js .backBar), so it stays while the card scrolls and the
+   words go under the band, not under the key (the user, 2026-10-23: "뒤로 가는 메뉴 고정",
+   "그리고 버튼이 글자 가린다"). The band is the 62px above the card's words, wall to wall. */
+dialog > .backBar {
+  position:sticky;
+  top:-62px;
+  z-index:3;
+  flex:none;
+  align-self:stretch;
+  height:62px;
+  margin:-62px -20px 0;
+  padding:0;
+  background:#0d1a3a;
+  box-shadow:0 8px 10px -4px #0d1a3a;
 }

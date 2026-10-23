@@ -2,8 +2,9 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   LANDED, IDLE, AGAIN, MILESTONES, freshLine, milestoneLine,
-  NEAR, DEEP, REAR, PHOTO, JUMP, DOCK, FAST, SIGHTS, SIGHT_TELLS, fastLine,
+  NEAR, DEEP, REAR, PHOTO, JUMP, DOCK, FAST, SIGHTS, SIGHT_TELLS, fastLine, REST_SAYS, restLine,
 } from '../src/core/lines.js';
+import { REST_ACTIONS } from '../src/core/sprite.js';
 import { MEMOS } from '../src/core/story.js';
 import { BODIES } from '../src/core/bodies.js';
 
@@ -75,4 +76,20 @@ test('Earth\'s weather she explains herself: two lines for each sight that has h
     assert.ok(SIGHTS[id], id);
     assert.equal(tells.length, 2, id);
   }
+});
+
+test('each rest word belongs to a rest action and is short', () => {
+  const sheets = REST_ACTIONS.map((a) => a.sheet);
+  for (const [sheet, says] of Object.entries(REST_SAYS)) {
+    assert.ok(sheets.includes(sheet), sheet);
+    assert.ok(says.any, sheet);
+    for (const [where, line] of Object.entries(says)) short(line, `${sheet} ${where}`);
+  }
+});
+
+test('a rest word fits where she is, else it is the action\'s own', () => {
+  assert.equal(restLine('rest-tea', ['docked', 'cold']), REST_SAYS['rest-tea'].docked);
+  assert.equal(restLine('rest-tea', ['saturn']), REST_SAYS['rest-tea'].any);
+  assert.equal(restLine('rest-scope', ['saturn']), REST_SAYS['rest-scope'].saturn);
+  assert.equal(restLine('idle', ['earth']), null);
 });

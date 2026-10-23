@@ -101,6 +101,34 @@ export const IDLE = [
 export const IDLE_AFTER_S = 20;
 export const IDLE_GAP_S = 45;
 
+// A word about what she is doing while she rests, said as the drawing of it begins,
+// fitted to where she is when a line is for that (the user, the same day: "상황에 맞는
+// 잡담 넣어줘"): cold or hot, docked, near a world.
+// (core/sprite.js REST_ACTIONS; the user, 2026-10-23: "소라가 휴식 모드일 떄에 만화처럼
+// 풍선글 띄워서 잡담하게 해.. 10개만 샘플로"). Each once a visit, and not within
+// REST_SAY_GAP_S of the last.
+export const REST_SAYS = {
+  'rest-tea': { any: t('후, 차가 아직 따뜻해.'), cold: t('추운 데선 따뜻한 차가 최고야.'), docked: t('정거장에 붙어서 마시는 차, 맛있다.') },
+  'rest-snack': { any: t('주먹밥은 우주에서 먹어도 맛있네.'), moon: t('달 보면서 먹으니 소풍 같아.'), earth: t('지구 보면서 먹으니 더 맛있다.') },
+  'rest-scope': { any: t('저 멀리 반짝이는 건 뭘까?'), saturn: t('고리 사이 틈까지 다 보여!'), jupiter: t('목성 줄무늬가 꿈틀대는 것 같아.'), earth: t('우리 동네도 보이려나?') },
+  'rest-note': { any: t('잊기 전에 적어 둬야지.') },
+  'rest-yawn': { any: t('하아암… 눈꺼풀이 무거워.'), cold: t('태양이 머니까 자꾸 졸려.') },
+  'rest-socks': { any: t('양말이 자꾸 흘러내려.'), cold: t('발이 시려. 양말 끝까지 올려야지.') },
+  'rest-umbrella': { any: t('우주엔 비가 안 오는데, 왜 폈지?'), hot: t('햇빛 가리기엔 딱이네.') },
+  'rest-juggle': { any: t('별 세 개까진 끄떡없지!') },
+  'rest-crane': { any: t('종이학아, 할머니한테 날아가.'), earth: t('종이학아, 저기 우리 집으로 가.') },
+  'rest-map': { any: t('어라, 지도가 거꾸로였네.') },
+};
+// Her word for a rest action where she is: the first of `where` (core/lines.js
+// REST_SAYS keys: docked, hot, cold, the world she is near) that the action has a line
+// for, else its own line; null for an action with none.
+export function restLine(sheet, where) {
+  const says = REST_SAYS[sheet];
+  if (!says) return null;
+  return says[where.find((w) => says[w])] ?? says.any;
+}
+export const REST_SAY_GAP_S = 40;
+
 // With nothing to do near a world, she talks about that world first: within
 // NEAR_RADII of its ground. Numbers are the well-known ones (the Sun is 109 Earths
 // across, Jupiter holds 1,300 Earths, sunlight takes four hours to reach Neptune).

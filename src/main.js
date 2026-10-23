@@ -66,9 +66,9 @@ import { bindTextSize } from './ui/textSize.js';
 import { shadowSpot } from './core/shadows.js';
 import { errandList, errandTally, errandsDone, whereOf, requestTarget, requestMet, recordDay, recordPlace, streak } from './core/daily.js';
 import { palFor } from './core/pal.js';
-import { seeFor, SEE_S } from './core/sprite.js';
+import { seeFor, SEE_S, REST_ACTIONS, SPRITE_FPS, FRAMES } from './core/sprite.js';
 import {
-  LANDED, IDLE, AGAIN, IDLE_AFTER_S, IDLE_GAP_S, freshLine, milestoneLine, CURIO_HINTS,
+  LANDED, IDLE, AGAIN, IDLE_AFTER_S, IDLE_GAP_S, restLine, REST_SAY_GAP_S, freshLine, milestoneLine, CURIO_HINTS,
   NEAR, NEAR_RADII, DEEP, DEEP_FROM_KM, REAR, PHOTO, JUMP, DOCK, SIGHTS, SIGHT_TELLS, fastLine,
 } from './core/lines.js';
 import {
@@ -1965,6 +1965,12 @@ ${STORY_MORE[target.id]}` : told) };
   // How long she has been coasting with nothing to do, and how long until she may speak again.
   let idleFor = 0;
   let idleQuiet = 0;
+  // Her word about a rest action (core/lines.js REST_SAYS): the drawing last frame, how
+  // long until the next may be said, and until when (performance.now()) she keeps at the
+  // action while her bubble is up rather than being drawn speaking.
+  let restSheetLast = null;
+  let restQuiet = 0;
+  let restLineUntil = 0;
   // A tour's line held back while a story card is in the way.
   let sayAfterCard = null;
   // What else waits for the card to close (a finished tour's stamp and cheer).
@@ -3855,7 +3861,7 @@ ${STORY_MORE[target.id]}` : told) };
         // Pointing at a sight just told of, and speaking while her bubble is up.
         see: performance.now() < seeUntil ? seeKind : null,
         snap: performance.now() - snapAt < SNAP_S * 1000 ? (performance.now() - snapAt) / 1000 : null,
-        talk: say.showing(),
+        talk: say.showing() && performance.now() >= restLineUntil,
         // The companion earned last (core/pal.js); drawn beside the sprite character only.
         pal: palFor({
           ...tally(), allTours: allToursDone(progress),
@@ -3911,6 +3917,24 @@ ${STORY_MORE[target.id]}` : told) };
       toast.show(eventMessage(feeling), null, SIGHT_S);
     }
     if (!docked && shownSpeed() > 1) feelingTold = null;
+    // As a rest action begins, now and then a word about it in her bubble.
+    restQuiet = Math.max(0, restQuiet - dt);
+    // (Where she is picks the line: docked, the heat or cold of the Sun, the world near.)
+    const restNear = view.heroSheet !== restSheetLast ? nearestSurface(state.position, bodies) : null;
+    const restSaid = restNear && restLine(view.heroSheet, [
+      ...(docked ? ['docked'] : []),
+      ...(sunKm < HOT_AU * AU_KM / 100 ? ['hot'] : sunKm > 19 * AU_KM / 100 ? ['cold'] : []),
+      ...(restNear.distance <= NEAR_RADII * restNear.body.radiusKm ? [restNear.body.id] : []),
+    ]);
+    restSheetLast = view.heroSheet;
+    if (restSaid && restQuiet === 0 && !say.showing() && !replay && !saidLines.has(restSaid)) {
+      const act = REST_ACTIONS.find((a) => a.sheet === view.heroSheet);
+      saidLines.add(restSaid);
+      say.show(restSaid, 4);
+      restLineUntil = performance.now() + ((FRAMES * act.times) / SPRITE_FPS.rest) * 1000;
+      restQuiet = REST_SAY_GAP_S;
+      idleQuiet = Math.max(idleQuiet, 10);
+    }
     // Lights and plumes, each told once on this device: a flash that is lit now, or of
     // the standing sights in reach the first not yet told; the next only SIGHT_GAP_S on.
     const sight = glowTellWait > 0 ? null

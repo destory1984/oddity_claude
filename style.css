@@ -7615,3 +7615,24 @@ dialog#radioSheet[open] > .backKey {
 #radioSheet #radioSheetHead {
   margin-top:6px;
 }
+
+/* The imagined places' "순간 이동": at the right end under the text, as the Bodies tab's
+   keys stand, 40px high, lined more faintly so a box on every row does not weigh (the
+   user, 2026-10-23: "버튼 안 예쁨", then "gpt하고 상의해봐": both picked this). */
+#journal #journalCurios li > button {
+  justify-self:end;
+  display:block;
+  width:96px;
+  height:40px;
+  min-height:40px;
+  margin:8px 0 2px;
+  padding:0 12px;
+  border:1px solid #6b4a268c;
+  border-radius:8px;
+  background:#fbf4e0;
+  color:#3b2a1a;
+  font-size:13px;
+  font-weight:600;
+  white-space:nowrap;
+  box-shadow:none;
+}

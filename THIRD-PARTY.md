@@ -44,6 +44,7 @@ NASA 이미지는 NASA가 이 게임을 보증한다는 뜻으로 쓰지 않는�
 | 파일 | 출처 | 조건 |
 |---|---|---|
 | `public/assets/sounds/stardust.mp3` | 한국저작권위원회, 「잔잔히 밀려오는 파도소리」(2019, 공유마당 G905-13220737). https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=13220737&menuNo=200020 원본(2분 54초)의 19.1초부터 1.9초를 잘라, 1.2kHz 아래를 걷어 내고 앞뒤를 줄여 모노 96kbps로 바꿨다. 게임은 이것을 앞으로, 또 거꾸로 튼다. | CC BY (출처 표시). 저작자: 한국저작권위원회 |
+| `public/assets/sounds/page.mp3` | PWLPL, 「Paper Page Flip and Document Rustle」(Pixabay, 2026). https://pixabay.com/sound-effects/paper-page-flip-and-document-rustle-481168/ 원본(14초)에서 종이 넘기는 소리 셋(0.30초, 7.62초, 10.18초부터 0.8초씩)을 잘라, 앞 0.03초와 뒤 0.25초를 줄이고 250Hz 아래를 걷어 내, 1초에 하나씩 모노 64kbps 3초로 이었다. | Pixabay 콘텐츠 라이선스 (출처 표시 의무 없음). 저작자: PWLPL |
 
 ## 글꼴
 

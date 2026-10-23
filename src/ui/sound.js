@@ -90,6 +90,7 @@ export function createSound({ music } = {}) {
     const data = noiseBuffer.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
     loadDust();
+    loadPage();
 
     // Flight: a quiet wind and nothing else (there is no air out here; it is a game).
     // A soft band of noise with a lower one under it, swelling slowly like gusts.
@@ -224,6 +225,22 @@ export function createSound({ music } = {}) {
   // its low roar taken out (high-pass at 1.2 kHz) so that it is sand or powder thrown
   // rather than the sea. Played forward as she scatters, backward as she gathers.
   // Till it has come (or if it cannot), the soft hiss of before stands in.
+  // A page of the notebook turned: public/assets/sounds/page.mp3 (3 s, 24 KB; Pixabay,
+  // THIRD-PARTY.md), three turns of paper cut from one recording, one in each second.
+  const PAGE_TURNS = 3;
+  const PAGE_TURN_S = 0.8;
+  const PAGE_VOLUME = 0.35;
+  let pageBuffer = null;
+  let pageTurn = 0;
+  function loadPage() {
+    if (typeof fetch !== 'function') return;
+    fetch(`${import.meta.env.BASE_URL}assets/sounds/page.mp3`)
+      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
+      .then((bytes) => new Promise((done, fail) => ctx.decodeAudioData(bytes, done, fail)))
+      .then((buffer) => { pageBuffer = buffer; })
+      .catch(() => {});
+  }
+
   let dustBuffers = null;
   function loadDust() {
     if (typeof fetch !== 'function') return;
@@ -321,7 +338,19 @@ export function createSound({ music } = {}) {
     // A page of the notebook turned (a journal tab pressed; the user, 2026-10-23: "수첩 탭
     // 넘길 때마다 종이 넘기는 소리"): a dry swish rising as the page lifts, a flutter of its
     // edge, and a soft pat as it lies down.
+    // Now a recording (the user's pick, "이거"): page.mp3 holds three turns, each in its own
+    // second, played in turn; till it has come, the swish made here stands in.
     page: () => {
+      if (pageBuffer) {
+        const src = ctx.createBufferSource();
+        src.buffer = pageBuffer;
+        const gain = ctx.createGain();
+        gain.gain.value = PAGE_VOLUME;
+        src.connect(gain).connect(sfx);
+        src.start(0, pageTurn, PAGE_TURN_S);
+        pageTurn = (pageTurn + 1) % PAGE_TURNS;
+        return;
+      }
       noise({ length: 0.22, volume: 0.11, type: 'bandpass', freq: 1700, to: 4200, attack: 0.05, hold: 0.08 });
       noise({ start: 0.09, length: 0.09, volume: 0.05, type: 'highpass', freq: 5200, attack: 0.02 });
       noise({ start: 0.19, length: 0.12, volume: 0.07, type: 'lowpass', freq: 900, to: 320, attack: 0.01 });

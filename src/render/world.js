@@ -73,18 +73,25 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
   camera.fov = Math.PI / 3;
   camera.inputs.clear();
 
+  // (performance marks "oddity:…": how long each part of the start takes, read by
+  // build/playtest/startup.cjs.)
+  performance.mark('oddity:engine');
   const sunBody = bodies.find((b) => b.kind === 'star');
   const rendered = createBodyMeshes(scene, bodies, sunBody);
   const sun = createSun(scene, sunBody);
+  performance.mark('oddity:bodies');
   const stars = await createStars(scene);
   const belt = await createBelt(scene);
+  performance.mark('oddity:stars');
   // Lights only matter to the spacecraft; planets and the Sun use their own shaders.
   const craftFill = new HemisphericLight('craftFill', new Vector3(0, 1, 0), scene);
   craftFill.intensity = 0.35;
   const craftSun = new DirectionalLight('craftSun', new Vector3(0, 0, 1), scene);
   craftSun.intensity = 1.1;
   const craftMeshes = createCraft(scene, [...CRAFT, ...CURIOS]);
+  performance.mark('oddity:craft');
   const siteModels = createSiteModels(scene, storySitesAt(0, bodies));
+  performance.mark('oddity:sites');
   // Real satellite pictures laid on a few famous places of Earth's ground.
   const groundPatches = createGroundPatches(scene);
   // A glow and a tail for each comet.
@@ -93,10 +100,12 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
   // The ring of the flight practice (core/practice.js), there only while practising.
   const practiceRing = createPracticeRing(scene);
   const glows = createGlows(scene, bodies);
+  performance.mark('oddity:glows');
 
   // The character (the pixel-art drawings) is drawn in the camera's own space.
   const hero = createSpriteHero(heroEngine ?? engine, { own: Boolean(heroEngine) });
   const ice = createIce(hero.scene);
+  performance.mark('oddity:models');
   // The traveler's place relative to each ringed planet last frame, to catch a crossing.
   const lastByRings = new Map();
 
@@ -250,6 +259,7 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
   }
 
   await scene.whenReadyAsync();
+  performance.mark('oddity:sceneReady');
 
   return {
     engine,

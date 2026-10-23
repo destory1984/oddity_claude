@@ -2,6 +2,8 @@
 // is fetched only when that language is in use. Everything else (start.js) loads after
 // them, because sentences are made as the code loads.
 import './i18n/en.js';
+// (The steps of the start are marked "oddity:…": build/playtest/startup.cjs reads them.)
+performance.mark('oddity:boot');
 import { language } from './core/i18n.js';
 
 const words = { ja: () => import('./i18n/ja.js'), zh: () => import('./i18n/zh.js') }[language()];

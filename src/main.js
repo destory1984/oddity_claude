@@ -106,6 +106,8 @@ import {
 } from './core/eclipses.js';
 import { t } from './core/i18n.js';
 
+// All the code is in (render/world.js marks the steps after this one).
+performance.mark('oddity:code');
 const $ = (id) => document.getElementById(id);
 const MAX_FRAME_GAP_S = 0.5;
 // After a jump to a body the view is turned this far (radians) off it.
@@ -571,6 +573,7 @@ let world;
 
 async function init() {
   try {
+    performance.mark('oddity:init');
     world = await createWorld(canvas, bodies, $('heroSheet'));
   } catch (e) {
     console.error(e);
@@ -2773,6 +2776,7 @@ ${STORY_MORE[target.id]}` : told) };
   window.addEventListener('resize', () => world.resize());
   if (matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints > 0) document.body.classList.add('touch');
 
+  performance.mark('oddity:ready');
   // After a change of language the plain black of the loading screen fades into the game.
   if (document.documentElement.classList.contains('quietStart')) {
     $('loading').classList.add('gone');
@@ -4288,6 +4292,12 @@ ${STORY_MORE[target.id]}` : told) };
     },
     // One of the sounds by its name (ui/sound.js cues), to be heard while it is being made.
     cue: (name) => sound.cue(name),
+    // How many meshes whose names start so are built, and how many of them are drawn now
+    // (models are built when first in sight: render/craft.js).
+    meshes: (prefix) => {
+      const all = world.engine.scenes.flatMap((s) => s.meshes).filter((m) => m.name.startsWith(prefix));
+      return { built: all.length, drawn: all.filter((m) => m.isEnabled() && m.isVisible).length };
+    },
   };
 }
 

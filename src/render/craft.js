@@ -173,18 +173,26 @@ export function createSiteModels(scene, siteList) {
   for (const site of siteList) {
     if (SITE_CARDS[site.id]) cards.set(site.id, createSiteCard(scene, site.id, SITE_CARDS[site.id]));
   }
+  // Which places have a model. Each is built the first time she comes within sight of
+  // it, not at the start: all of them took 0.8 s of every start (2026-10-23, the user:
+  // "언어 바꿀 떄에 많이 걸리는데? 4초?").
+  const modelled = new Set();
   for (const site of siteList) {
     // A landmark (a crater, a sea, a mountain) has nothing standing on it, unless a
     // model was made for it: MESSENGER's wreck where it hit Mercury.
     if (site.landmark && !SITE_BUILD[site.id]) continue;
     // Elsewhere only what has a model of its own: Earth's two launch pads.
     if (!['moon', 'mars', 'titan'].includes(site.parent) && !SITE_BUILD[site.id]) continue;
-    const [build, options] = SITE_BUILD[site.id] ?? DEFAULT_SITE;
-    const node = build(scene, `site_${site.id}`, mats, options);
+    modelled.add(site.id);
+  }
+  const buildSite = (id) => {
+    const [build, options] = SITE_BUILD[id] ?? DEFAULT_SITE;
+    const node = build(scene, `site_${id}`, mats, options);
     node.rotationQuaternion = new Quaternion();
     node.setEnabled(false);
-    nodes.set(site.id, node);
-  }
+    nodes.set(id, node);
+    return node;
+  };
 
   // The same places as they were on their day, for a scene played again
   // (core/replay.js): the model that comes down, and its engine's flame under it.
@@ -236,8 +244,9 @@ export function createSiteModels(scene, siteList) {
     root.setEnabled(false);
     return { node: root, flame: null, cords: null, stage: { pieces: parts.pieces, flames } };
   };
-  // Stages built only when their scene is first played (the landmarks': forty-one of
-  // them, each with a bubble's canvas, would weigh on a phone for nothing).
+  // Every scene's models are built only when the scene is first played (the landmarks'
+  // forty-one stages, each with a bubble's canvas, would weigh on a phone for nothing;
+  // the rest took 0.5 s of every start until 2026-10-23).
   const waiting = new Map();
   const thenOf = (id) => {
     if (!then.has(id) && waiting.has(id)) {
@@ -246,12 +255,8 @@ export function createSiteModels(scene, siteList) {
     }
     return then.get(id);
   };
-  for (const [id, [build, options, coming = 'flame', flameY = -0.06]] of Object.entries(SITE_REPLAY_BUILD)) {
-    if (coming === 'stage') {
-      if (build.lazy) waiting.set(id, () => stageOf(id, build, options));
-      else then.set(id, stageOf(id, build, options));
-      continue;
-    }
+  const makeThen = (id, build, options, coming, flameY) => {
+    if (coming === 'stage') return stageOf(id, build, options);
     if (coming === 'launch') {
       // The pad stays; the rocket stands on it in two pieces, each with a flame under
       // it, and a ship waits to the side. Everything hangs from one root, which is
@@ -265,8 +270,7 @@ export function createSiteModels(scene, siteList) {
       const boosterFlame = drum(scene, `then_${id}_flame1`, parts.booster, flameMaterial, { height: 0.5, diameterTop: 0.05, diameterBottom: 0.17, tessellation: 12 }, [0, -0.27, 0]);
       const upperFlame = drum(scene, `then_${id}_flame2`, parts.upper, flameMaterial, { height: 0.3, diameterTop: 0.04, diameterBottom: 0.13, tessellation: 12 }, [0, -0.16, 0]);
       root.setEnabled(false);
-      then.set(id, { node: root, flame: null, cords: null, launch: { ...parts, boosterFlame, upperFlame }, say: bubbleFor(id, root), sayBooster: bubbleFor(id, root, BOOSTER_SAYS, 'sayBooster') });
-      continue;
+      return { node: root, flame: null, cords: null, launch: { ...parts, boosterFlame, upperFlame }, say: bubbleFor(id, root), sayBooster: bubbleFor(id, root, BOOSTER_SAYS, 'sayBooster') };
     }
     if (coming === 'bag' || coming === 'bare') {
       // One that bounces: the model hangs from a node that turns (a ball rolling, Philae
@@ -313,8 +317,7 @@ export function createSiteModels(scene, siteList) {
       // (Its bubble goes along with it, not with its rolling.)
       const say = bubbleFor(id, root);
       root.setEnabled(false);
-      then.set(id, { node: root, flame: null, cords: null, tumble, bag, shape, say, say2: bubbleFor(id, root, SECOND_SAYS, 'say2') });
-      continue;
+      return { node: root, flame: null, cords: null, tumble, bag, shape, say, say2: bubbleFor(id, root, SECOND_SAYS, 'say2') };
     }
     const node = build(scene, `then_${id}`, mats, options);
     node.rotationQuaternion = new Quaternion();
@@ -356,7 +359,10 @@ export function createSiteModels(scene, siteList) {
       flame = drum(scene, `then_${id}_flame`, node, flameMaterial, { height: 0.34, diameterTop: 0.05, diameterBottom: 0.2, tessellation: 12 }, [0, flameY, 0]);
     }
     node.setEnabled(false);
-    then.set(id, { node, flame, cords, say: bubbleFor(id, node) });
+    return { node, flame, cords, say: bubbleFor(id, node) };
+  };
+  for (const [id, [build, options, coming = 'flame', flameY = -0.06]] of Object.entries(SITE_REPLAY_BUILD)) {
+    waiting.set(id, () => makeThen(id, build, options, coming, flameY));
   }
   // Cassini's plunge into Saturn: the craft itself, and round it the glow of the air it
   // heats, drawn out behind it (the model's -x is the way it has come).
@@ -448,7 +454,8 @@ export function createSiteModels(scene, siteList) {
         card.update(site, bodies.find((b) => b.id === site.parent), bodies.find((b) => b.kind === 'star'), position);
         continue;
       }
-      const now = nodes.get(site.id);
+      const near = Math.hypot(...site.position.map((n, i) => n - position[i])) < SITE_VISIBLE_KM;
+      const now = nodes.get(site.id) ?? (near && modelled.has(site.id) ? buildSite(site.id) : null);
       const old = replay?.id === site.id && !replay.open ? thenOf(site.id) : null;
       if (!now && !old) continue;
       if (old && now) now.setEnabled(false);
@@ -605,12 +612,20 @@ export function createSiteModels(scene, siteList) {
 
 export function createCraft(scene, craftList) {
   const mats = craftMaterials(scene);
-  const nodes = new Map(craftList.map((c) => [c.id, (CRAFT_BUILD[c.id] ?? CURIO_BUILD[c.id])(scene, c.id, mats)]));
-  const unfolding = new Map(Object.entries(CRAFT_UNFOLD).map(([id, build]) => {
-    const loose = build(scene, `${id}Unfolding`, mats);
-    loose.root.setEnabled(false);
-    return [id, loose];
-  }));
+  // Each model (and its loose parts for a scene) is built the first time it comes within
+  // sight, not at the start: all of them took 1.1 s of every start (2026-10-23).
+  const nodes = new Map();
+  const unfolding = new Map();
+  const buildCraft = (id) => {
+    const node = (CRAFT_BUILD[id] ?? CURIO_BUILD[id])(scene, id, mats);
+    nodes.set(id, node);
+    if (CRAFT_UNFOLD[id]) {
+      const loose = CRAFT_UNFOLD[id](scene, `${id}Unfolding`, mats);
+      loose.root.setEnabled(false);
+      unfolding.set(id, loose);
+    }
+    return node;
+  };
 
   // craft: this frame's positions (km); position: the traveler (km); sunPosition (km).
   // jolt: { id, push, tilt } for the craft being docked with (core/dock.js latchJolt).
@@ -629,14 +644,16 @@ export function createCraft(scene, craftList) {
       began = { id: null, at: 0 };
     }
     for (const c of craft) {
-      const node = nodes.get(c.id);
-      const loose = unfolding.get(c.id);
-      loose?.root.setEnabled(false);
       const rel = c.position.map((n, i) => (n - position[i]) / KM_PER_UNIT);
       const distanceKm = Math.hypot(...rel) * KM_PER_UNIT;
       const rule = RULES[c.id];
-      node.setEnabled(distanceKm < rule.visibleKm && !hidden.includes(c.id));
-      if (!node.isEnabled()) continue;
+      const shows = distanceKm < rule.visibleKm && !hidden.includes(c.id);
+      const node = nodes.get(c.id) ?? (shows || replay?.id === c.id ? buildCraft(c.id) : null);
+      if (!node) continue;
+      const loose = unfolding.get(c.id);
+      loose?.root.setEnabled(false);
+      node.setEnabled(shows);
+      if (!shows) continue;
       const sizeKm = Math.min(rule.maxKm, Math.max(rule.minKm ?? CRAFT_SIZE_KM, distanceKm * APPARENT));
       node.scaling.setAll(sizeKm / KM_PER_UNIT);
       node.position.set(rel[0], rel[1], rel[2]);

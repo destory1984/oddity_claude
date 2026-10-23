@@ -7581,3 +7581,25 @@ html.quietStart #loading > *:not(#loadError) {
   min-width:var(--top-key, var(--tap));
   padding:0 5px;
 }
+
+/* The journal's "오늘" page (index.html section[data-tab="today"]): the four boxes that
+   stood above the tabs, one under another with the scroll's own margins, and the count
+   at the foot (the user, 2026-10-23, plan "1"). */
+#journal #journalTabs button[data-tab="today"] { --tab-icon:url("/assets/ui/tab-today.svg"); }
+
+#journal #journalScroll section[data-tab="today"] > * {
+  margin-left:0;
+  margin-right:0;
+}
+
+#journal #journalScroll section[data-tab="today"] > #journalSummary {
+  margin-top:14px;
+  padding:0;
+}
+
+/* Nine tabs since "오늘": each takes the room its name needs, so a long one ("ミッション",
+   "Imagined") does not run into the next (they were nine equal shares). */
+html #journal #journalTabs > button[role="tab"] {
+  flex:1 1 auto;
+  padding:0 2px;
+}

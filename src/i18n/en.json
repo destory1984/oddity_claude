@@ -1,4 +1,6 @@
 {
+ "수첩 맨 앞에 \"오늘\" 탭이 생겨 오늘의 부탁, 무전, 하늘 소식, 쪽지를 모았고, 다른 탭은 목록이 넓어졌습니다.": "The notebook has a \"Today\" tab first, holding today's request, the radio, the sky news and the notes; the other tabs now give their lists more room.",
+ "오늘": "Today",
  "소라의 말풍선과 부탁 단추에서 글자가 넘치던 것, 화면 끝의 별자리 이름이 잘리던 것을 고쳤습니다.": "Fixed words running out of Sora's speech bubble and the request keys, and constellation names cut off at the screen's edge.",
  "게임을 열거나 언어를 바꿀 때 2초쯤 빨리 시작합니다. 탐사선과 장소의 모형은 가까이 갈 때 만들어집니다.": "The game starts about 2 seconds sooner when opened or when the language is changed. The models of spacecraft and places are now made as you come near them.",
  "언어를 바꾸면 로딩 화면 없이 잠깐 어두워졌다 그 자리에서 이어지고, 음악도 듣던 곡이 이어집니다.": "Changing the language no longer shows the loading screen: the view goes dark for a moment and carries on where you were, and the tune you were hearing goes on.",

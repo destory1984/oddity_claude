@@ -110,8 +110,11 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
 
   // One part of the journal shows at a time (the whole of it was fourteen screens long
   // on a phone). It opens on the part of what was done last, when that is new since it
-  // was last opened, and else on the part last looked at.
-  let tab = lastDone?.tab ?? 'bodies';
+  // was last opened, and else on the part last looked at; first of all on "오늘", the
+  // page of today's request, the radio story, the sky news, grandmother's notes and the
+  // count (they stood above the tabs and left a quarter of the screen to the lists: the
+  // user, 2026-10-23, "수첩이 좀 난잡해졌는데", then plan "1").
+  let tab = lastDone?.tab ?? 'today';
   function showTab(name) {
     tab = name;
     for (const button of $('journalTabs').children) button.setAttribute('aria-selected', String(button.dataset.tab === name));

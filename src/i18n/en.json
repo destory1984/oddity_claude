@@ -1,4 +1,12 @@
 {
+ "장소": "Places",
+ "비행": "Flying",
+ "따라 찍기": "Retake",
+ "내 사진": "My photos",
+ "엽서": "Postcards",
+ "할머니의 길": "Grandma's routes",
+ "갈래 안의 쪽": "Pages of this tab",
+ "수첩의 탭이 여섯으로 줄었습니다: 오늘, 장소, 사진, 이야기, 무전, 비행.": "The notebook now has six tabs: Today, Places, Photos, Stories, Radio, Flying.",
  "\"오늘의 부탁\"은 \"할머니의 부탁\", \"다음 미션\"은 \"다음 부탁\"이 되었습니다.": "\"Today's request\" is now \"Grandma's request\", and \"Next mission\" is \"Next request\".",
  "수첩의 무전 탭이 다른 탭처럼 수첩 안에서 펼쳐지고, 점을 누르면 그 아래에 들은 말이 나옵니다.": "The notebook's Radio tab now opens inside the notebook like the other tabs; press a point and what was heard shows under it.",
  "스캐너 단추가 처음에는 금빛으로 빛나고, 한 번 누르면 평소 색이 됩니다.": "The scanner key glows gold at first and takes its usual colour once pressed.",

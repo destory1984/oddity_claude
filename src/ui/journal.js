@@ -101,19 +101,54 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   // page of today's request, the radio story, the sky news, grandmother's notes and the
   // count (they stood above the tabs and left a quarter of the screen to the lists: the
   // user, 2026-10-23, "수첩이 좀 난잡해졌는데", then plan "1").
+  // Six tabs, each holding one or more parts, chosen in a row of small keys under the
+  // tabs: what is looked for, grouped (the user, 2026-10-23, "수첩의 메뉴 트리를 전체적으로
+  // 좀 손 보자.. gpt하고 상의해봐", then "만들어"; nine tabs before). A tab opens on the part
+  // of it last looked at.
+  const GROUPS = {
+    today: ['today'],
+    places: ['bodies', 'craft', 'curios'],
+    photos: ['missions', 'album', 'views'],
+    stories: ['stories'],
+    radio: ['radio'],
+    flight: ['tours', 'stunts'],
+  };
+  const PART_NAMES = {
+    bodies: t('천체'), craft: t('탐사선'), curios: t('상상'),
+    missions: t('따라 찍기'), album: t('내 사진'), views: t('엽서'),
+    tours: t('할머니의 길'), stunts: t('묘기 비행'),
+  };
+  const groupOf = (part) => Object.keys(GROUPS).find((g) => GROUPS[g].includes(part)) ?? part;
+  const lastPart = {};
   let tab = lastDone?.tab ?? 'today';
+  // name: a part, or a tab (its part last looked at).
   function showTab(name) {
-    tab = name;
-    for (const button of $('journalTabs').children) button.setAttribute('aria-selected', String(button.dataset.tab === name));
-    for (const part of $('journalScroll').children) part.hidden = part.dataset.tab !== name;
+    const part = GROUPS[name] ? lastPart[name] ?? GROUPS[name][0] : name;
+    const group = groupOf(part);
+    tab = part;
+    lastPart[group] = part;
+    for (const button of $('journalTabs').children) button.setAttribute('aria-selected', String(button.dataset.tab === group));
+    const seg = $('journalSeg');
+    seg.hidden = GROUPS[group].length < 2;
+    seg.replaceChildren(...(seg.hidden ? [] : GROUPS[group].map((p) => {
+      const key = document.createElement('button');
+      key.setAttribute('role', 'tab');
+      key.dataset.part = p;
+      key.textContent = PART_NAMES[p];
+      key.setAttribute('aria-selected', String(p === part));
+      key.addEventListener('click', () => {
+        if (p !== tab) onTab();
+        showTab(p);
+      });
+      return key;
+    })));
+    for (const section of $('journalScroll').children) section.hidden = section.dataset.tab !== part;
     $('journalScroll').scrollTop = 0;
   }
-  // The radio's tab opens its page over the whole screen at once, the part shown staying
-  // as it was (the user, 2026-10-22: "수첩 -> 무전은 풀 페이지로").
-  // A tab pressed turns a page (onTab: its sound), unless it is the page already open.
+  // A tab pressed turns a page (onTab: its sound), unless it is the one already open.
   for (const button of $('journalTabs').children) {
     button.addEventListener('click', () => {
-      if (button.dataset.tab !== tab) onTab();
+      if (button.dataset.tab !== groupOf(tab)) onTab();
       showTab(button.dataset.tab);
     });
   }

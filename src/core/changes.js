@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-23', text: t('수첩의 탭이 여섯으로 줄었습니다: 오늘, 장소, 사진, 이야기, 무전, 비행.') },
   { day: '2026-10-23', text: t('"오늘의 부탁"은 "할머니의 부탁", "다음 미션"은 "다음 부탁"이 되었습니다.') },
   { day: '2026-10-23', text: t('수첩의 무전 탭이 다른 탭처럼 수첩 안에서 펼쳐지고, 점을 누르면 그 아래에 들은 말이 나옵니다.') },
   { day: '2026-10-23', text: t('스캐너 단추가 처음에는 금빛으로 빛나고, 한 번 누르면 평소 색이 됩니다.') },

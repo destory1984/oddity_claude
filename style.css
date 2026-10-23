@@ -7550,3 +7550,50 @@ html #journal #journalTabs > button[role="tab"] {
 @media (prefers-reduced-motion: reduce) {
   #scannerButton.fresh { animation:none; box-shadow:0 0 0 1px #ffd98a, 0 0 10px 3px #ffd98a88; }
 }
+
+/* The journal's six tabs (since 2026-10-23: "수첩의 메뉴 트리") and the row of small keys
+   under them that picks a part of a tab (#journalSeg, ui/journal.js GROUPS). */
+#journal #journalTabs button[data-tab="places"] { --tab-icon:url("/assets/ui/tab-bodies.svg"); }
+#journal #journalTabs button[data-tab="photos"] { --tab-icon:url("/assets/ui/tab-album.svg"); }
+#journal #journalTabs button[data-tab="flight"] { --tab-icon:url("/assets/ui/tab-tours.svg"); }
+
+#journal #journalSeg {
+  display:flex;
+  flex:none;
+  margin:8px 14px 0;
+  border:1.5px solid #6b4a26;
+  border-radius:9px;
+  overflow:hidden;
+}
+
+#journal #journalSeg[hidden] {
+  display:none;
+}
+
+#journal #journalSeg button {
+  flex:1 1 0;
+  min-width:0;
+  height:38px;
+  min-height:38px;
+  margin:0;
+  padding:0 4px;
+  border:0;
+  border-left:1px solid #6b4a26;
+  border-radius:0;
+  background:#fbf4e0;
+  box-shadow:none;
+  color:#8a6a44;
+  font-size:13px;
+  font-weight:600;
+  white-space:nowrap;
+}
+
+#journal #journalSeg button:first-child {
+  border-left:0;
+}
+
+#journal #journalSeg button[aria-selected="true"] {
+  background:#f1d99a;
+  color:#3b2a1a;
+  font-weight:800;
+}

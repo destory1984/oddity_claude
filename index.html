@@ -188,21 +188,18 @@
     </div>
     <div id="journalTabs" role="tablist" aria-label="수첩의 갈래">
       <button role="tab" data-tab="today">오늘</button>
-      <button role="tab" data-tab="radio">무전</button>
-      <button role="tab" data-tab="bodies">천체</button>
-      <button role="tab" data-tab="missions" aria-label="사진 임무">임무</button>
-      <button role="tab" data-tab="album">사진첩</button>
+      <button role="tab" data-tab="places">장소</button>
+      <button role="tab" data-tab="photos">사진</button>
       <button role="tab" data-tab="stories" aria-label="이야기 장소">이야기</button>
-      <button role="tab" data-tab="craft">탐사선</button>
-      <button role="tab" data-tab="tours">코스</button>
-      <button role="tab" data-tab="curios" aria-label="상상 속 장소">상상</button>
+      <button role="tab" data-tab="radio">무전</button>
+      <button role="tab" data-tab="flight">비행</button>
     </div>
+    <div id="journalSeg" role="tablist" aria-label="갈래 안의 쪽" hidden></div>
     <div id="journalScroll">
       <section data-tab="today" hidden>
         <div id="journalDaily" hidden><span id="dailyText"></span><span id="dailyWeek" role="img"></span><small id="dailyCount"></small><span id="dailyKeys"><button id="dailyPrev" data-label="이전 부탁" hidden>이전 부탁</button><button id="dailyGo" data-label="목적지로">목적지로</button><button id="dailyJump" data-label="순간 이동" hidden>순간 이동</button><button id="dailyNext" data-label="다음 부탁" hidden>다음 부탁</button></span></div>
         <div id="journalRadio" hidden></div>
         <div id="journalSky" hidden></div>
-        <div id="journalNotes" hidden></div>
         <p id="journalSummary"></p>
       </section>
       <section data-tab="bodies">
@@ -221,6 +218,7 @@
         <div id="journalAlbum"></div>
       </section>
       <section data-tab="stories" hidden>
+        <div id="journalNotes" hidden></div>
         <p class="muted">실제로 일이 있었던 자리입니다. 찾아가면 그 이야기가 기록됩니다.</p>
         <div id="journalStories"></div>
       </section>
@@ -242,9 +240,12 @@
         <p class="muted">할머니가 수첩 뒤에 적어 둔 "가 보고 싶은 길" 아홉입니다. 한 길을 고르면 다음에 갈 곳이 화면 위에 뜨고, 차례대로 다 돌면 도장이 찍힙니다. 점수에는 들지 않습니다.</p>
         <p id="journalCrane" hidden><img src="/assets/notebook/stamp-crane.png" alt="종이학 도장">아홉 길을 모두 돌았다. 수첩 사이에 할머니가 접어 둔 종이학이 있었다.</p>
         <ul id="journalTours"></ul>
-        <h2>묘기 비행</h2>
+      </section>
+      <section data-tab="stunts" hidden>
         <p class="muted">하고 싶을 때만 하는 도전입니다. 못 해도 잃는 것이 없고 점수에도 들지 않습니다. 가장 좋은 기록이 남습니다.</p>
         <ul id="journalStunts"></ul>
+      </section>
+      <section data-tab="views" hidden>
         <h2>그림엽서 <small id="journalViewsCount"></small></h2>
         <p class="muted">이름 칸의 명당 단추(네 꼭지 별), 집 단추, 오로라 단추로 그 자리에 가면 한 장씩 얻습니다. 오로라가 뜨는 여덟 곳의 오로라 단추를 모두 눌러 보면 오로라 순례 도장이 찍힙니다. 점수에는 들지 않습니다.</p>
         <p id="journalViewsAll" hidden><img src="/assets/notebook/stamp-views.png" alt="그림엽서 도장">그림엽서 열세 장을 모두 모았다. 태양계에서 제일 좋은 자리는 다 서 봤다.</p>

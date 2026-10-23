@@ -461,7 +461,8 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
       if (touched && performance.now() > touched.until) touched = null;
       const shown = [];
       let touchedSpot = null;
-      for (const { id, el, direction } of skyNames) {
+      for (const sky of skyNames) {
+        const { id, el, direction } = sky;
         const z = dot(direction, view.camera.forward);
         const px = (dot(direction, view.camera.right) / Math.max(0.001, z)) * focal;
         const py = (-dot(direction, view.camera.up) / Math.max(0.001, z)) * focal;
@@ -475,8 +476,13 @@ export function createHud(bodies, { onSelect, onFace, onName, onInspect, onHome,
         el.hidden = kept || z <= 0.2 || off || Boolean(skyHidden?.(direction));
         if (kept) touchedSpot = { x: innerWidth / 2 + px, y: innerHeight / 2 + py };
         if (el.hidden) continue;
-        el.style.left = `${innerWidth / 2 + px}px`;
-        el.style.top = `${innerHeight / 2 + py}px`;
+        // The name is kept whole on screen: near an edge it is pushed in (half of "Southern
+        // Cross" stood past the left edge: the Codex playtester, 2026-10-23). Its size is
+        // measured once, the first time it shows.
+        if (!sky.wide) [sky.wide, sky.high] = [el.offsetWidth, el.offsetHeight];
+        const half = sky.wide / 2 + 4;
+        el.style.left = `${Math.min(innerWidth - half, Math.max(half, innerWidth / 2 + px))}px`;
+        el.style.top = `${Math.min(innerHeight - sky.high - 18, innerHeight / 2 + py)}px`;
         shown.push({ id, x: px, y: py });
       }
       // Turned away from what was touched: it stops telling.

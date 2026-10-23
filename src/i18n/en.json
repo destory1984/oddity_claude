@@ -1,4 +1,5 @@
 {
+ "소라의 말풍선과 부탁 단추에서 글자가 넘치던 것, 화면 끝의 별자리 이름이 잘리던 것을 고쳤습니다.": "Fixed words running out of Sora's speech bubble and the request keys, and constellation names cut off at the screen's edge.",
  "게임을 열거나 언어를 바꿀 때 2초쯤 빨리 시작합니다. 탐사선과 장소의 모형은 가까이 갈 때 만들어집니다.": "The game starts about 2 seconds sooner when opened or when the language is changed. The models of spacecraft and places are now made as you come near them.",
  "언어를 바꾸면 로딩 화면 없이 잠깐 어두워졌다 그 자리에서 이어지고, 음악도 듣던 곡이 이어집니다.": "Changing the language no longer shows the loading screen: the view goes dark for a moment and carries on where you were, and the tune you were hearing goes on.",
  "태양의 질량은 태양계 전체의 99.86%를 차지하고, 나머지 대부분은 목성입니다. 태양은 1초에 수소 약 6억 톤을 헬륨으로 바꾸고, 그 과정에서 약 400만 톤이 에너지로 사라집니다. 이렇게 오래 타는데도 핵융합으로 잃은 질량은 지금까지 전체의 0.03%쯤입니다. 태양에서는 입자가 초속 약 400 → 800km로 쏟아져 나와 태양풍이 되어 태양계 끝까지 불어 갑니다. 1859년 9월 영국의 캐링턴이 흑점 위의 강한 섬광을 보았고, 이튿날 기록상 가장 강한 지자기 폭풍이 지구를 덮쳐 전신기가 불꽃을 튀겼으며 오로라가 열대 지방에서도 보였습니다.": "The Sun holds 99.86% of the mass of the whole solar system, and most of the rest is Jupiter. Every second it turns about 600 million tonnes of hydrogen into helium, and about 4 million tonnes of that is lost as energy. Even after burning for so long, the mass it has lost to fusion is only about 0.03% of the total. Particles stream out of the Sun at about 400 → 800 km per second as the solar wind and blow to the edge of the solar system. In September 1859 the English astronomer Carrington saw a bright flash above a sunspot, and the next day the strongest geomagnetic storm on record hit Earth: telegraph machines threw sparks and auroras were seen even in the tropics.",
@@ -472,7 +473,7 @@
  "{}\n{}\n가까이에서 본 외계 행성 {}/{}": "{0}\n{1}\nExoplanets seen from close by: {2}/{3}",
  "트라피스트-1의 행성 일곱을 모두 가까이에서 보았습니다.": "You have seen all seven planets of TRAPPIST-1 from close by.",
  "일곱 개 다 봤다! 할머니가 믿으실까?": "Saw all seven! Will Grandma believe me?",
- "오늘의 부탁을 해냈습니다. 수첩에 별이 붙었습니다(해낸 날 {}일{}).": "You did today's request. A star is on the notebook ({0} days done{1}).",
+ "오늘의 부탁을 해냈습니다. 수첩에 별이 붙었습니다(해낸 날 {}일{}).": "You did today's request. A star is on the notebook (days done: {0}{1}).",
  ", {}일째 이어서": ", {0} in a row",
  "일주일 내내 했어! 대단하지?": "A whole week in a row! Not bad, right?",
  "부탁 끝! 할머니 좋아하시겠다.": "Request done! Grandma will be glad.",
@@ -963,7 +964,7 @@
  "{}{} 순간 이동": "Jump to {the0}",
  "{} 오늘의 부탁: {}": "{0} Today's request: {1}",
  "지난 7일 가운데 {}일 해냄": "Done on {the0} of the last 7 days",
- "해낸 날 {}일{}": "{0} days done{1}",
+ "해낸 날 {}일{}": "Days done: {0}{1}",
  " · {}일째 이어서": " · {0} in a row",
  "하늘 소식 {}": "Sky news {0}",
  "펼치기": "Open",

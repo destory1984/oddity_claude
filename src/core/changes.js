@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-23', text: t('소라의 말풍선과 부탁 단추에서 글자가 넘치던 것, 화면 끝의 별자리 이름이 잘리던 것을 고쳤습니다.') },
   { day: '2026-10-23', text: t('게임을 열거나 언어를 바꿀 때 2초쯤 빨리 시작합니다. 탐사선과 장소의 모형은 가까이 갈 때 만들어집니다.') },
   { day: '2026-10-23', text: t('언어를 바꾸면 로딩 화면 없이 잠깐 어두워졌다 그 자리에서 이어지고, 음악도 듣던 곡이 이어집니다.') },
   { day: '2026-10-22', text: t('무전 기록장 세 권에 그림이 생기고, 무전 전체 화면 위에 1973년 다락방의 무전기 그림이 걸렸습니다.') },

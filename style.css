@@ -7564,3 +7564,20 @@ html.quietStart #loading > *:not(#loadError) {
   opacity:0;
   pointer-events:none;
 }
+
+/* Sora's bubble wraps to a second line instead of running past its paper (the end of
+   "The Moon! Page one of Grandma's notebook." stood outside it: the Codex playtester,
+   2026-10-23). */
+#heroSay {
+  width:max-content;
+  white-space:pre-line;
+  text-align:center;
+}
+
+/* The errand keys widen for a long name under the drawing ("设为目的地", "次のお願い" stood
+   past the key's sides: the Codex playtester, 2026-10-23). */
+#journal #journalDaily #dailyKeys button {
+  width:auto;
+  min-width:var(--top-key, var(--tap));
+  padding:0 5px;
+}

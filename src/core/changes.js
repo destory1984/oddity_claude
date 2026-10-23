@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-23', text: t('멀리서 수성의 메신저 잔해로 순간 이동하면 너무 먼 곳에 서던 것을 고쳤습니다.') },
   { day: '2026-10-23', text: t('따라 찍기에 소라의 사연과 본보기 옛 사진이 붙었습니다.') },
   { day: '2026-10-23', text: t('할머니의 부탁 칸의 일곱 날 별 대신 "마친 부탁"이 있고, 누르면 해낸 부탁이 나옵니다.') },
   { day: '2026-10-23', text: t('제목 옆 "기록" 단추에 모든 집계와 "기록 지우기"를 모았습니다.') },

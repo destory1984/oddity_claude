@@ -607,7 +607,8 @@ export function createSiteModels(scene, siteList) {
     }
   }
 
-  return { update, has: (id) => nodes.has(id) || cards.has(id) };
+  // (A place's model counts before it is built: a jump from afar asks before it is near.)
+  return { update, has: (id) => modelled.has(id) || cards.has(id) };
 }
 
 export function createCraft(scene, craftList) {

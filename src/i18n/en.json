@@ -1,4 +1,5 @@
 {
+ "멀리서 수성의 메신저 잔해로 순간 이동하면 너무 먼 곳에 서던 것을 고쳤습니다.": "Fixed a jump from afar to MESSENGER's wreck on Mercury stopping much too far away.",
  "마친 부탁 {}": "Requests done: {0}",
  "{}월 {}일": "{0}/{1}",
  "할머니의 부탁을 해냈습니다(마친 부탁 {}곳).": "You did Grandma's request ({0} done in all).",

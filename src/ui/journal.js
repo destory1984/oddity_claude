@@ -120,7 +120,8 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   };
   const groupOf = (part) => Object.keys(GROUPS).find((g) => GROUPS[g].includes(part)) ?? part;
   const lastPart = {};
-  let tab = lastDone?.tab ?? 'today';
+  // (A kept part no longer in GROUPS opens "오늘".)
+  let tab = Object.values(GROUPS).flat().includes(lastDone?.tab) ? lastDone.tab : 'today';
   // name: a part, or a tab (its part last looked at).
   function showTab(name) {
     const part = GROUPS[name] ? lastPart[name] ?? GROUPS[name][0] : name;

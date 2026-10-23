@@ -1902,7 +1902,16 @@ ${STORY_MORE[target.id]}` : told) };
     showScanner(true);
   }
   let scannerWanted = scanner.on();
+  // Gold, as the practice's key is, till it is first pressed; its setting is kept only
+  // once it has been (the user, 2026-10-23: "스캐너 버튼은 처음에는 금색, 한 번이라도
+  // 누르면, 그 이후는 지금과 같은 색").
+  try {
+    $('scannerButton').classList.toggle('fresh', localStorage.getItem(SCANNER_KEY) === null);
+  } catch {
+    // Storage shut: it stays as it always was.
+  }
   $('scannerButton').addEventListener('click', () => {
+    $('scannerButton').classList.remove('fresh');
     scannerWanted = !scannerWanted;
     showScanner(scannerWanted, true);
     try {

@@ -7636,3 +7636,14 @@ dialog#radioSheet[open] > .backKey {
   white-space:nowrap;
   box-shadow:none;
 }
+
+/* The scanner's key in gold, with the practice key's slow glow, till it is first pressed
+   (main.js .fresh; the user, 2026-10-23: "스캐너 버튼은 처음에는 금색"). */
+#scannerButton.fresh {
+  border-color:#ffd98a;
+  background-color:#3a2f1ccc;
+  animation:practiceGlow 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  #scannerButton.fresh { animation:none; box-shadow:0 0 0 1px #ffd98a, 0 0 10px 3px #ffd98a88; }
+}

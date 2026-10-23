@@ -3483,14 +3483,14 @@ ${STORY_MORE[target.id]}` : told) };
       saveDaily(daily);
       if (firstToday) {
         const run = streak(daily, today);
-        toast.show(t`오늘의 부탁을 해냈습니다. 수첩에 별이 붙었습니다(해낸 날 ${daily.days.length}일${run > 1 ? t`, ${run}일째 이어서` : ''}).`);
+        toast.show(t`할머니의 부탁을 해냈습니다. 수첩에 별이 붙었습니다(해낸 날 ${daily.days.length}일${run > 1 ? t`, ${run}일째 이어서` : ''}).`);
         say.show(run > 0 && run % 7 === 0 ? t('일주일 내내 했어! 대단하지?') : t('부탁 끝! 할머니 좋아하시겠다.'));
         // Seven days running: a stamp of seven stars.
         if (run > 0 && run % 7 === 0) stampDown('notebook/stamp-week.png');
       } else {
         // (Whose request it is said in full, the user, 2026-10-20: "부탁 2를 해냈습니다. ->
         // 할머니의 부탁 2를..".)
-        toast.show(t`할머니의 부탁 ${n + 1}${objectParticle(String(n + 1))} 해냈습니다. 수첩의 다음 미션으로 이어 갈 수 있습니다.`);
+        toast.show(t`할머니의 부탁 ${n + 1}${objectParticle(String(n + 1))} 해냈습니다. 수첩의 다음 부탁으로 이어 갈 수 있습니다.`);
         say.show(t('하나 더 끝! 다음은 뭐지?'));
       }
       sound.cue('discovered');
@@ -3621,7 +3621,7 @@ ${STORY_MORE[target.id]}` : told) };
       dailyDue = false;
       noteCard.show({
         scene: t('수첩 사이에 오늘 날짜가 적힌 쪽지가 끼워져 있다.'),
-        title: t('오늘의 부탁'),
+        title: t('할머니의 부탁'),
         text: t`${request.text}\n\n수첩을 열면 다시 볼 수 있단다.`,
         button: t('확인'),
       });

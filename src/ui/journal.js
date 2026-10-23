@@ -158,7 +158,9 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     const today = daily ? daily() : null;
     $('journalDaily').hidden = !today;
     if (!today) return;
-    const label = today.index ? t`부탁 ${today.index + 1}` : t('오늘의 부탁');
+    // ("할머니의 부탁": it was "오늘의 부탁", but it is one list walked in turn, any number a
+    // day: Codex (GPT) and the user, 2026-10-23.)
+    const label = today.index ? t`할머니의 부탁 ${today.index + 1}` : t('할머니의 부탁');
     // One done has grandmother's red tick and "해냄" before it, in a paler ink (the user,
     // 2026-10-20: "해낸 부탁은 표시를 해줘. 헷갈리네": a ★ for the ☆ was all that told it;
     // 2026-10-22, of the red ring it had: "동그라미가 아니라 체크 표시").
@@ -245,7 +247,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     const progress = lastProgress;
     const s = summarize(progress, bodies, missions, stories);
     $('journalSummary').textContent =
-      t`발견 ${s.discovered}/${s.bodies} · 착지 ${s.landed}/${s.bodies} · 사진 ${s.photos}/${s.missions} · 이야기 ${s.stories}/${s.storyTotal}`;
+      t`전체 기록: 발견 ${s.discovered}/${s.bodies} · 착지 ${s.landed}/${s.bodies} · 사진 ${s.photos}/${s.missions} · 이야기 ${s.stories}/${s.storyTotal}`;
 
     // Grandmother's notes read so far: press one to read it again.
     const read = notes.filter((n) => (progress.notes ?? []).includes(n.id));

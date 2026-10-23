@@ -143,7 +143,8 @@ async function main() {
         const found = await page.evaluate((css) => {
           const el = document.querySelector(css);
           if (!el) return false;
-          el.click();
+          // (A point of a drawing, an SVG element, has no click(): a click event does.)
+          el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
           return true;
         }, arg);
         if (!found) log.push(`(step ${step}: nothing matches)`);

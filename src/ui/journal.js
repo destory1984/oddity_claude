@@ -41,24 +41,11 @@ const CLIPPING = t('1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구
 // The explorer's journal: bodies found and landed on, photo missions done.
 export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, views = null, sky = null, exo = null, onRadioJump = () => {}, onTab = () => {} }) {
   const dialog = $('journal');
-  // The radio friend's page (ui/radioWeb.js): drawn again with each log. In the journal a
-  // small picture of it; a press opens it over the whole screen, where its points are
-  // pressed (the user, 2026-10-22: "무전은.. 풀 화면으로 가는게 낫지않겠음?", then "따로
-  // 전체 화면"). Its way back returns to the journal.
-  const radioChart = createRadioWeb($('radioChart'), document.createElement('div'), { onJump: onRadioJump });
-  const radioSheet = $('radioSheet');
-  const radioBig = createRadioWeb($('radioSheetChart'), $('radioSheetDetail'), {
-    onJump(id) {
-      radioSheet.close();
-      onRadioJump(id);
-    },
-  });
-  const openRadio = () => {
-    if (lastProgress) radioBig.draw(lastProgress.radio);
-    radioSheet.showModal();
-  };
-  $('radioOpen').addEventListener('click', openRadio);
-  $('radioSheetClose').addEventListener('click', () => radioSheet.close());
+  // The radio friend's page (ui/radioWeb.js): drawn again with each log, its points
+  // pressed in the journal's own "무전" part, as every other part is read (it opened over
+  // the whole screen from 2026-10-22, "따로 전체 화면", till the user, 2026-10-23: "수첩 ->
+  // 무전 탭도 다른 탭과 동일하게").
+  const radioChart = createRadioWeb($('radioChart'), $('radioDetail'), { onJump: onRadioJump });
 
   $('journalButton').addEventListener('click', () => open());
   $('closeJournal').addEventListener('click', () => dialog.close());
@@ -126,9 +113,8 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   // A tab pressed turns a page (onTab: its sound), unless it is the page already open.
   for (const button of $('journalTabs').children) {
     button.addEventListener('click', () => {
-      if (button.dataset.tab !== tab || button.dataset.tab === 'radio') onTab();
-      if (button.dataset.tab === 'radio') openRadio();
-      else showTab(button.dataset.tab);
+      if (button.dataset.tab !== tab) onTab();
+      showTab(button.dataset.tab);
     });
   }
   $('resetJournal').addEventListener('click', () => {
@@ -241,7 +227,10 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     else if (next?.kind === 'note') line.textContent = t('할머니의 쪽지를 기다리는 중');
     else if (next?.kind === 'done') line.textContent = t('오십 년 만에 이어졌다');
     fold.append(head, line, t('펼치기'));
-    fold.addEventListener('click', openRadio);
+    fold.addEventListener('click', () => {
+      onTab();
+      showTab('radio');
+    });
     $('journalRadio').replaceChildren(fold);
     $('journalRadio').hidden = false;
     document.querySelector('#journalTabs button[data-tab="radio"]').classList.toggle('live', next?.kind !== 'done');
@@ -764,7 +753,6 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       noteDone(lastProgress, progress);
       if (progress.radio !== lastProgress?.radio) {
         radioChart.draw(progress.radio);
-        if (radioSheet.open) radioBig.draw(progress.radio);
       }
       if (dialog.open && progress.radio !== lastProgress?.radio) {
         lastProgress = progress;

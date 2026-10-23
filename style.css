@@ -7439,100 +7439,43 @@ dialog#settings[open] > .backKey {
   background:#b23133;
 }
 
-/* In the journal the chart is a picture to press: no key's frame round it (ui/journal.js). */
-#journal #radioOpen {
-  display:block;
-  width:100%;
-  min-height:0;
-  margin:0;
-  padding:0;
-  border:0;
-  background:none;
-  box-shadow:none;
-  cursor:zoom-in;
-}
-
-#journal #radioOpen .radioChart {
-  display:block;
-  pointer-events:none;
-}
-
-/* The radio chart over the whole screen, on the journal's paper (the user, 2026-10-22:
-   "무전은.. 풀 화면으로 가는게 낫지않겠음?", "따로 전체 화면"): the way back 8px from the
-   corner as on every sheet, the chart as large as leaves room for what a point tells
-   under it, all in a column at most 640px wide. */
-dialog#radioSheet[open] {
-  display:flex;
-  flex-direction:column;
-  width:100vw;
-  max-width:100vw;
-  height:100vh;
-  height:100dvh;
-  max-height:100vh;
-  max-height:100dvh;
-  margin:0;
-  border:0;
-  border-radius:0;
-  padding:calc(54px + env(safe-area-inset-top)) max(16px, calc((100vw - 640px) / 2)) max(16px, env(safe-area-inset-bottom));
-  overflow-y:auto;
-  background:#f2e6c8;
-  color:#3b2a1a;
-}
-
-dialog#radioSheet > .backKey {
-  top:max(8px, env(safe-area-inset-top));
-  left:max(8px, env(safe-area-inset-left));
-  width:44px;
-  height:44px;
-  border:1.5px solid #6b4a26;
-  background:#fbf4e0;
-  color:#3b2a1a;
-}
-
 /* Its head: the attic radio of 1973 by the night sea, fading into the paper (the user's
-   pick "B" of two, 2026-10-22). */
-#radioSheet #radioSheetHead {
+   pick "B" of two, 2026-10-22), at the top of the journal's "무전" part since 2026-10-23. */
+#journalRadioPage #radioHead {
   display:block;
   width:100%;
   height:auto;
-  margin:-6px 0 8px;
+  margin:6px 0 8px;
   border-radius:8px 8px 0 0;
 }
 
-#radioSheet h2 {
-  margin:0 0 2px;
-  font-family:var(--hand);
-  font-size:24px;
-  color:#3b2a1a;
-}
-
-#radioSheet .muted {
+#journalRadioPage .muted {
   margin:0;
   color:#6b5236;
 }
 
-#radioSheet .radioChart svg {
+#journalRadioPage .radioChart svg {
   width:min(100%, 58vh);
   max-width:none;
 }
 
-#radioSheet .radioDetail {
+#journalRadioPage .radioDetail {
   flex:1 0 auto;
 }
 
 /* A point's words in the journal's dark ink: the sheets' own pale grey (meant for the
    night-blue ones) did not show on the paper (the user, 2026-10-22: "글자 색깔.. 안 보여"). */
-#radioSheet .radioDetail p,
-#radioSheet .radioDetail strong {
+#journalRadioPage .radioDetail p,
+#journalRadioPage .radioDetail strong {
   color:#3b2a1a;
 }
 
 /* A point's picture smaller here, so that its words are seen without scrolling. */
-#radioSheet .radioDetail img {
+#journalRadioPage .radioDetail img {
   max-width:260px;
 }
 
-#radioSheet button {
+#journalRadioPage button {
   min-height:40px;
   padding:6px 14px;
   border:1.5px solid #6b4a26;
@@ -7540,13 +7483,6 @@ dialog#radioSheet > .backKey {
   background:#fbf4e0;
   box-shadow:0 1px 0 #6b4a2640;
   color:#3b2a1a;
-}
-
-#radioSheet #radioSheetClose {
-  align-self:center;
-  min-height:44px;
-  margin-top:8px;
-  font-weight:700;
 }
 
 /* After a change of language (index.html sets html.quietStart): the loading screen is
@@ -7602,18 +7538,6 @@ html.quietStart #loading > *:not(#loadError) {
 html #journal #journalTabs > button[role="tab"] {
   flex:1 1 auto;
   padding:0 2px;
-}
-
-/* The radio page's way back stays in its corner while the page scrolls, and the attic
-   picture starts below it (it scrolled away with the page and its foot lay on the
-   picture's top: the user, 2026-10-23, "겹치고... 버튼은 고정으로 해줘"). */
-dialog#radioSheet[open] > .backKey {
-  position:fixed;
-  box-shadow:0 2px 8px #3b2a1a33;
-}
-
-#radioSheet #radioSheetHead {
-  margin-top:6px;
 }
 
 /* The scanner's key in gold, with the practice key's slow glow, till it is first pressed

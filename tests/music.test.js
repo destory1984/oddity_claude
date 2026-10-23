@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  BAR_S, BARS_PER_TUNE, CHORDS, MELODY, TUNES, barPlan, moodFor, tuneFor, nextTuneBar, tuneOrder, barInOrder,
+  BAR_S, BARS_PER_TUNE, CHORDS, MELODY, TUNES, barPlan, moodFor, tuneFor, nextTuneBar, tuneOrder, barInOrder, keptMusic,
 } from '../src/core/music.js';
 
 const BARS = BARS_PER_TUNE * TUNES.length;
@@ -151,4 +151,15 @@ test('each sitting the tunes go round in a chance order, every tune once a round
   const heard = new Set();
   for (let p = 0; p < again; p += BARS_PER_TUNE) heard.add(tuneFor(barInOrder(p, order)).id);
   assert.equal(heard.size, TUNES.length);
+});
+
+test('after a change of language the music carries on where it stood, or starts afresh', () => {
+  const order = tuneOrder(() => 0.3);
+  assert.deepEqual(keptMusic({ order, bar: 37 }), { order, bar: 37 });
+  // A broken or old note: the music starts afresh.
+  assert.equal(keptMusic(null), null);
+  assert.equal(keptMusic({ order, bar: -1 }), null);
+  assert.equal(keptMusic({ order, bar: 1.5 }), null);
+  assert.equal(keptMusic({ order: order.slice(1), bar: 3 }), null);
+  assert.equal(keptMusic({ order: order.map(() => 0), bar: 3 }), null);
 });

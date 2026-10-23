@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-23', text: t('언어를 바꾸면 로딩 화면 없이 잠깐 어두워졌다 그 자리에서 이어지고, 음악도 듣던 곡이 이어집니다.') },
   { day: '2026-10-22', text: t('무전 기록장 세 권에 그림이 생기고, 무전 전체 화면 위에 1973년 다락방의 무전기 그림이 걸렸습니다.') },
   { day: '2026-10-22', text: t('수첩 맨 위에 무전 이야기 줄이 생겨 찾은 숨은 장소와 다음에 갈 곳을 알려 주고, 무전 탭이 맨 앞으로 왔습니다.') },
   { day: '2026-10-22', text: t('수첩의 무전 탭을 누르면 화면 가득 펼쳐져, 점을 눌러 들은 말을 볼 수 있습니다.') },

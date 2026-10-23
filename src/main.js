@@ -440,7 +440,7 @@ const named = (id) => bodyById(id) ?? craftById(id) ?? curiosAt(bodies, state.po
 const toast = createToast($('toast'));
 const say = createSay($('heroSay'));
 const warp = createWarp($('warp'));
-const sound = createSound();
+const sound = createSound({ music: resume?.music });
 const canvas = $('space');
 
 // Call after every change to the log: saves it and shows the score. Returns true
@@ -2694,8 +2694,9 @@ ${STORY_MORE[target.id]}` : told) };
     },
     onClose: () => setPaused(settingsPriorPause),
     today: () => dayOf(new Date()),
-    // The game starts again in the other language, from this very place and moment.
-    onLanguage: () => saveResume({ position: [...state.position], orientation: [...state.orientation], simTime, selectedId }),
+    // The game starts again in the other language, from this very place and moment, the
+    // music going on with its tune and no loading picture between.
+    onLanguage: () => saveResume({ position: [...state.position], orientation: [...state.orientation], simTime, selectedId, music: sound.musicPlace(), quiet: true }),
     // A link out (About): the same, kept for half an hour.
     onLeave: () => saveResume({ position: [...state.position], orientation: [...state.orientation], simTime, selectedId, tab: 'about', until: Date.now() + 30 * 60 * 1000 }),
     reopen: resume ? resume.tab ?? true : false,
@@ -2772,7 +2773,13 @@ ${STORY_MORE[target.id]}` : told) };
   window.addEventListener('resize', () => world.resize());
   if (matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints > 0) document.body.classList.add('touch');
 
-  $('loading').style.display = 'none';
+  // After a change of language the plain black of the loading screen fades into the game.
+  if (document.documentElement.classList.contains('quietStart')) {
+    $('loading').classList.add('gone');
+    setTimeout(() => { $('loading').style.display = 'none'; }, 400);
+  } else {
+    $('loading').style.display = 'none';
+  }
   document.body.dataset.ready = 'true';
   if (!glowsTold.has('start') && !resume) {
     markTold('start');

@@ -507,6 +507,16 @@ export function tuneOrder(random = Math.random) {
   return order;
 }
 
+// Where the music stood when the page was loaded anew for another language: { order, bar }
+// as sound's musicPlace() gave it (`bar`: bars played so far). Null when it does not fit
+// these tunes, and the music then starts afresh.
+export function keptMusic(saved) {
+  if (!saved || !Array.isArray(saved.order) || !Number.isInteger(saved.bar) || saved.bar < 0) return null;
+  const sorted = [...saved.order].sort((a, b) => a - b);
+  if (sorted.length !== TUNES.length || !sorted.every((n, i) => n === i)) return null;
+  return { order: [...saved.order], bar: saved.bar };
+}
+
 // The bar number to play at `position` (bars played so far in this sitting) when the
 // tunes go round in `order`: the same place in the tune, in a later round each time
 // round, so a tune's notes differ from its last turn.

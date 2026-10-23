@@ -283,6 +283,9 @@ export function saveLanguage(choice) {
 // (the user, 2026-10-07: "백버튼 누르면, 게임이 완전히 새로 시작하네"). `until` (ms): after
 // that moment the place is forgotten, so that a link that opened a new window does not
 // decide where a much later reload begins.
+// A change of language also keeps where the music stood (`music`) and asks for a quiet
+// start (`quiet`: index.html reads it before anything is drawn and leaves out the loading
+// picture; the user, 2026-10-23: "언어를 바꾸면 ... 게임이 아예 새로 시작하는데").
 const RESUME_KEY = 'oddity.resume';
 
 export function saveResume(place) {
@@ -301,7 +304,7 @@ export function takeResume() {
     const numbers = (list, n) => Array.isArray(list) && list.length === n && list.every(Number.isFinite);
     if (place && Number.isFinite(place.until) && Date.now() > place.until) return null;
     if (!place || !numbers(place.position, 3) || !Array.isArray(place.orientation) || !place.orientation.every(Number.isFinite)) return null;
-    return { position: place.position, orientation: place.orientation, simTime: Number.isFinite(place.simTime) ? place.simTime : 0, selectedId: typeof place.selectedId === 'string' ? place.selectedId : null, tab: typeof place.tab === 'string' ? place.tab : null };
+    return { position: place.position, orientation: place.orientation, simTime: Number.isFinite(place.simTime) ? place.simTime : 0, selectedId: typeof place.selectedId === 'string' ? place.selectedId : null, tab: typeof place.tab === 'string' ? place.tab : null, music: place.music ?? null };
   } catch {
     return null;
   }

@@ -3,7 +3,7 @@
 // (public/assets/sounds/stardust.mp3, 1.9 s, 24 KB; CC BY, THIRD-PARTY.md).
 
 import { callFor } from '../core/voice.js';
-import { BAR_S, barPlan, tuneFor, nextTuneBar, tuneOrder, barInOrder } from '../core/music.js';
+import { BAR_S, barPlan, tuneFor, nextTuneBar, tuneOrder, barInOrder, keptMusic } from '../core/music.js';
 
 const MUTE_KEY = 'oddity.muted';
 const MUSIC_KEY = 'oddity.music';
@@ -45,7 +45,10 @@ function saveMuted(muted) {
   }
 }
 
-export function createSound() {
+// `music`: where the music stood before the page was loaded anew for another language
+// ({ order, bar }, core/music.js keptMusic): it carries on from there, the same tune.
+export function createSound({ music } = {}) {
+  const kept = keptMusic(music);
   let ctx = null;
   let master;
   let noiseBuffer;
@@ -60,8 +63,8 @@ export function createSound() {
   // When the next bar of music starts (audio clock) and which bar it is.
   let nextBarAt = 0;
   // Bars played so far; the tunes go round in an order drawn afresh each sitting.
-  let barNumber = 0;
-  const order = tuneOrder();
+  let barNumber = kept?.bar ?? 0;
+  const order = kept?.order ?? tuneOrder();
   let playing = null;
   // The bars still sounding, each through its own gain ({ out, until }), so that a jump
   // to the next tune can fade them out at once.
@@ -604,6 +607,8 @@ export function createSound() {
       nextBarAt += BAR_S;
     },
     musicOn: () => musicOn,
+    // Where the music stands, kept over a reload (createSound's `music`).
+    musicPlace: () => ({ order: [...order], bar: barNumber }),
     // The name of the tune being played (null before the first bar).
     tuneName: () => playing,
     // Jump to the next tune now; returns its name. The bars that are sounding fade out

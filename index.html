@@ -25,6 +25,13 @@
   <link rel="stylesheet" href="/fonts/nanum-pen-script/400.css">
   <link rel="stylesheet" href="/fonts/gaegu/400.css">
   <link rel="stylesheet" href="/style.css">
+  <!-- Loaded anew after a change of language (src/ui/storage.js saveResume, `quiet`): the
+       loading screen is plain black, without its picture (style.css html.quietStart). -->
+  <script>
+    try {
+      if (JSON.parse(sessionStorage.getItem('oddity.resume') || '{}').quiet === true) document.documentElement.classList.add('quietStart');
+    } catch (e) { /* the loading screen as always */ }
+  </script>
 </head>
 <body>
   <canvas id="space" aria-label="태양계 비행 화면" tabindex="0"></canvas>

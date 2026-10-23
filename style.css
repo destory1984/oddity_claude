@@ -7549,3 +7549,18 @@ dialog#radioSheet > .backKey {
   font-weight:700;
 }
 
+/* After a change of language (index.html sets html.quietStart): the loading screen is
+   plain black, without the title and Sora's picture, and fades into the game. */
+html.quietStart #loading {
+  background:#02040b;
+  transition:opacity .4s;
+}
+
+html.quietStart #loading > *:not(#loadError) {
+  visibility:hidden;
+}
+
+#loading.gone {
+  opacity:0;
+  pointer-events:none;
+}

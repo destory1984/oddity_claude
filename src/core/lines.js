@@ -105,7 +105,8 @@ export const IDLE_GAP_S = 45;
 // fitted to where she is when a line is for that (the user, the same day: "상황에 맞는
 // 잡담 넣어줘"): cold or hot, docked, near a world.
 // (core/sprite.js REST_ACTIONS; the user, 2026-10-23: "소라가 휴식 모드일 떄에 만화처럼
-// 풍선글 띄워서 잡담하게 해.. 10개만 샘플로"). Each once a visit, and not within
+// 풍선글 띄워서 잡담하게 해.. 10개만 샘플로", then "다른 동작에도 다 넣어줘": all forty).
+// Each once a visit, and not within
 // REST_SAY_GAP_S of the last.
 export const REST_SAYS = {
   'rest-tea': { any: t('후, 차가 아직 따뜻해.'), cold: t('추운 데선 따뜻한 차가 최고야.'), docked: t('정거장에 붙어서 마시는 차, 맛있다.') },
@@ -118,6 +119,36 @@ export const REST_SAYS = {
   'rest-juggle': { any: t('별 세 개까진 끄떡없지!') },
   'rest-crane': { any: t('종이학아, 할머니한테 날아가.'), earth: t('종이학아, 저기 우리 집으로 가.') },
   'rest-map': { any: t('어라, 지도가 거꾸로였네.') },
+  'rest-tilt': { any: t('음? 방금 뭐가 지나갔나?'), saturn: t('고리가 왜 기울어 있지?') },
+  'rest-wave': { any: t('안녕! 거기 누구 있어?'), docked: t('창문 너머로 손 흔들어 줘야지.'), earth: t('지구야, 안녕! 나 여기 있어.') },
+  'rest-spin': { any: t('빙그르르, 어지러워.') },
+  'rest-hop': { any: t('발 디딜 데도 없는데 뛰었네.'), moon: t('달에서라면 훨씬 높이 뛸 텐데.') },
+  'rest-look': { any: t('두리번두리번, 뭐 재미난 거 없나.') },
+  'rest-stretch': { any: t('으쌰, 기지개 한번 켜고.') },
+  'rest-nod': { any: t('응, 응. 다 알 것 같아.') },
+  'rest-sway': { any: t('음악이 없어도 흔들흔들.') },
+  'rest-cheer': { any: t('야호, 여기까지 왔다!'), saturn: t('토성까지 오다니, 야호!') },
+  'rest-wave2': { any: t('두 손 다 흔들어야 보이겠지?'), earth: t('할머니, 보여요? 여기예요!') },
+  'rest-sit': { any: t('잠깐 앉았다 가자.'), docked: t('정거장 옆에 앉으니 든든해.') },
+  'rest-star': { any: t('어느 별이 제일 밝지?'), hot: t('태양 쪽은 눈부셔서 못 보겠어.') },
+  'rest-ribbon': { any: t('리본이 삐뚤어졌나?') },
+  'rest-photo': { any: t('이건 할머니께 보여 드려야지.'), saturn: t('토성은 어떻게 찍어도 예뻐.'), jupiter: t('목성이 화면에 다 안 들어가.') },
+  'rest-letter': { any: t('집에 엽서 보내면 좋아하겠지.') },
+  'rest-bubble': { any: t('비눗방울이 안 터지고 둥둥 떠.') },
+  'rest-float': { any: t('이대로 둥실 떠 있고 싶다.'), cold: t('몸을 웅크리면 좀 덜 추워.') },
+  'rest-plush': { any: t('토끼야, 너도 우주 처음이지?'), moon: t('토끼야, 저기가 네 고향이래.') },
+  'rest-music': { any: t('이 노래 좋다. 한 번 더.') },
+  'rest-knit': { any: t('목도리 다 뜨면 할머니 드려야지.'), cold: t('추우니까 목도리 빨리 떠야지.') },
+  'rest-gum': { any: t('풍선껌이 행성만큼 커지면 좋겠다.') },
+  'rest-draw': { any: t('보이는 대로 그려 두자.'), saturn: t('고리 그리기는 너무 어려워.'), jupiter: t('줄무늬를 몇 개나 그려야 하지?') },
+  'rest-yoyo': { any: t('요요가 안 돌아와… 아, 왔다.') },
+  'rest-comb': { any: t('머리 좀 빗고, 단정하게.') },
+  'rest-count': { any: t('하나, 둘, 셋… 또 처음부터네.') },
+  'rest-string': { any: t('실뜨기는 혼자 하면 심심해.') },
+  'rest-clap': { any: t('짝짝짝, 오늘도 잘했어.') },
+  'rest-rope': { any: t('줄넘기 몇 개 했더라?') },
+  'rest-pinwheel': { any: t('후 불면 잘 돌아간다.') },
+  'rest-water': { any: t('새싹아, 무럭무럭 자라라.'), mars: t('화성 흙에서도 자랄까?') },
 };
 // Her word for a rest action where she is: the first of `where` (core/lines.js
 // REST_SAYS keys: docked, hot, cold, the world she is near) that the action has a line

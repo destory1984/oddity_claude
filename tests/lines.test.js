@@ -80,6 +80,7 @@ test('Earth\'s weather she explains herself: two lines for each sight that has h
 
 test('each rest word belongs to a rest action and is short', () => {
   const sheets = REST_ACTIONS.map((a) => a.sheet);
+  assert.deepEqual(Object.keys(REST_SAYS).sort(), [...sheets].sort());
   for (const [sheet, says] of Object.entries(REST_SAYS)) {
     assert.ok(sheets.includes(sheet), sheet);
     assert.ok(says.any, sheet);

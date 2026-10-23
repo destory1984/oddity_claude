@@ -7651,3 +7651,90 @@ dialog > .backBar {
   background:#0d1a3a;
   box-shadow:0 8px 10px -4px #0d1a3a;
 }
+
+/* "기록" by the journal's title and the sheet of counts it unfolds under the head (ui/journal.js
+   showRecord; the journal's new tree, step 2, 2026-10-23). */
+#journal .journalHead #recordKey {
+  flex:none;
+  width:auto;
+  min-width:44px;
+  height:44px;
+  min-height:44px;
+  margin:0;
+  padding:0 10px;
+  font-size:13px;
+  font-weight:700;
+}
+
+#journal .journalHead #recordKey[aria-expanded="true"] {
+  background:#f1d99a;
+}
+
+#journal #journalRecord {
+  flex:none;
+  max-height:70%;
+  overflow-y:auto;
+  margin:8px 14px 0;
+  padding:12px 16px;
+  border:1.5px solid #6b4a26;
+  border-radius:12px;
+  background:#fffaf0;
+  box-shadow:0 6px 18px #3b2a1a40;
+  color:#3b2a1a;
+}
+
+#journal #journalRecord[hidden] {
+  display:none;
+}
+
+#journal #journalRecord h3 {
+  margin:4px 0 6px;
+  font-size:15px;
+}
+
+#journal #journalRecord h3 small {
+  color:#8a6a44;
+  font-weight:600;
+}
+
+#journal #journalRecord h3:not(:first-child) {
+  margin-top:14px;
+}
+
+#journal #journalRecord p {
+  display:flex;
+  justify-content:space-between;
+  margin:0;
+  padding:6px 0;
+  border-bottom:1px dashed #c9ad7a;
+  font-size:13.5px;
+}
+
+#journal #journalRecord .journalActions {
+  margin-top:12px;
+}
+
+/* (The sheet of counts lies over the tabs and the page, under the head, instead of pushing
+   them down; the title keeps to one line beside the four keys.) */
+#journal #journalRecord {
+  position:absolute;
+  top:calc(max(8px, env(safe-area-inset-top)) + 52px);
+  left:14px;
+  right:14px;
+  z-index:5;
+  max-height:calc(100% - 140px);
+  margin:0;
+}
+
+#journal .journalHead h1 {
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+@media (max-width: 380px) {
+  /* (Narrow, the face before the title gives its room to the title's words.) */
+  #journal .journalHead #journalPortrait {
+    display:none;
+  }
+}

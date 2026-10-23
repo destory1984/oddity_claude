@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-23', text: t('제목 옆 "기록" 단추에 모든 집계와 "기록 지우기"를 모았습니다.') },
   { day: '2026-10-23', text: t('공유 화면이 전체 화면이 되고, 수첩은 닫을 때 회오리 없이 종이 소리와 함께 사라집니다.') },
   { day: '2026-10-23', text: t('쪽지 같은 카드를 내려도 돌아가기 단추가 위 모서리에 남고, 글자를 가리지 않습니다.') },
   { day: '2026-10-23', text: t('수첩의 탭이 여섯으로 줄었습니다: 오늘, 장소, 사진, 이야기, 무전, 비행.') },

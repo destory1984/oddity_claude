@@ -39,7 +39,7 @@ function picture(file, alt, className = '') {
 const CLIPPING = t('1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.');
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, views = null, sky = null, exo = null, onRadioJump = () => {}, onTab = () => {} }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, views = null, sky = null, exo = null, onRadioJump = () => {}, onTab = () => {}, errands = null }) {
   const dialog = $('journal');
   // The radio friend's page (ui/radioWeb.js): drawn again with each log, its points
   // pressed in the journal's own "무전" part, as every other part is read (it opened over
@@ -145,10 +145,67 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     for (const section of $('journalScroll').children) section.hidden = section.dataset.tab !== part;
     $('journalScroll').scrollTop = 0;
   }
+  // "기록" by the title: every count in one place, the notebook's 261 slots and what is
+  // kept beside them, and the wipe (the user, 2026-10-23, the journal's new tree, step 2;
+  // the count stood at the foot of "오늘" and the wipe at the foot of the bodies).
+  function showRecord(on) {
+    $('journalRecord').hidden = !on;
+    $('recordKey').setAttribute('aria-expanded', String(on));
+    if (on) renderRecord();
+  }
+  $('recordKey').addEventListener('click', () => {
+    onTab();
+    showRecord($('journalRecord').hidden);
+  });
+  function renderRecord() {
+    const progress = lastProgress;
+    if (!progress) return;
+    const s = summarize(progress, bodies, missions, stories);
+    const row = (name, got, of) => {
+      const line = document.createElement('p');
+      const what = document.createElement('span');
+      what.textContent = name;
+      const count = document.createElement('b');
+      count.textContent = `${got} / ${of}`;
+      line.append(what, count);
+      return line;
+    };
+    const head = (words, small = '') => {
+      const h = document.createElement('h3');
+      h.textContent = words;
+      if (small) {
+        const note = document.createElement('small');
+        note.textContent = small;
+        h.append(' ', note);
+      }
+      return h;
+    };
+    const filled = s.discovered + s.landed + s.photos + s.stories;
+    const slots = 2 * s.bodies + s.missions + s.storyTotal;
+    const outside = [
+      [t('무전 숨은 장소'), radioHint(progress.radio).found, radioHint(progress.radio).total],
+      [t('탐사선'), craft.filter((c) => (progress.craft ?? []).includes(c.id)).length, craft.length],
+      [t('상상 속 장소'), CURIOS.filter((c) => !c.group && (progress.curios ?? []).includes(c.id)).length, CURIOS.filter((c) => !c.group).length],
+      [t('할머니의 길'), TOURS.filter((x) => (progress.tours ?? []).includes(x.id)).length, TOURS.length],
+      ...(views ? [[t('엽서'), views.cards().filter((card) => card.got).length, views.cards().length]] : []),
+      ...(errands ? [[t('마친 부탁'), errands().done, errands().total]] : []),
+    ];
+    $('recordRows').replaceChildren(
+      head(t('수첩 채우기'), t`${filled} / ${slots}칸`),
+      row(t('천체 발견'), s.discovered, s.bodies),
+      row(t('천체 착지'), s.landed, s.bodies),
+      row(t('따라 찍기'), s.photos, s.missions),
+      row(t('이야기 장소'), s.stories, s.storyTotal),
+      head(t('칸 밖의 기록')),
+      ...outside.map(([name, got, of]) => row(name, got, of)),
+    );
+  }
+
   // A tab pressed turns a page (onTab: its sound), unless it is the one already open.
   for (const button of $('journalTabs').children) {
     button.addEventListener('click', () => {
       if (button.dataset.tab !== groupOf(tab)) onTab();
+      showRecord(false);
       showTab(button.dataset.tab);
     });
   }
@@ -280,10 +337,6 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
 
   function render() {
     const progress = lastProgress;
-    const s = summarize(progress, bodies, missions, stories);
-    $('journalSummary').textContent =
-      t`전체 기록: 발견 ${s.discovered}/${s.bodies} · 착지 ${s.landed}/${s.bodies} · 사진 ${s.photos}/${s.missions} · 이야기 ${s.stories}/${s.storyTotal}`;
-
     // Grandmother's notes read so far: press one to read it again.
     const read = notes.filter((n) => (progress.notes ?? []).includes(n.id));
     const noteRow = $('journalNotes');
@@ -763,6 +816,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     renderStunts();
     renderViews();
     renderAlbum();
+    showRecord(false);
     dialog.showModal();
     if (lastDone && !lastDone.seen && DONE_TABS.some(([, part]) => part === lastDone.tab)) {
       showTab(lastDone.tab);

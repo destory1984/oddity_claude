@@ -103,6 +103,13 @@ export function errandList(day, daily) {
   return out;
 }
 
+// How many of grandmother's errands are done, of all: { done, total } (the journal's
+// "기록": the places of ERRANDS in daily.places; an anniversary's own place is not one).
+export function errandTally(daily) {
+  const done = new Set(daily?.places ?? []);
+  return { done: ERRANDS.filter((e) => done.has(e.id)).length, total: ERRANDS.length };
+}
+
 // The first errand of a day, or null when every place has been done.
 export function dailyRequest(day, daily) {
   return errandList(day, daily)[0] ?? null;

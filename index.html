@@ -180,11 +180,18 @@
   <dialog id="journal" aria-labelledby="journalTitle">
     <div class="journalHead">
       <h1 id="journalTitle" tabindex="-1" autofocus><img id="journalPortrait" src="/assets/seora-sprites/portrait.png" alt="">탐험 수첩</h1>
+      <button id="recordKey" aria-expanded="false" aria-controls="journalRecord">기록</button>
       <div id="journalText" class="textSize" role="group" aria-label="글자 크기">
         <button id="textSmaller" data-way="-1" aria-label="글자 작게" title="글자 작게">가<span aria-hidden="true">−</span></button>
         <button id="textLarger" data-way="1" aria-label="글자 크게" title="글자 크게">가<span aria-hidden="true">+</span></button>
       </div>
       <button id="closeJournal" aria-label="비행으로 돌아가기" title="비행으로 돌아가기 (Esc, J)">✕</button>
+    </div>
+    <div id="journalRecord" hidden>
+      <div id="recordRows"></div>
+      <div class="journalActions">
+        <button id="resetJournal">기록 지우기</button>
+      </div>
     </div>
     <div id="journalTabs" role="tablist" aria-label="수첩의 갈래">
       <button role="tab" data-tab="today">오늘</button>
@@ -200,13 +207,9 @@
         <div id="journalDaily" hidden><span id="dailyText"></span><span id="dailyWeek" role="img"></span><small id="dailyCount"></small><span id="dailyKeys"><button id="dailyPrev" data-label="이전 부탁" hidden>이전 부탁</button><button id="dailyGo" data-label="목적지로">목적지로</button><button id="dailyJump" data-label="순간 이동" hidden>순간 이동</button><button id="dailyNext" data-label="다음 부탁" hidden>다음 부탁</button></span></div>
         <div id="journalRadio" hidden></div>
         <div id="journalSky" hidden></div>
-        <p id="journalSummary"></p>
       </section>
       <section data-tab="bodies">
         <ul id="journalBodies"></ul>
-        <div class="journalActions">
-          <button id="resetJournal">기록 지우기</button>
-        </div>
       </section>
       <section data-tab="missions" hidden>
         <p class="muted">사진 모드에서 "사진 찍기"를 누르는 순간의 구도로 판정합니다.</p>

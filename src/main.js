@@ -64,7 +64,7 @@ import { feelFovDeg, easeFovDeg, streakAmount, BASE_FOV_DEG } from './core/speed
 import { famousFor } from './core/famous.js';
 import { bindTextSize } from './ui/textSize.js';
 import { shadowSpot } from './core/shadows.js';
-import { errandList, requestTarget, requestMet, recordDay, recordPlace, streak, lastWeek } from './core/daily.js';
+import { errandList, errandTally, requestTarget, requestMet, recordDay, recordPlace, streak, lastWeek } from './core/daily.js';
 import { palFor } from './core/pal.js';
 import { seeFor, SEE_S } from './core/sprite.js';
 import {
@@ -2240,6 +2240,8 @@ ${STORY_MORE[target.id]}` : told) };
   const journal = createJournal({
     // A page turned with each tab.
     onTab: () => sound.cue('page'),
+    // Grandmother's errands done, of all (the journal's "기록").
+    errands: () => errandTally(daily),
     onRadioJump(id) {
       $('journal').close();
       jumpToHidden(id);

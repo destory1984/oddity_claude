@@ -115,3 +115,12 @@ test('days done are kept once, and the run of days counts back from today or yes
   assert.deepEqual(sanitizeDaily({ days: ['2026-10-02', 'junk', 3, '2026-10-02'] }), { days: ['2026-10-02'], places: [] });
   assert.deepEqual(sanitizeDaily(null), createDaily());
 });
+
+// The journal's record counts the errands done of all (2026-10-23, "기록").
+test('the errands done are counted of all, an anniversary place apart', async () => {
+  const { errandTally, errandList } = await import('../src/core/daily.js');
+  const all = errandList('2026-10-05', createDaily());
+  assert.deepEqual(errandTally(createDaily()), { done: 0, total: all.length });
+  assert.deepEqual(errandTally({ ...createDaily(), places: ['moon', 'venus', 'apollo11'] }), { done: 2, total: all.length });
+  assert.deepEqual(errandTally(null), { done: 0, total: all.length });
+});

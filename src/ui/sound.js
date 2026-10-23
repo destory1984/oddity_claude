@@ -318,6 +318,14 @@ export function createSound({ music } = {}) {
   }
 
   const CUES = {
+    // A page of the notebook turned (a journal tab pressed; the user, 2026-10-23: "수첩 탭
+    // 넘길 때마다 종이 넘기는 소리"): a dry swish rising as the page lifts, a flutter of its
+    // edge, and a soft pat as it lies down.
+    page: () => {
+      noise({ length: 0.22, volume: 0.11, type: 'bandpass', freq: 1700, to: 4200, attack: 0.05, hold: 0.08 });
+      noise({ start: 0.09, length: 0.09, volume: 0.05, type: 'highpass', freq: 5200, attack: 0.02 });
+      noise({ start: 0.19, length: 0.12, volume: 0.07, type: 'lowpass', freq: 900, to: 320, attack: 0.01 });
+    },
     discovered: () => [523, 659, 784, 880, 1047].forEach((f, i) => pluck(f, i * 0.1, 0.14)),
     // Touching down: a soft low thump, no tick. (It was a burst of noise at full volume
     // with a plucked note, which came out as a hard "tack".)

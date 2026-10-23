@@ -7603,3 +7603,15 @@ html #journal #journalTabs > button[role="tab"] {
   flex:1 1 auto;
   padding:0 2px;
 }
+
+/* The radio page's way back stays in its corner while the page scrolls, and the attic
+   picture starts below it (it scrolled away with the page and its foot lay on the
+   picture's top: the user, 2026-10-23, "겹치고... 버튼은 고정으로 해줘"). */
+dialog#radioSheet[open] > .backKey {
+  position:fixed;
+  box-shadow:0 2px 8px #3b2a1a33;
+}
+
+#radioSheet #radioSheetHead {
+  margin-top:6px;
+}

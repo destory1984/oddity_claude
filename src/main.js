@@ -2215,6 +2215,8 @@ ${STORY_MORE[target.id]}` : told) };
     });
   }
   const journal = createJournal({
+    // A page turned with each tab.
+    onTab: () => sound.cue('page'),
     onRadioJump(id) {
       $('journal').close();
       jumpToHidden(id);

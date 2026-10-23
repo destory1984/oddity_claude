@@ -39,7 +39,7 @@ function picture(file, alt, className = '') {
 const CLIPPING = t('1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.');
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, views = null, sky = null, exo = null, onRadioJump = () => {} }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, views = null, sky = null, exo = null, onRadioJump = () => {}, onTab = () => {} }) {
   const dialog = $('journal');
   // The radio friend's page (ui/radioWeb.js): drawn again with each log. In the journal a
   // small picture of it; a press opens it over the whole screen, where its points are
@@ -123,8 +123,13 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   }
   // The radio's tab opens its page over the whole screen at once, the part shown staying
   // as it was (the user, 2026-10-22: "수첩 -> 무전은 풀 페이지로").
+  // A tab pressed turns a page (onTab: its sound), unless it is the page already open.
   for (const button of $('journalTabs').children) {
-    button.addEventListener('click', () => (button.dataset.tab === 'radio' ? openRadio() : showTab(button.dataset.tab)));
+    button.addEventListener('click', () => {
+      if (button.dataset.tab !== tab || button.dataset.tab === 'radio') onTab();
+      if (button.dataset.tab === 'radio') openRadio();
+      else showTab(button.dataset.tab);
+    });
   }
   $('resetJournal').addEventListener('click', () => {
     if (window.confirm(t('탐험 기록을 모두 지울까요? 되돌릴 수 없습니다. 지금 가까이 있는 천체는 곧바로 다시 기록됩니다.'))) onReset();

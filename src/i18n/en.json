@@ -1,4 +1,10 @@
 {
+ "마친 부탁 {}": "Requests done: {0}",
+ "{}월 {}일": "{0}/{1}",
+ "할머니의 부탁을 해냈습니다(마친 부탁 {}곳).": "You did Grandma's request ({0} done in all).",
+ "소라: 할머니 수첩에 붙어 있던 옛 우주 사진들이야. 나도 이 사진처럼 찍어 볼래.": "Sora: These old space photos were stuck in Grandma's notebook. I want to take mine just like them.",
+ "할머니의 부탁 칸의 일곱 날 별 대신 \"마친 부탁\"이 있고, 누르면 해낸 부탁이 나옵니다.": "The request card shows \"Requests done\" instead of seven days' stars; press it to see them.",
+ "따라 찍기에 소라의 사연과 본보기 옛 사진이 붙었습니다.": "Retakes now carry Sora's reason and the old photo each is taken after.",
  "기록": "Record",
  "수첩 채우기": "Filling the notebook",
  "{} / {}칸": "{0} / {1} slots",

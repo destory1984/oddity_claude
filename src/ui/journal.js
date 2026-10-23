@@ -1,4 +1,4 @@
-import { famousFor } from '../core/famous.js';
+import { famousFor, FAMOUS } from '../core/famous.js';
 import { lastSlotLast } from '../core/story.js';
 import { summarize, journalOrder } from '../core/progress.js';
 import { surfaceDistance, bodyPicture } from '../core/bodies.js';
@@ -246,6 +246,11 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     daily().step(-1);
     renderDaily();
   });
+  let doneOpen = false;
+  $('dailyDone').addEventListener('click', () => {
+    doneOpen = !doneOpen;
+    renderDaily();
+  });
   function renderDaily() {
     const today = daily ? daily() : null;
     $('journalDaily').hidden = !today;
@@ -260,10 +265,22 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     text.classList.toggle('done', today.done);
     if (today.done) text.replaceChildren(picture('notebook/mark-check.png', ''), t`${label} · 해냄: ${today.text}`);
     else text.textContent = `☆ ${label}: ${today.text}`;
-    // The last seven days, today last.
-    $('dailyWeek').setAttribute('aria-label', t`지난 7일 가운데 ${today.week.filter(Boolean).length}일 해냄`);
-    $('dailyWeek').replaceChildren(...today.week.map((did) => (did ? picture('notebook/day-star.png', '') : document.createElement('i'))));
-    $('dailyCount').textContent = t`해낸 날 ${today.days}일${today.streak > 1 ? t` · ${today.streak}일째 이어서` : ''}`;
+    // The errands done, folded to their count; a press lists them, the latest first, with
+    // the day each was done (the journal's new tree, step 3: the seven days' stars were
+    // hard to read, the user, 2026-10-23: "별.. 저게 뭔지 나도 모르겠으니").
+    const done = $('dailyDone');
+    done.hidden = !today.doneList.length;
+    done.textContent = `${t`마친 부탁 ${today.doneList.length}`} ${doneOpen ? '▴' : '▾'}`;
+    done.setAttribute('aria-expanded', String(doneOpen));
+    const list = $('dailyDoneList');
+    list.hidden = !doneOpen || !today.doneList.length;
+    list.replaceChildren(...(list.hidden ? [] : today.doneList.map(({ name, day }) => {
+      const li = document.createElement('li');
+      const when = document.createElement('small');
+      when.textContent = day ? t`${Number(day.slice(5, 7))}월 ${Number(day.slice(8, 10))}일` : '';
+      li.append(when, name);
+      return li;
+    })));
     $('dailyGo').hidden = today.done;
     $('dailyJump').hidden = today.done || !today.canJump;
     // Free to walk the errands either way, done or not (the user, 2026-10-22: "왜 좌우로
@@ -467,6 +484,12 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       title.textContent = `${done ? '✓' : '○'} ${mission.name}`;
       const hint = document.createElement('span');
       hint.textContent = mission.hint;
+      // The old photograph it is taken after, when it is one (core/famous.js).
+      if (FAMOUS[mission.id]) {
+        const art = picture(FAMOUS[mission.id].file, '', 'missionArt');
+        art.loading = 'lazy';
+        li.append(art);
+      }
       li.append(title, hint);
       missionList.append(li);
     }

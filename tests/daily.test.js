@@ -112,7 +112,7 @@ test('days done are kept once, and the run of days counts back from today or yes
   assert.equal(streak(createDaily(), '2026-10-02'), 0);
   // 26 Sept to 2 Oct: the 28th, the 1st and the 2nd were done.
   assert.deepEqual(lastWeek(daily, '2026-10-02'), [false, false, true, false, false, true, true]);
-  assert.deepEqual(sanitizeDaily({ days: ['2026-10-02', 'junk', 3, '2026-10-02'] }), { days: ['2026-10-02'], places: [] });
+  assert.deepEqual(sanitizeDaily({ days: ['2026-10-02', 'junk', 3, '2026-10-02'] }), { days: ['2026-10-02'], places: [], placeDays: {} });
   assert.deepEqual(sanitizeDaily(null), createDaily());
 });
 
@@ -123,4 +123,18 @@ test('the errands done are counted of all, an anniversary place apart', async ()
   assert.deepEqual(errandTally(createDaily()), { done: 0, total: all.length });
   assert.deepEqual(errandTally({ ...createDaily(), places: ['moon', 'venus', 'apollo11'] }), { done: 2, total: all.length });
   assert.deepEqual(errandTally(null), { done: 0, total: all.length });
+});
+
+// Each errand's day is kept from now on, for the journal's "마친 부탁" (2026-10-23).
+test('the day each errand is done is kept, and the errands done come latest first', async () => {
+  const { errandsDone, recordPlace } = await import('../src/core/daily.js');
+  let daily = recordPlace(createDaily(), 'moon', '2026-10-22');
+  daily = recordPlace(daily, 'venus', '2026-10-23');
+  daily = recordPlace(daily, 'moon', '2026-10-24');
+  assert.deepEqual(daily.placeDays, { moon: '2026-10-22', venus: '2026-10-23' });
+  assert.deepEqual(errandsDone(daily), [{ id: 'venus', day: '2026-10-23' }, { id: 'moon', day: '2026-10-22' }]);
+  // Done before days were kept: no day.
+  assert.deepEqual(errandsDone({ days: [], places: ['iss'] }), [{ id: 'iss', day: null }]);
+  // A saved record keeps known places with real days only.
+  assert.deepEqual(sanitizeDaily({ places: ['moon'], placeDays: { moon: '2026-10-22', nowhere: '2026-10-22', venus: 'junk' } }).placeDays, { moon: '2026-10-22' });
 });

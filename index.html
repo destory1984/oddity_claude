@@ -204,7 +204,7 @@
     <div id="journalSeg" role="tablist" aria-label="갈래 안의 쪽" hidden></div>
     <div id="journalScroll">
       <section data-tab="today" hidden>
-        <div id="journalDaily" hidden><span id="dailyText"></span><span id="dailyWeek" role="img"></span><small id="dailyCount"></small><span id="dailyKeys"><button id="dailyPrev" data-label="이전 부탁" hidden>이전 부탁</button><button id="dailyGo" data-label="목적지로">목적지로</button><button id="dailyJump" data-label="순간 이동" hidden>순간 이동</button><button id="dailyNext" data-label="다음 부탁" hidden>다음 부탁</button></span></div>
+        <div id="journalDaily" hidden><span id="dailyText"></span><button id="dailyDone" aria-expanded="false" aria-controls="dailyDoneList"></button><span id="dailyKeys"><button id="dailyPrev" data-label="이전 부탁" hidden>이전 부탁</button><button id="dailyGo" data-label="목적지로">목적지로</button><button id="dailyJump" data-label="순간 이동" hidden>순간 이동</button><button id="dailyNext" data-label="다음 부탁" hidden>다음 부탁</button></span><ol id="dailyDoneList" hidden></ol></div>
         <div id="journalRadio" hidden></div>
         <div id="journalSky" hidden></div>
       </section>
@@ -212,6 +212,7 @@
         <ul id="journalBodies"></ul>
       </section>
       <section data-tab="missions" hidden>
+        <p class="soraNote">소라: 할머니 수첩에 붙어 있던 옛 우주 사진들이야. 나도 이 사진처럼 찍어 볼래.</p>
         <p class="muted">사진 모드에서 "사진 찍기"를 누르는 순간의 구도로 판정합니다.</p>
         <ul id="journalMissions"></ul>
       </section>

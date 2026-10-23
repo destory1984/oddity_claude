@@ -134,24 +134,34 @@ export function requestMet(request, { storiesNow, position, bodies, craft, photo
 
 // The days an errand was done, oldest first, and the places done (each asked for once):
 // { days: ['YYYY-MM-DD', ...], places: [id, ...] }.
+// placeDays: the day each errand's place was done ({ id: 'YYYY-MM-DD' }), kept since
+// 2026-10-23 for the journal's "마친 부탁"; those done before have none.
 export function createDaily() {
-  return { days: [], places: [] };
+  return { days: [], places: [], placeDays: {} };
 }
 
 const KNOWN = new Set([...ERRANDS.map((e) => e.id), ...ANNIVERSARIES.map(([, , , id]) => id)]);
 export function sanitizeDaily(raw) {
   const days = Array.isArray(raw?.days) ? raw.days.filter((d) => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)) : [];
   const places = Array.isArray(raw?.places) ? raw.places.filter((id) => KNOWN.has(id)) : [];
-  return { days: [...new Set(days)].sort().slice(-400), places: [...new Set(places)] };
+  const placeDays = Object.fromEntries(Object.entries(raw?.placeDays ?? {})
+    .filter(([id, day]) => KNOWN.has(id) && typeof day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day)));
+  return { days: [...new Set(days)].sort().slice(-400), places: [...new Set(places)], placeDays };
 }
 
 export function recordDay(daily, day) {
   return daily.days.includes(day) ? daily : { ...daily, days: [...daily.days, day].sort() };
 }
 
-export function recordPlace(daily, id) {
+export function recordPlace(daily, id, day = null) {
   const places = daily.places ?? [];
-  return places.includes(id) ? daily : { ...daily, places: [...places, id] };
+  if (places.includes(id)) return daily;
+  return { ...daily, places: [...places, id], placeDays: { ...(daily.placeDays ?? {}), ...(day ? { [id]: day } : {}) } };
+}
+
+// The errands done, the latest first: [{ id, day }] (day null when not kept).
+export function errandsDone(daily) {
+  return [...(daily?.places ?? [])].reverse().map((id) => ({ id, day: daily.placeDays?.[id] ?? null }));
 }
 
 // How many days in a row up to today (or up to yesterday, when today's is not done

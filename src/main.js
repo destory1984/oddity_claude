@@ -64,7 +64,7 @@ import { feelFovDeg, easeFovDeg, streakAmount, BASE_FOV_DEG } from './core/speed
 import { famousFor } from './core/famous.js';
 import { bindTextSize } from './ui/textSize.js';
 import { shadowSpot } from './core/shadows.js';
-import { errandList, errandTally, requestTarget, requestMet, recordDay, recordPlace, streak, lastWeek } from './core/daily.js';
+import { errandList, errandTally, errandsDone, whereOf, requestTarget, requestMet, recordDay, recordPlace, streak } from './core/daily.js';
 import { palFor } from './core/pal.js';
 import { seeFor, SEE_S } from './core/sprite.js';
 import {
@@ -2287,9 +2287,9 @@ ${STORY_MORE[target.id]}` : told) };
       step(way) {
         errand = Math.max(0, Math.min(errands.length - 1, errand + way));
       },
-      days: daily.days.length,
-      streak: streak(daily, today),
-      week: lastWeek(daily, today),
+      // The errands done, the latest first, each with its day when kept (the seven days'
+      // stars stood here till 2026-10-23: "별.. 저게 뭔지 나도 모르겠으니").
+      doneList: errandsDone(daily).map(({ id, day }) => ({ name: whereOf(id), day })),
       go() {
         selectedId = requestTarget(errandAt(errand));
         hud.showSelection(named(selectedId));
@@ -3494,19 +3494,19 @@ ${STORY_MORE[target.id]}` : told) };
       const job = errandAt(n);
       if (!job || errandDone(n) || !requestMet(job, { storiesNow, position: state.position, bodies, craft, photoSubject })) continue;
       const firstToday = !requestDone();
-      daily = recordPlace(daily, job.id);
+      daily = recordPlace(daily, job.id, today);
       if (firstToday) daily = recordDay(daily, today);
       saveDaily(daily);
       if (firstToday) {
         const run = streak(daily, today);
-        toast.show(t`할머니의 부탁을 해냈습니다. 수첩에 별이 붙었습니다(해낸 날 ${daily.days.length}일${run > 1 ? t`, ${run}일째 이어서` : ''}).`);
+        toast.show(t`할머니의 부탁을 해냈습니다(마친 부탁 ${errandTally(daily).done}곳).`);
         say.show(run > 0 && run % 7 === 0 ? t('일주일 내내 했어! 대단하지?') : t('부탁 끝! 할머니 좋아하시겠다.'));
         // Seven days running: a stamp of seven stars.
         if (run > 0 && run % 7 === 0) stampDown('notebook/stamp-week.png');
       } else {
         // (Whose request it is said in full, the user, 2026-10-20: "부탁 2를 해냈습니다. ->
         // 할머니의 부탁 2를..".)
-        toast.show(t`할머니의 부탁 ${n + 1}${objectParticle(String(n + 1))} 해냈습니다. 수첩의 다음 부탁으로 이어 갈 수 있습니다.`);
+        toast.show(t`할머니의 부탁을 해냈습니다(마친 부탁 ${errandTally(daily).done}곳).`);
         say.show(t('하나 더 끝! 다음은 뭐지?'));
       }
       sound.cue('discovered');

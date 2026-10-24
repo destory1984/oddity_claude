@@ -67,6 +67,8 @@ export function cometAt(t, w, h, seed = 11) {
   const side = [right ? w : 0, down];
   const [from, to] = low ? [[side[0], h - down], [top[0], h]] : [top, side];
   const length = Math.hypot(to[0] - from[0], to[1] - from[1]);
+  // (A sheet not laid out yet, 0 wide: no comet, not one at NaN.)
+  if (!(length > 0)) return null;
   const way = [(to[0] - from[0]) / length, (to[1] - from[1]) / length];
   // (It comes in from a little off the sheet and leaves a little off it.)
   const far = -24 + (length + 48) * u;

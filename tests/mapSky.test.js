@@ -45,3 +45,7 @@ test('a comet goes by every two and a half to five seconds, across a corner, fal
   assert.equal(corners.size, 4);
   assert.equal(cometAt(0, w, h), null);
 });
+
+test('a sheet not laid out yet has no comet, never one at NaN', () => {
+  assert.equal(cometAt(cometStart(1) + COMET_S / 2, 0, 0), null);
+});

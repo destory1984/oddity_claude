@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-10-25', text: t('동작 줄이기를 켜도 수첩을 닫을 때 종이 소리가 납니다.') },
   { day: '2026-10-25', text: t('게임 아이콘이 바뀌었습니다: 토성 고리에 앉아 할머니의 수첩을 안은 소라.') },
   { day: '2026-10-24', text: t('큰 지도가 펼쳐지기 전에 별똥별을 그리다 나던 오류를 고쳤습니다.') },
   { day: '2026-10-23', text: t('소라가 쉬면서 하는 마흔 가지 동작 모두에 혼잣말이 붙었습니다.') },

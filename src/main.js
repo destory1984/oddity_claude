@@ -1806,13 +1806,15 @@ ${STORY_MORE[target.id]}` : told) };
     }).observe(dialog, { attributes: true, attributeFilter: ['open'] });
     dialog.close = (value) => {
       if (closing) return;
-      if (!dialog.open || !canWhirl()) return closeNow.call(dialog, value);
-      opening?.cancel();
-      opening = null;
+      if (!dialog.open) return closeNow.call(dialog, value);
       // The journal is put away as paper is: a short fade and a page's sound, no whirl
       // (the user, 2026-10-23: "돌아갈 때에 회오리 말고, 일반적인 화면 전환 & 종이 소리만").
+      // The sound plays under reduced motion too; only the fade is left out there.
       if (dialogId === 'journal') {
+        opening?.cancel();
+        opening = null;
         sound.cue('page');
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return closeNow.call(dialog, value);
         const fade = dialog.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: 'ease-out' });
         closing = fade;
         const shut = () => {
@@ -1823,6 +1825,9 @@ ${STORY_MORE[target.id]}` : told) };
         fade.finished.then(shut, shut);
         return;
       }
+      if (!canWhirl()) return closeNow.call(dialog, value);
+      opening?.cancel();
+      opening = null;
       const { move } = swirl(dialog, key, { inward: true, lasts: MENU_IN_MS, ink: '#cfe0ff', rim: MENU_RIM, onTop: true });
       closing = move;
       const done = () => {

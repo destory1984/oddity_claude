@@ -1,11 +1,11 @@
 # 홍보 동영상 만들기
 
-유튜브 쇼츠용 세로 영상(1080 x 1920, 30fps, 약 29초)을 게임 화면에서 바로 만든다. 한국어판과 영어판이 있다.
+유튜브 쇼츠용 세로 영상(1080 x 1920, 30fps, 약 27초)을 게임 화면에서 바로 만든다. 2026-10-28에 한국어판을 다시 만들었다(나로호와 수첩을 빼고 일식을 넣었다. 장면마다 카메라가 돌며 다가간다). 영어판은 아직 10-14의 장면 차례다.
 결과물과 녹화 원본은 `assets/promo/` 에 쌓이고 저장소에는 올리지 않는다(원본 그림이 1GB 넘게 나온다).
 
 ## 순서
 
-1. 장면 녹화: `node build/promo/shoot.cjs ko music earth fly naro aurora apollo jupiter saturn`
+1. 장면 녹화: `node build/promo/shoot.cjs ko music earth fly eclipse aurora apollo jupiter saturn`
    - 공개 페이지(https://destory1984.github.io/oddity_claude/)를 창 없이 띄워 찍는다. 장면마다 효과음도 같이 녹음한다.
    - `music` 은 음악만 36초 녹음한다(효과음을 끈다). 다른 장면은 음악을 끄고 효과음만 녹음한다.
    - 수첩 장면은 가득 찬 수첩을 보이려고 개발 서버의 "모든 임무 완료" 단추를 쓴다:

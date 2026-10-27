@@ -21,12 +21,11 @@ CUTS = {
   '': [
     ('earth', 2.0, 3.5),
     ('fly', 0.6, 4.0),
-    ('naro', 8.0, 4.0),
+    ('eclipse', 1.5, 4.0),
     ('aurora', 0.5, 3.5),
     ('apollo', 11.0, 4.0),
     ('jupiter', 0.5, 3.5),
     ('saturn', 0.5, 3.5),
-    ('journal', 1.0, 2.6),
   ],
   'gaze': [
     ('earth', 2.0, 3.5),
@@ -48,7 +47,7 @@ CUTS = {
 }
 CUT = CUTS[FILM]
 # The end card stands on a blurred still of this shot's last frame.
-END_ON = {'': -2, 'thatday': -1, 'gaze': -1}[FILM]
+END_ON = {'': -1, 'thatday': -1, 'gaze': -1}[FILM]
 END_S = 3.2
 
 

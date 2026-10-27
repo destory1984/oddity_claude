@@ -43,8 +43,47 @@ const clean = (p) => p.evaluate(() => {
 const gaze = (p) => p.evaluate(() => document.getElementById('gazeButton').click());
 const busy = (p) => p.evaluate(() => document.body.classList.contains('warping') || /가는 중|on the way|向かって|前往/.test(document.querySelector('#flightLabel, .flightLabel')?.textContent ?? ''));
 
+// The camera moving through a shot, as in a film (the user, 2026-10-28: "모든 장면들은
+// 영화처럼 카메라 시점이 움직이는 기법.. 그렇게 찍어"): the view as it was framed goes
+// round the body's middle by 'yaw' degrees (about the camera's own up) and in to 'push'
+// of its height over the ground, over 's' seconds, eased at both ends. The framing
+// itself is kept: the camera turns with the move, so what was in the middle stays there.
+const glide = async (p, id, { s, yaw = 0, push = 1 }) => {
+  const steps = Math.max(1, Math.round(s * 20));
+  const start = await p.evaluate((id) => {
+    const o = window.oddity;
+    const b = o.bodies().find((x) => x.id === id);
+    const st = o.getState();
+    const [x, y, z, w] = st.orientation;
+    const turn = (v) => {
+      const t = [2 * (y * v[2] - z * v[1]), 2 * (z * v[0] - x * v[2]), 2 * (x * v[1] - y * v[0])];
+      return [v[0] + w * t[0] + (y * t[2] - z * t[1]), v[1] + w * t[1] + (z * t[0] - x * t[2]), v[2] + w * t[2] + (x * t[1] - y * t[0])];
+    };
+    return { off: st.position.map((n, i) => n - b.position[i]), ahead: turn([0, 0, 1]), above: turn([0, 1, 0]), radius: b.radiusKm };
+  }, id);
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const e = t * t * (3 - 2 * t);
+    await p.evaluate(({ id, off, ahead, above, radius, a, k }) => {
+      const o = window.oddity;
+      const b = o.bodies().find((x) => x.id === id);
+      // (Rodrigues: v turned by a about the unit axis 'above'.)
+      const c = Math.cos(a), sn = Math.sin(a);
+      const dot = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+      const cross = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+      const turn = (v) => { const x = cross(above, v), d = dot(above, v); return v.map((n, j) => n * c + x[j] * sn + above[j] * d * (1 - c)); };
+      const r = Math.hypot(...off);
+      const there = turn(off).map((n) => n / r * (radius + (r - radius) * k));
+      const at = b.position.map((n, j) => n + there[j]);
+      const look = turn(ahead);
+      o.place(at, at.map((n, j) => n + look[j]), above);
+    }, { id, ...start, a: (yaw * Math.PI / 180) * e, k: 1 - (1 - push) * e });
+    await p.waitForTimeout(50);
+  }
+};
+
 // A best view by the plate's four-pointed star.
-const vista = (id, name, holdS) => async (p, rec) => {
+const vista = (id, name, holdS, move = null) => async (p, rec) => {
   await settle(p);
   await near(p, id, 40);
   await p.waitForTimeout(2500);
@@ -57,7 +96,8 @@ const vista = (id, name, holdS) => async (p, rec) => {
   await gaze(p);
   await p.waitForTimeout(1500);
   await rec.start();
-  await p.waitForTimeout(holdS * 1000);
+  if (move) await glide(p, id, { s: holdS, ...move });
+  else await p.waitForTimeout(holdS * 1000);
   return `picked ${picked}`;
 };
 
@@ -156,8 +196,10 @@ module.exports = {
     await settle(p);
     // (After her two opening lines: the second is long and runs to the screen's edge.)
     await p.waitForTimeout(9000);
+    // (The turn of the camera makes her say she is dizzy: her bubble is left out.)
+    await p.addStyleTag({ content: '#heroSay { visibility: hidden !important; }' });
     await rec.start();
-    await p.waitForTimeout(6000);
+    await glide(p, 'earth', { s: 6, yaw: 8, push: 0.85 });
   },
   // The music alone, longer than the film (shoot.cjs turns the effects off for it).
   music: async (p, rec) => {
@@ -177,6 +219,9 @@ module.exports = {
     await p.evaluate(() => document.getElementById('faceTarget').click());
     await p.waitForTimeout(3000);
     const box = await p.evaluate(() => { const r = document.getElementById('flyButton').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, w: r.width }; });
+    // (Her word to a newcomer, that she might try the practice first, covered the middle
+    // of the shot in the cut of 2026-10-28: left out.)
+    await p.addStyleTag({ content: '#heroSay { visibility: hidden !important; }' });
     await rec.start();
     await p.waitForTimeout(800);
     await p.mouse.move(box.x, box.y);
@@ -200,10 +245,58 @@ module.exports = {
     await gaze(p);
     await p.waitForTimeout(1500);
     await rec.start();
-    await p.waitForTimeout(6000);
+    await glide(p, 'earth', { s: 6, yaw: 10, push: 0.92 });
     return `picked ${picked}`;
   },
-  jupiter: vista('jupiter', ['목성', 'Jupiter'], 6),
+  // The Sun going behind Earth, seen from Earth's shadow (2026-10-28, the user picked the
+  // still with its last edge going and the aurora on the rim): photo mode, nothing laid
+  // over the view but her; the camera 3 Earth radii off on the shadow's axis, sliding in
+  // from 0.45 to 0.2 radii aside. (Nearer than the Moon: the game's Sun is drawn much
+  // larger than it would look from so close, and from the Moon Earth could not cover it.)
+  eclipse: async (p, rec) => {
+    await settle(p);
+    await p.evaluate(() => document.getElementById('photoButton').click());
+    await p.waitForTimeout(800);
+    await p.addStyleTag({ content: '#hud > *:not(#markers), #photoTools, #toast, #heroSay, #guide, #skyTold, #testBar, .marker, .skyName, .viewBackKey { visibility: hidden !important; }' });
+    const stand = (f) => p.evaluate((f) => {
+      const e = window.oddity.bodies().find((b) => b.id === 'earth');
+      const norm = (v) => { const l = Math.hypot(...v); return v.map((x) => x / l); };
+      const s = norm(e.position.map((x) => -x));
+      const side = norm([s[2], 0, -s[0]]);
+      window.oddity.place(e.position.map((x, i) => x - s[i] * 3 * e.radiusKm + side[i] * f * e.radiusKm), e.position);
+    }, f);
+    await stand(0.45);
+    await p.waitForTimeout(5000);
+    await rec.start();
+    const steps = 50;
+    for (let i = 0; i <= steps; i++) {
+      await stand(0.45 - 0.25 * (i / steps));
+      await p.waitForTimeout(100);
+    }
+    await p.waitForTimeout(1000);
+  },
+  // Jupiter on its sunlit side with her before it (its best view stood on its night
+  // side by 2026-10-28, and the plate's view is its own camera, which a move would leave).
+  jupiter: async (p, rec) => {
+    await settle(p);
+    await p.evaluate(() => {
+      const bs = window.oddity.bodies();
+      const by = (x) => bs.find((b) => b.id === x);
+      const j = by('jupiter');
+      const norm = (v) => { const l = Math.hypot(...v); return v.map((x) => x / l); };
+      const d = norm(by('sun').position.map((x, i) => x - j.position[i]));
+      const s = norm([d[2], 0, -d[0]]);
+      const dir = norm([d[0] * 0.8 + s[0] * 0.6, d[1] * 0.8 + 0.25, d[2] * 0.8 + s[2] * 0.6]);
+      const at = j.position.map((x, i) => x + dir[i] * j.radiusKm * 5);
+      window.oddity.place(at, j.position.map((x, i) => x - [0, 1, 0][i] * 1.4 * j.radiusKm));
+    });
+    await p.waitForTimeout(3000);
+    await closeAll(p);
+    await gaze(p);
+    await p.waitForTimeout(2000);
+    await rec.start();
+    await glide(p, 'jupiter', { s: 6, yaw: 12, push: 0.85 });
+  },
   apollo: scene('moon', 'apollo11', ['아폴로 11호', 'Apollo 11'], 24),
   naro: scene('earth', 'naro', ['나로우주센터', 'Naro'], 24),
   // The notebook, full (the dev server's test key fills it: PROMO_URL to port 4417).
@@ -224,6 +317,6 @@ module.exports = {
     for (let i = 0; i < 12; i++) { await p.evaluate(() => { document.getElementById('journalScroll').scrollBy({ top: 120, behavior: 'smooth' }); }); await p.waitForTimeout(400); }
     await p.waitForTimeout(800);
   },
-  saturn: vista('saturn', ['토성', 'Saturn'], 6),
+  saturn: vista('saturn', ['토성', 'Saturn'], 6, { yaw: -12, push: 0.85 }),
   settle, closeAll, pick, near, gaze, busy,
 };

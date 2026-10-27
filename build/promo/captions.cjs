@@ -13,12 +13,12 @@ const FIRST = {
   ko: {
     earth: '할머니가 적다 만 우주 탐험 수첩',
     fly: '내 손으로 직접 날아서',
-    naro: '그날의 발사를 다시 보고',
+    eclipse: '달에서 보는 일식',
     aurora: '오로라 위를 날고',
     apollo: '달에 내리던 순간으로',
-    jupiter: '목성의 붉은 폭풍을 지나',
+    // (The Great Red Spot is not always on the side filmed: the cut of 2026-10-28 had none.)
+    jupiter: '목성의 구름 띠를 지나',
     saturn: '토성의 고리까지',
-    journal: '빈칸 208개를 채워요',
     end: { title: '할머니의 수첩', note: '본격 우주멍 힐링 비행 게임', find: '구글 플레이에서 찾아보세요', store: 'Space Oddity - 할머니의 수첩' },
   },
   en: {

@@ -438,3 +438,17 @@ export function noteDue(radio, nowMs, freshStart) {
 export function readNote(radio) {
   return { ...radio, noteRead: true };
 }
+
+// The whole story done, for the dev server's "모든 임무 완료" key (the user, 2026-10-28:
+// "모든 미션 완료 버튼 누르면, 무전 미션도 완료한걸로 해줘"): every meeting heard, every clue
+// and hidden place known, the call sign got, grandmother's note read.
+export function completeRadio(nowMs) {
+  return {
+    visits: Object.fromEntries(SPEAKERS.map((s) => [s.id, s.visits.length])),
+    clues: CLUES.map((c) => c.id),
+    found: HIDDEN.map((h) => h.id),
+    callSign: true,
+    noteAt: nowMs,
+    noteRead: true,
+  };
+}

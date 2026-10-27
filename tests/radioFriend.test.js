@@ -5,7 +5,7 @@ import { CRAFT } from '../src/core/craft.js';
 import { CURIOS } from '../src/core/curios.js';
 import { STORIES } from '../src/core/stories.js';
 import {
-  SPEAKERS, CLUES, HIDDEN, createRadio, nextVisit, hear, openHidden, sanitizeRadio, speakerAt,
+  SPEAKERS, CLUES, HIDDEN, createRadio, nextVisit, hear, openHidden, sanitizeRadio, speakerAt, completeRadio, noteDue,
 } from '../src/core/radioFriend.js';
 
 // Nobody heard yet: a newcomer is told once that someone is on the air (only a small key
@@ -269,4 +269,12 @@ test('every hidden place is told with a picture on file, photos credited', async
     assert.equal(foundNote(place.id).pages[0].imageAlt, place.name);
     if (place.picture.endsWith('.jpg')) assert.ok(credits.includes(`| \`${place.picture}\` |`), `${place.picture} is not in THIRD-PARTY.md`);
   }
+});
+
+test('completeRadio is the whole story done, and survives sanitizing', () => {
+  const done = completeRadio(1000);
+  for (const s of SPEAKERS) assert.equal(nextVisit(done, s.id), null);
+  assert.deepEqual(openHidden(done).sort(), HIDDEN.map((h) => h.id).sort());
+  assert.equal(noteDue(done, 10 ** 9, true), false);
+  assert.deepEqual(sanitizeRadio(done), done);
 });

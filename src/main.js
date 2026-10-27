@@ -100,7 +100,7 @@ import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
-import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN, FINAL_NOTE, noteDue, readNote, heardNobody } from './core/radioFriend.js';
+import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN, FINAL_NOTE, noteDue, readNote, heardNobody, completeRadio } from './core/radioFriend.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
 } from './core/eclipses.js';
@@ -1387,7 +1387,9 @@ ${STORY_MORE[target.id]}` : told) };
     skyLabels: skyLabels(),
     onSelect: selectBody,
     onFace: () => facePicked(),
-    onPhoto: () => photoView.show(photoSlides(named(hud.plateId())), readingFor(named(hud.plateId()))),
+    // (Earth's photo page ends at the photo's words, with nothing to read under them: the
+    // user, 2026-10-28, of its caption and credit: "지구 설명은 … 여기로 끝. 아래는 지워".)
+    onPhoto: () => photoView.show(photoSlides(named(hud.plateId())), hud.plateId() === 'earth' ? null : readingFor(named(hud.plateId()))),
     // Someone to hear on the radio where she is docked or stays (core/radioFriend.js):
     // the meeting on the note card; what is heard is written down when it closes.
     onRadio() {
@@ -2403,7 +2405,8 @@ ${STORY_MORE[target.id]}` : told) };
     } catch { /* storage shut: nothing to keep */ }
     // (Into the log in hand as well: it is written out again as the page leaves.)
     // (And every imagined place: the user, 2026-10-16: "상상 탭에 있는 것들도 포함해줘".)
-    progress = { ...progress, discovered: ids(BODIES), landed: ids(BODIES), photos: ids(MISSIONS), stories: ids(STORIES), craft: ids(CRAFT), curios: ids(CURIOS), notes: ids(NOTES), tours: ids(TOURS), tour: null };
+    // (And the radio friend's story: the user, 2026-10-28, "무전 미션도 완료한걸로 해줘".)
+    progress = { ...progress, discovered: ids(BODIES), landed: ids(BODIES), photos: ids(MISSIONS), stories: ids(STORIES), craft: ids(CRAFT), curios: ids(CURIOS), notes: ids(NOTES), tours: ids(TOURS), tour: null, radio: completeRadio(Date.now()) };
     saveProgress(progress);
     saveGuideDone();
     location.reload();

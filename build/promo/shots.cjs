@@ -212,6 +212,8 @@ module.exports = {
       const row = [...document.querySelectorAll('#journalCourses li')].find((li) => li.innerText.startsWith('오로라 유영') || li.innerText.startsWith('Drifting Over'));
       row.querySelector('button').click();
     });
+    // (A note kept back by the hush still holds the game: it goes straight on.)
+    await p.evaluate(() => setInterval(() => { if (window.oddity.getState().paused) document.getElementById('pauseButton').click(); }, 100));
     await p.waitForTimeout(8000);
     await rec.start();
     await p.waitForTimeout(58000);

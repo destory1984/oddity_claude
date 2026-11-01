@@ -801,7 +801,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const li = document.createElement('li');
       li.className = course.on ? 'going' : '';
       const title = document.createElement('strong');
-      title.textContent = `${course.name}${course.on ? t(' · 하는 중') : ''}`;
+      title.textContent = course.name;
       const todo = document.createElement('span');
       todo.className = 'stops';
       todo.textContent = course.open ? course.todo : t`${course.where}에 한 번 가 보면 열립니다.`;

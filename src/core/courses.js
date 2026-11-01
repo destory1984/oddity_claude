@@ -7,8 +7,7 @@
 // M33 goes with M31, 15 degrees from it; the Crab and Ring nebulae are not in the game.
 //
 // body: what she goes round. lapS: a round in seconds. A round is kept in one of four ways:
-//   spot: where the user stood (core/startSpots.js), with toward, the way she was going;
-//   sun: from and toward, in the same directions, measured from the body to the Sun;
+//   sun: from and toward, in the directions of core/startSpots.js, measured to the Sun;
 //   sky: a thing of the fixed sky stands overDeg above the plane of the round, so that it
 //     keeps passing over the body; 'milkyWay': the plane is the galaxy's and the band runs
 //     behind the body all the way round;
@@ -22,13 +21,15 @@
 // rollDeg: the view turned, for a band that lies across a tall screen.
 import { orientationFrom, right, up } from './orientation.js';
 import { GALACTIC_CENTRE, GALACTIC_POLE, GALAXIES, NEBULAE, fromEquatorial } from './sky.js';
-import { fromSpot, outOf, sunFrame } from './startSpots.js';
+import { outOf, sunFrame } from './startSpots.js';
 import { t } from './i18n.js';
 
 export const COURSES = [
   { id: 'auroraDrift', body: 'earth', lapS: 120, rail: { latDeg: 67, startS: 75, atKm: 800, sunwardKm: 470, highKm: 400, rangeKm: 1500 }, name: t('오로라 유영'), todo: t('밤쪽 오로라 한 곳을 가까이에서 맴돌며 빛의 커튼 사이를 지나갑니다.') },
-  { id: 'earthRound', body: 'earth', lapS: 120, name: t('지구 한 바퀴'), todo: t('지구 둘레를 두 분에 한 바퀴 돕니다. 낮과 밤, 오로라가 차례로 지나갑니다.'),
-    spot: { body: 'earth', at: [26444.3, -7115.1, 2123.1], ahead: [-0.9321, 0.3592, -0.0476], above: [0.3376, 0.9087, 0.2455] }, toward: [0.1308, 0.196, -0.9719] },
+  // At the height of the round the user flew; its plane leans to the line of day and night,
+  // for the Sun in view puts out the rest (the user, 2026-11-02: "태양이 안 보였으면 좋겠어").
+  { id: 'earthRound', body: 'earth', lapS: 120, radii: 4.31, name: t('지구 한 바퀴'), todo: t('지구 둘레를 두 분에 한 바퀴 돕니다. 낮과 밤, 오로라가 차례로 지나갑니다.'),
+    sun: { from: [0.5, 0, -0.87], toward: [0, 1, 0] } },
   { id: 'milkyWay', body: 'earth', lapS: 180, radii: 8, rollDeg: 35, sky: 'milkyWay', name: t('은하수 일주'), todo: t('은하수가 놓인 평면을 따라 지구를 돕니다. 은하 중심에서 출발합니다.') },
   { id: 'orion', body: 'earth', lapS: 150, radii: 6, sky: 'm42', overDeg: 16, name: t('오리온 대성운'), todo: t('지구를 돌면서 겨울 밤하늘의 붉은 성운을 봅니다.') },
   { id: 'andromeda', body: 'moon', lapS: 150, radii: 7, sky: 'm31', overDeg: 16, name: t('안드로메다은하'), todo: t('달을 돌면서 안드로메다은하와 곁의 삼각형자리 은하를 봅니다.') },
@@ -70,10 +71,9 @@ function skyWay(id) {
 
 // The round: `from` the body's centre to where it starts, and `along` the way it goes.
 function roundOf(course, frame, ringNormal) {
-  if (course.spot || course.sun) {
-    const { at, from: start, toward } = { ...course.spot, ...course.sun, toward: course.toward ?? course.sun.toward };
-    const from = unit(outOf(frame, at ?? start));
-    return { from, along: squareTo(outOf(frame, toward), from) };
+  if (course.sun) {
+    const from = unit(outOf(frame, course.sun.from));
+    return { from, along: squareTo(outOf(frame, course.sun.toward), from) };
   }
   if (course.rings) {
     const { overDeg, roundDeg } = course.rings;
@@ -115,19 +115,15 @@ export function courseStart(course, body, sun, ringNormal = null) {
   if (course.rail) return { ...railAt(course, body, sun, course.rail.startS), slide: {} };
   const frame = sunFrame(body.position, sun.position);
   const { from, along } = roundOf(course, frame, ringNormal);
-  const km = course.spot ? Math.hypot(...course.spot.at) : course.radii * body.radiusKm;
-  let stand;
-  if (course.spot) stand = fromSpot(course.spot, body, sun);
-  else {
-    const looking = from.map((n) => -n);
-    const normal = cross(from, along);
-    const roll = rad(course.rollDeg ?? 0);
-    const above = mix(Math.cos(roll), normal, Math.sin(roll), cross(looking, normal));
-    stand = {
-      position: body.position.map((n, i) => n + from[i] * km),
-      orientation: orientationFrom(mix(Math.cos(DIP), looking, -Math.sin(DIP), above), above),
-    };
-  }
+  const km = course.radii * body.radiusKm;
+  const looking = from.map((n) => -n);
+  const normal = cross(from, along);
+  const roll = rad(course.rollDeg ?? 0);
+  const above = mix(Math.cos(roll), normal, Math.sin(roll), cross(looking, normal));
+  const stand = {
+    position: body.position.map((n, i) => n + from[i] * km),
+    orientation: orientationFrom(mix(Math.cos(DIP), looking, -Math.sin(DIP), above), above),
+  };
   const speed = (2 * Math.PI * km) / course.lapS;
   const side = dot(along, right(stand.orientation)) * speed;
   const rise = dot(along, up(stand.orientation)) * speed;

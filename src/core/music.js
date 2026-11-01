@@ -1,7 +1,7 @@
 import { t } from './i18n.js';
 // Background music, decided here and played by ui/sound.js. No sound files: a slow pad
 // of three notes per bar under a few bell notes, different every bar but always the
-// same for a given bar number. Fifty tunes take turns, each with its own four chords,
+// same for a given bar number. A hundred tunes take turns, each with its own four chords,
 // five-note scale, beat and bell.
 
 export const BAR_S = 8;
@@ -168,7 +168,7 @@ export const TUNES = [
     id: 'clock', name: t('시계탑'),
     chords: [chord('C3', 'G3', 'C4', 'E4'), chord('G2', 'G3', 'B3', 'D4'), chord('A2', 'A3', 'C4', 'E4'), chord('F2', 'A3', 'C4', 'F4')],
     melody: scale('G4 A4 C5 D5 E5 G5 A5 C6'),
-    slots: [0, 1, 2, 3, 4, 5, 6, 7], busy: 0.6,
+    slots: [0, 1, 2, 3, 4, 5, 6, 7], busy: 0.58,
     bell: { length: 0.8, overtone: 5, overtoneVolume: 0.12 },
     motif: [2, 4, 2, 5, 2, 6, 3, 0],
   },
@@ -466,6 +466,439 @@ export const TUNES = [
     slots: [0, 2.5, 4, 6.5], busy: 0.62,
     bell: { length: 2.7, overtone: 3, overtoneVolume: 0.12 },
     motif: [4, 2, 0, 1, 3, 5, 7, 5],
+  },
+  // The fifty below made it a hundred (the user, 2026-11-01: "음악 50곡 늘려줘"): other keys, modes,
+  // progressions and beats again, from a script checked against tests/music.test.js.
+  {
+    // A minor, a slow ring round the Moon.
+    id: 'moonHalo', name: t('달무리'),
+    chords: [chord('A2', 'A3', 'C4', 'E4'), chord('F2', 'F3', 'A3', 'C4'), chord('G2', 'G3', 'B3', 'D4'), chord('A2', 'A3', 'C4', 'E4')],
+    melody: scale('A4 C5 D5 E5 G5 A5 C6 D6'),
+    slots: [0, 2, 4, 6], busy: 0.66,
+    bell: { length: 2.6, overtone: 3, overtoneVolume: 0.1 },
+  },
+  {
+    // G major, thin and rising.
+    id: 'crescent', name: t('초승달'),
+    chords: [chord('G2', 'G3', 'B3', 'D4'), chord('C3', 'G3', 'C4', 'E4'), chord('E2', 'G3', 'B3', 'E4'), chord('D2', 'F#3', 'A3', 'D4')],
+    melody: scale('G4 A4 B4 D5 E5 G5 A5 B5'),
+    slots: [0, 0.5, 1.5, 3, 3.5, 4.5, 6], busy: 0.45,
+    bell: { length: 1.1, overtone: 3, overtoneVolume: 0.16 },
+    motif: [0, 2, 4, 5, 4, 2, 1, 3],
+  },
+  {
+    // C minor, the last thin light before morning.
+    id: 'lastCrescent', name: t('그믐달'),
+    chords: [chord('C3', 'G3', 'C4', 'D#4'), chord('A#2', 'F3', 'A#3', 'D4'), chord('G#2', 'G#3', 'C4', 'D#4'), chord('A#2', 'F3', 'A#3', 'D4')],
+    melody: scale('C5 D#5 F5 G5 A#5 C6 D#6 F6'),
+    slots: [0, 2.5, 4, 6.5], busy: 0.64,
+    bell: { length: 2.5, overtone: 2, overtoneVolume: 0.12 },
+  },
+  {
+    // E major in threes, round and full.
+    id: 'fullMoon', name: t('보름달'),
+    chords: [chord('E2', 'G#3', 'B3', 'E4'), chord('G#2', 'G#3', 'B3', 'D#4'), chord('A2', 'A3', 'C#4', 'E4'), chord('B2', 'F#3', 'B3', 'D#4')],
+    melody: scale('E4 F#4 G#4 B4 C#5 E5 F#5 G#5'),
+    slots: [0, 1.33, 2.67, 4, 5.33, 6.67], busy: 0.52,
+    bell: { length: 1.8, overtone: 2, overtoneVolume: 0.16 },
+    motif: [7, 5, 6, 4, 5, 3, 4, 2],
+  },
+  {
+    // F sharp phrygian, a held breath and a few close notes.
+    id: 'eclipseShadow', name: t('일식의 그늘'),
+    chords: [chord('F#2', 'F#3', 'A3', 'C#4'), chord('G2', 'G3', 'B3', 'D4'), chord('E2', 'G3', 'B3', 'E4'), chord('F#2', 'F#3', 'A3', 'C#4')],
+    melody: scale('F#4 G4 B4 C#5 D5 F#5 G5 B5'),
+    slots: [0, 3, 3.5, 4, 7], busy: 0.6,
+    bell: { length: 2.2, overtone: 3, overtoneVolume: 0.14 },
+    motif: [0, 3, 1, 4, 2, 5, 3, 6],
+  },
+  {
+    // D lydian, fine and fast, blown outward.
+    id: 'beyondSolarWind', name: t('태양풍 너머'),
+    chords: [chord('D2', 'F#3', 'A3', 'D4'), chord('E2', 'G#3', 'B3', 'E4'), chord('A2', 'A3', 'C#4', 'E4'), chord('D2', 'F#3', 'A3', 'D4')],
+    melody: scale('D5 E5 F#5 G#5 A5 B5 C#6 D6'),
+    slots: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7], busy: 0.26,
+    bell: { length: 0.8, overtone: 4, overtoneVolume: 0.1, wave: 'triangle' },
+  },
+  {
+    // E flat minor, the farthest and emptiest.
+    id: 'oortCloud', name: t('오르트 구름'),
+    chords: [chord('D#2', 'F#3', 'A#3', 'D#4'), chord('B2', 'F#3', 'B3', 'D#4'), chord('G#2', 'G#3', 'B3', 'D#4'), chord('F2', 'F3', 'G#3', 'C#4')],
+    melody: scale('D#4 F#4 G#4 A#4 C#5 D#5 F#5 G#5'),
+    slots: [0, 2, 4, 6], busy: 0.66,
+    bell: { length: 2.9, overtone: 2, overtoneVolume: 0.08 },
+  },
+  {
+    // B major, small and warm a long way out.
+    id: 'plutoHeart', name: t('명왕성의 하트'),
+    chords: [chord('B2', 'F#3', 'B3', 'D#4'), chord('F#2', 'F#3', 'A#3', 'C#4'), chord('G#2', 'G#3', 'B3', 'D#4'), chord('E2', 'G#3', 'B3', 'E4')],
+    melody: scale('B4 C#5 D#5 F#5 G#5 B5 C#6 D#6'),
+    slots: [0, 1.5, 3, 4, 5.5, 7], busy: 0.5,
+    bell: { length: 2.0, overtone: 4, overtoneVolume: 0.1 },
+    motif: [2, 0, 3, 1, 4, 2, 5, 7, 5, 3],
+  },
+  {
+    // C dorian, slow waves of cold liquid.
+    id: 'titanLakes', name: t('타이탄의 호수'),
+    chords: [chord('C3', 'G3', 'C4', 'D#4'), chord('F2', 'F3', 'A3', 'C4'), chord('A#2', 'F3', 'A#3', 'D4'), chord('F2', 'F3', 'A3', 'C4')],
+    melody: scale('C5 D#5 F5 G5 A#5 C6 D#6 F6'),
+    slots: [0, 1.6, 3.2, 4.8, 6.4], busy: 0.58,
+    bell: { length: 1.9, overtone: 3, overtoneVolume: 0.12 },
+  },
+  {
+    // A flat lydian, moving under the ice.
+    id: 'europaSea', name: t('유로파의 바다'),
+    chords: [chord('G#2', 'G#3', 'C4', 'D#4'), chord('A#2', 'F3', 'A#3', 'D4'), chord('C3', 'G3', 'C4', 'D#4'), chord('A#2', 'F3', 'A#3', 'D4')],
+    melody: scale('G#4 A#4 C5 D5 D#5 F5 G5 G#5'),
+    slots: [0, 0.75, 2, 3, 3.75, 5, 6], busy: 0.45,
+    bell: { length: 1.5, overtone: 5, overtoneVolume: 0.1 },
+    motif: [4, 5, 7, 5, 4, 2, 1, 2],
+  },
+  {
+    // A mixolydian, steady and going away.
+    id: 'voyager', name: t('보이저'),
+    chords: [chord('A2', 'A3', 'C#4', 'E4'), chord('G2', 'G3', 'B3', 'D4'), chord('D2', 'F#3', 'A3', 'D4'), chord('A2', 'A3', 'C#4', 'E4')],
+    melody: scale('A4 B4 C#5 E5 F#5 A5 B5 C#6'),
+    slots: [0, 1.5, 3, 4, 5.5, 7], busy: 0.5,
+    bell: { length: 1.7, overtone: 2, overtoneVolume: 0.16 },
+    motif: [0, 1, 3, 2, 4, 3, 5, 4, 6, 5],
+  },
+  {
+    // F dorian, short beeps in pairs.
+    id: 'farSignal', name: t('먼 신호'),
+    chords: [chord('F2', 'F3', 'G#3', 'C4'), chord('D#2', 'G3', 'A#3', 'D#4'), chord('A#2', 'F3', 'A#3', 'D4'), chord('C3', 'G3', 'C4', 'D#4')],
+    melody: scale('F4 G#4 A#4 C5 D#5 F5 G#5 A#5'),
+    slots: [0, 0.4, 2, 2.4, 4, 4.4, 6, 6.4], busy: 0.42,
+    bell: { length: 0.9, overtone: 5, overtoneVolume: 0.12 },
+    motif: [7, 4, 2, 4, 7, 6, 3, 1],
+  },
+  {
+    // E minor, a key tapped by hand.
+    id: 'atticRadio', name: t('다락방 무전기'),
+    chords: [chord('E2', 'G3', 'B3', 'E4'), chord('G2', 'G3', 'B3', 'D4'), chord('D2', 'F#3', 'A3', 'D4'), chord('C3', 'G3', 'C4', 'E4')],
+    melody: scale('E4 G4 A4 B4 D5 E5 G5 A5'),
+    slots: [0, 0.35, 0.7, 2, 4, 4.35, 4.7, 6], busy: 0.42,
+    bell: { length: 0.9, overtone: 3, overtoneVolume: 0.2, wave: 'triangle' },
+    motif: [3, 5, 7, 6, 4, 2, 0, 2],
+  },
+  {
+    // D major, dust in a stripe of light.
+    id: 'attic', name: t('다락방'),
+    chords: [chord('D2', 'F#3', 'A3', 'D4'), chord('B2', 'F#3', 'B3', 'D4'), chord('E2', 'G3', 'B3', 'E4'), chord('A2', 'A3', 'C#4', 'E4')],
+    melody: scale('D4 E4 F#4 A4 B4 D5 E5 F#5'),
+    slots: [0, 1, 2, 4, 5, 6], busy: 0.5,
+    bell: { length: 2.1, overtone: 2, overtoneVolume: 0.14 },
+  },
+  {
+    // B minor, dark water breathing.
+    id: 'nightSea', name: t('밤바다'),
+    chords: [chord('B2', 'F#3', 'B3', 'D4'), chord('G2', 'G3', 'B3', 'D4'), chord('A2', 'A3', 'C#4', 'E4'), chord('B2', 'F#3', 'B3', 'D4')],
+    melody: scale('B4 D5 E5 F#5 A5 B5 D6 E6'),
+    slots: [0, 1.6, 3.2, 4.8, 6.4], busy: 0.58,
+    bell: { length: 2.3, overtone: 2, overtoneVolume: 0.12 },
+  },
+  {
+    // G mixolydian, long swells and a small run.
+    id: 'waves', name: t('파도 소리'),
+    chords: [chord('G2', 'G3', 'B3', 'D4'), chord('C3', 'G3', 'C4', 'E4'), chord('F2', 'F3', 'A3', 'C4'), chord('C3', 'G3', 'C4', 'E4')],
+    melody: scale('G4 A4 B4 D5 E5 G5 A5 B5'),
+    slots: [0, 1, 3, 3.67, 4.33, 5, 7], busy: 0.45,
+    bell: { length: 1.6, overtone: 3, overtoneVolume: 0.14 },
+    motif: [1, 3, 2, 5, 4, 7, 6, 4],
+  },
+  {
+    // F major, plucked and homely.
+    id: 'seasideVillage', name: t('바닷가 마을'),
+    chords: [chord('F2', 'F3', 'A3', 'C4'), chord('A2', 'A3', 'C4', 'E4'), chord('D2', 'F3', 'A3', 'D4'), chord('A#2', 'F3', 'A#3', 'D4')],
+    melody: scale('F4 G4 A4 C5 D5 F5 G5 A5'),
+    slots: [0, 1, 1.5, 3, 4, 5, 5.5, 7], busy: 0.42,
+    bell: { length: 1.2, overtone: 3, overtoneVolume: 0.18, wave: 'triangle' },
+    motif: [5, 3, 1, 0, 1, 3, 5, 7],
+  },
+  {
+    // C lydian, wide leaps over the water.
+    id: 'seagull', name: t('갈매기'),
+    chords: [chord('C3', 'G3', 'C4', 'E4'), chord('D2', 'F#3', 'A3', 'D4'), chord('B2', 'F#3', 'B3', 'D4'), chord('E2', 'G3', 'B3', 'E4')],
+    melody: scale('C5 D5 E5 F#5 G5 A5 B5 C6'),
+    slots: [0, 0.5, 1.5, 3, 3.5, 4.5, 6], busy: 0.45,
+    bell: { length: 1.0, overtone: 2, overtoneVolume: 0.2 },
+    motif: [0, 4, 3, 7, 6, 2, 1, 5],
+  },
+  {
+    // B flat major in threes, rocking.
+    id: 'sailboat', name: t('돛단배'),
+    chords: [chord('A#2', 'F3', 'A#3', 'D4'), chord('D#2', 'G3', 'A#3', 'D#4'), chord('C3', 'G3', 'C4', 'D#4'), chord('F2', 'F3', 'A3', 'C4')],
+    melody: scale('A#4 C5 D5 F5 G5 A#5 C6 D6'),
+    slots: [0, 1.33, 2.67, 4, 5.33, 6.67], busy: 0.52,
+    bell: { length: 1.4, overtone: 2, overtoneVolume: 0.18 },
+    motif: [2, 3, 5, 3, 2, 0, 1, 3, 4, 1],
+  },
+  {
+    // D mixolydian, yellow and falling one by one.
+    id: 'ginkgo', name: t('은행잎'),
+    chords: [chord('D2', 'F#3', 'A3', 'D4'), chord('C3', 'G3', 'C4', 'E4'), chord('D2', 'F#3', 'A3', 'D4'), chord('G2', 'G3', 'B3', 'D4')],
+    melody: scale('D5 E5 F#5 A5 B5 D6 E6 F#6'),
+    slots: [0, 0.75, 2, 3, 3.75, 5, 6], busy: 0.45,
+    bell: { length: 1.0, overtone: 4, overtoneVolume: 0.12, wave: 'triangle' },
+    motif: [7, 5, 6, 4, 5, 3, 4, 2],
+  },
+  {
+    // G minor, a slow drift downward.
+    id: 'fallenLeaves', name: t('낙엽'),
+    chords: [chord('G2', 'G3', 'A#3', 'D4'), chord('C3', 'G3', 'C4', 'D#4'), chord('F2', 'F3', 'A3', 'C4'), chord('A#2', 'F3', 'A#3', 'D4')],
+    melody: scale('G4 A#4 C5 D5 F5 G5 A#5 C6'),
+    slots: [0, 1, 2, 4, 5, 6], busy: 0.5,
+    bell: { length: 1.6, overtone: 2, overtoneVolume: 0.16 },
+    motif: [7, 4, 2, 4, 7, 6, 3, 1],
+  },
+  {
+    // C sharp minor, high and cold, drops from the eaves.
+    id: 'icicles', name: t('고드름'),
+    chords: [chord('E2', 'G#3', 'C#4', 'E4'), chord('A2', 'A3', 'C#4', 'E4'), chord('E2', 'G#3', 'B3', 'E4'), chord('B2', 'F#3', 'B3', 'D#4')],
+    melody: scale('C#5 E5 F#5 G#5 B5 C#6 E6 F#6'),
+    slots: [0, 0.5, 1.5, 3, 3.5, 4.5, 6], busy: 0.45,
+    bell: { length: 0.8, overtone: 5, overtoneVolume: 0.12 },
+  },
+  {
+    // A hirajoshi, a few plucked notes in late winter.
+    id: 'plumBlossom', name: t('매화'),
+    chords: [chord('A2', 'A3', 'C4', 'E4'), chord('D2', 'F3', 'A3', 'D4'), chord('F2', 'F3', 'A3', 'C4'), chord('G2', 'G3', 'B3', 'D4')],
+    melody: scale('A4 B4 C5 E5 F5 A5 B5 C6'),
+    slots: [0, 3, 3.5, 4, 7], busy: 0.6,
+    bell: { length: 2.0, overtone: 2, overtoneVolume: 0.16, wave: 'triangle' },
+  },
+  {
+    // E lydian, light and carried off.
+    id: 'dandelion', name: t('민들레 홀씨'),
+    chords: [chord('E2', 'G#3', 'B3', 'E4'), chord('F#2', 'F#3', 'A#3', 'C#4'), chord('E2', 'G#3', 'C#4', 'E4'), chord('F#2', 'F#3', 'A#3', 'C#4')],
+    melody: scale('E5 F#5 G#5 A#5 B5 C#6 D#6 E6'),
+    slots: [0, 0.35, 0.7, 2, 4, 4.35, 4.7, 6], busy: 0.42,
+    bell: { length: 0.9, overtone: 3, overtoneVolume: 0.14 },
+    motif: [0, 3, 1, 4, 2, 5, 3, 6],
+  },
+  {
+    // D dorian on five notes, a long low sigh.
+    id: 'pineWind', name: t('솔바람'),
+    chords: [chord('D2', 'F3', 'A3', 'D4'), chord('F2', 'F3', 'A3', 'C4'), chord('C3', 'G3', 'C4', 'E4'), chord('G2', 'G3', 'B3', 'D4')],
+    melody: scale('D4 E4 G4 A4 B4 D5 E5 G5'),
+    slots: [0, 1.6, 3.2, 4.8, 6.4], busy: 0.58,
+    bell: { length: 2.4, overtone: 2, overtoneVolume: 0.14 },
+  },
+  {
+    // G dorian, knocks of hollow wood.
+    id: 'bamboo', name: t('대나무 숲'),
+    chords: [chord('G2', 'G3', 'A#3', 'D4'), chord('F2', 'F3', 'A3', 'C4'), chord('A#2', 'F3', 'A#3', 'D4'), chord('C3', 'G3', 'C4', 'E4')],
+    melody: scale('G4 A#4 C5 D5 F5 G5 A#5 C6'),
+    slots: [0, 0.4, 2, 2.4, 4, 4.4, 6, 6.4], busy: 0.42,
+    bell: { length: 0.8, overtone: 3, overtoneVolume: 0.2, wave: 'triangle' },
+    motif: [2, 0, 3, 1, 4, 2, 5, 7, 5, 3],
+  },
+  {
+    // B mixolydian, a bell stirred now and then.
+    id: 'windChime', name: t('풍경 소리'),
+    chords: [chord('B2', 'F#3', 'B3', 'D#4'), chord('E2', 'G#3', 'B3', 'E4'), chord('B2', 'F#3', 'B3', 'D#4'), chord('A2', 'A3', 'C#4', 'E4')],
+    melody: scale('B4 C#5 D#5 F#5 G#5 B5 C#6 D#6'),
+    slots: [0, 3, 3.5, 4, 7], busy: 0.6,
+    bell: { length: 2.8, overtone: 5, overtoneVolume: 0.1 },
+  },
+  {
+    // E dorian, a walk up and a look back.
+    id: 'hillPass', name: t('고갯마루'),
+    chords: [chord('E2', 'G3', 'B3', 'E4'), chord('D2', 'F#3', 'A3', 'D4'), chord('A2', 'A3', 'C#4', 'E4'), chord('E2', 'G3', 'B3', 'E4')],
+    melody: scale('E4 G4 A4 B4 D5 E5 G5 A5'),
+    slots: [0, 1.5, 3, 4, 5.5, 7], busy: 0.5,
+    bell: { length: 1.3, overtone: 2, overtoneVolume: 0.24, wave: 'triangle' },
+    motif: [4, 5, 7, 5, 4, 2, 1, 2],
+  },
+  {
+    // C major, two quick steps and a stop.
+    id: 'steppingStones', name: t('징검다리'),
+    chords: [chord('C3', 'G3', 'C4', 'E4'), chord('G2', 'G3', 'B3', 'D4'), chord('F2', 'F3', 'A3', 'C4'), chord('A2', 'A3', 'C4', 'E4')],
+    melody: scale('C5 D5 E5 G5 A5 C6 D6 E6'),
+    slots: [0, 0.4, 2, 2.4, 4, 4.4, 6, 6.4], busy: 0.42,
+    bell: { length: 0.9, overtone: 3, overtoneVolume: 0.16 },
+    motif: [0, 1, 3, 2, 4, 3, 5, 4, 6, 5],
+  },
+  {
+    // B flat mixolydian, turning and unwinding.
+    id: 'yarn', name: t('실타래'),
+    chords: [chord('A#2', 'F3', 'A#3', 'D4'), chord('D#2', 'G3', 'A#3', 'D#4'), chord('F2', 'F3', 'G#3', 'C4'), chord('D#2', 'G3', 'A#3', 'D#4')],
+    melody: scale('A#4 C5 D5 F5 G5 A#5 C6 D6'),
+    slots: [0, 1, 1.5, 3, 4, 5, 5.5, 7], busy: 0.42,
+    bell: { length: 1.3, overtone: 4, overtoneVolume: 0.1 },
+    motif: [3, 5, 7, 6, 4, 2, 0, 2],
+  },
+  {
+    // F sharp minor, even stitches, one after another.
+    id: 'knitting', name: t('뜨개질'),
+    chords: [chord('F#2', 'F#3', 'A3', 'C#4'), chord('A2', 'A3', 'C#4', 'E4'), chord('D2', 'F#3', 'A3', 'D4'), chord('E2', 'G#3', 'B3', 'E4')],
+    melody: scale('F#4 A4 B4 C#5 E5 F#5 A5 B5'),
+    slots: [0, 1, 2, 3, 4, 5, 6, 7], busy: 0.42,
+    bell: { length: 1.0, overtone: 2, overtoneVolume: 0.2 },
+    motif: [0, 2, 4, 5, 4, 2, 1, 3],
+  },
+  {
+    // E flat major, steam in a quiet kitchen.
+    id: 'teacup', name: t('찻잔'),
+    chords: [chord('D#2', 'G3', 'A#3', 'D#4'), chord('C3', 'G3', 'C4', 'D#4'), chord('G#2', 'G#3', 'C4', 'D#4'), chord('A#2', 'F3', 'A#3', 'D4')],
+    melody: scale('D#4 F4 G4 A#4 C5 D#5 F5 G5'),
+    slots: [0, 1, 3, 3.67, 4.33, 5, 7], busy: 0.45,
+    bell: { length: 1.7, overtone: 3, overtoneVolume: 0.1 },
+  },
+  {
+    // A flat major, faded and fond.
+    id: 'oldPhotos', name: t('옛날 사진'),
+    chords: [chord('G#2', 'G#3', 'C4', 'D#4'), chord('C3', 'G3', 'C4', 'D#4'), chord('F2', 'F3', 'G#3', 'C4'), chord('D#2', 'G3', 'A#3', 'D#4')],
+    melody: scale('G#4 A#4 C5 D#5 F5 G#5 A#5 C6'),
+    slots: [0, 2.5, 4, 6.5], busy: 0.64,
+    bell: { length: 2.6, overtone: 2, overtoneVolume: 0.1 },
+  },
+  {
+    // F mixolydian, line after line.
+    id: 'letter', name: t('편지'),
+    chords: [chord('F2', 'F3', 'A3', 'C4'), chord('D#2', 'G3', 'A#3', 'D#4'), chord('D2', 'F3', 'A3', 'D4'), chord('C3', 'G3', 'C4', 'D#4')],
+    melody: scale('F4 G4 A4 C5 D5 F5 G5 A5'),
+    slots: [0, 1, 2, 4, 5, 6], busy: 0.5,
+    bell: { length: 1.5, overtone: 3, overtoneVolume: 0.12 },
+    motif: [1, 3, 2, 5, 4, 7, 6, 4],
+  },
+  {
+    // D flat major, a red box on a corner.
+    id: 'postbox', name: t('우체통'),
+    chords: [chord('A#2', 'F3', 'A#3', 'C#4'), chord('F#2', 'F#3', 'A#3', 'C#4'), chord('G#2', 'G#3', 'C4', 'D#4'), chord('D#2', 'F#3', 'A#3', 'D#4')],
+    melody: scale('C#5 D#5 F5 G#5 A#5 C#6 D#6 F6'),
+    slots: [0, 0.75, 2, 3, 3.75, 5, 6], busy: 0.45,
+    bell: { length: 1.1, overtone: 2, overtoneVolume: 0.2, wave: 'triangle' },
+    motif: [5, 3, 1, 0, 1, 3, 5, 7],
+  },
+  {
+    // A major, steady as wheels.
+    id: 'trainStation', name: t('기차역'),
+    chords: [chord('A2', 'A3', 'C#4', 'E4'), chord('F#2', 'F#3', 'A3', 'C#4'), chord('D2', 'F#3', 'A3', 'D4'), chord('B2', 'F#3', 'B3', 'D4')],
+    melody: scale('A4 B4 C#5 E5 F#5 A5 B5 C#6'),
+    slots: [0, 1, 2, 3, 4, 5, 6, 7], busy: 0.42,
+    bell: { length: 0.9, overtone: 4, overtoneVolume: 0.12 },
+    motif: [0, 4, 3, 7, 6, 2, 1, 5],
+  },
+  {
+    // D minor in threes, an empty carriage at night.
+    id: 'lastTrain', name: t('막차'),
+    chords: [chord('D2', 'F3', 'A3', 'D4'), chord('C3', 'G3', 'C4', 'E4'), chord('A#2', 'F3', 'A#3', 'D4'), chord('A2', 'A3', 'C4', 'E4')],
+    melody: scale('D4 F4 G4 A4 C5 D5 F5 G5'),
+    slots: [0, 1.33, 2.67, 4, 5.33, 6.67], busy: 0.52,
+    bell: { length: 2.0, overtone: 2, overtoneVolume: 0.14 },
+  },
+  {
+    // B dorian, round a corner and round again.
+    id: 'alley', name: t('골목길'),
+    chords: [chord('B2', 'F#3', 'B3', 'D4'), chord('E2', 'G#3', 'B3', 'E4'), chord('D2', 'F#3', 'A3', 'D4'), chord('A2', 'A3', 'C#4', 'E4')],
+    melody: scale('B4 D5 E5 F#5 A5 B5 D6 E6'),
+    slots: [0, 0.5, 1.5, 3, 3.5, 4.5, 6], busy: 0.45,
+    bell: { length: 1.0, overtone: 3, overtoneVolume: 0.22, wave: 'triangle' },
+    motif: [2, 3, 5, 3, 2, 0, 1, 3, 4, 1],
+  },
+  {
+    // F minor, one lamp and a long dark.
+    id: 'streetlight', name: t('가로등'),
+    chords: [chord('F2', 'F3', 'G#3', 'C4'), chord('G#2', 'G#3', 'C4', 'D#4'), chord('A#2', 'F3', 'A#3', 'C#4'), chord('D#2', 'G3', 'A#3', 'D#4')],
+    melody: scale('F4 G#4 A#4 C5 D#5 F5 G#5 A#5'),
+    slots: [0, 2, 4, 6], busy: 0.66,
+    bell: { length: 2.8, overtone: 3, overtoneVolume: 0.08 },
+  },
+  {
+    // G lydian, rising with no hurry.
+    id: 'balloon', name: t('열기구'),
+    chords: [chord('G2', 'G3', 'B3', 'D4'), chord('A2', 'A3', 'C#4', 'E4'), chord('B2', 'F#3', 'B3', 'D4'), chord('F#2', 'F#3', 'A3', 'C#4')],
+    melody: scale('G4 A4 B4 C#5 D5 E5 F#5 G5'),
+    slots: [0, 1.5, 3, 4, 5.5, 7], busy: 0.5,
+    bell: { length: 1.9, overtone: 2, overtoneVolume: 0.14 },
+    motif: [0, 3, 1, 4, 2, 5, 3, 6],
+  },
+  {
+    // C mixolydian, a throw, a glide, a dip.
+    id: 'paperPlane', name: t('종이비행기'),
+    chords: [chord('C3', 'G3', 'C4', 'E4'), chord('A#2', 'F3', 'A#3', 'D4'), chord('F2', 'F3', 'A3', 'C4'), chord('G2', 'G3', 'A#3', 'D4')],
+    melody: scale('C5 D5 E5 G5 A5 C6 D6 E6'),
+    slots: [0, 1, 3, 3.67, 4.33, 5, 7], busy: 0.45,
+    bell: { length: 0.9, overtone: 2, overtoneVolume: 0.24, wave: 'triangle' },
+    motif: [4, 5, 7, 5, 4, 2, 1, 2],
+  },
+  {
+    // E mixolydian, pulled up by the string.
+    id: 'kite', name: t('연날리기'),
+    chords: [chord('E2', 'G#3', 'B3', 'E4'), chord('A2', 'A3', 'C#4', 'E4'), chord('D2', 'F#3', 'A3', 'D4'), chord('E2', 'G#3', 'B3', 'E4')],
+    melody: scale('E5 F#5 G#5 B5 C#6 E6 F#6 G#6'),
+    slots: [0, 1, 1.5, 3, 4, 5, 5.5, 7], busy: 0.42,
+    bell: { length: 1.2, overtone: 2, overtoneVolume: 0.2 },
+    motif: [7, 4, 2, 4, 7, 6, 3, 1],
+  },
+  {
+    // B flat dorian, looking and waiting.
+    id: 'oldTelescope', name: t('낡은 망원경'),
+    chords: [chord('A#2', 'F3', 'A#3', 'C#4'), chord('D#2', 'G3', 'A#3', 'D#4'), chord('F2', 'F3', 'G#3', 'C#4'), chord('G#2', 'G#3', 'C4', 'D#4')],
+    melody: scale('A#4 C#5 D#5 F5 G#5 A#5 C#6 D#6'),
+    slots: [0, 2.5, 4, 6.5], busy: 0.64,
+    bell: { length: 2.2, overtone: 4, overtoneVolume: 0.1 },
+  },
+  {
+    // F sharp dorian, a dome opening at dusk.
+    id: 'observatory', name: t('천문대'),
+    chords: [chord('F#2', 'F#3', 'A3', 'C#4'), chord('A2', 'A3', 'C#4', 'E4'), chord('B2', 'F#3', 'B3', 'D#4'), chord('E2', 'G#3', 'B3', 'E4')],
+    melody: scale('F#4 A4 B4 C#5 E5 F#5 A5 B5'),
+    slots: [0, 1, 2, 4, 5, 6], busy: 0.5,
+    bell: { length: 1.8, overtone: 3, overtoneVolume: 0.14 },
+    motif: [2, 0, 3, 1, 4, 2, 5, 7, 5, 3],
+  },
+  {
+    // D phrygian, going round and never landing.
+    id: 'orbit', name: t('궤도'),
+    chords: [chord('D2', 'F3', 'A3', 'D4'), chord('D#2', 'G3', 'A#3', 'D#4'), chord('F2', 'F3', 'A3', 'C4'), chord('D#2', 'G3', 'A#3', 'D#4')],
+    melody: scale('D4 D#4 G4 A4 A#4 D5 D#5 G5'),
+    slots: [0, 1, 2, 3, 4, 5, 6, 7], busy: 0.42,
+    bell: { length: 1.2, overtone: 2, overtoneVolume: 0.18 },
+    motif: [7, 5, 6, 4, 5, 3, 4, 2],
+  },
+  {
+    // E flat lydian, nothing comes down.
+    id: 'weightless', name: t('무중력'),
+    chords: [chord('D#2', 'G3', 'A#3', 'D#4'), chord('F2', 'F3', 'A3', 'C4'), chord('D#2', 'G3', 'A#3', 'D#4'), chord('D2', 'F3', 'A3', 'D4')],
+    melody: scale('D#5 F5 G5 A5 A#5 C6 D6 D#6'),
+    slots: [0, 3, 3.5, 4, 7], busy: 0.6,
+    bell: { length: 2.5, overtone: 2, overtoneVolume: 0.14 },
+  },
+  {
+    // G sharp minor, small stones passing.
+    id: 'asteroidBelt', name: t('소행성대'),
+    chords: [chord('G#2', 'G#3', 'B3', 'D#4'), chord('E2', 'G#3', 'B3', 'E4'), chord('F#2', 'F#3', 'A#3', 'C#4'), chord('B2', 'F#3', 'B3', 'D#4')],
+    melody: scale('G#4 B4 C#5 D#5 F#5 G#5 B5 C#6'),
+    slots: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7], busy: 0.26,
+    bell: { length: 0.8, overtone: 3, overtoneVolume: 0.18, wave: 'triangle' },
+  },
+  {
+    // B lydian, another galaxy, wide and far.
+    id: 'andromeda', name: t('안드로메다'),
+    chords: [chord('B2', 'F#3', 'B3', 'D#4'), chord('F2', 'F3', 'G#3', 'C#4'), chord('F#2', 'F#3', 'A#3', 'C#4'), chord('D#2', 'F#3', 'A#3', 'D#4')],
+    melody: scale('B4 C#5 D#5 F5 F#5 G#5 A#5 B5'),
+    slots: [0, 2.5, 4, 6.5], busy: 0.64,
+    bell: { length: 2.7, overtone: 3, overtoneVolume: 0.1 },
+    motif: [0, 4, 3, 7, 6, 2, 1, 5],
+  },
+  {
+    // A dorian, one note that does not move.
+    id: 'northStar', name: t('북극성'),
+    chords: [chord('A2', 'A3', 'C4', 'E4'), chord('G2', 'G3', 'B3', 'D4'), chord('A2', 'A3', 'C4', 'E4'), chord('D2', 'F#3', 'A3', 'D4')],
+    melody: scale('A4 C5 D5 E5 G5 A5 C6 D6'),
+    slots: [0, 1, 3, 3.67, 4.33, 5, 7], busy: 0.45,
+    bell: { length: 1.4, overtone: 5, overtoneVolume: 0.1 },
+  },
+  {
+    // C major in threes, a word from long ago.
+    id: 'starlightLetter', name: t('별빛 편지'),
+    chords: [chord('A2', 'A3', 'C4', 'E4'), chord('F2', 'F3', 'A3', 'C4'), chord('C3', 'G3', 'C4', 'E4'), chord('G2', 'G3', 'B3', 'D4')],
+    melody: scale('C5 D5 E5 G5 A5 C6 D6 E6'),
+    slots: [0, 1.33, 2.67, 4, 5.33, 6.67], busy: 0.52,
+    bell: { length: 2.2, overtone: 3, overtoneVolume: 0.12 },
+    motif: [3, 5, 7, 6, 4, 2, 0, 2],
   },
 ];
 

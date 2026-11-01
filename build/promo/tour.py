@@ -16,7 +16,7 @@ FADE_S = 2.5
 # From and to (s) of each caption of a take: <shot>-<take>-<n>.png (captions.cjs).
 TAKES = {
     'auroraDrift': {
-        '1': [(0, 6), (6, 13), (13, 20), (20, 26)],
+        '1': [(0, 6), (6, 13), (13, 20), (20, 24.9)],
         '2': [(0, 9), (9, 24.9)],
     },
 }

@@ -18,7 +18,7 @@
 
 ## 추천코스 쇼츠
 
-코스 하나를 60초 안의 쇼츠로 만든다. 한 장면이 56초라 `cut.py` 대신 `tour.py` 를 쓴다(그림을 모두 메모리에 올리면 10GB가 든다).
+코스 하나를 30초 쇼츠로 만든다. 한 장면이 길어 `cut.py` 대신 `tour.py` 를 쓴다(그림을 모두 메모리에 올리면 10GB가 든다).
 
 1. 녹화: `PROMO_URL=http://localhost:4417/oddity_claude/ node build/promo/shoot.cjs ko auroraDrift`
 2. 자막과 끝 화면: `FILM=tour node build/promo/captions.cjs ko`

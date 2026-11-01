@@ -1,6 +1,6 @@
 """Cuts a Short of one tour course from one long shot (build/promo/shoot.cjs): the frames as
 they were recorded, its caption over them, the shot's own sound (the game's music, faded
-out over the end) and the end card, 60 seconds at most. cut.py holds every frame in memory,
+out over the end) and the end card, 30 seconds (a Short may run 60). cut.py holds every frame in memory,
 10 GB for a shot this long, so this goes straight to ffmpeg.
 Run: python -P build/promo/tour.py <lang> <shot>  ->  assets/promo/tour-<shot>-<lang>.mp4
 """
@@ -10,7 +10,7 @@ from PIL import Image, ImageFilter
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'promo')
 SIZE = (1080, 1920)
 START_S = 0.5
-SHOT_S = 56.0
+SHOT_S = 26.5
 END_S = 3.2
 FADE_S = 2.5
 
@@ -40,7 +40,7 @@ def main(lang, name):
     offset = START_S + times[0] - audio
     graph = (
         f'[0:v]fps=30,scale={SIZE[0]}:{SIZE[1]}[film];'
-        f'[1:v]format=rgba,fade=t=in:st=0:d=0.5:alpha=1,fade=t=out:st=4.5:d=0.8:alpha=1[words];'
+        f'[1:v]format=rgba,fade=t=in:st=0:d=0.5:alpha=1,fade=t=out:st=4.5:d=0.5:alpha=1[words];'
         f'[film][words]overlay=eof_action=pass,scale=in_range=pc:out_range=tv,format=yuv420p,setsar=1[main];'
         f'[3:v]fps=30,scale={SIZE[0]}:{SIZE[1]}:in_range=pc:out_range=tv,format=yuv420p,setsar=1[end];'
         f'[main][end]concat=n=2:v=1:a=0[v];'

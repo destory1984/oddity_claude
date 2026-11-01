@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-01', text: t('목성 곁 모노리스 장면에 슈트라우스의 「차라투스트라는 이렇게 말했다」 첫머리가 흐릅니다.') },
   { day: '2026-11-01', text: t('배경 음악이 쉰 곡 늘어 백 곡이 되었습니다.') },
   { day: '2026-10-28', text: t('지구의 사진 보기는 사진과 그 설명에서 끝납니다. 아래에 있던 긴 읽을거리를 뺐습니다.') },
   { day: '2026-10-25', text: t('동작 줄이기를 켜도 수첩을 닫을 때 종이 소리가 납니다.') },

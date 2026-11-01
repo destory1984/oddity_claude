@@ -3,7 +3,7 @@
 // (public/assets/sounds/stardust.mp3, 1.9 s, 24 KB; CC BY, THIRD-PARTY.md).
 
 import { callFor } from '../core/voice.js';
-import { BAR_S, barPlan, tuneFor, nextTuneBar, tuneOrder, barInOrder, keptMusic } from '../core/music.js';
+import { BAR_S, SUNRISE, barPlan, tuneFor, nextTuneBar, tuneOrder, barInOrder, keptMusic } from '../core/music.js';
 
 const MUTE_KEY = 'oddity.muted';
 const MUSIC_KEY = 'oddity.music';
@@ -300,6 +300,46 @@ export function createSound({ music } = {}) {
   }
 
   const PENTATONIC = [523, 587, 659, 784, 880, 1047, 1175, 1319];
+  // A brass note: two saws a little apart, through a filter that opens as the note is blown.
+  function brass(freq, start, length, volume, out) {
+    const t = ctx.currentTime + start;
+    const env = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.Q.value = 1;
+    filter.frequency.setValueAtTime(freq * 2, t);
+    filter.frequency.exponentialRampToValueAtTime(Math.min(5000, freq * 7), t + 0.14);
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(volume, t + 0.07);
+    env.gain.setValueAtTime(volume, t + Math.max(0.08, length - 0.1));
+    env.gain.exponentialRampToValueAtTime(0.0001, t + length + 0.3);
+    filter.connect(env).connect(out);
+    for (const detune of [-5, 5]) {
+      const osc = ctx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.value = freq;
+      osc.detune.value = detune;
+      osc.connect(filter);
+      osc.start(t);
+      osc.stop(t + length + 0.35);
+    }
+  }
+
+  // A kettledrum: a falling note, its overtone and the stick's thud.
+  function drum(freq, start, volume, out) {
+    tone({ freq, to: freq * 0.92, start, length: 0.55, volume, out });
+    tone({ freq: freq * 1.5, start, length: 0.25, volume: volume * 0.35, out });
+    noise({ start, length: 0.08, volume: volume * 0.7, type: 'lowpass', freq: 500, to: 180, out });
+  }
+
+  // The background music steps aside for `seconds`, for music that belongs to a scene.
+  function quietMusic(seconds) {
+    const { gain } = musicBus;
+    gain.cancelScheduledValues(ctx.currentTime);
+    gain.setTargetAtTime(0, ctx.currentTime, 0.25);
+    if (musicOn) gain.setTargetAtTime(1, ctx.currentTime + seconds, 0.8);
+  }
+
   // The long sounds of a scene played again (a rocket's roar runs ten seconds) go
   // through a bus of their own, so that leaving the scene can still them at once.
   let sceneBus = null;
@@ -315,6 +355,16 @@ export function createSound({ music } = {}) {
 
   // Wind past a parachute for `seconds`: a soft band of noise that swells twice a
   // breath, with a low flutter of the canopy under it.
+  function burnFor(seconds) {
+    const out = scene();
+    for (let at = 0; at < seconds; at += 7) {
+      const length = Math.min(7.6, seconds - at + 0.6);
+      noise({ start: at, length, volume: 0.2, type: 'lowpass', freq: 260, to: 200, attack: 0.4, out });
+      noise({ start: at, length, volume: 0.06, type: 'bandpass', freq: 1100, to: 800, attack: 0.4, out });
+    }
+    tone({ freq: 58, to: 50, length: seconds, volume: 0.12, attack: 0.5, out });
+  }
+
   function windDown(seconds) {
     const out = scene();
     noise({ length: seconds, volume: 0.1, type: 'bandpass', freq: 420, to: 300, attack: seconds * 0.7, out });
@@ -589,14 +639,24 @@ export function createSound({ music } = {}) {
       for (let k = 0; k < 33; k++) tone({ freq: 1000, start: k * 0.6, length: 0.3, volume: 0.05, attack: 0.02, out });
     },
     // A main engine burning in space for a long while (Juno at Jupiter, 21 s): a steady
-    // low hiss that comes on at once and is cut at the end.
-    burnLong: () => {
+    // low hiss that comes on at once and is cut at the end. burnShort: the ship before the
+    // slab, whose engine is out by the time the brass comes in.
+    burnLong: () => burnFor(21),
+    burnShort: () => burnFor(11.5),
+    // The opening of Also sprach Zarathustra (core/music.js SUNRISE), the background music
+    // standing aside: an organ's low C, the brass, the drums, a cymbal on the last chord.
+    sunrise: () => {
       const out = scene();
-      for (const at of [0, 7, 14]) {
-        noise({ start: at, length: 7.6, volume: 0.2, type: 'lowpass', freq: 260, to: 200, attack: 0.4, out });
-        noise({ start: at, length: 7.6, volume: 0.06, type: 'bandpass', freq: 1100, to: 800, attack: 0.4, out });
+      quietMusic(SUNRISE.seconds);
+      const { pedal, climax } = SUNRISE;
+      tone({ freq: pedal, length: 16.5, volume: 0.07, attack: 1.2, hold: 13.5, out });
+      brass(pedal * 2, 0, 16, 0.016, out);
+      for (const [at, length, volume, notes] of SUNRISE.brass) {
+        for (const freq of notes) brass(freq, at, length, volume, out);
       }
-      tone({ freq: 58, to: 50, length: 21, volume: 0.12, attack: 0.5, out });
+      for (const [at, freq] of SUNRISE.drum) drum(freq, at, 0.22, out);
+      drum(pedal * 2, climax, 0.34, out);
+      noise({ start: climax, length: 3.4, volume: 0.09, type: 'highpass', freq: 4500, to: 2500, attack: 0.02, out });
     },
     // It stands: two bells over the thump.
     stood: () => {
@@ -617,6 +677,10 @@ export function createSound({ music } = {}) {
     // Still a scene's long sounds (the scene was left before its end).
     hushScene() {
       if (ctx && sceneBus) sceneBus.gain.setTargetAtTime(0, ctx.currentTime, 0.12);
+      if (ctx && musicOn) {
+        musicBus.gain.cancelScheduledValues(ctx.currentTime);
+        musicBus.gain.setTargetAtTime(1, ctx.currentTime, 0.4);
+      }
     },
     // { gain, pitch, sparkle } from core/audio.js engineSound(); called every frame.
     engine({ gain, pitch }) {
@@ -663,7 +727,10 @@ export function createSound({ music } = {}) {
     setMusic(on) {
       musicOn = on;
       saveMusic(on);
-      if (ctx) musicBus.gain.setTargetAtTime(on ? 1 : 0, ctx.currentTime, 0.3);
+      if (ctx) {
+        musicBus.gain.cancelScheduledValues(ctx.currentTime);
+        musicBus.gain.setTargetAtTime(on ? 1 : 0, ctx.currentTime, 0.3);
+      }
     },
     // Spoken by the browser's own voice (no sound files): in Korean on a device set to
     // Korean, in English on any other (core/voice.js). Silent when muted or when the

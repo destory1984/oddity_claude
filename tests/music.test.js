@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  BAR_S, BARS_PER_TUNE, CHORDS, MELODY, TUNES, barPlan, moodFor, tuneFor, nextTuneBar, tuneOrder, barInOrder, keptMusic,
+  BAR_S, BARS_PER_TUNE, CHORDS, MELODY, SUNRISE, TUNES, barPlan, moodFor, tuneFor, nextTuneBar, tuneOrder, barInOrder, keptMusic,
 } from '../src/core/music.js';
 
 const BARS = BARS_PER_TUNE * TUNES.length;
@@ -164,4 +164,15 @@ test('after a change of language the music carries on where it stood, or starts 
   assert.equal(keptMusic({ order, bar: 1.5 }), null);
   assert.equal(keptMusic({ order: order.slice(1), bar: 3 }), null);
   assert.equal(keptMusic({ order: order.map(() => 0), bar: 3 }), null);
+});
+
+test('the Strauss opening climbs C, G, C twice, turns major to minor, then minor to major', () => {
+  const lines = SUNRISE.brass.filter(([, , , notes]) => notes.length === 1).map(([, , , [note]]) => note);
+  assert.deepEqual(lines, [261.63, 392, 523.25, 261.63, 392, 523.25]);
+  const thirds = SUNRISE.brass.filter(([, , , notes]) => notes.length > 1).map(([, , , notes]) => notes[3]);
+  assert.deepEqual(thirds, [329.63, 311.13, 311.13, 329.63]);
+  const times = SUNRISE.brass.map(([at]) => at);
+  assert.deepEqual(times, [...times].sort((a, b) => a - b));
+  assert.equal(times[times.length - 1], SUNRISE.climax);
+  for (const [at, length] of SUNRISE.brass) assert.ok(at + length < SUNRISE.seconds);
 });

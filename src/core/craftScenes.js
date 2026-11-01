@@ -226,7 +226,8 @@ export const CRAFT_SCENES = {
     day: t('소설 속 2010년'),
     seconds: 32,
     downAt: 16,
-    sounds: [[0.5, 'burnLong'], [16, 'stood'], [24, 'clunk']],
+    // The brass comes in as the engine goes out; its last chord is the Sun on the slab.
+    sounds: [[0.5, 'burnShort'], [12, 'sunrise'], [16, 'stood']],
     lines: [
       { at: 0, text: t('지어낸 이야기입니다. 우주선 한 척이 목성까지 날아와, 목성과 이오 사이에 떠 있는 판 앞에서 속도를 줄입니다.') },
       { at: 8, text: t('우주선은 엔진 불을 끄고, 가운데 바퀴를 천천히 돌리며 판 쪽으로 미끄러져 갑니다.') },

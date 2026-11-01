@@ -979,3 +979,28 @@ export function barPlan(bar, mood) {
   });
   return { bass: bass * octave, pad: pad.map((f) => f * octave), notes, bell: tune.bell };
 }
+
+// The opening of Richard Strauss's Also sprach Zarathustra (1896) for the ship stopping
+// before the slab (core/craftScenes.js monolith; the user, 2026-11-01: "모노리스 애니 보여줄
+// 때, 짜라수트라 틀어주는건?", "넣어"). Played by ui/sound.js, as no recording of it may be
+// used. About 30 s in the score, cut to 16: at `climax` the last chord comes as the Sun
+// stands on the slab. brass: [at, length, volume, notes]; drum: [at, Hz].
+const TUTTI = (third) => ['C3', 'G3', 'C4', third, 'G4', 'C5'].map(hz);
+export const SUNRISE = {
+  seconds: 17,
+  climax: 12.4,
+  pedal: hz('C2'),
+  brass: [
+    [1, 1.5, 0.11, [hz('C4')]],
+    [2.5, 1.5, 0.11, [hz('G4')]],
+    [4, 0.9, 0.12, [hz('C5')]],
+    [4.9, 0.8, 0.05, TUTTI('E4')],
+    [5.7, 1.5, 0.05, TUTTI('D#4')],
+    [8.6, 1.3, 0.12, [hz('C4')]],
+    [9.9, 1.3, 0.12, [hz('G4')]],
+    [11.2, 0.7, 0.13, [hz('C5')]],
+    [11.9, 0.5, 0.065, TUTTI('D#4')],
+    [12.4, 3.6, 0.085, TUTTI('E4')],
+  ],
+  drum: [6.4, 6.73, 7.06, 7.39, 7.72, 8.05].map((at, i) => [at, hz(i % 2 ? 'G2' : 'C3')]),
+};

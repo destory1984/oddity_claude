@@ -1,3 +1,4 @@
+import { SUNRISE } from '../src/core/music.js';
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { REPLAYS, replayFor, replayFrame, replayOn, replaySounds, replayAt } from '../src/core/replay.js';
@@ -496,6 +497,11 @@ test('the slab has a made-up scene: the ship comes in, burns, stops and says a w
   assert.equal(at(16).come, 1);
   assert.ok(at(20).say > 0.99 && at(23).say === 0);
   assert.equal(at(30).glint, 1);
+  // The brass's last chord comes as the Sun stands on the slab.
+  const brassAt = scene.sounds.find(([, name]) => name === 'sunrise')[0];
+  const climax = brassAt + SUNRISE.climax;
+  assert.ok(at(climax).glint > 0 && at(climax).glint < 1);
+  assert.ok(brassAt + SUNRISE.seconds <= scene.seconds);
 });
 
 test('the slab on the Moon has a made-up scene: they come, one touches it, the Sun comes up and it calls', () => {

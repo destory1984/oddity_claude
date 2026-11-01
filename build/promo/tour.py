@@ -23,7 +23,8 @@ TAKES = {
 
 
 def main(lang, name, take):
-    folder = os.path.abspath(os.path.join(ROOT, lang, name))
+    # (One recording for every language: the bare view has no words on it.)
+    folder = os.path.abspath(os.path.join(ROOT, 'ko', name))
     times = json.load(open(os.path.join(folder, 'times.json')))
     rel = [t - times[0] for t in times]
     picked = [i for i, t in enumerate(rel) if START_S <= t <= START_S + SHOT_S]
@@ -31,7 +32,7 @@ def main(lang, name, take):
     last = Image.open(os.path.join(folder, f'{picked[-1]:05d}.jpg')).convert('RGB').resize(SIZE, Image.LANCZOS)
     back = last.filter(ImageFilter.GaussianBlur(28)).point(lambda v: int(v * 0.35)).convert('RGBA')
     back.alpha_composite(Image.open(os.path.join(ROOT, lang, 'captions', 'end.png')).convert('RGBA'))
-    end = os.path.join(folder, 'end.jpg')
+    end = os.path.join(folder, f'end-{lang}.jpg')
     back.convert('RGB').save(end, quality=95)
     # Each frame stays until the next was recorded.
     lines = []

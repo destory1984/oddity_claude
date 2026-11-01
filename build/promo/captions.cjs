@@ -93,6 +93,15 @@ const TOUR = {
     'auroraDrift-2-2': '소리 없는 빛의 커튼',
     end: FIRST.ko.end,
   },
+  en: {
+    'auroraDrift-1-1': 'The aurora, seen from space',
+    'auroraDrift-1-2': '400 km up,\nwhere the space station flies',
+    'auroraDrift-1-3': 'Particles from the Sun\nset the air glowing',
+    'auroraDrift-1-4': 'Silent curtains of light',
+    'auroraDrift-2-1': 'Shall we fly\ninto the aurora tonight?',
+    'auroraDrift-2-2': 'Silent curtains of light',
+    end: FIRST.en.end,
+  },
 };
 const LINES = { thatday: THAT_DAY, gaze: GAZE, tour: TOUR }[process.env.FILM] ?? FIRST;
 

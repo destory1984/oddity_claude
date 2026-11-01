@@ -12,6 +12,8 @@ const path = require('path');
 const { chromium, executablePath } = require('./env.cjs');
 const SHOTS = require('./shots.cjs');
 
+// The shots with the music on and the effects off.
+const TUNED = ['music', 'auroraDrift'];
 const URL = process.env.PROMO_URL || 'https://destory1984.github.io/oddity_claude/';
 const ROOT = path.join(__dirname, '..', '..', 'assets', 'promo');
 
@@ -61,7 +63,7 @@ async function shoot(browser, lang, name) {
       };
       window.__rec.stop();
     });
-  }, [lang, name === 'music']);
+  }, [lang, TUNED.includes(name)]);
   const out = path.join(ROOT, lang, name);
   fs.rmSync(out, { recursive: true, force: true });
   fs.mkdirSync(out, { recursive: true });

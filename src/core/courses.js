@@ -13,6 +13,12 @@
 //     keeps passing over the body; 'milkyWay': the plane is the galaxy's and the band runs
 //     behind the body all the way round;
 //   rings: inclined overDeg to the rings, starting roundDeg from the Sun's side.
+//   rail: round a stretch of the aurora over the night side, which no lock can do: the
+//     lock goes round a body, and the ring shows on the night side only (the user,
+//     2026-11-02: "오로라만 집중적으로 보는 곳으로", "이건 맴돌기가 아니네..."). atKm: how high the
+//     point she looks at stands, in the curtain (100 to 1,500 km up); highKm: how high she
+//     flies; rangeKm: how far off she goes round it, through the curtain twice a lap;
+//     startS: how far into a lap it starts, where the curtains stand thickest.
 // rollDeg: the view turned, for a band that lies across a tall screen.
 import { orientationFrom, right, up } from './orientation.js';
 import { GALACTIC_CENTRE, GALACTIC_POLE, GALAXIES, NEBULAE, fromEquatorial } from './sky.js';
@@ -20,6 +26,7 @@ import { fromSpot, outOf, sunFrame } from './startSpots.js';
 import { t } from './i18n.js';
 
 export const COURSES = [
+  { id: 'auroraDrift', body: 'earth', lapS: 120, rail: { latDeg: 67, startS: 75, atKm: 800, sunwardKm: 470, highKm: 400, rangeKm: 1500 }, name: t('오로라 유영'), todo: t('밤쪽 오로라 한 곳을 가까이에서 맴돌며 빛의 커튼 사이를 지나갑니다.') },
   { id: 'earthRound', body: 'earth', lapS: 120, name: t('지구 한 바퀴'), todo: t('지구 둘레를 두 분에 한 바퀴 돕니다. 낮과 밤, 오로라가 차례로 지나갑니다.'),
     spot: { body: 'earth', at: [26444.3, -7115.1, 2123.1], ahead: [-0.9321, 0.3592, -0.0476], above: [0.3376, 0.9087, 0.2455] }, toward: [0.1308, 0.196, -0.9719] },
   { id: 'milkyWay', body: 'earth', lapS: 180, radii: 8, rollDeg: 35, sky: 'milkyWay', name: t('은하수 일주'), todo: t('은하수가 놓인 평면을 따라 지구를 돕니다. 은하 중심에서 출발합니다.') },
@@ -36,6 +43,7 @@ export const COURSES = [
     sun: { from: [0.8, 0.1, 0.6], toward: [-0.1, 0.95, 0.2] } },
   { id: 'venusPhases', body: 'venus', lapS: 120, radii: 5.5, name: t('금성의 위상'), todo: t('금성을 돌면서 둥근 모습이 초승달처럼 변하는 것을 봅니다.'),
     sun: { from: [1, 0.05, 0], toward: [0, 0, 1] } },
+  { id: 'coronaDrift', body: 'sun', lapS: 180, radii: 4.5, rollDeg: 35, sky: 'milkyWay', name: t('태양 코로나 유영'), todo: t('태양 가까이에서 코로나를 따라 돕니다. 뒤로 은하수가 흐릅니다.') },
   { id: 'magellan', body: 'moon', lapS: 150, radii: 7, sky: 'lmc', overDeg: 14, name: t('마젤란은하'), todo: t('달을 돌면서 남쪽 하늘의 큰 은하와 작은 은하를 봅니다.') },
 ];
 
@@ -83,9 +91,28 @@ function roundOf(course, frame, ringNormal) {
   return { from, along: cross(normal, from) };
 }
 
+// Where a rail has her after `seconds`, looking at the point it goes round.
+export function railAt(course, body, sun, seconds) {
+  // (Over midnight, Earth a strip at the foot of the view (the user, 2026-11-02: "지구가 조금
+  // 보여야해"); facing the Sun the view rises by sunwardKm, for the Sun, drawn large, stands
+  // on the horizon there, and in view it puts out the aurora and the stars. The user, 2026-11-02: "태양은 안 나와야해... 다 없어지네".)
+  const { latDeg, atKm, sunwardKm, highKm, rangeKm } = course.rail;
+  const away = unit([body.position[0] - sun.position[0], 0, body.position[2] - sun.position[2]]);
+  const over = mix(Math.cos(rad(latDeg)), away, Math.sin(rad(latDeg)), [0, 1, 0]);
+  const east = unit(cross(over, [0, 1, 0]));
+  const north = cross(over, east);
+  const turn = (2 * Math.PI * seconds) / course.lapS;
+  const aside = mix(Math.cos(turn), east, Math.sin(turn), north);
+  const position = body.position.map((n, i) => n + over[i] * (body.radiusKm + highKm) + aside[i] * rangeKm);
+  const facingSun = Math.max(0, dot(aside, away));
+  const point = body.position.map((n, i) => n + over[i] * (body.radiusKm + atKm + sunwardKm * facingSun));
+  return { position, orientation: orientationFrom(point.map((n, i) => n - position[i]), over) };
+}
+
 // Where a round starts and the slide that carries her along it, with the bodies where
 // they are now. ringNormal: of the body, for a round kept to its rings.
 export function courseStart(course, body, sun, ringNormal = null) {
+  if (course.rail) return { ...railAt(course, body, sun, course.rail.startS), slide: {} };
   const frame = sunFrame(body.position, sun.position);
   const { from, along } = roundOf(course, frame, ringNormal);
   const km = course.spot ? Math.hypot(...course.spot.at) : course.radii * body.radiusKm;

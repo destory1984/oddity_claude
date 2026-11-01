@@ -16,6 +16,16 @@
 
 영어판은 `ko` 자리에 `en` 을 넣는다.
 
+## 추천코스 쇼츠
+
+코스 하나를 60초 안의 쇼츠로 만든다. 한 장면이 56초라 `cut.py` 대신 `tour.py` 를 쓴다(그림을 모두 메모리에 올리면 10GB가 든다).
+
+1. 녹화: `PROMO_URL=http://localhost:4417/oddity_claude/ node build/promo/shoot.cjs ko auroraDrift`
+2. 자막과 끝 화면: `FILM=tour node build/promo/captions.cjs ko`
+3. 편집: `python -P build/promo/tour.py ko auroraDrift` → `assets/promo/tour-auroraDrift-ko.mp4`
+
+공개 페이지에 코스가 올라간 뒤에는 `PROMO_URL` 을 빼도 된다.
+
 ## 고칠 곳
 
 | 무엇 | 파일 |

@@ -100,7 +100,7 @@ import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
-import { COURSES, courseById, courseStart } from './core/courses.js';
+import { COURSES, courseById, courseStart, railAt } from './core/courses.js';
 import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN, FINAL_NOTE, noteDue, readNote, heardNobody, completeRadio } from './core/radioFriend.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -319,6 +319,8 @@ let lockAim = null;
 let lockFor = null;
 // The tour course under way (core/courses.js): she slides round on the lock by herself.
 let course = null;
+// How long it has gone on, for one on a rail (the aurora's).
+let courseTime = 0;
 // The target's direction in her own frame as she stands and looks now.
 function aimNow() {
   const toward = here(selectedId).position.map((n, i) => n - state.position[i]);
@@ -2235,10 +2237,13 @@ ${STORY_MORE[target.id]}` : told) };
       wasWith = null;
       hud.showSelection(named(body.id));
       faceTurn = null;
-      locked = true;
-      lockFor = selectedId;
-      lockAim = aimNow();
+      if (!chosen.rail) {
+        locked = true;
+        lockFor = selectedId;
+        lockAim = aimNow();
+      }
       course = id;
+      courseTime = chosen.rail?.startS ?? 0;
       showLockKey();
       // Only the view on the screen, Sora gone too, behind the flash (the user, 2026-11-02:
       // "추천코스에서는 소라도 없앤 우주멍으로해줘"); the moon brings all back and the course goes on.
@@ -2363,7 +2368,12 @@ ${STORY_MORE[target.id]}` : told) };
     courses: {
       all: () => COURSES.map((c) => ({ ...c, open: c.body === 'earth' || visited(bodyById(c.body), progress), where: bodyById(c.body).name, on: course === c.id })),
       start: flyCourse,
-      quit: () => { locked = false; showLockKey(); },
+      quit: () => {
+        if (locked) unlock('button');
+        course = null;
+        state = { ...state, sideSpeed: 0, riseSpeed: 0 };
+        showLockKey();
+      },
     },
     views: {
       cards: () => VIEW_CARDS.map((card) => ({ ...card, file: cardFile(card.id), got: views.cards.includes(card.id) })),
@@ -3381,9 +3391,14 @@ ${STORY_MORE[target.id]}` : told) };
     // sliding there, so that the keys are hers at once.
     if (course && !warp.busy()) {
       const pressed = [intent.drive, intent.strafe, intent.rise, intent.turnX, intent.turnY, intent.roll].some((n) => n);
-      if (pressed || !locked || Math.max(state.sideSpeed ?? 0, state.riseSpeed ?? 0) < 0.01) {
+      const rail = courseById(course).rail;
+      if (pressed || (!rail && (!locked || Math.max(state.sideSpeed ?? 0, state.riseSpeed ?? 0) < 0.01))) {
         course = null;
         state = { ...state, sideSpeed: 0, riseSpeed: 0 };
+      } else if (rail && dt > 0) {
+        const chosen = courseById(course);
+        courseTime += dt;
+        state = { ...state, ...railAt(chosen, here(chosen.body), here('sun'), courseTime) };
       }
     }
     // Locked and something else chosen, or locked and flying forward with the target

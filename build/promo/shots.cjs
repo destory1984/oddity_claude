@@ -201,6 +201,21 @@ module.exports = {
     await rec.start();
     await glide(p, 'earth', { s: 6, yaw: 8, push: 0.85 });
   },
+  // A tour course for its Short (build/promo/tour.py): pressed in the journal as a player
+  // would, a minute of the bare view with the game's music (shoot.cjs TUNED).
+  auroraDrift: async (p, rec) => {
+    await settle(p);
+    await p.waitForTimeout(1500);
+    await p.evaluate(() => {
+      window.__keep = ['journal'];
+      document.getElementById('courseButton').click();
+      const row = [...document.querySelectorAll('#journalCourses li')].find((li) => li.innerText.startsWith('오로라 유영') || li.innerText.startsWith('Drifting Over'));
+      row.querySelector('button').click();
+    });
+    await p.waitForTimeout(8000);
+    await rec.start();
+    await p.waitForTimeout(58000);
+  },
   // The music alone, longer than the film (shoot.cjs turns the effects off for it).
   music: async (p, rec) => {
     await settle(p);

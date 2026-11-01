@@ -82,7 +82,12 @@ const GAZE = {
     end: { ...FIRST.en.end, find: 'Coming soon to Google Play' },
   },
 };
-const LINES = { thatday: THAT_DAY, gaze: GAZE }[process.env.FILM] ?? FIRST;
+// The Shorts of the tour courses (FILM=tour, build/promo/tour.py).
+const TOUR = {
+  ko: { auroraDrift: '지구 오로라 유영', end: FIRST.ko.end },
+  en: { auroraDrift: 'Drifting over Earth\'s aurora', end: FIRST.en.end },
+};
+const LINES = { thatday: THAT_DAY, gaze: GAZE, tour: TOUR }[process.env.FILM] ?? FIRST;
 
 const page = (body) => `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="${DEV}fonts/pretendard/pretendardvariable-dynamic-subset.css">

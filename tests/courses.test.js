@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { COURSES, courseById, courseStart } from '../src/core/courses.js';
+import { COURSES, courseById, courseStart, railAt } from '../src/core/courses.js';
 import { BODIES } from '../src/core/bodies.js';
 import { forward } from '../src/core/orientation.js';
 import { GALACTIC_POLE, GALAXIES, NEBULAE, fromEquatorial } from '../src/core/sky.js';
@@ -17,10 +17,11 @@ const velocity = ({ orientation, slide }) => {
   return r.map((n, i) => n * slide.sideSpeed * slide.sideSign + u[i] * slide.riseSpeed * slide.riseSign);
 };
 
-test('eleven rounds, the first the one the user was flying, each of a known body', () => {
-  assert.equal(COURSES.length, 11);
-  assert.equal(COURSES[0].id, 'earthRound');
-  assert.equal(new Set(COURSES.map((c) => c.id)).size, 11);
+test('thirteen rounds, the aurora first, then the one the user was flying, each of a known body', () => {
+  assert.equal(COURSES.length, 13);
+  assert.equal(COURSES[0].id, 'auroraDrift');
+  assert.equal(COURSES[1].id, 'earthRound');
+  assert.equal(new Set(COURSES.map((c) => c.id)).size, 13);
   for (const c of COURSES) {
     assert.ok(body(c.body), c.id);
     assert.ok(c.name && c.todo, c.id);
@@ -29,7 +30,7 @@ test('eleven rounds, the first the one the user was flying, each of a known body
 });
 
 test('every round starts clear of the ground, going square to the body at the speed of its lap', () => {
-  for (const c of COURSES) {
+  for (const c of COURSES.filter((x) => !x.rail)) {
     const b = at(c.body);
     const start = courseStart(c, b, sun, [0.1, 0.99, 0.05]);
     const out = start.position.map((n, i) => n - b.position[i]);
@@ -41,8 +42,20 @@ test('every round starts clear of the ground, going square to the body at the sp
   }
 });
 
+test('the aurora rail goes round a point of the curtain, keeping off it and above the ground', () => {
+  const c = courseById('auroraDrift');
+  const b = at('earth');
+  const point = (seconds) => railAt(c, b, sun, seconds);
+  const out = (p) => p.position.map((n, i) => n - b.position[i]);
+  const zero = point(0);
+  const half = point(c.lapS / 2);
+  assert.ok(Math.hypot(...zero.position.map((n, i) => n - half.position[i])) > 2 * c.rail.rangeKm * 0.99);
+  assert.ok(Math.hypot(...zero.position.map((n, i) => n - point(c.lapS).position[i])) < 1);
+  for (const s of [0, 30, 60, 90]) assert.ok(Math.hypot(...out(point(s))) > b.radiusKm + 300);
+});
+
 test('she looks at the body from the start', () => {
-  for (const c of COURSES) {
+  for (const c of COURSES.filter((x) => !x.rail)) {
     const b = at(c.body);
     const start = courseStart(c, b, sun, [0.1, 0.99, 0.05]);
     const toward = unit(b.position.map((n, i) => n - start.position[i]));

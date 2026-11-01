@@ -1,7 +1,7 @@
 import { t } from './i18n.js';
 // Background music, decided here and played by ui/sound.js. No sound files: a slow pad
 // of three notes per bar under a few bell notes, different every bar but always the
-// same for a given bar number. A hundred tunes take turns, each with its own four chords,
+// same for a given bar number. Ninety-nine tunes take turns, each with its own four chords,
 // five-note scale, beat and bell.
 
 export const BAR_S = 8;
@@ -623,15 +623,6 @@ export const TUNES = [
     slots: [0, 0.5, 1.5, 3, 3.5, 4.5, 6], busy: 0.45,
     bell: { length: 1.0, overtone: 2, overtoneVolume: 0.2 },
     motif: [0, 4, 3, 7, 6, 2, 1, 5],
-  },
-  {
-    // B flat major in threes, rocking.
-    id: 'sailboat', name: t('돛단배'),
-    chords: [chord('A#2', 'F3', 'A#3', 'D4'), chord('D#2', 'G3', 'A#3', 'D#4'), chord('C3', 'G3', 'C4', 'D#4'), chord('F2', 'F3', 'A3', 'C4')],
-    melody: scale('A#4 C5 D5 F5 G5 A#5 C6 D6'),
-    slots: [0, 1.33, 2.67, 4, 5.33, 6.67], busy: 0.52,
-    bell: { length: 1.4, overtone: 2, overtoneVolume: 0.18 },
-    motif: [2, 3, 5, 3, 2, 0, 1, 3, 4, 1],
   },
   {
     // D mixolydian, yellow and falling one by one.

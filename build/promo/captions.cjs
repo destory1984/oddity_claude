@@ -90,8 +90,7 @@ const TOUR = {
     'auroraDrift-1-3': '태양에서 온 입자가\n공기와 부딪쳐 빛난다',
     'auroraDrift-1-4': '낮은 곳은 초록,\n높은 곳은 붉은빛',
     'auroraDrift-2-1': '오늘 밤, 오로라 속을\n날아 볼까요',
-    'auroraDrift-2-2': '할머니도 이 빛을\n보고 싶어 하신다',
-    'auroraDrift-2-3': '소리 없는 빛의 커튼',
+    'auroraDrift-2-2': '소리 없는 빛의 커튼',
     end: FIRST.ko.end,
   },
 };

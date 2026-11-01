@@ -8,6 +8,13 @@ import { t } from './i18n.js';
 const rad = (deg) => (deg * Math.PI) / 180;
 const OBLIQUITY = rad(23.44);
 
+// The galaxy's plane is tilted 60 degrees to the planets' plane. In the game's axes
+// (y north of the ecliptic) the galactic north pole is at ecliptic longitude 180,
+// latitude 29.8 degrees, and the centre (Sagittarius) at longitude 266.8, latitude -5.5.
+const fromEcliptic = (lonDeg, latDeg) => [Math.cos(rad(latDeg)) * Math.cos(rad(lonDeg)), Math.sin(rad(latDeg)), Math.cos(rad(latDeg)) * Math.sin(rad(lonDeg))];
+export const GALACTIC_POLE = fromEcliptic(180, 29.8);
+export const GALACTIC_CENTRE = fromEcliptic(266.8, -5.5);
+
 // Equatorial coordinates (the sky as mapped from Earth's poles) to a unit vector in the
 // game's axes: x and z span the planets' plane, y is north of it.
 export function fromEquatorial(raH, decDeg) {

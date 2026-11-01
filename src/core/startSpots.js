@@ -48,7 +48,7 @@ export function sunFrame(bodyPosition, sunPosition) {
 }
 
 const into = (frame, v) => [dot(v, frame.toSun), dot(v, frame.above), dot(v, frame.aside)];
-const outOf = (frame, [a, b, c]) => [0, 1, 2].map((i) => a * frame.toSun[i] + b * frame.above[i] + c * frame.aside[i]);
+export const outOf = (frame, [a, b, c]) => [0, 1, 2].map((i) => a * frame.toSun[i] + b * frame.above[i] + c * frame.aside[i]);
 
 // A state as a place: for writing a new start down.
 export function toSpot({ position, orientation }, body, sun) {

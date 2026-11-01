@@ -50,11 +50,13 @@
     <p id="loadError"></p>
   </div>
 
+  <img id="gazeLogo" src="/assets/ui/title.png" alt="" width="609" height="146">
   <div id="hud">
     <header>
       <div class="brand"><strong><img class="titleArt" src="/assets/ui/title.png" alt="Space Oddity" width="609" height="146"></strong><span>할머니의 수첩</span></div>
       <nav>
         <button id="practiceButton" data-label="연습" title="비행 연습" aria-label="비행 연습">비행 연습</button>
+        <button id="courseButton" data-label="추천코스" title="우주 관광 추천코스" aria-label="우주 관광 추천코스">우주 관광 추천코스</button>
         <button id="journalButton">수첩</button>
         <button id="shareButton" data-label="공유" title="내 자리 공유" aria-label="내 자리 공유">내 자리 공유</button>
         <button id="photoButton" data-label="사진" title="사진 모드 (P)">사진 모드</button>
@@ -239,6 +241,11 @@
         <p class="muted">무전으로 들은 말이 쌓이는 곳입니다. 수첩 칸에는 들지 않습니다. 점을 누르면 그 말이 보입니다.</p>
         <div id="radioChart" class="radioChart"></div>
         <div id="radioDetail" class="radioDetail"></div>
+      </section>
+      <section data-tab="courses" hidden>
+        <h2>우주 관광 추천코스</h2>
+        <p class="muted">아마추어 천문가들이 즐겨 찾는 천체로 만든 코스입니다. 누르면 그 자리로 순간 이동해 우주멍 화면으로 저절로 돕니다. 달 단추를 누르면 단추가 돌아오고, 화살표 단추를 누르면 코스를 벗어납니다. 점수에는 들지 않습니다.</p>
+        <ul id="journalCourses"></ul>
       </section>
       <section data-tab="tours" hidden>
         <p class="muted">할머니가 수첩 뒤에 적어 둔 "가 보고 싶은 길" 아홉입니다. 한 길을 고르면 다음에 갈 곳이 화면 위에 뜨고, 차례대로 다 돌면 도장이 찍힙니다. 점수에는 들지 않습니다.</p>

@@ -1,21 +1,15 @@
 import {
   PointsCloudSystem, Vector3, Color3, Color4, CreateSphere, CreateLineSystem, Constants, Mesh, VertexData, ShaderMaterial, Effect,
 } from './babylon.js';
-import { fromEquatorial, GALAXIES, NEBULAE, CONSTELLATIONS, BRIGHT_STARS } from '../core/sky.js';
+import { fromEquatorial, GALAXIES, NEBULAE, CONSTELLATIONS, BRIGHT_STARS, GALACTIC_POLE as POLE_WAY, GALACTIC_CENTRE as CENTRE_WAY } from '../core/sky.js';
 import skyFrag from './shaders/sky.frag?raw';
 import streakVert from './shaders/streak.vert?raw';
 import streakFrag from './shaders/streak.frag?raw';
 import { shader } from './planets.js';
 
-// The galaxy's plane is tilted 60 degrees to the planets' plane. In the game's axes
-// (y north of the ecliptic) the galactic north pole is at ecliptic longitude 180,
-// latitude 29.8 degrees, and the centre (Sagittarius) at longitude 266.8, latitude -5.5.
 const rad = (deg) => (deg * Math.PI) / 180;
-const fromEcliptic = (lonDeg, latDeg) => new Vector3(
-  Math.cos(rad(latDeg)) * Math.cos(rad(lonDeg)), Math.sin(rad(latDeg)), Math.cos(rad(latDeg)) * Math.sin(rad(lonDeg)),
-);
-const GALACTIC_POLE = fromEcliptic(180, 29.8);
-const GALACTIC_CENTRE = fromEcliptic(266.8, -5.5);
+const GALACTIC_POLE = new Vector3(...POLE_WAY);
+const GALACTIC_CENTRE = new Vector3(...CENTRE_WAY);
 
 // Galaxies are drawn 1.6 times their real apparent size so they can be picked out.
 const GALAXY_ZOOM = 1.6;

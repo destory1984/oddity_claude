@@ -39,7 +39,7 @@ function picture(file, alt, className = '') {
 const CLIPPING = t('1990.2.14. 보이저 1호가 60억km 밖에서 찍은 지구. 신문에서 오려 붙였다. 나머지 칸을 모두 채우면 열리는 마지막 칸.');
 
 // The explorer's journal: bodies found and landed on, photo missions done.
-export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, views = null, sky = null, exo = null, onRadioJump = () => {}, onTab = () => {}, errands = null }) {
+export function createJournal({ bodies, missions, stories = [], craft = [], onGo, onJump, onReset, onOpen, onClose, onDeletePhoto = () => {}, onDetail = null, notes = [], onNote = null, memos = {}, lastSlot = null, lastShut = () => false, onSendPhoto = null, onPair = null, onTourStart = null, onTourQuit = null, daily = null, stunts = null, courses = null, views = null, sky = null, exo = null, onRadioJump = () => {}, onTab = () => {}, errands = null }) {
   const dialog = $('journal');
   // The radio friend's page (ui/radioWeb.js): drawn again with each log, its points
   // pressed in the journal's own "무전" part, as every other part is read (it opened over
@@ -111,12 +111,12 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     photos: ['missions', 'album', 'views'],
     stories: ['stories'],
     radio: ['radio'],
-    flight: ['tours', 'stunts'],
+    flight: ['courses', 'tours', 'stunts'],
   };
   const PART_NAMES = {
     bodies: t('천체'), craft: t('탐사선'), curios: t('상상'),
     missions: t('따라 찍기'), album: t('내 사진'), views: t('엽서'),
-    tours: t('할머니의 길'), stunts: t('묘기 비행'),
+    courses: t('추천코스'), tours: t('할머니의 길'), stunts: t('묘기 비행'),
   };
   const groupOf = (part) => Object.keys(GROUPS).find((g) => GROUPS[g].includes(part)) ?? part;
   const lastPart = {};
@@ -791,6 +791,36 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     }
   }
 
+  // 우주 관광 추천코스 (core/courses.js): what each is, and a button; shut till she has been there.
+  // courses: { all(): [{ id, name, todo, open, where, on }], start(id), quit() }.
+  function renderCourses() {
+    const list = $('journalCourses');
+    list.replaceChildren();
+    if (!courses) return;
+    for (const course of courses.all()) {
+      const li = document.createElement('li');
+      li.className = course.on ? 'going' : '';
+      const title = document.createElement('strong');
+      title.textContent = `${course.name}${course.on ? t(' · 하는 중') : ''}`;
+      const todo = document.createElement('span');
+      todo.className = 'stops';
+      todo.textContent = course.open ? course.todo : t`${course.where}에 한 번 가 보면 열립니다.`;
+      li.append(title, todo);
+      if (course.open) {
+        const button = document.createElement('button');
+        button.textContent = course.on ? t('그만두기') : t('날아 보기');
+        button.setAttribute('aria-label', `${course.name} ${button.textContent}`);
+        button.addEventListener('click', () => {
+          dialog.close();
+          if (course.on) courses.quit();
+          else courses.start(course.id);
+        });
+        li.append(button);
+      }
+      list.append(li);
+    }
+  }
+
   // Picture postcards and the round of the auroras (core/viewCards.js).
   // views: { cards(): [{ id, name, file, got }], round(): { stood, of, done, stamp, names } }.
   function renderViews() {
@@ -838,6 +868,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     renderCurios();
     renderTours();
     renderStunts();
+    renderCourses();
     renderViews();
     renderAlbum();
     showRecord(false);
@@ -859,6 +890,12 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
 
   return {
     open,
+    // The course key at the top of the screen (the user, 2026-11-02: "추천코스를 지금 연습 아이콘
+    // 위치에 넣어줘").
+    openCourses() {
+      open();
+      showTab('courses');
+    },
     isOpen: () => dialog.open,
     setAlbum(photos) {
       album = photos;

@@ -100,6 +100,7 @@ import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
 import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
+import { COURSES, courseById, courseStart } from './core/courses.js';
 import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN, FINAL_NOTE, noteDue, readNote, heardNobody, completeRadio } from './core/radioFriend.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -316,6 +317,8 @@ let lockAim = null;
 // "목표물에 고정시켜놓고, 다른 행성을 보려고 하면, 안 먹히고 엉뚱한 방향을 보게 되네":
 // the new one was swung to where the old one had been held in her view).
 let lockFor = null;
+// The tour course under way (core/courses.js): she slides round on the lock by herself.
+let course = null;
 // The target's direction in her own frame as she stands and looks now.
 function aimNow() {
   const toward = here(selectedId).position.map((n, i) => n - state.position[i]);
@@ -2207,6 +2210,44 @@ ${STORY_MORE[target.id]}` : told) };
     onClose: () => setPaused(photoPriorPause),
   });
 
+  // A tour course: behind a jump's flash to its start, the lock on what it goes round and
+  // the slide already going, in 우주멍. Any key ends it (the frame, below).
+  function flyCourse(id) {
+    const chosen = courseById(id);
+    if (!chosen || warp.busy()) return;
+    if (locked) unlock('jump');
+    sound.cue('warp');
+    warp.play(() => {
+      if (docked) {
+        docked = null;
+        showCraftCard(null);
+        sound.hush();
+      }
+      if (visit && !hasArrived(visit)) sound.hush();
+      visit = null;
+      stuntJumped = true;
+      home = null;
+      input.clear();
+      const body = here(chosen.body);
+      const start = courseStart(chosen, body, here('sun'), world.ringNormal(body.id));
+      state = { ...createState(start.position, start.orientation), ...start.slide };
+      selectedId = body.id;
+      wasWith = null;
+      hud.showSelection(named(body.id));
+      faceTurn = null;
+      locked = true;
+      lockFor = selectedId;
+      lockAim = aimNow();
+      course = id;
+      showLockKey();
+      // Only the view on the screen, Sora gone too, behind the flash (the user, 2026-11-02:
+      // "추천코스에서는 소라도 없앤 우주멍으로해줘"); the moon brings all back and the course goes on.
+      if (!gazing) setGaze(true);
+      gazeBare = true;
+      gazeWords();
+    });
+  }
+
   let journalPriorPause = false;
   // To an open hidden place of the radio friend's story, from the journal's radio page:
   // behind a jump's flash, 80 km south of it and 60 km up, looking at it (on the ground),
@@ -2318,6 +2359,11 @@ ${STORY_MORE[target.id]}` : told) };
       all: () => STUNTS.map((s) => ({ ...s, record: recordText(s.id, stuntRecords), on: stunt?.id === s.id, done: stuntRecords[s.id] !== undefined })),
       start: beginStunt,
       quit: quitStunt,
+    },
+    courses: {
+      all: () => COURSES.map((c) => ({ ...c, open: c.body === 'earth' || visited(bodyById(c.body), progress), where: bodyById(c.body).name, on: course === c.id })),
+      start: flyCourse,
+      quit: () => { locked = false; showLockKey(); },
     },
     views: {
       cards: () => VIEW_CARDS.map((card) => ({ ...card, file: cardFile(card.id), got: views.cards.includes(card.id) })),
@@ -3020,6 +3066,7 @@ ${STORY_MORE[target.id]}` : told) };
     },
   });
   $('practiceButton').addEventListener('click', () => startPractice());
+  $('courseButton').addEventListener('click', () => { if (!practice) journal.openCourses(); });
   // From the settings: once they have shut (the game is held while they are open).
   $('practiceStart').addEventListener('click', () => {
     $('settings').addEventListener('close', () => startPractice(), { once: true });
@@ -3330,6 +3377,15 @@ ${STORY_MORE[target.id]}` : told) };
     const slowPoints = craft.map((c) => c.position);
     // (How far the locked target is before this step: sliding round it keeps that.)
     if (aimedId !== selectedId) aimedId = null;
+    // A tour course ends with any key, the lock let go or the slide stopped; she stops
+    // sliding there, so that the keys are hers at once.
+    if (course && !warp.busy()) {
+      const pressed = [intent.drive, intent.strafe, intent.rise, intent.turnX, intent.turnY, intent.roll].some((n) => n);
+      if (pressed || !locked || Math.max(state.sideSpeed ?? 0, state.riseSpeed ?? 0) < 0.01) {
+        course = null;
+        state = { ...state, sideSpeed: 0, riseSpeed: 0 };
+      }
+    }
     // Locked and something else chosen, or locked and flying forward with the target
     // turned off the screen: she means to go elsewhere, and the lock lets go (the user,
     // 2026-10-18, having forgotten the lock: "화면이 미친듯이 움직이는데"). Forward and back with the target
@@ -3403,7 +3459,8 @@ ${STORY_MORE[target.id]}` : told) };
     // 지구에 고정이 안 되잖아": the ground slid away under her, 12.5 degrees a minute at
     // Earth). Not from farther than LOCK_CARRY_RADII of its centre: from the Moon's
     // distance that would sweep her 84,000 km a minute.
-    if (locked && dt > 0 && !docked && !visit && !home && !photo.active()) {
+    // (Not on a tour course: its round is kept in its plane.)
+    if (locked && !course && dt > 0 && !docked && !visit && !home && !photo.active()) {
       const aim = here(selectedId);
       const ground = sites.some((s) => s.id === aim.id) ? here(aim.parent) : bodyById(aim.id, bodies);
       if (ground && state.restingOn !== ground.id) {

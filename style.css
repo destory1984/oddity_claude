@@ -1668,6 +1668,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 
 /* The tours in the journal: the route's name, grandmother's memo, the stops in order. */
 #journalTours li,
+#journalCourses li,
 #journalStunts li {
   padding:10px 0;
   border-bottom:1px solid #ffffff12;
@@ -1676,6 +1677,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 #journalTours li strong,
+#journalCourses li strong,
 #journalStunts li strong {
   display:block;
   font-weight:400;
@@ -1684,16 +1686,19 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 #journalTours li.done strong,
+#journalCourses li.done strong,
 #journalStunts li.done strong {
   color:#7fe3c5;
 }
 
 #journalTours li.going strong,
+#journalCourses li.going strong,
 #journalStunts li.going strong {
   color:#ffdfa6;
 }
 
 #journalTours .memo,
+#journalCourses .memo,
 #journalStunts .memo {
   display:block;
   margin:2px 0 4px;
@@ -1703,6 +1708,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 #journalTours .stops,
+#journalCourses .stops,
 #journalStunts .stops {
   display:block;
   line-height:1.7;
@@ -1710,6 +1716,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 #journalTours li button,
+#journalCourses li button,
 #journalStunts li button {
   display:block;
   margin-top:6px;
@@ -1851,6 +1858,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 
 /* A tour's stamp beside its name; the clipping in the last slot; stars on a reply. */
 #journalTours li,
+#journalCourses li,
 #journalStunts li {
   position:relative;
 }
@@ -1869,6 +1877,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 #journalTours li.done strong,
+#journalCourses li.done strong,
 #journalStunts li.done strong,
 #journalTours li.done .memo,
 #journalStunts li.done .memo {
@@ -2539,6 +2548,7 @@ input[type=range] {
 
 #journalBodies li,
 #journalTours li,
+#journalCourses li,
 #journalStunts li {
   border-bottom:1px solid #b79a6a99;
 }
@@ -2548,6 +2558,7 @@ input[type=range] {
 #journalStories li strong,
 #journalCraft li strong,
 #journalTours li strong,
+#journalCourses li strong,
 #journalStunts li strong,
 #journalCurios li strong {
   color:#3b2a1a;
@@ -2561,6 +2572,7 @@ input[type=range] {
 #journalStories li,
 #journalCraft li,
 #journalTours li,
+#journalCourses li,
 #journalStunts li,
 #journalAlbum figure,
 #journalNotes,
@@ -2573,6 +2585,7 @@ input[type=range] {
 #journalStories li.done strong,
 #journalCraft li.done strong,
 #journalTours li.done strong,
+#journalCourses li.done strong,
 #journalStunts li.done strong,
 #journalAlbum figcaption span,
 #journalCurios li.done strong {
@@ -2580,6 +2593,7 @@ input[type=range] {
 }
 
 #journalTours li.going strong,
+#journalCourses li.going strong,
 #journalStunts li.going strong {
   color:#a35a00;
 }
@@ -2587,6 +2601,7 @@ input[type=range] {
 /* Grandmother writes in brown ink, Sora in navy. */
 #journalBodies .memo,
 #journalTours .memo,
+#journalCourses .memo,
 #journalStunts .memo,
 #journal li.clipping span,
 #journalAlbum figcaption .sent {
@@ -2660,6 +2675,7 @@ html.shell body {
 
 #journalBodies .memo,
 #journalTours .memo,
+#journalCourses .memo,
 #journalStunts .memo,
 #journal li.clipping span,
 #journalCrane,
@@ -4622,6 +4638,7 @@ dialog .sheetHead .soundKeys button::before {
 #settings .soundKeys button.off { opacity:.6; }
 
 /* A stunt flight done once carries its stamp, as a tour does (ui/journal.js). */
+#journalCourses li,
 #journalStunts li {
   position:relative;
 }
@@ -4874,6 +4891,23 @@ html.gaze #testBar {
   border:0;
   background:transparent;
   pointer-events:none;
+}
+
+/* The title, small, at the top left while just looking (the user, 2026-11-02: "우주멍 모드에서는
+   화면 상단 왼쪽에 조그맣게 로고 넣어줘"). It takes no touch, so a drag still turns the view. */
+#gazeLogo {
+  position:fixed;
+  top:calc(env(safe-area-inset-top, 0px) + 12px);
+  left:calc(env(safe-area-inset-left, 0px) + 12px);
+  width:92px;
+  height:auto;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .6s ease;
+}
+
+html.gaze #gazeLogo {
+  opacity:.8;
 }
 
 html.gaze #gazeButton {
@@ -5740,6 +5774,7 @@ html.gaze #gazeButton {
    between the map and the notebook, where they marked it; it can be put away in the
    settings or at the end of a practice. */
 #hud nav #practiceButton::before { background-image:url("/assets/ui/icon-practice.svg"); }
+#hud nav #courseButton::before { background-image:url("/assets/ui/icon-course.svg"); }
 
 /* While practising there is only the flight: the stars, the ring, her, the keys that
    fly her, the speed and the line that says what to do. (Hidden, not taken out: the keys that
@@ -6620,7 +6655,7 @@ dialog .journalActions {
    journal had words (its count). Now the camera says "사진", the first row "연습", "공유",
    the count, "설정". No word on the flight screen is under 10px (the labels were 9px, as
    were the speed box's name and unit, the thrust line, "비행 방향" and the errand's keys). */
-#hud nav :is(#practiceButton, #shareButton, #journalButton, #photoButton, #settingsButton),
+#hud nav :is(#courseButton, #practiceButton, #shareButton, #journalButton, #photoButton, #settingsButton),
 #hud #targetRow :is(#faceTarget, #lockTarget, #inspectTarget) {
   flex-direction:column;
   gap:2px;
@@ -6629,13 +6664,13 @@ dialog .journalActions {
   white-space:nowrap;
 }
 
-#hud nav :is(#practiceButton, #shareButton, #journalButton, #photoButton, #settingsButton)::before {
+#hud nav :is(#courseButton, #practiceButton, #shareButton, #journalButton, #photoButton, #settingsButton)::before {
   display:block;
   width:19px;
   height:19px;
 }
 
-#hud nav :is(#practiceButton, #shareButton, #photoButton, #settingsButton)::after,
+#hud nav :is(#courseButton, #practiceButton, #shareButton, #photoButton, #settingsButton)::after,
 #hud #targetRow :is(#faceTarget, #lockTarget, #inspectTarget)::after {
   content:attr(data-label);
   font-size:10px;

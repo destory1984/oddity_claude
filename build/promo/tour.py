@@ -9,15 +9,15 @@ from PIL import Image, ImageFilter
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'promo')
 SIZE = (1080, 1920)
-START_S = 0.5
-SHOT_S = 26.5
-END_S = 3.2
+START_S = 0.1
+SHOT_S = 27.8
+END_S = 2.0
 FADE_S = 2.5
 # From and to (s) of each caption of a take: <shot>-<take>-<n>.png (captions.cjs).
 TAKES = {
     'auroraDrift': {
         '1': [(0, 6), (6, 13), (13, 20), (20, 26)],
-        '2': [(0, 9), (14, 26)],
+        '2': [(0, 9), (9, 27.8)],
     },
 }
 
@@ -49,7 +49,7 @@ def main(lang, name, take):
     inputs = ['-f', 'concat', '-safe', '0', '-i', frames]
     graph = [f'[0:v]fps=30,scale={SIZE[0]}:{SIZE[1]}[f0]']
     for n, (a, b) in enumerate(spans, 1):
-        length = b - a
+        length = round(b - a, 2)
         inputs += ['-loop', '1', '-t', str(length), '-framerate', '30', '-i', os.path.join(ROOT, lang, 'captions', f'{name}-{take}-{n}.png')]
         graph.append(f'[{n}:v]format=rgba,fade=t=in:st=0:d=0.4:alpha=1,fade=t=out:st={length - 0.4}:d=0.4:alpha=1,setpts=PTS+{a}/TB[w{n}]')
         graph.append(f'[f{n - 1}][w{n}]overlay=eof_action=pass[f{n}]')

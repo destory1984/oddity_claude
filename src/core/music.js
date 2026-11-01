@@ -1,7 +1,7 @@
 import { t } from './i18n.js';
 // Background music, decided here and played by ui/sound.js. No sound files: a slow pad
 // of three notes per bar under a few bell notes, different every bar but always the
-// same for a given bar number. Ninety-nine tunes take turns, each with its own four chords,
+// same for a given bar number. A hundred tunes take turns, each with its own four chords,
 // five-note scale, beat and bell.
 
 export const BAR_S = 8;
@@ -623,6 +623,16 @@ export const TUNES = [
     slots: [0, 0.5, 1.5, 3, 3.5, 4.5, 6], busy: 0.45,
     bell: { length: 1.0, overtone: 2, overtoneVolume: 0.2 },
     motif: [0, 4, 3, 7, 6, 2, 1, 5],
+  },
+  {
+    // E major in long breaths, for the aurora (the user, 2026-11-02, in place of 돛단배: "한 곡
+    // 더 만들어").
+    id: 'lightCurtain', name: t('빛의 커튼'),
+    chords: [chord('E2', 'G#3', 'B3', 'E4'), chord('G#2', 'G#3', 'B3', 'E4'), chord('A2', 'A3', 'C#4', 'E4'), chord('B2', 'F#3', 'B3', 'D#4')],
+    melody: scale('E5 F#5 G#5 B5 C#6 E6 F#6 G#6'),
+    slots: [0, 2, 3, 5, 6], busy: 0.42,
+    bell: { length: 1.8, overtone: 2, overtoneVolume: 0.2 },
+    motif: [4, 3, 2, 0, 1, 2, 3, 5, 4, 2],
   },
   {
     // D mixolydian, yellow and falling one by one.

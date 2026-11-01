@@ -16,14 +16,14 @@ test('a bar lasts eight seconds and the four chords come round in order', () => 
   assert.deepEqual(MELODY, [440, 523.25, 587.33, 659.26, 783.99, 880, 1046.5, 1174.66]);
 });
 
-test('ninety-nine tunes take turns, sixteen bars each, and come round again', () => {
-  assert.equal(TUNES.length, 99);
+test('a hundred tunes take turns, sixteen bars each, and come round again', () => {
+  assert.equal(TUNES.length, 100);
   assert.equal(BARS_PER_TUNE, 16);
   assert.deepEqual(TUNES.map((t) => t.name), ['오르골', '새벽', '먼 바다', '자장가', '별무리', '깊은 밤', '유영', '빗방울', '가야금', '오로라', '회전목마',
     '눈송이', '등불', '달빛 왈츠', '풀밭', '시계탑', '모닥불', '은하수', '반딧불',
     '샛별', '꼬리별', '고래자리', '은빛 비', '목성의 띠', '토성 고리', '얼음 달', '모래바람', '등대', '종이학', '바람개비', '별똥비', '오솔길', '물수제비', '할머니 마루', '수첩 한 장', '해바라기', '첫눈', '봄비', '저녁놀', '연못', '나비', '고요의 바다', '붉은 행성', '우주정거장', '별자리', '은하 건너', '꿈길', '소라 껍데기', '귀갓길', '창백한 푸른 점',
-    '달무리', '초승달', '그믐달', '보름달', '일식의 그늘', '태양풍 너머', '오르트 구름', '명왕성의 하트', '타이탄의 호수', '유로파의 바다', '보이저', '먼 신호', '다락방 무전기', '다락방', '밤바다', '파도 소리', '바닷가 마을', '갈매기', '은행잎', '낙엽', '고드름', '매화', '민들레 홀씨', '솔바람', '대나무 숲', '풍경 소리', '고갯마루', '징검다리', '실타래', '뜨개질', '찻잔', '옛날 사진', '편지', '우체통', '기차역', '막차', '골목길', '가로등', '열기구', '종이비행기', '연날리기', '낡은 망원경', '천문대', '궤도', '무중력', '소행성대', '안드로메다', '북극성', '별빛 편지']);
-  assert.equal(new Set(TUNES.map((t) => t.id)).size, 99);
+    '달무리', '초승달', '그믐달', '보름달', '일식의 그늘', '태양풍 너머', '오르트 구름', '명왕성의 하트', '타이탄의 호수', '유로파의 바다', '보이저', '먼 신호', '다락방 무전기', '다락방', '밤바다', '파도 소리', '바닷가 마을', '갈매기', '빛의 커튼', '은행잎', '낙엽', '고드름', '매화', '민들레 홀씨', '솔바람', '대나무 숲', '풍경 소리', '고갯마루', '징검다리', '실타래', '뜨개질', '찻잔', '옛날 사진', '편지', '우체통', '기차역', '막차', '골목길', '가로등', '열기구', '종이비행기', '연날리기', '낡은 망원경', '천문대', '궤도', '무중력', '소행성대', '안드로메다', '북극성', '별빛 편지']);
+  assert.equal(new Set(TUNES.map((t) => t.id)).size, 100);
   assert.equal(tuneFor(0).id, 'box');
   assert.equal(tuneFor(15).id, 'box');
   assert.equal(tuneFor(16).id, 'dawn');
@@ -65,7 +65,7 @@ test('a tune with a figure walks along it; the notes of a bar are not all the sa
   const withFigure = TUNES.filter((t) => t.motif);
   assert.deepEqual(withFigure.map((t) => t.id), ['drift', 'gayageum', 'aurora', 'carousel', 'lantern', 'waltz', 'meadow', 'clock', 'campfire', 'firefly',
     'comet', 'jupiterBands', 'saturnRings', 'dustStorm', 'paperCrane', 'pinwheel', 'path', 'skippingStone', 'notebookPage', 'sunset', 'butterfly', 'station', 'constellations', 'dreamPath', 'wayHome', 'paleBlueDot',
-    'crescent', 'fullMoon', 'eclipseShadow', 'plutoHeart', 'europaSea', 'voyager', 'farSignal', 'atticRadio', 'waves', 'seasideVillage', 'seagull', 'ginkgo', 'fallenLeaves', 'dandelion', 'bamboo', 'hillPass', 'steppingStones', 'yarn', 'knitting', 'letter', 'postbox', 'trainStation', 'alley', 'balloon', 'paperPlane', 'kite', 'observatory', 'orbit', 'andromeda', 'starlightLetter']);
+    'crescent', 'fullMoon', 'eclipseShadow', 'plutoHeart', 'europaSea', 'voyager', 'farSignal', 'atticRadio', 'waves', 'seasideVillage', 'seagull', 'lightCurtain', 'ginkgo', 'fallenLeaves', 'dandelion', 'bamboo', 'hillPass', 'steppingStones', 'yarn', 'knitting', 'letter', 'postbox', 'trainStation', 'alley', 'balloon', 'paperPlane', 'kite', 'observatory', 'orbit', 'andromeda', 'starlightLetter']);
   for (const tune of withFigure) {
     assert.ok(tune.motif.length >= 8 && tune.motif.every((n) => Number.isInteger(n) && n >= 0 && n < 8), tune.id);
     // Neighbours in the figure are never the same note twice.

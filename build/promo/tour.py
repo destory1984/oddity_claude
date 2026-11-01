@@ -10,14 +10,14 @@ from PIL import Image, ImageFilter
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'promo')
 SIZE = (1080, 1920)
 START_S = 0.1
-SHOT_S = 27.8
-END_S = 2.0
+SHOT_S = 24.9
+END_S = 5.0
 FADE_S = 2.5
 # From and to (s) of each caption of a take: <shot>-<take>-<n>.png (captions.cjs).
 TAKES = {
     'auroraDrift': {
         '1': [(0, 6), (6, 13), (13, 20), (20, 26)],
-        '2': [(0, 9), (9, 27.8)],
+        '2': [(0, 9), (9, 24.9)],
     },
 }
 
@@ -59,7 +59,7 @@ def main(lang, name, take):
     graph.append(f'[{k + 2}:v]fps=30,scale={SIZE[0]}:{SIZE[1]}:in_range=pc:out_range=tv,format=yuv420p,setsar=1[end]')
     graph.append('[main][end]concat=n=2:v=1:a=0[v]')
     graph.append(f'[{k + 1}:a]atrim={offset:.3f}:{offset + total:.3f},asetpts=PTS-STARTPTS,afade=t=in:d=0.3,'
-                 f'afade=t=out:st={total - FADE_S:.3f}:d={FADE_S},apad=whole_dur={total:.3f},loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]')
+                 f'afade=t=out:st={min(total, rel[-1] - START_S) - FADE_S:.3f}:d={FADE_S},apad=whole_dur={total:.3f},loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a]')
     film = os.path.join(ROOT, f'tour-{name}-{take}-{lang}.mp4')
     subprocess.run(['ffmpeg', '-v', 'error', '-y', *inputs, '-filter_complex', ';'.join(graph), '-map', '[v]', '-map', '[a]',
                     '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-c:a', 'aac', '-b:a', '192k',

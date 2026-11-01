@@ -84,8 +84,16 @@ const GAZE = {
 };
 // The Shorts of the tour courses (FILM=tour, build/promo/tour.py).
 const TOUR = {
-  ko: { auroraDrift: '지구 오로라 유영', end: FIRST.ko.end },
-  en: { auroraDrift: 'Drifting over Earth\'s aurora', end: FIRST.en.end },
+  ko: {
+    'auroraDrift-1-1': '우주에서 본 오로라',
+    'auroraDrift-1-2': '높이 400km,\n우주정거장이 나는 곳',
+    'auroraDrift-1-3': '태양에서 온 입자가\n공기와 부딪쳐 빛난다',
+    'auroraDrift-1-4': '낮은 곳은 초록,\n높은 곳은 붉은빛',
+    'auroraDrift-2-1': '오늘 밤, 오로라 속을\n날아 볼까요',
+    'auroraDrift-2-2': '할머니도 이 빛을\n보고 싶어 하신다',
+    'auroraDrift-2-3': '소리 없는 빛의 커튼',
+    end: FIRST.ko.end,
+  },
 };
 const LINES = { thatday: THAT_DAY, gaze: GAZE, tour: TOUR }[process.env.FILM] ?? FIRST;
 

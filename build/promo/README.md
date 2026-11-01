@@ -22,7 +22,7 @@
 
 1. 녹화: `PROMO_URL=http://localhost:4417/oddity_claude/ node build/promo/shoot.cjs ko auroraDrift`
 2. 자막과 끝 화면: `FILM=tour node build/promo/captions.cjs ko`
-3. 편집: `python -P build/promo/tour.py ko auroraDrift` → `assets/promo/tour-auroraDrift-ko.mp4`
+3. 편집: `python -P build/promo/tour.py ko auroraDrift 1` → `assets/promo/tour-auroraDrift-1-ko.mp4` (마지막 숫자는 자막 안의 번호, 자막의 때는 `tour.py` 의 `TAKES`)
 
 공개 페이지에 코스가 올라간 뒤에는 `PROMO_URL` 을 빼도 된다.
 

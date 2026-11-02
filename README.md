@@ -114,7 +114,7 @@
 
 [이슈](https://github.com/destory1984/oddity_claude/issues)에 적어 주면 된다.
 
-## 실행과 시험
+## 자신의 PC에서 직접 실행하고 싶다면
 
 Node.js 22 이상이 필요하다.
 

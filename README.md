@@ -7,6 +7,7 @@
 - 안드로이드: 구글 플레이 https://play.google.com/store/apps/details?id=io.github.destory1984.spaceoddity (한국, 미국, 일본, 뉴질랜드)
 - 아이폰: 앱은 시간이 좀 더 걸린다. 그때까지는 위 주소를 사파리로 열어 홈 화면에 추가하면 앱처럼 쓸 수 있다.
 - 홍보 동영상(유튜브 쇼츠, 30초): https://www.youtube.com/shorts/Bx5qOGBql-k
+- 추천코스 쇼츠 1호, 오로라 유영(30초): 한국어 https://youtube.com/shorts/PFKDWAiD0No , 영어 https://youtube.com/shorts/DakC5-zHVQg
 
 <a href="https://www.youtube.com/shorts/Bx5qOGBql-k"><img src="docs/promo-cover.jpg" width="220" alt="홍보 동영상의 마지막 장면. 소라 그림 아래에 Space Oddity, 할머니의 수첩, 본격 우주멍 힐링 비행 게임, 구글 플레이에서 찾아보세요. 누르면 유튜브에서 열린다"></a>
 

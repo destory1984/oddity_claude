@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-02', text: t('추천코스 오로라 유영을 유튜브 쇼츠로 올렸습니다.'), link: t('https://youtube.com/shorts/PFKDWAiD0No') },
   { day: '2026-11-02', text: t('우주 관광 추천코스 13개가 생겼습니다. 코스를 고르면 자동으로 비행합니다.') },
   { day: '2026-11-01', text: t('목성 곁 모노리스 장면에 슈트라우스의 「차라투스트라는 이렇게 말했다」 첫머리가 흐릅니다.') },
   { day: '2026-11-01', text: t('배경 음악이 쉰 곡 늘어 백 곡이 되었습니다.') },

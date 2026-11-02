@@ -8,6 +8,7 @@ test('the version is shown short: v0.1 for 0.1.0, v0.1.3 for 0.1.3', () => {
   assert.equal(versionLabel('0.1.3'), 'v0.1.3');
   assert.equal(versionLabel('0.10.0'), 'v0.10');
   assert.equal(versionLabel('1.0.0'), 'v1.0');
+  assert.equal(versionLabel('1.0.0'), 'v1.0');
 });
 
 test('the day of the update is given on the Korean clock, without the hour', () => {

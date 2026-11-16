@@ -6,6 +6,20 @@
 
 추천코스 쇼츠 1호, 오로라 유영(30초): 한국어 https://youtube.com/shorts/PFKDWAiD0No , 영어 https://youtube.com/shorts/DakC5-zHVQg
 
+<a href="https://www.youtube.com/shorts/Bx5qOGBql-k"><img src="docs/promo-cover.jpg" width="220" alt="홍보 동영상의 마지막 장면. 소라 그림 아래에 Space Oddity, 할머니의 수첩, 본격 우주멍 힐링 비행 게임, 구글 플레이에서 찾아보세요. 누르면 유튜브에서 열린다"></a>
+
+![휴대전화 화면 셋. 왼쪽은 지구의 밤 쪽 6,794km 위의 비행 화면으로, 지구 가장자리로 해가 떠오르고 가운데에 캐릭터 소라가 있다. 왼쪽 위에 미니맵, 오른쪽 위에 단추 아홉이 두 줄로(비행 연습, 수첩, 효과음, 배경 음악, 설정, 그 아래 사진, 바라보기, 고정, 확대) 있고 그 아래 목표 이름 칸에 오로라와 집 단추가 붙어 있다. 그 밑에 지구 오로라를 알리는 안내가 떠 있다. 오른쪽 맨 아래 구석에 단추 아홉이 세 줄로 모여 있고(맨 위 줄 양 끝에 후진과 전진, 가운데에 정지를 둔 이동 단추 넷, 맨 아래 줄 왼쪽에 뒤 보기, 오른쪽에 우주멍), 왼쪽 아래에 속도가 있다. 가운데는 탐험 수첩의 코스 갈래, 오른쪽은 지구를 확대 관찰하며 읽을거리를 띄운 화면이다](docs/screenshot.jpg)
+
+게임 안의 사진 모드로 찍은 풍경이다. 
+
+<p>
+<img src="docs/scenery/saturn.jpg" width="100%" alt="햇빛을 받은 토성과 넓게 기울어진 고리. 고리의 그림자가 토성 몸에 걸려 있다">
+<img src="docs/scenery/earth.jpg" width="49%" alt="구름이 덮인 낮의 지구. 북아메리카 서쪽 해안이 보인다">
+<img src="docs/scenery/io-jupiter.jpg" width="49%" alt="목성의 줄무늬 구름 앞에 뜬 누런 위성 이오. 목성 위에 이오의 검은 그림자가 찍혀 있다">
+<img src="docs/scenery/sun.jpg" width="49%" alt="가까이서 본 태양. 가장자리에 붉은 홍염이 솟아 있다">
+<img src="docs/scenery/uranus.jpg" width="49%" alt="옅은 청록색 천왕성과 세로로 선 가는 고리들">
+</p>
+
 자세한 설명:
 
 본격 우주멍 힐링 비행 게임.

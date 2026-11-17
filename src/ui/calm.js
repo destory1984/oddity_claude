@@ -150,7 +150,24 @@ export function createCalm({ sound }) {
     update();
   };
   sleepButton.addEventListener('click', nextSleep);
-  gazeSleepKey?.addEventListener('click', nextSleep);
+  // A press of that key says what it did, at the foot of the screen for five seconds (the
+  // user, 2026-11-18: "버튼을 누르면, 화면 아래 중앙에 '잠들기 / 몇 분 후에 화면이 꺼집니다'라고
+  // 5초간 띄워줘"): "Zz" alone told them nothing.
+  const note = document.getElementById('gazeNote');
+  let noteTimer = 0;
+  gazeSleepKey?.addEventListener('click', () => {
+    nextSleep();
+    if (!note) return;
+    note.querySelector('strong').textContent = t('잠들기');
+    note.querySelector('span').textContent = duration ? t`${duration}분 후에 화면이 꺼집니다.` : t('타이머를 껐습니다.');
+    note.hidden = false;
+    note.classList.remove('gone');
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(() => {
+      note.classList.add('gone');
+      noteTimer = setTimeout(() => { note.hidden = true; }, 600);
+    }, 5000);
+  });
   clockButton.addEventListener('click', () => {
     enabled = !enabled;
     try { localStorage.setItem(key, enabled ? '1' : '0'); } catch { /* This window only. */ }

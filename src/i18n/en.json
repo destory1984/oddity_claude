@@ -5647,5 +5647,8 @@
  "궤도 일출": "Sunrise from Orbit",
  "지구 400km 위를 돌며 밤에서 낮으로 넘어갑니다. 지평선에 빨강, 주황, 파랑의 띠가 켜지고 태양이 솟습니다.": "Circle the Earth 400 km up, passing from night into day. Bands of red, orange and blue light up along the horizon, and the Sun rises.",
  "궤도에서 보는 해돋이가 생겼습니다. 추천코스 궤도 일출로 날아 볼 수 있습니다.": "Sunrise seen from orbit is here. Fly it with the tour Sunrise from Orbit.",
- "{}분": "{0} min"
+ "{}분": "{0} min",
+ "잠들기": "Sleep",
+ "{}분 후에 화면이 꺼집니다.": "The screen goes dark in {0} minutes.",
+ "타이머를 껐습니다.": "The timer is off."
 }

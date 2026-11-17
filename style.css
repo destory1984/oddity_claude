@@ -487,6 +487,57 @@ kbd {
   }
 }
 
+/* What the sleep key just did, at the foot of the screen in the middle, over the keys' row,
+   for five seconds while just looking (ui/calm.js). */
+#gazeNote {
+  position:fixed;
+  z-index:21;
+  left:50%;
+  bottom:calc(max(12px, env(safe-area-inset-bottom)) + 76px);
+  transform:translateX(-50%);
+  width:max-content;
+  max-width:calc(100vw - 32px);
+  box-sizing:border-box;
+  padding:12px 22px;
+  border-radius:16px;
+  background:#0b1630cc;
+  color:#fff1d0;
+  font-family:var(--hand);
+  text-align:center;
+  pointer-events:none;
+  animation:gazeNoteIn .35s ease both;
+  transition:opacity .6s ease;
+}
+
+#gazeNote[hidden] {
+  display:none;
+}
+
+#gazeNote.gone {
+  opacity:0;
+}
+
+#gazeNote strong {
+  display:block;
+  font-size:26px;
+  font-weight:400;
+}
+
+#gazeNote span {
+  display:block;
+  margin-top:4px;
+  font-size:21px;
+}
+
+@keyframes gazeNoteIn {
+  from { opacity:0; transform:translate(-50%, 8px); }
+  to { opacity:1; transform:translate(-50%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #gazeNote { animation:none; transition:none; }
+}
+
 #sleepVeil {
   position:fixed;
   inset:0;

@@ -85,8 +85,9 @@ export function createCalm({ sound }) {
       clock.querySelector('time').textContent = new Intl.DateTimeFormat(locale, {
         hour: '2-digit', minute: '2-digit', ...(locale === 'en' ? {} : { hourCycle: 'h23' }),
       }).format(date);
+      // Short, as people write it: "Wed, Nov 18", "11월 18일 (수)" (the user, 2026-11-18: "줄임말로 쓰지").
       clock.querySelector('.gazeDate').textContent = new Intl.DateTimeFormat(locale, {
-        month: 'long', day: 'numeric', weekday: 'long',
+        month: 'short', day: 'numeric', weekday: 'short',
       }).format(date);
       const left = clock.querySelector('.gazeSleep');
       left.textContent = state.minutes ? t`☾ ${state.minutes}분` : '';

@@ -80,16 +80,19 @@ export function createSound({ music } = {}) {
     ctx = new AudioContextClass();
     master = ctx.createGain();
     master.gain.value = MASTER_VOLUME;
-    master.connect(ctx.destination);
+    // The sleep timer turns everything down, music and effects alike, on its own gain after
+    // the master (the user, 2026-11-18, "잠들기 하면, 음악도 꺼지는거지?" then "그렇게 해": the
+    // engine's hum went on). The music switch, the effects switch and scene ducking stay apart.
+    sleepBus = ctx.createGain();
+    sleepBus.gain.value = sleepLevel;
+    master.connect(sleepBus);
+    sleepBus.connect(ctx.destination);
     sfx = ctx.createGain();
     sfx.gain.value = muted ? 0 : 1;
     sfx.connect(master);
     musicBus = ctx.createGain();
     musicBus.gain.value = musicOn ? 1 : 0;
-    sleepBus = ctx.createGain();
-    sleepBus.gain.value = sleepLevel;
-    musicBus.connect(sleepBus);
-    sleepBus.connect(master);
+    musicBus.connect(master);
 
     noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const data = noiseBuffer.getChannelData(0);
@@ -671,7 +674,7 @@ export function createSound({ music } = {}) {
   };
 
   return {
-    // A separate music gain keeps scene ducking and the music switch from undoing sleep.
+    // A gain of its own (after the master) keeps scene ducking and the switches from undoing sleep.
     sleepVolume(level, seconds = 0) {
       sleepLevel = level;
       if (!ctx || !sleepBus) return;

@@ -18,6 +18,10 @@
 //     point she looks at stands, in the curtain (100 to 1,500 km up); highKm: how high she
 //     flies; rangeKm: how far off she goes round it, through the curtain twice a lap;
 //     startS: how far into a lap it starts, where the curtains stand thickest.
+//   rail.orbit: a low round of the whole body, through midnight, dawn, noon and dusk,
+//     looking ahead along the way at lookDeg under the level, so the horizon stands low in
+//     the view and the Sun comes up over it (an orbital sunrise; the user, 2026-11-18:
+//     "2", for a course of the dawn layers drawn in shaders/air.frag). highKm: how high.
 // rollDeg: the view turned, for a band that lies across a tall screen.
 import { orientationFrom, right, up } from './orientation.js';
 import { GALACTIC_CENTRE, GALACTIC_POLE, GALAXIES, NEBULAE, fromEquatorial } from './sky.js';
@@ -30,6 +34,8 @@ export const COURSES = [
   // for the Sun in view puts out the rest (the user, 2026-11-02: "태양이 안 보였으면 좋겠어").
   { id: 'earthRound', body: 'earth', lapS: 120, radii: 4.31, name: t('지구 한 바퀴'), todo: t('두 분 동안 지구를 한 바퀴 비행합니다. 낮과 밤, 오로라가 차례로 지나갑니다.'),
     sun: { from: [0.5, 0, -0.87], toward: [0, 1, 0] } },
+  // 360 s a lap: the layers last about eight seconds, the Sun about half a minute to come up.
+  { id: 'orbitSunrise', body: 'earth', lapS: 360, rail: { orbit: true, highKm: 400, lookDeg: 12, startS: 22 }, name: t('궤도 일출'), todo: t('지구 400km 위를 돌며 밤에서 낮으로 넘어갑니다. 지평선에 빨강, 주황, 파랑의 띠가 켜지고 태양이 솟습니다.') },
   { id: 'milkyWay', body: 'earth', lapS: 180, radii: 8, rollDeg: 35, sky: 'milkyWay', name: t('은하수 일주'), todo: t('은하수가 놓인 평면을 따라 지구 둘레를 비행합니다. 은하 중심에서 출발합니다.') },
   { id: 'orion', body: 'earth', lapS: 150, radii: 6, sky: 'm42', overDeg: 16, name: t('오리온 대성운'), todo: t('지구를 돌면서 겨울 밤하늘의 붉은 성운을 봅니다.') },
   { id: 'andromeda', body: 'moon', lapS: 150, radii: 7, sky: 'm31', overDeg: 16, name: t('안드로메다은하'), todo: t('달을 돌면서 안드로메다은하와 곁의 삼각형자리 은하를 봅니다.') },
@@ -93,6 +99,7 @@ function roundOf(course, frame, ringNormal) {
 
 // Where a rail has her after `seconds`, looking at the point it goes round.
 export function railAt(course, body, sun, seconds) {
+  if (course.rail.orbit) return orbitAt(course, body, sun, seconds);
   // (Over midnight, Earth a strip at the foot of the view (the user, 2026-11-02: "지구가 조금
   // 보여야해"); facing the Sun the view rises by sunwardKm, for the Sun, drawn large, stands
   // on the horizon there, and in view it puts out the aurora and the stars. The user, 2026-11-02: "태양은 안 나와야해... 다 없어지네".)
@@ -107,6 +114,20 @@ export function railAt(course, body, sun, seconds) {
   const facingSun = Math.max(0, dot(aside, away));
   const point = body.position.map((n, i) => n + over[i] * (body.radiusKm + atKm + sunwardKm * facingSun));
   return { position, orientation: orientationFrom(point.map((n, i) => n - position[i]), over) };
+}
+
+// The orbital sunrise's round: from midnight (0 s) toward the Sun's side, square to the
+// Sun's pole, looking ahead.
+function orbitAt(course, body, sun, seconds) {
+  const { highKm, lookDeg } = course.rail;
+  const frame = sunFrame(body.position, sun.position);
+  const night = frame.toSun.map((n) => -n);
+  const turn = (2 * Math.PI * seconds) / course.lapS;
+  const out = mix(Math.cos(turn), night, Math.sin(turn), frame.aside);
+  const ahead = mix(-Math.sin(turn), night, Math.cos(turn), frame.aside);
+  const position = body.position.map((n, i) => n + out[i] * (body.radiusKm + highKm));
+  const look = mix(Math.cos(rad(lookDeg)), ahead, -Math.sin(rad(lookDeg)), out);
+  return { position, orientation: orientationFrom(look, out) };
 }
 
 // Where a round starts and the slide that carries her along it, with the bodies where

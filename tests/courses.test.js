@@ -17,11 +17,11 @@ const velocity = ({ orientation, slide }) => {
   return r.map((n, i) => n * slide.sideSpeed * slide.sideSign + u[i] * slide.riseSpeed * slide.riseSign);
 };
 
-test('thirteen rounds, the aurora first, then the one the user was flying, each of a known body', () => {
-  assert.equal(COURSES.length, 13);
+test('fourteen rounds, the aurora first, then the one the user was flying, each of a known body', () => {
+  assert.equal(COURSES.length, 14);
   assert.equal(COURSES[0].id, 'auroraDrift');
   assert.equal(COURSES[1].id, 'earthRound');
-  assert.equal(new Set(COURSES.map((c) => c.id)).size, 13);
+  assert.equal(new Set(COURSES.map((c) => c.id)).size, 14);
   for (const c of COURSES) {
     assert.ok(body(c.body), c.id);
     assert.ok(c.name && c.todo, c.id);
@@ -80,4 +80,24 @@ test('a thing of the sky stands over the plane of its round by what is asked', (
     const out = unit(start.position.map((n, i) => n - b.position[i]));
     assert.ok(Math.abs(dot(way, out) + Math.cos((c.overDeg * Math.PI) / 180)) < 1e-6, c.id);
   }
+});
+
+test('the orbital sunrise goes round low, from the night side toward the Sun, looking ahead', () => {
+  const c = courseById('orbitSunrise');
+  const b = at('earth');
+  const toSun = unit(sun.position.map((n, i) => n - b.position[i]));
+  const point = (seconds) => railAt(c, b, sun, seconds);
+  const out = (p) => p.position.map((n, i) => n - b.position[i]);
+  for (const s of [0, 30, 90, 200, 359]) assert.ok(Math.abs(Math.hypot(...out(point(s))) - (b.radiusKm + 400)) < 1, s);
+  // From midnight at 0 s it starts on the night side and comes to noon half a lap on.
+  assert.ok(dot(unit(out(point(0))), toSun) < -0.99);
+  assert.ok(dot(unit(out(point(c.rail.startS))), toSun) < -0.5);
+  assert.ok(dot(unit(out(point(c.lapS / 2))), toSun) > 0.99);
+  // Looking ahead where it goes, 12 degrees under the level.
+  const p = point(c.rail.startS);
+  const going = point(c.rail.startS + 0.5).position.map((n, i) => n - p.position[i]);
+  const look = forward(p.orientation);
+  const level = unit(going);
+  assert.ok(Math.abs(Math.asin(-dot(look, unit(out(p)))) * 180 / Math.PI - 12) < 0.5);
+  assert.ok(dot(look, level) > 0.97);
 });

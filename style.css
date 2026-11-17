@@ -411,7 +411,10 @@ kbd {
   color:#ffbdb3;
 }
 
-/* Grandmother's notebook hand, cream (the user picked look "나" of three, 2026-11-18). */
+/* Grandmother's notebook hand, cream (the user picked look "나" of three, 2026-11-18),
+   at the top left just under the title (#gazeLogo), each line as wide as the title (the
+   user: "시간과 날짜를 왼쪽 상단, 제목 바로 아래로 옮기고, 폰트도 적당히 줄여서 폭을 맞춰").
+   ui/calm.js sets each line's size to fit; the drift against burn-in is a quarter here. */
 #gazeClock {
   --clock-font-family:var(--hand);
   --clock-weight:400;
@@ -423,15 +426,15 @@ kbd {
   --clock-spacing:0.02em;
   --clock-date-spacing:0.06em;
   --clock-shadow:0 2px 10px #000a;
-  --clock-top:12%;
+  --clock-top:calc(env(safe-area-inset-top, 0px) + 12px + 92px * 146 / 609 + 6px);
   --clock-line-height:1.2;
-  --clock-line-gap:8px;
+  --clock-line-gap:2px;
   position:fixed;
   z-index:20;
   top:var(--clock-top);
-  left:50%;
-  transform:translate(calc(-50% + var(--clock-x, 0px)), var(--clock-y, 0px));
-  text-align:center;
+  left:calc(env(safe-area-inset-left, 0px) + 12px);
+  transform:translate(calc(var(--clock-x, 0px) / 4), calc(var(--clock-y, 0px) / 4));
+  text-align:left;
   white-space:nowrap;
   pointer-events:none;
   font-family:var(--clock-font-family);
@@ -443,6 +446,12 @@ kbd {
   text-shadow:var(--clock-shadow);
   opacity:0;
   transition:none;
+}
+
+/* Each line only as wide as its words, so ui/calm.js can measure it. */
+#gazeClock > :not([hidden]) {
+  display:block;
+  width:max-content;
 }
 
 #gazeClock.visible {
@@ -4931,7 +4940,8 @@ html[lang="zh-Hans"] * {
 /* The "우주멍" button: the corner cell the key block left empty, at the right foot of the
    screen, as large as the other keys. A crescent moon, yellow (the user's pick "B" of five,
    2026-10-19), on the same navy as the keys beside it. */
-#gazeButton {
+#gazeButton,
+#gazeMusic {
   position:absolute;
   right:0;
   bottom:0;
@@ -4955,7 +4965,8 @@ html[lang="zh-Hans"] * {
 }
 
 @media (max-width: 480px) {
-  #gazeButton {
+  #gazeButton,
+  #gazeMusic {
     width:var(--top-key);
     height:var(--top-key);
     min-height:var(--top-key);
@@ -4967,7 +4978,7 @@ html[lang="zh-Hans"] * {
    left. The button itself stays, faint, to bring them back. Hidden things take no touch,
    so a drag anywhere turns the view. */
 html.gaze #hud > :not(footer),
-html.gaze #hud footer > :not(#gazeButton),
+html.gaze #hud footer > :not(#gazeButton):not(#gazeMusic),
 html.gaze #hint,
 html.gaze #guide,
 html.gaze #toast,
@@ -5011,6 +5022,42 @@ html.gaze #gazeLogo {
 html.gaze #gazeButton {
   opacity:.4;
   border-color:var(--gold);
+}
+
+/* Music on or off while just looking, beside the moon (the user, 2026-11-18: "우주멍에서는
+   배경음악 ON/OFF 버튼을 우주멍 버튼 옆에 그려줘"). Only there; it comes up softly once the
+   rest has gone, as faint as the moon. */
+#gazeMusic {
+  display:none;
+}
+
+html.gaze #gazeMusic {
+  display:inline-flex;
+  right:var(--step, 64px);
+  opacity:.4;
+  border-color:var(--gold);
+  animation:gazeMusicIn .6s ease both;
+}
+
+#gazeMusic::before {
+  content:"";
+  flex:none;
+  width:25px;
+  height:25px;
+  background:url("/assets/ui/icon-music-on.svg") center / contain no-repeat;
+}
+
+#gazeMusic.off::before {
+  background-image:url("/assets/ui/icon-music-off.svg");
+}
+
+@keyframes gazeMusicIn {
+  from { opacity:0; }
+  to { opacity:.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.gaze #gazeMusic { animation:none; }
 }
 
 /* The line "현재 제한 0.01c" under the speed is gone (the user, 2026-10-05: "없애자"): the
@@ -5102,7 +5149,8 @@ html.gaze #gazeButton {
   #hud footer #reverseButton,
   #hud footer #brake,
   #hud footer #flyButton,
-  #hud footer #gazeButton {
+  #hud footer #gazeButton,
+  #hud footer #gazeMusic {
     width:44px;
     height:44px;
     min-height:44px;

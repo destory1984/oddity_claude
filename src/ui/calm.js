@@ -44,6 +44,29 @@ export function createCalm({ sound }) {
     clockButton.setAttribute('aria-pressed', String(enabled));
     sleepButton.textContent = duration ? t`잠들기: ${duration}분` : t('잠들기: 끔');
   };
+  // Each line as wide as the title above it (style.css #gazeClock), measured again only
+  // when its words or the title's width change. A long date (in English) is not made
+  // smaller than can be read: it may then reach past the title.
+  let fitted = '';
+  // The hand font comes in only when first used: measured before, the lines came out a
+  // third too narrow. Measure again once it is in.
+  document.fonts?.addEventListener?.('loadingdone', () => { fitted = ''; });
+  const fitLines = (sleepWords) => {
+    const time = clock.querySelector('time');
+    const date = clock.querySelector('.gazeDate');
+    const width = document.getElementById('gazeLogo')?.getBoundingClientRect?.().width || 92;
+    const key = `${time.textContent}|${date.textContent}|${sleepWords}|${width}`;
+    if (key === fitted) return;
+    fitted = key;
+    const fit = (el, least, most) => {
+      el.style.fontSize = '40px';
+      const natural = el.getBoundingClientRect?.().width;
+      if (natural) el.style.fontSize = `${Math.max(least, Math.min(most, (40 * width) / natural))}px`;
+    };
+    fit(time, 16, 48);
+    fit(date, 10, 22);
+    clock.querySelector('.gazeSleep').style.fontSize = date.style.fontSize;
+  };
   const update = () => {
     const now = Date.now();
     const state = sleepState(deadline, now);
@@ -68,6 +91,7 @@ export function createCalm({ sound }) {
       const left = clock.querySelector('.gazeSleep');
       left.textContent = state.minutes ? t`☾ ${state.minutes}분` : '';
       left.hidden = !state.minutes;
+      fitLines(left.textContent);
       const offset = clockOffset(now);
       clock.style.setProperty('--clock-x', `${offset.x}px`);
       clock.style.setProperty('--clock-y', `${offset.y}px`);

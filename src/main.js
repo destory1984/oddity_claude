@@ -2506,6 +2506,10 @@ ${STORY_MORE[target.id]}` : told) };
     $('bgmButton').classList.toggle('off', !on);
     $('bgmButton').setAttribute('aria-label', on ? t('배경 음악 끄기') : t('배경 음악 켜기'));
     $('bgmButton').title = on ? t('배경 음악 켜짐 (B)') : t('배경 음악 꺼짐 (B)');
+    // The same switch beside the moon while just looking (style.css #gazeMusic).
+    $('gazeMusic').classList.toggle('off', !on);
+    $('gazeMusic').setAttribute('aria-label', $('bgmButton').getAttribute('aria-label'));
+    $('gazeMusic').title = $('bgmButton').title;
   }
   function toggleMusic() {
     sound.unlock();
@@ -2515,6 +2519,7 @@ ${STORY_MORE[target.id]}` : told) };
   }
   showMusicButton();
   $('bgmButton').addEventListener('click', toggleMusic);
+  $('gazeMusic').addEventListener('click', toggleMusic);
   // The tune that is playing, beside the button, while the settings are open (the user,
   // 2026-10-19: "설정 -> 옵션에 지금 흐르고 있는 BGM 제목 넣어줘"). A tune just chosen by
   // the button shows at once, before its first bar sounds.
@@ -2588,7 +2593,7 @@ ${STORY_MORE[target.id]}` : told) };
   const gazePieces = () => {
     // The target panel is a name and bare keys (on a wide screen too since v0.1.186).
     const panel = '#targetPanel > *';
-    const all = `#hud header nav button, #hud header .brand, #hud .telemetry, #minimap, #scanner, #scannerButton, #reticle, #markers > *, ${panel}, #hud footer .speedBox, #hud footer .throttle, #hud footer button:not(#gazeButton), #hint, #guide, #toast, #heroSay, #skyTold, #testBar button`;
+    const all = `#hud header nav button, #hud header .brand, #hud .telemetry, #minimap, #scanner, #scannerButton, #reticle, #markers > *, ${panel}, #hud footer .speedBox, #hud footer .throttle, #hud footer button:not(#gazeButton):not(#gazeMusic), #hint, #guide, #toast, #heroSay, #skyTold, #testBar button`;
     return [...document.querySelectorAll(all)].filter((el) => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden' && Number(getComputedStyle(el).opacity) > 0.02);
   };
   // onTop: over an open dialog, in the top layer as a popover (where there is none,

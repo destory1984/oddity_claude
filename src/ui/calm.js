@@ -8,7 +8,8 @@ export function createCalm({ sound }) {
   const clockButton = document.getElementById('gazeClockButton');
   const sleepButton = document.getElementById('sleepButton');
   // The same timer beside the music key while just looking (the user, 2026-11-18: "우주멍에
-  // 잠들기 단추도 넣어"): "Zz" when off, the minutes left when on.
+  // 잠들기 단추도 넣어"): a timer drawn when off (style.css; it was "Zz" till the user, 2026-11-18:
+  // "zz보다 타이어 아이콘을 그려넣는게 어때?", a timer meant), the minutes left when on.
   const gazeSleepKey = document.getElementById('gazeSleep');
   const key = 'oddity.gazeClock';
   let enabled = false;
@@ -87,7 +88,7 @@ export function createCalm({ sound }) {
     if (fading) veil.style.opacity = String(state.veil);
     if (state.done && !finished) { finished = true; syncWake(); }
     if (gazeSleepKey) {
-      const words = state.minutes ? t`${state.minutes}분` : 'Zz';
+      const words = state.minutes ? t`${state.minutes}분` : '';
       if (gazeSleepKey.textContent !== words) gazeSleepKey.textContent = words;
     }
     clock.classList.toggle('visible', gazing && enabled && ready);

@@ -5106,7 +5106,8 @@ html.gaze #gazeMusic {
 }
 
 /* The sleep timer beside the music (the user, 2026-11-18: "우주멍에 잠들기 단추도 넣어"):
-   "Zz" in grandmother's hand, the minutes left while it runs, a little brighter then. */
+   a stopwatch when off, the minutes left in grandmother's hand while it runs, a little
+   brighter then. */
 html.gaze #gazeSleep {
   display:inline-flex;
   right:calc(2 * var(--step, 64px));
@@ -5117,6 +5118,14 @@ html.gaze #gazeSleep {
   color:#fff1d0;
   white-space:nowrap;
   animation:gazeMusicIn .6s ease both;
+}
+
+html.gaze #gazeSleep:not(.on)::before {
+  content:"";
+  flex:none;
+  width:25px;
+  height:25px;
+  background:url("/assets/ui/icon-timer.svg") center / contain no-repeat;
 }
 
 html.gaze #gazeSleep.on {

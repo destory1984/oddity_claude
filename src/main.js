@@ -2593,7 +2593,7 @@ ${STORY_MORE[target.id]}` : told) };
   const gazePieces = () => {
     // The target panel is a name and bare keys (on a wide screen too since v0.1.186).
     const panel = '#targetPanel > *';
-    const all = `#hud header nav button, #hud header .brand, #hud .telemetry, #minimap, #scanner, #scannerButton, #reticle, #markers > *, ${panel}, #hud footer .speedBox, #hud footer .throttle, #hud footer button:not(#gazeButton):not(#gazeMusic), #hint, #guide, #toast, #heroSay, #skyTold, #testBar button`;
+    const all = `#hud header nav button, #hud header .brand, #hud .telemetry, #minimap, #scanner, #scannerButton, #reticle, #markers > *, ${panel}, #hud footer .speedBox, #hud footer .throttle, #hud footer button:not(#gazeButton):not(#gazeMusic):not(#gazeSleep), #hint, #guide, #toast, #heroSay, #skyTold, #testBar button`;
     return [...document.querySelectorAll(all)].filter((el) => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden' && Number(getComputedStyle(el).opacity) > 0.02);
   };
   // onTop: over an open dialog, in the top layer as a popover (where there is none,

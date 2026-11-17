@@ -4941,7 +4941,8 @@ html[lang="zh-Hans"] * {
    screen, as large as the other keys. A crescent moon, yellow (the user's pick "B" of five,
    2026-10-19), on the same navy as the keys beside it. */
 #gazeButton,
-#gazeMusic {
+#gazeMusic,
+#gazeSleep {
   position:absolute;
   right:0;
   bottom:0;
@@ -4966,7 +4967,8 @@ html[lang="zh-Hans"] * {
 
 @media (max-width: 480px) {
   #gazeButton,
-  #gazeMusic {
+  #gazeMusic,
+  #gazeSleep {
     width:var(--top-key);
     height:var(--top-key);
     min-height:var(--top-key);
@@ -4978,7 +4980,7 @@ html[lang="zh-Hans"] * {
    left. The button itself stays, faint, to bring them back. Hidden things take no touch,
    so a drag anywhere turns the view. */
 html.gaze #hud > :not(footer),
-html.gaze #hud footer > :not(#gazeButton):not(#gazeMusic),
+html.gaze #hud footer > :not(#gazeButton):not(#gazeMusic):not(#gazeSleep),
 html.gaze #hint,
 html.gaze #guide,
 html.gaze #toast,
@@ -5027,7 +5029,8 @@ html.gaze #gazeButton {
 /* Music on or off while just looking, beside the moon (the user, 2026-11-18: "우주멍에서는
    배경음악 ON/OFF 버튼을 우주멍 버튼 옆에 그려줘"). Only there; it comes up softly once the
    rest has gone, as faint as the moon. */
-#gazeMusic {
+#gazeMusic,
+#gazeSleep {
   display:none;
 }
 
@@ -5051,13 +5054,33 @@ html.gaze #gazeMusic {
   background-image:url("/assets/ui/icon-music-off.svg");
 }
 
+/* The sleep timer beside the music (the user, 2026-11-18: "우주멍에 잠들기 단추도 넣어"):
+   "Zz" in grandmother's hand, the minutes left while it runs, a little brighter then. */
+html.gaze #gazeSleep {
+  display:inline-flex;
+  right:calc(2 * var(--step, 64px));
+  opacity:.4;
+  border-color:var(--gold);
+  font-family:var(--hand);
+  font-size:16px;
+  color:#fff1d0;
+  white-space:nowrap;
+  animation:gazeMusicIn .6s ease both;
+}
+
+html.gaze #gazeSleep.on {
+  font-size:15px;
+  animation:none;
+  opacity:.7;
+}
+
 @keyframes gazeMusicIn {
   from { opacity:0; }
   to { opacity:.4; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.gaze #gazeMusic { animation:none; }
+  html.gaze #gazeMusic, html.gaze #gazeSleep { animation:none; }
 }
 
 /* The line "현재 제한 0.01c" under the speed is gone (the user, 2026-10-05: "없애자"): the
@@ -5150,7 +5173,8 @@ html.gaze #gazeMusic {
   #hud footer #brake,
   #hud footer #flyButton,
   #hud footer #gazeButton,
-  #hud footer #gazeMusic {
+  #hud footer #gazeMusic,
+  #hud footer #gazeSleep {
     width:44px;
     height:44px;
     min-height:44px;

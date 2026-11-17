@@ -7,6 +7,9 @@ export function createCalm({ sound }) {
   const veil = document.getElementById('sleepVeil');
   const clockButton = document.getElementById('gazeClockButton');
   const sleepButton = document.getElementById('sleepButton');
+  // The same timer beside the music key while just looking (the user, 2026-11-18: "우주멍에
+  // 잠들기 단추도 넣어"): "Zz" when off, the minutes left when on.
+  const gazeSleepKey = document.getElementById('gazeSleep');
   const key = 'oddity.gazeClock';
   let enabled = false;
   try { enabled = localStorage.getItem(key) === '1'; } catch { /* This window only. */ }
@@ -43,6 +46,11 @@ export function createCalm({ sound }) {
     clockButton.textContent = enabled ? t('켜짐') : t('꺼짐');
     clockButton.setAttribute('aria-pressed', String(enabled));
     sleepButton.textContent = duration ? t`잠들기: ${duration}분` : t('잠들기: 끔');
+    if (gazeSleepKey) {
+      gazeSleepKey.setAttribute('aria-label', sleepButton.textContent);
+      gazeSleepKey.title = sleepButton.textContent;
+      gazeSleepKey.classList.toggle('on', Boolean(duration));
+    }
   };
   // Each line as wide as the title above it (style.css #gazeClock), measured again only
   // when its words or the title's width change. A long date (in English) is not made
@@ -78,6 +86,10 @@ export function createCalm({ sound }) {
     }
     if (fading) veil.style.opacity = String(state.veil);
     if (state.done && !finished) { finished = true; syncWake(); }
+    if (gazeSleepKey) {
+      const words = state.minutes ? t`${state.minutes}분` : 'Zz';
+      if (gazeSleepKey.textContent !== words) gazeSleepKey.textContent = words;
+    }
     clock.classList.toggle('visible', gazing && enabled && ready);
     if (gazing && enabled) {
       const locale = language();
@@ -128,7 +140,7 @@ export function createCalm({ sound }) {
     event.preventDefault();
     event.stopImmediatePropagation();
   }, { capture: true });
-  sleepButton.addEventListener('click', () => {
+  const nextSleep = () => {
     const next = { 0: 15, 15: 30, 30: 60, 60: 0 }[duration];
     cancelSleep();
     duration = next;
@@ -136,7 +148,9 @@ export function createCalm({ sound }) {
     veil.style.transitionDuration = '250ms';
     showButtons();
     update();
-  });
+  };
+  sleepButton.addEventListener('click', nextSleep);
+  gazeSleepKey?.addEventListener('click', nextSleep);
   clockButton.addEventListener('click', () => {
     enabled = !enabled;
     try { localStorage.setItem(key, enabled ? '1' : '0'); } catch { /* This window only. */ }

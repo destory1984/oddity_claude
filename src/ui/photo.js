@@ -27,6 +27,7 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
   function toggle() {
     active = !active;
     clearInput();
+    $('wallpaperGuide').hidden = !active || !$('clockSpace').checked;
     if (active) {
       priorPause = isPaused();
       setPaused(true);
@@ -46,6 +47,47 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
       $('showHero').checked = true;
     }
   }
+
+  async function savePicture(picture, wallpaper = false) {
+    const blob = await new Promise((resolve, reject) => {
+      picture.toBlob((b) => (b ? resolve(b) : reject(new Error(t('이미지 생성 실패')))), 'image/png');
+    });
+    const file = new File([blob], `${wallpaper ? 'oddity-wallpaper' : 'oddity'}-${new Date().toISOString().replace(/[:.]/g, '-')}.png`, { type: 'image/png' });
+    const touch = document.body.classList.contains('touch');
+    if (touch && navigator.canShare?.({ files: [file] })) {
+      try {
+        // With a link to the place, so the friend it goes to can stand there too (the user,
+        // 2026-10-19: "사진도 찰칵하고, SNS나 카톡에 공유하는 기능도 만들자").
+        const info = shareInfo();
+        await navigator.share({ files: [file], title: 'Space Oddity', ...(info ? { text: `${info.text}\n${info.url}` } : {}) });
+      } catch (e) {
+        if (e.name !== 'AbortError') throw e;
+      }
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      toast.show(wallpaper ? t('배경화면 크기로 저장했습니다.') : t('화면 표시 없는 우주 사진을 저장했습니다.'));
+    }
+  }
+
+  $('clockSpace').addEventListener('change', () => {
+    $('wallpaperGuide').hidden = !active || !$('clockSpace').checked;
+  });
+  $('wallpaper').addEventListener('click', async () => {
+    const wallpaperButton = $('wallpaper');
+    wallpaperButton.disabled = true;
+    try {
+      await savePicture(world.wallpaper(), true);
+    } catch {
+      toast.show(t('사진을 저장하지 못했습니다. 다시 시도해 주세요.'));
+    } finally {
+      wallpaperButton.disabled = false;
+    }
+  });
 
   $('fov').addEventListener('input', (e) => setFovDeg(Number(e.target.value)));
   $('exitPhoto').addEventListener('click', toggle);
@@ -76,29 +118,7 @@ export function createPhoto({ world, canvas, toast, setPaused, isPaused, clearIn
       } catch {
         shot.thumb = null;
       }
-      const blob = await new Promise((resolve, reject) => {
-        picture.toBlob((b) => (b ? resolve(b) : reject(new Error(t('이미지 생성 실패')))), 'image/png');
-      });
-      const file = new File([blob], `oddity-${new Date().toISOString().replace(/[:.]/g, '-')}.png`, { type: 'image/png' });
-      const touch = document.body.classList.contains('touch');
-      if (touch && navigator.canShare?.({ files: [file] })) {
-        try {
-          // With a link to the place, so the friend it goes to can stand there too (the user,
-          // 2026-10-19: "사진도 찰칵하고, SNS나 카톡에 공유하는 기능도 만들자").
-          const info = shareInfo();
-          await navigator.share({ files: [file], title: 'Space Oddity', ...(info ? { text: `${info.text}\n${info.url}` } : {}) });
-        } catch (e) {
-          if (e.name !== 'AbortError') throw e;
-        }
-      } else {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = file.name;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
-        toast.show(t('화면 표시 없는 우주 사진을 저장했습니다.'));
-      }
+      await savePicture(picture);
       onCaptured(shot);
     } catch (e) {
       toast.show(t('사진을 저장하지 못했습니다. 다시 시도해 주세요.'));

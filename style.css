@@ -411,6 +411,104 @@ kbd {
   color:#ffbdb3;
 }
 
+/* Grandmother's notebook hand, cream (the user picked look "나" of three, 2026-11-18). */
+#gazeClock {
+  --clock-font-family:var(--hand);
+  --clock-weight:400;
+  --clock-size:clamp(48px, 14vw, 76px);
+  --clock-date-size:17px;
+  --clock-sleep-size:13px;
+  --clock-color:#fff1d0;
+  --clock-opacity:0.9;
+  --clock-spacing:0.02em;
+  --clock-date-spacing:0.06em;
+  --clock-shadow:0 2px 10px #000a;
+  --clock-top:12%;
+  --clock-line-height:1.2;
+  --clock-line-gap:8px;
+  position:fixed;
+  z-index:20;
+  top:var(--clock-top);
+  left:50%;
+  transform:translate(calc(-50% + var(--clock-x, 0px)), var(--clock-y, 0px));
+  text-align:center;
+  white-space:nowrap;
+  pointer-events:none;
+  font-family:var(--clock-font-family);
+  font-weight:var(--clock-weight);
+  font-size:var(--clock-size);
+  line-height:var(--clock-line-height);
+  color:var(--clock-color);
+  letter-spacing:var(--clock-spacing);
+  text-shadow:var(--clock-shadow);
+  opacity:0;
+  transition:none;
+}
+
+#gazeClock.visible {
+  opacity:var(--clock-opacity);
+  transition:opacity 600ms ease;
+}
+
+#gazeClock .gazeDate,
+#gazeClock .gazeSleep {
+  margin-top:var(--clock-line-gap);
+  font-size:var(--clock-date-size);
+  letter-spacing:var(--clock-date-spacing);
+}
+
+#gazeClock .gazeSleep {
+  font-size:var(--clock-sleep-size);
+}
+
+/* Two columns leave room for the return key even with the replay key present. */
+@media (max-width:480px) {
+  #photoTools:not([hidden]) {
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+  #photoTools:not([hidden])::before { display:none; }
+  #photoTools:not([hidden]) > div { display:none; }
+  #photoTools:not([hidden]) label { min-width:0; }
+  #photoTools:not([hidden]) label:has(#clockSpace) { grid-column:1 / -1; }
+  #photoTools:not([hidden]) button {
+    width:100%;
+    max-width:none;
+    min-width:0;
+  }
+}
+
+#sleepVeil {
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  background:#000;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 250ms linear;
+}
+
+#wallpaperGuide {
+  position:fixed;
+  left:10%;
+  top:9%;
+  width:80%;
+  height:21%;
+  box-sizing:border-box;
+  border:1px dashed #ffffff99;
+  border-radius:12px;
+  pointer-events:none;
+  z-index:20;
+}
+
+@media (orientation:landscape) {
+  #wallpaperGuide { display:none; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  #gazeClock.visible { transition:none; }
+}
+
 #photoTools {
   position:fixed;
   bottom:24px;

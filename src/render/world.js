@@ -1,3 +1,4 @@
+import { wallpaperSize } from '../core/calm.js';
 import {
   Engine, Scene, FreeCamera, Vector3, Color4, Quaternion, HemisphericLight, DirectionalLight,
 } from './babylon.js';
@@ -301,6 +302,39 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
       pen.imageSmoothingEnabled = false;
       pen.drawImage(heroCanvas, 0, 0, whole.width, whole.height);
       return whole;
+    },
+    // Capture synchronously so no normal frame can see the temporary drawing size.
+    wallpaper() {
+      const engines = [engine, heroEngine].filter(Boolean);
+      const previous = engines.map((view) => ({
+        view, scaling: view.getHardwareScalingLevel(),
+        width: view.getRenderWidth(), height: view.getRenderHeight(),
+      }));
+      const limit = Math.min(...engines.map((view) => view.getCaps().maxTextureSize));
+      // Never smaller than the view already is (in the phone frame on a computer the
+      // frame's own zoom can make the plain view finer than the device ratio alone).
+      const finest = Math.max(window.devicePixelRatio || 1, engine.getRenderWidth() / canvas.clientWidth);
+      const size = wallpaperSize(canvas.clientWidth, canvas.clientHeight, finest, limit);
+      try {
+        for (const view of engines) {
+          view.setHardwareScalingLevel(canvas.clientWidth / size.width);
+          view.setSize(size.width, size.height);
+        }
+        this.render();
+        const source = this.picture();
+        // picture() may be the live canvas when there is no separate hero engine.
+        const copy = document.createElement('canvas');
+        copy.width = size.width;
+        copy.height = size.height;
+        copy.getContext('2d').drawImage(source, 0, 0, size.width, size.height);
+        return copy;
+      } finally {
+        for (const prior of previous) {
+          prior.view.setHardwareScalingLevel(prior.scaling);
+          prior.view.setSize(prior.width, prior.height);
+        }
+        this.render();
+      }
     },
     resize() {
       sharpen();

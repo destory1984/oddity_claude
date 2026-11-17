@@ -77,6 +77,7 @@ import {
 import {
   NOTES, MEMOS, GREETINGS, dueNote, noteById, LAST_SLOT, lastSlotOpen, photoSlots,
 } from './core/story.js';
+import { createCalm } from './ui/calm.js';
 import { createSound } from './ui/sound.js';
 import { cueForEvent, engineSound } from './core/audio.js';
 import { moodFor } from './core/music.js';
@@ -2564,6 +2565,7 @@ ${STORY_MORE[target.id]}` : told) };
   // rings of ripples spread from the moon while the water goes or comes. Both are drawn on
   // one canvas laid under the words (`gazeInk`), which takes itself away when the last
   // ring has faded.
+  const calmParts = createCalm({ sound });
   let gazing = false;
   // A second press while just looking takes Sora away too, the scenery alone left; a
   // third brings everything back (the user, 2026-10-09: "한 번 누르면, 지금처럼 / 한 번 더
@@ -2732,6 +2734,7 @@ ${STORY_MORE[target.id]}` : told) };
   };
   const setGaze = (on) => {
     gazing = on;
+    calmParts.setGazing(on);
     gazeBare = false;
     $('gazeButton').setAttribute('aria-pressed', String(on));
     gazeWords();
@@ -2740,6 +2743,7 @@ ${STORY_MORE[target.id]}` : told) };
       gazeFlight(true).then((whole) => {
         if (!whole || !gazing) return;
         document.documentElement.classList.add('gaze');
+        calmParts.reveal();
         gazeClear();
       });
     } else {

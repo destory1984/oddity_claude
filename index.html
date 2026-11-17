@@ -148,11 +148,16 @@
   </aside>
 
   <div id="photoGoal" class="marker goal" hidden></div>
+  <div id="gazeClock" aria-hidden="true"><time></time><div class="gazeDate"></div><div class="gazeSleep" hidden></div></div>
+  <div id="sleepVeil" aria-hidden="true"></div>
+  <div id="wallpaperGuide" hidden aria-hidden="true"></div>
   <div id="photoTools" hidden>
     <div><strong>사진 모드</strong><span id="photoHint">드래그로 구도 조절 · 휠로 확대</span></div>
     <label><input type="checkbox" id="showHero" checked> 소라 표시</label>
     <label>화각 <input type="range" id="fov" min="5" max="95" value="60" aria-label="화각"></label>
     <button id="capture"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1.4-2h5.2L16 7h2.5A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.4" fill="none" stroke="currentColor" stroke-width="2"/></svg>사진 찍기</button>
+    <button id="wallpaper">배경화면</button>
+    <label><input type="checkbox" id="clockSpace"> 시계 자리 보기</label>
     <button id="replayAgain" hidden>다시 보기</button>
     <button id="exitPhoto">비행으로 돌아가기</button>
   </div>
@@ -433,10 +438,11 @@
       <dt class="installRow">앱으로 설치</dt><dd class="installRow">안드로이드 크롬: 메뉴 ⋮ → 앱 설치. 아이폰 사파리: 공유 → 홈 화면에 추가. 설치하면 인터넷 없이도 열립니다. <button id="installButton" hidden>지금 설치</button></dd>
       <dt id="screenTerm" hidden>화면 비율</dt><dd id="screenRow" hidden><span id="screenNow"></span> 바꾸면 게임이 처음 자리에서 다시 시작합니다(수첩은 그대로).<br><button id="screenButton"></button></dd>
       <dt>속도의 느낌</dt><dd><span id="feelNow"></span> 그 자리 제한 속도의 60%를 넘으면 시야가 넓어지고, 2c부터 별이 짧은 줄로 늘어납니다. 어지러우면 끄세요.<br><button id="feelButton"></button></dd>
+      <dt>우주멍 시계</dt><dd>우주멍 동안 화면 위쪽에 시각과 날짜를 띄우고, 화면이 꺼지지 않게 합니다.<br><button id="gazeClockButton"></button></dd>
       <dt>별자리 이름</dt><dd><span id="skyNamesNow"></span> 하늘에 별자리와 은하, 성운의 이름을 띄웁니다. 꺼도 이름을 누르던 자리를 누르면 그 이야기가 뜹니다.<br><button id="skyNamesButton"></button></dd>
       <dt>소리</dt><dd>맨 위 두 단추로 효과음과 배경 음악을 따로 켜고 끕니다(M 키, B 키도 됩니다).</dd>
       <dt>진공</dt><dd>우주는 진공이라 실제로는 아무 소리도 들리지 않습니다. 엔진 소리와 착륙 소리는 보는 맛을 위해 넣은 것입니다.</dd>
-      <dt>배경 음악</dt><dd>백 곡이 2분쯤씩 흐릅니다. 지금 흐르는 곡의 이름은 아래에 뜹니다. 순서는 열 때마다 바뀝니다. 천체 가까이에서는 음이 잦고, 먼 우주에서는 낮고 드물며, 표면에 서면 화음만 남습니다.<br><button id="tuneButton">다음 곡</button> <span id="tuneNow" aria-live="polite"></span></dd>
+      <dt>배경 음악</dt><dd>백 곡이 2분쯤씩 흐릅니다. 지금 흐르는 곡의 이름은 아래에 뜹니다. 순서는 열 때마다 바뀝니다. 천체 가까이에서는 음이 잦고, 먼 우주에서는 낮고 드물며, 표면에 서면 화음만 남습니다.<br><button id="tuneButton">다음 곡</button> <button id="sleepButton"></button> <span id="tuneNow" aria-live="polite"></span></dd>
       </dl>
     </section>
     <section data-tab="help" hidden>

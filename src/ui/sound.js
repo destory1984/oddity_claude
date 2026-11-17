@@ -57,6 +57,8 @@ export function createSound({ music } = {}) {
   let muted = loadMuted();
   let musicOn = loadMusic();
   let musicBus;
+  let sleepBus;
+  let sleepLevel = 1;
   // Effects (cues, the flight sound) go through their own switch, so effects and music
   // can be turned off separately. `muted` means the effects are off.
   let sfx;
@@ -84,7 +86,10 @@ export function createSound({ music } = {}) {
     sfx.connect(master);
     musicBus = ctx.createGain();
     musicBus.gain.value = musicOn ? 1 : 0;
-    musicBus.connect(master);
+    sleepBus = ctx.createGain();
+    sleepBus.gain.value = sleepLevel;
+    musicBus.connect(sleepBus);
+    sleepBus.connect(master);
 
     noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const data = noiseBuffer.getChannelData(0);
@@ -666,6 +671,20 @@ export function createSound({ music } = {}) {
   };
 
   return {
+    // A separate music gain keeps scene ducking and the music switch from undoing sleep.
+    sleepVolume(level, seconds = 0) {
+      sleepLevel = level;
+      if (!ctx || !sleepBus) return;
+      const gain = sleepBus.gain;
+      const now = ctx.currentTime;
+      if (gain.cancelAndHoldAtTime) gain.cancelAndHoldAtTime(now);
+      else {
+        const current = gain.value;
+        gain.cancelScheduledValues(now);
+        gain.setValueAtTime(current, now);
+      }
+      gain.linearRampToValueAtTime(level, now + seconds);
+    },
     unlock() {
       if (!ensure()) return;
       if (ctx.state === 'suspended') ctx.resume();

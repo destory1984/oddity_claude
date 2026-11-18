@@ -792,7 +792,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   }
 
   // 우주 관광 추천코스 (core/courses.js): what each is, and a button; shut till she has been there.
-  // courses: { all(): [{ id, name, todo, open, where, on }], start(id), quit() }.
+  // courses: { all(): [{ id, name, todo, open, where, on }], start(id), quit(), share(id) }.
   function renderCourses() {
     const list = $('journalCourses');
     list.replaceChildren();
@@ -815,7 +815,16 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
           if (course.on) courses.quit();
           else courses.start(course.id);
         });
-        li.append(button);
+        // Sent to a friend as a link that flies it (the user, 2026-11-19: "추천코스도 카톡링크로
+        // 날릴 수 있게 해줘").
+        const send = document.createElement('button');
+        send.textContent = t('보내기');
+        send.setAttribute('aria-label', `${course.name} ${send.textContent}`);
+        send.addEventListener('click', () => courses.share(course.id));
+        const keys = document.createElement('div');
+        keys.className = 'keys';
+        keys.append(button, send);
+        li.append(keys);
       }
       list.append(li);
     }

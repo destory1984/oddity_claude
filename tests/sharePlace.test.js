@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { encodePlace, decodePlace, SHARE_BASE } from '../src/core/sharePlace.js';
+import { encodePlace, decodePlace, SHARE_BASE, courseLink, decodeCourse } from '../src/core/sharePlace.js';
 
 const IDS = ['earth', 'moon', 'saturn'];
 const PLACE = {
@@ -40,4 +40,12 @@ test('a shared place opens in the Android app by an intent address that falls ba
   const link = `${SHARE_BASE}?p=earth.eh7.5cc`;
   assert.equal(appIntent(link), `intent://destory1984.github.io/oddity_claude/?p=earth.eh7.5cc#Intent;scheme=https;package=${APP_PACKAGE};S.browser_fallback_url=${encodeURIComponent(link)};end`);
   assert.equal(APP_PACKAGE, 'io.github.destory1984.spaceoddity');
+});
+
+test('a tour course goes in a link by its id, and only a known course comes back out', () => {
+  const ids = ['cupola', 'auroraDrift'];
+  const url = courseLink('cupola');
+  assert.equal(url, `${SHARE_BASE}?c=cupola`);
+  assert.equal(decodeCourse(new URL(url).searchParams.get('c'), ids), 'cupola');
+  for (const bad of [null, '', 'toString', 'cupola2', '<b>']) assert.equal(decodeCourse(bad, ids), null);
 });

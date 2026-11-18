@@ -26,7 +26,7 @@ import { addPhoto, removePhoto, photoPlace, photoCaption } from './core/album.js
 import { ratePhoto, dayOf, sendPostcard, arrivedReplies, replyFor, cardPlace } from './core/postcard.js';
 import { isLocalHost } from './core/count.js';
 import { pickSpot, fromSpot, toSpot, NEAR_EARTH_ONLY } from './core/startSpots.js';
-import { encodePlace, decodePlace, SHARE_BASE, KAKAO_JS_KEY, KAKAO_SDK } from './core/sharePlace.js';
+import { encodePlace, decodePlace, SHARE_BASE, KAKAO_JS_KEY, KAKAO_SDK, courseLink, decodeCourse } from './core/sharePlace.js';
 import { skyAnchor, clockTime } from './core/clock.js';
 import { teleportSpot, visited } from './core/teleport.js';
 import { behindBody, skyBehind, lostInGlare, nearestBodies, nearbyMoons } from './core/markers.js';
@@ -186,6 +186,8 @@ const START_NEAR = import.meta.env.DEV ? { id: 'earth', fromCentreKm: 20000 } : 
 // under. This sitting opens there under that sky (their layout, the moment they opened
 // the game, their game clock); the player's own layout setting is left as it is.
 const shared = decodePlace(new URLSearchParams(location.search).get('p'), BODIES.map((b) => b.id));
+// A tour course a friend sent (?c=, core/sharePlace.js): flown as soon as the game is free.
+const sharedCourse = decodeCourse(new URLSearchParams(location.search).get('c'), COURSES.map((c) => c.id));
 // One layout for everyone, the travel layout: with the shared clock every player then sees
 // the worlds in the same places (the user, 2026-10-19: "행성배치는 없애자.. 그래야 모든 사람이
 // 동일한 별 위치를 보게 되니"; of the two, "여행 배치"). Today's sky was a choice in the
@@ -2496,6 +2498,7 @@ ${STORY_MORE[target.id]}` : told) };
     courses: {
       all: () => COURSES.map((c) => ({ ...c, open: c.body === 'earth' || visited(bodyById(c.body), progress), where: bodyById(c.body).name, on: course === c.id })),
       start: flyCourse,
+      share: (id) => courseShare(id),
       quit: () => {
         if (locked) unlock('button');
         course = null;
@@ -4393,20 +4396,23 @@ ${STORY_MORE[target.id]}` : told) };
       }
     });
   }
-  $('shareButton').addEventListener('click', () => {
-    const info = placeShare();
-    if (!info) return toast.show(t('다른 별 둘레에서는 자리를 나눌 수 없습니다.'));
+  // The sheet for what is to be sent: info { url, text, button }; with `photo`, the view as
+  // it is goes with it when ticked.
+  function openShare(info, photo) {
     shareNow = info;
     $('sharePic').hidden = true;
     $('sharePhotoRow').hidden = true;
-    viewPhoto().then((photo) => {
-      if (!photo || shareNow !== info) return;
-      info.photo = photo;
-      info.picture = URL.createObjectURL(photo);
-      $('sharePic').src = info.picture;
-      $('sharePic').hidden = false;
-      $('sharePhotoRow').hidden = false;
-    });
+    if (photo) {
+      viewPhoto().then((file) => {
+        if (!file || shareNow !== info) return;
+        info.photo = file;
+        info.picture = URL.createObjectURL(file);
+        $('sharePic').src = info.picture;
+        $('sharePic').hidden = false;
+        $('sharePhotoRow').hidden = false;
+      });
+    }
+    $('shareTitle').textContent = info.title ?? t('내 자리 공유');
     $('shareWhere').textContent = info.text;
     $('shareKakao').disabled = true;
     $('shareKakao').hidden = false;
@@ -4417,8 +4423,24 @@ ${STORY_MORE[target.id]}` : told) };
     $('shareSheet').addEventListener('close', () => setPaused(prior), { once: true });
     $('shareSheet').showModal();
     loadKakao().then(() => { $('shareKakao').disabled = false; }, () => { $('shareKakao').hidden = true; });
+  }
+  $('shareButton').addEventListener('click', () => {
+    const info = placeShare();
+    if (!info) return toast.show(t('다른 별 둘레에서는 자리를 나눌 수 없습니다.'));
+    openShare(info, true);
     return undefined;
   });
+  // A tour course, from its row in the journal: a link that flies it.
+  function courseShare(id) {
+    const chosen = courseById(id);
+    if (!chosen) return;
+    openShare({
+      url: courseLink(id),
+      title: t('추천코스 공유'),
+      text: t`추천코스 "${chosen.name}" 링크예요. 열면 바로 이 코스를 날아요.`,
+      button: t('이 코스 날아 보기'),
+    }, false);
+  }
   const withPhoto = () => Boolean(shareNow?.photo) && $('sharePhoto').checked;
   $('shareSheet').addEventListener('close', () => {
     if (shareNow?.picture) URL.revokeObjectURL(shareNow.picture);
@@ -4444,7 +4466,7 @@ ${STORY_MORE[target.id]}` : told) };
       window.Kakao.Share.sendDefault({
         objectType: 'feed',
         content: { title: `Space Oddity — ${t('할머니의 수첩')}`, description: text, ...image, link },
-        buttons: [{ title: t('같은 자리에서 보기'), link }],
+        buttons: [{ title: shareNow.button ?? t('같은 자리에서 보기'), link }],
       });
       $('shareSheet').close();
     } catch {
@@ -4525,6 +4547,23 @@ ${STORY_MORE[target.id]}` : told) };
     } catch {
       // The address stays; nothing else changes.
     }
+  }
+
+  // Opened from a course's link: said once, the address put back, and the course flown as
+  // soon as nothing is open over the game (grandmother's first card, a jump under way).
+  if (sharedCourse && !shared) {
+    try {
+      history.replaceState(null, '', location.pathname);
+    } catch {
+      // The address stays; nothing else changes.
+    }
+    const sent = courseById(sharedCourse);
+    const waitFree = setInterval(() => {
+      if (warp.busy() || document.querySelector('dialog[open]')) return;
+      clearInterval(waitFree);
+      toast.show(t`친구가 보낸 추천코스를 날아갑니다: "${sent.name}"`);
+      flyCourse(sharedCourse);
+    }, 500);
   }
 
   // Read-only diagnostics for verification. No travel shortcuts.

@@ -84,3 +84,11 @@ export function decodePlace(line, bodyIds) {
     sky: { layout: parts[10] === 'd' ? 'today' : 'tour', openedAt: opened * 1000, simTime: clock },
   };
 }
+
+// A tour course to send (the user, 2026-11-19: "추천코스도 카톡링크로 날릴 수 있게 해줘"):
+// ?c= and the course's id (core/courses.js). The game opened by it flies that course.
+export const courseLink = (id) => `${SHARE_BASE}?c=${id}`;
+// The course in a link, or null when it is not one of `courseIds`.
+export function decodeCourse(line, courseIds) {
+  return typeof line === 'string' && courseIds.includes(line) ? line : null;
+}

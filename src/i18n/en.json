@@ -5653,5 +5653,11 @@
  "타이머를 껐습니다.": "The timer is off.",
  "큐폴라에서 본 지구": "Earth from the Cupola",
  "우주정거장의 큐폴라 창 안에서 지구를 내려다봅니다. 낮과 노을, 밤의 도시 불빛이 지나갑니다.": "Look down on Earth from inside the space station's Cupola window. Day, sunset glow and the night's city lights pass by.",
- "추천코스 큐폴라에서 본 지구가 생겼습니다. 우주정거장 창 안에서 지구를 봅니다.": "New tour: Earth from the Cupola. Watch Earth from inside the space station's window."
+ "추천코스 큐폴라에서 본 지구가 생겼습니다. 우주정거장 창 안에서 지구를 봅니다.": "New tour: Earth from the Cupola. Watch Earth from inside the space station's window.",
+ "보내기": "Send",
+ "이 코스 날아 보기": "Fly this tour",
+ "추천코스 \"{}\" 링크예요. 열면 바로 이 코스를 날아요.": "Sending you the tour \"{0}\". Open it and you fly it right away.",
+ "친구가 보낸 추천코스를 날아갑니다: \"{}\"": "Flying the tour \"{0}\" a friend sent.",
+ "추천코스를 링크로 보낼 수 있습니다. 받은 사람이 열면 그 코스를 바로 날아갑니다.": "Tours can be sent as a link. Whoever opens it flies that tour at once.",
+ "추천코스 공유": "Share a Tour"
 }

@@ -1880,6 +1880,12 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   margin-top:6px;
 }
 
+/* A course's two keys side by side: fly it, send it. */
+#journalCourses .keys {
+  display:flex;
+  gap:8px;
+}
+
 #journalStunts .record {
   display:block;
   margin-top:2px;

@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-19', text: t('추천코스를 링크로 보낼 수 있습니다. 받은 사람이 열면 그 코스를 바로 날아갑니다.') },
   { day: '2026-11-19', text: t('추천코스 큐폴라에서 본 지구가 생겼습니다. 우주정거장 창 안에서 지구를 봅니다.') },
   { day: '2026-11-18', text: t('궤도에서 보는 해돋이가 생겼습니다. 추천코스 궤도 일출로 날아 볼 수 있습니다.') },
   { day: '2026-11-18', text: t('우주멍 시계, 잠들기 타이머, 배경화면 저장이 생겼습니다.') },

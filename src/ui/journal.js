@@ -818,7 +818,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
         // Sent to a friend as a link that flies it (the user, 2026-11-19: "추천코스도 카톡링크로
         // 날릴 수 있게 해줘").
         const send = document.createElement('button');
-        send.textContent = t('보내기');
+        send.textContent = t('링크 보내기');
         send.setAttribute('aria-label', `${course.name} ${send.textContent}`);
         send.addEventListener('click', () => courses.share(course.id));
         const keys = document.createElement('div');

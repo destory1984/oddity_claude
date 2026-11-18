@@ -5,6 +5,10 @@ varying vec2 vUV;
 uniform vec3 sun;
 uniform vec3 eye;
 uniform sampler2D day;
+// A finer day map in two halves, west (day) and east (dayE), when split is 1:
+// a phone cannot hold one picture 16384 wide.
+uniform sampler2D dayE;
+uniform float split;
 uniform sampler2D night;
 // The cloud layer's map and how far east of the ground's it stands (in turns), for the
 // clouds' shadows on the ground.
@@ -41,7 +45,7 @@ float etnaAsh(float along,float aside){
 void main(){
   vec3 N=normalize(n),V=normalize(eye-wp);
   float light=dot(N,sun);
-  vec3 tex=texture2D(day,vUV).rgb;
+  vec3 tex=split<.5?texture2D(day,vUV).rgb:(vUV.x<.5?texture2D(day,vec2(vUV.x*2.,vUV.y)).rgb:texture2D(dayE,vec2(vUV.x*2.-1.,vUV.y)).rgb);
   float daySide=smoothstep(-.08,.22,light);
   // Cloud shadows: the cloud that shades this spot stands a little toward the Sun from
   // it, farther the lower the Sun (the clouds are drawn higher than they are, so the
@@ -53,6 +57,9 @@ void main(){
   float shade=smoothstep(.3,.8,texture2D(cloudMap,vec2(vUV.x-cloudShift+toSun.x,clamp(vUV.y+toSun.y,0.,1.))).r);
   vec3 col=tex*(.095+max(0.,light)*1.28*(1.-.4*shade));
   vec3 cities=texture2D(night,vUV).rgb;
+  // NASA's Black Marble shows ice and snow faintly grey under starlight as well:
+  // on the fine map, only the lights.
+  if(split>.5)cities=max(cities-vec3(.16),0.)*1.2;
   col+=cities*vec3(1.25,.89,.5)*(1.-daySide)*1.25;
   // The squid boats of the East Sea (38 degrees north, 131.3 east; the map's u runs from
   // 180 west to 180 east, its v from the north pole down): a patch of white-green lamps

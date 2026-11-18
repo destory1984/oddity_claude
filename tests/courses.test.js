@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { COURSES, courseById, courseStart, railAt } from '../src/core/courses.js';
+import { COURSES, courseById, courseStart, cupolaPlan, railAt } from '../src/core/courses.js';
 import { BODIES } from '../src/core/bodies.js';
 import { forward } from '../src/core/orientation.js';
 import { GALACTIC_POLE, GALAXIES, NEBULAE, fromEquatorial } from '../src/core/sky.js';
@@ -17,11 +17,11 @@ const velocity = ({ orientation, slide }) => {
   return r.map((n, i) => n * slide.sideSpeed * slide.sideSign + u[i] * slide.riseSpeed * slide.riseSign);
 };
 
-test('fourteen rounds, the aurora first, then the one the user was flying, each of a known body', () => {
-  assert.equal(COURSES.length, 14);
+test('fifteen rounds, the aurora first, then the one the user was flying, each of a known body', () => {
+  assert.equal(COURSES.length, 15);
   assert.equal(COURSES[0].id, 'auroraDrift');
   assert.equal(COURSES[1].id, 'earthRound');
-  assert.equal(new Set(COURSES.map((c) => c.id)).size, 14);
+  assert.equal(new Set(COURSES.map((c) => c.id)).size, 15);
   for (const c of COURSES) {
     assert.ok(body(c.body), c.id);
     assert.ok(c.name && c.todo, c.id);
@@ -100,4 +100,29 @@ test('the orbital sunrise goes round low, from the night side toward the Sun, lo
   const level = unit(going);
   assert.ok(Math.abs(Math.asin(-dot(look, unit(out(p)))) * 180 / Math.PI - 12) < 0.5);
   assert.ok(dot(look, level) > 0.97);
+});
+
+test('the cupola course goes over both poles 1,000 km up, past the planned place, the Sun in sight never in the window', () => {
+  const c = { ...courseById('cupola'), rail: { ...courseById('cupola').rail } };
+  const b = at('earth');
+  const toSun = unit(sun.position.map((n, i) => n - b.position[i]));
+  // A place on the night side, 37.6 degrees north, standing still for the test.
+  const place = unit([-toSun[0] * 0.79, 0.61, -toSun[2] * 0.79]);
+  c.rail.plan = cupolaPlan(c, b, sun, () => place);
+  const out = (s) => unit(railAt(c, b, sun, s).position.map((n, i) => n - b.position[i]));
+  let north = -1, south = 1, worst = -1;
+  for (let s = 0; s < c.lapS; s += 15) {
+    const p = railAt(c, b, sun, s);
+    assert.ok(Math.abs(Math.hypot(...p.position.map((n, i) => n - b.position[i])) - (b.radiusKm + 1000)) < 1, s);
+    north = Math.max(north, out(s)[1]);
+    south = Math.min(south, out(s)[1]);
+    // Looking toward the Sun only while the Earth hides it (the dusk and dawn glance).
+    const dip = Math.acos(b.radiusKm / (b.radiusKm + 1000));
+    if (Math.asin(dot(out(s), toSun)) > -dip) worst = Math.max(worst, dot(forward(p.orientation), toSun));
+  }
+  assert.ok(north > 0.99 && south < -0.99, 'over both poles');
+  assert.ok(worst < 0.5, `the Sun in sight at least 60 degrees from the middle of the view (${worst})`);
+  // At leadS it is beside the place, near enough to see it in the middle of the view.
+  const by = dot(out(c.rail.leadS), place);
+  assert.ok(by > Math.cos((25 * Math.PI) / 180) && by < 0.9999, String(by));
 });

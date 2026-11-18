@@ -673,7 +673,47 @@ export function createSound({ music } = {}) {
     },
   };
 
+  // The hum inside the station (the cupola course): fans and pumps that never stop, a low band of
+  // noise and two faint tones of a fan, swelling a little now and then.
+  let hum = null;
+  function cabinHum(on) {
+    if (!ensure()) return;
+    if (!hum) {
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      gain.connect(sfx);
+      const src = ctx.createBufferSource();
+      src.buffer = noiseBuffer;
+      src.loop = true;
+      const low = ctx.createBiquadFilter();
+      low.type = 'lowpass';
+      low.frequency.value = 420;
+      const lowLevel = ctx.createGain();
+      // (Half as loud as at first: the user, 2026-11-19, "화이트 노이즈는 음량을 절반으로".)
+      lowLevel.gain.value = 0.275;
+      src.connect(low).connect(lowLevel).connect(gain);
+      for (const [hz, level] of [[118, 0.05], [236, 0.02], [61, 0.04]]) {
+        const tone = ctx.createOscillator();
+        tone.frequency.value = hz;
+        const toneLevel = ctx.createGain();
+        toneLevel.gain.value = level;
+        tone.connect(toneLevel).connect(gain);
+        tone.start();
+      }
+      const sway = ctx.createOscillator();
+      sway.frequency.value = 0.07;
+      const swayDepth = ctx.createGain();
+      swayDepth.gain.value = 0.06;
+      sway.connect(swayDepth).connect(lowLevel.gain);
+      sway.start();
+      src.start();
+      hum = gain;
+    }
+    hum.gain.setTargetAtTime(on ? 0.5 : 0, ctx.currentTime, on ? 1.2 : 0.4);
+  }
+
   return {
+    cabinHum,
     // A gain of its own (after the master) keeps scene ducking and the switches from undoing sleep.
     sleepVolume(level, seconds = 0) {
       sleepLevel = level;

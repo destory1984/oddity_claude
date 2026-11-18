@@ -22,6 +22,8 @@
 //     looking ahead along the way at lookDeg under the level, so the horizon stands low in
 //     the view and the Sun comes up over it (an orbital sunrise; the user, 2026-11-18:
 //     "2", for a course of the dawn layers drawn in shaders/air.frag). highKm: how high.
+//   rail.cupola: a round over both poles, looking out of a side window from inside the
+//     station's cupola (main.js cupolaView draws the window and what floats in it).
 // rollDeg: the view turned, for a band that lies across a tall screen.
 import { orientationFrom, right, up } from './orientation.js';
 import { GALACTIC_CENTRE, GALACTIC_POLE, GALAXIES, NEBULAE, fromEquatorial } from './sky.js';
@@ -35,6 +37,14 @@ export const COURSES = [
   { id: 'earthRound', body: 'earth', lapS: 120, radii: 4.31, name: t('지구 한 바퀴'), todo: t('두 분 동안 지구를 한 바퀴 비행합니다. 낮과 밤, 오로라가 차례로 지나갑니다.'),
     sun: { from: [0.5, 0, -0.87], toward: [0, 1, 0] } },
   // 360 s a lap: the layers last about eight seconds, the Sun about half a minute to come up.
+  // In the station's cupola, round the Earth over both poles through day, dusk, night and
+  // dawn, looking out of a side window square to the way she goes, so the Sun, which stays
+  // in the plane of the round, never stands in the window. 1,000 km up, higher than the
+  // station's 400 km, for more of the Earth in the window (the user, 2026-11-19: "조금 더
+  // 고도를 높이면?"); 105 minutes a round as at that height, flown at twice the pace (the
+  // user: "지구 이동 속도를 2배로"; main.js CUPOLA_PACE). overHorizonDeg: how far over the
+  // horizon the middle of the view stands; leadS: when she passes over Seoul at night.
+  { id: 'cupola', body: 'earth', lapS: 3150, rail: { cupola: true, highKm: 1000, overHorizonDeg: 5, startS: 0, leadS: 700 }, name: t('큐폴라에서 본 지구'), todo: t('우주정거장의 큐폴라 창 안에서 지구를 내려다봅니다. 낮과 노을, 밤의 도시 불빛이 지나갑니다.') },
   { id: 'orbitSunrise', body: 'earth', lapS: 360, rail: { orbit: true, highKm: 400, lookDeg: 12, startS: 22 }, name: t('궤도 일출'), todo: t('지구 400km 위를 돌며 밤에서 낮으로 넘어갑니다. 지평선에 빨강, 주황, 파랑의 띠가 켜지고 태양이 솟습니다.') },
   { id: 'milkyWay', body: 'earth', lapS: 180, radii: 8, rollDeg: 35, sky: 'milkyWay', name: t('은하수 일주'), todo: t('은하수가 놓인 평면을 따라 지구 둘레를 비행합니다. 은하 중심에서 출발합니다.') },
   { id: 'orion', body: 'earth', lapS: 150, radii: 6, sky: 'm42', overDeg: 16, name: t('오리온 대성운'), todo: t('지구를 돌면서 겨울 밤하늘의 붉은 성운을 봅니다.') },
@@ -100,6 +110,7 @@ function roundOf(course, frame, ringNormal) {
 // Where a rail has her after `seconds`, looking at the point it goes round.
 export function railAt(course, body, sun, seconds) {
   if (course.rail.orbit) return orbitAt(course, body, sun, seconds);
+  if (course.rail.cupola) return cupolaAt(course, body, sun, seconds);
   // (Over midnight, Earth a strip at the foot of the view (the user, 2026-11-02: "지구가 조금
   // 보여야해"); facing the Sun the view rises by sunwardKm, for the Sun, drawn large, stands
   // on the horizon there, and in view it puts out the aurora and the stars. The user, 2026-11-02: "태양은 안 나와야해... 다 없어지네".)
@@ -114,6 +125,97 @@ export function railAt(course, body, sun, seconds) {
   const facingSun = Math.max(0, dot(aside, away));
   const point = body.position.map((n, i) => n + over[i] * (body.radiusKm + atKm + sunwardKm * facingSun));
   return { position, orientation: orientationFrom(point.map((n, i) => n - position[i]), over) };
+}
+
+// The round passes over a place (rail.plan, set when the course starts: core/surface.js
+// gives where Korea will be when she is over it): plan.over, the way to it from the
+// Earth's middle then; plan.on, square to it in the plane that holds it and the night;
+// plan.atS, when she is over it. She looks out of the side window away from the Sun
+// (which stays in that plane, so never in the window), and for a few minutes at dusk and
+// dawn, while the Sun is just under the horizon, she turns slowly to look along the
+// horizon toward it, where the dawn layers burn (shaders/air.frag), and back.
+const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+// How much to turn toward the aurora, and which way (along the ground). Earth's aurora
+// rings stand at 67 degrees north and south about the spin axis, y (core/glows.js); she
+// turns toward the nearest point of the nearer ring, 500 km up, among those she can look
+// at with the Sun 80 degrees or more from the middle of the view, when one is within
+// 3,800 km, at night only. (Turned nearer the Sun, the ground she looked at over the
+// curtains lay past the day-night line and shone grey in daylight: the axis here stands
+// square to the Earth's path, so there is no polar night.)
+export function auroraGlance(position, body, sunUpDeg, toSun, dipRad = 0) {
+  const out = unit(position.map((n, i) => n - body.position[i]));
+  const lat = (Math.asin(out[1]) * 180) / Math.PI;
+  const ring = rad(67) * (lat < 0 ? -1 : 1);
+  const r = body.radiusKm + 500;
+  let best = null;
+  for (let k = 0; k < 96; k++) {
+    const lon = (2 * Math.PI * k) / 96;
+    const point = [body.position[0] + Math.cos(ring) * Math.cos(lon) * r, body.position[1] + Math.sin(ring) * r, body.position[2] + Math.cos(ring) * Math.sin(lon) * r];
+    const to = point.map((n, i) => n - position[i]);
+    const km = Math.hypot(...to);
+    if (best && km >= best.km) continue;
+    const flat = mix(1, to, -dot(to, out), out);
+    if (Math.hypot(...flat) < 1e-6) continue;
+    const toward = unit(flat);
+    const look = mix(Math.cos(dipRad), toward, -Math.sin(dipRad), out);
+    if (toSun && dot(look, toSun) > 0.15) continue;
+    best = { km, toward };
+  }
+  const night = smooth(-6, -18, sunUpDeg);
+  if (!best) return { weight: 0, toward: out, lat };
+  return { weight: 0.9 * night * smooth(3800, 2200, best.km), toward: best.toward, lat };
+}
+
+function cupolaAt(course, body, sun, seconds) {
+  const { highKm, overHorizonDeg, plan } = course.rail;
+  const frame = sunFrame(body.position, sun.position);
+  const over = plan?.over ?? frame.toSun.map((n) => -n);
+  const on = plan?.on ?? frame.aside;
+  const turn = (2 * Math.PI * (seconds - (plan?.atS ?? 0))) / course.lapS;
+  const out = mix(Math.cos(turn), over, Math.sin(turn), on);
+  const position = body.position.map((n, i) => n + out[i] * (body.radiusKm + highKm));
+  const normal = cross(over, on);
+  const side = dot(normal, frame.toSun) > 0 ? normal.map((n) => -n) : normal;
+  const horizon = (Math.acos(body.radiusKm / (body.radiusKm + highKm)) * 180) / Math.PI;
+  // The Sun's height over the level, in degrees; it looks 18 degrees in radius here.
+  const c = dot(out, frame.toSun);
+  const sunUp = (Math.asin(Math.max(-1, Math.min(1, c))) * 180) / Math.PI;
+  const glance = smooth(-66, -60, sunUp) * (1 - smooth(-54, -50, sunUp));
+  const sunward = squareTo(frame.toSun, out);
+  let ahead = unit(mix(1 - glance, side, glance, sunward));
+  // When the aurora is near on the night side, she turns slowly along the ground to it and
+  // back (the user, 2026-11-19: "돌다가, 오로라가 보이면, 그쪽으로 패닝해줘").
+  const aurora = auroraGlance(position, body, sunUp, frame.toSun, rad(horizon + overHorizonDeg));
+  if (aurora.weight > 0) ahead = unit(mix(1 - aurora.weight, ahead, aurora.weight, aurora.toward));
+  const dip = rad(horizon + overHorizonDeg * (1 - glance) + 3 * glance);
+  const look = mix(Math.cos(dip), ahead, -Math.sin(dip), out);
+  return { position, orientation: orientationFrom(look, out) };
+}
+
+// Where the cupola course is to pass over a place, startS + leadS into the course:
+// `toward(seconds)` gives the way to the place then, from the Earth's middle.
+export function cupolaPlan(course, body, sun, toward) {
+  const atS = course.rail.startS + course.rail.leadS;
+  const place = unit(toward(course.rail.leadS));
+  const frame = sunFrame(body.position, sun.position);
+  const night = frame.toSun.map((n) => -n);
+  // Round the poles (Earth's spin axis is y): over Seoul, then over the polar night and
+  // its aurora, both north and south (the user, 2026-11-19: "돌다가, 오로라가 보이면,
+  // 그쪽으로 패닝해줘"; a round in the plane of the night stayed far from it).
+  const planeOn = (over) => {
+    const on = mix(1, [0, 1, 0], -over[1], over);
+    return Math.hypot(...on) < 1e-6 ? frame.aside : unit(on);
+  };
+  // She looks out to the side, so she passes the place by as far as the middle of the
+  // view reaches over the ground: beta, the arc from under her to there.
+  const { highKm, overHorizonDeg } = course.rail;
+  const R = body.radiusKm;
+  const nadir = rad(90 - ((Math.acos(R / (R + highKm)) * 180) / Math.PI + overHorizonDeg));
+  const beta = Math.asin(Math.min(1, ((R + highKm) / R) * Math.sin(nadir))) - nadir;
+  const normal = cross(place, planeOn(place));
+  const side = dot(normal, frame.toSun) > 0 ? normal.map((n) => -n) : normal;
+  const over = unit(mix(Math.cos(beta), place, Math.sin(beta), side));
+  return { over, on: planeOn(over), atS };
 }
 
 // The orbital sunrise's round: from midnight (0 s) toward the Sun's side, square to the

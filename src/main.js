@@ -99,9 +99,9 @@ import { standSpot, startVisit, hasArrived, visitStep, landingCounts, carriedRou
 import { HOME, homeSpot, auroraSpot, AURORA_VIEWS, meteorSpot, poleSpot, POLES, startHome, homeStep, homeArrived } from './core/home.js';
 import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
-import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN } from './core/surface.js';
+import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN, surfaceDirection } from './core/surface.js';
 import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
-import { COURSES, courseById, courseStart, railAt } from './core/courses.js';
+import { COURSES, courseById, courseStart, cupolaPlan, railAt } from './core/courses.js';
 import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN, FINAL_NOTE, noteDue, readNote, heardNobody, completeRadio } from './core/radioFriend.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -320,6 +320,11 @@ let lockAim = null;
 let lockFor = null;
 // The tour course under way (core/courses.js): she slides round on the lock by herself.
 let course = null;
+// While the cupola course is flown the world keeps its own clock, at true pace times
+// CUPOLA_PACE: the ground goes by twice as fast as at that height (the user, 2026-11-19:
+// "지구 이동 속도를 2배로"), the round taking half its time (core/courses.js).
+let cupolaClock = false;
+const CUPOLA_PACE = 2;
 // How long it has gone on, for one on a rail (the aurora's).
 let courseTime = 0;
 // The target's direction in her own frame as she stands and looks now.
@@ -2215,6 +2220,103 @@ ${STORY_MORE[target.id]}` : told) };
 
   // A tour course: behind a jump's flash to its start, the lock on what it goes round and
   // the slide already going, in 우주멍. Any key ends it (the frame, below).
+  // The cupola course (the user, 2026-11-19: "큐폴라 정식으로 올리고"): a window frame drawn
+  // by GPT over the view, the clock and the title put away, the station's hum, lightning in
+  // the night's clouds and finer Earth maps (render/world.js setEarthFine).
+  let cupolaOn = false;
+  // When the cat next sets off (course seconds), and its way across.
+  let catFrom = Infinity;
+  let catWay = null;
+  let catTurn = -1;
+  const CAT_S = 40;
+  function cupolaView(on) {
+    if (on === cupolaOn) return;
+    cupolaOn = on;
+    let frame = document.getElementById('cupolaFrame');
+    if (!frame) {
+      document.body.insertAdjacentHTML('beforeend', `<img id="cupolaFrame" alt="" src="${import.meta.env.BASE_URL}assets/cupola/frame.png" style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;pointer-events:none;z-index:5" hidden>`);
+      frame = document.getElementById('cupolaFrame');
+      // A plush cat afloat in the cupola, now and then (the user, 2026-11-19: "가끔씩 물건이
+      // 둥둥 떠다니게 해볼까? 고양이 인형은 어때"): before the frame, being nearer.
+      document.body.insertAdjacentHTML('beforeend', `<img id="cupolaCat" alt="" src="${import.meta.env.BASE_URL}assets/cupola/cat-0.png" style="position:fixed;left:0;top:0;width:34vw;pointer-events:none;z-index:6;will-change:transform" hidden>`);
+    }
+    frame.hidden = !on;
+    document.getElementById('cupolaCat').hidden = true;
+    catFrom = on ? courseTime + 15 : Infinity;
+    if (!on && cupolaClock) { cupolaClock = false; simTime = clockNow(); }
+    sound.cabinHum(on);
+    world.setStorms(on);
+    for (const id of ['gazeClock', 'gazeLogo']) { const e = document.getElementById(id); if (e) e.style.visibility = on ? 'hidden' : ''; }
+    if (on) world.setEarthFine(`${import.meta.env.BASE_URL}assets/cupola/`, () => cupolaOn).catch((e) => console.warn('fine maps', e));
+    else world.setEarthPlain();
+  }
+
+  // Floating in the cupola: the view drifts a third of a degree now and then, as
+  // a body afloat does, on slow periods that do not repeat together; the frame, near at
+  // hand, drifts a few pixels more than the Earth, far off (parallax), so the one reads
+  // as near and the other as far. No shaking: the station glides.
+  const floatAt = () => {
+    const s = courseTime;
+    return {
+      yaw: 0.0055 * Math.sin(s * 0.47) + 0.0025 * Math.sin(s * 0.19 + 1.3),
+      pitch: 0.0045 * Math.sin(s * 0.37 + 0.6) + 0.002 * Math.sin(s * 0.13 + 2.1),
+      dx: 5 * Math.sin(s * 0.29 + 0.4), dy: 4 * Math.sin(s * 0.23 + 1.9),
+    };
+  };
+  function cupolaFloat(st) {
+    const f = floatAt();
+    return rotateLocal(st.orientation, f.yaw, f.pitch);
+  }
+  // The frame lit by what is outside: the day Earth's blue-white light, nearly nothing at night.
+  function cupolaLight() {
+    const frame = document.getElementById('cupolaFrame');
+    if (!frame) return;
+    const earth = here('earth');
+    const sunNow = here('sun');
+    const out = state.position.map((n, i) => n - earth.position[i]);
+    const toSun = sunNow.position.map((n, i) => n - earth.position[i]);
+    const c = out.reduce((s, n, i) => s + n * toSun[i], 0) / (Math.hypot(...out) * Math.hypot(...toSun));
+    const day = Math.min(1, Math.max(0, (c + 0.2) / 0.45));
+    const f = floatAt();
+    const vh = innerHeight / (2 * Math.tan(world.fov() / 2));
+    // The frame turns with the view, and moves a little more besides.
+    const px = -f.yaw * vh + f.dx, py = f.pitch * vh + f.dy;
+    frame.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) scale(1.04)`;
+    const cat = document.getElementById('cupolaCat');
+    if (cat) {
+      if (courseTime >= catFrom && !catWay) {
+        const fromLeft = Math.random() < 0.5;
+        // Six cats in turn: the plain one and five in space helmets (the user, 2026-11-19:
+        // "6개를 모두 뺑뺑이 돌려").
+        catTurn = (catTurn + 1) % 6;
+        cat.src = `${import.meta.env.BASE_URL}assets/cupola/cat-${catTurn}.png`;
+        catWay = { from: catFrom, fromLeft, y0: 0.2 + Math.random() * 0.45, y1: 0.2 + Math.random() * 0.45, spin: (Math.random() < 0.5 ? -1 : 1) * (50 + Math.random() * 80), tip: Math.random() * 360, bump: Math.random() < 0.4 };
+      }
+      if (catWay) {
+        const u = (courseTime - catWay.from) / CAT_S;
+        if (u >= 1 || u < 0) {
+          catWay = null;
+          cat.hidden = true;
+          // About once a minute, a pass taking 40 s of it (the user, 2026-11-19: "1분에 한 번 꼴로 나오게 해줘").
+          catFrom = courseTime + 14 + Math.random() * 12;
+        } else {
+          cat.hidden = false;
+          const wPx = cat.offsetWidth || innerWidth * 0.34;
+          let x = -wPx + u * (innerWidth + wPx);
+          if (!catWay.fromLeft) x = innerWidth - wPx - x;
+          let y = (catWay.y0 + (catWay.y1 - catWay.y0) * u) * innerHeight + 18 * Math.sin(u * 6.3);
+          let scale = 1;
+          // Now and then it touches the glass halfway and floats back off it a little.
+          if (catWay.bump) { const b = Math.exp(-(((u - 0.5) / 0.06) ** 2)); scale = 1 - 0.07 * b; y += 6 * b; }
+          // Nearer than the frame: it moves with the drift twice as much.
+          cat.style.transform = `translate(${(x + 2 * px).toFixed(1)}px, ${(y + 2 * py).toFixed(1)}px) rotate(${(catWay.tip + catWay.spin * u).toFixed(1)}deg) scale(${scale.toFixed(3)})`;
+          cat.style.filter = `brightness(${(0.18 + 0.82 * day).toFixed(3)}) saturate(${(0.7 + 0.3 * day).toFixed(2)})`;
+        }
+      }
+    }
+    frame.style.filter = `brightness(${(0.13 + 0.87 * day).toFixed(3)}) saturate(${(0.6 + 0.4 * day).toFixed(2)}) hue-rotate(${(-8 * day).toFixed(1)}deg)`;
+  }
+
   function flyCourse(id) {
     const chosen = courseById(id);
     if (!chosen || warp.busy()) return;
@@ -2231,7 +2333,31 @@ ${STORY_MORE[target.id]}` : told) };
       stuntJumped = true;
       home = null;
       input.clear();
-      const body = here(chosen.body);
+      let body = here(chosen.body);
+      // The cupola course keeps its own clock (the user, 2026-11-19, "가": of moving the
+      // game's clock for the course): the world turns at its true pace, not fifty times
+      // over, and it is moved on to the next hour when it is deep night over Seoul as she
+      // passes it (leadS in), so that she sees its lights. Back to the shared clock at the end.
+      if (chosen.rail?.cupola) {
+        const seoul = (t) => surfaceDirection(37.57, 126.98, spinOf('earth', t));
+        const toSun = (() => { const s = here('sun').position, e = body.position; const v = s.map((n, i) => n - e[i]); const l = Math.hypot(...v); return v.map((n) => n / l); })();
+        const lead = chosen.rail.leadS;
+        // The hour of the day when it is darkest there. (A fixed depth was not always to be
+        // had: in November the Sun is never more than 46 degrees under Seoul's horizon.)
+        let t0 = simTime;
+        let deepest = Infinity;
+        for (let t = simTime; t < simTime + 86164; t += 120) {
+          const s = seoul(t + lead * CUPOLA_PACE);
+          const c = s[0] * toSun[0] + s[1] * toSun[1] + s[2] * toSun[2];
+          if (c < deepest) { deepest = c; t0 = t; }
+        }
+        simTime = t0;
+        bodies = allAt(simTime);
+        craft = craftAt(simTime, bodies);
+        cupolaClock = true;
+        body = here(chosen.body);
+        chosen.rail.plan = cupolaPlan(chosen, body, here('sun'), (s) => seoul(simTime + s * CUPOLA_PACE));
+      }
       const start = courseStart(chosen, body, here('sun'), world.ringNormal(body.id));
       state = { ...createState(start.position, start.orientation), ...start.slide };
       selectedId = body.id;
@@ -2250,6 +2376,7 @@ ${STORY_MORE[target.id]}` : told) };
       // "추천코스에서는 소라도 없앤 우주멍으로해줘"); the moon brings all back and the course goes on.
       if (!gazing) setGaze(true);
       gazeBare = true;
+      cupolaView(Boolean(chosen.rail?.cupola));
       gazeWords();
     });
   }
@@ -2372,6 +2499,7 @@ ${STORY_MORE[target.id]}` : told) };
       quit: () => {
         if (locked) unlock('button');
         course = null;
+        cupolaView(false);
         state = { ...state, sideSpeed: 0, riseSpeed: 0 };
         showLockKey();
       },
@@ -3268,7 +3396,7 @@ ${STORY_MORE[target.id]}` : told) };
       const craftBefore = craft;
       // Up to the shared clock: after the game stood still (a pause, a card, a hidden tab)
       // the sky catches up at once, and she is carried along with the world she is by.
-      stepS = Math.max(0, clockNow() - simTime);
+      stepS = cupolaClock ? dt * CUPOLA_PACE : Math.max(0, clockNow() - simTime);
       simTime += stepS;
       const stepDt = stepS / TIME_SCALE;
       bodies = allAt(simTime);
@@ -3403,13 +3531,16 @@ ${STORY_MORE[target.id]}` : told) };
       const rail = courseById(course).rail;
       if (pressed || (!rail && (!locked || Math.max(state.sideSpeed ?? 0, state.riseSpeed ?? 0) < 0.01))) {
         course = null;
+        cupolaView(false);
         state = { ...state, sideSpeed: 0, riseSpeed: 0 };
       } else if (rail && dt > 0) {
         const chosen = courseById(course);
         courseTime += dt;
         state = { ...state, ...railAt(chosen, here(chosen.body), here('sun'), courseTime) };
+        if (chosen.rail.cupola) state = { ...state, orientation: cupolaFloat(state) };
       }
     }
+    if (cupolaOn) cupolaLight();
     // Locked and something else chosen, or locked and flying forward with the target
     // turned off the screen: she means to go elsewhere, and the lock lets go (the user,
     // 2026-10-18, having forgotten the lock: "화면이 미친듯이 움직이는데"). Forward and back with the target

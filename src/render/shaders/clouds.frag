@@ -5,6 +5,8 @@ varying vec2 vUV;
 uniform vec3 sun;
 uniform sampler2D cloudMap;
 uniform float time;
+// Lightning in the night's clouds, while the cupola course is flown (render/world.js setStorms).
+uniform float storms;
 float hash1(vec2 p){
   return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);
 }
@@ -41,6 +43,24 @@ void main(){
     float shows=exp(-off/.13)*smoothstep(.2,.5,facing)*(.6+.4*smoothstep(.02,.25,a));
     lit=mix(lit,rings*1.5,shows*.85);
     a=max(a,.75*shows);
+  }
+  // Lightning: on the night side, in thick cloud, here and there a cell of the map
+  // (half a degree, some 55 km) flashes for a moment, and now and then twice.
+  if(storms>0.&&facing<-.05&&a>.3){
+    vec2 g=vUV*vec2(1440.,720.);
+    vec2 cell=floor(g);
+    float r=hash1(cell);
+    float beat=time*1.7+r*13.;
+    float slot=floor(beat);
+    float on=step(.985,hash1(cell+slot*vec2(.37,1.13)));
+    float t=fract(beat);
+    float env=exp(-t*9.)+.6*exp(-max(t-.18,0.)*14.)*step(.18,t);
+    vec2 at=vec2(.5);
+    vec2 dd=fract(g)-at;
+    float spot=exp(-dot(dd,dd)*70.)+.3*exp(-dot(dd,dd)*18.);
+    float flash=on*env*spot*smoothstep(.3,.7,a)*storms;
+    lit+=vec3(.75,.82,1.)*flash*5.;
+    a=max(a,flash);
   }
   gl_FragColor=vec4(lit,a*.68);
 }

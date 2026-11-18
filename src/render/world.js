@@ -1,6 +1,6 @@
 import { wallpaperSize } from '../core/calm.js';
 import {
-  Engine, Scene, FreeCamera, Vector3, Color4, Quaternion, HemisphericLight, DirectionalLight,
+  Engine, Scene, FreeCamera, Vector3, Color4, Quaternion, HemisphericLight, DirectionalLight, Texture,
 } from './babylon.js';
 import { BODIES, KM_PER_UNIT, TIME_SCALE } from '../core/bodies.js';
 import { multiply } from '../core/orientation.js';
@@ -41,6 +41,9 @@ const HERO_FINEST = 4;
 // than a dense screen (a phone's) and stretched, which smears pixel art; she is drawn on
 // her own sheet, one drawn point to one point of the screen. Without it, or where a
 // second sheet cannot be had, she is drawn into the view as before.
+// The cupola course's fine Earth maps while they are on, and the plain ones they replaced.
+let fineEarth = null;
+
 export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
   const engine = new Engine(canvas, true, {
     preserveDrawingBuffer: true, stencil: true, powerPreference: 'high-performance',
@@ -274,6 +277,42 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
     // Jupiter slide by it, core/vista.js).
     elapsed: () => elapsed,
     // Earth's clouds from a picture (render/realClouds.js), at its address.
+    // Finer Earth maps for the cupola course, GPU-compressed (KTX2, Basis), the day in two
+    // halves 8,192 wide (shaders/planet.frag). Swapped in once all are loaded, so the plain
+    // maps show meanwhile; a GPU that cannot hold 8,192 keeps the plain ones. `still()`
+    // says whether they are still wanted when they come.
+    async setEarthFine(base, still = () => true) {
+      const material = scene.materials.find((m) => m.name === 'planet');
+      if (!material || fineEarth || engine.getCaps().maxTextureSize < 8192) return false;
+      await import('@babylonjs/core/Materials/Textures/Loaders/ktxTextureLoader.js');
+      const load = (file) => new Promise((done, fail) => {
+        const t = new Texture(`${base}${file}`, scene, false, false, Texture.TRILINEAR_SAMPLINGMODE, () => done(t), (m) => fail(new Error(m)));
+      });
+      const fine = await Promise.all([load('day-w.ktx2'), load('day-e.ktx2'), load('night.ktx2')]);
+      if (!still() || fineEarth) { for (const t of fine) t.dispose(); return false; }
+      for (const t of fine) t.wrapU = Texture.CLAMP_ADDRESSMODE;
+      fineEarth = { fine, day: material._textures.day, night: material._textures.night };
+      material.setTexture('day', fine[0]);
+      material.setTexture('dayE', fine[1]);
+      material.setTexture('night', fine[2]);
+      material.setFloat('split', 1);
+      return true;
+    },
+    // The usual maps back, and the fine ones let go (they take much of a phone's memory).
+    setEarthPlain() {
+      const material = scene.materials.find((m) => m.name === 'planet');
+      if (!material || !fineEarth) return;
+      material.setTexture('day', fineEarth.day);
+      material.setTexture('night', fineEarth.night);
+      material.setTexture('dayE', fineEarth.day);
+      material.setFloat('split', 0);
+      for (const t of fineEarth.fine) t.dispose();
+      fineEarth = null;
+    },
+    // Lightning in the night's clouds (shaders/clouds.frag), during the cupola course.
+    setStorms(on) {
+      scene.materials.find((m) => m.name === 'cloudLayer')?.setFloat('storms', on ? 1 : 0);
+    },
     setEarthClouds(url) {
       rendered.find((item) => item.body.id === 'earth')?.setClouds?.(url);
     },

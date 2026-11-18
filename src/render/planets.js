@@ -55,18 +55,23 @@ function createEarth(scene, body, sunDir) {
   const diameter = (2 * body.radiusKm) / KM_PER_UNIT;
 
   const earth = CreateSphere('earth', { diameter, segments: 112 }, scene);
-  const surface = shader(scene, 'planet', planetFrag, ['sun', 'eye', 'cloudShift', 'time'], ['day', 'night', 'cloudMap']);
+  const surface = shader(scene, 'planet', planetFrag, ['sun', 'eye', 'cloudShift', 'time', 'split'], ['day', 'night', 'cloudMap', 'dayE']);
+  surface.setFloat('split', 0);
   surface.setFloat('time', 0);
   surface.setFloat('cloudShift', 0);
-  surface.setTexture('day', texture(scene, 'earth-day.webp'));
+  const dayMap = texture(scene, 'earth-day.webp');
+  surface.setTexture('day', dayMap);
+  // The east half of the cupola course's fine map (render/world.js); unused till then.
+  surface.setTexture('dayE', dayMap);
   surface.setTexture('night', texture(scene, 'earth-night.webp'));
   surface.setVector3('sun', sunDir);
   surface.setVector3('eye', Vector3.Zero());
   earth.material = surface;
 
   const clouds = CreateSphere('clouds', { diameter: diameter * CLOUD_SCALE, segments: 96 }, scene);
-  const cloudMaterial = shader(scene, 'cloudLayer', cloudsFrag, ['sun', 'time'], ['cloudMap']);
+  const cloudMaterial = shader(scene, 'cloudLayer', cloudsFrag, ['sun', 'time', 'storms'], ['cloudMap']);
   cloudMaterial.setFloat('time', 0);
+  cloudMaterial.setFloat('storms', 0);
   const cloudMap = texture(scene, 'earth-clouds.webp');
   cloudMaterial.setTexture('cloudMap', cloudMap);
   // The ground shader reads the same map, to lay the clouds' shadows on the ground.

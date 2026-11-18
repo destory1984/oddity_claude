@@ -26,6 +26,8 @@ async function shoot(browser, lang, name) {
       localStorage.setItem('oddity.lang.v1', l);
       localStorage.setItem('oddity.music', music ? '1' : '0');
       localStorage.setItem('oddity.muted', music ? '1' : '0');
+      // No 우주멍 clock in a film or a store picture (it is on by default since v1.0.16).
+      localStorage.setItem('oddity.gazeClock', '0');
     } catch {}
     // Once the scene is set (window.__hush, shots.cjs settle) no sheet opens at all but
     // those kept (window.__keep): shut 0.15 s after it opened, today's request still

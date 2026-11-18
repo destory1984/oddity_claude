@@ -12,8 +12,9 @@ export function createCalm({ sound }) {
   // "zz보다 타이어 아이콘을 그려넣는게 어때?", a timer meant), the minutes left when on.
   const gazeSleepKey = document.getElementById('gazeSleep');
   const key = 'oddity.gazeClock';
-  let enabled = false;
-  try { enabled = localStorage.getItem(key) === '1'; } catch { /* This window only. */ }
+  // On unless turned off (the user, 2026-11-18: "우주멍 시계를 default로 해").
+  let enabled = true;
+  try { enabled = localStorage.getItem(key) !== '0'; } catch { /* This window only. */ }
   let gazing = false;
   let ready = false;
   let reveal = 0;

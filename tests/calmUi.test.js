@@ -45,11 +45,14 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-test('clock defaults off, remembers its switch, waits for the pieces, and hides immediately', () => {
+test('clock defaults on, remembers its switch, waits for the pieces, and hides immediately', () => {
   const rest = createCalm({ sound });
   rest.setGazing(true);
   rest.reveal();
   vi.advanceTimersByTime(1000);
+  assert.equal(elements.gazeClock.classList.contains('visible'), true);
+  elements.gazeClockButton.click();
+  assert.equal(storage.get('oddity.gazeClock'), '0');
   assert.equal(elements.gazeClock.classList.contains('visible'), false);
   elements.gazeClockButton.click();
   assert.equal(storage.get('oddity.gazeClock'), '1');

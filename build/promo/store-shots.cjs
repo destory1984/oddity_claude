@@ -30,6 +30,8 @@ async function shoot(browser, lang) {
       localStorage.setItem('oddity.lang.v1', lang);
       localStorage.setItem('oddity.music', '0');
       localStorage.setItem('oddity.muted', '1');
+      // No 우주멍 clock in a film or a store picture (it is on by default since v1.0.16).
+      localStorage.setItem('oddity.gazeClock', '0');
     } catch { /* storage shut */ }
     if (window.SpeechSynthesis) SpeechSynthesis.prototype.speak = () => {};
   }, lang);

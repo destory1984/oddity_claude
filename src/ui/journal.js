@@ -116,7 +116,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   const PART_NAMES = {
     bodies: t('천체'), craft: t('탐사선'), curios: t('상상'),
     missions: t('따라 찍기'), album: t('내 사진'), views: t('엽서'),
-    courses: t('추천코스'), tours: t('할머니의 길'), stunts: t('묘기 비행'),
+    courses: t('추천 우주멍 코스'), tours: t('할머니의 길'), stunts: t('묘기 비행'),
   };
   const groupOf = (part) => Object.keys(GROUPS).find((g) => GROUPS[g].includes(part)) ?? part;
   const lastPart = {};

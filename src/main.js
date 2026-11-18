@@ -4437,6 +4437,8 @@ ${STORY_MORE[target.id]}` : told) };
     openShare({
       url: courseLink(id),
       title: t('추천코스 공유'),
+      // The card shows the course's snapshot (journal row), from the published game.
+      image: `${SHARE_BASE}assets/courses/${id}.jpg`,
       text: t`추천코스 "${chosen.name}" 링크예요. 열면 바로 이 코스를 날아요.`,
       button: t('이 코스 날아 보기'),
     }, false);
@@ -4450,7 +4452,7 @@ ${STORY_MORE[target.id]}` : told) };
     const link = { mobileWebUrl: url, webUrl: url };
     // With the photo, the card shows it: put up on Kakao's server first (a card takes a
     // picture by its address), else the game's own picture.
-    let image = { imageUrl: `${SHARE_BASE}og.jpg` };
+    let image = { imageUrl: shareNow.image ?? `${SHARE_BASE}og.jpg` };
     if (withPhoto()) {
       $('shareKakao').disabled = true;
       try {

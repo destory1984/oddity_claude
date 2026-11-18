@@ -824,7 +824,22 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
         const keys = document.createElement('div');
         keys.className = 'keys';
         keys.append(button, send);
-        li.append(keys);
+        // A snapshot of the course where its keys stand, the keys beside it; pressed, it
+        // flies the course as the key does (the user, 2026-11-19: "이 부분에 대표 스냅 사진 넣자").
+        const shot = document.createElement('button');
+        shot.className = 'shot';
+        shot.setAttribute('aria-label', `${course.name} ${t('날아 보기')}`);
+        const pic = document.createElement('img');
+        pic.src = `${import.meta.env.BASE_URL}assets/courses/${course.id}.jpg`;
+        pic.alt = '';
+        pic.loading = 'lazy';
+        pic.addEventListener('error', () => shot.remove(), { once: true });
+        shot.append(pic);
+        shot.addEventListener('click', () => button.click());
+        const row = document.createElement('div');
+        row.className = 'shotRow';
+        row.append(shot, keys);
+        li.append(row);
       }
       list.append(li);
     }

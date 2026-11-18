@@ -1886,6 +1886,40 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   gap:8px;
 }
 
+/* The course's snapshot, its keys beside it. */
+#journalCourses .shotRow {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:6px;
+}
+#journalCourses .shotRow .keys {
+  flex-direction:column;
+  gap:6px;
+}
+#journalCourses .shotRow .keys button {
+  margin-top:0;
+}
+#journal #journalCourses li button.shot {
+  display:block;
+  flex:0 0 auto;
+  width:150px;
+  height:100px;
+  min-height:0;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  border-radius:8px;
+  border:1px solid #7a5a3666;
+  background:#0b0f1a;
+}
+#journalCourses button.shot img {
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
 #journalStunts .record {
   display:block;
   margin-top:2px;

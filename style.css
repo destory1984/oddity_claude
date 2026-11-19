@@ -5080,6 +5080,20 @@ html.gaze #skyTold,
 html.gaze #testBar {
   visibility:hidden !important;
 }
+/* The cupola's window frame and its floating cat belong to the bare view only: when the
+   moon brings the words and buttons back mid-course, the frame steps aside with the course
+   still flying, and comes back with the next press (the user, 2026-11-19, the frame left
+   over the buttons: "큐폴라 다녀오면 이렇게 된다"). */
+html:not(.gaze) #cupolaFrame,
+html:not(.gaze) #cupolaCat {
+  display:none !important;
+}
+/* While the frame is up, the keys that stay through the bare view (the moon, music, sleep)
+   lie above it: a solid part of a frame drawn there hid the moon, the one way back (the user,
+   2026-11-19: "아이콘이 안 보임"). */
+html.gaze #hud {
+  z-index:7;
+}
 
 /* The ink's tails and the ripples round the drain, drawn while the pieces move (main.js
    `gazeInk`): under the words and buttons, over the scene, taking no touch. */

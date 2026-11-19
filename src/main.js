@@ -2248,7 +2248,9 @@ ${STORY_MORE[target.id]}` : told) };
     if (!on && cupolaClock) { cupolaClock = false; simTime = clockNow(); }
     sound.cabinHum(on);
     world.setStorms(on);
-    for (const id of ['gazeClock', 'gazeLogo']) { const e = document.getElementById(id); if (e) e.style.visibility = on ? 'hidden' : ''; }
+    // (The logo and the clock stay up in the cupola too, as in any 우주멍: the user, 2026-11-19,
+    // "우주멍처럼 로고, 시간 넣어줘. 우주정거장도".)
+    for (const id of ['gazeClock', 'gazeLogo']) { const e = document.getElementById(id); if (e) e.style.visibility = ''; }
     if (on) world.setEarthFine(`${import.meta.env.BASE_URL}assets/cupola/`, () => cupolaOn).catch((e) => console.warn('fine maps', e));
     else world.setEarthPlain();
   }

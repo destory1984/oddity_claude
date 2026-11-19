@@ -5120,6 +5120,8 @@ html.gaze #hud {
   opacity:0;
   pointer-events:none;
   transition:opacity .6s ease;
+  /* Over a cabin's window frame too (main.js cupolaView, z-index 5), as the clock is. */
+  z-index:20;
 }
 
 html.gaze #gazeLogo {

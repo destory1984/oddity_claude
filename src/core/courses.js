@@ -44,7 +44,7 @@ export const COURSES = [
   // 고도를 높이면?"); 105 minutes a round as at that height, flown at twice the pace (the
   // user: "지구 이동 속도를 2배로"; main.js CUPOLA_PACE). overHorizonDeg: how far over the
   // horizon the middle of the view stands; leadS: when she passes over Seoul at night.
-  { id: 'cupola', body: 'earth', lapS: 3150, rail: { cupola: true, highKm: 1000, overHorizonDeg: 5, startS: 0, leadS: 700 }, name: t('큐폴라에서 본 지구'), todo: t('우주정거장의 큐폴라 창 안에서 지구를 내려다봅니다. 낮과 노을, 밤의 도시 불빛이 지나갑니다.') },
+  { id: 'cupola', body: 'earth', lapS: 3150, rail: { cupola: true, highKm: 1000, overHorizonDeg: 5, startS: 0, leadS: 700 }, name: t('큐폴라에서 본 지구'), todo: t('큐폴라는 국제우주정거장 아래쪽에 달린, 창 일곱 개짜리 둥근 전망대입니다. 그 창 안에서 지구를 내려다봅니다. 낮과 노을, 밤의 도시 불빛이 지나갑니다.') },
   { id: 'orbitSunrise', body: 'earth', lapS: 360, rail: { orbit: true, highKm: 400, lookDeg: 12, startS: 22 }, name: t('궤도 일출'), todo: t('지구 400km 위를 돌며 밤에서 낮으로 넘어갑니다. 지평선에 빨강, 주황, 파랑의 띠가 켜지고 태양이 솟습니다.') },
   { id: 'milkyWay', body: 'earth', lapS: 180, radii: 8, rollDeg: 35, sky: 'milkyWay', name: t('은하수 일주'), todo: t('은하수가 놓인 평면을 따라 지구 둘레를 비행합니다. 은하 중심에서 출발합니다.') },
   { id: 'orion', body: 'earth', lapS: 150, radii: 6, sky: 'm42', overDeg: 16, name: t('오리온 대성운'), todo: t('지구를 돌면서 겨울 밤하늘의 붉은 성운을 봅니다.') },

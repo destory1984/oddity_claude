@@ -2674,7 +2674,9 @@ ${STORY_MORE[target.id]}` : told) };
     // to the window.
     const fade = 0.8 * (chosen.rail.testSpeed ?? 1);
     pic.style.opacity = Math.min(1, before ? (courseTime - p.from) / fade : 1, after ? (p.to - courseTime) / fade : 1).toFixed(3);
-    const slow = 1.2 * (chosen.rail.testSpeed ?? 1);
+    // (fadeS: a photo's own, slower way in and out: McCandless's helmet, the user, 2026-11-20,
+    // "화면 전환을 부드럽게".)
+    const slow = (p.fadeS ?? 1.2) * (chosen.rail.testSpeed ?? 1);
     box.style.opacity = Math.min(1, before ? 1 : (courseTime - p.from) / slow, after ? 1 : (p.to - courseTime) / slow).toFixed(3);
   }
   // The mission's own clock under the date, with where she is: the day of the mission and

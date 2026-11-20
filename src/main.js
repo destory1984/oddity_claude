@@ -2293,7 +2293,7 @@ ${STORY_MORE[target.id]}` : told) };
   // degrees apart: an afternoon in Florida, a morning on the Pacific).
   // How far from Apollo 11's landing light the landing would be with these bodies, in
   // degrees: the Sun's height at the place (core/courses.js apolloAt: aLand, where the Earth
-  // stands 20 degrees up ahead) from 11, and 90 more if it is not behind her.
+  // stands 20 degrees up ahead) from 11, and half its turn away from straight behind her.
   const APOLLO_SUN_DEG = 11;
   function apolloLandingMiss(list) {
     const find = (id) => list.find((b) => b.id === id);
@@ -2308,8 +2308,10 @@ ${STORY_MORE[target.id]}` : told) };
     const toEarth = unit(earth.position.map((n, i) => n - site[i]));
     const level = (v) => { const k = v.reduce((q, n, i) => q + n * out[i], 0); return v.map((n, i) => n - out[i] * k); };
     const sinE = toSun.reduce((q, n, i) => q + n * out[i], 0);
-    const behind = level(toSun).reduce((q, n, i) => q + n * level(toEarth)[i], 0) < 0;
-    return Math.abs((Math.asin(sinE) * 180) / Math.PI - APOLLO_SUN_DEG) + (behind ? 0 : 90);
+    // (And straight behind: the shadow thrown along the way she looks, toward the Earth.)
+    const ls = unit(level(toSun).map((n) => -n)), le = unit(level(toEarth));
+    const off = (Math.acos(Math.max(-1, Math.min(1, ls.reduce((q, n, i) => q + n * le[i], 0)))) * 180) / Math.PI;
+    return Math.abs((Math.asin(sinE) * 180) / Math.PI - APOLLO_SUN_DEG) + 0.5 * off;
   }
   function apolloPlan(chosen) {
     const pace = chosen.rail.pace ?? 1;
@@ -2436,7 +2438,8 @@ ${STORY_MORE[target.id]}` : told) };
   // the phone's buzz while it burns, a pulse every 0.4 s (iPhone browsers cannot buzz).
   function burnFelt(chosen, wasTime) {
     for (const b of chosen.rail.burns ?? []) {
-      if (b.from > wasTime && b.from <= courseTime) sound.burn((b.to - courseTime) / (chosen.rail.testSpeed ?? 1), b.power);
+      // (Only while some of it is left: a long frame or a jump of the course may pass it all.)
+      if (b.from > wasTime && b.from <= courseTime && b.to - courseTime > 0.5) sound.burn((b.to - courseTime) / (chosen.rail.testSpeed ?? 1), b.power);
     }
     const b = burnNow();
     if (!b?.buzz || b.on < 0.5) return;
@@ -2584,9 +2587,9 @@ ${STORY_MORE[target.id]}` : told) };
   let apolloSway = 0;
   const smoothstep01 = (x) => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k); };
   const puffOf = (t, list) => Math.max(0, ...list.map((at) => (t < at || t > at + 0.55 ? 0 : Math.min(1, (t - at) / 0.05) * (1 - (t - at) / 0.55))));
-  const DOCK_PUFFS = { fwd: [721, 722.8, 736.2], side: [726, 728.5, 732, 734.6, 739, 740.6, 742.2] };
+  const DOCK_PUFFS = { fwd: [721, 722.8, 739.5], side: [726, 728, 733.5, 736.5, 743, 745.2, 747] };
   const UNDOCK_PUFFS = { fwd: [491.6, 491.9, 493.4], side: [496.5, 499] };
-  function dockPose(t, d) {
+  function dockPose(t, d, overhead) {
     const [h0, h1] = d.hold;
     if (t < h0) {
       const x = (t - d.from) / (h0 - d.from);
@@ -2599,15 +2602,28 @@ ${STORY_MORE[target.id]}` : told) };
       const y = t - h0;
       return { km: d.holdKm + 1.2 * Math.sin(y * 0.9), sx: -0.035 + 0.025 * Math.sin(y * 0.7), uy: 0.09 + 0.01 * Math.sin(y * 0.5), a: 1.35 * (1 - smoothstep01((t - h0 - 1) / (h1 - h0 - 1))), roll: 0.05 * Math.sin(y * 0.4) };
     }
-    if (t < d.capture) {
-      const x = (t - h1) / (d.capture - h1);
-      return { km: d.holdKm + (d.nearKm - d.holdKm) * smoothstep01(x), sx: -0.015 - 0.03 * Math.sin(x * Math.PI), uy: 0.09 + 0.015 * Math.sin(x * Math.PI * 2), a: 0.14 * Math.sin(x * Math.PI * 1.5) * (1 - x), roll: 0 };
+    if (!overhead) {
+      // Still in the front glass: drifting a little closer, going up out of it (she goes over
+      // Eagle's roof, where the docking hatch is).
+      const x = Math.min(1, (t - h1) / (d.top - h1));
+      return { km: d.holdKm - 4 * x, sx: -0.035 + 0.01 * x, uy: 0.09 + 0.12 * x * x, a: 0, roll: 0 };
     }
-    // Caught: the swing, dying away; then drawn in by the probe at the latch.
+    // Seen through the overhead window, which lies a little forward of Eagle's docking hatch
+    // (the user, 2026-11-21: "이것만 수정"): she comes down onto the hatch, not onto the eye,
+    // her probe along the line square to the roof (axial), off toward the top of the window
+    // and a little right by hatchKm (up, right), so that she is seen aslant and, close, goes
+    // partly past its edge.
+    const [hu, hr] = d.hatchKm ?? [0, 0];
+    if (t < d.capture) {
+      // Coming straight down, slowest at the end, drifting off the line and puffed back.
+      const x = Math.max(0, (t - d.top) / (d.capture - d.top));
+      return { axial: true, km: d.nearKm + (d.topKm - d.nearKm) * (1 - x) ** 2, up: hu + 0.6 * Math.sin(x * Math.PI * 2), right: hr + 0.8 * Math.sin(x * Math.PI), a: 0.12 * Math.sin(x * Math.PI * 1.5) * (1 - x), roll: 0.3 * (1 - x) };
+    }
+    // Caught: the swing, slow and dying away; then drawn in by the probe at the latch.
     const y = t - d.capture;
-    const wob = t < d.latch ? 0.26 * Math.exp(-y * 0.42) * Math.sin(y * 2 * Math.PI * 0.42) : 0;
-    const pull = smoothstep01((t - d.latch) / 0.25);
-    return { km: d.nearKm - 1.6 * pull, sx: -0.015 + 0.25 * wob * 0.1, uy: 0.09, a: 0, roll: 0, wob };
+    const wob = t < d.latch ? 0.26 * Math.exp(-y * 0.32) * Math.sin(y * 2 * Math.PI * 0.3) : 0;
+    const pull = smoothstep01((t - d.latch) / (d.pullS ?? 0.25));
+    return { axial: true, km: d.nearKm - 1.6 * pull, up: hu, right: hr + 0.3 * wob, a: 0, roll: 0, wob };
   }
   function undockPose(t, d) {
     if (t < d.part) return { km: d.nearKm, sx: -0.015, uy: 0.09, a: 0, roll: 0 };
@@ -2619,7 +2635,9 @@ ${STORY_MORE[target.id]}` : told) };
     const t = courseTime;
     apolloSway = 0;
     let pose = null, spec = null, puffs = null;
-    if (d && t >= d.from && t < d.to) { pose = dockPose(t, d); spec = d; puffs = DOCK_PUFFS; }
+    // (Through Eagle's overhead window once its frame is shown: the change hidden by the dark.)
+    const overhead = Boolean(d?.topCabin) && document.getElementById('cupolaFrame')?.dataset.cabin === d.topCabin;
+    if (d && t >= d.from && t < d.to) { pose = dockPose(t, d, overhead); spec = d; puffs = DOCK_PUFFS; }
     else if (u && t >= u.from && t < u.to) { pose = undockPose(t, u); spec = u; puffs = UNDOCK_PUFFS; }
     if (!pose) {
       world.setFloatModel('columbia', null);
@@ -2627,13 +2645,18 @@ ${STORY_MORE[target.id]}` : told) };
     }
     apolloSway = pose.wob ?? 0;
     const { km, sx, uy, a, roll } = pose;
-    const look = forward(base.orientation);
+    let look = forward(base.orientation);
     const side = right(base.orientation);
-    const upward = rotateVector(base.orientation, [0, 1, 0]);
+    let upward = rotateVector(base.orientation, [0, 1, 0]);
+    // (Looking up through the overhead window, cabins[].tilt: what was up is ahead.)
+    if (overhead) [look, upward] = [upward, look.map((n) => -n)];
     // (Left of the line of sight and a little up, in the middle of Eagle's triangular glass:
     // on the line it stood against the frame's diagonal bar.)
-    const at = base.position.map((n, i) => n + look[i] * km + side[i] * km * sx + upward[i] * km * uy);
-    const toEye = base.position.map((n, i) => n - at[i]);
+    const at = pose.axial
+      ? base.position.map((n, i) => n + look[i] * km + side[i] * pose.right + upward[i] * pose.up)
+      : base.position.map((n, i) => n + look[i] * km + side[i] * km * sx + upward[i] * km * uy);
+    // (Axial: her nose down the line square to Eagle's roof, back toward it, not to the eye.)
+    const toEye = pose.axial ? look.map((n) => -n) : base.position.map((n, i) => n - at[i]);
     const len = Math.hypot(...toEye);
     // Side on, it reads as the command and service modules (cone, can, bell, dish); end on
     // all the way it was a grey disc (the user's check, 2026-11-20). wob: the swing after the
@@ -2768,6 +2791,89 @@ ${STORY_MORE[target.id]}` : told) };
       g.lineTo(qx, qy);
       g.stroke();
     }
+  }
+  // Eagle's altimeter (the user, 2026-11-21: "고도계는 어디에 있어?", "1안으로"): the big round
+  // gauge at the lower left of her panel (rail.landing.gauge: its middle and the radius of its
+  // face inside the ticks, in the cabin picture's pixels) given a working needle over its
+  // painted one, on a scale that opens out low down (0 at seven o'clock, 120 km at five, 300
+  // degrees round: 15 m and 50 m some 30 degrees apart), with the height in figures in a
+  // small window under the middle and ALT over it. Her eye's height less the cabin's own
+  // 8 m, so it reads 0 on the ground.
+  const ALT_TOP_M = 120000;
+  let altNeedle = null;
+  function cabinAltimeter(frame, px, py) {
+    const L = course ? courseById(course).rail?.landing : null;
+    let dial = document.getElementById('cabinAltimeter');
+    const on = L?.gauge && frame && !frame.hidden && frame.naturalWidth && frame.dataset.cabin === 'assets/tours/eagle-cabin.webp';
+    if (!on) {
+      if (dial) dial.hidden = true;
+      altNeedle = null;
+      return;
+    }
+    if (!dial) {
+      document.body.insertAdjacentHTML('beforeend', '<canvas id="cabinAltimeter" aria-hidden="true" style="position:fixed;z-index:6;pointer-events:none"></canvas>');
+      dial = document.getElementById('cabinAltimeter');
+    }
+    const nw = frame.naturalWidth, nh = frame.naturalHeight, W = innerWidth, H = innerHeight;
+    const s0 = Math.max(W / nw, H / nh), S = s0 * 1.04;
+    const ox = (W - nw * s0) * 0.5, oy = (H - nh * s0) * 0.45;
+    const [gx, gy, gr] = L.gauge;
+    const cx = W / 2 + (ox + gx * s0 - W / 2) * 1.04 + px, cy = H / 2 + (oy + gy * s0 - H / 2) * 1.04 + py;
+    const r = gr * S;
+    const size = Math.ceil(2 * r + 4);
+    const dpr = Math.min(3, devicePixelRatio || 1);
+    if (dial.width !== Math.round(size * dpr)) { dial.width = Math.round(size * dpr); dial.height = Math.round(size * dpr); }
+    Object.assign(dial.style, { left: `${(cx - size / 2).toFixed(1)}px`, top: `${(cy - size / 2).toFixed(1)}px`, width: `${size}px`, height: `${size}px`, filter: frame.style.filter });
+    dial.hidden = false;
+    const moon = here('moon');
+    const m = Math.max(0, (Math.hypot(...state.position.map((n, i) => n - moon.position[i])) - moon.radiusKm - 0.008) * 1000);
+    const want = (300 * Math.log10(1 + Math.min(m, ALT_TOP_M))) / Math.log10(1 + ALT_TOP_M);
+    // (A needle has some weight: it follows over a fifth of a second.)
+    altNeedle = altNeedle === null ? want : altNeedle + (want - altNeedle) * 0.2;
+    const g = dial.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, size, size);
+    g.translate(size / 2, size / 2);
+    // The face over the painted needle, a little lighter at the middle.
+    const face = g.createRadialGradient(0, 0, 0, 0, 0, r);
+    face.addColorStop(0, '#1d1d1d');
+    face.addColorStop(1, '#111');
+    g.fillStyle = face;
+    g.beginPath();
+    g.arc(0, 0, r, 0, 2 * Math.PI);
+    g.fill();
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillStyle = '#d8c39a';
+    g.font = `700 ${(r * 0.2).toFixed(1)}px 'Arial Narrow', Arial, sans-serif`;
+    g.fillText('ALT', 0, -r * 0.42);
+    // The figures in a little window.
+    const text = m >= 1000 ? `${(m / 1000).toFixed(m >= 10000 ? 0 : 1)} km` : `${Math.round(m)} m`;
+    g.fillStyle = '#050505';
+    g.fillRect(-r * 0.46, r * 0.3, r * 0.92, r * 0.3);
+    g.strokeStyle = '#3c3a36';
+    g.lineWidth = Math.max(1, r * 0.03);
+    g.strokeRect(-r * 0.46, r * 0.3, r * 0.92, r * 0.3);
+    g.fillStyle = '#f2e6c8';
+    g.font = `700 ${(r * 0.21).toFixed(1)}px ui-monospace, Consolas, monospace`;
+    g.fillText(text, 0, r * 0.46);
+    // The needle: cream ahead, dark behind, from seven o'clock round.
+    g.rotate(((-150 + altNeedle) * Math.PI) / 180);
+    g.fillStyle = '#e9dcbc';
+    g.beginPath();
+    g.moveTo(-r * 0.035, 0);
+    g.lineTo(0, -r * 0.93);
+    g.lineTo(r * 0.035, 0);
+    g.closePath();
+    g.fill();
+    g.fillStyle = '#2a2a2a';
+    g.fillRect(-r * 0.03, 0, r * 0.06, r * 0.3);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.translate(size / 2, size / 2);
+    g.fillStyle = '#7d7d78';
+    g.beginPath();
+    g.arc(0, 0, r * 0.08, 0, 2 * Math.PI);
+    g.fill();
   }
   // The contact light on Eagle's panel (rail.landing.lamp: where, in the cabin picture's
   // pixels), dark until a probe under her feet touches the ground at `contact`, then lit blue
@@ -3065,6 +3171,8 @@ ${STORY_MORE[target.id]}` : told) };
     // veil; let go at the course's second, the view jumped before the frame did.)
     const shown = document.getElementById('cupolaFrame')?.dataset.cabin;
     const entry = chosen?.rail?.cabins ? [...chosen.rail.cabins].reverse().find((c) => courseTime >= c.at && c.cabin === shown) : null;
+    // (cabins[].tilt: the head tipped back that far, Eagle's overhead window looked up through.)
+    if (entry?.tilt) pitch += entry.tilt;
     if (entry?.aim) {
       const vh = innerHeight / (2 * Math.tan(world.fov() / 2));
       yaw += Math.atan((-entry.aim[0] * innerWidth) / vh);
@@ -3286,6 +3394,12 @@ ${STORY_MORE[target.id]}` : told) };
       document.body.insertAdjacentHTML('beforeend', '<div id="cabinCaption" aria-live="polite" style="position:fixed;left:50%;top:58vh;z-index:8;width:min(78vw,420px);transform:translateX(-50%);pointer-events:none;padding:8px 12px;border-radius:10px;background:rgba(4,8,18,.55);color:#f3efe4;font:500 14px/1.45 system-ui,sans-serif;text-align:center;text-shadow:0 1px 2px #000;word-break:keep-all;opacity:0"></div>');
       box = document.getElementById('cabinCaption');
     }
+    // (Lower, under the window, in a cabin that asks it: cabins[].captionY, the user, 2026-11-21:
+    // "자막은 창 아래로 내려", of Eagle's overhead window.)
+    const shown = document.getElementById('cupolaFrame')?.dataset.cabin;
+    const entry = chosen?.rail?.cabins ? [...chosen.rail.cabins].reverse().find((c) => courseTime >= c.at && c.cabin === shown) : null;
+    const top = `${entry?.captionY ?? 58}vh`;
+    if (box.style.top !== top) box.style.top = top;
     if (captionShown !== now) {
       captionShown = now;
       box.textContent = now.text;
@@ -3391,6 +3505,7 @@ ${STORY_MORE[target.id]}` : told) };
     cabinGlow();
     cabinKeyPlace(frame, px, py);
     cabinLamp(frame, px, py);
+    cabinAltimeter(frame, px, py);
     cabinGround();
     cabinWordsPlace(frame, px, py);
   }
@@ -4717,7 +4832,7 @@ ${STORY_MORE[target.id]}` : told) };
       world.setFloatModel('columbia', null);
       landingNow = { dust: 0, shadow: null };
       cabinGround();
-      if (!course) cabinLamp(null);
+      if (!course) { cabinLamp(null); cabinAltimeter(null); }
     }
     // McCandless seen from outside, coming out of the bay (core/courses.js mmuFigure).
     const figure = shuttleRail?.mmu ? mmuFigure(courseById(course), here('earth'), here('hubble'), here('sun'), courseTime) : null;

@@ -14,7 +14,7 @@
 | `public/assets/tours/pillars.jpg` | NASA, Jeff Hester, Paul Scowen (Arizona State University), 「창조의 기둥」 (허블, 1995년, STScI-PRC1995-44a). | 미국 정부 저작물, 저작권 없음 |
 | `public/assets/tours/mmu-figure.webp` | NASA, S84-27017 (1984년 2월 7일, MMU로 나는 브루스 매캔들리스). https://images.nasa.gov/details/s84-27017 사람만 오려 내고, 비치는 바이저를 GPT(OpenAI 이미지 생성)로 채웠다. | 미국 정부 저작물, 저작권 없음 |
 | `public/assets/tours/mmu-face.jpg` | NASA, S84-27034A (STS-41B, 매캔들리스의 헬멧). https://images.nasa.gov/details/s84-27034a | 미국 정부 저작물, 저작권 없음 |
-| `public/assets/tours/apollo-cabin.webp`, `eagle-cabin.webp`, `shuttle-cabin.webp`, `helmet-rim.webp`, `helmet-hands.webp`, `candy.webp`, `*-switch*-down.webp` | 이 게임을 위해 GPT(OpenAI 이미지 생성)로 그렸다. | 이 저장소의 것 |
+| `public/assets/tours/apollo-cabin.webp`, `eagle-cabin.webp`, `shuttle-cabin.webp`, `eagle-top.webp`, `helmet-rim.webp`, `helmet-hands.webp`, `candy.webp`, `*-switch*-down.webp` | 이 게임을 위해 GPT(OpenAI 이미지 생성)로 그렸다. | 이 저장소의 것 |
 | `public/assets/tours/helmet-air.mp3` | 이 게임을 위해 만든 소리(우주복 환풍기와 숨소리를 잡음으로 합성). | 이 저장소의 것 |
 | `public/assets/earth-clouds.webp` | NASA Visible Earth, 구름 합성 지도. https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg | 미국 정부 저작물, 저작권 없음 |
 | 실제 구름 (게임이 열릴 때마다 받아 옴, `src/render/realClouds.js`) | NASA GIBS, VIIRS Suomi NPP / NOAA-20 Corrected Reflectance (True Color), 어제의 지구 전체. https://gibs.earthdata.nasa.gov | NASA 영상, 저작권 없음 |

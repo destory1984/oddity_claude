@@ -860,7 +860,7 @@ export function createSound({ music } = {}) {
     },
     // A big engine for `seconds` (engineBurn above).
     burn(seconds, power) {
-      if (!ctx || muted || !noiseBuffer) return;
+      if (!ctx || muted || !noiseBuffer || !(seconds > 0.5)) return;
       engineBurn(seconds, power);
     },
     // Still a scene's long sounds (the scene was left before its end).

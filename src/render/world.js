@@ -186,6 +186,10 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
       directions[c.id] = rel.map((n) => n / length);
       distances[c.id] = length * KM_PER_UNIT;
     }
+    // The eye turned for this frame before the craft are placed: the shuttle's arm is drawn in
+    // the eye's own frame and, a frame behind, shook as the view turned (the user, 2026-11-20,
+    // Discovery's course at true speed: "로봇팔이 사시나무 떨듯이 떨어").
+    camera.rotationQuaternion = new Quaternion(...(seen?.orientation ?? multiply(orientation, photoOrientation || [0, 0, 0, 1])));
     craftMeshes.update(craft, position, sunNow.position, jolt, hiddenCraft, replay);
     siteModels.update(sites, now, position, replay);
     groundPatches.update(now, position, clockS);
@@ -210,7 +214,6 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
     sun.material.setFloat('eclipse', eclipseDepth(visibility));
     const bead = sunBead(directions[sunNow.id], distances[sunNow.id], sunNow.radiusKm, occluders);
 
-    camera.rotationQuaternion = new Quaternion(...(seen?.orientation ?? multiply(orientation, photoOrientation || [0, 0, 0, 1])));
     const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
     hero.update({
       dt, speed, turn, fov: camera.fov, photoOrientation, visible: heroVisible, alpha: heroAlpha, aspect, move,

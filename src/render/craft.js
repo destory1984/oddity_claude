@@ -800,6 +800,8 @@ export function createCraft(scene, craftList) {
       return;
     }
     const eye = scene.activeCamera;
+    // (Its matrix as turned this frame, not as last drawn.)
+    eye.computeWorldMatrix(true);
     const o = eye.globalPosition;
     const R = eye.getDirection(Vector3.Right()), U = eye.getDirection(Vector3.Up()), F = eye.getDirection(Vector3.Forward());
     const toEye = (p) => { const d = p.subtract(o); return [Vector3.Dot(d, R), Vector3.Dot(d, U), Vector3.Dot(d, F)]; };

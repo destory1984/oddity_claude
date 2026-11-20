@@ -132,17 +132,44 @@ function grime(g, w, h, rnd, count, dark = 0.12, size = 60) {
     g.fillRect(x - r, y - r, 2 * r, 2 * r);
   }
 }
-// Tiles in a grid, each a little lighter or darker; a few patched ones.
+// Tiles in a grid, each a little lighter or darker; a few patched ones. Weathered as the
+// flown orbiters were: on white tiles some new ones far whiter, some gone yellow, some
+// grey with use; on black ones faded grey patches. Rows of a shade run together a little,
+// as tiles were replaced a stretch at a time.
 function paintTiles(g, w, h, rnd, { base, spread, size, gap, gapColor, patch }) {
   g.fillStyle = gapColor;
   g.fillRect(0, 0, w, h);
+  const white = base[0] > 128;
+  let run = 0;
   for (let y = 0; y < h; y += size) {
     for (let x = 0; x < w; x += size) {
-      const k = (rnd() - 0.5) * spread + (rnd() < 0.025 ? patch : 0);
-      const c = base.map((n) => Math.max(0, Math.min(255, Math.round(n + k))));
+      if (rnd() < 0.05) run = (rnd() - 0.5) * spread * 1.6;
+      run *= 0.85;
+      const k = (rnd() - 0.5) * spread * 1.6 + run + (rnd() < 0.025 ? patch : 0);
+      let c = base.map((n) => n + k);
+      const r = rnd();
+      if (white) {
+        if (r < 0.035) c = c.map((n) => n + 22); // new, unflown
+        else if (r < 0.085) c = [c[0] + 4, c[1] - 2, c[2] - 18]; // yellowed
+        else if (r < 0.13) c = c.map((n) => n - 24); // grey with use
+      } else if (r < 0.06) c = c.map((n) => n + 18 + rnd() * 16); // faded
+      c = c.map((n) => Math.max(0, Math.min(255, Math.round(n))));
       g.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
       g.fillRect(x + gap, y + gap, size - gap, size - gap);
     }
+  }
+}
+// Streaks, as rain runs down a wall: soft dark (or rusty) lines in one direction.
+function streaks(g, w, h, rnd, count, dark = 0.12, along = 'y') {
+  for (let i = 0; i < count; i++) {
+    const x0 = rnd() * w, y0 = rnd() * h, len = (0.15 + rnd() * 0.45) * (along === 'y' ? h : w), wide = 3 + rnd() * 10;
+    const grad = along === 'y' ? g.createLinearGradient(0, y0, 0, y0 + len) : g.createLinearGradient(x0, 0, x0 + len, 0);
+    const tone = rnd() < 0.75 ? '52,48,40' : '120,96,60';
+    grad.addColorStop(0, `rgba(${tone},${(dark * (0.5 + rnd())).toFixed(3)})`);
+    grad.addColorStop(1, `rgba(${tone},0)`);
+    g.fillStyle = grad;
+    if (along === 'y') g.fillRect(x0, y0, wide, len);
+    else g.fillRect(x0, y0, len, wide);
   }
 }
 // The white blankets: quilted squares with their stitching, soft hollows, grime.
@@ -165,7 +192,17 @@ function paintBlanket(g, w, h, rnd, { size = 64, base = [226, 222, 211] } = {}) 
   for (let y = 0; y <= h; y += size) { g.beginPath(); g.moveTo(0, y + 0.5); g.lineTo(w, y + 0.5); g.stroke(); }
   for (let x = 0; x <= w; x += size) { g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, h); g.stroke(); }
   g.setLineDash([]);
-  grime(g, w, h, rnd, 40, 0.12, 70);
+  grime(g, w, h, rnd, 70, 0.16, 70);
+  // Yellowed patches, and dirty hand marks near the seams.
+  for (let i = 0; i < 26; i++) {
+    const x = rnd() * w, y = rnd() * h, r = 20 + rnd() * 70;
+    const spot = g.createRadialGradient(x, y, 0, x, y, r);
+    spot.addColorStop(0, `rgba(190,160,95,${(0.08 + rnd() * 0.12).toFixed(3)})`);
+    spot.addColorStop(1, 'rgba(190,160,95,0)');
+    g.fillStyle = spot;
+    g.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
+  streaks(g, w, h, rnd, 14, 0.1);
 }
 function materialOf(scene, name, tex, { spec = 0.12, power = 24, emissive = 0, color = null } = {}) {
   const m = new StandardMaterial(name, scene);
@@ -233,7 +270,22 @@ function paintForward(g, w, h, rnd) {
   for (const [a0, a1] of panes) pane(a0, a1, 14.05, 15.3, 6);
   pane(1.3, 1.5, 12.35, 13.05);
   pane(PI - 1.5, PI - 1.3, 12.35, 13.05);
-  // The forward thrusters: dark ports either side ahead of the windows.
+  // The forward thrusters: dark ports either side ahead of the windows, soot blown back
+  // from each over the tiles behind it.
+  for (const a of [0.55, 0.85, PI - 0.85, PI - 0.55]) {
+    const soot = g.createLinearGradient(0, py(17.05), 0, py(15.4));
+    soot.addColorStop(0, 'rgba(25,23,20,.55)');
+    soot.addColorStop(1, 'rgba(25,23,20,0)');
+    g.fillStyle = soot;
+    g.beginPath();
+    g.moveTo(px(a) - 8, py(17.05));
+    g.lineTo(px(a) + 8, py(17.05));
+    g.lineTo(px(a) + 22, py(15.4));
+    g.lineTo(px(a) - 22, py(15.4));
+    g.closePath();
+    g.fill();
+  }
+  grime(g, w, h, rnd, 30, 0.12, 40);
   g.fillStyle = '#0d0d0f';
   for (const a of [0.55, 0.85, PI - 0.85, PI - 0.55]) {
     g.beginPath();
@@ -300,11 +352,21 @@ function paintRadiator(g, w, h, rnd) {
   g.fillStyle = 'rgba(30,32,38,0.95)';
   g.fillRect(0, 0, 10, h);
   g.fillRect(w - 10, 0, 10, h);
-  grime(g, w, h, rnd, 25, 0.1, 60);
+  grime(g, w, h, rnd, 40, 0.14, 60);
+  // Haze on the silvering, and a dull patch here and there.
+  for (let i = 0; i < 18; i++) {
+    const x = rnd() * w, y = rnd() * h, r = 30 + rnd() * 90;
+    const spot = g.createRadialGradient(x, y, 0, x, y, r);
+    spot.addColorStop(0, `rgba(210,212,215,${(0.1 + rnd() * 0.15).toFixed(3)})`);
+    spot.addColorStop(1, 'rgba(210,212,215,0)');
+    g.fillStyle = spot;
+    g.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
 }
 function paintWingTop(g, w, h, rnd) {
   paintTiles(g, w, h, rnd, { base: [224, 221, 212], spread: 10, size: 16, gap: 1, gapColor: '#aaa69c', patch: -25 });
-  grime(g, w, h, rnd, 40, 0.1, 60);
+  grime(g, w, h, rnd, 70, 0.14, 60);
+  streaks(g, w, h, rnd, 30, 0.1, 'x');
   // The leading edge, grey carbon; the elevons' hinge lines.
   const le = g.createLinearGradient(0, 0, w * 0.06, 0);
   le.addColorStop(0, '#3b3b3e');
@@ -320,10 +382,23 @@ function paintWingTop(g, w, h, rnd) {
 }
 function paintBlackTiles(g, w, h, rnd) {
   paintTiles(g, w, h, rnd, { base: [26, 26, 28], spread: 16, size: 32, gap: 2, gapColor: '#0c0c0d', patch: 40 });
+  // Faded grey blotches and scuffs.
+  for (let i = 0; i < 24; i++) {
+    const x = rnd() * w, y = rnd() * h, r = 15 + rnd() * 50;
+    const spot = g.createRadialGradient(x, y, 0, x, y, r);
+    spot.addColorStop(0, `rgba(120,118,112,${(0.08 + rnd() * 0.12).toFixed(3)})`);
+    spot.addColorStop(1, 'rgba(120,118,112,0)');
+    g.fillStyle = spot;
+    g.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
+  g.strokeStyle = 'rgba(140,138,130,.25)';
+  g.lineWidth = 1;
+  for (let i = 0; i < 30; i++) { const x = rnd() * w, y = rnd() * h; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 40, y + (rnd() - 0.5) * 12); g.stroke(); }
 }
 function paintTail(g, w, h, rnd) {
   paintTiles(g, w, h, rnd, { base: [224, 221, 212], spread: 10, size: 18, gap: 1, gapColor: '#aaa69c', patch: -25 });
-  grime(g, w, h, rnd, 30, 0.1, 60);
+  grime(g, w, h, rnd, 50, 0.14, 60);
+  streaks(g, w, h, rnd, 20, 0.1, 'x');
   g.fillStyle = '#3c3c3f';
   g.fillRect(0, 0, w * 0.07, h);
   g.fillStyle = 'rgba(40,40,40,0.8)';
@@ -542,8 +617,10 @@ export function buildChallenger(scene, name = 'challenger') {
   // OMS pods on the aft top, either side of the fin.
   for (const side of [1, -1]) {
     surface(scene, `${name}Pod${side}`, root, aftTop, 24, 24, (u, v) => {
-      const x = lerp(-9.0, -18.9, v);
-      const r = 1.18 * Math.sqrt(clamp01((-9.0 - x) / 2.6)) ** 0.8;
+      // (Starting a little aft of the bay's end: from -9.0 the pods ran into the open doors'
+      // aft corners, the user, 2026-11-20: "붙었네".)
+      const x = lerp(-9.9, -18.9, v);
+      const r = 1.18 * Math.sqrt(clamp01((-9.9 - x) / 2.4)) ** 0.8;
       const a = u * 2 * PI;
       return [x, 2.62 + r * 0.82 * Math.sin(a), side * 1.82 + r * Math.cos(a)];
     });

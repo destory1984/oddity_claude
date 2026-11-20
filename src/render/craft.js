@@ -1,4 +1,4 @@
-import { Vector3, Quaternion, Matrix, Color3, CreatePlane, CreateSphere, StandardMaterial, Texture, TransformNode, DynamicTexture, Mesh } from './babylon.js';
+import { Vector3, Quaternion, Matrix, Color3, CreatePlane, CreateSphere, CreateCylinder, StandardMaterial, Texture, TransformNode, DynamicTexture, Mesh } from './babylon.js';
 import { KM_PER_UNIT } from '../core/bodies.js';
 import { CRAFT_SIZE_KM } from '../core/craft.js';
 import { craftMaterials } from './craftParts.js';
@@ -8,6 +8,7 @@ import { BRIDGE_KM } from '../core/curios.js';
 import { CRAFT_UNFOLD_ALL as CRAFT_UNFOLD } from './craftUnfold.js';
 import { SITE_BUILD, SITE_REPLAY_BUILD, SITE_SAYS, SECOND_SAYS, BOOSTER_SAYS, SAYS_ON_LEFT, SAYS_BY, sayBubble } from './siteModels.js';
 import { drum, rod, group, box } from './craftParts.js';
+import { buildChallenger, shadeChallenger } from './challenger3d.js';
 
 // Spacecraft and landers. The models are in craftModels.js (in orbit) and
 // siteModels.js (on the ground), built from the parts in craftParts.js; this file
@@ -611,12 +612,225 @@ export function createSiteModels(scene, siteList) {
   return { update, has: (id) => modelled.has(id) || cards.has(id) };
 }
 
+// Craft drawn at a set width (km) for a while, whatever the distance.
+const SIZE_SET = new Map();
+export function setCraftSize(id, km) {
+  if (km === null) SIZE_SET.delete(id);
+  else SIZE_SET.set(id, km);
+}
+// While drawn at a set width, these are shown as a cut-out photo that always faces
+// the eye, not the model (the user, 2026-11-20: Hubble out of Discovery's window as a
+// photo, NASA S109E5018, taken from Columbia in 2002). width: the photo's width over the
+// set width.
+// The shuttle's arm holding a craft shown as a photo, by the course's seconds from
+// letting it go (t < 0 holding; after, it stays where it let go, then folds down out of
+// the window) (the user, 2026-11-20, Discovery's course: the moment Hubble is let go).
+const ARM_SET = new Map();
+export function setCraftArm(id, t) {
+  if (t === null) ARM_SET.delete(id);
+  else ARM_SET.set(id, t);
+}
+const PHOTO_SET = { hubble: { src: 'assets/tours/hubble-photo.webp', aspect: 787 / 1400, width: 0.5 } };
+// Another photo in that place for a course of its own: McCandless's spacewalk puts
+// Challenger where Hubble would be, seen from his helmet.
+const PHOTO_USE = new Map();
+export function setCraftPhoto(id, photo) {
+  if (photo === null) PHOTO_USE.delete(id);
+  else PHOTO_USE.set(id, photo);
+}
+const photoFor = (id) => PHOTO_USE.get(id) ?? PHOTO_SET[id];
+// A 3D model in that place instead of a photo (the user, 2026-11-20: "MMU 코스에
+// 챌린저 넣어"): { kind: 'challenger', doors (0 shut, 1 open), arm, forward, up (unit
+// vectors: where her nose and her open bay point) }. Drawn as long as the set width.
+const MODEL_USE = new Map();
+export function setCraftModel(id, model) {
+  if (model === null) MODEL_USE.delete(id);
+  else MODEL_USE.set(id, model);
+}
+// Photos at a place of their own, by name: { photo, km (where, in km), sizeKm }.
+const FLOATS = new Map();
+export function setFloatPhoto(name, f) {
+  if (f === null) FLOATS.delete(name);
+  else FLOATS.set(name, f);
+}
+
 export function createCraft(scene, craftList) {
   const mats = craftMaterials(scene);
   // Each model (and its loose parts for a scene) is built the first time it comes within
   // sight, not at the start: all of them took 1.1 s of every start (2026-10-23).
   const nodes = new Map();
   const unfolding = new Map();
+  const photos = new Map();
+  // One plane for each picture, kept: Challenger's bay doors open by one picture giving way
+  // to the next, and a picture shown again is there at once.
+  const byPicture = new Map();
+  const pictureOf = (p) => {
+    const kept = byPicture.get(p.src);
+    if (kept) return kept;
+    const plane = CreatePlane(`photo_${p.src}`, { width: p.width, height: p.width * p.aspect }, scene);
+    plane.isPickable = false;
+    plane.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    const texture = new Texture(`${import.meta.env.BASE_URL}${p.src}`, scene, false, true);
+    texture.hasAlpha = true;
+    texture.wrapU = Texture.CLAMP_ADDRESSMODE;
+    texture.wrapV = Texture.CLAMP_ADDRESSMODE;
+    const material = new StandardMaterial(`photo_${p.src}`, scene);
+    material.disableLighting = true;
+    material.diffuseTexture = texture;
+    material.emissiveTexture = texture;
+    material.useAlphaFromDiffuseTexture = true;
+    material.backFaceCulling = false;
+    plane.material = material;
+    plane.metadata = p;
+    plane.setEnabled(false);
+    byPicture.set(p.src, plane);
+    return plane;
+  };
+  const photoOf = (id) => {
+    const plane = pictureOf(photoFor(id));
+    const had = photos.get(id);
+    if (had && had !== plane) had.setEnabled(false);
+    photos.set(id, plane);
+    return plane;
+  };
+  // The 3D models put in a craft's place (setCraftModel), each built the first time
+  // it is wanted, with the Sun's shadows on itself (a smaller map on a phone).
+  const models = new Map();
+  const modelOf = (kind) => {
+    if (models.has(kind)) return models.get(kind);
+    const ship = buildChallenger(scene, `model_${kind}`);
+    for (const m of ship.root.getChildMeshes()) m.isPickable = false;
+    const sun = scene.getLightByName('craftSun');
+    const phone = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+    if (sun) ship.shadows = shadeChallenger(ship, sun, { size: phone ? 1024 : 2048 });
+    models.set(kind, ship);
+    return ship;
+  };
+  const shownModels = new Set();
+  const loose = new Map();
+  // The arm: two booms from a shoulder below the window, the elbow up and away, a wrist
+  // with its grapple at the photo's lower side. Worked out in the eye's own frame
+  // (right, up, ahead), so that it goes along with the shuttle as she turns.
+  const arms = new Map();
+  const armOf = (id) => {
+    if (arms.has(id)) return arms.get(id);
+    // Worn (the user, 2026-11-20: "로봇팔에 웨더링 좀 입혀"): the booms in a white blanket
+    // gone a little yellow over the flights, its stitched seams across, grime and scuffs,
+    // a dark band at each joint; the joints and the hand dark metal.
+    const skin = new DynamicTexture(`${id}ArmSkin`, { width: 256, height: 1024 }, scene, true);
+    const g = skin.getContext();
+    let seed = 7;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    g.fillStyle = '#d6d0bf';
+    g.fillRect(0, 0, 256, 1024);
+    for (let i = 0; i < 260; i++) {
+      // Blotches of yellowing and of grime, soft.
+      const x = rnd() * 256, y = rnd() * 1024, r = 6 + rnd() * 40;
+      const tone = rnd() < 0.7 ? `rgba(196,176,120,${(0.05 + rnd() * 0.12).toFixed(3)})` : `rgba(70,64,52,${(0.04 + rnd() * 0.1).toFixed(3)})`;
+      const spot = g.createRadialGradient(x, y, 0, x, y, r);
+      spot.addColorStop(0, tone);
+      spot.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = spot;
+      g.fillRect(x - r, y - r, 2 * r, 2 * r);
+    }
+    for (let y = 40; y < 1000; y += 74 + Math.floor(rnd() * 30)) {
+      // A seam across the boom, its stitches, and the blanket puckered beside it.
+      g.fillStyle = 'rgba(90,84,70,0.55)';
+      g.fillRect(0, y, 256, 2);
+      g.fillStyle = 'rgba(255,252,240,0.35)';
+      g.fillRect(0, y + 3, 256, 3);
+      g.fillStyle = 'rgba(80,74,60,0.5)';
+      for (let x = 0; x < 256; x += 9) g.fillRect(x, y - 4, 4, 1);
+    }
+    g.strokeStyle = 'rgba(60,56,48,0.35)';
+    g.lineWidth = 1;
+    for (let i = 0; i < 70; i++) {
+      // Scuffs.
+      const x = rnd() * 256, y = rnd() * 1024, l = 8 + rnd() * 30, a = (rnd() - 0.5) * 0.8;
+      g.beginPath();
+      g.moveTo(x, y);
+      g.lineTo(x + Math.sin(a) * l, y + Math.cos(a) * l);
+      g.stroke();
+    }
+    for (const y of [0, 1000]) {
+      // The dark bands where a boom meets its joints.
+      g.fillStyle = '#3a3a3a';
+      g.fillRect(0, y, 256, 24);
+    }
+    skin.update();
+    const material = new StandardMaterial(`${id}Arm`, scene);
+    material.diffuseTexture = skin;
+    material.emissiveTexture = skin;
+    material.emissiveColor = new Color3(0.2, 0.2, 0.2);
+    material.specularColor = new Color3(0.12, 0.12, 0.12);
+    const metal = new StandardMaterial(`${id}ArmMetal`, scene);
+    metal.diffuseColor = new Color3(0.3, 0.3, 0.31);
+    metal.emissiveColor = new Color3(0.07, 0.07, 0.075);
+    metal.specularColor = new Color3(0.45, 0.45, 0.45);
+    const root = new TransformNode(`${id}Arm`, scene);
+    const boom = (n, look = material) => {
+      const mesh = CreateCylinder(`${id}Arm${n}`, { height: 1, diameter: 1, tessellation: 18 }, scene);
+      mesh.parent = root;
+      mesh.material = look;
+      mesh.isPickable = false;
+      mesh.rotationQuaternion = new Quaternion();
+      return mesh;
+    };
+    const elbow = CreateSphere(`${id}ArmElbow`, { diameter: 1, segments: 10 }, scene);
+    elbow.parent = root;
+    elbow.material = metal;
+    elbow.isPickable = false;
+    const arm = { root, upper: boom('Upper'), lower: boom('Lower'), hand: boom('Hand', metal), elbow, held: null };
+    arms.set(id, arm);
+    return arm;
+  };
+  const span = (mesh, a, b, across) => {
+    const d = b.subtract(a);
+    const length = d.length();
+    mesh.position.copyFrom(a.add(b).scale(0.5));
+    mesh.scaling.set(across, length, across);
+    Quaternion.FromUnitVectorsToRef(Vector3.Up(), d.scale(1 / length), mesh.rotationQuaternion);
+  };
+  const smooth = (x) => { const u = Math.min(1, Math.max(0, x)); return u * u * (3 - 2 * u); };
+  function armDraw(id, plane, t) {
+    const arm = armOf(id);
+    const fold = smooth((t - 15) / 35);
+    if (t >= 0 && fold >= 1) {
+      arm.root.setEnabled(false);
+      return;
+    }
+    const eye = scene.activeCamera;
+    const o = eye.globalPosition;
+    const R = eye.getDirection(Vector3.Right()), U = eye.getDirection(Vector3.Up()), F = eye.getDirection(Vector3.Forward());
+    const toEye = (p) => { const d = p.subtract(o); return [Vector3.Dot(d, R), Vector3.Dot(d, U), Vector3.Dot(d, F)]; };
+    const fromEye = ([a, b, c]) => o.add(R.scale(a)).add(U.scale(b)).add(F.scale(c));
+    const p = plane.metadata;
+    const w = plane.scaling.x * p.width;
+    const h = w * p.aspect;
+    // The grapple on the body's lower side, a little left of the middle.
+    if (t < 0 || !arm.held) arm.held = toEye(plane.position.add(R.scale(-0.1 * w)).add(U.scale(-0.2 * h)));
+    const held = arm.held;
+    const far = Math.hypot(...held);
+    const shoulder = [held[0] + 0.05 * far, -0.8 * far, 0.55 * far];
+    const low = [held[0], -0.9 * far, held[2]];
+    const wrist = held.map((n, i) => n + (low[i] - n) * fold);
+    const [s, wv] = [fromEye(shoulder), fromEye(wrist)];
+    const reach = 0.62 * Vector3.Distance(fromEye(held), s);
+    const way = wv.subtract(s);
+    const dist = Math.min(way.length(), 2 * reach * 0.999);
+    const dir = way.normalize();
+    const pole = fromEye([-0.7, 0.5, 0.3]).subtract(o);
+    const bend = pole.subtract(dir.scale(Vector3.Dot(pole, dir))).normalize();
+    const elbow = s.add(dir.scale(dist / 2)).add(bend.scale(Math.sqrt(Math.max(0, reach * reach - (dist / 2) ** 2))));
+    const thick = 0.018 * far;
+    span(arm.upper, s, elbow, thick);
+    span(arm.lower, elbow, wv, thick);
+    const back = wv.subtract(elbow).normalize();
+    span(arm.hand, wv.subtract(back.scale(0.07 * far)), wv, 1.6 * thick);
+    arm.elbow.position.copyFrom(elbow);
+    arm.elbow.scaling.setAll(1.4 * thick);
+    arm.root.setEnabled(true);
+  }
   const buildCraft = (id) => {
     const node = (CRAFT_BUILD[id] ?? CURIO_BUILD[id])(scene, id, mats);
     nodes.set(id, node);
@@ -644,6 +858,19 @@ export function createCraft(scene, craftList) {
       if (began.id && left.unfold) left = { ...left, id: began.id, at: performance.now() };
       began = { id: null, at: 0 };
     }
+    // A model shows only while its craft is drawn this frame (below).
+    for (const ship of shownModels) ship.root.setEnabled(false);
+    shownModels.clear();
+    for (const [name, plane] of loose) if (!FLOATS.has(name) || FLOATS.get(name).photo.src !== plane.metadata.src) plane.setEnabled(false);
+    for (const [name, f] of FLOATS) {
+      const plane = pictureOf(f.photo);
+      loose.set(name, plane);
+      plane.position.set(...f.km.map((n, i) => (n - position[i]) / KM_PER_UNIT));
+      plane.scaling.setAll(f.sizeKm / KM_PER_UNIT);
+      // (Drawn over the craft photo behind it: two see-through planes would sort wrongly.)
+      plane.renderingGroupId = 1;
+      plane.setEnabled(true);
+    }
     for (const c of craft) {
       const rel = c.position.map((n, i) => (n - position[i]) / KM_PER_UNIT);
       const distanceKm = Math.hypot(...rel) * KM_PER_UNIT;
@@ -654,10 +881,43 @@ export function createCraft(scene, craftList) {
       const loose = unfolding.get(c.id);
       loose?.root.setEnabled(false);
       node.setEnabled(shows);
-      if (!shows) continue;
-      const sizeKm = Math.min(rule.maxKm, Math.max(rule.minKm ?? CRAFT_SIZE_KM, distanceKm * APPARENT));
+      if (!shows) { photos.get(c.id)?.setEnabled(false); arms.get(c.id)?.root.setEnabled(false); continue; }
+      const sizeKm = SIZE_SET.get(c.id) ?? Math.min(rule.maxKm, Math.max(rule.minKm ?? CRAFT_SIZE_KM, distanceKm * APPARENT));
       node.scaling.setAll(sizeKm / KM_PER_UNIT);
       node.position.set(rel[0], rel[1], rel[2]);
+      const modelled = SIZE_SET.has(c.id) && MODEL_USE.get(c.id);
+      if (modelled) {
+        photos.get(c.id)?.setEnabled(false);
+        arms.get(c.id)?.root.setEnabled(false);
+        node.setEnabled(false);
+        const ship = modelOf(modelled.kind);
+        shownModels.add(ship);
+        ship.root.setEnabled(true);
+        ship.root.position.copyFrom(node.position);
+        ship.root.scaling.setAll(sizeKm / KM_PER_UNIT / ship.length);
+        // The shadow's push along the surface is in the world's units: as small as she is drawn.
+        if (ship.shadows) ship.shadows.normalBias = ship.normalBias * ship.root.scaling.x;
+        const forward = new Vector3(...modelled.forward);
+        const up = new Vector3(...modelled.up);
+        // Her nose (+x) along forward, her bay (+y) along up.
+        Quaternion.RotationQuaternionFromAxisToRef(forward, up, Vector3.Cross(forward, up), ship.root.rotationQuaternion);
+        ship.pose({ doors: modelled.doors ?? 1, arm: modelled.arm ?? {} });
+        continue;
+      }
+      const photoed = SIZE_SET.has(c.id) && photoFor(c.id);
+      if (photoed || photos.has(c.id)) {
+        const plane = photoed ? photoOf(c.id) : photos.get(c.id);
+        plane.setEnabled(Boolean(photoed));
+        if (!photoed) arms.get(c.id)?.root.setEnabled(false);
+        if (photoed) {
+          plane.scaling.setAll(sizeKm / KM_PER_UNIT);
+          plane.position.copyFrom(node.position);
+          if (ARM_SET.has(c.id)) armDraw(c.id, plane, ARM_SET.get(c.id));
+          else arms.get(c.id)?.root.setEnabled(false);
+          node.setEnabled(false);
+          continue;
+        }
+      }
       // (The curios' ship turns its back from the slab instead, core/curios.js.)
       const toward = c.awayFrom ? c.position.map((n, i) => 2 * n - c.awayFrom[i]) : sunPosition;
       const ahead = new Vector3(...toward.map((n, i) => (n - position[i]) / KM_PER_UNIT));

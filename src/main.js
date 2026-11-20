@@ -101,7 +101,7 @@ import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN, surfaceDirection } from './core/surface.js';
 import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
-import { COURSES, courseById, courseStart, cupolaPlan, railAt } from './core/courses.js';
+import { COURSES, courseById, courseStart, cupolaPlan, railAt, mmuFigure, mmuShipFacing } from './core/courses.js';
 import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN, FINAL_NOTE, noteDue, readNote, heardNobody, completeRadio } from './core/radioFriend.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -327,8 +327,12 @@ let course = null;
 // "지구 이동 속도를 2배로"), the round taking half its time (core/courses.js).
 let cupolaClock = false;
 const CUPOLA_PACE = 2;
+// How fast that clock goes for the course under way (rail.pace; the cupola's 2).
+let clockPace = CUPOLA_PACE;
 // How long it has gone on, for one on a rail (the aurora's).
 let courseTime = 0;
+// The spacewalker's head turned by a drag, eased back after (radians).
+const headTurn = { yaw: 0, pitch: 0, at: 0 };
 // The target's direction in her own frame as she stands and looks now.
 function aimNow() {
   const toward = here(selectedId).position.map((n, i) => n - state.position[i]);
@@ -612,6 +616,14 @@ async function init() {
         // 틀렸다는 표시를 해볼까?"). Turned to face the ring she would have it before her
         // without having slid, and sliding from there took it away again.
         if (practice?.run.step === 'slide') return practiceWrong();
+        // In McCandless's helmet a drag turns his head; let go, it comes back to
+        // Challenger (rail.feel, core/courses.js).
+        if (course && courseTime >= 0 && courseById(course)?.rail?.feel) {
+          headTurn.yaw = Math.max(-1.3, Math.min(1.3, headTurn.yaw + dx));
+          headTurn.pitch = Math.max(-0.9, Math.min(0.9, headTurn.pitch + dy));
+          headTurn.at = performance.now();
+          return;
+        }
         aimedId = null;
         faceTurn = null;
         if (practice) practice.turning = false;
@@ -2231,8 +2243,17 @@ ${STORY_MORE[target.id]}` : told) };
   let catWay = null;
   let catTurn = -1;
   const CAT_S = 40;
-  function cupolaView(on) {
-    if (on === cupolaOn) return;
+  // cabin: the frame picture's path under the site (core/courses.js rail.cabin), or none.
+  function cupolaView(cabin) {
+    const on = Boolean(cabin);
+    if (on === cupolaOn && (!on || document.getElementById('cupolaFrame')?.dataset.cabin === cabin)) return;
+    // From one cabin to another in the course (rail.cabins): the picture alone changes.
+    if (on && cupolaOn) {
+      const shown = document.getElementById('cupolaFrame');
+      shown.dataset.cabin = cabin;
+      shown.src = `${import.meta.env.BASE_URL}${cabin}`;
+      return;
+    }
     cupolaOn = on;
     let frame = document.getElementById('cupolaFrame');
     if (!frame) {
@@ -2240,7 +2261,11 @@ ${STORY_MORE[target.id]}` : told) };
       frame = document.getElementById('cupolaFrame');
       // A plush cat afloat in the cupola, now and then (the user, 2026-11-19: "가끔씩 물건이
       // 둥둥 떠다니게 해볼까? 고양이 인형은 어때"): before the frame, being nearer.
-      document.body.insertAdjacentHTML('beforeend', `<img id="cupolaCat" alt="" src="${import.meta.env.BASE_URL}assets/cupola/cat-0.png" style="position:fixed;left:0;top:0;width:34vw;pointer-events:none;z-index:6;will-change:transform" hidden>`);
+      document.body.insertAdjacentHTML('beforeend', `<img id="cupolaCat" alt="" src="${import.meta.env.BASE_URL}assets/cupola/cat-0.png" style="position:fixed;left:0;top:0;width:34vw;pointer-events:none;z-index:7;will-change:transform" hidden>`);
+    }
+    if (on && frame.dataset.cabin !== cabin) {
+      frame.dataset.cabin = cabin;
+      frame.src = `${import.meta.env.BASE_URL}${cabin}`;
     }
     frame.hidden = !on;
     document.getElementById('cupolaCat').hidden = true;
@@ -2248,28 +2273,499 @@ ${STORY_MORE[target.id]}` : told) };
     if (!on && cupolaClock) { cupolaClock = false; simTime = clockNow(); }
     sound.cabinHum(on);
     world.setStorms(on);
-    // (The logo and the clock stay up in the cupola too, as in any 우주멍: the user, 2026-11-19,
+    // (The logo and the clock stay up in a cabin too, as in any 우주멍: the user, 2026-11-19,
     // "우주멍처럼 로고, 시간 넣어줘. 우주정거장도".)
     for (const id of ['gazeClock', 'gazeLogo']) { const e = document.getElementById(id); if (e) e.style.visibility = ''; }
     if (on) world.setEarthFine(`${import.meta.env.BASE_URL}assets/cupola/`, () => cupolaOn).catch((e) => console.warn('fine maps', e));
     else world.setEarthPlain();
+    // What belongs to the cabin goes with it (the switches stayed on after the course: the
+    // user, 2026-11-19, "이건 왜 계속 남아있어?").
+    if (!on) for (const el of document.querySelectorAll('.cabinKey, .cabinWord, #cabinGlow, #cabinCount, #cabinCaption')) el.hidden = true;
   }
 
   // Floating in the cupola: the view drifts a third of a degree now and then, as
   // a body afloat does, on slow periods that do not repeat together; the frame, near at
   // hand, drifts a few pixels more than the Earth, far off (parallax), so the one reads
   // as near and the other as far. No shaking: the station glides.
+  // Apollo goes up from Kennedy's pad 39A (28.6 N, 80.6 W) and comes down in the
+  // Pacific at Apollo 11's own spot (13.3 N, 169.15 W), both in daylight: the clock is moved
+  // on to the hour of the day when the lower of the two Suns stands highest (the two are 88
+  // degrees apart: an afternoon in Florida, a morning on the Pacific).
+  function apolloPlan(chosen) {
+    const pace = chosen.rail.pace ?? 1;
+    const padAt = chosen.rail.ascent.liftoff * pace;
+    const endAt = (chosen.lapS - 20) * pace;
+    const pad = (t) => surfaceDirection(28.61, -80.6, spinOf('earth', t));
+    const spot = (t) => surfaceDirection(13.3, -169.15, spinOf('earth', t));
+    const toSunNow = (() => { const sp = here('sun').position, e = here('earth').position; const v = sp.map((n, i) => n - e[i]); const l = Math.hypot(...v); return v.map((n) => n / l); })();
+    const sunUp = (d) => d[0] * toSunNow[0] + d[1] * toSunNow[1] + d[2] * toSunNow[2];
+    let t0 = simTime, high = -Infinity;
+    for (let t = simTime; t < simTime + 86164; t += 120) {
+      const c = Math.min(sunUp(pad(t + padAt)), sunUp(spot(t + endAt)));
+      if (c > high) { high = c; t0 = t; }
+    }
+    simTime = t0;
+    bodies = allAt(simTime);
+    craft = craftAt(simTime, bodies);
+    chosen.rail.pad = pad(simTime + padAt);
+    chosen.rail.splash = spot(simTime + endAt);
+  }
+  // The window the course is seen through at `seconds` (rail.cabins: from `at` on), and
+  // the change from one to the next behind a short dark (the user, 2026-11-19: Apollo on to
+  // the landing and home, "달 착륙까지 이어 붙여. 지구까지 귀환하자"): Columbia, Eagle, Columbia.
+  function cabinFor(chosen, seconds) {
+    const list = chosen?.rail?.cabins;
+    if (!list) return chosen?.rail?.cabin;
+    let cabin = list[0].cabin;
+    for (const c of list) if (seconds >= c.at) cabin = c.cabin;
+    return cabin;
+  }
+  let cabinFading = null;
+  function cabinFade(want) {
+    if (cabinFading === want) return;
+    // Under a photo the frame is swapped at once: the photo hides the change.
+    const photo = document.getElementById('cabinPhoto');
+    if (photo && !photo.hidden && Number(photo.style.opacity || 1) > 0.95) {
+      if (course && cupolaOn) cupolaView(want);
+      return;
+    }
+    cabinFading = want;
+    let veil = document.getElementById('cabinVeil');
+    if (!veil) {
+      document.body.insertAdjacentHTML('beforeend', '<div id="cabinVeil" style="position:fixed;inset:0;z-index:9;background:#000;opacity:0;pointer-events:none"></div>');
+      veil = document.getElementById('cabinVeil');
+    }
+    veil.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 450, fill: 'forwards' }).finished.then(() => {
+      if (course && cupolaOn) cupolaView(want);
+      cabinFading = null;
+      veil.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800, fill: 'forwards' });
+    }, () => { cabinFading = null; });
+  }
+  // How hot the way down through the air is, 0 to 1 (rail.glow: from, peak, to): the
+  // window glows orange, the frame is lit by it and the cabin shakes.
+  function glowNow() {
+    const g = course ? courseById(course).rail?.glow : null;
+    if (!g || courseTime <= g.from || courseTime >= g.to) return 0;
+    const ease = (x) => x * x * (3 - 2 * x);
+    return courseTime < g.peak ? ease((courseTime - g.from) / (g.peak - g.from)) : 1 - ease((courseTime - g.peak) / (g.to - g.peak));
+  }
+  function cabinGlow() {
+    const g = glowNow();
+    let glow = document.getElementById('cabinGlow');
+    if (!g) {
+      if (glow) glow.hidden = true;
+      return;
+    }
+    if (!glow) {
+      document.body.insertAdjacentHTML('beforeend', '<div id="cabinGlow" style="position:fixed;inset:0;z-index:4;pointer-events:none;background:radial-gradient(ellipse at 50% 45%, rgba(255,170,70,.45) 0%, rgba(255,120,30,.7) 50%, rgba(220,60,10,.95) 100%);mix-blend-mode:screen"></div>');
+      glow = document.getElementById('cabinGlow');
+    }
+    glow.hidden = false;
+    glow.style.opacity = (g * (0.85 + 0.15 * Math.sin(courseTime * 23))).toFixed(3);
+  }
+  // Under weight (rail.still: [from, to], a burn, the ground, the air): nothing floats and the
+  // view does not drift, 1 inside, easing over two seconds at the edges (the user,
+  // 2026-11-19: "그럼 고양이가 떠다니면 안 되잖아").
+  function stillNow() {
+    const list = course ? courseById(course).rail?.still : null;
+    let most = 0;
+    for (const [from, to] of list ?? []) {
+      const inside = Math.min(courseTime - from, to - courseTime);
+      if (inside > 0) most = Math.max(most, Math.min(1, inside / 2));
+    }
+    return most;
+  }
+  // The shaking of a launch or a staging (rail.shakes: from, peak, to, as rail.glow).
+  function shakeNow() {
+    const list = course ? courseById(course).rail?.shakes : null;
+    const ease = (x) => x * x * (3 - 2 * x);
+    let most = 0;
+    for (const k of list ?? []) {
+      if (courseTime <= k.from || courseTime >= k.to) continue;
+      most = Math.max(most, courseTime < k.peak ? ease((courseTime - k.from) / (k.peak - k.from)) : 1 - ease((courseTime - k.peak) / (k.to - k.peak)));
+    }
+    return most;
+  }
+  // A short dark over everything (rail.fades), behind which the course jumps: to the orbit
+  // after the launch, and back to the pad when it goes round again.
+  function veilBlink() {
+    let veil = document.getElementById('cabinVeil');
+    if (!veil) {
+      document.body.insertAdjacentHTML('beforeend', '<div id="cabinVeil" style="position:fixed;inset:0;z-index:9;background:#000;opacity:0;pointer-events:none"></div>');
+      veil = document.getElementById('cabinVeil');
+    }
+    veil.animate([{ opacity: 0 }, { opacity: 1, offset: 0.3 }, { opacity: 1, offset: 0.55 }, { opacity: 0 }], { duration: 1500, fill: 'forwards' });
+  }
   const floatAt = () => {
     const s = courseTime;
+    const g = Math.max(glowNow(), shakeNow());
+    const a = 1 - stillNow();
     return {
-      yaw: 0.0055 * Math.sin(s * 0.47) + 0.0025 * Math.sin(s * 0.19 + 1.3),
-      pitch: 0.0045 * Math.sin(s * 0.37 + 0.6) + 0.002 * Math.sin(s * 0.13 + 2.1),
-      dx: 5 * Math.sin(s * 0.29 + 0.4), dy: 4 * Math.sin(s * 0.23 + 1.9),
+      yaw: a * (0.0055 * Math.sin(s * 0.47) + 0.0025 * Math.sin(s * 0.19 + 1.3)) + g * 0.005 * Math.sin(s * 53),
+      pitch: a * (0.0045 * Math.sin(s * 0.37 + 0.6) + 0.002 * Math.sin(s * 0.13 + 2.1)) + g * 0.005 * Math.sin(s * 47 + 1),
+      dx: a * 5 * Math.sin(s * 0.29 + 0.4) + g * 4 * Math.sin(s * 61), dy: a * 4 * Math.sin(s * 0.23 + 1.9) + g * 4 * Math.sin(s * 57 + 2),
     };
   };
+  // Floating in the suit (rail.feel, McCandless's course, in his helmet): the body
+  // turning and tipping slowly, the horizon with it; a puff of the thruster now and then,
+  // a small push and the hands giving a little; the head where a drag turned it (the user,
+  // 2026-11-20: "우주 유영하는 느낌이 안 나", then 1, 2, 3, 4, 6 of the six).
+  const PUFF_EVERY = 9;
+  const puffAt = (k) => 5 + k * PUFF_EVERY + 2.5 * Math.sin(k * 1.7);
+  function lastPuff() {
+    let k = Math.floor((courseTime - 5) / PUFF_EVERY) + 1;
+    while (k > 0 && puffAt(k) > courseTime) k--;
+    return k >= 0 && puffAt(k) <= courseTime ? { k, age: courseTime - puffAt(k) } : null;
+  }
+  function spacewalkFeel() {
+    const rail = course ? courseById(course)?.rail : null;
+    if (!rail?.feel || courseTime < 0) return { yaw: 0, pitch: 0, roll: 0 };
+    const s = courseTime;
+    const p = lastPuff();
+    const push = p && p.age < 3 ? Math.exp(-p.age * 1.6) * Math.sin(Math.min(p.age * 3, Math.PI / 2)) * (p.k % 2 ? 1 : -1) : 0;
+    return {
+      yaw: 0.03 * Math.sin(s * 0.09 + 2) + 0.012 * push + headTurn.yaw,
+      pitch: 0.022 * Math.sin(s * 0.13) + 0.01 * Math.abs(push) + headTurn.pitch,
+      roll: 0.08 * Math.sin(s * 0.11) + 0.035 * Math.sin(s * 0.27 + 1),
+    };
+  }
+  let puffShown = -1;
+  function spacewalkTick(dt) {
+    const rail = course ? courseById(course)?.rail : null;
+    const inHelmet = Boolean(rail?.feel && courseTime >= 0 && cupolaOn);
+    sound.ambient(`${import.meta.env.BASE_URL}${rail?.air ?? 'assets/tours/helmet-air.mp3'}`, inHelmet, 0.28);
+    // The head comes back to Challenger a while after the finger has gone.
+    if (performance.now() - headTurn.at > 700) {
+      const k = Math.exp(-dt / 1.3);
+      headTurn.yaw *= k;
+      headTurn.pitch *= k;
+    }
+    if (!inHelmet) headTurn.yaw = headTurn.pitch = 0;
+    // The hands, a layer of their own under the visor's rim (rail.hands), moving with the
+    // frame and giving a little at each puff.
+    const frame = document.getElementById('cupolaFrame');
+    let hands = document.getElementById('spacewalkHands');
+    const showHands = inHelmet && rail.hands && frame && !frame.hidden;
+    if (showHands && !hands) {
+      frame.insertAdjacentHTML('beforebegin', `<img id="spacewalkHands" alt="" src="${import.meta.env.BASE_URL}${rail.hands}" style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;pointer-events:none;z-index:5">`);
+      hands = document.getElementById('spacewalkHands');
+    }
+    const p = inHelmet ? lastPuff() : null;
+    if (hands) {
+      hands.hidden = !showHands;
+      const a = p ? p.age : 9;
+      const give = a < 1.2 ? Math.exp(-a * 4) * Math.sin(a * 22) * 5 : 0;
+      hands.style.transform = `${frame?.style.transform ?? ''} translate(0px, ${give.toFixed(1)}px)`;
+    }
+    // The puff: a white breath of nitrogen at a lower corner, and its hiss.
+    if (p && p.k !== puffShown && p.age < 0.5) {
+      puffShown = p.k;
+      sound.puff();
+      const side = p.k % 2 ? 'left' : 'right';
+      document.body.insertAdjacentHTML('beforeend', `<div class="spacewalkPuff" aria-hidden="true" style="position:fixed;${side}:4%;bottom:6%;width:46vmin;height:46vmin;z-index:4;pointer-events:none;border-radius:50%;background:radial-gradient(circle, rgba(255,255,255,.75) 0%, rgba(235,240,255,.35) 35%, rgba(255,255,255,0) 70%)"></div>`);
+      const puff = document.body.lastElementChild;
+      const out = side === 'left' ? -1 : 1;
+      puff.animate([
+        { transform: 'translate(0, 0) scale(.2)', opacity: 0.9 },
+        { transform: `translate(${out * 18}vmin, 10vmin) scale(1.6)`, opacity: 0 },
+      ], { duration: 1100, easing: 'ease-out', fill: 'forwards' }).finished.then(() => puff.remove(), () => puff.remove());
+    }
+    // The visor: the Sun's light spreading in it when he looks toward it.
+    let glare = document.getElementById('visorGlare');
+    if (!glare && inHelmet) {
+      document.body.insertAdjacentHTML('beforeend', '<div id="visorGlare" aria-hidden="true" style="position:fixed;inset:0;z-index:5;pointer-events:none;mix-blend-mode:screen;opacity:0"></div>');
+      glare = document.getElementById('visorGlare');
+    }
+    if (glare) {
+      let o = 0;
+      if (inHelmet) {
+        const sun = here('sun').position.map((n, i) => n - state.position[i]);
+        const d = Math.hypot(...sun);
+        const toSun = sun.map((n) => n / d);
+        const ahead = forward(state.orientation);
+        const across = right(state.orientation);
+        const upward = rotateVector(state.orientation, [0, 1, 0]);
+        const c = toSun.reduce((acc, n, i) => acc + n * ahead[i], 0);
+        o = Math.max(0, (c - 0.55) / 0.45) ** 1.5;
+        if (c > 0.05) {
+          const vh = innerHeight / (2 * Math.tan(world.fov() / 2));
+          const x = innerWidth / 2 + (toSun.reduce((acc, n, i) => acc + n * across[i], 0) / c) * vh;
+          const y = innerHeight / 2 - (toSun.reduce((acc, n, i) => acc + n * upward[i], 0) / c) * vh;
+          glare.style.background = `radial-gradient(circle at ${x.toFixed(0)}px ${y.toFixed(0)}px, rgba(255,236,190,.95) 0%, rgba(255,205,120,.45) 12%, rgba(255,190,90,.12) 34%, rgba(255,190,90,0) 60%), linear-gradient(115deg, rgba(255,220,150,0) 30%, rgba(255,220,150,.10) 45%, rgba(255,220,150,0) 60%)`;
+        }
+      }
+      glare.style.opacity = o.toFixed(3);
+      glare.hidden = o <= 0.001;
+    }
+  }
   function cupolaFloat(st) {
     const f = floatAt();
-    return rotateLocal(st.orientation, f.yaw, f.pitch);
+    // A window off to one side (rail.cabins[].aim: where on the screen, from its middle, as
+    // parts of its width and height, what the course looks at should stand): the view
+    // turns so that it stands there, in the glass.
+    let yaw = f.yaw, pitch = f.pitch;
+    const chosen = course ? courseById(course) : null;
+    const entry = chosen?.rail?.cabins ? [...chosen.rail.cabins].reverse().find((c) => courseTime >= c.at) : null;
+    if (entry?.aim && document.getElementById('cupolaFrame')?.dataset.cabin === entry.cabin) {
+      const vh = innerHeight / (2 * Math.tan(world.fov() / 2));
+      yaw += Math.atan((-entry.aim[0] * innerWidth) / vh);
+      pitch += Math.atan((entry.aim[1] * innerHeight) / vh);
+    }
+    const feel = spacewalkFeel();
+    return rotateLocal(st.orientation, yaw + feel.yaw, pitch + feel.pitch, feel.roll);
+  }
+  // Toggle switches drawn on a cabin's frame (rail.cabinKeys, in the picture's pixels: the
+  // part that takes a press, the lever that flips, its label): the left one the sound
+  // effects, the right one the music, up for on (the user, 2026-11-19: "왼쪽 토글에는 Sound,
+  // 오른쪽은 Music이라고 써줘", the switches doing what they say). The lever is the frame's
+  // own picture, flipped for off.
+  // Words painted on a cabin's frame (rail.cabinWords: text, x and y of its middle and its
+  // height, in the picture's pixels) (the user, 2026-11-19: "창문 어딘가에 아폴로 11이라고
+  // 작게 써줘").
+  function cabinWordsPlace(frame, px, py) {
+    const words = course ? courseById(course).rail?.cabinWords : null;
+    const els = [...document.querySelectorAll('.cabinWord')];
+    if (!words || frame.hidden || !frame.naturalWidth) {
+      for (const el of els) el.hidden = true;
+      return;
+    }
+    const nw = frame.naturalWidth, nh = frame.naturalHeight, W = innerWidth, H = innerHeight;
+    const s0 = Math.max(W / nw, H / nh), S = s0 * 1.04;
+    const ox = (W - nw * s0) * 0.5, oy = (H - nh * s0) * 0.45;
+    words.forEach((word, i) => {
+      let el = els[i];
+      if (!el) {
+        document.body.insertAdjacentHTML('beforeend', `<div class="cabinWord" aria-hidden="true" style="position:fixed;left:0;top:0;z-index:6;pointer-events:none;white-space:nowrap;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;letter-spacing:.12em;color:rgba(236,232,220,.78);text-shadow:0 1px 1px rgba(0,0,0,.7);transform:translate(-50%,-50%)"></div>`);
+        el = document.body.lastElementChild;
+      }
+      el.hidden = false;
+      if (el.textContent !== word.text) el.textContent = word.text;
+      const x = W / 2 + (ox + word.x * s0 - W / 2) * 1.04 + px, y = H / 2 + (oy + word.y * s0 - H / 2) * 1.04 + py;
+      Object.assign(el.style, { left: `${x.toFixed(1)}px`, top: `${y.toFixed(1)}px`, fontSize: `${Math.max(7, word.size * S).toFixed(1)}px`, lineHeight: '1', filter: frame.style.filter });
+    });
+  }
+  // The course's words at the foot of the window, on or off by the third switch (the user,
+  // 2026-11-19: "자막을 on/off 할 수 있게 해줘"), kept for the next time.
+  const CAPTIONS_KEY = 'oddity-cabin-captions';
+  let captionsOn = (() => { try { return localStorage.getItem(CAPTIONS_KEY) !== '0'; } catch { return true; } })();
+  function toggleCaptions() {
+    captionsOn = !captionsOn;
+    try { localStorage.setItem(CAPTIONS_KEY, captionsOn ? '1' : '0'); } catch { /* kept for this visit only */ }
+    sound.cue('click');
+  }
+  // The same switch beside the moon while just looking, shown while a course with captions
+  // runs (style.css #gazeCaption).
+  document.getElementById('gazeCaption')?.addEventListener('click', toggleCaptions);
+  function gazeCaptionKey() {
+    const key = document.getElementById('gazeCaption');
+    if (!key) return;
+    const has = Boolean(course && courseById(course)?.rail?.captions);
+    key.classList.toggle('has', has);
+    key.classList.toggle('off', !captionsOn);
+    const label = captionsOn ? t('자막 끄기') : t('자막 켜기');
+    if (key.getAttribute('aria-label') !== label) key.setAttribute('aria-label', label);
+  }
+  const cabinOn = (does) => (does === 'sound' ? !sound.muted() : does === 'caption' ? captionsOn : sound.musicOn());
+  function cabinKeyPlace(frame, px, py) {
+    // (Each drawn on one cabin's picture: `cabin`, when the course has more than one.)
+    const spots = (course ? courseById(course).rail?.cabinKeys : null)?.filter((k) => !k.cabin || k.cabin === frame.dataset.cabin);
+    const keys = [...document.querySelectorAll('.cabinKey')];
+    for (const key of keys.slice(spots?.length ?? 0)) key.hidden = true;
+    if (!spots?.length || frame.hidden || !frame.naturalWidth) {
+      for (const key of keys) key.hidden = true;
+      return;
+    }
+    const nw = frame.naturalWidth, nh = frame.naturalHeight, W = innerWidth, H = innerHeight;
+    // As the frame lies: covering the screen (object-fit), at 50% 45%, then scaled 1.04 about
+    // the middle and moved by the drift.
+    const s0 = Math.max(W / nw, H / nh), S = s0 * 1.04;
+    const ox = (W - nw * s0) * 0.5, oy = (H - nh * s0) * 0.45;
+    const at = (x, y) => [W / 2 + (ox + x * s0 - W / 2) * 1.04 + px, H / 2 + (oy + y * s0 - H / 2) * 1.04 + py];
+    const px2 = (n) => `${n.toFixed(1)}px`;
+    spots.forEach((spot, i) => {
+      let key = keys[i];
+      if (!key) {
+        document.body.insertAdjacentHTML('beforeend', `<button class="cabinKey" type="button" style="position:fixed;left:0;top:0;z-index:6;margin:0;padding:0;border:0;background:transparent;cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent"><span class="lever" style="position:absolute;background-repeat:no-repeat;transition:transform .16s ease-in"></span><span class="word" style="position:absolute;left:-50%;right:-50%;text-align:center;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;letter-spacing:.06em;color:#f2f0ea;text-shadow:0 1px 1px rgba(0,0,0,.85);white-space:nowrap"></span></button>`);
+        key = document.body.lastElementChild;
+        key.addEventListener('click', () => {
+          // (The key may serve another cabin's switch by now: what it does is read at the press.)
+          if (key.dataset.does === 'sound') {
+            if (!sound.muted()) sound.cue('click');
+            toggleSound();
+            if (!sound.muted()) sound.cue('click');
+          } else if (key.dataset.does === 'caption') {
+            toggleCaptions();
+          } else {
+            toggleMusic();
+            sound.cue('click');
+          }
+        });
+      }
+      key.hidden = false;
+      key.dataset.does = spot.does;
+      const on = cabinOn(spot.does);
+      key.setAttribute('aria-label', spot.does === 'sound' ? (on ? t('효과음 끄기') : t('효과음 켜기')) : spot.does === 'caption' ? (on ? t('자막 끄기') : t('자막 켜기')) : (on ? t('배경 음악 끄기') : t('배경 음악 켜기')));
+      key.setAttribute('aria-pressed', String(on));
+      const [hx, hy] = at(spot.hit[0], spot.hit[1]);
+      Object.assign(key.style, { left: px2(hx), top: px2(hy), width: px2((spot.hit[2] - spot.hit[0]) * S), height: px2((spot.hit[3] - spot.hit[1]) * S) });
+      const lever = key.querySelector('.lever');
+      // Off: the panel drawn again with the lever down (spot.down: the picture and where it
+      // lies on the frame, in the frame's pixels) (the user, 2026-11-19: "gpt 한테 내렸을 때의
+      // 이미지를 그려달라고 해서, 그걸 붙이자"); without one, the frame's own lever flipped.
+      const down = !on && spot.down;
+      const src = down ? `${import.meta.env.BASE_URL}${down.src}` : frame.src;
+      if (lever.dataset.src !== src) { lever.dataset.src = src; lever.style.backgroundImage = `url("${src}")`; }
+      Object.assign(lever.style, {
+        left: px2((spot.lever[0] - spot.hit[0]) * S), top: px2((spot.lever[1] - spot.hit[1]) * S),
+        width: px2((spot.lever[2] - spot.lever[0]) * S), height: px2((spot.lever[3] - spot.lever[1]) * S),
+        backgroundSize: down ? `${px2(down.w * S)} ${px2(down.h * S)}` : `${px2(nw * S)} ${px2(nh * S)}`,
+        backgroundPosition: down ? `${px2((down.x - spot.lever[0]) * S)} ${px2((down.y - spot.lever[1]) * S)}` : `${px2(-spot.lever[0] * S)} ${px2(-spot.lever[1] * S)}`,
+        transform: on || down ? 'none' : 'scaleY(-1)',
+        filter: frame.style.filter,
+      });
+      // The label, painted on the panel above its switch.
+      const word = key.querySelector('.word');
+      if (word.textContent !== spot.label) word.textContent = spot.label;
+      Object.assign(word.style, { top: px2((spot.labelY - spot.hit[1]) * S), fontSize: px2(Math.max(7, 20 * S)), lineHeight: '1', transform: 'translateY(-100%)', filter: frame.style.filter });
+    });
+  }
+  // A countdown in the cabin to the course's big moment (rail.countdown: `at` course seconds,
+  // shown from `from` seconds before, a beep each of the last `beeps`, then the burn's roar)
+  // (the user, 2026-11-19, Apollo's first minute and a half going round the Earth: "그냥 지구만
+  // 뺑뺑이 도는거야?", "카운트다운해줘").
+  // Words now and then at the foot of the window, on what is happening and what happened
+  // (rail.captions: from `at` course seconds, each for CAPTION_S) (the user, 2026-11-19:
+  // "중간 중간 설명 있으면 덜 지루할 것 같아").
+  const CAPTION_S = 10;
+  let captionShown = null;
+  // Photographs shown over the window before the course begins (rail.photos: from, to in
+  // course seconds, the picture, `pan` its left-right place in % from and to, `zoom` from
+  // and to, `y` its up-down place and `origin` where it grows from) (the user, 2026-11-19,
+  // Apollo: Kennedy's launch complex from the air, panned, then the Saturn V waiting on its
+  // pad, then the countdown: "발사 단지 항공", "발사대의 새턴 5호").
+  function cabinPhoto(chosen) {
+    const list = cupolaOn ? chosen?.rail?.photos : null;
+    let box = document.getElementById('cabinPhoto');
+    const i = list ? list.findIndex((p) => courseTime >= p.from && courseTime < p.to) : -1;
+    if (i < 0) {
+      if (box) box.hidden = true;
+      return;
+    }
+    if (!box) {
+      document.body.insertAdjacentHTML('beforeend', `<div id="cabinPhoto" aria-hidden="true" style="position:fixed;inset:0;z-index:8;overflow:hidden;background:#000;pointer-events:none"><div class="pic" style="position:absolute;inset:0;background-size:cover;background-repeat:no-repeat;will-change:transform,opacity"></div><span style="position:absolute;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));font:500 10px/1 system-ui,sans-serif;color:rgba(255,255,255,.6);text-shadow:0 1px 2px #000">${t('사진: NASA')}</span></div>`);
+      box = document.getElementById('cabinPhoto');
+    }
+    box.hidden = false;
+    const p = list[i];
+    // One straight after another goes through the dark between them; the window gives way
+    // to one, and one to the window, by the whole box fading.
+    const after = list.some((q) => q.from === p.to);
+    const before = list.some((q) => q.to === p.from);
+    const pic = box.firstElementChild;
+    if (pic.dataset.src !== p.src) { pic.dataset.src = p.src; pic.style.backgroundImage = `url("${import.meta.env.BASE_URL}${p.src}")`; }
+    const x = (courseTime - p.from) / (p.to - p.from);
+    const ease = x * x * (3 - 2 * x);
+    const [x0, x1] = p.pan ?? [50, 50];
+    const [z0, z1] = p.zoom ?? [1, 1];
+    pic.style.backgroundPosition = `${(x0 + (x1 - x0) * ease).toFixed(2)}% ${p.y ?? 50}%`;
+    pic.style.transformOrigin = p.origin ?? '50% 50%';
+    pic.style.transform = `scale(${(z0 + (z1 - z0) * ease).toFixed(4)})`;
+    // Each comes up out of the dark, goes into it before the next, and the last gives way
+    // to the window.
+    const fade = 0.8 * (chosen.rail.testSpeed ?? 1);
+    pic.style.opacity = Math.min(1, before ? (courseTime - p.from) / fade : 1, after ? (p.to - courseTime) / fade : 1).toFixed(3);
+    const slow = 1.2 * (chosen.rail.testSpeed ?? 1);
+    box.style.opacity = Math.min(1, before ? 1 : (courseTime - p.from) / slow, after ? 1 : (p.to - courseTime) / slow).toFixed(3);
+  }
+  // The mission's own clock under the date, with where she is: the day of the mission and
+  // the hours since liftoff, as the course passes the true moments (rail.met: course
+  // second and mission hour; rail.phases: from which course second, the name) (2026-11-19,
+  // Apollo, so that eight days are felt in a course of minutes). Off with the captions.
+  function cabinMet(chosen) {
+    const met = cupolaOn && captionsOn ? chosen?.rail?.met : null;
+    let line = document.getElementById('cabinMet');
+    if (!met || courseTime < met[0][0]) {
+      if (line) line.hidden = true;
+      return;
+    }
+    if (!line) {
+      document.body.insertAdjacentHTML('beforeend', '<div id="cabinMet" aria-hidden="true" style="position:fixed;z-index:20;pointer-events:none;white-space:nowrap;font-family:var(--hand);font-size:14px;letter-spacing:.04em;color:#fff1d0;opacity:.85;text-shadow:0 2px 8px #000c"></div>');
+      line = document.getElementById('cabinMet');
+    }
+    let h = met[met.length - 1][1];
+    for (let i = 1; i < met.length; i++) {
+      if (courseTime < met[i][0]) {
+        const [s0, h0] = met[i - 1], [s1, h1] = met[i];
+        h = h0 + ((h1 - h0) * (courseTime - s0)) / (s1 - s0);
+        break;
+      }
+    }
+    let phase = '';
+    for (const [from, name] of chosen.rail.phases ?? []) if (courseTime >= from) phase = name;
+    const mins = Math.floor(h * 60);
+    const clock = `${String(Math.floor(mins / 60)).padStart(3, '0')}:${String(mins % 60).padStart(2, '0')}`;
+    const text = `${t`임무 ${Math.floor(h / 24) + 1}일째`} · ${phase} · ${clock}`;
+    if (line.textContent !== text) line.textContent = text;
+    const under = document.getElementById('gazeClock')?.getBoundingClientRect();
+    if (under) Object.assign(line.style, { left: `${under.left.toFixed(1)}px`, top: `${(under.bottom + 4).toFixed(1)}px` });
+    line.hidden = false;
+  }
+  function cabinCaption(chosen) {
+    const list = chosen?.rail?.captions;
+    let box = document.getElementById('cabinCaption');
+    const now = list && captionsOn ? [...list].reverse().find((c) => courseTime >= c.at && courseTime < c.at + CAPTION_S) : null;
+    if (!now) {
+      if (box && captionShown) box.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: 'forwards' });
+      captionShown = null;
+      return;
+    }
+    if (!box) {
+      document.body.insertAdjacentHTML('beforeend', '<div id="cabinCaption" aria-live="polite" style="position:fixed;left:50%;top:58vh;z-index:8;width:min(78vw,420px);transform:translateX(-50%);pointer-events:none;padding:8px 12px;border-radius:10px;background:rgba(4,8,18,.55);color:#f3efe4;font:500 14px/1.45 system-ui,sans-serif;text-align:center;text-shadow:0 1px 2px #000;word-break:keep-all;opacity:0"></div>');
+      box = document.getElementById('cabinCaption');
+    }
+    if (captionShown !== now) {
+      captionShown = now;
+      box.textContent = now.text;
+      box.animate([{ opacity: 0, transform: 'translate(-50%, 6px)' }, { opacity: 1, transform: 'translate(-50%, 0)' }], { duration: 700, easing: 'ease-out', fill: 'forwards' });
+    }
+  }
+  let countShown = null;
+  let countSpec = null;
+  function cabinCount(chosen) {
+    const specs = chosen?.rail?.countdowns ?? (chosen?.rail?.countdown ? [chosen.rail.countdown] : []);
+    const spec = specs.find((c) => c.at - courseTime <= c.from && c.at - courseTime > -4);
+    if (spec !== countSpec) { countSpec = spec; countShown = null; }
+    let box = document.getElementById('cabinCount');
+    const left = spec ? spec.at - courseTime : Infinity;
+    const on = spec && left <= spec.from && left > -4;
+    if (!on) {
+      if (box) box.hidden = true;
+      countShown = null;
+      return;
+    }
+    if (!box) {
+      document.body.insertAdjacentHTML('beforeend', '<div id="cabinCount" aria-live="polite" style="position:fixed;left:0;right:0;top:calc(max(12px, env(safe-area-inset-top)) + 22vh);z-index:8;text-align:center;pointer-events:none;font:600 15px/1.3 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.08em;color:#ffd27a;text-shadow:0 0 8px rgba(255,170,60,.75),0 1px 2px #000"><div class="said"></div><div class="num" style="font-size:44px;line-height:1.1"></div></div>');
+      box = document.getElementById('cabinCount');
+    }
+    box.hidden = false;
+    const whole = Math.ceil(left);
+    const said = box.querySelector('.said'), num = box.querySelector('.num');
+    if (left > 0) {
+      said.textContent = spec.said;
+      num.textContent = whole > 59 ? `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}` : String(whole);
+      num.style.fontSize = whole <= spec.beeps ? '56px' : '30px';
+    } else {
+      said.textContent = '';
+      num.textContent = spec.go;
+      num.style.fontSize = '44px';
+    }
+    const mark = left > 0 ? whole : 0;
+    if (countShown !== null && mark !== countShown) {
+      if (mark > 0 && mark <= spec.beeps) sound.cue('count');
+      if (mark === 0) sound.cue(spec.goCue ?? 'burnLong');
+      num.animate([{ transform: 'scale(1.25)', opacity: 0.6 }, { transform: 'scale(1)', opacity: 1 }], { duration: 260, easing: 'ease-out' });
+    }
+    countShown = mark;
   }
   // The frame lit by what is outside: the day Earth's blue-white light, nearly nothing at night.
   function cupolaLight() {
@@ -2287,14 +2783,21 @@ ${STORY_MORE[target.id]}` : told) };
     const px = -f.yaw * vh + f.dx, py = f.pitch * vh + f.dy;
     frame.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) scale(1.04)`;
     const cat = document.getElementById('cupolaCat');
-    if (cat) {
+    if (cat && stillNow() > 0) {
+      cat.hidden = true;
+      catWay = null;
+      catFrom = Math.max(catFrom, courseTime + 10);
+    } else if (cat) {
       if (courseTime >= catFrom && !catWay) {
         const fromLeft = Math.random() < 0.5;
         // Six cats in turn: the plain one and five in space helmets (the user, 2026-11-19:
         // "6개를 모두 뺑뺑이 돌려").
-        catTurn = (catTurn + 1) % 6;
-        cat.src = `${import.meta.env.BASE_URL}assets/cupola/cat-${catTurn}.png`;
-        catWay = { from: catFrom, fromLeft, y0: 0.2 + Math.random() * 0.45, y1: 0.2 + Math.random() * 0.45, spin: (Math.random() < 0.5 ? -1 : 1) * (50 + Math.random() * 80), tip: Math.random() * 360, bump: Math.random() < 0.4 };
+        // What floats is the course's own (rail.floaters), else the six cats.
+        const floaters = courseById(course)?.rail?.floaters ?? [0, 1, 2, 3, 4, 5].map((n) => `assets/cupola/cat-${n}.png`);
+        // (Nothing floats in a helmet: rail.floaters empty.)
+        if (floaters.length) catTurn = (catTurn + 1) % floaters.length;
+        if (floaters.length) cat.src = `${import.meta.env.BASE_URL}${floaters[catTurn]}`;
+        if (floaters.length) catWay = { from: catFrom, fromLeft, y0: 0.2 + Math.random() * 0.45, y1: 0.2 + Math.random() * 0.45, spin: (Math.random() < 0.5 ? -1 : 1) * (50 + Math.random() * 80), tip: Math.random() * 360, bump: Math.random() < 0.4 };
       }
       if (catWay) {
         const u = (courseTime - catWay.from) / CAT_S;
@@ -2319,6 +2822,11 @@ ${STORY_MORE[target.id]}` : told) };
       }
     }
     frame.style.filter = `brightness(${(0.13 + 0.87 * day).toFixed(3)}) saturate(${(0.6 + 0.4 * day).toFixed(2)}) hue-rotate(${(-8 * day).toFixed(1)}deg)`;
+    const hot = glowNow();
+    if (hot) frame.style.filter += ` sepia(${(0.7 * hot).toFixed(2)}) saturate(${(1 + 1.5 * hot).toFixed(2)}) hue-rotate(${(-12 * hot).toFixed(1)}deg) brightness(${(1 + 0.8 * hot).toFixed(2)})`;
+    cabinGlow();
+    cabinKeyPlace(frame, px, py);
+    cabinWordsPlace(frame, px, py);
   }
 
   function flyCourse(id) {
@@ -2359,10 +2867,42 @@ ${STORY_MORE[target.id]}` : told) };
         bodies = allAt(simTime);
         craft = craftAt(simTime, bodies);
         cupolaClock = true;
+        clockPace = CUPOLA_PACE;
         body = here(chosen.body);
         chosen.rail.plan = cupolaPlan(chosen, body, here('sun'), (s) => seoul(simTime + s * CUPOLA_PACE));
       }
-      const start = courseStart(chosen, body, here('sun'), world.ringNormal(body.id));
+      if (chosen.rail?.apollo) {
+        apolloPlan(chosen);
+        body = here(chosen.body);
+      }
+      // Other courses with a clock of their own, at rail.pace times the true pace.
+      if (chosen.rail?.pace && !chosen.rail.cupola) {
+        cupolaClock = true;
+        clockPace = chosen.rail.pace * (chosen.rail.testSpeed ?? 1);
+      }
+      // Discovery's course in daylight: the clock moved on to the next time Hubble
+      // has the Sun some 30 degrees over its level, morning on the ground under it.
+      if (chosen.rail?.shuttle) {
+        let best = simTime;
+        let near = Infinity;
+        // (Hubble goes round once in 95 minutes times the game's fifty.)
+        for (let t = simTime; t < simTime + 95 * 60 * 50; t += 1500) {
+          const all = allAt(t);
+          const hub = craftAt(t, all).find((c) => c.id === 'hubble');
+          const e = all.find((b) => b.id === 'earth');
+          const sn = all.find((b) => b.id === 'sun');
+          if (!hub) continue;
+          const out = hub.position.map((n, i) => n - e.position[i]);
+          const toS = sn.position.map((n, i) => n - e.position[i]);
+          const c = out.reduce((sum, n, i) => sum + n * toS[i], 0) / (Math.hypot(...out) * Math.hypot(...toS));
+          if (Math.abs(c - 0.5) < near) { near = Math.abs(c - 0.5); best = t; }
+        }
+        simTime = best;
+        bodies = allAt(simTime);
+        craft = craftAt(simTime, bodies);
+        body = here(chosen.body);
+      }
+      const start = courseStart(chosen, body, here('sun'), world.ringNormal(body.id), here('moon'), here('hubble'));
       state = { ...createState(start.position, start.orientation), ...start.slide };
       selectedId = body.id;
       wasWith = null;
@@ -2380,7 +2920,7 @@ ${STORY_MORE[target.id]}` : told) };
       // "추천코스에서는 소라도 없앤 우주멍으로해줘"); the moon brings all back and the course goes on.
       if (!gazing) setGaze(true);
       gazeBare = true;
-      cupolaView(Boolean(chosen.rail?.cupola));
+      cupolaView(cabinFor(chosen, courseTime) ?? false);
       gazeWords();
     });
   }
@@ -2616,6 +3156,10 @@ ${STORY_MORE[target.id]}` : told) };
     $('soundButton').classList.toggle('off', sound.muted());
     $('soundButton').setAttribute('aria-label', sound.muted() ? t('효과음 켜기') : t('효과음 끄기'));
     $('soundButton').title = sound.muted() ? t('효과음 꺼짐 (M)') : t('효과음 켜짐 (M)');
+    // The same switch beside the moon while just looking (style.css #gazeSound).
+    $('gazeSound').classList.toggle('off', sound.muted());
+    $('gazeSound').setAttribute('aria-label', $('soundButton').getAttribute('aria-label'));
+    $('gazeSound').title = $('soundButton').title;
   }
   function toggleSound() {
     sound.unlock();
@@ -2625,6 +3169,7 @@ ${STORY_MORE[target.id]}` : told) };
   }
   showSoundButton();
   $('soundButton').addEventListener('click', toggleSound);
+  $('gazeSound').addEventListener('click', toggleSound);
   // Audio may only start after a user gesture.
   for (const type of ['pointerdown', 'keydown']) {
     document.addEventListener(type, () => sound.unlock(), { capture: true });
@@ -3401,7 +3946,7 @@ ${STORY_MORE[target.id]}` : told) };
       const craftBefore = craft;
       // Up to the shared clock: after the game stood still (a pause, a card, a hidden tab)
       // the sky catches up at once, and she is carried along with the world she is by.
-      stepS = cupolaClock ? dt * CUPOLA_PACE : Math.max(0, clockNow() - simTime);
+      stepS = cupolaClock ? dt * clockPace : Math.max(0, clockNow() - simTime);
       simTime += stepS;
       const stepDt = stepS / TIME_SCALE;
       bodies = allAt(simTime);
@@ -3540,12 +4085,54 @@ ${STORY_MORE[target.id]}` : told) };
         state = { ...state, sideSpeed: 0, riseSpeed: 0 };
       } else if (rail && dt > 0) {
         const chosen = courseById(course);
-        courseTime += dt;
-        state = { ...state, ...railAt(chosen, here(chosen.body), here('sun'), courseTime) };
-        if (chosen.rail.cupola) state = { ...state, orientation: cupolaFloat(state) };
+        // rail.testSpeed: the course run that many times faster while the user
+        // tries it (2026-11-19: "나와의 테스트 기간 중에는 아폴로 속도를 10배로 해").
+        const wasTime = courseTime;
+        courseTime += dt * (chosen.rail.testSpeed ?? 1);
+        state = { ...state, ...railAt(chosen, here(chosen.body), here('sun'), courseTime, here('moon'), here('hubble')) };
+        if (chosen.rail.cabin) state = { ...state, orientation: cupolaFloat(state) };
+        // Sounds at their moments (rail.sounds: [seconds, cue]).
+        for (const [at, name] of chosen.rail.sounds ?? []) if (at > wasTime && at <= courseTime) sound.cue(name);
+        for (const at of chosen.rail.fades ?? []) if (at > wasTime && at <= courseTime) veilBlink();
+        // Home again, and round once more from the pad (the user, 2026-11-19: "지구로
+        // 돌아오면, 다시 반복해"), behind the last blink.
+        if (chosen.rail.loops && courseTime >= chosen.lapS) {
+          courseTime += (chosen.rail.startS ?? 0) - chosen.lapS;
+          if (chosen.rail.apollo) apolloPlan(chosen);
+        }
+        if (chosen.rail.cabins && cupolaOn) {
+          const want = cabinFor(chosen, courseTime);
+          if (want !== document.getElementById('cupolaFrame')?.dataset.cabin) cabinFade(want);
+        }
       }
     }
+    cabinPhoto(course ? courseById(course) : null);
+    cabinMet(course ? courseById(course) : null);
+    cabinCount(course ? courseById(course) : null);
+    cabinCaption(course ? courseById(course) : null);
+    gazeCaptionKey();
+    spacewalkTick(dt);
     if (cupolaOn) cupolaLight();
+    // Hubble drawn at a set size while Discovery backs away from it, so that it goes small.
+    const shuttleRail = course ? courseById(course)?.rail : null;
+    world.setCraftSize('hubble', shuttleRail?.shuttle ? (shuttleRail.craftKm ?? 5.6) : null);
+    // Held by the shuttle's arm until the course's second 0, let go then.
+    world.setCraftArm('hubble', shuttleRail?.arm ? courseTime : null);
+    // Another photo in Hubble's place (McCandless's course: Challenger).
+    let shownPhoto = shuttleRail?.shuttle ? (shuttleRail.craftPhoto ?? null) : null;
+    for (const [at, photo] of shuttleRail?.craftPhotos ?? []) if (courseTime >= at) shownPhoto = photo;
+    world.setCraftPhoto('hubble', shuttleRail?.craftModel ? null : shownPhoto);
+    // Or Challenger in 3D (render/challenger3d.js), her bay doors swinging open
+    // over rail.doorsS, her arm posed as in his photo of her.
+    if (shuttleRail?.craftModel) {
+      const facing = mmuShipFacing(courseById(course), here('earth'), here('hubble'), here('sun'));
+      const [shutS, openS] = shuttleRail.doorsS ?? [-44, -36];
+      const x = Math.max(0, Math.min(1, (courseTime - shutS) / (openS - shutS)));
+      world.setCraftModel('hubble', { kind: shuttleRail.craftModel, doors: x * x * (3 - 2 * x), arm: shuttleRail.armPose ?? {}, ...facing });
+    } else world.setCraftModel('hubble', null);
+    // McCandless seen from outside, coming out of the bay (core/courses.js mmuFigure).
+    const figure = shuttleRail?.mmu ? mmuFigure(courseById(course), here('earth'), here('hubble'), here('sun'), courseTime) : null;
+    world.setFloatPhoto('figure', figure ? { photo: shuttleRail.figure, km: figure, sizeKm: shuttleRail.figureKm } : null);
     // Locked and something else chosen, or locked and flying forward with the target
     // turned off the screen: she means to go elsewhere, and the lock lets go (the user,
     // 2026-10-18, having forgotten the lock: "화면이 미친듯이 움직이는데"). Forward and back with the target
@@ -3717,7 +4304,8 @@ ${STORY_MORE[target.id]}` : told) };
       finished = progressChanged(before) || finished;
     }
     // A place reached for the first time opens its card, once she has settled.
-    if (told.newly.length) cardDue = { id: told.newly[0], in: CARD_AFTER_S };
+    // (Not while a course flies her by: the card would stop the course; it waits in the journal.)
+    if (told.newly.length && !course) cardDue = { id: told.newly[0], in: CARD_AFTER_S };
     // An errand done (today's, or the one the journal shows): its place is never asked
     // for again, and the first of the day puts a star on the day. (A photo is looked at
     // once, while the game is still stopped in photo mode.)

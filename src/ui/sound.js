@@ -52,6 +52,9 @@ export function createSound({ music } = {}) {
   let ctx = null;
   let master;
   let noiseBuffer;
+  // A recording looped quietly under the effects (the helmet's fan and breath):
+  // { url, buffer, src, gain }.
+  const loops = new Map();
   let engine;
   const FLIGHT_VOLUME = 0.8;
   let muted = loadMuted();
@@ -818,6 +821,61 @@ export function createSound({ music } = {}) {
       window.speechSynthesis?.cancel();
     },
     muted: () => muted,
+    // A quiet loop on or off, through the effects switch (off with them); fetched
+    // the first time, faded in and out over a second (2026-11-20, McCandless's helmet: the
+    // suit's fan and his breath, the user: "소리는 작게 해").
+    ambient(url, on, volume = 0.3) {
+      if (!ctx) return;
+      let loop = loops.get(url);
+      if (!loop) {
+        if (!on) return;
+        loop = { buffer: null, src: null, gain: ctx.createGain(), want: on, loading: true };
+        loop.gain.gain.value = 0;
+        loop.gain.connect(sfx);
+        loops.set(url, loop);
+        fetch(url)
+          .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
+          .then((bytes) => new Promise((done, fail) => ctx.decodeAudioData(bytes, done, fail)))
+          .then((buffer) => { loop.buffer = buffer; loop.loading = false; })
+          .catch(() => { loop.loading = false; });
+      }
+      if (loop.buffer && !loop.src) {
+        loop.src = ctx.createBufferSource();
+        loop.src.buffer = loop.buffer;
+        loop.src.loop = true;
+        // (The encoder's silence at either end left out of the loop.)
+        loop.src.loopStart = 0.06;
+        loop.src.loopEnd = loop.buffer.duration - 0.06;
+        loop.src.connect(loop.gain);
+        loop.src.start(ctx.currentTime, 0.06);
+      }
+      if (loop.want !== on || loop.level !== volume) {
+        loop.want = on;
+        loop.level = volume;
+        const now = ctx.currentTime;
+        loop.gain.gain.cancelScheduledValues(now);
+        loop.gain.gain.setValueAtTime(loop.gain.gain.value, now);
+        loop.gain.gain.linearRampToValueAtTime(on ? volume : 0, now + 1.2);
+      }
+    },
+    // A short soft hiss: the spacewalker's thruster puffing.
+    puff() {
+      if (!ctx || muted || !noiseBuffer) return;
+      const t = ctx.currentTime;
+      const src = ctx.createBufferSource();
+      src.buffer = noiseBuffer;
+      const band = ctx.createBiquadFilter();
+      band.type = 'bandpass';
+      band.frequency.value = 3200;
+      band.Q.value = 0.8;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.05, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0005, t + 0.5);
+      src.connect(band).connect(gain).connect(sfx);
+      src.start(t, Math.random());
+      src.stop(t + 0.55);
+    },
     setMuted(value) {
       muted = value;
       saveMuted(muted);

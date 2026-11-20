@@ -7,6 +7,15 @@
 | `public/assets/cupola/day-w.ktx2`, `day-e.ktx2` | NASA Visible Earth, Blue Marble Next Generation (2004년 7월, 21600x10800). https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74092/world.200407.3x21600x10800.jpg 를 16384x8192로 줄여 동서 두 장으로 나누고 KTX2(Basis)로 눌렀다. | 미국 정부 저작물, 저작권 없음 |
 | `public/assets/cupola/night.ktx2` | NASA Visible Earth, Black Marble 2016 (3km). https://eoimages.gsfc.nasa.gov/images/imagerecords/144000/144898/BlackMarble_2016_3km.jpg 를 KTX2(Basis)로 눌렀다. | 미국 정부 저작물, 저작권 없음 |
 | `public/assets/cupola/frame.png`, `cat-0.png` → `cat-5.png` | 이 게임을 위해 GPT(OpenAI 이미지 생성)로 그렸다. | 이 저장소의 것 |
+| `public/assets/tours/kennedy-pan.jpg` | NASA, S69-27741 (1969년 5월, 39A 발사대로 가는 아폴로 11호). https://images.nasa.gov/details/S69-27741 | 미국 정부 저작물, 저작권 없음 |
+| `public/assets/tours/pad.jpg` | NASA, 6900846 (39A 발사대의 아폴로 11호 새턴 5호). https://images.nasa.gov/details/6900846 | 미국 정부 저작물, 저작권 없음 |
+| `public/assets/tours/hubble-grapple.jpg` | NASA, s31-03-009 (STS-31, 디스커버리의 로봇팔에 붙들린 허블, 1990년). https://images.nasa.gov/details/s31-03-009 | 미국 정부 저작물, 저작권 없음 |
+| `public/assets/tours/hubble-photo.webp` | NASA, s109e5018 (STS-109, 2002년 고친 뒤의 허블). https://images.nasa.gov/details/s109e5018 배경을 걷어 냈다. | 미국 정부 저작물, 저작권 없음 |
+| `public/assets/tours/pillars.jpg` | NASA, Jeff Hester, Paul Scowen (Arizona State University), 「창조의 기둥」 (허블, 1995년, STScI-PRC1995-44a). | 미국 정부 저작물, 저작권 없음 |
+| `public/assets/tours/mmu-figure.webp` | NASA, S84-27017 (1984년 2월 7일, MMU로 나는 브루스 매캔들리스). https://images.nasa.gov/details/s84-27017 사람만 오려 내고, 비치는 바이저를 GPT(OpenAI 이미지 생성)로 채웠다. | 미국 정부 저작물, 저작권 없음 |
+| `public/assets/tours/mmu-face.jpg` | NASA, S84-27034A (STS-41B, 매캔들리스의 헬멧). https://images.nasa.gov/details/s84-27034a | 미국 정부 저작물, 저작권 없음 |
+| `public/assets/tours/apollo-cabin.webp`, `eagle-cabin.webp`, `shuttle-cabin.webp`, `helmet-rim.webp`, `helmet-hands.webp`, `candy.webp`, `*-switch*-down.webp` | 이 게임을 위해 GPT(OpenAI 이미지 생성)로 그렸다. | 이 저장소의 것 |
+| `public/assets/tours/helmet-air.mp3` | 이 게임을 위해 만든 소리(우주복 환풍기와 숨소리를 잡음으로 합성). | 이 저장소의 것 |
 | `public/assets/earth-clouds.webp` | NASA Visible Earth, 구름 합성 지도. https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg | 미국 정부 저작물, 저작권 없음 |
 | 실제 구름 (게임이 열릴 때마다 받아 옴, `src/render/realClouds.js`) | NASA GIBS, VIIRS Suomi NPP / NOAA-20 Corrected Reflectance (True Color), 어제의 지구 전체. https://gibs.earthdata.nasa.gov | NASA 영상, 저작권 없음 |
 | `public/assets/planets/mars.webp` | Solar System Scope 지도(8K 원본을 4096×2048로 줄임). https://www.solarsystemscope.com/textures/ | CC BY 4.0 (출처 표시) |

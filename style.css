@@ -5033,6 +5033,8 @@ html[lang="zh-Hans"] * {
    2026-10-19), on the same navy as the keys beside it. */
 #gazeButton,
 #gazeMusic,
+#gazeSound,
+#gazeCaption,
 #gazeSleep {
   position:absolute;
   right:0;
@@ -5059,6 +5061,8 @@ html[lang="zh-Hans"] * {
 @media (max-width: 480px) {
   #gazeButton,
   #gazeMusic,
+  #gazeSound,
+  #gazeCaption,
   #gazeSleep {
     width:var(--top-key);
     height:var(--top-key);
@@ -5071,7 +5075,7 @@ html[lang="zh-Hans"] * {
    left. The button itself stays, faint, to bring them back. Hidden things take no touch,
    so a drag anywhere turns the view. */
 html.gaze #hud > :not(footer),
-html.gaze #hud footer > :not(#gazeButton):not(#gazeMusic):not(#gazeSleep),
+html.gaze #hud footer > :not(#gazeButton):not(#gazeMusic):not(#gazeSound):not(#gazeCaption):not(#gazeSleep),
 html.gaze #hint,
 html.gaze #guide,
 html.gaze #toast,
@@ -5085,7 +5089,14 @@ html.gaze #testBar {
    still flying, and comes back with the next press (the user, 2026-11-19, the frame left
    over the buttons: "큐폴라 다녀오면 이렇게 된다"). */
 html:not(.gaze) #cupolaFrame,
-html:not(.gaze) #cupolaCat {
+html:not(.gaze) #cupolaCat,
+html:not(.gaze) .cabinKey,
+html:not(.gaze) .cabinWord,
+html:not(.gaze) #cabinCaption,
+html:not(.gaze) #cabinPhoto,
+html:not(.gaze) #cabinMet,
+html:not(.gaze) #cabinGlow,
+html:not(.gaze) #cabinCount {
   display:none !important;
 }
 /* While the frame is up, the keys that stay through the bare view (the moon, music, sleep)
@@ -5137,13 +5148,15 @@ html.gaze #gazeButton {
    배경음악 ON/OFF 버튼을 우주멍 버튼 옆에 그려줘"). Only there; it comes up softly once the
    rest has gone, as faint as the moon. */
 #gazeMusic,
+#gazeSound,
+#gazeCaption,
 #gazeSleep {
   display:none;
 }
 
 html.gaze #gazeMusic {
   display:inline-flex;
-  right:var(--step, 64px);
+  right:calc(2 * var(--step, 64px));
   opacity:.4;
   border-color:var(--gold);
   animation:gazeMusicIn .6s ease both;
@@ -5166,7 +5179,7 @@ html.gaze #gazeMusic {
    brighter then. */
 html.gaze #gazeSleep {
   display:inline-flex;
-  right:calc(2 * var(--step, 64px));
+  right:calc(3 * var(--step, 64px));
   opacity:.4;
   border-color:var(--gold);
   font-family:var(--hand);
@@ -5190,13 +5203,50 @@ html.gaze #gazeSleep.on {
   opacity:.7;
 }
 
+/* Sound effects on or off right beside the moon, and the course's captions on or off at the
+   far end while a course with captions runs (the user, 2026-11-20: "우주멍 아이콘 옆에 소리
+   on/off 아이콘 넣어", "자막 단추도 넣고"). */
+html.gaze #gazeSound,
+html.gaze #gazeCaption.has {
+  display:inline-flex;
+  right:var(--step, 64px);
+  opacity:.4;
+  border-color:var(--gold);
+  animation:gazeMusicIn .6s ease both;
+}
+
+html.gaze #gazeCaption.has {
+  right:calc(4 * var(--step, 64px));
+}
+
+#gazeSound::before,
+#gazeCaption::before {
+  content:"";
+  flex:none;
+  width:25px;
+  height:25px;
+  background:url("/assets/ui/icon-sound-on.svg") center / contain no-repeat;
+}
+
+#gazeSound.off::before {
+  background-image:url("/assets/ui/icon-sound-off.svg");
+}
+
+#gazeCaption::before {
+  background-image:url("/assets/ui/icon-caption-on.svg");
+}
+
+#gazeCaption.off::before {
+  background-image:url("/assets/ui/icon-caption-off.svg");
+}
+
 @keyframes gazeMusicIn {
   from { opacity:0; }
   to { opacity:.4; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.gaze #gazeMusic, html.gaze #gazeSleep { animation:none; }
+  html.gaze #gazeMusic, html.gaze #gazeSleep, html.gaze #gazeSound, html.gaze #gazeCaption.has { animation:none; }
 }
 
 /* The line "현재 제한 0.01c" under the speed is gone (the user, 2026-10-05: "없애자"): the
@@ -5290,6 +5340,8 @@ html.gaze #gazeSleep.on {
   #hud footer #flyButton,
   #hud footer #gazeButton,
   #hud footer #gazeMusic,
+  #hud footer #gazeSound,
+  #hud footer #gazeCaption,
   #hud footer #gazeSleep {
     width:44px;
     height:44px;
@@ -8131,4 +8183,14 @@ dialog > .backBar {
 
 #journal #journalMissions li:has(> .missionArt) > :not(.missionArt) {
   grid-column:2;
+}
+
+/* A cabin switch's lever is a piece of the frame's own picture, flipped for off; its edges
+   fade into the panel so no box shows around it (the user, 2026-11-19: "저거 티 안 나게
+   마무리 해"). */
+.cabinKey .lever {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent), linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent), linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+  mask-composite: intersect;
 }

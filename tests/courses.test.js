@@ -1,6 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { COURSES, courseById, courseStart, cupolaPlan, railAt } from '../src/core/courses.js';
+import { COURSES, courseById, courseStart, cupolaPlan, railAt, mmuShipFacing } from '../src/core/courses.js';
+import fs from 'node:fs';
 import { BODIES } from '../src/core/bodies.js';
 import { forward } from '../src/core/orientation.js';
 import { GALACTIC_POLE, GALAXIES, NEBULAE, fromEquatorial } from '../src/core/sky.js';
@@ -17,11 +18,11 @@ const velocity = ({ orientation, slide }) => {
   return r.map((n, i) => n * slide.sideSpeed * slide.sideSign + u[i] * slide.riseSpeed * slide.riseSign);
 };
 
-test('fifteen rounds, the aurora first, then the one the user was flying, each of a known body', () => {
-  assert.equal(COURSES.length, 15);
+test('eighteen rounds, the aurora first, then the one the user was flying, each of a known body', () => {
+  assert.equal(COURSES.length, 18);
   assert.equal(COURSES[0].id, 'auroraDrift');
   assert.equal(COURSES[1].id, 'earthRound');
-  assert.equal(new Set(COURSES.map((c) => c.id)).size, 15);
+  assert.equal(new Set(COURSES.map((c) => c.id)).size, 18);
   for (const c of COURSES) {
     assert.ok(body(c.body), c.id);
     assert.ok(c.name && c.todo, c.id);
@@ -125,4 +126,24 @@ test('the cupola course goes over both poles 1,000 km up, past the planned place
   // At leadS it is beside the place, near enough to see it in the middle of the view.
   const by = dot(out(c.rail.leadS), place);
   assert.ok(by > Math.cos((25 * Math.PI) / 180) && by < 0.9999, String(by));
+});
+
+test('every picture and sound a course names is there in public/', () => {
+  const named = new Set();
+  const walk = (v) => {
+    if (typeof v === 'string' && /\.(png|webp|jpg|mp3)$/.test(v)) named.add(v);
+    else if (v && typeof v === 'object') for (const x of Object.values(v)) walk(x);
+  };
+  for (const c of COURSES) walk(c.rail ?? {});
+  assert.ok(named.size >= 19, String(named.size));
+  for (const path of named) assert.ok(fs.existsSync(`public/${path}`), path);
+});
+
+test("McCandless's Challenger lies square: her nose across her open bay, both unit long", () => {
+  const c = courseById('mmu');
+  const earth = { position: [150000000, 0, 0] };
+  const hubble = { position: [150000000 + 6900, 300, 200] };
+  const { forward: f, up: u } = mmuShipFacing(c, earth, hubble, sun);
+  assert.ok(Math.abs(Math.hypot(...f) - 1) < 1e-9 && Math.abs(Math.hypot(...u) - 1) < 1e-9);
+  assert.ok(Math.abs(dot(f, u)) < 1e-9, String(dot(f, u)));
 });

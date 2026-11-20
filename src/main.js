@@ -2384,7 +2384,34 @@ ${STORY_MORE[target.id]}` : told) };
       if (courseTime <= k.from || courseTime >= k.to) continue;
       most = Math.max(most, courseTime < k.peak ? ease((courseTime - k.from) / (k.peak - k.from)) : 1 - ease((courseTime - k.peak) / (k.to - k.peak)));
     }
+    // An engine burning shakes the cabin the while, less than the launch, throbbing a little.
+    const b = burnNow();
+    if (b) most = Math.max(most, b.on * b.power * 0.6 * (0.85 + 0.15 * Math.sin(courseTime * 9)));
     return most;
+  }
+  // The big engine burning now, if any (rail.burns: from, to, power 0..1, buzz: the phone
+  // buzzes with it) (the user, 2026-11-20: "점화할 때에 진동과 소리"; Eagle's descent without
+  // the buzz: "진동은 별로고"). on: 0..1, up over 0.6 s, down over 0.4 s.
+  function burnNow() {
+    const list = course ? courseById(course).rail?.burns : null;
+    const b = list?.find((k) => courseTime > k.from && courseTime < k.to + 0.4);
+    if (!b) return null;
+    const on = Math.min(1, (courseTime - b.from) / 0.6, Math.max(0, (b.to + 0.4 - courseTime) / 0.4));
+    return { ...b, on };
+  }
+  let buzzAt = 0;
+  // Each frame of a course: a burn's sound as it lights (all of it, to its end, at once) and
+  // the phone's buzz while it burns, a pulse every 0.4 s (iPhone browsers cannot buzz).
+  function burnFelt(chosen, wasTime) {
+    for (const b of chosen.rail.burns ?? []) {
+      if (b.from > wasTime && b.from <= courseTime) sound.burn((b.to - courseTime) / (chosen.rail.testSpeed ?? 1), b.power);
+    }
+    const b = burnNow();
+    if (!b?.buzz || b.on < 0.5) return;
+    const now = performance.now();
+    if (now - buzzAt < 400) return;
+    buzzAt = now;
+    try { navigator.vibrate?.(Math.round(60 + 60 * b.power)); } catch { /* no buzzing here */ }
   }
   // A short dark over everything (rail.fades), behind which the course jumps: to the orbit
   // after the launch, and back to the pad when it goes round again.
@@ -2402,7 +2429,8 @@ ${STORY_MORE[target.id]}` : told) };
     // (McCandless flying himself: the drift eases away too, his own pushes move him.)
     const a = (1 - stillNow()) * (mmuFly.on ? Math.max(0, 1 - (courseTime - mmuFly.onT) / 1.5) : 1);
     return {
-      yaw: a * (0.0055 * Math.sin(s * 0.47) + 0.0025 * Math.sin(s * 0.19 + 1.3)) + g * 0.005 * Math.sin(s * 53),
+      // (The two ships swinging after the capture: the window goes with Eagle, against Columbia.)
+      yaw: a * (0.0055 * Math.sin(s * 0.47) + 0.0025 * Math.sin(s * 0.19 + 1.3)) + g * 0.005 * Math.sin(s * 53) - 0.05 * apolloSway,
       pitch: a * (0.0045 * Math.sin(s * 0.37 + 0.6) + 0.002 * Math.sin(s * 0.13 + 2.1)) + g * 0.005 * Math.sin(s * 47 + 1),
       dx: a * 5 * Math.sin(s * 0.29 + 0.4) + g * 4 * Math.sin(s * 61), dy: a * 4 * Math.sin(s * 0.23 + 1.9) + g * 4 * Math.sin(s * 57 + 2),
     };
@@ -2509,43 +2537,205 @@ ${STORY_MORE[target.id]}` : told) };
     if (!course) mmuFlyReset();
     mmuFlyUi(inHelmet, dt);
   }
-  // Columbia coming to dock with Eagle, seen from Eagle's window (rail.dock: from, at the
-  // moment they touch, to, its distance far and near in km and its drawn length; the user,
-  // 2026-11-20: "아폴로 귀환 시에 사령선이 도킹하는걸", then "(가)로 해", a scene to watch). Placed along the course's
-  // own view, before the window turns it into the glass (cupolaFloat), it comes in from a
-  // little left and above, slowing, its probe turning to the eye; it touches at `at`.
+  // Columbia and Eagle, seen from Eagle's triangular window: coming to dock (rail.dock) and,
+  // earlier, letting her go (rail.undock). Placed along the course's own view, before the
+  // window turns it into the glass (cupolaFloat).
+  // Docking (the user, 2026-11-20: "아폴로 귀환 시에 사령선이 도킹하는걸", "(가)로 해", then
+  // "도킹이 저렇게 쉽다구? 다시 해봐"): Collins brings Columbia in side on from 150 km, brakes
+  // with her jets and stops at holdKm (the hold), turns her probe to Eagle there; creeps in,
+  // drifting off the line and puffed back onto it; at `capture` the probe is caught and the
+  // two ships swing, Collins puffing to steady them; at `latch` the probe draws them
+  // together and the twelve latches bang shut.
+  // Undocking (the user: "'떨어져 나올 때'에, 이 장면도 3D 모델로 만들자"): Columbia filling
+  // the glass, a knock at `part`, and she backs away with a puff of her jets, turning side
+  // on, and goes up out of the window before Eagle's engine lights.
+  let apolloSway = 0;
+  const smoothstep01 = (x) => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k); };
+  const puffOf = (t, list) => Math.max(0, ...list.map((at) => (t < at || t > at + 0.55 ? 0 : Math.min(1, (t - at) / 0.05) * (1 - (t - at) / 0.55))));
+  const DOCK_PUFFS = { fwd: [721, 722.8, 736.2], side: [726, 728.5, 732, 734.6, 739, 740.6, 742.2] };
+  const UNDOCK_PUFFS = { fwd: [491.6, 491.9, 493.4], side: [496.5, 499] };
+  function dockPose(t, d) {
+    const [h0, h1] = d.hold;
+    if (t < h0) {
+      const x = (t - d.from) / (h0 - d.from);
+      const e = 1 - (1 - x) ** 2;
+      const off = 1 - e;
+      return { km: d.farKm + (d.holdKm - d.farKm) * e, sx: -0.035 - 0.1 * off, uy: 0.09 + 0.1 * off, a: 1.35, roll: 0.5 * off };
+    }
+    if (t < h1) {
+      // Holding, a little adrift, and turning the probe to the eye.
+      const y = t - h0;
+      return { km: d.holdKm + 1.2 * Math.sin(y * 0.9), sx: -0.035 + 0.025 * Math.sin(y * 0.7), uy: 0.09 + 0.01 * Math.sin(y * 0.5), a: 1.35 * (1 - smoothstep01((t - h0 - 1) / (h1 - h0 - 1))), roll: 0.05 * Math.sin(y * 0.4) };
+    }
+    if (t < d.capture) {
+      const x = (t - h1) / (d.capture - h1);
+      return { km: d.holdKm + (d.nearKm - d.holdKm) * smoothstep01(x), sx: -0.015 - 0.03 * Math.sin(x * Math.PI), uy: 0.09 + 0.015 * Math.sin(x * Math.PI * 2), a: 0.14 * Math.sin(x * Math.PI * 1.5) * (1 - x), roll: 0 };
+    }
+    // Caught: the swing, dying away; then drawn in by the probe at the latch.
+    const y = t - d.capture;
+    const wob = t < d.latch ? 0.26 * Math.exp(-y * 0.42) * Math.sin(y * 2 * Math.PI * 0.42) : 0;
+    const pull = smoothstep01((t - d.latch) / 0.25);
+    return { km: d.nearKm - 1.6 * pull, sx: -0.015 + 0.25 * wob * 0.1, uy: 0.09, a: 0, roll: 0, wob };
+  }
+  function undockPose(t, d) {
+    if (t < d.part) return { km: d.nearKm, sx: -0.015, uy: 0.09, a: 0, roll: 0 };
+    const x = (t - d.part) / (d.to - d.part);
+    return { km: d.nearKm + (d.farKm - d.nearKm) * x ** 1.5, sx: -0.015 - 0.12 * x, uy: 0.09 + 0.55 * x * x, a: 1.35 * smoothstep01((t - d.part - 2.5) / 8), roll: 0.4 * x };
+  }
   function apolloDock(chosen, base) {
-    const d = chosen.rail.dock;
-    if (!d || courseTime < d.from || courseTime >= d.to) {
+    const d = chosen.rail.dock, u = chosen.rail.undock;
+    const t = courseTime;
+    apolloSway = 0;
+    let pose = null, spec = null, puffs = null;
+    if (d && t >= d.from && t < d.to) { pose = dockPose(t, d); spec = d; puffs = DOCK_PUFFS; }
+    else if (u && t >= u.from && t < u.to) { pose = undockPose(t, u); spec = u; puffs = UNDOCK_PUFFS; }
+    if (!pose) {
       world.setFloatModel('columbia', null);
       return;
     }
-    const x = Math.min(1, (courseTime - d.from) / (d.at - d.from));
-    const ease = 1 - (1 - x) ** 2.4;
-    const km = d.farKm + (d.nearKm - d.farKm) * ease;
+    apolloSway = pose.wob ?? 0;
+    const { km, sx, uy, a, roll } = pose;
     const look = forward(base.orientation);
     const side = right(base.orientation);
     const upward = rotateVector(base.orientation, [0, 1, 0]);
-    const off = 1 - ease;
-    // (Held left of the line of sight and a little up, in the middle of Eagle's triangular
-    // glass: on the line it stood against the frame's diagonal bar.)
-    const at = base.position.map((n, i) => n + look[i] * km + side[i] * km * (-0.015 - 0.1 * off) + upward[i] * km * (0.09 + 0.1 * off));
+    // (Left of the line of sight and a little up, in the middle of Eagle's triangular glass:
+    // on the line it stood against the frame's diagonal bar.)
+    const at = base.position.map((n, i) => n + look[i] * km + side[i] * km * sx + upward[i] * km * uy);
     const toEye = base.position.map((n, i) => n - at[i]);
     const len = Math.hypot(...toEye);
-    // Side on while it comes, so that it reads as the command and service modules (cone,
-    // can, bell, dish), turning its probe to the eye over the last ten seconds (the user's
-    // check, 2026-11-20: end on all the way it was a grey disc).
-    const turn = Math.min(1, Math.max(0, (d.at - courseTime) / 10));
-    const a = (1 - (1 - turn) ** 2) * 1.35;
-    const nose = toEye.map((n, i) => (n / len) * Math.cos(a) + side[i] * Math.sin(a) * 0.94 + upward[i] * Math.sin(a) * 0.34);
+    // Side on, it reads as the command and service modules (cone, can, bell, dish); end on
+    // all the way it was a grey disc (the user's check, 2026-11-20). wob: the swing after the
+    // capture, about her up.
+    const w = pose.wob ?? 0;
+    const nose = toEye.map((n, i) => (n / len) * Math.cos(a) + side[i] * Math.sin(a) * 0.94 + upward[i] * Math.sin(a) * 0.34 + side[i] * Math.sin(w));
     const nl = Math.hypot(...nose);
     const f = nose.map((n) => n / nl);
-    const roll = 0.5 * off + 0.15 * Math.sin(courseTime * 0.3);
-    const u0 = upward.map((n, i) => n * Math.cos(roll) + side[i] * Math.sin(roll));
+    const r = roll + 0.15 * Math.sin(t * 0.3);
+    const u0 = upward.map((n, i) => n * Math.cos(r) + side[i] * Math.sin(r));
     const dotUF = u0.reduce((s, n, i) => s + n * f[i], 0);
     const u1 = u0.map((n, i) => n - f[i] * dotUF);
     const ul = Math.hypot(...u1);
-    world.setFloatModel('columbia', { kind: 'columbia', km: at, sizeKm: d.sizeKm, forward: f, up: u1.map((n) => n / ul) });
+    world.setFloatModel('columbia', { kind: 'columbia', km: at, sizeKm: spec.sizeKm, forward: f, up: u1.map((n) => n / ul), pose: { fwd: puffOf(t, puffs.fwd), side: puffOf(t, puffs.side) } });
+  }
+  // Each puff of Columbia's jets heard faintly as it starts.
+  function apolloDockSounds(chosen, wasTime) {
+    if (!chosen.rail.dock && !chosen.rail.undock) return;
+    for (const at of [...DOCK_PUFFS.fwd, ...DOCK_PUFFS.side, ...UNDOCK_PUFFS.fwd, ...UNDOCK_PUFFS.side]) {
+      if (at > wasTime && at <= courseTime) sound.cue('rcs');
+    }
+  }
+  // Eagle's landing felt from her window (rail.landing; the user, 2026-11-20: "진동은 별로고
+  // 나머지는 해봐"): her shadow on the ground where the Sun throws it, from the start of the
+  // descent until she lifts off; from `dust` the engine's blast blowing dust out across the
+  // ground, gone the moment the engine is cut at `touch` (no air holds it); the contact
+  // light on the panel from `contact` (cabinLamp).
+  const LANDER_TALL_KM = 0.007;
+  const LANDER_WIDE_KM = 0.0095;
+  function apolloLanding(chosen, base) {
+    const L = chosen.rail.landing;
+    const t = courseTime;
+    const shadowOn = L && t >= 505 && t < 700;
+    let shadow = null;
+    if (shadowOn) {
+      const moon = here('moon'), sun = here('sun');
+      const fromMoon = base.position.map((n, i) => n - moon.position[i]);
+      const r = Math.hypot(...fromMoon);
+      const up = fromMoon.map((n) => n / r);
+      const h = r - moon.radiusKm;
+      const toSun = sun.position.map((n, i) => n - base.position[i]);
+      const sl = Math.hypot(...toSun);
+      const s = toSun.map((n) => n / sl);
+      const sinE = s.reduce((a, n, i) => a + n * up[i], 0);
+      // (A Sun under 2 degrees throws no shadow worth the name; one higher than 80 none to see.)
+      if (h < 4 && sinE > 0.035 && sinE < 0.98) {
+        const away = s.map((n, i) => -(n - up[i] * sinE));
+        const al = Math.hypot(...away);
+        const horiz = away.map((n) => n / al);
+        const cotE = Math.sqrt(1 - sinE * sinE) / sinE;
+        const feet = moon.position.map((n, i) => n + up[i] * (moon.radiusKm + 0.0004) + horiz[i] * h * cotE);
+        shadow = { kind: 'landerShadow', km: feet, sizeKm: LANDER_WIDE_KM, forward: horiz, up, pose: { stretch: Math.min(25, (LANDER_TALL_KM * cotE) / LANDER_WIDE_KM) } };
+      }
+    }
+    world.setFloatModel('landerShadow', shadow);
+    cabinDust(L && t > L.dust && t < L.touch ? smoothstep01((t - L.dust) / (L.touch - 2 - L.dust)) : 0);
+  }
+  // The dust blown out by Eagle's engine, over the window and under the frame: a low haze and
+  // streaks racing out from below the middle, along the ground and away (k 0..1).
+  let dustBits = null;
+  function cabinDust(k) {
+    let canvas = document.getElementById('cabinDust');
+    if (!k) {
+      if (canvas) canvas.hidden = true;
+      return;
+    }
+    if (!canvas) {
+      document.body.insertAdjacentHTML('beforeend', '<canvas id="cabinDust" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;z-index:4;pointer-events:none"></canvas>');
+      canvas = document.getElementById('cabinDust');
+    }
+    canvas.hidden = false;
+    const W = Math.round(innerWidth / 2), H = Math.round(innerHeight / 2);
+    if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+    const g = canvas.getContext('2d');
+    g.clearRect(0, 0, W, H);
+    const haze = g.createLinearGradient(0, H * 0.35, 0, H);
+    haze.addColorStop(0, 'rgba(150,140,124,0)');
+    haze.addColorStop(1, `rgba(150,140,124,${(0.32 * k).toFixed(3)})`);
+    g.fillStyle = haze;
+    g.fillRect(0, 0, W, H);
+    const now = performance.now() / 1000;
+    // Each bit races out from under her along the ground toward the horizon (about 55% down
+    // the screen), fast at first, slowing and thinning as it goes away.
+    if (!dustBits) dustBits = Array.from({ length: 150 }, (_, i) => ({ to: -0.5 + 2 * ((i * 0.618) % 1), from: 0.35 + 0.3 * ((i * 0.41) % 1), life: 0.45 + ((i * 0.37) % 1) * 0.5, t0: (i * 0.173) % 1 }));
+    const hy = H * 0.55;
+    const at = (b, x) => {
+      const e = 1 - (1 - x) ** 2.2;
+      return [W * (b.from + (b.to - b.from) * e), H * 1.02 + (hy - H * 1.02) * e];
+    };
+    g.lineCap = 'round';
+    for (const b of dustBits) {
+      const x = (now / b.life + b.t0) % 1;
+      const [px, py] = at(b, x);
+      const [qx, qy] = at(b, Math.max(0, x - 0.09));
+      const alpha = k * 0.42 * (1 - x) * Math.min(1, x * 8);
+      g.strokeStyle = `rgba(196,184,164,${alpha.toFixed(3)})`;
+      g.lineWidth = 0.6 + 2.2 * (1 - x);
+      g.beginPath();
+      g.moveTo(px, py);
+      g.lineTo(qx, qy);
+      g.stroke();
+    }
+  }
+  // The contact light on Eagle's panel (rail.landing.lamp: where, in the cabin picture's
+  // pixels), dark until a probe under her feet touches the ground at `contact`, then lit blue
+  // till she lifts off; placed with the frame as it lies and drifts (cabinKeyPlace).
+  function cabinLamp(frame, px, py) {
+    const L = course ? courseById(course).rail?.landing : null;
+    let lamp = document.getElementById('contactLamp');
+    const on = L?.lamp && frame && !frame.hidden && frame.naturalWidth && frame.dataset.cabin === 'assets/tours/eagle-cabin.webp';
+    if (!on) {
+      // (Its display is flex: the hidden attribute would not hide it.)
+      if (lamp) lamp.style.display = 'none';
+      return;
+    }
+    if (!lamp) {
+      document.body.insertAdjacentHTML('beforeend', '<div id="contactLamp" aria-hidden="true" style="position:fixed;z-index:6;pointer-events:none;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;border-radius:4px;border:2px solid #3b3f45;font-family:\'Arial Narrow\',Arial,sans-serif;font-weight:700;letter-spacing:.06em;line-height:1.1;transition:background .08s,color .08s,box-shadow .08s">LUNAR<br>CONTACT</div>');
+      lamp = document.getElementById('contactLamp');
+    }
+    const nw = frame.naturalWidth, nh = frame.naturalHeight, W = innerWidth, H = innerHeight;
+    const s0 = Math.max(W / nw, H / nh), S = s0 * 1.04;
+    const ox = (W - nw * s0) * 0.5, oy = (H - nh * s0) * 0.45;
+    const [x0, y0, x1, y1] = L.lamp;
+    const x = W / 2 + (ox + x0 * s0 - W / 2) * 1.04 + px, y = H / 2 + (oy + y0 * s0 - H / 2) * 1.04 + py;
+    const lit = courseTime >= L.contact && courseTime < 700;
+    Object.assign(lamp.style, {
+      left: `${x.toFixed(1)}px`, top: `${y.toFixed(1)}px`, width: `${((x1 - x0) * S).toFixed(1)}px`, height: `${((y1 - y0) * S).toFixed(1)}px`,
+      fontSize: `${Math.max(6, 26 * S).toFixed(1)}px`,
+      background: lit ? 'radial-gradient(ellipse at 50% 45%, #d8f0ff 0%, #5fb4ff 55%, #2f78c8 100%)' : 'linear-gradient(#24282e, #1a1d22)',
+      color: lit ? '#0b2a4a' : '#565c64',
+      boxShadow: lit ? '0 0 14px 4px rgba(90,170,255,.7), inset 0 0 6px rgba(255,255,255,.6)' : 'inset 0 1px 3px rgba(0,0,0,.8)',
+      filter: lit ? 'none' : frame.style.filter,
+      display: 'flex',
+    });
   }
   // McCandless flying himself, in his helmet (the user, 2026-11-20: "우주 유영을 자기가
   // 컨트롤 할 수 있게 해보자. 너무 멀어지거나, 연료를 다 쓰면, 챌린저에서 줄을 발사해서
@@ -2935,6 +3125,8 @@ ${STORY_MORE[target.id]}` : told) };
     });
   }
   // A countdown in the cabin to the course's big moment (rail.countdown: `at` course seconds,
+  // in 여기어때 잘난체, the user's pick of five on 2026-11-20 ("발사/이륙 폰트를 바꾸자"),
+  // public/fonts/jalnan; Japanese and Chinese letters fall back to the bold sans,
   // shown from `from` seconds before, a beep each of the last `beeps`, then the burn's roar)
   // (the user, 2026-11-19, Apollo's first minute and a half going round the Earth: "그냥 지구만
   // 뺑뺑이 도는거야?", "카운트다운해줘").
@@ -3051,7 +3243,7 @@ ${STORY_MORE[target.id]}` : told) };
       return;
     }
     if (!box) {
-      document.body.insertAdjacentHTML('beforeend', '<div id="cabinCount" aria-live="polite" style="position:fixed;left:0;right:0;top:calc(max(12px, env(safe-area-inset-top)) + 22vh);z-index:8;text-align:center;pointer-events:none;font:600 15px/1.3 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.08em;color:#ffd27a;text-shadow:0 0 8px rgba(255,170,60,.75),0 1px 2px #000"><div class="said"></div><div class="num" style="font-size:44px;line-height:1.1"></div></div>');
+      document.body.insertAdjacentHTML('beforeend', '<div id="cabinCount" aria-live="polite" style="position:fixed;left:0;right:0;top:calc(max(12px, env(safe-area-inset-top)) + 22vh);z-index:8;text-align:center;pointer-events:none;font:700 15px/1.3 Jalnan,Pretendard Variable,Pretendard,system-ui,sans-serif;font-synthesis:none;letter-spacing:.02em;color:#ffd27a;text-shadow:0 0 8px rgba(255,170,60,.75),0 1px 2px #000"><div class="said"></div><div class="num" style="font-size:44px;line-height:1.1"></div></div>');
       box = document.getElementById('cabinCount');
     }
     box.hidden = false;
@@ -3134,6 +3326,7 @@ ${STORY_MORE[target.id]}` : told) };
     if (hot) frame.style.filter += ` sepia(${(0.7 * hot).toFixed(2)}) saturate(${(1 + 1.5 * hot).toFixed(2)}) hue-rotate(${(-12 * hot).toFixed(1)}deg) brightness(${(1 + 0.8 * hot).toFixed(2)})`;
     cabinGlow();
     cabinKeyPlace(frame, px, py);
+    cabinLamp(frame, px, py);
     cabinWordsPlace(frame, px, py);
   }
 
@@ -4404,10 +4597,13 @@ ${STORY_MORE[target.id]}` : told) };
         courseTime += dt * (chosen.rail.testSpeed ?? 1);
         state = { ...state, ...railAt(chosen, here(chosen.body), here('sun'), courseTime, here('moon'), here('hubble')) };
         apolloDock(chosen, state);
+        apolloLanding(chosen, state);
         if (chosen.rail.cabin) state = { ...state, orientation: cupolaFloat(state) };
         if (chosen.rail.mmu) mmuFlyStep(chosen, dt, jetKey);
         // Sounds at their moments (rail.sounds: [seconds, cue]).
         for (const [at, name] of chosen.rail.sounds ?? []) if (at > wasTime && at <= courseTime) sound.cue(name);
+        burnFelt(chosen, wasTime);
+        apolloDockSounds(chosen, wasTime);
         // (Not round again once McCandless flies himself: the user, 2026-11-20, "유저가 수동으로
         // 움직이기 시작하면, 그 시간부터는 시간 제한 없애줘".)
         const flying = Boolean(chosen.rail.mmu && mmuFly.on);
@@ -4448,7 +4644,12 @@ ${STORY_MORE[target.id]}` : told) };
       const x = Math.max(0, Math.min(1, (courseTime - shutS) / (openS - shutS)));
       world.setCraftModel('hubble', { kind: shuttleRail.craftModel, doors: x * x * (3 - 2 * x), arm: shuttleRail.armPose ?? {}, ...facing });
     } else world.setCraftModel('hubble', null);
-    if (!course || !courseById(course)?.rail?.dock) world.setFloatModel('columbia', null);
+    if (!course || !courseById(course)?.rail?.dock) {
+      world.setFloatModel('columbia', null);
+      world.setFloatModel('landerShadow', null);
+      cabinDust(0);
+      if (!course) cabinLamp(null);
+    }
     // McCandless seen from outside, coming out of the bay (core/courses.js mmuFigure).
     const figure = shuttleRail?.mmu ? mmuFigure(courseById(course), here('earth'), here('hubble'), here('sun'), courseTime) : null;
     world.setFloatPhoto('figure', figure ? { photo: shuttleRail.figure, km: figure, sizeKm: shuttleRail.figureKm } : null);

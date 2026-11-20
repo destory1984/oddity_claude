@@ -376,6 +376,59 @@ export function createSound({ music } = {}) {
     tone({ freq: 58, to: 50, length: seconds, volume: 0.12, attack: 0.5, out });
   }
 
+  // A big engine burning under her for `seconds` (Apollo's burns, the user, 2026-11-20: "달
+  // 뒷면에서 엔진 켤 때에 엔진 소리 및 진동 추가", "점화할 때에 진동과 소리"): in space it is
+  // heard through the ship itself, so mostly low. A thump and a gasp as the valves open; a
+  // deep rumble that throbs a little, a hiss of the flow on it and a growl under it; then
+  // cut, a clunk of the valves closing and the rumble gone in a third of a second.
+  // power 0..1: how loud (the lander's descent engine, throttled, is the softest).
+  function engineBurn(seconds, power = 1) {
+    const out = scene();
+    const t = ctx.currentTime;
+    const end = t + seconds;
+    const p = Math.max(0.2, Math.min(1, power));
+    // Opening.
+    noise({ length: 0.3, volume: 0.3 * p, type: 'lowpass', freq: 650, to: 140, attack: 0.02, out });
+    tone({ freq: 74, to: 46, length: 0.55, volume: 0.16 * p, out });
+    noise({ start: 0.04, length: 1.1, volume: 0.09 * p, type: 'bandpass', freq: 1100, to: 380, attack: 0.08, out });
+    // The rumble: low noise through a gain that a slow wobble moves.
+    const src = ctx.createBufferSource();
+    src.buffer = noiseBuffer;
+    src.loop = true;
+    const low = ctx.createBiquadFilter();
+    low.type = 'lowpass';
+    low.frequency.value = 150;
+    low.Q.value = 0.8;
+    const body = ctx.createGain();
+    body.gain.setValueAtTime(0.0001, t);
+    body.gain.exponentialRampToValueAtTime(0.42 * p, t + 0.7);
+    body.gain.setValueAtTime(0.42 * p, end - 0.05);
+    body.gain.exponentialRampToValueAtTime(0.0001, end + 0.32);
+    const throb = ctx.createGain();
+    throb.gain.value = 1;
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 6.5;
+    const depth = ctx.createGain();
+    depth.gain.value = 0.22;
+    lfo.connect(depth).connect(throb.gain);
+    src.connect(low).connect(body).connect(throb).connect(out);
+    src.start(t);
+    src.stop(end + 0.4);
+    lfo.start(t);
+    lfo.stop(end + 0.4);
+    // The flow's hiss riding on it, and the growl under it.
+    for (let at = 0; at < seconds; at += 7) {
+      const length = Math.min(7.4, seconds - at + 0.3);
+      const first = at === 0, last = at + 7 >= seconds;
+      noise({ start: at, length, volume: 0.05 * p, type: 'bandpass', freq: 900, to: 760, attack: first ? 0.6 : 0.35, hold: last ? length - 0.3 : length - 0.6, out });
+    }
+    tone({ freq: 44, to: 41, length: seconds + 0.3, volume: 0.14 * p, attack: 0.6, hold: seconds - 0.05, out });
+    tone({ freq: 88, to: 82, type: 'triangle', length: seconds + 0.3, volume: 0.025 * p, attack: 0.6, hold: seconds - 0.05, out });
+    // Cut off.
+    noise({ start: seconds, length: 0.16, volume: 0.22 * p, type: 'lowpass', freq: 800, to: 200, out });
+    tone({ freq: 96, to: 62, start: seconds, length: 0.3, volume: 0.1 * p, out });
+  }
+
   function windDown(seconds) {
     const out = scene();
     noise({ length: seconds, volume: 0.1, type: 'bandpass', freq: 420, to: 300, attack: seconds * 0.7, out });
@@ -481,6 +534,44 @@ export function createSound({ music } = {}) {
       bell(659, 0.9, 0.05);
       bell(988, 1.08, 0.05);
     },
+    // Apollo's docking done the hard way (main.js apolloDock; the user, 2026-11-20: "도킹이
+    // 저렇게 쉽다구? 다시 해봐"). rcs: one of Columbia's small jets, a short dry hiss heard
+    // faintly across the gap. capture: the probe's head caught by the drogue, a metal clack
+    // and a creak as the two ships swing. latches: the probe drawn in and the twelve latches
+    // round the tunnel firing almost as one, a ripple of clunks and a bang.
+    rcs: () => {
+      noise({ length: 0.3, volume: 0.035, type: 'bandpass', freq: 2600, to: 1500, attack: 0.01 });
+    },
+    capture: () => {
+      noise({ length: 0.09, volume: 0.2, type: 'bandpass', freq: 2400, to: 900, attack: 0.004 });
+      tone({ freq: 640, to: 590, type: 'triangle', length: 0.25, volume: 0.03 });
+      tone({ freq: 120, to: 80, length: 0.3, volume: 0.1 });
+      noise({ start: 0.35, length: 1.4, volume: 0.035, type: 'bandpass', freq: 380, to: 260, attack: 0.3 });
+    },
+    latches: () => {
+      for (let k = 0; k < 12; k++) {
+        const at = 0.02 * k + 0.008 * Math.sin(k * 5.1);
+        noise({ start: at, length: 0.07, volume: 0.09, type: 'lowpass', freq: 1500, to: 400 });
+      }
+      noise({ start: 0.24, length: 0.35, volume: 0.3, type: 'lowpass', freq: 600, to: 120 });
+      tone({ freq: 86, to: 58, start: 0.24, length: 0.6, volume: 0.16 });
+      noise({ start: 0.3, length: 1.2, volume: 0.05, type: 'highpass', freq: 3800, to: 1500 });
+    },
+    // Eagle let go of: the latches springing back, a hollow knock, and the gap opening.
+    parting: () => {
+      noise({ length: 0.12, volume: 0.2, type: 'lowpass', freq: 900, to: 220 });
+      tone({ freq: 104, to: 70, length: 0.4, volume: 0.12 });
+      noise({ start: 0.06, length: 0.9, volume: 0.05, type: 'bandpass', freq: 1800, to: 700, attack: 0.05 });
+    },
+    // Eagle's feet on the Moon: the engine already cut by the burn's end, a deep thud of
+    // the legs taking her weight and the frame settling.
+    touchdown: () => {
+      noise({ length: 0.4, volume: 0.32, type: 'lowpass', freq: 420, to: 90, attack: 0.01 });
+      tone({ freq: 62, to: 40, length: 0.7, volume: 0.2 });
+      noise({ start: 0.18, length: 0.5, volume: 0.06, type: 'bandpass', freq: 700, to: 300, attack: 0.05 });
+    },
+    // The contact light: one soft tone, as the lamp comes on.
+    contact: () => tone({ freq: 1480, length: 0.35, volume: 0.03, attack: 0.01, hold: 0.25 }),
     // McCandless's jets, one burst for each press (main.js mmuFly, the user, 2026-11-20:
     // "칙칙하면서 소리도 나고", then "한 번에 한 번씩만"): a soft knock and a hiss of nitrogen
     // falling away over 0.45 s, lower for a push ahead, higher for one back.
@@ -766,6 +857,11 @@ export function createSound({ music } = {}) {
     cue(name) {
       if (!ctx || muted || !CUES[name]) return;
       CUES[name]();
+    },
+    // A big engine for `seconds` (engineBurn above).
+    burn(seconds, power) {
+      if (!ctx || muted || !noiseBuffer) return;
+      engineBurn(seconds, power);
     },
     // Still a scene's long sounds (the scene was left before its end).
     hushScene() {

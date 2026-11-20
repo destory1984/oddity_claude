@@ -1,0 +1,10 @@
+여기어때 잘난체 (Jalnan)
+Copyright (c) 여기어때컴퍼니 (Yeogi Eottae Company).
+
+이 게임의 비행 코스 카운트다운에는 (주)여기어때컴퍼니가 제공한 여기어때 잘난체 글꼴이 적용되어 있습니다.
+
+The countdowns of this game's tour courses use the Jalnan typeface, provided by Yeogi Eottae Company.
+
+The font file JalnanOTF00.woff is included as it was distributed, not modified.
+License (free for personal and commercial use, embedding allowed, the font itself may not be sold):
+https://www.sandollcloud.com/free-font/772/Jalnan

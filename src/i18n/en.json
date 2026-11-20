@@ -5671,10 +5671,8 @@
  "자막 켜기": "Captions on",
  "사진: NASA": "Photo: NASA",
  "임무 {}일째": "Mission day {0}",
- "미국 플로리다의 케네디 우주센터. 왼쪽의 큰 건물에서 로켓을 세워서 조립합니다.": "Kennedy Space Center in Florida, USA. The rocket is stacked upright in the big building on the left.",
  "다 만든 로켓은 운반차에 실려 시속 1.6km로, 5.6km 떨어진 발사대까지 갑니다.": "The finished rocket rides a transporter at 1.6 km/h to the launch pad 5.6 km away.",
  "39A 발사대에 선 아폴로 11호의 새턴 5호. 높이 110m, 연료를 채우면 2,900톤입니다.": "Apollo 11's Saturn V on Pad 39A. It stands 110 m tall and weighs 2,900 tons when fueled.",
- "1969년 7월 16일 아침. 세 사람은 새턴 5호 꼭대기의 사령선에 누워 있습니다.": "The morning of July 16, 1969. The three of them lie in the command module at the top of the Saturn V.",
  "발사 9초 전, 1단 엔진 다섯 개에 불이 붙습니다.": "Nine seconds before launch, the five first-stage engines ignite.",
  "이륙! 높이 110m의 새턴 5호가 떠오릅니다. 발사탑을 벗어나자 관제가 휴스턴으로 넘어갑니다.": "Liftoff! The 110 m Saturn V rises. Once it clears the tower, control passes to Houston.",
  "기체를 돌려 동쪽 바다 쪽으로 눕기 시작합니다. 곧 소리보다 빨라집니다.": "The rocket tips over toward the eastern sea. Soon it is faster than sound.",
@@ -5789,5 +5787,13 @@
  "뒤로": "Back",
  "줄 하나 없이 우주 유영에서 직접 날 수 있습니다. 150m를 넘거나 질소가 떨어지면 챌린저가 줄로 끌어당깁니다.": "In A spacewalk with no tether you can now fly yourself. Past 150 m or out of nitrogen, Challenger reels you in on a line.",
  "아폴로 11호의 길에서 사령선 컬럼비아가 이글에 다가와 도킹하는 모습을 봅니다.": "In Apollo 11's flight you now see the command module Columbia come in and dock with Eagle.",
- "컬럼비아가 다가옵니다. 콜린스가 혼자 달을 돌며 기다리고 있었습니다.": "Columbia comes near. Collins had been circling the Moon alone, waiting."
+ "컬럼비아가 다가옵니다. 콜린스가 혼자 달을 돌며 기다리고 있었습니다.": "Columbia comes near. Collins had been circling the Moon alone, waiting.",
+ "1969년 7월 16일, 미국 플로리다의 케네디 우주센터. 왼쪽의 큰 건물에서 로켓을 세워서 조립합니다.": "July 16, 1969: Kennedy Space Center in Florida, USA. The rocket is stacked upright in the big building on the left.",
+ "그날 아침, 세 사람은 새턴 5호 꼭대기의 사령선에 누워 있습니다.": "That morning the three of them lie in the command module at the top of the Saturn V.",
+ "탐침이 걸리는 순간 두 배가 크게 흔들렸습니다. 콜린스가 손으로 자세를 바로잡았습니다.": "The moment the probe caught, the two ships swung hard. Collins steadied them by hand.",
+ "달 궤도 진입 점화까지": "Until the burn into lunar orbit",
+ "아폴로 11호의 길에서 엔진을 켜면 소리가 나고 선실이 떨리며, 안드로이드 폰은 진동합니다.": "In Apollo 11's flight an engine lighting is heard, the cabin shakes and Android phones buzz.",
+ "아폴로 11호의 길에서 이글이 컬럼비아에서 떨어져 나오고, 도킹은 흔들린 끝에 붙습니다.": "In Apollo 11's flight Eagle parts from Columbia, and the docking latches only after a swing.",
+ "아폴로 11호의 길의 착륙에서 먼지가 날리고, 땅에 닿으면 착지 신호등이 켜집니다.": "In Apollo 11's landing dust blows across the ground, and the contact light comes on at the touch.",
+ "컬럼비아에 구겨진 은박, 분사 자국, 엔진의 그을음이 생겼습니다.": "Columbia has crinkled foil, thruster stains and a scorched engine."
 }

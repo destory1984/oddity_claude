@@ -1,0 +1,10 @@
+/* 여기어때 잘난체 (Jalnan), (주)여기어때컴퍼니. The countdowns of the tour courses (main.js
+   cabinCount). The file as it is given, not cut down: LICENSE.txt in this folder. Fetched
+   only when a countdown shows. */
+@font-face {
+  font-family: 'Jalnan';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./JalnanOTF00.woff') format('woff');
+}

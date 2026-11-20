@@ -9,7 +9,7 @@ import { CRAFT_UNFOLD_ALL as CRAFT_UNFOLD } from './craftUnfold.js';
 import { SITE_BUILD, SITE_REPLAY_BUILD, SITE_SAYS, SECOND_SAYS, BOOSTER_SAYS, SAYS_ON_LEFT, SAYS_BY, sayBubble } from './siteModels.js';
 import { drum, rod, group, box } from './craftParts.js';
 import { buildChallenger, shadeChallenger } from './challenger3d.js';
-import { buildColumbia } from './columbia3d.js';
+import { buildColumbia, buildLanderShadow } from './columbia3d.js';
 
 // Spacecraft and landers. The models are in craftModels.js (in orbit) and
 // siteModels.js (on the ground), built from the parts in craftParts.js; this file
@@ -706,11 +706,15 @@ export function createCraft(scene, craftList) {
   const models = new Map();
   // (One shadow map for them all: a light keeps one.)
   let modelShadows = null;
-  const BUILDS = { challenger: buildChallenger, columbia: buildColumbia };
+  const BUILDS = { challenger: buildChallenger, columbia: buildColumbia, landerShadow: buildLanderShadow };
   const modelOf = (kind) => {
     if (models.has(kind)) return models.get(kind);
     const ship = BUILDS[kind](scene, `model_${kind}`);
     for (const m of ship.root.getChildMeshes()) m.isPickable = false;
+    if (ship.flat) {
+      models.set(kind, ship);
+      return ship;
+    }
     const sun = scene.getLightByName('craftSun');
     const phone = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
     if (sun && !modelShadows) modelShadows = shadeChallenger(ship, sun, { size: phone ? 1024 : 2048 });

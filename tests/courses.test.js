@@ -158,3 +158,30 @@ test('flying himself, McCandless stands where his way from Challenger says and l
   const back = unit(rel.map((v) => -v));
   assert.ok(dot(look, back) > 0.9999, String(dot(look, back)));
 });
+
+test("Apollo's burns at the far side of the Moon fire with the Earth hidden, and none overlaps another", () => {
+  const apollo = courseById('apollo11');
+  const earth = { position: [0, 0, 0], radiusKm: 6371 };
+  const moon = { position: [384400, 0, 0], radiusKm: 1737 };
+  const sun = { position: [0, 0, -1.5e8] };
+  const hidden = (t) => {
+    const p = railAt(apollo, earth, sun, t, moon, null).position;
+    const d = earth.position.map((v, i) => v - p[i]);
+    const l = Math.hypot(...d);
+    const m = moon.position.map((v, i) => v - p[i]);
+    const along = m.reduce((s, v, i) => s + (v * d[i]) / l, 0);
+    return along > 0 && Math.hypot(...m.map((v, i) => v - (d[i] / l) * along)) < moon.radiusKm;
+  };
+  const burns = apollo.rail.burns;
+  for (const at of [322, 800]) {
+    const b = burns.find((k) => k.from === at);
+    assert.ok(b, at);
+    for (let t = b.from; t <= b.to; t += 2) assert.ok(hidden(t), `${t}`);
+    // Each with its countdown, whose own sound gives way to the burn's.
+    assert.equal(apollo.rail.countdowns.find((c) => c.at === at)?.goCue, 'none');
+  }
+  const sorted = [...burns].sort((a, b) => a.from - b.from);
+  for (let i = 1; i < sorted.length; i++) assert.ok(sorted[i].from > sorted[i - 1].to, sorted[i].from);
+  // The landing's engine with no buzz (the user: "진동은 별로고").
+  assert.ok(!burns.find((b) => b.landing).buzz);
+});

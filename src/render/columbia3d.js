@@ -1,4 +1,4 @@
-import { Vector3, Quaternion, Color3, StandardMaterial, TransformNode, DynamicTexture, Mesh, CreateCylinder, CreateSphere, CreateBox, CreateTorus, Texture } from './babylon.js';
+import { Vector3, Quaternion, Color3, StandardMaterial, TransformNode, DynamicTexture, Mesh, CreateCylinder, CreateSphere, CreateBox, CreateTorus, CreatePlane, Texture } from './babylon.js';
 
 // Apollo 11's command and service module, Columbia, as Eagle saw it coming back from the
 // Moon to dock (the user, 2026-11-20: "아폴로 귀환 시에 사령선이 도킹하는걸 게임에 넣는건 어때",
@@ -85,6 +85,55 @@ function paintCommand(g, w, h, rnd) {
   win(0.42, 0.42, 54, 54);
   win(0.25, 0.38, 60, 60);
   grime(g, w, h, rnd, 30, 0.08, 40);
+  weatherCommand(g, w, h, rnd);
+}
+// Eight days flown (the user, 2026-11-20: "웨더링 더 넣고"): the tape crinkled all over in
+// fine creases that catch the light or go dark, dull and bright patches where it lies flat
+// or lifts, a few lifted corners with their shadows, scorch round the windows' rims and the
+// brown fans of the module's own small jets.
+function weatherCommand(g, w, h, rnd) {
+  for (let i = 0; i < 900; i++) {
+    const x = rnd() * w, y = rnd() * h, l = 4 + rnd() * 18, a = (rnd() - 0.5) * 2.4;
+    g.strokeStyle = rnd() < 0.55 ? `rgba(255,255,255,${(0.1 + rnd() * 0.25).toFixed(2)})` : `rgba(40,42,46,${(0.12 + rnd() * 0.25).toFixed(2)})`;
+    g.lineWidth = 0.6 + rnd() * 1.2;
+    g.beginPath();
+    g.moveTo(x, y);
+    g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l);
+    g.stroke();
+  }
+  for (let i = 0; i < 40; i++) {
+    const x = rnd() * w, y = rnd() * h, r = 20 + rnd() * 70;
+    const spot = g.createRadialGradient(x, y, 0, x, y, r);
+    spot.addColorStop(0, rnd() < 0.5 ? 'rgba(150,146,138,.28)' : 'rgba(255,255,250,.22)');
+    spot.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = spot;
+    g.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
+  for (let i = 0; i < 14; i++) {
+    // A corner of tape lifted: bright face, dark gap under it.
+    const x = rnd() * w, y = rnd() * h, k = 8 + rnd() * 14;
+    g.fillStyle = 'rgba(30,30,34,.55)';
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + k, y + 2); g.lineTo(x + 2, y + k); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(250,250,252,.8)';
+    g.beginPath(); g.moveTo(x - 2, y - 2); g.lineTo(x + k - 3, y - 1); g.lineTo(x - 1, y + k - 3); g.closePath(); g.fill();
+  }
+  for (const [u, v] of [[0.22, 0.6], [0.28, 0.6], [0.08, 0.42], [0.42, 0.42], [0.25, 0.38]]) {
+    const x = u * w, y = (1 - v) * h, r = 46;
+    const ring = g.createRadialGradient(x, y, 24, x, y, r);
+    ring.addColorStop(0, 'rgba(92,70,44,.4)');
+    ring.addColorStop(1, 'rgba(92,70,44,0)');
+    g.fillStyle = ring;
+    g.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
+  for (const u of [0.12, 0.37, 0.62, 0.87]) {
+    const x = u * w, y = 0.3 * h;
+    const fan = g.createRadialGradient(x, y, 2, x, y, 70);
+    fan.addColorStop(0, 'rgba(88,62,34,.55)');
+    fan.addColorStop(0.5, 'rgba(120,92,52,.22)');
+    fan.addColorStop(1, 'rgba(120,92,52,0)');
+    g.fillStyle = fan;
+    g.beginPath(); g.moveTo(x, y); g.arc(x, y, 70, 0.9, 2.25); g.closePath(); g.fill();
+  }
 }
 // The service module: a ring of panels, the white radiator strips near its front, the
 // words UNITED STATES down one side with the flag. u round it, v along it (0 at the back).
@@ -121,6 +170,43 @@ function paintService(g, w, h, rnd) {
   g.fillStyle = '#23305f';
   g.fillRect(fx, fy, fw * 0.45, fh * 0.54);
   grime(g, w, h, rnd, 40, 0.1, 50);
+  weatherService(g, w, h, rnd);
+}
+// Eight days flown: the words and the flag a little faded, grime run along the panels,
+// the radiators greyed unevenly, and round each of the four thruster quads (u 1/8, 3/8,
+// 5/8, 7/8 round, some 83% of the way forward) the yellow-brown fans of their exhaust.
+function weatherService(g, w, h, rnd) {
+  g.fillStyle = 'rgba(200,198,190,.22)';
+  g.fillRect(0.8 * w, 0, 0.12 * w, h);
+  for (let i = 0; i < 70; i++) {
+    const x = rnd() * w, y0 = rnd() * h, l = 40 + rnd() * 200;
+    const run = g.createLinearGradient(0, y0, 0, y0 + l);
+    run.addColorStop(0, `rgba(70,62,50,${(0.12 + rnd() * 0.2).toFixed(2)})`);
+    run.addColorStop(1, 'rgba(70,62,50,0)');
+    g.fillStyle = run;
+    g.fillRect(x, y0, 1 + rnd() * 3, l);
+  }
+  for (const u0 of [0.05, 0.55]) {
+    for (let i = 0; i < 18; i++) {
+      const x = (u0 + rnd() * 0.22) * w, y = h * (0.05 + rnd() * 0.42), r = 10 + rnd() * 34;
+      const spot = g.createRadialGradient(x, y, 0, x, y, r);
+      spot.addColorStop(0, `rgba(150,146,130,${(0.15 + rnd() * 0.2).toFixed(2)})`);
+      spot.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = spot;
+      g.fillRect(x - r, y - r, 2 * r, 2 * r);
+    }
+  }
+  for (const u of [0.125, 0.375, 0.625, 0.875]) {
+    const x = u * w, y = (1 - 0.83) * h;
+    for (const [a0, a1, r] of [[-0.5, 0.5, 120], [Math.PI - 0.5, Math.PI + 0.5, 120], [Math.PI / 2 - 0.35, Math.PI / 2 + 0.35, 210]]) {
+      const fan = g.createRadialGradient(x, y, 4, x, y, r);
+      fan.addColorStop(0, 'rgba(96,66,30,.6)');
+      fan.addColorStop(0.45, 'rgba(150,112,58,.28)');
+      fan.addColorStop(1, 'rgba(160,124,70,0)');
+      g.fillStyle = fan;
+      g.beginPath(); g.moveTo(x, y); g.arc(x, y, r, a0, a1); g.closePath(); g.fill();
+    }
+  }
 }
 function paintBell(g, w, h, rnd) {
   const grad = g.createLinearGradient(0, 0, 0, h);
@@ -131,6 +217,22 @@ function paintBell(g, w, h, rnd) {
   g.fillRect(0, 0, w, h);
   for (let x = 0; x < w; x += 6) { g.fillStyle = `rgba(30,28,26,${(0.18 + rnd() * 0.15).toFixed(2)})`; g.fillRect(x, 0, 1, h); }
   for (const v of [0.35, 0.55, 0.75]) { g.fillStyle = 'rgba(40,38,36,.5)'; g.fillRect(0, v * h, w, 3); }
+  // Heat: the throat darkest, then bands going blue-grey, straw and bronze toward the rim,
+  // mottled.
+  const heat = g.createLinearGradient(0, 0, 0, h);
+  heat.addColorStop(0, 'rgba(10,10,12,.55)');
+  heat.addColorStop(0.3, 'rgba(60,70,96,.35)');
+  heat.addColorStop(0.55, 'rgba(120,110,150,.22)');
+  heat.addColorStop(0.72, 'rgba(176,150,90,.3)');
+  heat.addColorStop(0.88, 'rgba(150,100,60,.32)');
+  heat.addColorStop(1, 'rgba(110,84,60,.2)');
+  g.fillStyle = heat;
+  g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 120; i++) {
+    const x = rnd() * w, y = rnd() * h, r = 4 + rnd() * 16;
+    g.fillStyle = `rgba(${rnd() < 0.5 ? '40,36,40' : '190,160,120'},${(0.08 + rnd() * 0.12).toFixed(2)})`;
+    g.fillRect(x - r, y - r / 3, 2 * r, (2 * r) / 3);
+  }
 }
 
 export function buildColumbia(scene, name = 'columbia') {
@@ -176,12 +278,14 @@ export function buildColumbia(scene, name = 'columbia') {
   add(along(CreateCylinder(`${name}Service`, { height: 3.9, diameter: 3.92, tessellation: 64 }, scene)), smMat, -2.29, 0, 0);
   add(along(CreateCylinder(`${name}Aft`, { height: 0.2, diameterTop: 3.92, diameterBottom: 3.4, tessellation: 64 }, scene)), dark, -4.34, 0, 0);
   add(along(CreateCylinder(`${name}Bell`, { height: 2.9, diameterTop: 0.9, diameterBottom: 2.5, tessellation: 48, cap: Mesh.NO_CAP }, scene)), bellMat, -5.85, 0, 0);
+  const quads = [];
   for (let k = 0; k < 4; k++) {
     const a = PI / 4 + (k / 4) * 2 * PI;
     const quad = new TransformNode(`${name}Quad${k}`, scene);
     quad.parent = root;
     quad.position.set(-1.0, 2.0 * Math.cos(a), 2.0 * Math.sin(a));
     quad.rotation.x = a;
+    quads.push(quad);
     const box = add(CreateBox(`${name}QuadBox${k}`, { width: 0.75, height: 0.22, depth: 0.55 }, scene), metal);
     box.parent = quad;
     for (const [dx, dz, ry, rz] of [[0.42, 0, 0, -PI / 2], [-0.42, 0, 0, PI / 2], [0, 0.32, PI / 2, 0], [0, -0.32, -PI / 2, 0]]) {
@@ -200,6 +304,98 @@ export function buildColumbia(scene, name = 'columbia') {
   }
   add(CreateBox(`${name}DishBack`, { width: 0.2, height: 0.7, depth: 0.7 }, scene), gold, -4.3, 3.35, 0);
 
+  // The jets' puffs (the user, 2026-11-20: "도킹이 저렇게 쉽다구?"): a soft white cone out of
+  // each quad's forward nozzle (fwd: braking as she comes, pushing back as she goes) and one
+  // side nozzle (side: the small corrections), shown by pose().
+  const puffMat = new StandardMaterial(`${name}Puff`, scene);
+  puffMat.disableLighting = true;
+  puffMat.emissiveColor = new Color3(0.92, 0.94, 0.97);
+  puffMat.backFaceCulling = false;
+  const puffs = { fwd: [], side: [] };
+  for (const quad of quads) {
+    const k = puffs.fwd.length;
+    for (const kind of ['fwd', 'side']) {
+      const cone = CreateCylinder(`${name}Puff${kind}${k}`, { height: 1, diameterTop: 0.9, diameterBottom: 0.07, tessellation: 16, cap: Mesh.NO_CAP }, scene);
+      cone.material = puffMat;
+      cone.parent = quad;
+      cone.isPickable = false;
+      if (kind === 'fwd') cone.rotation.z = -PI / 2;
+      else cone.rotation.x = k % 2 ? -PI / 2 : PI / 2;
+      cone.metadata = { at: kind === 'fwd' ? [0.53, 0.02, 0] : [0, 0.02, k % 2 ? -0.43 : 0.43], dir: kind === 'fwd' ? [1, 0, 0] : [0, 0, k % 2 ? -1 : 1] };
+      cone.setEnabled(false);
+      puffs[kind].push(cone);
+    }
+  }
   const LENGTH = 4.47 + 7.3;
-  return { root, length: LENGTH, pose() {} };
+  return {
+    root,
+    length: LENGTH,
+    pose({ fwd = 0, side = 0 } = {}) {
+      for (const [kind, v] of [['fwd', fwd], ['side', side]]) {
+        for (const cone of puffs[kind]) {
+          cone.setEnabled(v > 0.02);
+          if (v <= 0.02) continue;
+          const len = 0.5 + 1.6 * v;
+          cone.scaling.set(0.6 + 0.6 * v, len, 0.6 + 0.6 * v);
+          const { at, dir } = cone.metadata;
+          cone.position.set(at[0] + dir[0] * len * 0.5, at[1], at[2] + dir[2] * len * 0.5);
+          cone.visibility = 0.8 * v;
+        }
+      }
+    },
+  };
+}
+
+// Eagle's shadow on the ground as she comes down (the user, 2026-11-20, of the landing seen
+// from Eagle's window: "나머지는 해봐"): the lander's outline as a low Sun throws it, lying
+// flat on the Moon, its feet at the origin and stretching along +x, 1 wide (z). pose({
+// stretch }): how many times longer than wide, as the Sun's height makes it. Not a shadow
+// caster itself (flat: craft.js leaves it out of the shadow map).
+function paintLanderShadow(g, w, h) {
+  g.clearRect(0, 0, w, h);
+  g.fillStyle = 'rgba(0,0,0,0.82)';
+  const y = h / 2;
+  g.beginPath();
+  // The legs, splayed, then the descent stage, the ascent stage and its antennas, drawn
+  // along the length as the Sun stretches them.
+  g.moveTo(0, y - h * 0.46); g.lineTo(w * 0.24, y - h * 0.3); g.lineTo(w * 0.24, y + h * 0.3); g.lineTo(0, y + h * 0.46);
+  g.lineTo(w * 0.05, y + h * 0.46); g.lineTo(w * 0.3, y + h * 0.28); g.lineTo(w * 0.3, y - h * 0.28); g.lineTo(w * 0.05, y - h * 0.46);
+  g.closePath();
+  g.fill();
+  g.fillRect(w * 0.18, y - h * 0.3, w * 0.36, h * 0.6);
+  g.beginPath();
+  g.moveTo(w * 0.52, y - h * 0.26); g.lineTo(w * 0.86, y - h * 0.2); g.lineTo(w * 0.94, y - h * 0.06); g.lineTo(w * 0.94, y + h * 0.1);
+  g.lineTo(w * 0.84, y + h * 0.24); g.lineTo(w * 0.52, y + h * 0.26);
+  g.closePath();
+  g.fill();
+  g.fillRect(w * 0.9, y - h * 0.3, w * 0.09, 2);
+  g.fillRect(w * 0.86, y + h * 0.18, w * 0.12, 2);
+}
+export function buildLanderShadow(scene, name = 'landerShadow') {
+  const root = new TransformNode(name, scene);
+  root.rotationQuaternion = Quaternion.Identity();
+  const tex = new DynamicTexture(`${name}T`, { width: 512, height: 128 }, scene, true);
+  paintLanderShadow(tex.getContext(), 512, 128);
+  tex.hasAlpha = true;
+  tex.update(false);
+  const mat = new StandardMaterial(`${name}M`, scene);
+  mat.diffuseTexture = tex;
+  mat.useAlphaFromDiffuseTexture = true;
+  mat.disableLighting = true;
+  mat.emissiveColor = new Color3(0, 0, 0);
+  mat.backFaceCulling = false;
+  const plane = CreatePlane(`${name}P`, { width: 1, height: 1 }, scene);
+  plane.rotation.x = PI / 2;
+  plane.parent = root;
+  plane.material = mat;
+  plane.isPickable = false;
+  return {
+    root,
+    length: 1,
+    flat: true,
+    pose({ stretch = 4 } = {}) {
+      plane.scaling.x = stretch;
+      plane.position.x = stretch / 2;
+    },
+  };
 }

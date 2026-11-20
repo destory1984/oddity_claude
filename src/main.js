@@ -2399,7 +2399,8 @@ ${STORY_MORE[target.id]}` : told) };
   const floatAt = () => {
     const s = courseTime;
     const g = Math.max(glowNow(), shakeNow());
-    const a = 1 - stillNow();
+    // (McCandless flying himself: the drift eases away too, his own pushes move him.)
+    const a = (1 - stillNow()) * (mmuFly.on ? Math.max(0, 1 - (courseTime - mmuFly.onT) / 1.5) : 1);
     return {
       yaw: a * (0.0055 * Math.sin(s * 0.47) + 0.0025 * Math.sin(s * 0.19 + 1.3)) + g * 0.005 * Math.sin(s * 53),
       pitch: a * (0.0045 * Math.sin(s * 0.37 + 0.6) + 0.002 * Math.sin(s * 0.13 + 2.1)) + g * 0.005 * Math.sin(s * 47 + 1),
@@ -2421,12 +2422,16 @@ ${STORY_MORE[target.id]}` : told) };
     const rail = course ? courseById(course)?.rail : null;
     if (!rail?.feel || courseTime < 0) return { yaw: 0, pitch: 0, roll: 0 };
     const s = courseTime;
-    const p = lastPuff();
+    const p = mmuFly.on ? null : lastPuff();
     const push = p && p.age < 3 ? Math.exp(-p.age * 1.6) * Math.sin(Math.min(p.age * 3, Math.PI / 2)) * (p.k % 2 ? 1 : -1) : 0;
+    // Flying himself, the slow turning eases away (the user, 2026-11-20: "내가 한 번이라도 전/후
+    // 버튼 누르면, 그때부터는 핸드폰이 혼자서 움직이는건 stop"), and a push trembles the view.
+    const calm = mmuFly.on ? Math.max(0, 1 - (courseTime - mmuFly.onT) / 1.5) : 1;
+    const j = mmuFly.shake;
     return {
-      yaw: 0.03 * Math.sin(s * 0.09 + 2) + 0.012 * push + headTurn.yaw,
-      pitch: 0.022 * Math.sin(s * 0.13) + 0.01 * Math.abs(push) + headTurn.pitch,
-      roll: 0.08 * Math.sin(s * 0.11) + 0.035 * Math.sin(s * 0.27 + 1),
+      yaw: calm * (0.03 * Math.sin(s * 0.09 + 2) + 0.012 * push) + headTurn.yaw + j * 0.0025 * (Math.random() - 0.5),
+      pitch: calm * (0.022 * Math.sin(s * 0.13) + 0.01 * Math.abs(push)) + headTurn.pitch + j * 0.0025 * (Math.random() - 0.5),
+      roll: calm * (0.08 * Math.sin(s * 0.11) + 0.035 * Math.sin(s * 0.27 + 1)),
     };
   }
   let puffShown = -1;
@@ -2450,12 +2455,16 @@ ${STORY_MORE[target.id]}` : told) };
       frame.insertAdjacentHTML('beforebegin', `<img id="spacewalkHands" alt="" src="${import.meta.env.BASE_URL}${rail.hands}" style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;pointer-events:none;z-index:5">`);
       hands = document.getElementById('spacewalkHands');
     }
-    const p = inHelmet ? lastPuff() : null;
+    const p = inHelmet && !mmuFly.on ? lastPuff() : null;
+    // The grip: pushing ahead the gloves press forward on the handles (down and a little
+    // bigger), pushing back they pull in (up), eased in and out.
+    mmuFly.grip += ((mmuFly.thrust || 0) - mmuFly.grip) * Math.min(1, dt * 14);
     if (hands) {
       hands.hidden = !showHands;
       const a = p ? p.age : 9;
       const give = a < 1.2 ? Math.exp(-a * 4) * Math.sin(a * 22) * 5 : 0;
-      hands.style.transform = `${frame?.style.transform ?? ''} translate(0px, ${give.toFixed(1)}px)`;
+      const g = mmuFly.grip;
+      hands.style.transform = `${frame?.style.transform ?? ''} translate(0px, ${(give + g * 7).toFixed(1)}px) scale(${(1 + Math.abs(g) * 0.018).toFixed(4)})`;
     }
     // The puff: a white breath of nitrogen at a lower corner, and its hiss.
     if (p && p.k !== puffShown && p.age < 0.5) {
@@ -2550,9 +2559,9 @@ ${STORY_MORE[target.id]}` : told) };
   const MMU_FUEL_S = 30; // seconds of pushing in full tanks
   const MMU_SHOOT_S = 2; // the line on its way
   const MMU_PULL_S = 10; // and reeling him in
-  const mmuFly = { on: false, rel: null, vel: [0, 0, 0], fuel: 1, line: null, keys: 0, puffAt: 0 };
+  const mmuFly = { on: false, onT: 0, rel: null, vel: [0, 0, 0], fuel: 1, line: null, keys: 0, puffAt: 0, jetAt: 0, thrust: 0, grip: 0, shake: 0, warned: 1 };
   function mmuFlyReset() {
-    Object.assign(mmuFly, { on: false, rel: null, vel: [0, 0, 0], fuel: 1, line: null, keys: 0 });
+    Object.assign(mmuFly, { on: false, rel: null, vel: [0, 0, 0], fuel: 1, line: null, keys: 0, thrust: 0, shake: 0, warned: 1 });
   }
   function mmuNote(text) {
     let note = document.getElementById('mmuNote');
@@ -2573,6 +2582,7 @@ ${STORY_MORE[target.id]}` : told) };
     const thrust = mmuFly.fuel > 0 ? push : 0;
     if (!mmuFly.on && thrust) {
       mmuFly.on = true;
+      mmuFly.onT = courseTime;
       mmuFly.rel = state.position.map((n, i) => n - hub[i]);
       mmuFly.vel = [0, 0, 0];
     }
@@ -2585,15 +2595,29 @@ ${STORY_MORE[target.id]}` : told) };
       if (speed > MMU_TOP) mmuFly.vel = mmuFly.vel.map((v) => (v * MMU_TOP) / speed);
       mmuFly.fuel = Math.max(0, mmuFly.fuel - (Math.abs(thrust) * dt) / MMU_FUEL_S);
       headTurn.at = performance.now();
-      if (performance.now() - mmuFly.puffAt > 380) {
-        mmuFly.puffAt = performance.now();
-        sound.puff();
+      const now = performance.now();
+      if (now - mmuFly.jetAt > 140) {
+        mmuFly.jetAt = now;
+        sound.cue(thrust > 0 ? 'jet' : 'jetBack');
+        // (A phone that can, buzzes with each burst; iPhone browsers cannot.)
+        try { navigator.vibrate?.(22); } catch { /* no buzzing here */ }
+      }
+      if (now - mmuFly.puffAt > 380) {
+        mmuFly.puffAt = now;
         mmuPuff(thrust > 0 ? 'back' : 'front');
       }
+    } else if (mmuFly.thrust) sound.cue('jetEnd');
+    mmuFly.thrust = thrust;
+    mmuFly.shake = thrust ? 1 : Math.max(0, mmuFly.shake - dt * 5);
+    // Low on nitrogen: three beeps at a quarter, and again at a tenth.
+    for (const mark of [0.25, 0.1]) {
+      if (mmuFly.fuel < mark && mmuFly.warned > mark) { mmuFly.warned = mark; sound.cue('lowFuel'); }
     }
+    if (mmuFly.fuel > 0.3) mmuFly.warned = 1;
     const far = Math.hypot(...mmuFly.rel) / MMU_KM_PER_M;
     if (!mmuFly.line && (far > MMU_FAR_M || mmuFly.fuel <= 0)) {
-      mmuFly.line = { t: 0, fromKm: Math.hypot(...mmuFly.rel) };
+      mmuFly.line = { t: 0, fromKm: Math.hypot(...mmuFly.rel), latched: false };
+      sound.cue('lineShoot');
       mmuNote(far > MMU_FAR_M ? t('너무 멀어졌습니다. 챌린저가 줄을 쏘아 끌어당깁니다.') : t('질소가 다 떨어졌습니다. 챌린저가 줄을 쏘아 끌어당깁니다.'));
       sound.cue('click');
     }
@@ -2604,6 +2628,7 @@ ${STORY_MORE[target.id]}` : told) };
         mmuFly.rel = mmuFly.rel.map((n, i) => n + mmuFly.vel[i] * dt);
         line.fromKm = Math.hypot(...mmuFly.rel);
       } else {
+        if (!line.latched) { line.latched = true; sound.cue('lineLatch'); sound.cue('reel'); }
         const x = Math.min(1, (line.t - MMU_SHOOT_S) / MMU_PULL_S);
         const ease = x * x * (3 - 2 * x);
         const km = line.fromKm + (MMU_NEAR_M * MMU_KM_PER_M - line.fromKm) * ease;
@@ -2662,13 +2687,14 @@ ${STORY_MORE[target.id]}` : told) };
     const show = inHelmet && Boolean(course && courseById(course)?.rail?.mmu);
     let keys = document.getElementById('mmuKeys');
     if (show && !keys) {
-      document.body.insertAdjacentHTML('beforeend', `<div id="mmuKeys" style="position:fixed;left:14px;bottom:calc(220px + env(safe-area-inset-bottom));z-index:9;display:flex;flex-direction:column;gap:10px"><button type="button" data-way="1">${t('앞으로')}</button><button type="button" data-way="-1">${t('뒤로')}</button></div>`);
+      document.body.insertAdjacentHTML('beforeend', `<div id="mmuKeys" style="position:fixed;left:14px;top:calc(57vh - 148px);z-index:9;display:flex;flex-direction:column;gap:12px"><button type="button" data-way="1" aria-label="${t('앞으로')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/><path d="M6 19l6-6 6 6" opacity=".55"/></svg></button><button type="button" data-way="-1" aria-label="${t('뒤로')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10l6 6 6-6"/><path d="M6 5l6 6 6-6" opacity=".55"/></svg></button></div>`);
       keys = document.getElementById('mmuKeys');
       for (const button of keys.querySelectorAll('button')) {
-        Object.assign(button.style, { width: '64px', height: '64px', borderRadius: '50%', border: '1.5px solid rgba(232,196,120,.75)', background: 'rgba(10,14,22,.55)', color: '#f3e6c4', font: '600 13px/1.1 system-ui,sans-serif', padding: '0', whiteSpace: 'nowrap', touchAction: 'none', userSelect: 'none', webkitUserSelect: 'none' });
+        Object.assign(button.style, { width: '60px', height: '60px', borderRadius: '50%', border: '1.5px solid rgba(232,196,120,.75)', background: 'rgba(10,14,22,.55)', padding: '0', display: 'grid', placeItems: 'center', touchAction: 'none', userSelect: 'none', webkitUserSelect: 'none', transition: 'transform .08s, background .08s' });
+        Object.assign(button.firstElementChild.style, { width: '28px', height: '28px', stroke: '#f0d9a0', strokeWidth: '2.4', fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round', pointerEvents: 'none' });
         const way = Number(button.dataset.way);
-        const down = (e) => { e.preventDefault(); e.stopPropagation(); mmuFly.keys = way; button.style.background = 'rgba(232,196,120,.45)'; button.setPointerCapture?.(e.pointerId); };
-        const up = (e) => { e.stopPropagation(); if (mmuFly.keys === way) mmuFly.keys = 0; button.style.background = 'rgba(10,14,22,.55)'; };
+        const down = (e) => { e.preventDefault(); e.stopPropagation(); mmuFly.keys = way; button.style.background = 'rgba(232,196,120,.42)'; button.style.transform = 'scale(.92)'; button.setPointerCapture?.(e.pointerId); };
+        const up = (e) => { e.stopPropagation(); if (mmuFly.keys === way) mmuFly.keys = 0; button.style.background = 'rgba(10,14,22,.55)'; button.style.transform = ''; };
         button.addEventListener('pointerdown', down);
         button.addEventListener('pointerup', up);
         button.addEventListener('pointercancel', up);
@@ -2710,24 +2736,60 @@ ${STORY_MORE[target.id]}` : told) };
         cuff.style.opacity = low && mmuFly.fuel > 0 ? (0.65 + 0.35 * Math.abs(Math.sin(performance.now() / 260))).toFixed(2) : '1';
       }
     }
-    // The line: from Challenger's bay to him, first flying out, then taut while he is reeled in.
+    // The line, drawn as a rope (the user, 2026-11-20: "줄을 좀 리얼하게 그리고"): braided,
+    // pale and a little worn, thin at Challenger and thick by him; it whips out in a curve with
+    // a hook at its end, then straightens and hums taut while the winch reels him in.
     let svg = document.getElementById('mmuLine');
     const line = show ? mmuFly.line : null;
     if (line && !svg) {
-      document.body.insertAdjacentHTML('beforeend', '<svg id="mmuLine" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;z-index:4;pointer-events:none"><line stroke="rgba(255,236,180,.35)" stroke-width="7" stroke-linecap="round"/><line stroke="#fff4d6" stroke-width="2.2" stroke-linecap="round"/></svg>');
+      document.body.insertAdjacentHTML('beforeend', '<svg id="mmuLine" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;overflow:visible"><g class="rope" fill="none" stroke-linecap="round"></g><g class="hook" fill="none" stroke="#c9ccd2" stroke-width="2.4" stroke-linecap="round"><path d="M0 0 v9 a5 5 0 1 0 8 -4"/><circle r="2.4" fill="#8d9199" stroke="none"/></g></svg>');
       svg = document.getElementById('mmuLine');
     }
     if (svg) {
       const from = line ? mmuOnScreen(here('hubble').position) : null;
       svg.style.display = from ? '' : 'none';
       if (from) {
-        const to = [innerWidth * 0.5, innerHeight * 1.05];
-        const k = Math.min(1, line.t / MMU_SHOOT_S);
-        const end = [from[0] + (to[0] - from[0]) * k, from[1] + (to[1] - from[1]) * k];
-        for (const el of svg.querySelectorAll('line')) {
-          el.setAttribute('x1', from[0].toFixed(1)); el.setAttribute('y1', from[1].toFixed(1));
-          el.setAttribute('x2', end[0].toFixed(1)); el.setAttribute('y2', end[1].toFixed(1));
+        const to = [innerWidth * 0.5, innerHeight * 1.06];
+        const out = Math.min(1, line.t / MMU_SHOOT_S);
+        const reach = 1 - (1 - out) ** 2;
+        const tip = [from[0] + (to[0] - from[0]) * reach, from[1] + (to[1] - from[1]) * reach];
+        const dx = tip[0] - from[0], dy = tip[1] - from[1];
+        const span = Math.hypot(dx, dy) || 1;
+        const nx = -dy / span, ny = dx / span;
+        // Slack while it flies (a bow and a travelling wave), all but straight once latched.
+        const slack = line.latched ? 0.012 : 0.16 * (1 - out * 0.6);
+        const time = performance.now() / 1000;
+        const N = 28;
+        const pts = [];
+        for (let k = 0; k <= N; k++) {
+          const s = k / N;
+          const bow = Math.sin(s * Math.PI) * slack * span;
+          const wave = Math.sin(s * 9 - time * (line.latched ? 30 : 11)) * (line.latched ? 0.6 : 7) * Math.sin(s * Math.PI);
+          pts.push([from[0] + dx * s + nx * (bow + wave), from[1] + dy * s + ny * (bow + wave)]);
         }
+        const g = svg.querySelector('.rope');
+        if (g.childElementCount !== N * 3) {
+          g.innerHTML = '';
+          for (let k = 0; k < N; k++) g.insertAdjacentHTML('beforeend', '<line stroke="#4d4537"/><line stroke="#d8cfb6"/><line stroke="#8a7d62" stroke-dasharray="2.2 2.6"/>');
+        }
+        const lines = g.children;
+        for (let k = 0; k < N; k++) {
+          const [a, c] = [pts[k], pts[k + 1]];
+          const w = 1.2 + 6.8 * ((k + 0.5) / N) ** 1.6;
+          for (let layer = 0; layer < 3; layer++) {
+            const el = lines[k * 3 + layer];
+            el.setAttribute('x1', a[0].toFixed(1)); el.setAttribute('y1', a[1].toFixed(1));
+            el.setAttribute('x2', c[0].toFixed(1)); el.setAttribute('y2', c[1].toFixed(1));
+            // Dark edge, pale body, and the braid's twist across it.
+            el.setAttribute('stroke-width', (layer === 0 ? w + 1.6 : layer === 1 ? w : w * 0.55).toFixed(2));
+            if (layer === 2) el.setAttribute('stroke-dashoffset', ((line.latched ? -time * 40 : 0) + k * 1.3).toFixed(1));
+          }
+        }
+        // The hook at the free end while it flies, turned along its way.
+        const hook = svg.querySelector('.hook');
+        hook.style.display = line.latched ? 'none' : '';
+        const angle = (Math.atan2(dy, dx) * 180) / Math.PI - 90;
+        hook.setAttribute('transform', `translate(${tip[0].toFixed(1)} ${tip[1].toFixed(1)}) rotate(${angle.toFixed(1)}) scale(${(0.6 + reach * 1.4).toFixed(2)})`);
       }
     }
   }
@@ -3015,7 +3077,8 @@ ${STORY_MORE[target.id]}` : told) };
     const f = floatAt();
     const vh = innerHeight / (2 * Math.tan(world.fov() / 2));
     // The frame turns with the view, and moves a little more besides.
-    const px = -f.yaw * vh + f.dx, py = f.pitch * vh + f.dy;
+    const jolt = mmuFly.shake * 1.6;
+    const px = -f.yaw * vh + f.dx + jolt * (Math.random() - 0.5), py = f.pitch * vh + f.dy + jolt * (Math.random() - 0.5);
     frame.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) scale(1.04)`;
     const cat = document.getElementById('cupolaCat');
     if (cat && stillNow() > 0) {
@@ -4335,10 +4398,13 @@ ${STORY_MORE[target.id]}` : told) };
         if (chosen.rail.mmu) mmuFlyStep(chosen, dt, jetKey);
         // Sounds at their moments (rail.sounds: [seconds, cue]).
         for (const [at, name] of chosen.rail.sounds ?? []) if (at > wasTime && at <= courseTime) sound.cue(name);
-        for (const at of chosen.rail.fades ?? []) if (at > wasTime && at <= courseTime) veilBlink();
+        // (Not round again once McCandless flies himself: the user, 2026-11-20, "유저가 수동으로
+        // 움직이기 시작하면, 그 시간부터는 시간 제한 없애줘".)
+        const flying = Boolean(chosen.rail.mmu && mmuFly.on);
+        for (const at of chosen.rail.fades ?? []) if (!flying && at > wasTime && at <= courseTime) veilBlink();
         // Home again, and round once more from the pad (the user, 2026-11-19: "지구로
         // 돌아오면, 다시 반복해"), behind the last blink.
-        if (chosen.rail.loops && courseTime >= chosen.lapS) {
+        if (chosen.rail.loops && courseTime >= chosen.lapS && !flying) {
           courseTime += (chosen.rail.startS ?? 0) - chosen.lapS;
           if (chosen.rail.apollo) apolloPlan(chosen);
         }

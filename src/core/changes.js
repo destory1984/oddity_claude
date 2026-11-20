@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-20', text: t('줄 하나 없이 우주 유영에서 추진기를 뿜으면 소리와 떨림이 나고, 직접 날기 시작하면 시간 제한이 없어집니다.') },
   { day: '2026-11-20', text: t('줄 하나 없이 우주 유영에서 직접 날 수 있습니다. 150m를 넘거나 질소가 떨어지면 챌린저가 줄로 끌어당깁니다.') },
   { day: '2026-11-20', text: t('아폴로 11호의 길에서 사령선 컬럼비아가 이글에 다가와 도킹하는 모습을 봅니다.') },
   { day: '2026-11-20', text: t('우주 왕복선 디스커버리와 허블 코스의 로봇팔이 가까운 쪽은 굵고 허블 쪽은 가늘게, 멀고 가까움이 보입니다.') },

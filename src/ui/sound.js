@@ -481,6 +481,35 @@ export function createSound({ music } = {}) {
       bell(659, 0.9, 0.05);
       bell(988, 1.08, 0.05);
     },
+    // McCandless's jets while a key is held (main.js mmuFly, the user, 2026-11-20: "내가 누를
+    // 때에 칙칙하면서 소리도 나고"): a short burst of hiss every 0.14 s with a soft knock
+    // under it, lower for a push ahead, higher for one back; and a sigh when it is let go.
+    jet: () => {
+      noise({ length: 0.13, volume: 0.045, type: 'bandpass', freq: 2300, to: 1700, attack: 0.008 });
+      tone({ freq: 90, to: 60, length: 0.07, volume: 0.02 });
+    },
+    jetBack: () => {
+      noise({ length: 0.13, volume: 0.04, type: 'bandpass', freq: 3300, to: 2500, attack: 0.008 });
+      tone({ freq: 110, to: 75, length: 0.07, volume: 0.018 });
+    },
+    jetEnd: () => noise({ length: 0.5, volume: 0.03, type: 'bandpass', freq: 2600, to: 900, attack: 0.02 }),
+    // Challenger's line: shot out with a rising swish, the hook catching with a clack, and
+    // the winch humming for the ten seconds he is reeled in.
+    lineShoot: () => {
+      noise({ length: 0.75, volume: 0.05, type: 'highpass', freq: 900, to: 5200, attack: 0.06 });
+      tone({ freq: 260, to: 820, type: 'triangle', length: 0.6, volume: 0.012, attack: 0.05 });
+    },
+    lineLatch: () => {
+      noise({ length: 0.12, volume: 0.11, type: 'lowpass', freq: 900, to: 220 });
+      tone({ freq: 150, length: 0.2, volume: 0.05 });
+      noise({ start: 0.025, length: 0.05, volume: 0.04, type: 'highpass', freq: 5200 });
+    },
+    reel: () => {
+      tone({ freq: 70, to: 96, type: 'sawtooth', length: 10, volume: 0.009, attack: 0.4, hold: 9.3 });
+      noise({ length: 10, volume: 0.01, type: 'bandpass', freq: 420, to: 520, attack: 0.4, hold: 9.3 });
+    },
+    // Nitrogen running low: three short beeps.
+    lowFuel: () => [0, 0.16, 0.32].forEach((at) => tone({ freq: 1320, start: at, length: 0.09, volume: 0.03, attack: 0.005 })),
     // A jump, six seconds like the flash (ui/warp.js). All bells and clear tones, no low
     // noise: music-box notes climbing a five-note scale faster and faster for 2.6 s, a
     // bright chord as the screen goes white, then a few slow chimes drifting down as

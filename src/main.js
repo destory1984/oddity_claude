@@ -2291,6 +2291,26 @@ ${STORY_MORE[target.id]}` : told) };
   // Pacific at Apollo 11's own spot (13.3 N, 169.15 W), both in daylight: the clock is moved
   // on to the hour of the day when the lower of the two Suns stands highest (the two are 88
   // degrees apart: an afternoon in Florida, a morning on the Pacific).
+  // How far from Apollo 11's landing light the landing would be with these bodies, in
+  // degrees: the Sun's height at the place (core/courses.js apolloAt: aLand, where the Earth
+  // stands 20 degrees up ahead) from 11, and 90 more if it is not behind her.
+  const APOLLO_SUN_DEG = 11;
+  function apolloLandingMiss(list) {
+    const find = (id) => list.find((b) => b.id === id);
+    const earth = find('earth'), moon = find('moon'), sun = find('sun');
+    const unit = (v) => { const l = Math.hypot(...v); return v.map((n) => n / l); };
+    const u = unit(moon.position.map((n, i) => n - earth.position[i]));
+    const w = unit([u[2], 0, -u[0]]);
+    const aLand = Math.acos(-Math.sin((20 * Math.PI) / 180));
+    const out = u.map((n, i) => Math.cos(aLand) * n - Math.sin(aLand) * w[i]);
+    const site = moon.position.map((n, i) => n + out[i] * moon.radiusKm);
+    const toSun = unit(sun.position.map((n, i) => n - site[i]));
+    const toEarth = unit(earth.position.map((n, i) => n - site[i]));
+    const level = (v) => { const k = v.reduce((q, n, i) => q + n * out[i], 0); return v.map((n, i) => n - out[i] * k); };
+    const sinE = toSun.reduce((q, n, i) => q + n * out[i], 0);
+    const behind = level(toSun).reduce((q, n, i) => q + n * level(toEarth)[i], 0) < 0;
+    return Math.abs((Math.asin(sinE) * 180) / Math.PI - APOLLO_SUN_DEG) + (behind ? 0 : 90);
+  }
   function apolloPlan(chosen) {
     const pace = chosen.rail.pace ?? 1;
     const padAt = chosen.rail.ascent.liftoff * pace;
@@ -2299,11 +2319,23 @@ ${STORY_MORE[target.id]}` : told) };
     const spot = (t) => surfaceDirection(13.3, -169.15, spinOf('earth', t));
     const toSunNow = (() => { const sp = here('sun').position, e = here('earth').position; const v = sp.map((n, i) => n - e[i]); const l = Math.hypot(...v); return v.map((n) => n / l); })();
     const sunUp = (d) => d[0] * toSunNow[0] + d[1] * toSunNow[1] + d[2] * toSunNow[2];
-    let t0 = simTime, high = -Infinity;
-    for (let t = simTime; t < simTime + 86164; t += 120) {
+    // And the light of Apollo 11's landing on 20 July 1969 (the user, 2026-11-20: "1969년 7월
+    // 20일로 고정하는 거", "지금 개발해봐"): the game's sky is its own layout, not the
+    // calendar, so what is kept is that day's light: the Sun some 11 degrees up behind Eagle
+    // where she lands (the Earth ahead), her shadow long before her. Over a month of the
+    // game's clock, every half hour, the time whose landing light is nearest that, with the
+    // pad and the splash both in daylight (the Sun over 15 degrees up at each).
+    const sinUp = Math.sin((15 * Math.PI) / 180);
+    let t0 = simTime, best = Infinity, high = -Infinity, tHigh = simTime;
+    for (let t = simTime; t < simTime + 30 * 86400; t += 1800) {
       const c = Math.min(sunUp(pad(t + padAt)), sunUp(spot(t + endAt)));
-      if (c > high) { high = c; t0 = t; }
+      if (c > high) { high = c; tHigh = t; }
+      if (c < sinUp) continue;
+      const miss = apolloLandingMiss(bodiesAt(t));
+      if (miss < best) { best = miss; t0 = t; }
     }
+    // (None in daylight at both ends with that light: the old way, daylight alone.)
+    if (best === Infinity) t0 = tHigh;
     simTime = t0;
     bodies = allAt(simTime);
     craft = craftAt(simTime, bodies);
@@ -2628,15 +2660,20 @@ ${STORY_MORE[target.id]}` : told) };
   // 나머지는 해봐"): her shadow on the ground where the Sun throws it, from the start of the
   // descent until she lifts off; from `dust` the engine's blast blowing dust out across the
   // ground, gone the moment the engine is cut at `touch` (no air holds it); the contact
-  // light on the panel from `contact` (cabinLamp).
+  // light on the panel from `contact` (cabinLamp). Both drawn over the window, under the
+  // frame (cabinGround), the shadow as its outline on the true ground seen from the eye:
+  // as a model on the ground it lay nearer than the view's near plane (some 1.4 km there).
   const LANDER_TALL_KM = 0.007;
   const LANDER_WIDE_KM = 0.0095;
+  // The lander's shadow, along (0 at her feet, 1 at the top of her antennas) and across
+  // (-0.5 to 0.5): splayed legs, the descent stage, the ascent stage and its antennas.
+  const LANDER_OUTLINE = [[0, -0.46], [0.06, -0.46], [0.22, -0.31], [0.52, -0.27], [0.84, -0.21], [0.95, -0.07], [1, -0.02], [0.95, 0.1], [0.84, 0.23], [0.52, 0.27], [0.22, 0.31], [0.06, 0.46], [0, 0.46], [0.12, 0]];
+  let landingNow = { dust: 0, shadow: null };
   function apolloLanding(chosen, base) {
     const L = chosen.rail.landing;
     const t = courseTime;
-    const shadowOn = L && t >= 505 && t < 700;
     let shadow = null;
-    if (shadowOn) {
+    if (L && t >= 505 && t < 700) {
       const moon = here('moon'), sun = here('sun');
       const fromMoon = base.position.map((n, i) => n - moon.position[i]);
       const r = Math.hypot(...fromMoon);
@@ -2645,26 +2682,26 @@ ${STORY_MORE[target.id]}` : told) };
       const toSun = sun.position.map((n, i) => n - base.position[i]);
       const sl = Math.hypot(...toSun);
       const s = toSun.map((n) => n / sl);
-      const sinE = s.reduce((a, n, i) => a + n * up[i], 0);
+      const sinE = s.reduce((q, n, i) => q + n * up[i], 0);
       // (A Sun under 2 degrees throws no shadow worth the name; one higher than 80 none to see.)
       if (h < 4 && sinE > 0.035 && sinE < 0.98) {
         const away = s.map((n, i) => -(n - up[i] * sinE));
         const al = Math.hypot(...away);
-        const horiz = away.map((n) => n / al);
+        const along = away.map((n) => n / al);
+        const across = [up[1] * along[2] - up[2] * along[1], up[2] * along[0] - up[0] * along[2], up[0] * along[1] - up[1] * along[0]];
         const cotE = Math.sqrt(1 - sinE * sinE) / sinE;
-        const feet = moon.position.map((n, i) => n + up[i] * (moon.radiusKm + 0.0004) + horiz[i] * h * cotE);
-        shadow = { kind: 'landerShadow', km: feet, sizeKm: LANDER_WIDE_KM, forward: horiz, up, pose: { stretch: Math.min(25, (LANDER_TALL_KM * cotE) / LANDER_WIDE_KM) } };
+        const long = Math.min(25 * LANDER_WIDE_KM, LANDER_TALL_KM * cotE);
+        const feet = moon.position.map((n, i) => n + up[i] * moon.radiusKm + along[i] * h * cotE);
+        shadow = LANDER_OUTLINE.map(([x, y]) => feet.map((n, i) => n + along[i] * x * long + across[i] * y * LANDER_WIDE_KM));
       }
     }
-    world.setFloatModel('landerShadow', shadow);
-    cabinDust(L && t > L.dust && t < L.touch ? smoothstep01((t - L.dust) / (L.touch - 2 - L.dust)) : 0);
+    landingNow = { dust: L && t > L.dust && t < L.touch ? smoothstep01((t - L.dust) / (L.touch - 2 - L.dust)) : 0, shadow };
   }
-  // The dust blown out by Eagle's engine, over the window and under the frame: a low haze and
-  // streaks racing out from below the middle, along the ground and away (k 0..1).
-  let dustBits = null;
-  function cabinDust(k) {
+  // Drawn each frame with the view as it stands (cupolaLight, after the window's drift).
+  function cabinGround() {
+    const { dust, shadow } = course ? landingNow : { dust: 0, shadow: null };
     let canvas = document.getElementById('cabinDust');
-    if (!k) {
+    if (!dust && !shadow) {
       if (canvas) canvas.hidden = true;
       return;
     }
@@ -2677,6 +2714,33 @@ ${STORY_MORE[target.id]}` : told) };
     if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
     const g = canvas.getContext('2d');
     g.clearRect(0, 0, W, H);
+    if (shadow) {
+      const f = forward(state.orientation), rt = right(state.orientation), u = rotateVector(state.orientation, [0, 1, 0]);
+      const vh = H / (2 * Math.tan(world.fov() / 2));
+      const pts = [];
+      for (const p of shadow) {
+        const d = p.map((n, i) => n - state.position[i]);
+        const z = d.reduce((q, n, i) => q + n * f[i], 0);
+        if (z <= 0.001) { pts.length = 0; break; }
+        pts.push([W / 2 + (d.reduce((q, n, i) => q + n * rt[i], 0) / z) * vh, H / 2 - (d.reduce((q, n, i) => q + n * u[i], 0) / z) * vh]);
+      }
+      if (pts.length) {
+        g.save();
+        g.filter = 'blur(1px)';
+        g.fillStyle = 'rgba(4,4,6,0.7)';
+        g.beginPath();
+        pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y)));
+        g.closePath();
+        g.fill();
+        g.restore();
+      }
+    }
+    if (dust) cabinDustDraw(g, W, H, dust);
+  }
+  // The dust blown out by Eagle's engine, over the window and under the frame: a low haze and
+  // streaks racing out from below the middle, along the ground and away (k 0..1).
+  let dustBits = null;
+  function cabinDustDraw(g, W, H, k) {
     const haze = g.createLinearGradient(0, H * 0.35, 0, H);
     haze.addColorStop(0, 'rgba(150,140,124,0)');
     haze.addColorStop(1, `rgba(150,140,124,${(0.32 * k).toFixed(3)})`);
@@ -3327,6 +3391,7 @@ ${STORY_MORE[target.id]}` : told) };
     cabinGlow();
     cabinKeyPlace(frame, px, py);
     cabinLamp(frame, px, py);
+    cabinGround();
     cabinWordsPlace(frame, px, py);
   }
 
@@ -3375,6 +3440,10 @@ ${STORY_MORE[target.id]}` : told) };
       if (chosen.rail?.apollo) {
         apolloPlan(chosen);
         body = here(chosen.body);
+        // Its sky held still while it is flown (the plan's moment may lie days of the game's
+        // clock ahead), and the clock back to now when it is left (cupolaView).
+        cupolaClock = true;
+        clockPace = 0;
       }
       // Other courses with a clock of their own, at rail.pace times the true pace.
       if (chosen.rail?.pace && !chosen.rail.cupola) {
@@ -4646,8 +4715,8 @@ ${STORY_MORE[target.id]}` : told) };
     } else world.setCraftModel('hubble', null);
     if (!course || !courseById(course)?.rail?.dock) {
       world.setFloatModel('columbia', null);
-      world.setFloatModel('landerShadow', null);
-      cabinDust(0);
+      landingNow = { dust: 0, shadow: null };
+      cabinGround();
       if (!course) cabinLamp(null);
     }
     // McCandless seen from outside, coming out of the bay (core/courses.js mmuFigure).

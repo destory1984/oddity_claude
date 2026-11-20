@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-20', text: t('아폴로 11호의 길에서 이글은 1969년 그날처럼 해가 뒤에서 낮게 비추는 밝은 땅에 내립니다.') },
   { day: '2026-11-20', text: t('아폴로 11호의 길에서 엔진을 켜면 소리가 나고 선실이 떨리며, 안드로이드 폰은 진동합니다.') },
   { day: '2026-11-20', text: t('아폴로 11호의 길에서 이글이 컬럼비아에서 떨어져 나오고, 도킹은 흔들린 끝에 붙습니다.') },
   { day: '2026-11-20', text: t('아폴로 11호의 길의 착륙에서 먼지가 날리고, 땅에 닿으면 착지 신호등이 켜집니다.') },

@@ -1,4 +1,4 @@
-import { Vector3, Quaternion, Color3, StandardMaterial, TransformNode, DynamicTexture, Mesh, CreateCylinder, CreateSphere, CreateBox, CreateTorus, CreatePlane, Texture } from './babylon.js';
+import { Vector3, Quaternion, Color3, StandardMaterial, TransformNode, DynamicTexture, Mesh, CreateCylinder, CreateSphere, CreateBox, CreateTorus, Texture } from './babylon.js';
 
 // Apollo 11's command and service module, Columbia, as Eagle saw it coming back from the
 // Moon to dock (the user, 2026-11-20: "아폴로 귀환 시에 사령선이 도킹하는걸 게임에 넣는건 어때",
@@ -346,56 +346,3 @@ export function buildColumbia(scene, name = 'columbia') {
   };
 }
 
-// Eagle's shadow on the ground as she comes down (the user, 2026-11-20, of the landing seen
-// from Eagle's window: "나머지는 해봐"): the lander's outline as a low Sun throws it, lying
-// flat on the Moon, its feet at the origin and stretching along +x, 1 wide (z). pose({
-// stretch }): how many times longer than wide, as the Sun's height makes it. Not a shadow
-// caster itself (flat: craft.js leaves it out of the shadow map).
-function paintLanderShadow(g, w, h) {
-  g.clearRect(0, 0, w, h);
-  g.fillStyle = 'rgba(0,0,0,0.82)';
-  const y = h / 2;
-  g.beginPath();
-  // The legs, splayed, then the descent stage, the ascent stage and its antennas, drawn
-  // along the length as the Sun stretches them.
-  g.moveTo(0, y - h * 0.46); g.lineTo(w * 0.24, y - h * 0.3); g.lineTo(w * 0.24, y + h * 0.3); g.lineTo(0, y + h * 0.46);
-  g.lineTo(w * 0.05, y + h * 0.46); g.lineTo(w * 0.3, y + h * 0.28); g.lineTo(w * 0.3, y - h * 0.28); g.lineTo(w * 0.05, y - h * 0.46);
-  g.closePath();
-  g.fill();
-  g.fillRect(w * 0.18, y - h * 0.3, w * 0.36, h * 0.6);
-  g.beginPath();
-  g.moveTo(w * 0.52, y - h * 0.26); g.lineTo(w * 0.86, y - h * 0.2); g.lineTo(w * 0.94, y - h * 0.06); g.lineTo(w * 0.94, y + h * 0.1);
-  g.lineTo(w * 0.84, y + h * 0.24); g.lineTo(w * 0.52, y + h * 0.26);
-  g.closePath();
-  g.fill();
-  g.fillRect(w * 0.9, y - h * 0.3, w * 0.09, 2);
-  g.fillRect(w * 0.86, y + h * 0.18, w * 0.12, 2);
-}
-export function buildLanderShadow(scene, name = 'landerShadow') {
-  const root = new TransformNode(name, scene);
-  root.rotationQuaternion = Quaternion.Identity();
-  const tex = new DynamicTexture(`${name}T`, { width: 512, height: 128 }, scene, true);
-  paintLanderShadow(tex.getContext(), 512, 128);
-  tex.hasAlpha = true;
-  tex.update(false);
-  const mat = new StandardMaterial(`${name}M`, scene);
-  mat.diffuseTexture = tex;
-  mat.useAlphaFromDiffuseTexture = true;
-  mat.disableLighting = true;
-  mat.emissiveColor = new Color3(0, 0, 0);
-  mat.backFaceCulling = false;
-  const plane = CreatePlane(`${name}P`, { width: 1, height: 1 }, scene);
-  plane.rotation.x = PI / 2;
-  plane.parent = root;
-  plane.material = mat;
-  plane.isPickable = false;
-  return {
-    root,
-    length: 1,
-    flat: true,
-    pose({ stretch = 4 } = {}) {
-      plane.scaling.x = stretch;
-      plane.position.x = stretch / 2;
-    },
-  };
-}

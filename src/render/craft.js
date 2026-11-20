@@ -768,8 +768,10 @@ export function createCraft(scene, craftList) {
     metal.emissiveColor = new Color3(0.07, 0.07, 0.075);
     metal.specularColor = new Color3(0.45, 0.45, 0.45);
     const root = new TransformNode(`${id}Arm`, scene);
-    const boom = (n, look = material) => {
-      const mesh = CreateCylinder(`${id}Arm${n}`, { height: 1, diameter: 1, tessellation: 18 }, scene);
+    // A boom wider at its start (bottom, toward the shoulder) than at its end: the near end of
+    // the arm reads wider, as it would seen from its root.
+    const boom = (n, look = material, start = 1, end = 1) => {
+      const mesh = CreateCylinder(`${id}Arm${n}`, { height: 1, diameterBottom: start, diameterTop: end, tessellation: 18 }, scene);
       mesh.parent = root;
       mesh.material = look;
       mesh.isPickable = false;
@@ -780,7 +782,7 @@ export function createCraft(scene, craftList) {
     elbow.parent = root;
     elbow.material = metal;
     elbow.isPickable = false;
-    const arm = { root, upper: boom('Upper'), lower: boom('Lower'), hand: boom('Hand', metal), elbow, held: null };
+    const arm = { root, upper: boom('Upper', material, 2.4, 1.5), lower: boom('Lower', material, 1.5, 1), hand: boom('Hand', metal), elbow, held: null };
     arms.set(id, arm);
     return arm;
   };
@@ -813,11 +815,20 @@ export function createCraft(scene, craftList) {
     if (t < 0 || !arm.held) arm.held = toEye(plane.position.add(R.scale(-0.1 * w)).add(U.scale(-0.2 * h)));
     const held = arm.held;
     const far = Math.hypot(...held);
-    const shoulder = [held[0] + 0.05 * far, -0.8 * far, 0.55 * far];
-    const low = [held[0], -0.9 * far, held[2]];
+    // The shoulder near the eye, so the arm comes in thick and narrows toward Hubble as a
+    // boom of one width does seen from its root (the user, 2026-11-20:
+    // "로봇팔 폭이 근거리와 원거리가 같네"; it stood at 55% of Hubble's distance).
+    // Just under the bottom edge, its elbow in the lower left window. Not nearer than two
+    // thirds of Hubble's distance: the eye cuts away all within 10 km (its near plane) and
+    // a shoulder at a fifth of the way was cut off with half the arm. The rest of the
+    // nearness is in the booms' taper (armOf).
+    const root = Math.max(0.66 * far, 1.2 * eye.minZ);
+    const shoulder = [-0.12 * root, -0.63 * root, root];
+    // Let go, the hand folds down past the shoulder's side, out under the lower left window.
+    const low = [-0.3 * root, -1.2 * root, 1.2 * root];
     const wrist = held.map((n, i) => n + (low[i] - n) * fold);
     const [s, wv] = [fromEye(shoulder), fromEye(wrist)];
-    const reach = 0.62 * Vector3.Distance(fromEye(held), s);
+    const reach = 0.6 * Vector3.Distance(fromEye(held), s);
     const way = wv.subtract(s);
     const dist = Math.min(way.length(), 2 * reach * 0.999);
     const dir = way.normalize();
@@ -830,7 +841,7 @@ export function createCraft(scene, craftList) {
     const back = wv.subtract(elbow).normalize();
     span(arm.hand, wv.subtract(back.scale(0.07 * far)), wv, 1.6 * thick);
     arm.elbow.position.copyFrom(elbow);
-    arm.elbow.scaling.setAll(1.4 * thick);
+    arm.elbow.scaling.setAll(1.8 * thick);
     arm.root.setEnabled(true);
   }
   const buildCraft = (id) => {

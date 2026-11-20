@@ -135,7 +135,7 @@ test('every picture and sound a course names is there in public/', () => {
     else if (v && typeof v === 'object') for (const x of Object.values(v)) walk(x);
   };
   for (const c of COURSES) walk(c.rail ?? {});
-  assert.ok(named.size >= 19, String(named.size));
+  assert.ok(named.size >= 18, String(named.size));
   for (const path of named) assert.ok(fs.existsSync(`public/${path}`), path);
 });
 

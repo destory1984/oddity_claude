@@ -5156,7 +5156,7 @@ html.gaze #gazeButton {
 
 html.gaze #gazeMusic {
   display:inline-flex;
-  right:calc(2 * var(--step, 64px));
+  right:var(--step, 64px);
   opacity:.4;
   border-color:var(--gold);
   animation:gazeMusicIn .6s ease both;
@@ -5217,6 +5217,11 @@ html.gaze #gazeCaption.has {
 
 html.gaze #gazeCaption.has {
   right:calc(4 * var(--step, 64px));
+}
+
+/* Music beside the moon, sound effects next to it (the user, 2026-11-20: "소리 / 음악 아이콘 위치 바꿔"). */
+html.gaze #gazeSound {
+  right:calc(2 * var(--step, 64px));
 }
 
 #gazeSound::before,

@@ -2507,7 +2507,7 @@ ${STORY_MORE[target.id]}` : told) };
       glare.hidden = o <= 0.001;
     }
     if (!course) mmuFlyReset();
-    mmuFlyUi(inHelmet);
+    mmuFlyUi(inHelmet, dt);
   }
   // Columbia coming to dock with Eagle, seen from Eagle's window (rail.dock: from, at the
   // moment they touch, to, its distance far and near in km and its drawn length; the user,
@@ -2554,14 +2554,14 @@ ${STORY_MORE[target.id]}` : told) };
   const MMU_KM_PER_M = 2.8; // the course's km for one true metre: "about 100 m" stands at 280 km
   const MMU_FAR_M = 150;
   const MMU_NEAR_M = 30;
-  const MMU_ACCEL = 6; // km/s gained in each second of a push
+  const MMU_BURST = 5; // km/s gained with each burst (some 2 m/s)
+  const MMU_BURST_FUEL = 0.035; // of full tanks, each burst (28 in all)
   const MMU_TOP = 24; // km/s at most (some 9 m/s)
-  const MMU_FUEL_S = 30; // seconds of pushing in full tanks
   const MMU_SHOOT_S = 2; // the line on its way
   const MMU_PULL_S = 10; // and reeling him in
-  const mmuFly = { on: false, onT: 0, rel: null, vel: [0, 0, 0], fuel: 1, line: null, keys: 0, puffAt: 0, jetAt: 0, thrust: 0, grip: 0, shake: 0, warned: 1 };
+  const mmuFly = { on: false, onT: 0, rel: null, vel: [0, 0, 0], fuel: 1, line: null, keys: 0, puffAt: 0, held: 0, thrust: 0, grip: 0, shake: 0, warned: 1, needle: 1 };
   function mmuFlyReset() {
-    Object.assign(mmuFly, { on: false, rel: null, vel: [0, 0, 0], fuel: 1, line: null, keys: 0, thrust: 0, shake: 0, warned: 1 });
+    Object.assign(mmuFly, { on: false, rel: null, vel: [0, 0, 0], fuel: 1, line: null, keys: 0, held: 0, thrust: 0, shake: 0, warned: 1 });
   }
   function mmuNote(text) {
     let note = document.getElementById('mmuNote');
@@ -2579,7 +2579,11 @@ ${STORY_MORE[target.id]}` : told) };
     if (!cupolaOn) return;
     const hub = here('hubble').position;
     const push = mmuFly.line ? 0 : Math.max(-1, Math.min(1, key + mmuFly.keys));
-    const thrust = mmuFly.fuel > 0 ? push : 0;
+    // One burst for each press (the user, 2026-11-20: "계속 누르고 있으니까, 기관총 소리 난다. 한 번에
+    // 한 번씩만 가동"): the jets fire as a key goes down and not again till it is let go.
+    const pressed = Math.sign(push);
+    const thrust = mmuFly.fuel > 0 && pressed && pressed !== mmuFly.held ? pressed : 0;
+    mmuFly.held = pressed;
     if (!mmuFly.on && thrust) {
       mmuFly.on = true;
       mmuFly.onT = courseTime;
@@ -2588,27 +2592,22 @@ ${STORY_MORE[target.id]}` : told) };
     }
     if (!mmuFly.on) return;
     if (thrust) {
-      // The way he looks, the head's turn in it (cupolaFloat); the head stays turned while he pushes.
+      // The way he looks, the head's turn in it (cupolaFloat).
       const ahead = forward(state.orientation);
-      mmuFly.vel = mmuFly.vel.map((v, i) => v + ahead[i] * thrust * MMU_ACCEL * dt);
+      mmuFly.vel = mmuFly.vel.map((v, i) => v + ahead[i] * thrust * MMU_BURST);
       const speed = Math.hypot(...mmuFly.vel);
       if (speed > MMU_TOP) mmuFly.vel = mmuFly.vel.map((v) => (v * MMU_TOP) / speed);
-      mmuFly.fuel = Math.max(0, mmuFly.fuel - (Math.abs(thrust) * dt) / MMU_FUEL_S);
+      mmuFly.fuel = Math.max(0, mmuFly.fuel - MMU_BURST_FUEL);
       headTurn.at = performance.now();
-      const now = performance.now();
-      if (now - mmuFly.jetAt > 140) {
-        mmuFly.jetAt = now;
-        sound.cue(thrust > 0 ? 'jet' : 'jetBack');
-        // (A phone that can, buzzes with each burst; iPhone browsers cannot.)
-        try { navigator.vibrate?.(22); } catch { /* no buzzing here */ }
-      }
-      if (now - mmuFly.puffAt > 380) {
-        mmuFly.puffAt = now;
-        mmuPuff(thrust > 0 ? 'back' : 'front');
-      }
-    } else if (mmuFly.thrust) sound.cue('jetEnd');
-    mmuFly.thrust = thrust;
-    mmuFly.shake = thrust ? 1 : Math.max(0, mmuFly.shake - dt * 5);
+      sound.cue(thrust > 0 ? 'jet' : 'jetBack');
+      // (A phone that can, buzzes with the burst; iPhone browsers cannot.)
+      try { navigator.vibrate?.(45); } catch { /* no buzzing here */ }
+      mmuPuff(thrust > 0 ? 'back' : 'front');
+      mmuFly.shake = 1;
+    }
+    // The gloves press the handle while the key is held; the view shakes with the burst and settles.
+    mmuFly.thrust = mmuFly.line ? 0 : pressed;
+    mmuFly.shake = Math.max(0, mmuFly.shake - dt * 2.4);
     // Low on nitrogen: three beeps at a quarter, and again at a tenth.
     for (const mark of [0.25, 0.1]) {
       if (mmuFly.fuel < mark && mmuFly.warned > mark) { mmuFly.warned = mark; sound.cue('lowFuel'); }
@@ -2682,8 +2681,10 @@ ${STORY_MORE[target.id]}` : told) };
   }
   // The jets' two keys, the gauge on the inside of his left wrist (nitrogen and how far
   // Challenger is), and the line from her bay.
-  const WRIST = { x: 165, y: 1505, w: 270, h: 124, turn: -24 }; // in the hands picture's pixels
-  function mmuFlyUi(inHelmet) {
+  // On the left glove of the hands picture (its pixels, from GPT's check7.json).
+  const DIAL = { x: 255, y: 1635, r: 57 };
+  const COUNTER = { x: 354.5, y: 1667.5, turn: 15, size: 30 };
+  function mmuFlyUi(inHelmet, dt) {
     const show = inHelmet && Boolean(course && courseById(course)?.rail?.mmu);
     let keys = document.getElementById('mmuKeys');
     if (show && !keys) {
@@ -2703,11 +2704,15 @@ ${STORY_MORE[target.id]}` : told) };
     }
     if (keys) keys.hidden = !show;
     if (!show) mmuFly.keys = 0;
-    // The gauge rides with the hands (the same layer and drift).
+    // The gauge rides with the hands (the same layer and drift). It is drawn on the glove
+    // itself (the hands picture, GPT's order 7: a pressure dial strapped on and a counter
+    // beside it; the user's pick "나", "좋 더 진짜스럽게", "위치 안 맞는다"); the game
+    // turns its needle with the nitrogen left (empty at the lower left, in the red; full
+    // at the lower right) and turns the counter's figures to the metres from Challenger.
     const hands = document.getElementById('spacewalkHands');
     let wrist = document.getElementById('mmuWrist');
     if (show && hands && !wrist) {
-      hands.insertAdjacentHTML('afterend', '<div id="mmuWrist" aria-hidden="true" style="position:fixed;inset:0;z-index:5;pointer-events:none"><div class="cuff" style="position:absolute;box-sizing:border-box;border-radius:8%/16%;background:linear-gradient(#262b31,#14181c);border:2px solid #474d55;box-shadow:0 2px 6px rgba(0,0,0,.6);padding:6% 7%;color:#8ff0a4;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700"><div class="row" style="display:flex;align-items:center;gap:6%"><span>N₂</span><div style="flex:1;height:0.62em;border:1px solid #5d6670;border-radius:2px;padding:1px"><div class="bar" style="height:100%;background:#8ff0a4"></div></div></div><div class="read" style="margin-top:4%;white-space:nowrap"></div></div></div>');
+      hands.insertAdjacentHTML('afterend', `<div id="mmuWrist" aria-hidden="true" style="position:fixed;inset:0;z-index:5;pointer-events:none"><svg style="position:absolute;overflow:visible"><g class="needle"><path d="M${DIAL.x} ${DIAL.y + 9} L${DIAL.x} ${DIAL.y - DIAL.r * 0.78}" stroke="#141414" stroke-width="4.5" stroke-linecap="round"/><path d="M${DIAL.x} ${DIAL.y - DIAL.r * 0.55} L${DIAL.x} ${DIAL.y - DIAL.r * 0.78}" stroke="#b3202a" stroke-width="4.5" stroke-linecap="round"/></g><circle cx="${DIAL.x}" cy="${DIAL.y}" r="6" fill="#1c1c1c"/><circle cx="${DIAL.x - 1.5}" cy="${DIAL.y - 1.5}" r="2" fill="#8c8c8c"/><text class="range" x="${COUNTER.x}" y="${COUNTER.y}" transform="rotate(${COUNTER.turn} ${COUNTER.x} ${COUNTER.y})" text-anchor="middle" dominant-baseline="central" fill="#efe9da" font-family="'Courier New',monospace" font-weight="700" font-size="${COUNTER.size}" letter-spacing="2"></text></svg></div>`);
       wrist = document.getElementById('mmuWrist');
     }
     if (wrist) {
@@ -2717,23 +2722,21 @@ ${STORY_MORE[target.id]}` : told) };
         const nw = hands.naturalWidth || 1206, nh = hands.naturalHeight || 1971;
         const s0 = Math.max(innerWidth / nw, innerHeight / nh);
         const ox = (innerWidth - nw * s0) * 0.5, oy = (innerHeight - nh * s0) * 0.45;
-        const cuff = wrist.firstElementChild;
-        Object.assign(cuff.style, {
-          left: `${(ox + (WRIST.x - WRIST.w / 2) * s0).toFixed(1)}px`, top: `${(oy + (WRIST.y - WRIST.h / 2) * s0).toFixed(1)}px`,
-          width: `${(WRIST.w * s0).toFixed(1)}px`, height: `${(WRIST.h * s0).toFixed(1)}px`,
-          fontSize: `${Math.max(9, 40 * s0).toFixed(1)}px`, transform: `rotate(${WRIST.turn}deg)`,
-        });
-        const low = mmuFly.fuel < 0.25;
-        const bar = cuff.querySelector('.bar');
-        bar.style.width = `${(mmuFly.fuel * 100).toFixed(1)}%`;
-        bar.style.background = low ? '#ff9a6a' : '#8ff0a4';
-        cuff.style.color = low ? '#ffb38a' : '#8ff0a4';
+        const svgEl = wrist.firstElementChild;
+        if (svgEl.dataset.size !== `${nw}x${nh}x${s0}`) {
+          svgEl.dataset.size = `${nw}x${nh}x${s0}`;
+          svgEl.setAttribute('viewBox', `0 0 ${nw} ${nh}`);
+          Object.assign(svgEl.style, { left: `${ox.toFixed(1)}px`, top: `${oy.toFixed(1)}px`, width: `${(nw * s0).toFixed(1)}px`, height: `${(nh * s0).toFixed(1)}px` });
+        }
+        // The needle eases toward the nitrogen left, as a real one would, a little behind.
+        mmuFly.needle += (mmuFly.fuel - mmuFly.needle) * Math.min(1, dt * 6);
+        const angle = -135 + 270 * mmuFly.needle;
+        svgEl.querySelector('.needle').setAttribute('transform', `rotate(${angle.toFixed(1)} ${DIAL.x} ${DIAL.y})`);
         const hub = here('hubble').position;
-        const metres = Math.round(Math.hypot(...state.position.map((n, i) => n - hub[i])) / MMU_KM_PER_M);
-        const text = `${Math.round(mmuFly.fuel * 100)}% · ${metres}m`;
-        const read = cuff.querySelector('.read');
-        if (read.textContent !== text) read.textContent = text;
-        cuff.style.opacity = low && mmuFly.fuel > 0 ? (0.65 + 0.35 * Math.abs(Math.sin(performance.now() / 260))).toFixed(2) : '1';
+        const metres = Math.min(999, Math.round(Math.hypot(...state.position.map((n, i) => n - hub[i])) / MMU_KM_PER_M));
+        const text = String(metres).padStart(3, '0');
+        const range = svgEl.querySelector('.range');
+        if (range.textContent !== text) range.textContent = text;
       }
     }
     // The line, drawn as a rope (the user, 2026-11-20: "줄을 좀 리얼하게 그리고"): braided,

@@ -481,18 +481,17 @@ export function createSound({ music } = {}) {
       bell(659, 0.9, 0.05);
       bell(988, 1.08, 0.05);
     },
-    // McCandless's jets while a key is held (main.js mmuFly, the user, 2026-11-20: "내가 누를
-    // 때에 칙칙하면서 소리도 나고"): a short burst of hiss every 0.14 s with a soft knock
-    // under it, lower for a push ahead, higher for one back; and a sigh when it is let go.
+    // McCandless's jets, one burst for each press (main.js mmuFly, the user, 2026-11-20:
+    // "칙칙하면서 소리도 나고", then "한 번에 한 번씩만"): a soft knock and a hiss of nitrogen
+    // falling away over 0.45 s, lower for a push ahead, higher for one back.
     jet: () => {
-      noise({ length: 0.13, volume: 0.045, type: 'bandpass', freq: 2300, to: 1700, attack: 0.008 });
-      tone({ freq: 90, to: 60, length: 0.07, volume: 0.02 });
+      noise({ length: 0.45, volume: 0.05, type: 'bandpass', freq: 2300, to: 1200, attack: 0.015 });
+      tone({ freq: 90, to: 55, length: 0.12, volume: 0.028 });
     },
     jetBack: () => {
-      noise({ length: 0.13, volume: 0.04, type: 'bandpass', freq: 3300, to: 2500, attack: 0.008 });
-      tone({ freq: 110, to: 75, length: 0.07, volume: 0.018 });
+      noise({ length: 0.45, volume: 0.045, type: 'bandpass', freq: 3300, to: 1800, attack: 0.015 });
+      tone({ freq: 110, to: 70, length: 0.12, volume: 0.025 });
     },
-    jetEnd: () => noise({ length: 0.5, volume: 0.03, type: 'bandpass', freq: 2600, to: 900, attack: 0.02 }),
     // Challenger's line: shot out with a rising swish, the hook catching with a clack, and
     // the winch humming for the ten seconds he is reeled in.
     lineShoot: () => {

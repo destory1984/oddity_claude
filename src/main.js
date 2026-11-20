@@ -2529,14 +2529,18 @@ ${STORY_MORE[target.id]}` : told) };
     const off = 1 - ease;
     // (Held left of the line of sight and a little up, in the middle of Eagle's triangular
     // glass: on the line it stood against the frame's diagonal bar.)
-    const at = base.position.map((n, i) => n + look[i] * km + side[i] * km * (-0.07 - 0.05 * off) + upward[i] * km * (0.1 + 0.08 * off));
+    const at = base.position.map((n, i) => n + look[i] * km + side[i] * km * (-0.015 - 0.1 * off) + upward[i] * km * (0.09 + 0.1 * off));
     const toEye = base.position.map((n, i) => n - at[i]);
     const len = Math.hypot(...toEye);
-    // Its nose toward the eye, turned aside a little while it is far, and slowly rolling.
-    const nose = toEye.map((n, i) => n / len + side[i] * 0.45 * off + upward[i] * 0.2 * off);
+    // Side on while it comes, so that it reads as the command and service modules (cone,
+    // can, bell, dish), turning its probe to the eye over the last ten seconds (the user's
+    // check, 2026-11-20: end on all the way it was a grey disc).
+    const turn = Math.min(1, Math.max(0, (d.at - courseTime) / 10));
+    const a = (1 - (1 - turn) ** 2) * 1.35;
+    const nose = toEye.map((n, i) => (n / len) * Math.cos(a) + side[i] * Math.sin(a) * 0.94 + upward[i] * Math.sin(a) * 0.34);
     const nl = Math.hypot(...nose);
     const f = nose.map((n) => n / nl);
-    const roll = 0.6 * off;
+    const roll = 0.5 * off + 0.15 * Math.sin(courseTime * 0.3);
     const u0 = upward.map((n, i) => n * Math.cos(roll) + side[i] * Math.sin(roll));
     const dotUF = u0.reduce((s, n, i) => s + n * f[i], 0);
     const u1 = u0.map((n, i) => n - f[i] * dotUF);
@@ -2803,8 +2807,11 @@ ${STORY_MORE[target.id]}` : told) };
     // turns so that it stands there, in the glass.
     let yaw = f.yaw, pitch = f.pitch;
     const chosen = course ? courseById(course) : null;
-    const entry = chosen?.rail?.cabins ? [...chosen.rail.cabins].reverse().find((c) => courseTime >= c.at) : null;
-    if (entry?.aim && document.getElementById('cupolaFrame')?.dataset.cabin === entry.cabin) {
+    // (The entry of the frame now shown: the aim held till the frame is swapped under the
+    // veil; let go at the course's second, the view jumped before the frame did.)
+    const shown = document.getElementById('cupolaFrame')?.dataset.cabin;
+    const entry = chosen?.rail?.cabins ? [...chosen.rail.cabins].reverse().find((c) => courseTime >= c.at && c.cabin === shown) : null;
+    if (entry?.aim) {
       const vh = innerHeight / (2 * Math.tan(world.fov() / 2));
       yaw += Math.atan((-entry.aim[0] * innerWidth) / vh);
       pitch += Math.atan((entry.aim[1] * innerHeight) / vh);

@@ -162,7 +162,7 @@ export function buildColumbia(scene, name = 'columbia') {
   heat.rotation.z = PI / 2;
   heat.scaling.y = 0.12;
   add(along(CreateCylinder(`${name}Tunnel`, { height: 0.42, diameter: 0.86, tessellation: 32 }, scene)), metal, 3.3, 0, 0);
-  add(along(CreateCylinder(`${name}ProbeBase`, { height: 0.18, diameter: 0.7, tessellation: 24 }, scene)), dark, 3.58, 0, 0);
+  add(along(CreateCylinder(`${name}ProbeBase`, { height: 0.18, diameter: 0.7, tessellation: 24 }, scene)), metal, 3.58, 0, 0);
   add(along(CreateCylinder(`${name}Probe`, { height: 0.85, diameterTop: 0.05, diameterBottom: 0.12, tessellation: 12 }, scene)), metal, 4.05, 0, 0);
   for (let k = 0; k < 3; k++) {
     const a = (k / 3) * 2 * PI;

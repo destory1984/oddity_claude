@@ -4231,7 +4231,11 @@ ${STORY_MORE[target.id]}` : told) };
     // 해"): Earth's ground went by at 0.4 km a second. It comes in by degrees between
     // NEAR_CARRY_FROM and NEAR_CARRY_FULL radii from the centre, so the view does not
     // start turning at a blow; from farther the world is seen turning, as before.
-    if (!locked && !state.restingOn && !practice && dt > 0 && !docked && !visit && !home && !photo.active() && !warp.busy()) {
+    // (Not on a tour course, which sets where she is itself: carried after it, the eye slid off
+    // Discovery's Hubble by the Earth's turn of that frame, 200 m a frame once the course ran
+    // the world at true speed, and Hubble and the arm holding it shook: the user, 2026-11-20,
+    // "그래도 떨어".)
+    if (!locked && !course && !state.restingOn && !practice && dt > 0 && !docked && !visit && !home && !photo.active() && !warp.busy()) {
       const ground = nearestSurface(state.position, bodies).body;
       const far = Math.hypot(...state.position.map((n, i) => n - ground.position[i])) / ground.radiusKm;
       // Not by a world whose rings lie tilted from its turning: carried round the turning

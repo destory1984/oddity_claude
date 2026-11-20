@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { COURSES, courseById, courseStart, cupolaPlan, railAt, mmuShipFacing } from '../src/core/courses.js';
+import { COURSES, courseById, courseStart, cupolaPlan, railAt, mmuShipFacing, mmuFlyAt } from '../src/core/courses.js';
 import fs from 'node:fs';
 import { BODIES } from '../src/core/bodies.js';
 import { forward } from '../src/core/orientation.js';
@@ -146,4 +146,15 @@ test("McCandless's Challenger lies square: her nose across her open bay, both un
   const { forward: f, up: u } = mmuShipFacing(c, earth, hubble, sun);
   assert.ok(Math.abs(Math.hypot(...f) - 1) < 1e-9 && Math.abs(Math.hypot(...u) - 1) < 1e-9);
   assert.ok(Math.abs(dot(f, u)) < 1e-9, String(dot(f, u)));
+});
+
+test('flying himself, McCandless stands where his way from Challenger says and looks back at her', () => {
+  const earth = { position: [150000000, 0, 0] };
+  const hubble = { position: [150000000 + 6900, 300, 200] };
+  const rel = [120, -40, 30];
+  const { position, orientation } = mmuFlyAt(earth, hubble, rel);
+  assert.deepEqual(position.map((v, i) => Math.round(v - hubble.position[i])), rel);
+  const look = forward(orientation);
+  const back = unit(rel.map((v) => -v));
+  assert.ok(dot(look, back) > 0.9999, String(dot(look, back)));
 });

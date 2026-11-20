@@ -101,7 +101,7 @@ import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN, surfaceDirection } from './core/surface.js';
 import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
-import { COURSES, courseById, courseStart, cupolaPlan, railAt, mmuFigure, mmuShipFacing } from './core/courses.js';
+import { COURSES, courseById, courseStart, cupolaPlan, railAt, mmuFigure, mmuShipFacing, mmuFlyAt } from './core/courses.js';
 import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN, FINAL_NOTE, noteDue, readNote, heardNobody, completeRadio } from './core/radioFriend.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -2497,6 +2497,239 @@ ${STORY_MORE[target.id]}` : told) };
       glare.style.opacity = o.toFixed(3);
       glare.hidden = o <= 0.001;
     }
+    if (!course) mmuFlyReset();
+    mmuFlyUi(inHelmet);
+  }
+  // Columbia coming to dock with Eagle, seen from Eagle's window (rail.dock: from, at the
+  // moment they touch, to, its distance far and near in km and its drawn length; the user,
+  // 2026-11-20: "아폴로 귀환 시에 사령선이 도킹하는걸", then "(가)로 해", a scene to watch). Placed along the course's
+  // own view, before the window turns it into the glass (cupolaFloat), it comes in from a
+  // little left and above, slowing, its probe turning to the eye; it touches at `at`.
+  function apolloDock(chosen, base) {
+    const d = chosen.rail.dock;
+    if (!d || courseTime < d.from || courseTime >= d.to) {
+      world.setFloatModel('columbia', null);
+      return;
+    }
+    const x = Math.min(1, (courseTime - d.from) / (d.at - d.from));
+    const ease = 1 - (1 - x) ** 2.4;
+    const km = d.farKm + (d.nearKm - d.farKm) * ease;
+    const look = forward(base.orientation);
+    const side = right(base.orientation);
+    const upward = rotateVector(base.orientation, [0, 1, 0]);
+    const off = 1 - ease;
+    // (Held left of the line of sight and a little up, in the middle of Eagle's triangular
+    // glass: on the line it stood against the frame's diagonal bar.)
+    const at = base.position.map((n, i) => n + look[i] * km + side[i] * km * (-0.07 - 0.05 * off) + upward[i] * km * (0.1 + 0.08 * off));
+    const toEye = base.position.map((n, i) => n - at[i]);
+    const len = Math.hypot(...toEye);
+    // Its nose toward the eye, turned aside a little while it is far, and slowly rolling.
+    const nose = toEye.map((n, i) => n / len + side[i] * 0.45 * off + upward[i] * 0.2 * off);
+    const nl = Math.hypot(...nose);
+    const f = nose.map((n) => n / nl);
+    const roll = 0.6 * off;
+    const u0 = upward.map((n, i) => n * Math.cos(roll) + side[i] * Math.sin(roll));
+    const dotUF = u0.reduce((s, n, i) => s + n * f[i], 0);
+    const u1 = u0.map((n, i) => n - f[i] * dotUF);
+    const ul = Math.hypot(...u1);
+    world.setFloatModel('columbia', { kind: 'columbia', km: at, sizeKm: d.sizeKm, forward: f, up: u1.map((n) => n / ul) });
+  }
+  // McCandless flying himself, in his helmet (the user, 2026-11-20: "우주 유영을 자기가
+  // 컨트롤 할 수 있게 해보자. 너무 멀어지거나, 연료를 다 쓰면, 챌린저에서 줄을 발사해서
+  // 끌어당기는걸로 하고. 그럼 손목 안 쪽에 연료 게이지 보여주고"; 150 m). Until the first
+  // push he goes as the course takes him; from then he goes where his jets send him and
+  // keeps going (nothing slows him but a push the other way), always looking back at
+  // Challenger unless the head is turned by a drag, and a push goes the way he looks.
+  // Out past 150 m, or with the nitrogen gone, Challenger shoots a line to him and reels
+  // him in to 30 m, his tanks full again.
+  const MMU_KM_PER_M = 2.8; // the course's km for one true metre: "about 100 m" stands at 280 km
+  const MMU_FAR_M = 150;
+  const MMU_NEAR_M = 30;
+  const MMU_ACCEL = 6; // km/s gained in each second of a push
+  const MMU_TOP = 24; // km/s at most (some 9 m/s)
+  const MMU_FUEL_S = 30; // seconds of pushing in full tanks
+  const MMU_SHOOT_S = 2; // the line on its way
+  const MMU_PULL_S = 10; // and reeling him in
+  const mmuFly = { on: false, rel: null, vel: [0, 0, 0], fuel: 1, line: null, keys: 0, puffAt: 0 };
+  function mmuFlyReset() {
+    Object.assign(mmuFly, { on: false, rel: null, vel: [0, 0, 0], fuel: 1, line: null, keys: 0 });
+  }
+  function mmuNote(text) {
+    let note = document.getElementById('mmuNote');
+    if (!note) {
+      document.body.insertAdjacentHTML('beforeend', '<div id="mmuNote" role="status" style="position:fixed;left:50%;top:30vh;z-index:9;width:min(78vw,420px);transform:translateX(-50%);pointer-events:none;padding:8px 12px;border-radius:10px;background:rgba(4,8,18,.6);color:#ffe9b0;font:600 14px/1.45 system-ui,sans-serif;text-align:center;text-shadow:0 1px 2px #000;word-break:keep-all"></div>');
+      note = document.getElementById('mmuNote');
+    }
+    note.textContent = text;
+    note.hidden = false;
+    note.getAnimations().forEach((a) => a.cancel());
+    note.animate([{ opacity: 0 }, { opacity: 1, offset: 0.08 }, { opacity: 1, offset: 0.85 }, { opacity: 0 }], { duration: 4500, fill: 'forwards' });
+  }
+  function mmuFlyStep(chosen, dt, key) {
+    if (courseTime < 0) { mmuFlyReset(); return; }
+    if (!cupolaOn) return;
+    const hub = here('hubble').position;
+    const push = mmuFly.line ? 0 : Math.max(-1, Math.min(1, key + mmuFly.keys));
+    const thrust = mmuFly.fuel > 0 ? push : 0;
+    if (!mmuFly.on && thrust) {
+      mmuFly.on = true;
+      mmuFly.rel = state.position.map((n, i) => n - hub[i]);
+      mmuFly.vel = [0, 0, 0];
+    }
+    if (!mmuFly.on) return;
+    if (thrust) {
+      // The way he looks, the head's turn in it (cupolaFloat); the head stays turned while he pushes.
+      const ahead = forward(state.orientation);
+      mmuFly.vel = mmuFly.vel.map((v, i) => v + ahead[i] * thrust * MMU_ACCEL * dt);
+      const speed = Math.hypot(...mmuFly.vel);
+      if (speed > MMU_TOP) mmuFly.vel = mmuFly.vel.map((v) => (v * MMU_TOP) / speed);
+      mmuFly.fuel = Math.max(0, mmuFly.fuel - (Math.abs(thrust) * dt) / MMU_FUEL_S);
+      headTurn.at = performance.now();
+      if (performance.now() - mmuFly.puffAt > 380) {
+        mmuFly.puffAt = performance.now();
+        sound.puff();
+        mmuPuff(thrust > 0 ? 'back' : 'front');
+      }
+    }
+    const far = Math.hypot(...mmuFly.rel) / MMU_KM_PER_M;
+    if (!mmuFly.line && (far > MMU_FAR_M || mmuFly.fuel <= 0)) {
+      mmuFly.line = { t: 0, fromKm: Math.hypot(...mmuFly.rel) };
+      mmuNote(far > MMU_FAR_M ? t('너무 멀어졌습니다. 챌린저가 줄을 쏘아 끌어당깁니다.') : t('질소가 다 떨어졌습니다. 챌린저가 줄을 쏘아 끌어당깁니다.'));
+      sound.cue('click');
+    }
+    if (mmuFly.line) {
+      const line = mmuFly.line;
+      line.t += dt;
+      if (line.t <= MMU_SHOOT_S) {
+        mmuFly.rel = mmuFly.rel.map((n, i) => n + mmuFly.vel[i] * dt);
+        line.fromKm = Math.hypot(...mmuFly.rel);
+      } else {
+        const x = Math.min(1, (line.t - MMU_SHOOT_S) / MMU_PULL_S);
+        const ease = x * x * (3 - 2 * x);
+        const km = line.fromKm + (MMU_NEAR_M * MMU_KM_PER_M - line.fromKm) * ease;
+        const length = Math.hypot(...mmuFly.rel) || 1;
+        mmuFly.rel = mmuFly.rel.map((n) => (n / length) * km);
+        mmuFly.vel = [0, 0, 0];
+        if (x >= 1) {
+          mmuFly.line = null;
+          mmuFly.fuel = 1;
+          mmuNote(t('질소를 다시 채웠습니다.'));
+        }
+      }
+    } else {
+      mmuFly.rel = mmuFly.rel.map((n, i) => n + mmuFly.vel[i] * dt);
+      // Not through her: 12 m off he touches her and stops coming nearer.
+      const length = Math.hypot(...mmuFly.rel);
+      const touchKm = 12 * MMU_KM_PER_M;
+      if (length < touchKm) {
+        const out = mmuFly.rel.map((n) => n / (length || 1));
+        mmuFly.rel = out.map((n) => n * touchKm);
+        const inward = Math.min(0, mmuFly.vel.reduce((acc, v, i) => acc + v * out[i], 0));
+        mmuFly.vel = mmuFly.vel.map((v, i) => v - out[i] * inward);
+      }
+    }
+    state = { ...state, ...mmuFlyAt(here('earth'), here('hubble'), mmuFly.rel) };
+    state = { ...state, orientation: cupolaFloat(state) };
+  }
+  // A white breath of nitrogen at the foot of the view: from both lower corners for a push
+  // ahead (the jets behind him blow back past his sides), from the top for one back.
+  function mmuPuff(way) {
+    const spots = way === 'back' ? [['left:2%', 'bottom:4%', -1, 1], ['right:2%', 'bottom:4%', 1, 1]] : [['left:30%', 'top:-8%', 0, -1]];
+    for (const [x, y, ox, oy] of spots) {
+      document.body.insertAdjacentHTML('beforeend', `<div class="spacewalkPuff" aria-hidden="true" style="position:fixed;${x};${y};width:30vmin;height:30vmin;z-index:4;pointer-events:none;border-radius:50%;background:radial-gradient(circle, rgba(255,255,255,.6) 0%, rgba(235,240,255,.28) 35%, rgba(255,255,255,0) 70%)"></div>`);
+      const puff = document.body.lastElementChild;
+      puff.animate([
+        { transform: 'translate(0, 0) scale(.3)', opacity: 0.8 },
+        { transform: `translate(${ox * 12}vmin, ${oy * 8}vmin) scale(1.4)`, opacity: 0 },
+      ], { duration: 800, easing: 'ease-out', fill: 'forwards' }).finished.then(() => puff.remove(), () => puff.remove());
+    }
+  }
+  // Where a point of space stands on the screen, or null behind.
+  function mmuOnScreen(point) {
+    const to = point.map((n, i) => n - state.position[i]);
+    const ahead = forward(state.orientation);
+    const c = to.reduce((acc, n, i) => acc + n * ahead[i], 0);
+    if (c <= 0) return null;
+    const across = right(state.orientation);
+    const upward = rotateVector(state.orientation, [0, 1, 0]);
+    const vh = innerHeight / (2 * Math.tan(world.fov() / 2));
+    return [innerWidth / 2 + (to.reduce((acc, n, i) => acc + n * across[i], 0) / c) * vh, innerHeight / 2 - (to.reduce((acc, n, i) => acc + n * upward[i], 0) / c) * vh];
+  }
+  // The jets' two keys, the gauge on the inside of his left wrist (nitrogen and how far
+  // Challenger is), and the line from her bay.
+  const WRIST = { x: 165, y: 1505, w: 270, h: 124, turn: -24 }; // in the hands picture's pixels
+  function mmuFlyUi(inHelmet) {
+    const show = inHelmet && Boolean(course && courseById(course)?.rail?.mmu);
+    let keys = document.getElementById('mmuKeys');
+    if (show && !keys) {
+      document.body.insertAdjacentHTML('beforeend', `<div id="mmuKeys" style="position:fixed;left:14px;bottom:calc(220px + env(safe-area-inset-bottom));z-index:9;display:flex;flex-direction:column;gap:10px"><button type="button" data-way="1">${t('앞으로')}</button><button type="button" data-way="-1">${t('뒤로')}</button></div>`);
+      keys = document.getElementById('mmuKeys');
+      for (const button of keys.querySelectorAll('button')) {
+        Object.assign(button.style, { width: '64px', height: '64px', borderRadius: '50%', border: '1.5px solid rgba(232,196,120,.75)', background: 'rgba(10,14,22,.55)', color: '#f3e6c4', font: '600 13px/1.1 system-ui,sans-serif', padding: '0', whiteSpace: 'nowrap', touchAction: 'none', userSelect: 'none', webkitUserSelect: 'none' });
+        const way = Number(button.dataset.way);
+        const down = (e) => { e.preventDefault(); e.stopPropagation(); mmuFly.keys = way; button.style.background = 'rgba(232,196,120,.45)'; button.setPointerCapture?.(e.pointerId); };
+        const up = (e) => { e.stopPropagation(); if (mmuFly.keys === way) mmuFly.keys = 0; button.style.background = 'rgba(10,14,22,.55)'; };
+        button.addEventListener('pointerdown', down);
+        button.addEventListener('pointerup', up);
+        button.addEventListener('pointercancel', up);
+        button.addEventListener('lostpointercapture', up);
+      }
+    }
+    if (keys) keys.hidden = !show;
+    if (!show) mmuFly.keys = 0;
+    // The gauge rides with the hands (the same layer and drift).
+    const hands = document.getElementById('spacewalkHands');
+    let wrist = document.getElementById('mmuWrist');
+    if (show && hands && !wrist) {
+      hands.insertAdjacentHTML('afterend', '<div id="mmuWrist" aria-hidden="true" style="position:fixed;inset:0;z-index:5;pointer-events:none"><div class="cuff" style="position:absolute;box-sizing:border-box;border-radius:8%/16%;background:linear-gradient(#262b31,#14181c);border:2px solid #474d55;box-shadow:0 2px 6px rgba(0,0,0,.6);padding:6% 7%;color:#8ff0a4;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700"><div class="row" style="display:flex;align-items:center;gap:6%"><span>N₂</span><div style="flex:1;height:0.62em;border:1px solid #5d6670;border-radius:2px;padding:1px"><div class="bar" style="height:100%;background:#8ff0a4"></div></div></div><div class="read" style="margin-top:4%;white-space:nowrap"></div></div></div>');
+      wrist = document.getElementById('mmuWrist');
+    }
+    if (wrist) {
+      wrist.hidden = !(show && hands && !hands.hidden);
+      if (!wrist.hidden) {
+        wrist.style.transform = hands.style.transform;
+        const nw = hands.naturalWidth || 1206, nh = hands.naturalHeight || 1971;
+        const s0 = Math.max(innerWidth / nw, innerHeight / nh);
+        const ox = (innerWidth - nw * s0) * 0.5, oy = (innerHeight - nh * s0) * 0.45;
+        const cuff = wrist.firstElementChild;
+        Object.assign(cuff.style, {
+          left: `${(ox + (WRIST.x - WRIST.w / 2) * s0).toFixed(1)}px`, top: `${(oy + (WRIST.y - WRIST.h / 2) * s0).toFixed(1)}px`,
+          width: `${(WRIST.w * s0).toFixed(1)}px`, height: `${(WRIST.h * s0).toFixed(1)}px`,
+          fontSize: `${Math.max(9, 40 * s0).toFixed(1)}px`, transform: `rotate(${WRIST.turn}deg)`,
+        });
+        const low = mmuFly.fuel < 0.25;
+        const bar = cuff.querySelector('.bar');
+        bar.style.width = `${(mmuFly.fuel * 100).toFixed(1)}%`;
+        bar.style.background = low ? '#ff9a6a' : '#8ff0a4';
+        cuff.style.color = low ? '#ffb38a' : '#8ff0a4';
+        const hub = here('hubble').position;
+        const metres = Math.round(Math.hypot(...state.position.map((n, i) => n - hub[i])) / MMU_KM_PER_M);
+        const text = `${Math.round(mmuFly.fuel * 100)}% · ${metres}m`;
+        const read = cuff.querySelector('.read');
+        if (read.textContent !== text) read.textContent = text;
+        cuff.style.opacity = low && mmuFly.fuel > 0 ? (0.65 + 0.35 * Math.abs(Math.sin(performance.now() / 260))).toFixed(2) : '1';
+      }
+    }
+    // The line: from Challenger's bay to him, first flying out, then taut while he is reeled in.
+    let svg = document.getElementById('mmuLine');
+    const line = show ? mmuFly.line : null;
+    if (line && !svg) {
+      document.body.insertAdjacentHTML('beforeend', '<svg id="mmuLine" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;z-index:4;pointer-events:none"><line stroke="rgba(255,236,180,.35)" stroke-width="7" stroke-linecap="round"/><line stroke="#fff4d6" stroke-width="2.2" stroke-linecap="round"/></svg>');
+      svg = document.getElementById('mmuLine');
+    }
+    if (svg) {
+      const from = line ? mmuOnScreen(here('hubble').position) : null;
+      svg.style.display = from ? '' : 'none';
+      if (from) {
+        const to = [innerWidth * 0.5, innerHeight * 1.05];
+        const k = Math.min(1, line.t / MMU_SHOOT_S);
+        const end = [from[0] + (to[0] - from[0]) * k, from[1] + (to[1] - from[1]) * k];
+        for (const el of svg.querySelectorAll('line')) {
+          el.setAttribute('x1', from[0].toFixed(1)); el.setAttribute('y1', from[1].toFixed(1));
+          el.setAttribute('x2', end[0].toFixed(1)); el.setAttribute('y2', end[1].toFixed(1));
+        }
+      }
+    }
   }
   function cupolaFloat(st) {
     const f = floatAt();
@@ -4079,8 +4312,13 @@ ${STORY_MORE[target.id]}` : told) };
     // A tour course ends with any key, the lock let go or the slide stopped; she stops
     // sliding there, so that the keys are hers at once.
     if (course && !warp.busy()) {
-      const pressed = [intent.drive, intent.strafe, intent.rise, intent.turnX, intent.turnY, intent.roll].some((n) => n);
       const rail = courseById(course).rail;
+      // In McCandless's helmet the keys are his jets, not a way out of the course (mmuFly):
+      // forward and back push him, the others are let be.
+      const steering = Boolean(rail?.mmu && courseTime >= 0 && cupolaOn);
+      const jetKey = steering ? intent.drive : 0;
+      if (steering) Object.assign(intent, { drive: 0, strafe: 0, rise: 0, turnX: 0, turnY: 0, roll: 0 });
+      const pressed = [intent.drive, intent.strafe, intent.rise, intent.turnX, intent.turnY, intent.roll].some((n) => n);
       if (pressed || (!rail && (!locked || Math.max(state.sideSpeed ?? 0, state.riseSpeed ?? 0) < 0.01))) {
         course = null;
         cupolaView(false);
@@ -4092,7 +4330,9 @@ ${STORY_MORE[target.id]}` : told) };
         const wasTime = courseTime;
         courseTime += dt * (chosen.rail.testSpeed ?? 1);
         state = { ...state, ...railAt(chosen, here(chosen.body), here('sun'), courseTime, here('moon'), here('hubble')) };
+        apolloDock(chosen, state);
         if (chosen.rail.cabin) state = { ...state, orientation: cupolaFloat(state) };
+        if (chosen.rail.mmu) mmuFlyStep(chosen, dt, jetKey);
         // Sounds at their moments (rail.sounds: [seconds, cue]).
         for (const [at, name] of chosen.rail.sounds ?? []) if (at > wasTime && at <= courseTime) sound.cue(name);
         for (const at of chosen.rail.fades ?? []) if (at > wasTime && at <= courseTime) veilBlink();
@@ -4132,6 +4372,7 @@ ${STORY_MORE[target.id]}` : told) };
       const x = Math.max(0, Math.min(1, (courseTime - shutS) / (openS - shutS)));
       world.setCraftModel('hubble', { kind: shuttleRail.craftModel, doors: x * x * (3 - 2 * x), arm: shuttleRail.armPose ?? {}, ...facing });
     } else world.setCraftModel('hubble', null);
+    if (!course || !courseById(course)?.rail?.dock) world.setFloatModel('columbia', null);
     // McCandless seen from outside, coming out of the bay (core/courses.js mmuFigure).
     const figure = shuttleRail?.mmu ? mmuFigure(courseById(course), here('earth'), here('hubble'), here('sun'), courseTime) : null;
     world.setFloatPhoto('figure', figure ? { photo: shuttleRail.figure, km: figure, sizeKm: shuttleRail.figureKm } : null);

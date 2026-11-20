@@ -9,6 +9,7 @@ import { CRAFT_UNFOLD_ALL as CRAFT_UNFOLD } from './craftUnfold.js';
 import { SITE_BUILD, SITE_REPLAY_BUILD, SITE_SAYS, SECOND_SAYS, BOOSTER_SAYS, SAYS_ON_LEFT, SAYS_BY, sayBubble } from './siteModels.js';
 import { drum, rod, group, box } from './craftParts.js';
 import { buildChallenger, shadeChallenger } from './challenger3d.js';
+import { buildColumbia } from './columbia3d.js';
 
 // Spacecraft and landers. The models are in craftModels.js (in orbit) and
 // siteModels.js (on the ground), built from the parts in craftParts.js; this file
@@ -643,6 +644,13 @@ const photoFor = (id) => PHOTO_USE.get(id) ?? PHOTO_SET[id];
 // 챌린저 넣어"): { kind: 'challenger', doors (0 shut, 1 open), arm, forward, up (unit
 // vectors: where her nose and her open bay point) }. Drawn as long as the set width.
 const MODEL_USE = new Map();
+// A 3D model at a place of its own, by name (Apollo's course: Columbia coming to dock with
+// Eagle): { kind, km (where, in km), sizeKm (its length), forward, up }.
+const FLOAT_MODELS = new Map();
+export function setFloatModel(name, model) {
+  if (model === null) FLOAT_MODELS.delete(name);
+  else FLOAT_MODELS.set(name, model);
+}
 export function setCraftModel(id, model) {
   if (model === null) MODEL_USE.delete(id);
   else MODEL_USE.set(id, model);
@@ -696,15 +704,30 @@ export function createCraft(scene, craftList) {
   // The 3D models put in a craft's place (setCraftModel), each built the first time
   // it is wanted, with the Sun's shadows on itself (a smaller map on a phone).
   const models = new Map();
+  // (One shadow map for them all: a light keeps one.)
+  let modelShadows = null;
+  const BUILDS = { challenger: buildChallenger, columbia: buildColumbia };
   const modelOf = (kind) => {
     if (models.has(kind)) return models.get(kind);
-    const ship = buildChallenger(scene, `model_${kind}`);
+    const ship = BUILDS[kind](scene, `model_${kind}`);
     for (const m of ship.root.getChildMeshes()) m.isPickable = false;
     const sun = scene.getLightByName('craftSun');
     const phone = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
-    if (sun) ship.shadows = shadeChallenger(ship, sun, { size: phone ? 1024 : 2048 });
+    if (sun && !modelShadows) modelShadows = shadeChallenger(ship, sun, { size: phone ? 1024 : 2048 });
+    else if (modelShadows) for (const m of ship.root.getChildMeshes()) { modelShadows.addShadowCaster(m, false); m.receiveShadows = true; }
+    ship.shadows = modelShadows;
+    ship.normalBias = 0.1;
     models.set(kind, ship);
     return ship;
+  };
+  const placeModel = (ship, rel, sizeKm, forward, up) => {
+    shownModels.add(ship);
+    ship.root.setEnabled(true);
+    ship.root.position.set(rel[0], rel[1], rel[2]);
+    ship.root.scaling.setAll(sizeKm / KM_PER_UNIT / ship.length);
+    if (ship.shadows) ship.shadows.normalBias = ship.normalBias * ship.root.scaling.x;
+    const f = new Vector3(...forward), u = new Vector3(...up);
+    Quaternion.RotationQuaternionFromAxisToRef(f, u, Vector3.Cross(f, u), ship.root.rotationQuaternion);
   };
   const shownModels = new Set();
   const loose = new Map();
@@ -874,6 +897,11 @@ export function createCraft(scene, craftList) {
     // A model shows only while its craft is drawn this frame (below).
     for (const ship of shownModels) ship.root.setEnabled(false);
     shownModels.clear();
+    for (const [, m] of FLOAT_MODELS) {
+      const ship = modelOf(m.kind);
+      placeModel(ship, m.km.map((n, i) => (n - position[i]) / KM_PER_UNIT), m.sizeKm, m.forward, m.up);
+      ship.pose(m.pose ?? {});
+    }
     for (const [name, plane] of loose) if (!FLOATS.has(name) || FLOATS.get(name).photo.src !== plane.metadata.src) plane.setEnabled(false);
     for (const [name, f] of FLOATS) {
       const plane = pictureOf(f.photo);

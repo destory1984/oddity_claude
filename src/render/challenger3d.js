@@ -531,8 +531,8 @@ export function buildChallenger(scene, name = 'challenger') {
   }, [-11.7, onWing(-11.7, 6.6), 6.6], [2.6, 1.37], [0, 0, 0]);
   flag.rotationQuaternion = flat.clone();
   flag.scaling.y = -1;
-  words('Nasa', 'NASA', -10.2, -6.4, [4.6, 1.15], 'bold italic 230px "Arial Black", Arial, sans-serif');
-  words('Name', 'Challenger', -11.7, -6.6, [5.2, 1.0], 'bold 170px Helvetica, Arial, sans-serif');
+  words('Nasa', 'NASA', -10.2, -5.8, [4.6, 1.15], 'bold italic 230px "Arial Black", Arial, sans-serif');
+  words('Name', 'Challenger', -11.7, -6.0, [5.2, 1.0], 'bold 170px Helvetica, Arial, sans-serif');
 
   const flap = CreateBox(`${name}BodyFlap`, { width: 2.2, height: 0.42, depth: 6.0 }, scene);
   flap.parent = root;

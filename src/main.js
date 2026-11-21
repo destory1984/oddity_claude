@@ -2675,7 +2675,7 @@ ${STORY_MORE[target.id]}` : told) };
     const dotUF = u0.reduce((s, n, i) => s + n * f[i], 0);
     const u1 = u0.map((n, i) => n - f[i] * dotUF);
     const ul = Math.hypot(...u1);
-    world.setFloatModel('columbia', { kind: 'columbia', km: at, sizeKm: spec.sizeKm, forward: f, up: u1.map((n) => n / ul), pose: { fwd: puffOf(t, puffs.fwd), side: puffOf(t, puffs.side) } });
+    world.setFloatModel('columbia', { kind: 'columbia', km: at, sizeKm: spec.sizeKm, forward: f, up: u1.map((n) => n / ul), pose: { fwd: puffOf(t, puffs.fwd), side: puffOf(t, puffs.side), t } });
   }
   // Each puff of Columbia's jets heard faintly as it starts.
   function apolloDockSounds(chosen, wasTime) {

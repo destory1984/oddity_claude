@@ -810,6 +810,8 @@ export function shadeChallenger(ship, light, { size = 2048, darkness = 0.08 } = 
   light.autoUpdateExtends = true;
   light.autoCalcShadowZBounds = true;
   for (const m of ship.root.getChildMeshes()) {
+    // (A jet's glow is light: it casts no shadow, render/columbia3d.js.)
+    if (m.metadata?.light) continue;
     shadows.addShadowCaster(m, false);
     m.receiveShadows = true;
   }

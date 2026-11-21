@@ -1,4 +1,4 @@
-import { Vector3, Quaternion, Color3, StandardMaterial, TransformNode, DynamicTexture, Mesh, CreateCylinder, CreateSphere, CreateBox, CreateTorus, Texture } from './babylon.js';
+import { Vector3, Quaternion, Color3, StandardMaterial, TransformNode, DynamicTexture, Mesh, CreateCylinder, CreateSphere, CreateBox, CreateTorus, CreatePlane, Texture, Constants } from './babylon.js';
 
 // Apollo 11's command and service module, Columbia, as Eagle saw it coming back from the
 // Moon to dock (the user, 2026-11-20: "아폴로 귀환 시에 사령선이 도킹하는걸 게임에 넣는건 어때",
@@ -334,42 +334,145 @@ export function buildColumbia(scene, name = 'columbia') {
   }
   add(CreateBox(`${name}DishBack`, { width: 0.22, height: 0.3, depth: 0.3 }, scene), dark, cx - 0.12, cr * ay, cr * az);
 
-  // The jets' puffs (the user, 2026-11-20: "도킹이 저렇게 쉽다구?"): a soft white cone out of
-  // each quad's forward nozzle (fwd: braking as she comes, pushing back as she goes) and one
-  // side nozzle (side: the small corrections), shown by pose().
-  const puffMat = new StandardMaterial(`${name}Puff`, scene);
-  puffMat.disableLighting = true;
-  puffMat.emissiveColor = new Color3(0.92, 0.94, 0.97);
-  puffMat.backFaceCulling = false;
-  const puffs = { fwd: [], side: [] };
-  for (const quad of quads) {
-    const k = puffs.fwd.length;
+  // The jets' puffs (the user, 2026-11-20: "도킹이 저렇게 쉽다구?"), out of each quad's
+  // forward nozzle (fwd: braking as she comes, pushing back as she goes) and one side nozzle
+  // (side: the small corrections), shown by pose(). As the films show them in vacuum (the
+  // user, 2026-11-22, chose sample "1+2+3"): a fan bright at the nozzle that spreads wide and
+  // thins out at once, fired in 0.1 s bursts each with a flash at the nozzle, and grains of
+  // propellant frozen as they leave flung out along the fan, fading as they go.
+  const glowTex = (w, h, paint) => {
+    const tex = new DynamicTexture(`${name}Glow${w}x${h}`, { width: w, height: h }, scene, false);
+    paint(tex.getContext());
+    tex.update();
+    return tex;
+  };
+  const fanTex = glowTex(64, 256, (c) => {
+    const g = c.createLinearGradient(0, 256, 0, 0);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.12, 'rgba(235,238,245,0.75)');
+    g.addColorStop(0.45, 'rgba(200,210,225,0.25)');
+    g.addColorStop(1, 'rgba(180,190,210,0)');
+    c.fillStyle = g;
+    c.fillRect(0, 0, 64, 256);
+  });
+  const dotTex = glowTex(64, 64, (c) => {
+    const g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.3, 'rgba(255,240,215,0.6)');
+    g.addColorStop(1, 'rgba(255,220,180,0)');
+    c.fillStyle = g;
+    c.fillRect(0, 0, 64, 64);
+  });
+  const glowMat = (part, tex, color) => {
+    const m = new StandardMaterial(`${name}${part}`, scene);
+    m.disableLighting = true;
+    m.emissiveTexture = tex;
+    m.opacityTexture = tex;
+    m.emissiveColor = color;
+    m.backFaceCulling = false;
+    m.alphaMode = Constants.ALPHA_ADD;
+    m.disableDepthWrite = true;
+    return m;
+  };
+  const fanMat = glowMat('PuffFan', fanTex, new Color3(0.9, 0.92, 0.96));
+  const flashMat = glowMat('PuffFlash', dotTex, new Color3(1, 0.93, 0.8));
+  const grainMat = glowMat('PuffGrain', dotTex, new Color3(0.85, 0.9, 1));
+  // (Light, not stuff: none of it casts a shadow, render/challenger3d.js shadeChallenger.)
+  const glowing = (mesh) => {
+    mesh.isPickable = false;
+    mesh.metadata = { ...mesh.metadata, light: true };
+    mesh.setEnabled(false);
+    return mesh;
+  };
+  const jets = { fwd: [], side: [] };
+  quads.forEach((quad, k) => {
     for (const kind of ['fwd', 'side']) {
-      const cone = CreateCylinder(`${name}Puff${kind}${k}`, { height: 1, diameterTop: 0.9, diameterBottom: 0.07, tessellation: 16, cap: Mesh.NO_CAP }, scene);
-      cone.material = puffMat;
-      cone.parent = quad;
-      cone.isPickable = false;
-      if (kind === 'fwd') cone.rotation.z = -PI / 2;
-      else cone.rotation.x = k % 2 ? -PI / 2 : PI / 2;
-      cone.metadata = { at: kind === 'fwd' ? [0.53, 0.02, 0] : [0, 0.02, k % 2 ? -0.43 : 0.43], dir: kind === 'fwd' ? [1, 0, 0] : [0, 0, k % 2 ? -1 : 1] };
-      cone.setEnabled(false);
-      puffs[kind].push(cone);
+      const dir = kind === 'fwd' ? [1, 0, 0] : [0, 0, k % 2 ? -1 : 1];
+      const at = kind === 'fwd' ? [0.53, 0.02, 0] : [0, 0.02, k % 2 ? -0.43 : 0.43];
+      const fan = glowing(CreateCylinder(`${name}PuffFan${kind}${k}`, { height: 1, diameterTop: 1.7, diameterBottom: 0.06, tessellation: 24, cap: Mesh.NO_CAP }, scene));
+      fan.material = fanMat;
+      fan.parent = quad;
+      if (kind === 'fwd') fan.rotation.z = -PI / 2;
+      else fan.rotation.x = k % 2 ? -PI / 2 : PI / 2;
+      const flash = glowing(CreatePlane(`${name}PuffFlash${kind}${k}`, { size: 1 }, scene));
+      flash.material = flashMat;
+      flash.parent = quad;
+      flash.billboardMode = Mesh.BILLBOARDMODE_ALL;
+      flash.position.set(at[0] + dir[0] * 0.07, at[1], at[2] + dir[2] * 0.07);
+      const grains = [];
+      for (let i = 0; i < 24; i++) {
+        const grain = glowing(CreatePlane(`${name}PuffGrain${kind}${k}_${i}`, { size: 0.07 }, scene));
+        grain.material = grainMat;
+        grain.parent = quad;
+        grain.billboardMode = Mesh.BILLBOARDMODE_ALL;
+        grains.push({ mesh: grain, v: [0, 0, 0], age: 9, life: 1 });
+      }
+      jets[kind].push({ fan, flash, grains, at, dir, next: 0 });
     }
-  }
+  });
+  // A burst every PULSE seconds while a jet is on, BURST long, sharp at the start.
+  const PULSE = 0.24, BURST = 0.1;
+  const fired = { fwd: -1, side: -1 };
+  let lastT = null;
   const LENGTH = 4.47 + 7.3;
   return {
     root,
     length: LENGTH,
-    pose({ fwd = 0, side = 0 } = {}) {
+    // fwd, side: how hard each set of jets is on now (0 to 1); t: the course's clock (s).
+    pose({ fwd = 0, side = 0, t = performance.now() / 1000 } = {}) {
+      const dt = lastT === null ? 0 : Math.max(0, Math.min(0.1, t - lastT));
+      lastT = t;
       for (const [kind, v] of [['fwd', fwd], ['side', side]]) {
-        for (const cone of puffs[kind]) {
-          cone.setEnabled(v > 0.02);
-          if (v <= 0.02) continue;
-          const len = 0.5 + 1.6 * v;
-          cone.scaling.set(0.6 + 0.6 * v, len, 0.6 + 0.6 * v);
-          const { at, dir } = cone.metadata;
-          cone.position.set(at[0] + dir[0] * len * 0.5, at[1], at[2] + dir[2] * len * 0.5);
-          cone.visibility = 0.8 * v;
+        const on = v > 0.02;
+        const pulse = Math.floor(t / PULSE);
+        const inPulse = t - pulse * PULSE;
+        const k = on && inPulse < BURST ? Math.min(1, inPulse / 0.015) * Math.exp(-inPulse / 0.06) * (0.6 + 0.4 * v) : 0;
+        const fresh = on && pulse !== fired[kind];
+        if (fresh) fired[kind] = pulse;
+        for (const jet of jets[kind]) {
+          const { fan, flash, at, dir } = jet;
+          fan.setEnabled(k > 0.02);
+          if (k > 0.02) {
+            const jitter = 0.92 + 0.08 * Math.random();
+            const len = (1.6 + 1.4 * k) * jitter;
+            const wide = (0.7 + 0.5 * k) * jitter;
+            fan.scaling.set(wide, len, wide);
+            fan.position.set(at[0] + dir[0] * len * 0.5, at[1], at[2] + dir[2] * len * 0.5);
+            fan.visibility = 0.75 * k;
+          }
+          flash.setEnabled(k > 0.05);
+          if (k > 0.05) {
+            flash.scaling.setAll(0.35 + 0.5 * k);
+            flash.visibility = k;
+          }
+          // A handful of grains each burst, out along the fan, fading as they go.
+          if (fresh) {
+            for (let i = 0; i < 6; i++) {
+              const g = jet.grains[jet.next];
+              jet.next = (jet.next + 1) % jet.grains.length;
+              const speed = 3 + 4 * Math.random();
+              const a = Math.random() * 2 * PI;
+              const r = 0.55 * Math.random();
+              // Along the jet, with a spread across it (the two axes square to dir).
+              const across = dir[0] ? [0, Math.cos(a), Math.sin(a)] : [Math.cos(a), Math.sin(a), 0];
+              g.v = dir.map((d, n) => speed * (d + r * across[n]));
+              g.age = 0;
+              g.life = 0.6 + 0.8 * Math.random();
+              g.mesh.position.set(at[0] + dir[0] * 0.07, at[1], at[2] + dir[2] * 0.07);
+            }
+          }
+          for (const g of jet.grains) {
+            if (g.age >= g.life) {
+              g.mesh.setEnabled(false);
+              continue;
+            }
+            g.age += dt;
+            g.mesh.setEnabled(true);
+            g.mesh.position.x += g.v[0] * dt;
+            g.mesh.position.y += g.v[1] * dt;
+            g.mesh.position.z += g.v[2] * dt;
+            g.mesh.visibility = 0.9 * Math.max(0, 1 - g.age / g.life) * (0.6 + 0.4 * Math.random());
+          }
         }
       }
     },

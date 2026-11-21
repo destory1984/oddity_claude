@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-22', text: t('컬럼비아의 자세 분사가 짧게 끊어 뿜으며 번쩍이고, 넓게 퍼지며 옅어지고, 얼어붙은 연료 알갱이를 흩뿌립니다.') },
   { day: '2026-11-22', text: t('아폴로 11호의 길에서 대기권에 들어설 때 화면이 덜 흔들리고, 창밖 불빛이 천천히 밝아졌다 어두워집니다.') },
   { day: '2026-11-22', text: t('컬럼비아의 앞머리 통로와 탐침, 고이득 안테나를 실제 사진에 맞춰 다시 만들었습니다.') },
   { day: '2026-11-21', text: t('아폴로 11호의 길에서 이글은 바위밭을 피해 낮게 떠서 날다 내리고, 앞쪽 땅에 그림자가 비칩니다.') },

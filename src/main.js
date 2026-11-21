@@ -2395,7 +2395,8 @@ ${STORY_MORE[target.id]}` : told) };
       glow = document.getElementById('cabinGlow');
     }
     glow.hidden = false;
-    glow.style.opacity = (g * (0.85 + 0.15 * Math.sin(courseTime * 23))).toFixed(3);
+    // (Breathing slowly, not flickering: the user found the shaking re-entry dizzying.)
+    glow.style.opacity = (g * (0.92 + 0.08 * Math.sin(courseTime * 4))).toFixed(3);
   }
   // Under weight (rail.still: [from, to], a burn, the ground, the air): nothing floats and the
   // view does not drift, 1 inside, easing over two seconds at the edges (the user,
@@ -2460,14 +2461,18 @@ ${STORY_MORE[target.id]}` : told) };
   }
   const floatAt = () => {
     const s = courseTime;
-    const g = Math.max(glowNow(), shakeNow());
+    // The way down through the air shakes the view a third as hard as a launch, and slower
+    // (the user, 2026-11-21, of Apollo's re-entry: "화면이 너무 흔들려서 어지러워").
+    const g = shakeNow();
+    const h = 0.3 * glowNow();
+    const rumble = (k) => 0.6 * Math.sin(s * 31 + k) + 0.4 * Math.sin(s * 19 + 2 * k);
     // (McCandless flying himself: the drift eases away too, his own pushes move him.)
     const a = (1 - stillNow()) * (mmuFly.on ? Math.max(0, 1 - (courseTime - mmuFly.onT) / 1.5) : 1);
     return {
       // (The two ships swinging after the capture: the window goes with Eagle, against Columbia.)
-      yaw: a * (0.0055 * Math.sin(s * 0.47) + 0.0025 * Math.sin(s * 0.19 + 1.3)) + g * 0.005 * Math.sin(s * 53) - 0.05 * apolloSway,
-      pitch: a * (0.0045 * Math.sin(s * 0.37 + 0.6) + 0.002 * Math.sin(s * 0.13 + 2.1)) + g * 0.005 * Math.sin(s * 47 + 1),
-      dx: a * 5 * Math.sin(s * 0.29 + 0.4) + g * 4 * Math.sin(s * 61), dy: a * 4 * Math.sin(s * 0.23 + 1.9) + g * 4 * Math.sin(s * 57 + 2),
+      yaw: a * (0.0055 * Math.sin(s * 0.47) + 0.0025 * Math.sin(s * 0.19 + 1.3)) + g * 0.005 * Math.sin(s * 53) + h * 0.005 * rumble(0) - 0.05 * apolloSway,
+      pitch: a * (0.0045 * Math.sin(s * 0.37 + 0.6) + 0.002 * Math.sin(s * 0.13 + 2.1)) + g * 0.005 * Math.sin(s * 47 + 1) + h * 0.005 * rumble(1),
+      dx: a * 5 * Math.sin(s * 0.29 + 0.4) + g * 4 * Math.sin(s * 61) + h * 2 * rumble(2), dy: a * 4 * Math.sin(s * 0.23 + 1.9) + g * 4 * Math.sin(s * 57 + 2) + h * 2 * rumble(3),
     };
   };
   // Floating in the suit (rail.feel, McCandless's course, in his helmet): the body

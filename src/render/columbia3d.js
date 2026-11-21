@@ -258,19 +258,27 @@ export function buildColumbia(scene, name = 'columbia') {
 
   // The command module: a cone 3.9 m across and 3.2 m high, its shoulder rounded, the
   // heat shield behind it, the docking tunnel and probe at its top.
-  add(along(CreateCylinder(`${name}Cone`, { height: 3.0, diameterTop: 0.9, diameterBottom: 3.84, tessellation: 64, cap: Mesh.NO_CAP }, scene)), cmMat, 1.62, 0, 0);
+  add(along(CreateCylinder(`${name}Cone`, { height: 3.0, diameterTop: 1.3, diameterBottom: 3.84, tessellation: 64, cap: Mesh.NO_CAP }, scene)), cmMat, 1.62, 0, 0);
   add(along(CreateTorus(`${name}Shoulder`, { diameter: 3.64, thickness: 0.3, tessellation: 64 }, scene)), cmMat, 0.12, 0, 0);
   const heat = add(CreateSphere(`${name}Heat`, { diameter: 3.9, segments: 32, slice: 0.5 }, scene), shield, 0.02, 0, 0);
   heat.rotation.z = PI / 2;
   heat.scaling.y = 0.12;
-  add(along(CreateCylinder(`${name}Tunnel`, { height: 0.42, diameter: 0.86, tessellation: 32 }, scene)), metal, 3.3, 0, 0);
-  add(along(CreateCylinder(`${name}ProbeBase`, { height: 0.18, diameter: 0.7, tessellation: 24 }, scene)), metal, 3.58, 0, 0);
-  add(along(CreateCylinder(`${name}Probe`, { height: 0.85, diameterTop: 0.05, diameterBottom: 0.12, tessellation: 12 }, scene)), metal, 4.05, 0, 0);
+  // Her nose as Aldrin's photograph from Eagle shows it (AS11-37-5446; the user, 2026-11-21:
+  // "3,4만 해"): a flat ring of bright metal at the top of the cone, the docking tunnel's
+  // mouth inside it rimmed with a copper ring, dark within, and the probe in it: a dark
+  // hub on three dark arms that reach to the rim, its spike standing out with a small head.
+  add(along(CreateCylinder(`${name}NoseRing`, { height: 0.04, diameter: 1.3, tessellation: 48 }, scene)), metal, 3.12, 0, 0);
+  const copper = material(scene, `${name}Copper`, null, { color: [0.72, 0.38, 0.22], spec: 0.6, power: 40 });
+  add(along(CreateTorus(`${name}TunnelRim`, { diameter: 0.96, thickness: 0.07, tessellation: 48 }, scene)), copper, 3.15, 0, 0);
+  add(along(CreateCylinder(`${name}Tunnel`, { height: 0.3, diameter: 0.92, tessellation: 32 }, scene)), dark, 3.0, 0, 0);
+  add(along(CreateCylinder(`${name}ProbeHub`, { height: 0.16, diameter: 0.32, tessellation: 20 }, scene)), dark, 3.2, 0, 0);
   for (let k = 0; k < 3; k++) {
-    const a = (k / 3) * 2 * PI;
-    const arm = add(CreateCylinder(`${name}ProbeArm${k}`, { height: 0.62, diameter: 0.04, tessellation: 8 }, scene), metal, 3.85, 0.17 * Math.cos(a), 0.17 * Math.sin(a));
-    arm.rotation.set(0.55 * Math.sin(a), 0, -PI / 2 + 0.55 * Math.cos(a));
+    const a = (k / 3) * 2 * PI + PI / 6;
+    const arm = add(CreateBox(`${name}ProbeArm${k}`, { width: 0.07, height: 0.34, depth: 0.07 }, scene), dark, 3.18, 0.3 * Math.cos(a), 0.3 * Math.sin(a));
+    arm.rotation.x = a - PI / 2;
   }
+  add(along(CreateCylinder(`${name}Probe`, { height: 0.5, diameterTop: 0.05, diameterBottom: 0.1, tessellation: 12 }, scene)), metal, 3.5, 0, 0);
+  add(CreateSphere(`${name}ProbeHead`, { diameter: 0.1, segments: 8 }, scene), dark, 3.76, 0, 0);
 
   // The service module behind it: a can 3.9 m across and 3.9 m long, its front fairing,
   // the four thruster quads, the engine bell, the high-gain antenna on its boom.
@@ -295,14 +303,36 @@ export function buildColumbia(scene, name = 'columbia') {
       nozzle.rotation.set(rz === 0 ? (dz > 0 ? PI / 2 : -PI / 2) : 0, ry, rz);
     }
   }
-  const boom = add(CreateCylinder(`${name}Boom`, { height: 1.6, diameter: 0.1, tessellation: 10 }, scene), metal, -3.9, 2.55, 0);
-  boom.rotation.z = -0.45;
-  for (const [dy, dz] of [[0.3, 0.3], [0.3, -0.3], [-0.3, 0.3], [-0.3, -0.3]]) {
-    const dish = add(CreateSphere(`${name}Dish${dy}${dz}`, { diameter: 0.8, segments: 16, slice: 0.5 }, scene), white, -4.45, 3.35 + dy, dz);
-    dish.rotation.z = PI / 2;
-    dish.scaling.y = 0.35;
+  // The high-gain antenna as the photograph shows it: close beside the service module's
+  // aft rim on a short boom, its four dishes dark grey mesh on spokes, facing ahead (it had
+  // no gold box; that was a guess).
+  const dishTex = paintTexture(scene, `${name}DishT`, 128, 128, (g, w, h) => {
+    g.fillStyle = '#3a3b3e';
+    g.fillRect(0, 0, w, h);
+    g.strokeStyle = 'rgba(150,152,156,.8)';
+    g.lineWidth = 2;
+    for (let k = 0; k < 12; k++) {
+      const a = (k / 12) * 2 * PI;
+      g.beginPath();
+      g.moveTo(w / 2, h / 2);
+      g.lineTo(w / 2 + Math.cos(a) * w, h / 2 + Math.sin(a) * h);
+      g.stroke();
+    }
+    g.strokeStyle = 'rgba(120,122,126,.5)';
+    for (const r of [0.2, 0.35, 0.48]) { g.beginPath(); g.arc(w / 2, h / 2, r * w, 0, 2 * PI); g.stroke(); }
+  });
+  const mesh = material(scene, `${name}DishMat`, dishTex, { spec: 0.35, power: 30 });
+  const ay = Math.cos(PI / 4), az = -Math.sin(PI / 4);
+  const boom = add(CreateCylinder(`${name}Boom`, { height: 1.3, diameter: 0.09, tessellation: 10 }, scene), metal, -4.05, 2.6 * ay, 2.6 * az);
+  boom.rotation.x = -PI / 4 - PI / 2;
+  const cx = -4.15, cr = 3.4;
+  const tang = [-az, ay];
+  for (const [dr, dt] of [[0.4, 0.4], [0.4, -0.4], [-0.4, 0.4], [-0.4, -0.4]]) {
+    const dish = add(CreateSphere(`${name}Dish${dr}${dt}`, { diameter: 0.8, segments: 16, slice: 0.5 }, scene), mesh, cx, (cr + dr) * ay + dt * tang[0], (cr + dr) * az + dt * tang[1]);
+    dish.rotation.z = -PI / 2;
+    dish.scaling.y = 0.32;
   }
-  add(CreateBox(`${name}DishBack`, { width: 0.2, height: 0.7, depth: 0.7 }, scene), gold, -4.3, 3.35, 0);
+  add(CreateBox(`${name}DishBack`, { width: 0.22, height: 0.3, depth: 0.3 }, scene), dark, cx - 0.12, cr * ay, cr * az);
 
   // The jets' puffs (the user, 2026-11-20: "도킹이 저렇게 쉽다구?"): a soft white cone out of
   // each quad's forward nozzle (fwd: braking as she comes, pushing back as she goes) and one

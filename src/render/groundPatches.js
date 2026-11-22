@@ -32,6 +32,11 @@ export const GROUND_PATCHES = [
   { id: 'mississippi', latDeg: 33.4, lonDeg: -91.1, sizeKm: 60, file: 'mississippi.webp' },
   { id: 'natron', latDeg: -2.42, lonDeg: 36.05, sizeKm: 60, file: 'natron.webp' },
   { id: 'aral', latDeg: 45.3, lonDeg: 59.6, sizeKm: 200, file: 'aral.webp' },
+  // Starbase and the sea off it, where the Starship course's booster falls back from 88 km
+  // out (the user, 2026-11-22: "내려오는 곳은 좀 더 고해상도 화면으로 바꿔"): 2,048 across,
+  // about 120 m a pixel; its sea clears from 5 to 14 km off the shore, so the open sea is
+  // Earth's own, in its colour and light ("바다 색 맞춰").
+  { id: 'starbase', latDeg: 26.0, lonDeg: -96.75, sizeKm: 240, file: 'starbase.webp' },
 ];
 // All lie on Earth.
 const ON = 'earth';

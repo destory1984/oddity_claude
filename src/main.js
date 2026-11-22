@@ -12,6 +12,7 @@ import { CRAFT, craftAt, craftById, hiddenCraft, craftPicture } from './core/cra
 import { CURIOS, curiosAt, hiddenCurios, carryingCurio, curiosNear, curioHead, setCurioDay, CURIO_ABOUT, BRIDGE_KM, groundSpot } from './core/curios.js';
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
+import { createStarshipStage } from './render/starshipStage.js';
 import { createVanish, cutOut, pictureOf } from './ui/vanish.js';
 import { realCloudMap } from './render/realClouds.js';
 import { createInput } from './ui/input.js';
@@ -101,7 +102,7 @@ import { VISTAS, VISTA_HELD, vistaSpot, warpSpot } from './core/vista.js';
 import { VIEW_CARDS, AURORA_ROUND, AURORA_STAMP, VIEWS_STAMP, cardFile, arriveAt, roundDone } from './core/viewCards.js';
 import { spinOf, spinAngle, SPIN_DAY_S, EARTH_START_SPIN, surfaceDirection } from './core/surface.js';
 import { lockRefusal, lockWaiting, lockLetGo, lockKeyState } from './core/orbitLock.js';
-import { COURSES, courseById, courseStart, cupolaPlan, railAt, mmuFigure, mmuShipFacing, mmuFlyAt } from './core/courses.js';
+import { COURSES, courseById, courseStart, cupolaPlan, railAt, mmuFigure, mmuShipFacing, mmuFlyAt, starshipTrack } from './core/courses.js';
 import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenSitesAt, foundNote, HIDDEN, FINAL_NOTE, noteDue, readNote, heardNobody, completeRadio } from './core/radioFriend.js';
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
@@ -2344,6 +2345,82 @@ ${STORY_MORE[target.id]}` : told) };
     chosen.rail.pad = pad(simTime + padAt);
     chosen.rail.splash = spot(simTime + endAt);
   }
+  // Starship's fifth flight (rail.starship): the stretches on the ground drawn by a little
+  // world of their own on a canvas over the game's (rail.stage; render/starshipStage.js,
+  // made the first time it is wanted and let go when the course is left), and from the
+  // booster's camera the ship on top of it, lighting its engines and going (rail.hotStage).
+  let starshipStage = null;
+  function starshipStep(chosen, base) {
+    const rail = chosen.rail;
+    const t = courseTime;
+    const onGround = rail.stage.some(([a, b]) => t >= a && t < b);
+    let canvas = document.getElementById('starshipStage');
+    if (onGround) {
+      if (!canvas) {
+        document.body.insertAdjacentHTML('beforeend', '<canvas id="starshipStage" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;z-index:6;pointer-events:none;background:#000"></canvas>');
+        canvas = document.getElementById('starshipStage');
+      }
+      if (!starshipStage) {
+        starshipStage = createStarshipStage(canvas);
+        addEventListener('resize', starshipResize);
+      }
+      canvas.hidden = false;
+      // Shaken a little by the liftoff and the catch, seen from far off (rail.stageShakes;
+      // the user, 2026-11-22: "땅이 너무 흔들린다"): two pixels at most, three to five times a
+      // second, for a few seconds.
+      let g = 0;
+      for (const k of rail.stageShakes ?? []) {
+        if (t <= k.from || t >= k.to) continue;
+        const x = t < k.peak ? (t - k.from) / (k.peak - k.from) : 1 - (t - k.peak) / (k.to - k.peak);
+        g = Math.max(g, k.power * x * x * (3 - 2 * x));
+      }
+      const rumble = (k) => 0.6 * Math.sin(t * 31 + k) + 0.4 * Math.sin(t * 19 + 2 * k);
+      canvas.style.transform = g > 0.01 ? `translate(${(g * 2 * rumble(0)).toFixed(2)}px, ${(g * 2 * rumble(1)).toFixed(2)}px) scale(1.01)` : '';
+      starshipStage.update(t);
+    } else if (canvas) canvas.hidden = true;
+    // The ship, seen from the booster: on top of it, then lit and away.
+    const hs = rail.hotStage;
+    if (!onGround && t < hs.to) {
+      const { position, nose, north } = starshipTrack(chosen, here('earth'), t, here('sun'));
+      const x = Math.max(0, (t - hs.from) / (hs.to - hs.from));
+      const km = hs.nearKm + (hs.farKm - hs.nearKm) * x * x;
+      const at = position.map((n, i) => n + nose[i] * km);
+      world.setFloatModel('starshipShip', { kind: 'ship', km: at, sizeKm: hs.sizeKm, forward: nose, up: north, pose: { fire: t >= hs.from ? Math.min(1, (t - hs.from) / 0.4) : 0, air: 0, at: t } });
+    } else world.setFloatModel('starshipShip', null);
+    void base;
+  }
+  function starshipResize() { starshipStage?.resize(); }
+  function starshipOff() {
+    world.setFloatModel('starshipShip', null);
+    const canvas = document.getElementById('starshipStage');
+    if (canvas) canvas.hidden = true;
+    if (starshipStage) {
+      starshipStage.dispose();
+      starshipStage = null;
+      removeEventListener('resize', starshipResize);
+      canvas?.remove();
+    }
+  }
+  // The pad at dawn (13 October 2024: the liftoff a few minutes before sunrise, the catch
+  // just after): the moment of the game's clock, within the next two days, when the Sun
+  // stands 3 degrees over the pad's horizon and rising; the sky held still while it is flown.
+  function starshipPlan(chosen) {
+    const pad = (t) => surfaceDirection(25.997, -97.157, spinOf('earth', t));
+    const toSun = (() => { const sp = here('sun').position, e = here('earth').position; const v = sp.map((n, i) => n - e[i]); const l = Math.hypot(...v); return v.map((n) => n / l); })();
+    const sunUp = (d) => d[0] * toSun[0] + d[1] * toSun[1] + d[2] * toSun[2];
+    const want = Math.sin((7 * Math.PI) / 180);
+    let t0 = simTime, best = Infinity;
+    for (let t = simTime; t < simTime + 2 * 86400; t += 60) {
+      const now = sunUp(pad(t));
+      if (sunUp(pad(t + 600)) <= now) continue;
+      const miss = Math.abs(now - want);
+      if (miss < best) { best = miss; t0 = t; }
+    }
+    simTime = t0;
+    bodies = allAt(simTime);
+    craft = craftAt(simTime, bodies);
+    chosen.rail.pad = pad(simTime);
+  }
   // The window the course is seen through at `seconds` (rail.cabins: from `at` on), and
   // the change from one to the next behind a short dark (the user, 2026-11-19: Apollo on to
   // the landing and home, "달 착륙까지 이어 붙여. 지구까지 귀환하자"): Columbia, Eagle, Columbia.
@@ -3336,6 +3413,9 @@ ${STORY_MORE[target.id]}` : told) };
     const after = list.some((q) => q.from === p.to);
     const before = list.some((q) => q.to === p.from);
     const pic = box.firstElementChild;
+    // (Whose photo: NASA's unless rail.photos[].credit names another.)
+    const credit = p.credit ? t`사진: ${p.credit}` : t('사진: NASA');
+    if (box.lastElementChild.textContent !== credit) box.lastElementChild.textContent = credit;
     if (pic.dataset.src !== p.src) { pic.dataset.src = p.src; pic.style.backgroundImage = `url("${import.meta.env.BASE_URL}${p.src}")`; }
     const x = (courseTime - p.from) / (p.to - p.from);
     const ease = x * x * (3 - 2 * x);
@@ -3562,6 +3642,12 @@ ${STORY_MORE[target.id]}` : told) };
         body = here(chosen.body);
         // Its sky held still while it is flown (the plan's moment may lie days of the game's
         // clock ahead), and the clock back to now when it is left (cupolaView).
+        cupolaClock = true;
+        clockPace = 0;
+      }
+      if (chosen.rail?.starship) {
+        starshipPlan(chosen);
+        body = here(chosen.body);
         cupolaClock = true;
         clockPace = 0;
       }
@@ -4787,6 +4873,7 @@ ${STORY_MORE[target.id]}` : told) };
         state = { ...state, ...railAt(chosen, here(chosen.body), here('sun'), courseTime, here('moon'), here('hubble')) };
         apolloDock(chosen, state);
         apolloLanding(chosen, state);
+        if (chosen.rail.starship) starshipStep(chosen, state);
         if (chosen.rail.cabin) state = { ...state, orientation: cupolaFloat(state) };
         if (chosen.rail.mmu) mmuFlyStep(chosen, dt, jetKey);
         // Sounds at their moments (rail.sounds: [seconds, cue]).
@@ -4802,6 +4889,7 @@ ${STORY_MORE[target.id]}` : told) };
         if (chosen.rail.loops && courseTime >= chosen.lapS && !flying) {
           courseTime += (chosen.rail.startS ?? 0) - chosen.lapS;
           if (chosen.rail.apollo) apolloPlan(chosen);
+          if (chosen.rail.starship) starshipPlan(chosen);
         }
         if (chosen.rail.cabins && cupolaOn) {
           const want = cabinFor(chosen, courseTime);
@@ -4833,6 +4921,7 @@ ${STORY_MORE[target.id]}` : told) };
       const x = Math.max(0, Math.min(1, (courseTime - shutS) / (openS - shutS)));
       world.setCraftModel('hubble', { kind: shuttleRail.craftModel, doors: x * x * (3 - 2 * x), arm: shuttleRail.armPose ?? {}, ...facing });
     } else world.setCraftModel('hubble', null);
+    if ((!course || !courseById(course)?.rail?.starship) && starshipStage) starshipOff();
     if (!course || !courseById(course)?.rail?.dock) {
       world.setFloatModel('columbia', null);
       landingNow = { dust: 0, shadow: null };

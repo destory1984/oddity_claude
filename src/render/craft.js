@@ -10,6 +10,7 @@ import { SITE_BUILD, SITE_REPLAY_BUILD, SITE_SAYS, SECOND_SAYS, BOOSTER_SAYS, SA
 import { drum, rod, group, box } from './craftParts.js';
 import { buildChallenger, shadeChallenger } from './challenger3d.js';
 import { buildColumbia } from './columbia3d.js';
+import { buildShip } from './starship3d.js';
 
 // Spacecraft and landers. The models are in craftModels.js (in orbit) and
 // siteModels.js (on the ground), built from the parts in craftParts.js; this file
@@ -706,7 +707,7 @@ export function createCraft(scene, craftList) {
   const models = new Map();
   // (One shadow map for them all: a light keeps one.)
   let modelShadows = null;
-  const BUILDS = { challenger: buildChallenger, columbia: buildColumbia };
+  const BUILDS = { challenger: buildChallenger, columbia: buildColumbia, ship: buildShip };
   const modelOf = (kind) => {
     if (models.has(kind)) return models.get(kind);
     const ship = BUILDS[kind](scene, `model_${kind}`);
@@ -714,7 +715,7 @@ export function createCraft(scene, craftList) {
     const sun = scene.getLightByName('craftSun');
     const phone = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
     if (sun && !modelShadows) modelShadows = shadeChallenger(ship, sun, { size: phone ? 1024 : 2048 });
-    else if (modelShadows) for (const m of ship.root.getChildMeshes()) { modelShadows.addShadowCaster(m, false); m.receiveShadows = true; }
+    else if (modelShadows) for (const m of ship.root.getChildMeshes()) { if (m.metadata?.light) continue; modelShadows.addShadowCaster(m, false); m.receiveShadows = true; }
     ship.shadows = modelShadows;
     ship.normalBias = 0.1;
     models.set(kind, ship);

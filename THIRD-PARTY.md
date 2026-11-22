@@ -14,7 +14,9 @@
 | `public/assets/tours/pillars.jpg` | NASA, Jeff Hester, Paul Scowen (Arizona State University), 「창조의 기둥」 (허블, 1995년, STScI-PRC1995-44a). | 미국 정부 저작물, 저작권 없음 |
 | `public/assets/tours/mmu-figure.webp` | NASA, S84-27017 (1984년 2월 7일, MMU로 나는 브루스 매캔들리스). https://images.nasa.gov/details/s84-27017 사람만 오려 내고, 비치는 바이저를 GPT(OpenAI 이미지 생성)로 채웠다. | 미국 정부 저작물, 저작권 없음 |
 | `public/assets/tours/mmu-face.jpg` | NASA, S84-27034A (STS-41B, 매캔들리스의 헬멧). https://images.nasa.gov/details/s84-27034a | 미국 정부 저작물, 저작권 없음 |
-| `public/assets/tours/apollo-cabin.webp`, `eagle-cabin.webp`, `shuttle-cabin.webp`, `eagle-top.webp`, `helmet-rim.webp`, `helmet-hands.webp`, `candy.webp`, `*-switch*-down.webp` | 이 게임을 위해 GPT(OpenAI 이미지 생성)로 그렸다. | 이 저장소의 것 |
+| `public/assets/tours/starbase-sat.jpg` | SpaceFrom.Space, SpaceX's Starbase - 2023-09-13 (위에서 본 스타베이스 위성 사진). https://commons.wikimedia.org/wiki/File:SpaceX's_Starbase_-_2023-09-13_(53343662904).jpg 가로 3,840px 판을 줄였다. | CC BY 2.0 |
+| `public/assets/tours/starship-pad.jpg` | Steve Jurvetson, SpaceX Starship before IFT-5 (5차 비행 전날 밤의 발사대). https://commons.wikimedia.org/wiki/File:SpaceX_Starship_before_IFT-5.jpg 줄였다. | CC BY 2.0 |
+| `public/assets/tours/apollo-cabin.webp`, `eagle-cabin.webp`, `shuttle-cabin.webp`, `eagle-top.webp`, `helmet-rim.webp`, `helmet-hands.webp`, `candy.webp`, `booster-up.webp`, `booster-down.webp`, `*-switch*-down.webp` | 이 게임을 위해 GPT(OpenAI 이미지 생성)로 그렸다. | 이 저장소의 것 |
 | `public/assets/tours/helmet-air.mp3` | 이 게임을 위해 만든 소리(우주복 환풍기와 숨소리를 잡음으로 합성). | 이 저장소의 것 |
 | `public/assets/earth-clouds.webp` | NASA Visible Earth, 구름 합성 지도. https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg | 미국 정부 저작물, 저작권 없음 |
 | 실제 구름 (게임이 열릴 때마다 받아 옴, `src/render/realClouds.js`) | NASA GIBS, VIIRS Suomi NPP / NOAA-20 Corrected Reflectance (True Color), 어제의 지구 전체. https://gibs.earthdata.nasa.gov | NASA 영상, 저작권 없음 |
@@ -220,7 +222,7 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 
 ## 땅에 깐 위성 사진
 
-`public/assets/terrain/` 의 사진 13장은 지구 그림이 너무 거칠어(한 화소에 10km쯤) 보이지 않는 이름난 자리에, 가까이 갔을 때 땅에 얇게 덮어 보인다. 둥글게 잘라 가장자리를 투명하게 하고, 색을 둘레 지구 그림에 맞추고(채널마다 0.8 → 1.25배), 대기처럼 회색(137, 137, 140)을 28% 섞어 살짝 뿌옇게 했으며, WebP 품질 55로 작게 줄였다(8 → 20KB).
+`public/assets/terrain/` 의 사진 14장은 지구 그림이 너무 거칠어(한 화소에 10km쯤) 보이지 않는 이름난 자리에, 가까이 갔을 때 땅에 얇게 덮어 보인다. 둥글게 잘라 가장자리를 투명하게 하고, 색을 둘레 지구 그림에 맞추고(채널마다 0.8 → 1.25배), 대기처럼 회색(137, 137, 140)을 28% 섞어 살짝 뿌옇게 했으며, WebP 품질 55로 작게 줄였다(8 → 20KB). 스타십 코스의 `starbase.webp` 는 1단이 내려오며 크게 보이므로 2,048 × 2,048, 회색 20%, 품질 72로 두었다(115KB).
 
 | 파일 | 원본 | 만든 이 | 라이선스 |
 |---|---|---|---|
@@ -237,6 +239,7 @@ CC BY-SA 2.0, CC BY-SA 3.0, CC BY-SA 3.0 IGO, GODL-India 사진은 출처를 밝
 | `mississippi.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (미시시피 강 굽이, EOX WMS 레이어 `s2cloudless`, 위도 33.4, 경도 -91.1 둘레 60km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
 | `natron.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (나트론 호수, EOX WMS 레이어 `s2cloudless`, 위도 -2.42, 경도 36.05 둘레 60km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
 | `aral.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (아랄해, EOX WMS 레이어 `s2cloudless`, 위도 45.3, 경도 59.6 둘레 200km를 1,024 × 1,024로 받아 512 × 512로 줄임) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
+| `starbase.webp` | [Sentinel-2 cloudless 2016](https://s2maps.eu) (스타베이스와 앞바다, EOX WMS 레이어 `s2cloudless`, 위도 26.0, 경도 -96.75 둘레 240km를 2,048 × 2,048로 받음. 바다는 해안에서 5 → 14km 사이에 걸쳐 투명하게 해 게임의 바다가 보이게 함) | EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016) | CC BY 4.0 |
 
 ## 사진 임무가 따라 찍는 실제 사진
 

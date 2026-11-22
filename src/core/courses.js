@@ -59,6 +59,12 @@ export const COURSES = [
   // 유영하는걸 추천 코스로", "우주 유영을 1인칭 시점으로"): Challenger (a cut-out of the photo he
   // took) in Hubble's place, falling back to about 100 m and coming near again.
   { id: 'mmu', body: 'earth', lapS: 340, rail: { shuttle: true, mmu: true, craftModel: 'challenger', doorsS: [-44, -36], armPose: { yaw: 0.12, pitch: 0.12, elbow: -0.15 }, noseDeg: 35, feel: true, air: 'assets/tours/helmet-air.mp3', hands: 'assets/tours/helmet-hands.webp', cabin: 'assets/tours/none.png', cabins: [{ at: -100, cabin: 'assets/tours/none.png' }, { at: -4, cabin: 'assets/tours/helmet-rim.webp' }], floaters: [], nearS: [-62, -46], farOutKm: 900, nearOutKm: 80, outS: [-32, -20], roundS: [-22, -10], figureOutKm: 11, figureKm: 3.4, figure: { src: 'assets/tours/mmu-figure.webp', aspect: 1029 / 900, width: 1 }, pace: 50, nearKm: 7, farKm: 140, turnS: 100000, aimOff: [0, 0], craftKm: 46, kmAt: [[0, 140], [20, 150], [170, 280], [230, 280], [320, 150], [340, 140]], figureEndKm: 50, loops: true, fades: [339.2], startS: -64, photos: [{ from: -8, to: 2.5, fadeS: 2.5, src: 'assets/tours/mmu-face.jpg', pan: [50, 50], zoom: [1, 4.5], origin: '54% 22%' }], phases: [[-64, t('챌린저 곁')], [0, t('홀로 나는 중')], [230, t('돌아가는 중')]], captions: [{ at: -62, text: t('1984년 2월 7일, 지구 위를 도는 우주 왕복선 챌린저.') }, { at: -32, text: t('브루스 매캔들리스가 등에 추진기를 메고 화물칸에서 나옵니다.') }, { at: -20, text: t('줄 하나 없이 우주를 나는 첫 우주 유영입니다.') }, { at: -14, text: t('이제 그의 헬멧 안으로 들어갑니다.') }, { at: 3, text: t('등에 멘 추진기의 이름은 MMU. 질소 가스를 뿜는 작은 분사구 24개로 움직입니다.') }, { at: 28, text: t('양손의 손잡이로 앞뒤, 위아래로 가고 몸을 돌립니다.') }, { at: 55, text: t('이제 챌린저와 그를 잇는 줄은 없습니다. 그 스스로가 작은 우주선입니다.') }, { at: 85, text: t('둘 다 시속 2만 8천km로 지구를 돌고 있지만, 함께 돌기에 서로는 거의 멈춘 듯 보입니다.') }, { at: 115, text: t('챌린저가 점점 작아집니다. 그는 약 100m까지 멀어졌습니다.') }, { at: 150, text: t('15년 전 아폴로 11호 때, 매캔들리스는 휴스턴에서 달 위의 암스트롱과 교신하던 사람이었습니다.') }, { at: 180, text: t('떠나며 그는 말했습니다. "닐에게는 작은 한 걸음이었겠지만, 내게는 엄청나게 큰 도약이다."') }, { at: 210, text: t('그는 이 추진기를 만드는 일에 오래 힘을 보탰습니다.') }, { at: 240, text: t('이제 챌린저로 돌아갑니다.') }, { at: 270, text: t('이날 동료 로버트 스튜어트도 같은 추진기로 날았습니다.') }, { at: 300, text: t('이날의 우주 유영은 5시간 55분 동안 이어졌습니다.') }] }, name: t('줄 하나 없이 우주 유영'), todo: t('1984년 줄 하나 없이 우주를 난 첫 사람, 브루스 매캔들리스의 헬멧 안에서 멀어지는 챌린저를 봅니다.') },
+  // Starship's fifth flight, 13 October 2024 (the user, 2026-11-22: "스페이스X 이륙 -> 착륙은
+  // 어때?", "1안" (the flight whose booster the tower caught), "3" (the liftoff and the catch
+  // from the ground, the flight between from a camera on the booster), "만들어"). stage: the
+  // stretches drawn on the ground at Starbase (render/starshipStage.js); the rest from the
+  // booster over the Gulf of Mexico (starshipAt). hotStage: the ship lighting and leaving.
+  { id: 'starship', body: 'earth', lapS: 440, rail: { starship: true, stage: [[-20, 30], [372, 460]], hotStage: { from: 158, to: 178, nearKm: 11, farKm: 400, sizeKm: 30, sideKm: 6, aimKm: 9 }, cabin: 'assets/tours/none.png', cabins: [{ at: -100, cabin: 'assets/tours/none.png', captionY: 76 }, { at: 30, cabin: 'assets/tours/booster-up.webp' }, { at: 184, cabin: 'assets/tours/booster-down.webp' }, { at: 372, cabin: 'assets/tours/none.png', captionY: 76 }], stageShakes: [{ from: 0.5, peak: 2.5, to: 9, power: 1 }, { from: 407.8, peak: 408.2, to: 410.5, power: 0.6 }], floaters: [], loops: true, fades: [30, 372, 439.2], startS: -44, burns: [{ from: -3, to: 20, power: 0.9, buzz: true }, { from: 20, to: 158, power: 0.55 }, { from: 188, to: 226, power: 0.6, buzz: true }, { from: 381, to: 407, power: 0.75, buzz: true }], shakes: [{ from: -3, peak: 2, to: 30 }, { from: 158, peak: 159, to: 163 }, { from: 406.8, peak: 407, to: 409 }], still: [[-60, 30], [372, 460]], photos: [{ from: -44, to: -32, src: 'assets/tours/starbase-sat.jpg', pan: [60, 76], zoom: [1, 2.4], origin: '74% 90%', credit: 'SpaceFrom.Space, CC BY 2.0' }, { from: -32, to: -20, src: 'assets/tours/starship-pad.jpg', pan: [57, 57], zoom: [1.1, 1.4], origin: '50% 12%', credit: 'Steve Jurvetson, CC BY 2.0' }], sounds: [[1.3, 'liftoff'], [158, 'staging'], [408.1, 'capture']], countdowns: [{ at: 0, from: 20, beeps: 10, said: t('발사까지'), go: t('이륙!') }], phases: [[-44, t('발사대')], [0, t('발사')], [158, t('단 분리')], [184, t('돌아오는 길')], [381, t('착륙')], [407, t('붙잡음')]], captions: [{ at: -43, text: t('2024년 10월 13일 아침, 미국 텍사스 남쪽 바닷가의 발사장. 높이 121m, 지금까지 만든 가장 큰 로켓입니다.') }, { at: -31, text: t('전날 밤의 발사대. 불 밝힌 탑 옆에서 로켓이 기다립니다.') }, { at: -19, text: t('아래는 1단 슈퍼 헤비, 위는 2단 스타십. 둘 다 다시 쓰려고 만든 로켓입니다.') }, { at: 2, text: t('1단 바닥의 엔진 33개에 불이 붙습니다.') }, { at: 34, text: t('1단 옆에 붙은 카메라로 봅니다. 하늘이 점점 검어집니다.') }, { at: 70, text: t('가장 큰 공기의 힘을 견디고 지나갑니다. 곧 소리보다 몇 배 빨라집니다.') }, { at: 120, text: t('2분 반 동안 연료 3,400톤을 태웠습니다.') }, { at: 158, text: t('2단이 1단에 붙은 채로 엔진을 켜고 떨어져 나갑니다. 핫 스테이징이라고 합니다.') }, { at: 186, text: t('1단은 몸을 돌려 엔진을 다시 켜고, 떠나온 발사장으로 되돌아갑니다.') }, { at: 232, text: t('고도 약 95km. 이제 떨어지며 격자 날개로 방향을 잡습니다.') }, { at: 300, text: t('1단에서 떨어져 나간 2단은 우주로 올라가 지구를 3분의 2 바퀴쯤 돌고, 1시간 남짓 뒤 인도양에 내렸습니다.') }, { at: 374, text: t('다시 발사장. 1단이 하늘에서 내려옵니다.') }, { at: 383, text: t('엔진 13개를 켜고 속도를 줄입니다.') }, { at: 394, text: t('마지막엔 엔진 세 개만 켜고 탑 옆으로 내려옵니다.') }, { at: 407, text: t('탑의 두 팔이 70m 높이의 1단을 공중에서 붙잡았습니다. 처음 해낸 일이었습니다.') }, { at: 420, text: t('발사부터 7분 만의 일이었습니다.') }], track: { alt: [[30, 2.5], [60, 12], [100, 35], [158, 65], [200, 92], [215, 95], [260, 82], [320, 40], [372, 3]], down: [[30, 0.3], [60, 3], [100, 20], [158, 62], [200, 86], [215, 88], [260, 70], [320, 26], [372, 1]], tilt: [[30, 0], [60, 14], [100, 34], [158, 52], [176, 60], [190, -60], [226, -55], [300, -15], [372, 0]] } }, name: t('스타십, 하늘에서 붙잡은 로켓'), todo: t('2024년 거대한 로켓이 날아올랐다 돌아와, 발사탑의 두 팔에 붙잡히기까지를 땅과 로켓에서 봅니다.') },
   { id: 'orbitSunrise', body: 'earth', lapS: 360, rail: { orbit: true, highKm: 400, lookDeg: 12, startS: 22 }, name: t('궤도 일출'), todo: t('지구 400km 위를 돌며 밤에서 낮으로 넘어갑니다. 지평선에 빨강, 주황, 파랑의 띠가 켜지고 태양이 솟습니다.') },
   { id: 'milkyWay', body: 'earth', lapS: 180, radii: 8, rollDeg: 35, sky: 'milkyWay', name: t('은하수 일주'), todo: t('은하수가 놓인 평면을 따라 지구 둘레를 비행합니다. 은하 중심에서 출발합니다.') },
   { id: 'orion', body: 'earth', lapS: 150, radii: 6, sky: 'm42', overDeg: 16, name: t('오리온 대성운'), todo: t('지구를 돌면서 겨울 밤하늘의 붉은 성운을 봅니다.') },
@@ -125,6 +131,7 @@ function roundOf(course, frame, ringNormal) {
 export function railAt(course, body, sun, seconds, moon = null, hubble = null) {
   if (course.rail.mmu && seconds < 0) return mmuAt(course, body, hubble, seconds, sun);
   if (course.rail.shuttle) return shuttleAt(course, body, hubble, seconds, sun);
+  if (course.rail.starship) return starshipAt(course, body, seconds, sun);
   if (course.rail.apollo) return apolloAt(course, body, moon, seconds, sun);
   if (course.rail.orbit) return orbitAt(course, body, sun, seconds);
   if (course.rail.cupola) return cupolaAt(course, body, sun, seconds);
@@ -531,6 +538,70 @@ function launchAt(course, earth, seconds, sun, w) {
   return { position, orientation: orientationFrom(look, up) };
 }
 const smoothstep01 = (x) => { const t = Math.min(1, Math.max(0, x)); return t * t * (3 - 2 * t); };
+// Starship's booster over the Gulf of Mexico (rail.track: alt, km up; down, km east of the
+// pad; tilt, degrees its nose leans from upright toward the east (on the way back, toward the
+// west), each at course seconds): where it is, its nose, and the pad's own up and east.
+// rail.pad: the pad (main.js starshipPlan); without it, east of the Sun's side, as for Apollo.
+const linear = (marks, s) => {
+  if (s <= marks[0][0]) return marks[0][1];
+  for (let i = 1; i < marks.length; i++) {
+    if (s < marks[i][0]) {
+      const [s0, v0] = marks[i - 1];
+      const [s1, v1] = marks[i];
+      return v0 + (v1 - v0) * ((s - s0) / (s1 - s0));
+    }
+  }
+  return marks[marks.length - 1][1];
+};
+export function starshipTrack(course, earth, seconds, sun = null) {
+  const { track } = course.rail;
+  const toSun = sun ? unit(sun.position.map((v, i) => v - earth.position[i])) : [1, 0, 0];
+  const pad = course.rail.pad ?? toSun;
+  const east = unit(cross(pad, [0, 1, 0]));
+  const north = cross(east, pad);
+  const down = linear(track.down, seconds);
+  const arc = down / earth.radiusKm;
+  const up = unit(mix(Math.cos(arc), pad, Math.sin(arc), east));
+  const ahead = unit(mix(-Math.sin(arc), pad, Math.cos(arc), east));
+  const position = earth.position.map((v, i) => v + up[i] * (earth.radiusKm + linear(track.alt, seconds)));
+  const tilt = rad(linear(track.tilt, seconds));
+  const nose = unit(mix(Math.cos(tilt), up, Math.sin(tilt), ahead));
+  return { position, nose, up, ahead, north };
+}
+// The view from the camera on the booster: up along it (cabin booster-up) until it turns
+// back after the ship has gone, then down past its grid fin to the ground it is coming back
+// to (cabin booster-down), the turn between over flip seconds.
+function starshipAt(course, earth, seconds, sun) {
+  const { position, nose, up, ahead, north } = starshipTrack(course, earth, seconds, sun);
+  const hs = course.rail.hotStage;
+  // Up along it, from a little to its side (the camera is on its flank), at a point a little
+  // way up the ship sitting on it, the booster's axis upright in the view (render/craft.js
+  // draws the ship there, main.js starshipStep).
+  const eye = position.map((n, i) => n - north[i] * hs.sideKm);
+  const aimAt = position.map((n, i) => n + nose[i] * (hs.nearKm + hs.aimKm));
+  const upView = unit(aimAt.map((n, i) => n - eye[i]));
+  // Down past the fin: 30 degrees off straight down, toward the coast it is coming back to,
+  // so the ground is seen to grow as it falls (the user, 2026-11-22: was 60, the ground
+  // seemed not to move: "지표가 왜 안 움직여", "가+나로 만들어").
+  const toward = ahead.map((v) => -v);
+  const downView = unit(mix(-Math.cos(rad(30)), up, Math.sin(rad(30)), toward));
+  const x = smoothstep01((seconds - 176) / 12);
+  let look = unit(mix(1 - x, upView, x, downView));
+  let screenUp = x < 0.5 ? squareTo(nose, look) : squareTo(toward, look);
+  // Falling, the booster sways as its grid fins steer it, and slowly rolls a little each
+  // way: a few slow waves of yaw, pitch and roll, growing in as it turns down.
+  if (x > 0) {
+    const s = seconds;
+    const yaw = rad(3.5 * Math.sin(s * 0.53) + 1.5 * Math.sin(s * 1.31 + 1)) * x;
+    const pitch = rad(2.5 * Math.sin(s * 0.71 + 2) + 1 * Math.sin(s * 1.7)) * x;
+    const roll = rad(14 * Math.sin(s * 0.11) + 3 * Math.sin(s * 0.47 + 0.5)) * x;
+    const side = cross(look, screenUp);
+    look = unit(look.map((n, i) => n + side[i] * Math.tan(yaw) + screenUp[i] * Math.tan(pitch)));
+    const side2 = cross(look, screenUp);
+    screenUp = squareTo(mix(Math.cos(roll), screenUp, Math.sin(roll), side2), look);
+  }
+  return { position: x < 0.5 ? eye : position, orientation: orientationFrom(look, screenUp) };
+}
 // A value along [[seconds, value], ...], eased between the marks, held before and after.
 function eased(marks, s) {
   if (s <= marks[0][0]) return marks[0][1];

@@ -11,8 +11,9 @@ test('each ground patch has its picture on file and credited, and is a size one 
     assert.ok(Math.abs(patch.latDeg) <= 90 && Math.abs(patch.lonDeg) <= 180, patch.id);
     assert.ok(existsSync(`public/assets/terrain/${patch.file}`), patch.file);
     assert.ok(credits.includes(`| \`${patch.file}\` |`), `${patch.file} is not in THIRD-PARTY.md`);
-    // 512 across: from 100 m to 400 m a pixel, against about 10 km for Earth's own map.
-    assert.ok(patch.sizeKm >= 30 && patch.sizeKm <= 200, patch.id);
+    // 512 across: from 100 m to 400 m a pixel, against about 10 km for Earth's own map
+    // (Starbase's, 240 km, is 2,048 across: 120 m a pixel).
+    assert.ok(patch.sizeKm >= 30 && patch.sizeKm <= 240, patch.id);
   }
 });
 

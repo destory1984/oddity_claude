@@ -29,3 +29,4 @@ export { CreateTorus } from '@babylonjs/core/Meshes/Builders/torusBuilder.js';
 export { CreateLathe } from '@babylonjs/core/Meshes/Builders/latheBuilder.js';
 export { CreatePolyhedron } from '@babylonjs/core/Meshes/Builders/polyhedronBuilder.js';
 export { DynamicTexture } from '@babylonjs/core/Materials/Textures/dynamicTexture.js';
+export { CreateGround } from '@babylonjs/core/Meshes/Builders/groundBuilder.js';

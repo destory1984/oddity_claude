@@ -1010,11 +1010,11 @@ function dokdoPieces(scene, name) {
   };
   return {
     pieces: {
-      isle1954: drawing(scene, `${name}Isle1954`, 'replay/dokdo-1954.png', [2, 1]),
-      isle: drawing(scene, `${name}Isle`, 'dokdo.png', [2, 1]),
+      isle1954: drawing(scene, `${name}Isle1954`, 'replay/dokdo-1954.webp', [2, 1]),
+      isle: drawing(scene, `${name}Isle`, 'dokdo.webp', [2, 1]),
       // (The boat is drawn 112 by 50 pixels and the tower 50 by 96.)
-      boat: drawing(scene, `${name}Boat`, 'replay/boat.png', [0.44, 0.196]),
-      tower: drawing(scene, `${name}Tower`, 'replay/tower.png', [0.172, 0.33]),
+      boat: drawing(scene, `${name}Boat`, 'replay/boat.webp', [0.44, 0.196]),
+      tower: drawing(scene, `${name}Tower`, 'replay/tower.webp', [0.172, 0.33]),
       lamp: lampOf('Lamp'),
       beam: beamOf('Beam'),
       topLamp: lampOf('TopLamp'),
@@ -1071,7 +1071,7 @@ function probeFor(by, body) {
 }
 // The Sun rising twice (core/landmarkStages.js 'sunrise'): a night sky, the Sun, and
 // in front of it the rim of a crater over its cratered floor. The Sun and the rim are
-// drawings ordered for it (public/assets/replay/sunrise-sun.jpg, sunrise-ridge.png): the
+// drawings ordered for it (public/assets/replay/sunrise-sun.webp, sunrise-ridge.webp): the
 // first stage was a flat disc behind eight round hills, and the user (2026-10-12) "예쁘다는
 // 느낌은 하나도 못 받았어"; of four looks shown side by side they chose this pair.
 // SUNRISE: the sizes the stage's timing goes by (the rim's crest and the Sun's disc).
@@ -1079,11 +1079,11 @@ function probeFor(by, body) {
 // stand tall before the game's own ground: its crest is then `crest` up.)
 export const SUNRISE = { ridge: [4.2, 0.984], sunk: 0.3, crest: 0.45, sun: 2.8, disc: 0.49, floor: 2.6 };
 function sunrisePieces(scene, name) {
-  const ridge = drawing(scene, `${name}Ridge`, 'replay/sunrise-ridge.png', SUNRISE.ridge);
+  const ridge = drawing(scene, `${name}Ridge`, 'replay/sunrise-ridge.webp', SUNRISE.ridge);
   // Its floor goes on flat toward the eye, over the game's own ground (sunlit and pale,
   // it showed under the drawing as another world).
   const ground = new StandardMaterial(`${name}FloorPaint`, scene);
-  const floorPicture = new Texture(`${import.meta.env.BASE_URL}assets/replay/sunrise-floor.jpg`, scene, true, true, Texture.NEAREST_SAMPLINGMODE);
+  const floorPicture = new Texture(`${import.meta.env.BASE_URL}assets/replay/sunrise-floor.webp`, scene, true, true, Texture.NEAREST_SAMPLINGMODE);
   floorPicture.wrapU = Texture.CLAMP_ADDRESSMODE;
   floorPicture.wrapV = Texture.CLAMP_ADDRESSMODE;
   ground.disableLighting = true;
@@ -1104,7 +1104,7 @@ function sunrisePieces(scene, name) {
   // The Sun is painted on black and added to the sky as light, its rays and all.
   const sun = new TransformNode(`${name}Sun`, scene);
   const shine = new StandardMaterial(`${name}SunShine`, scene);
-  const picture = new Texture(`${import.meta.env.BASE_URL}assets/replay/sunrise-sun.jpg`, scene, true, true);
+  const picture = new Texture(`${import.meta.env.BASE_URL}assets/replay/sunrise-sun.webp`, scene, true, true);
   picture.wrapU = Texture.CLAMP_ADDRESSMODE;
   picture.wrapV = Texture.CLAMP_ADDRESSMODE;
   shine.disableLighting = true;
@@ -1155,7 +1155,7 @@ const landmarkPieces = (id, { kind, by, body, say, say2, dinos }) => {
       : kind === 'huygens' ? huygensPieces(scene, name)
         : kind === 'solstice' ? hengePieces(scene, name)
           : kind === 'starNight' ? cheomPieces(scene, name)
-            : { photo: printOf(scene, `${name}Photo`, `stories/${id}.jpg`, 1.05) };
+            : { photo: printOf(scene, `${name}Photo`, `stories/${id}.webp`, 1.05) };
     if (kind === 'photo' || kind === 'impact') {
       const flash = new TransformNode(`${name}Flash`, scene);
       part(CreateSphere(`${name}FlashBall`, { diameter: 1, segments: 14 }, scene), flash, mats.white, [0, 0, 0]);
@@ -1259,9 +1259,9 @@ const LANDER_STAGE_BUILD = {
     flag: flagAlone(scene, `${name}Flag`, mats),
     john: astronaut(scene, `${name}John`, mats),
     // The photograph Duke took of that jump (NASA AS16-113-18339, public/assets/people/
-    // young.jpg): it comes up as a print (the user, 2026-10-07: "그 폴짝 실제 사진을 여기에서
+    // young.webp): it comes up as a print (the user, 2026-10-07: "그 폴짝 실제 사진을 여기에서
     // 보여주는건?").
-    photo: printOf(scene, `${name}Photo`, 'people/young.jpg', 0.6),
+    photo: printOf(scene, `${name}Photo`, 'people/young.webp', 0.6),
   })),
   surveyor1: (scene, name, mats) => ({
     pieces: {
@@ -1445,7 +1445,7 @@ const MOON_STAGES = {
     pieces.flash = new TransformNode(`${name}Flash`, scene);
     part(CreateSphere(`${name}FlashBall`, { diameter: 1, segments: 14 }, scene), pieces.flash, mats.white, [0, 0, 0]);
     pieces.probe = CRAFT_BUILD.cassini(scene, `${name}Probe`, mats);
-    pieces.photo = printOf(scene, `${name}Photo`, 'stories/whiteSpot.jpg', 1.05);
+    pieces.photo = printOf(scene, `${name}Photo`, 'stories/whiteSpot.webp', 1.05);
     pieces.bubble = sayBubble(scene, `${name}Bubble`, t('와. 폭풍이 제 꼬리를 쫓아가'));
     return { pieces, flames: {}, lit: ['flash'] };
   },

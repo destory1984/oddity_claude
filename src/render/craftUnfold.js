@@ -90,7 +90,7 @@ function voyagerPortrait(scene, name, mats) {
       plane.isPickable = false;
     };
     box(scene, `${name}SaganFrame`, sagan, glow(scene, `${name}SaganPaper`, '#f4f1e8', 1), [0.33, 0.56, 0.006], [0, -0.05, -0.006]);
-    flat('SaganPhoto', new Texture(`${import.meta.env.BASE_URL}assets/people/sagan.jpg`, scene), [0.3, 0.41], [0, 0.01, 0]);
+    flat('SaganPhoto', new Texture(`${import.meta.env.BASE_URL}assets/people/sagan.webp`, scene), [0.3, 0.41], [0, 0.01, 0]);
     const words = new DynamicTexture(`${name}SaganWords`, { width: 384, height: 140 }, scene, true);
     const ctx = words.getContext();
     ctx.fillStyle = '#f4f1e8';
@@ -557,7 +557,7 @@ function goesBy(id, make, { from, to, grow = [1, 1], turn = 0, fit = 0.8 }) {
 // turned to them (the stage's +z is toward the eye): `file` under public/assets/replay/.
 function sheet(scene, name, parent, file, [width, height], at = [0, 0, 0], sharp = true) {
   const texture = new Texture(`${import.meta.env.BASE_URL}assets/replay/${file}`, scene, true, true, sharp ? Texture.NEAREST_SAMPLINGMODE : Texture.BILINEAR_SAMPLINGMODE);
-  texture.hasAlpha = file.endsWith('.png');
+  texture.hasAlpha = sharp; // the drawings (sharp) see-through round them, the photos solid
   texture.wrapU = Texture.CLAMP_ADDRESSMODE;
   texture.wrapV = Texture.CLAMP_ADDRESSMODE;
   const material = new StandardMaterial(`${name}Material`, scene);
@@ -674,7 +674,7 @@ const saturnGoesBy = goesBy('pioneer11', (scene, name, world) => {
 // New Horizons at Arrokoth: two red lumps joined, turning slowly as it goes by.
 const arrokothGoesBy = goesBy('newHorizons', (scene, name, world, mats, root) => {
   // (A drawing ordered on 2026-10-06, 192 by 100 pixels: two smooth balls stood there.)
-  sheet(scene, `${name}Arrokoth`, world, 'arrokoth.png', [0.92, 0.48]);
+  sheet(scene, `${name}Arrokoth`, world, 'arrokoth.webp', [0.92, 0.48]);
   // (The user, 2026-10-06: "이번 대사는 \"눈사람이예요?\" 찰칵".)
   return says(scene, name, root, t('눈사람이에요?'));
 }, { from: [-1.9, -1.0], to: [1.9, -1.0], turn: 1.2 });
@@ -793,10 +793,10 @@ const moonThenEarth = goesBy('juice', (scene, name, world, mats, root) => {
 // two lumps joined. moon: it has come out; pair: its second lump is seen.
 const dinkineshGoesBy = goesBy('lucy', (scene, name, world, mats, root) => {
   // (Drawings ordered on 2026-10-06, 192 by 153 and 64 by 41 pixels: balls stood there.)
-  sheet(scene, `${name}Dinkinesh`, world, 'dinkinesh.png', [0.74, 0.59]);
+  sheet(scene, `${name}Dinkinesh`, world, 'dinkinesh.webp', [0.74, 0.59]);
   const moon = group(scene, `${name}Selam`, world);
   // Its two lumps are one drawing; until the second is made out it is seen end on, half as wide.
-  const selam = sheet(scene, `${name}SelamSheet`, moon, 'selam.png', [0.2, 0.128]);
+  const selam = sheet(scene, `${name}SelamSheet`, moon, 'selam.webp', [0.2, 0.128]);
   // Between its two pictures it asks the moon who it is (the user, 2026-10-06: "찰칵. 중간에
   // \"누구냐. 넌\" 그리고 찰칵 한 번 더").
   const say = says(scene, name, root, t('누구냐. 넌'));
@@ -829,10 +829,10 @@ function looksDown(id, hex, eye, fill) {
 // lower stage with its long shadow, and the paths walked from it. (Drawings ordered on
 // 2026-10-06, 256 pixels square: both were put together of balls and rods before.)
 const mroParachute = looksDown('mro', '#b9573a', [0, -0.3, 0.03], (scene, name, card) => {
-  sheet(scene, `${name}Photo`, card, 'photo-mro.jpg', [0.4, 0.4], [0, 0, 0.006], false);
+  sheet(scene, `${name}Photo`, card, 'photo-mro.webp', [0.4, 0.4], [0, 0, 0.006], false);
 });
 const lroFootpaths = looksDown('lro', '#9c9a96', [0, -0.33, 0.03], (scene, name, card) => {
-  sheet(scene, `${name}Photo`, card, 'photo-lro.jpg', [0.4, 0.4], [0, 0, 0.006], false);
+  sheet(scene, `${name}Photo`, card, 'photo-lro.webp', [0.4, 0.4], [0, 0, 0.006], false);
 });
 
 // Danuri braking into orbit: its engines burn at its back. (It goes round the Moon in the
@@ -893,7 +893,7 @@ function chandraFirstLight(scene, name, mats) {
   const look = gaze(scene, `${name}Gaze`, root, [0, 0.46, 0], [0, 1, 0], 0.8, 0.26, '#c8b0ff');
   const show = picture(scene, `${name}Picture`, root, mats, [0.55, 0.62, 0.3], 0.46, (card) => {
     // (A drawing ordered on 2026-10-06: rings of plain colour stood there.)
-    sheet(scene, `${name}Photo`, card, 'photo-casa.jpg', [0.44, 0.44], [0, 0, 0.006], false);
+    sheet(scene, `${name}Photo`, card, 'photo-casa.webp', [0.44, 0.44], [0, 0, 0.006], false);
   });
 
   function pose({ looking = 0, snap = 0 }) {

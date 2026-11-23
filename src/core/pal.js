@@ -2,7 +2,7 @@ import { t } from './i18n.js';
 // The small thing that floats beside Sora (docs/art-order-story-2.md): one is earned
 // at 40, 80 and 120 filled slots, for all the stunts, for all the photo missions, when
 // the journal is full, and when all nine tours are gone round. The one earned last in this order is the one that shows.
-// Drawings: public/assets/pals/pal-<id>-1.png to -4.png, four a second.
+// Drawings: public/assets/pals/pal-<id>-1.webp to -4.webp, four a second.
 export const PALS = [
   { id: 'star', name: t('작은 별'), slots: 40 },
   { id: 'saturn', name: t('작은 토성'), slots: 80 },
@@ -26,5 +26,5 @@ export function palFor({ done, total, allTours, allStunts = false, allPhotos = f
 }
 
 export function palFile(id, frame) {
-  return `pals/pal-${id}-${frame + 1}.png`;
+  return `pals/pal-${id}-${frame + 1}.webp`;
 }

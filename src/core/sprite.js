@@ -361,5 +361,5 @@ export function spriteFrame(state) {
 
 // The file for a sheet and frame, under the site's assets folder.
 export function spriteFile(sheet, frame) {
-  return `seora-sprites/${sheet}-${frame + 1}.png`;
+  return `seora-sprites/${sheet}-${frame + 1}.webp`;
 }

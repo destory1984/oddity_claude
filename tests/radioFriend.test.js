@@ -235,7 +235,7 @@ test('every speaker has a picture on file: a face, or the book of a log', async 
     // (A log's picture is its book on the craft's wall since 2026-10-22: "A, A, B".)
     assert.ok(speaker.portrait && existsSync(`public/assets/notebook/${speaker.portrait}`), speaker.id);
   }
-  assert.ok(existsSync('public/assets/notebook/radio-shota.png'));
+  assert.ok(existsSync('public/assets/notebook/radio-shota.webp'));
 });
 
 // Docked, she stays DOCK_GAP_KM from the craft: a hidden place by a craft must take that
@@ -267,7 +267,8 @@ test('every hidden place is told with a picture on file, photos credited', async
     assert.equal(foundNote(place.id).pages[0].image, place.picture);
     // Said in words for those who cannot see it (the review, 2026-10-22: alt was empty).
     assert.equal(foundNote(place.id).pages[0].imageAlt, place.name);
-    if (place.picture.endsWith('.jpg')) assert.ok(credits.includes(`| \`${place.picture}\` |`), `${place.picture} is not in THIRD-PARTY.md`);
+    // The photos (the others are drawings of the game's own).
+    if (['radio-kibo.webp', 'radio-venus.webp'].includes(place.picture)) assert.ok(credits.includes(`| \`${place.picture}\` |`), `${place.picture} is not in THIRD-PARTY.md`);
   }
 });
 

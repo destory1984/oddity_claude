@@ -48,25 +48,25 @@ export const NOTES = [
     id: 'opening',
     when: 'start',
     scene: t('심부름으로 온 할머니 댁. 할머니는 마실 나가셨고, 마루에 낡은 수첩과 쪽지가 놓여 있다.'),
-    image: 'porch.png',
+    image: 'porch.webp',
     imageAlt: t('햇빛이 드는 마루 위의 낡은 수첩과 접힌 쪽지, 돋보기안경과 연필'),
     title: t('소라에게'),
     text: LETTER.join('\n\n'),
     pages: [
       {
-        image: 'opening-arrive.png',
+        image: 'opening-arrive.webp',
         imageAlt: t('한낮의 골목. 돌담 사이 기와지붕 대문이 반쯤 열려 있고 섬돌 위에 보자기로 싼 반찬통이 놓여 있다'),
         scene: t('토요일 한낮. 엄마 심부름으로 반찬통을 들고 옆집 할머니 댁에 왔다. 대문은 반쯤 열려 있는데, 불러도 대답이 없다.'),
         say: t('할머니이! …마실 가셨나?'),
       },
       {
-        image: 'porch.png',
+        image: 'porch.webp',
         imageAlt: t('햇빛이 드는 마루 위의 낡은 수첩과 접힌 쪽지, 돋보기안경과 연필'),
         scene: t('마루에 낡은 수첩이 놓여 있다. 표지 모서리가 닳아 둥글다. 그 위에 접힌 쪽지 한 장. 겉에 "소라에게"라고 적혀 있다.'),
         say: t('어, 내 이름이네.'),
       },
       {
-        image: 'opening-notebook.png',
+        image: 'opening-notebook.webp',
         imageAlt: t('마루에 펼친 낡은 수첩. 왼쪽에 오려 붙인 달 사진, 오른쪽에 줄지은 네모 칸. 맨 위 몇 칸에만 작은 그림이 있고 나머지는 비어 있다'),
         text: LETTER[0],
         say: t('백여든 개도 넘는다고?'),
@@ -81,7 +81,7 @@ export const NOTES = [
     id: 'y1969',
     when: { landed: 'moon' },
     scene: t('달에 내려서자 수첩 첫 장 사이에서 쪽지가 떨어졌다.'),
-    image: 'note-1969.png',
+    image: 'note-1969.webp',
     imageAlt: t('여름 새벽의 마당. 마루 끝에 내놓은 흑백 텔레비전에 달 착륙선이 비치고, 빈 평상과 벗어 둔 고무신, 부채가 놓여 있다'),
     title: '1969.7.21',
     text: t('열다섯 살이었단다. 그날은 임시 공휴일이라 학교에 안 갔지.\n\n')
@@ -97,7 +97,7 @@ export const NOTES = [
     id: 'y1979',
     when: { slots: 40 },
     scene: t('마흔 칸을 채우자 수첩 사이에서 쪽지가 또 나왔다.'),
-    image: 'note-1979.png',
+    image: 'note-1979.webp',
     imageAlt: t('마루 위에 펼친 신문과 가위, 풀. 오려 낸 사진에 줄무늬 목성과 연기를 뿜는 작은 위성이 있다'),
     title: '1979',
     text: t('신문에서 보이저 1호가 보낸 목성 사진을 봤단다.\n\n')
@@ -110,7 +110,7 @@ export const NOTES = [
     id: 'y1986',
     when: { slots: 100 },
     scene: t('백 칸을 채우자 수첩 사이에서 쪽지가 또 나왔다.'),
-    image: 'note-1986.png',
+    image: 'note-1986.webp',
     imageAlt: t('동트기 전의 옥상. 망원경이 낮은 하늘을 향해 있고, 지평선 위에 아주 희미한 혜성이 있다'),
     title: '1986',
     text: t('핼리 혜성이 76년 만에 온다고 해서 몇 달을 기다렸단다.\n\n')
@@ -123,7 +123,7 @@ export const NOTES = [
     id: 'last',
     when: 'complete',
     scene: t('마지막 칸을 채우자 수첩 맨 뒷장이 열렸다.'),
-    image: 'note-last.png',
+    image: 'note-last.webp',
     imageAlt: t('펼쳐진 수첩의 맨 뒷장. 왼쪽에 신문에서 오린 사진이 붙어 있고 오른쪽에 손글씨 넉 줄이 있다'),
     title: t('이 수첩을 다 채운 사람에게'),
     text: t('1990년 신문에서 사진 한 장을 봤단다.\n60억 km 밖에서 찍은 지구가 먼지 한 톨 같더구나.\n\n')

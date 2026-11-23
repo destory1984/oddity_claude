@@ -2,7 +2,7 @@ import { t } from './i18n.js';
 // The longer telling of each story place, shown in the card that opens on arriving
 // (ui/storyCard.js), with a real photograph where one may be freely used.
 // detail: three or four sentences. photo: what the picture shows and whose it is; the
-// file is public/assets/stories/<id>.jpg. Sources and licences: THIRD-PARTY.md.
+// file is public/assets/stories/<id>.webp. Sources and licences: THIRD-PARTY.md.
 // The numbers here were written from memory and have not been checked against sources.
 const NASA = 'NASA';
 const LRO = t('NASA/GSFC/애리조나 주립대 (달 정찰 궤도선)');
@@ -544,5 +544,5 @@ export const STORY_DETAILS = {
 
 // The photo file for a story, relative to public/assets, or null when it has none.
 export function storyPhotoFile(id) {
-  return STORY_DETAILS[id]?.photo ? `stories/${id}.jpg` : null;
+  return STORY_DETAILS[id]?.photo ? `stories/${id}.webp` : null;
 }

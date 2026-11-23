@@ -2207,7 +2207,7 @@ ${STORY_MORE[target.id]}` : told) };
     const count = repliesDue.length;
     repliesDue = [];
     noteCard.show({
-      image: 'mailbox.png',
+      image: 'mailbox.webp',
       imageAlt: t('아침의 대문 옆 나무 우편함. 우표와 소인이 찍힌 누런 봉투가 반쯤 나와 있다'),
       scene: count > 1 ? t`우편함에 할머니의 답장이 ${count}통 와 있다.` : t('우편함에 할머니의 답장이 와 있다.'),
       title: t('소라에게'),
@@ -2258,11 +2258,11 @@ ${STORY_MORE[target.id]}` : told) };
     cupolaOn = on;
     let frame = document.getElementById('cupolaFrame');
     if (!frame) {
-      document.body.insertAdjacentHTML('beforeend', `<img id="cupolaFrame" alt="" src="${import.meta.env.BASE_URL}assets/cupola/frame.png" style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;pointer-events:none;z-index:5" hidden>`);
+      document.body.insertAdjacentHTML('beforeend', `<img id="cupolaFrame" alt="" src="${import.meta.env.BASE_URL}assets/cupola/frame.webp" style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;pointer-events:none;z-index:5" hidden>`);
       frame = document.getElementById('cupolaFrame');
       // A plush cat afloat in the cupola, now and then (the user, 2026-11-19: "가끔씩 물건이
       // 둥둥 떠다니게 해볼까? 고양이 인형은 어때"): before the frame, being nearer.
-      document.body.insertAdjacentHTML('beforeend', `<img id="cupolaCat" alt="" src="${import.meta.env.BASE_URL}assets/cupola/cat-0.png" style="position:fixed;left:0;top:0;width:34vw;pointer-events:none;z-index:7;will-change:transform" hidden>`);
+      document.body.insertAdjacentHTML('beforeend', `<img id="cupolaCat" alt="" src="${import.meta.env.BASE_URL}assets/cupola/cat-0.webp" style="position:fixed;left:0;top:0;width:34vw;pointer-events:none;z-index:7;will-change:transform" hidden>`);
     }
     if (on && frame.dataset.cabin !== cabin) {
       frame.dataset.cabin = cabin;
@@ -3556,7 +3556,7 @@ ${STORY_MORE[target.id]}` : told) };
         // Six cats in turn: the plain one and five in space helmets (the user, 2026-11-19:
         // "6개를 모두 뺑뺑이 돌려").
         // What floats is the course's own (rail.floaters), else the six cats.
-        const floaters = courseById(course)?.rail?.floaters ?? [0, 1, 2, 3, 4, 5].map((n) => `assets/cupola/cat-${n}.png`);
+        const floaters = courseById(course)?.rail?.floaters ?? [0, 1, 2, 3, 4, 5].map((n) => `assets/cupola/cat-${n}.webp`);
         // (Nothing floats in a helmet: rail.floaters empty.)
         if (floaters.length) catTurn = (catTurn + 1) % floaters.length;
         if (floaters.length) cat.src = `${import.meta.env.BASE_URL}${floaters[catTurn]}`;
@@ -5123,7 +5123,7 @@ ${STORY_MORE[target.id]}` : told) };
         toast.show(t`할머니의 부탁을 해냈습니다(마친 부탁 ${errandTally(daily).done}곳).`);
         say.show(run > 0 && run % 7 === 0 ? t('일주일 내내 했어! 대단하지?') : t('부탁 끝! 할머니 좋아하시겠다.'));
         // Seven days running: a stamp of seven stars.
-        if (run > 0 && run % 7 === 0) stampDown('notebook/stamp-week.png');
+        if (run > 0 && run % 7 === 0) stampDown('notebook/stamp-week.webp');
       } else {
         // (Whose request it is said in full, the user, 2026-10-20: "부탁 2를 해냈습니다. ->
         // 할머니의 부탁 2를..".)

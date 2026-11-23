@@ -146,13 +146,13 @@ export function skyLabels() {
     id: c.id,
     // Its English name is in the dictionary (src/i18n/en.json).
     name: t(c.name),
-    picture: `sky/${c.id}.png`,
+    picture: `sky/${c.id}.webp`,
     note: CONSTELLATION_NOTES[c.id] ?? '',
     story: (CONSTELLATION_STORIES[c.id] ?? [CONSTELLATION_NOTES[c.id] ?? '']).join('\n'),
     direction: fromEquatorial(c.label[0], c.label[1]),
     figure: c.lines.map((line) => line.map(([raH, decDeg]) => fromEquatorial(raH, decDeg))),
   }));
-  for (const g of [...GALAXIES, ...NEBULAE]) labels.push({ id: g.id, name: g.name, picture: `sky/${g.id}.png`, note: g.note, story: (DEEP_SKY_STORIES[g.id] ?? [g.note]).join('\n'), direction: fromEquatorial(g.raH, g.decDeg), figure: [] });
+  for (const g of [...GALAXIES, ...NEBULAE]) labels.push({ id: g.id, name: g.name, picture: `sky/${g.id}.webp`, note: g.note, story: (DEEP_SKY_STORIES[g.id] ?? [g.note]).join('\n'), direction: fromEquatorial(g.raH, g.decDeg), figure: [] });
   return labels;
 }
 

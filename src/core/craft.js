@@ -356,7 +356,7 @@ export function craftById(id) {
 
 // A craft's small drawing (public/assets/craft, 128 px): beside its name in the notebook
 // and on the card that is up while docked with it.
-export const craftPicture = (id) => `craft/${id}.png`;
+export const craftPicture = (id) => `craft/${id}.webp`;
 
 // Where every craft is at simulated time timeS, given the bodies at that time.
 export function craftAt(timeS, bodies) {

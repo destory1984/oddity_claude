@@ -189,11 +189,11 @@ export function huygensPieces(scene, name) {
 
   const pieces = { room, flame, view, globe };
   // His own drawing of that night (south up, as the telescope showed it), from Lowell's
-  // "Mars" (1894): public/assets/replay/huygens-1659.jpg, THIRD-PARTY.md. The user
+  // "Mars" (1894): public/assets/replay/huygens-1659.webp, THIRD-PARTY.md. The user
   // (2026-10-18) asked why the drawing was not the real one; it is now.
   const drawing = new StandardMaterial(`${name}Drawing`, scene);
   drawing.disableLighting = true;
-  drawing.emissiveTexture = new Texture(`${import.meta.env.BASE_URL}assets/replay/huygens-1659.jpg`, scene, true, true);
+  drawing.emissiveTexture = new Texture(`${import.meta.env.BASE_URL}assets/replay/huygens-1659.webp`, scene, true, true);
   drawing.diffuseColor = new Color3(0, 0, 0);
   drawing.specularColor = new Color3(0, 0, 0);
   drawing.backFaceCulling = false;

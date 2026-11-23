@@ -8,7 +8,7 @@ test('seven companions, four drawings each, all on file', () => {
   for (const pal of PALS) {
     for (let frame = 0; frame < PAL_FRAMES; frame++) assert.ok(existsSync(`public/assets/${palFile(pal.id, frame)}`), palFile(pal.id, frame));
   }
-  assert.equal(palFile('star', 0), 'pals/pal-star-1.png');
+  assert.equal(palFile('star', 0), 'pals/pal-star-1.webp');
 });
 
 test('the companion is the last one earned: by slots, by a full journal, by all nine tours', () => {

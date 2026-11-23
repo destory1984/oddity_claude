@@ -419,7 +419,7 @@ STORIES.push({
 // Inktomi, the youngest large crater on Rhea, nicknamed "the Splat" for its rays (the
 // user, 2026-10-14: "토성가자", then Kevin Gill's colour picture). Its place by the USGS
 // names (14.1 S, 112.1 W = 247.9 E); Rhea's map is centred on longitude 180, as Pluto's
-// and Ceres's are, so 180 is taken off (the crater sits at u = 0.689 of rhea.jpg).
+// and Ceres's are, so 180 is taken off (the crater sits at u = 0.689 of rhea.webp).
 STORIES.push({
   id: 'inktomi', name: t('레아의 잉크토미 분화구'), nameEn: 'Inktomi', year: 2007, type: 'surface', body: 'rhea',
   latDeg: -14.1, lonDeg: 67.9, withinKm: 150, landmark: true,
@@ -437,7 +437,7 @@ STORIES.push({
 });
 // Herschel on Mimas, the crater that makes the moon look like the Death Star. Its place
 // by the USGS names (1.4 S, 111.8 W = 248.2 E); Mimas's map is centred on longitude 180
-// as Rhea's is, so 180 is taken off (the central peak sits at u = 0.689 of mimas.jpg).
+// as Rhea's is, so 180 is taken off (the central peak sits at u = 0.689 of mimas.webp).
 STORIES.push({
   id: 'herschel', name: t('미마스의 허셜 분화구'), nameEn: 'Herschel', year: 2010, type: 'surface', body: 'mimas',
   latDeg: -1.4, lonDeg: 68.2, withinKm: 100, landmark: true,

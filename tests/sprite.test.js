@@ -29,8 +29,8 @@ test('78 sheets of four frames in use, and every drawing is in the assets folder
       assert.ok(existsSync(`public/assets/${spriteFile(sheet, frame)}`), spriteFile(sheet, frame));
     }
   }
-  assert.equal(spriteFile('idle', 0), 'seora-sprites/idle-1.png');
-  for (const f of ['portrait.png', 'loading-1.png', 'loading-4.png']) assert.ok(existsSync(`public/assets/seora-sprites/${f}`), f);
+  assert.equal(spriteFile('idle', 0), 'seora-sprites/idle-1.webp');
+  for (const f of ['portrait.webp', 'loading-1.webp', 'loading-4.webp']) assert.ok(existsSync(`public/assets/seora-sprites/${f}`), f);
 });
 
 test('the camera is behind her: flying ahead shows her back straight on, reversing shows her front', () => {

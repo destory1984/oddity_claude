@@ -13,9 +13,9 @@ describe('the "사진 보기" key', () => {
   it('shows a place its card photo, and a body its own', () => {
     const slides = photoSlides({ id: 'alpineValley', kind: 'site', name: '알프스 계곡' });
     expect(slides).toHaveLength(1);
-    expect(slides[0].file).toBe('stories/alpineValley.jpg');
+    expect(slides[0].file).toBe('stories/alpineValley.webp');
     expect(slides[0].credit).toMatch(/^사진: /);
-    expect(photoSlides({ id: 'mars', kind: 'planet', name: '화성' }).map((s) => s.file)).toEqual(['objectPhotos/mars.jpg']);
+    expect(photoSlides({ id: 'mars', kind: 'planet', name: '화성' }).map((s) => s.file)).toEqual(['objectPhotos/mars.webp']);
   });
 
   it('shows a craft the photos it took, each a file that is there', () => {
@@ -43,14 +43,14 @@ describe('the "사진 보기" key', () => {
 
   it('shows a body or a place its own photo first, then the more it has, each titled', () => {
     const bennu = photoSlides({ id: 'bennu', kind: 'asteroid', name: '베누' });
-    expect(bennu.map((s) => s.file)).toEqual(['objectPhotos/bennu.jpg', 'objectPhotos/bennu-shot1.jpg', 'objectPhotos/bennu-shot2.jpg']);
+    expect(bennu.map((s) => s.file)).toEqual(['objectPhotos/bennu.webp', 'objectPhotos/bennu-shot1.webp', 'objectPhotos/bennu-shot2.webp']);
     expect(bennu.map((s) => s.title)).toEqual(['베누', '베누에 닿는 순간', '베누에서 가져온 흙']);
     for (const slide of bennu) expect(slide.credit).toMatch(/^사진: /);
     for (const { id } of BODIES) {
       for (const slide of photoSlides({ id, kind: 'body', name: id })) expect(existsSync(`public/assets/${slide.file}`), slide.file).toBe(true);
     }
     const stonehenge = photoSlides({ id: 'stonehenge', kind: 'site', name: '스톤헨지' });
-    expect(stonehenge.map((s) => s.file)).toEqual(['stories/stonehenge.jpg', 'placePhotos/stonehenge-2.jpg']);
+    expect(stonehenge.map((s) => s.file)).toEqual(['stories/stonehenge.webp', 'placePhotos/stonehenge-2.webp']);
     expect(stonehenge[1].title).toBe('하늘에서 본 스톤헨지');
   });
 

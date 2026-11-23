@@ -38,7 +38,7 @@ export function createRadioWeb(chart, detail, { onJump }) {
     // The young radio operator's picture, in the middle point's telling.
     if (node.kind === 'centre') {
       const face = document.createElement('img');
-      face.src = `${import.meta.env.BASE_URL}assets/notebook/radio-shota.png`;
+      face.src = `${import.meta.env.BASE_URL}assets/notebook/radio-shota.webp`;
       face.alt = t('1973년, 진공관 무전기 앞에서 마이크를 든 소년');
       parts.unshift(face);
     }

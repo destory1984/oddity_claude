@@ -281,12 +281,12 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
     elapsed: () => elapsed,
     // Earth's clouds from a picture (render/realClouds.js), at its address.
     // Finer Earth maps for the cupola course, GPU-compressed (KTX2, Basis), the day in two
-    // halves 8,192 wide (shaders/planet.frag). Swapped in once all are loaded, so the plain
-    // maps show meanwhile; a GPU that cannot hold 8,192 keeps the plain ones. `still()`
+    // halves 4,096 wide (shaders/planet.frag). Swapped in once all are loaded, so the plain
+    // maps show meanwhile; a GPU that cannot hold 4,096 keeps the plain ones. `still()`
     // says whether they are still wanted when they come.
     async setEarthFine(base, still = () => true) {
       const material = scene.materials.find((m) => m.name === 'planet');
-      if (!material || fineEarth || engine.getCaps().maxTextureSize < 8192) return false;
+      if (!material || fineEarth || engine.getCaps().maxTextureSize < 4096) return false;
       await import('@babylonjs/core/Materials/Textures/Loaders/ktxTextureLoader.js');
       const load = (file) => new Promise((done, fail) => {
         const t = new Texture(`${base}${file}`, scene, false, false, Texture.TRILINEAR_SAMPLINGMODE, () => done(t), (m) => fail(new Error(m)));

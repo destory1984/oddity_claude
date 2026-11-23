@@ -138,7 +138,7 @@ html, body { margin: 0; width: 405px; height: 720px; background: transparent; ov
   await p.goto(`${DEV}fonts/gaegu/400.css`);
   for (const [key, line] of Object.entries(lines)) {
     const body = key === 'end'
-      ? `<div class="end"><img src="${DEV}assets/seora-sprites/cheer-big-1.png"><div class="name">Space Oddity</div><div class="title">${line.title}</div><div class="note">${line.note}</div><div class="find">${line.find}<b>${line.store}</b></div></div>`
+      ? `<div class="end"><img src="${DEV}assets/seora-sprites/cheer-big-1.webp"><div class="name">Space Oddity</div><div class="title">${line.title}</div><div class="note">${line.note}</div><div class="find">${line.find}<b>${line.store}</b></div></div>`
       : `<div class="band"><div class="kick">SPACE ODDITY</div><div class="line">${line.replace(/\n/g, '<br>')}</div></div>`;
     await p.setContent(page(body), { waitUntil: 'networkidle' });
     await p.evaluate(() => document.fonts.ready);

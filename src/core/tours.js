@@ -12,7 +12,7 @@ import { t } from './i18n.js';
 // range) or a craft ({ craft }: come within docking range).
 //   memo: grandmother's hand, why she wanted this route.
 //   line: what Sora says at the stop (반말, 25 characters at most).
-//   stamp: the rubber stamp for going round it, public/assets/notebook/stamp-<stamp>.png.
+//   stamp: the rubber stamp for going round it, public/assets/notebook/stamp-<stamp>.webp.
 // The film behind the ninth tour is never named; only the real places on its road are used.
 export const TOURS = [
   {
@@ -132,10 +132,10 @@ export const TOURS = [
 ];
 
 // The file of a tour's stamp, under the site's assets folder; the paper crane for all nine.
-export const stampFile = (tour) => `notebook/stamp-${tour.stamp}.png`;
-export const CRANE_FILE = 'notebook/stamp-crane.png';
+export const stampFile = (tour) => `notebook/stamp-${tour.stamp}.webp`;
+export const CRANE_FILE = 'notebook/stamp-crane.webp';
 // The picture pasted over a tour's page in the journal (384 x 216), named like its stamp.
-export const sceneFile = (tour) => `notebook/tour-${tour.stamp}.png`;
+export const sceneFile = (tour) => `notebook/tour-${tour.stamp}.webp`;
 
 export function tourById(id) {
   return TOURS.find((t) => t.id === id) ?? null;

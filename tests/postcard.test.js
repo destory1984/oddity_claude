@@ -115,15 +115,15 @@ test('a place she has answered before gets a second line, then a plain one', () 
 
 test('a postcard gets a stamp by what it shows, and every stamp is on file', () => {
   const of = (subject) => postageFile({ rate: { stars: 1, subject } });
-  assert.equal(of('moon'), 'notebook/postage-moon.png');
-  assert.equal(of('saturn'), 'notebook/postage-saturn.png');
-  assert.equal(of('earth'), 'notebook/postage-earth.png');
-  assert.equal(of('halley'), 'notebook/postage-comet.png');
-  assert.equal(of('mars'), 'notebook/postage-seora.png');
-  assert.equal(of(null), 'notebook/postage-telescope.png');
-  assert.equal(postageFile({}), 'notebook/postage-telescope.png');
+  assert.equal(of('moon'), 'notebook/postage-moon.webp');
+  assert.equal(of('saturn'), 'notebook/postage-saturn.webp');
+  assert.equal(of('earth'), 'notebook/postage-earth.webp');
+  assert.equal(of('halley'), 'notebook/postage-comet.webp');
+  assert.equal(of('mars'), 'notebook/postage-seora.webp');
+  assert.equal(of(null), 'notebook/postage-telescope.webp');
+  assert.equal(postageFile({}), 'notebook/postage-telescope.webp');
   for (const subject of ['moon', 'saturn', 'earth', 'halley', 'mars', null]) assert.ok(existsSync(`public/assets/${of(subject)}`), String(subject));
-  for (const f of ['postmark', 'star-on', 'star-off', 'gate', 'porch', 'clipping']) assert.ok(existsSync(`public/assets/notebook/${f}.png`), f);
+  for (const f of ['postmark', 'star-on', 'star-off', 'gate', 'porch', 'clipping']) assert.ok(existsSync(`public/assets/notebook/${f}.webp`), f);
 });
 
 test('a postcard picture says where it was taken, the day and the missions it met', () => {

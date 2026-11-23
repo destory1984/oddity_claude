@@ -125,7 +125,7 @@ test('a touch picks the sky thing whose figure or middle is nearest, within reac
 test('every sky name has its small drawing on file for the plate', () => {
   const labels = skyLabels();
   for (const l of labels) {
-    assert.equal(l.picture, `sky/${l.id}.png`);
+    assert.equal(l.picture, `sky/${l.id}.webp`);
     assert.ok(existsSync(`public/assets/${l.picture}`), l.picture);
   }
   assert.equal(readdirSync('public/assets/sky').length, labels.length);

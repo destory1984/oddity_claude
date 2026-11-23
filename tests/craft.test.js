@@ -333,7 +333,7 @@ test('every craft has its small drawing on file, and no drawing is without a cra
   const { existsSync, readdirSync } = await import('node:fs');
   const { craftPicture } = await import('../src/core/craft.js');
   for (const c of CRAFT) {
-    assert.equal(craftPicture(c.id), `craft/${c.id}.png`);
+    assert.equal(craftPicture(c.id), `craft/${c.id}.webp`);
     assert.ok(existsSync(`public/assets/${craftPicture(c.id)}`), c.id);
   }
   assert.equal(readdirSync('public/assets/craft').length, CRAFT.length);

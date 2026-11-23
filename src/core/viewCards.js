@@ -28,13 +28,13 @@ export const VIEW_CARDS = [
 ];
 
 // The picture of a card (384 x 216), under the site's assets folder.
-export const cardFile = (id) => `notebook/view-${id}.png`;
+export const cardFile = (id) => `notebook/view-${id}.webp`;
 // The worlds of the round, and its rubber stamp.
 export const AURORA_ROUND = Object.keys(AURORA_VIEWS);
-export const AURORA_STAMP = 'notebook/stamp-aurora.png';
+export const AURORA_STAMP = 'notebook/stamp-aurora.webp';
 // The stamp of all the cards got (the user, 2026-10-08, of a reward offered
 // for the whole set: "그래").
-export const VIEWS_STAMP = 'notebook/stamp-views.png';
+export const VIEWS_STAMP = 'notebook/stamp-views.webp';
 
 export const cardById = (id) => VIEW_CARDS.find((card) => card.id === id) ?? null;
 

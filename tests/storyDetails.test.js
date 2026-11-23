@@ -18,7 +18,7 @@ test('every story place has a longer telling of three sentences or more', () => 
 test('all 132 have a picture on file, with a caption and a credit (125 photographs and seven drawings made for the game)', () => {
   const without = STORIES.filter((s) => !STORY_DETAILS[s.id].photo).map((s) => s.id);
   assert.deepEqual(without, []);
-  assert.equal(storyPhotoFile('wadiRum'), 'stories/wadiRum.jpg');
+  assert.equal(storyPhotoFile('wadiRum'), 'stories/wadiRum.webp');
   assert.equal(storyPhotoFile('nowhere'), null);
   // A drawing says that it is one.
   for (const id of ['procellarum', 'acidalia', 'schiaparelli', 'bohyunsan', 'tanegashima', 'wenchang', 'vega']) assert.match(STORY_DETAILS[id].photo.caption, /^그림으로 그린 .*사진이 아닙니다\.$/);
@@ -28,12 +28,12 @@ test('all 132 have a picture on file, with a caption and a credit (125 photograp
     const { photo } = STORY_DETAILS[story.id];
     if (!photo) continue;
     const file = storyPhotoFile(story.id);
-    assert.equal(file, `stories/${story.id}.jpg`);
+    assert.equal(file, `stories/${story.id}.webp`);
     assert.ok(existsSync(`public/assets/${file}`), file);
     bytes += statSync(`public/assets/${file}`).size;
     assert.ok(photo.caption.length >= 6 && photo.credit.length >= 4, story.id);
     // Where it came from and its licence are written down.
-    assert.ok(credits.includes(`| \`${story.id}.jpg\` |`), `${story.id} is not in THIRD-PARTY.md`);
+    assert.ok(credits.includes(`| \`${story.id}.webp\` |`), `${story.id} is not in THIRD-PARTY.md`);
   }
   assert.equal(readdirSync('public/assets/stories').length, 132);
   // (4 MB until the four of Mercury came, 2026-10-12; 4.2 MB until the two of Venus,

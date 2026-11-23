@@ -203,7 +203,7 @@ export function cardWords(entry, missions = []) {
 
 export const starText = (stars) => '★'.repeat(stars) + '☆'.repeat(3 - stars);
 
-// The stamp on a postcard, by what the photo is of: public/assets/notebook/postage-*.png.
+// The stamp on a postcard, by what the photo is of: public/assets/notebook/postage-*.webp.
 const COMETS = ['halley', 'haleBopp', 'churyumov', 'atlas3i'];
 export function postageFile(entry) {
   const subject = entry.rate?.subject ?? null;
@@ -211,5 +211,5 @@ export function postageFile(entry) {
   if (!subject) stamp = 'telescope';
   else if (['moon', 'saturn', 'earth'].includes(subject)) stamp = subject;
   else if (COMETS.includes(subject)) stamp = 'comet';
-  return `notebook/postage-${stamp}.png`;
+  return `notebook/postage-${stamp}.webp`;
 }

@@ -3123,7 +3123,7 @@ dialog:where(:not(#journal)) button:hover {
 #loading {
   justify-content:flex-start;
   padding-top:20vh;
-  background:#02040b url("/assets/scenes/loading.png") center bottom / cover no-repeat;
+  background:#02040b url("/assets/scenes/loading.webp") center bottom / cover no-repeat;
   image-rendering:pixelated;
 }
 
@@ -3150,7 +3150,7 @@ dialog:where(:not(#journal)) button:hover {
 
 /* The outer page on a wide window: a dark night sky behind the phone-shaped frame. */
 html.shell body {
-  background:#02040b url("/assets/scenes/backdrop.png") center / cover no-repeat;
+  background:#02040b url("/assets/scenes/backdrop.webp") center / cover no-repeat;
   image-rendering:pixelated;
 }
 
@@ -5857,7 +5857,7 @@ html.gaze #gazeSound {
   transform:translateX(-50%) scale(1.03);
   border-radius:50%;
   pointer-events:none;
-  background:#000 url("/assets/ui/map-glass.jpg") center / 100% 100% no-repeat;
+  background:#000 url("/assets/ui/map-glass.webp") center / 100% 100% no-repeat;
   mix-blend-mode:screen;
 }
 

@@ -24,9 +24,9 @@ export const STUNTS = [
 ];
 
 // The rubber stamp a stunt leaves in the journal once it has a record (drawn to order,
-// 2026-10-04): public/assets/notebook/stamp-<name>.png.
+// 2026-10-04): public/assets/notebook/stamp-<name>.webp.
 const STUNT_STAMPS = { moonRun: 'moon-run', moonSkim: 'moon-skim', earthLap: 'earth-lap', ringGap: 'ring-gap' };
-export const stuntStampFile = (id) => `notebook/stamp-${STUNT_STAMPS[id]}.png`;
+export const stuntStampFile = (id) => `notebook/stamp-${STUNT_STAMPS[id]}.webp`;
 
 export function stuntById(id) {
   return STUNTS.find((s) => s.id === id) ?? null;

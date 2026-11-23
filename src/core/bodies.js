@@ -439,7 +439,7 @@ export function bodiesAt(timeS) {
 }
 
 // A body's small drawing (public/assets/bodies, 128 px): beside its name in the notebook.
-export const bodyPicture = (id) => `bodies/${id}.png`;
+export const bodyPicture = (id) => `bodies/${id}.webp`;
 
 export function bodyById(id, bodies = BODIES) {
   return bodies.find((body) => body.id === id);

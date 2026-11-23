@@ -25,7 +25,7 @@ import { surfaceDirection, spinOf } from './surface.js';
 export const SPEAKERS = [
   {
     // (Made up, as everyone met here is: no real astronaut is a speaker.)
-    id: 'issCrew', kind: 'person', at: { craft: 'iss' }, name: t('국제우주정거장 당번, 마야 린드'), portrait: 'radio-iss.png',
+    id: 'issCrew', kind: 'person', at: { craft: 'iss' }, name: t('국제우주정거장 당번, 마야 린드'), portrait: 'radio-iss.webp',
     hail: t('치익… 여기는 국제우주정거장, 당번 마야 린드. 들리니?'),
     visits: [
       {
@@ -49,7 +49,7 @@ export const SPEAKERS = [
     ],
   },
   {
-    id: 'tiangongCrew', kind: 'person', at: { craft: 'tiangong' }, name: t('톈궁 승무원, 저우 린'), portrait: 'radio-tiangong.png',
+    id: 'tiangongCrew', kind: 'person', at: { craft: 'tiangong' }, name: t('톈궁 승무원, 저우 린'), portrait: 'radio-tiangong.webp',
     hail: t('치익… 여기는 톈궁, 승무원 저우 린. 잘 들려.'),
     visits: [
       {
@@ -64,7 +64,7 @@ export const SPEAKERS = [
     ],
   },
   {
-    id: 'tanegashimaCrew', kind: 'person', at: { site: 'tanegashima' }, name: t('다네가시마의 은퇴한 발사 요원, 오카다 스미에'), portrait: 'radio-tanegashima.png',
+    id: 'tanegashimaCrew', kind: 'person', at: { site: 'tanegashima' }, name: t('다네가시마의 은퇴한 발사 요원, 오카다 스미에'), portrait: 'radio-tanegashima.webp',
     hail: t('치익… 다네가시마예요. 은퇴한 늙은이지만 무전기는 아직 켜 둔답니다.'),
     visits: [
       {
@@ -86,7 +86,7 @@ export const SPEAKERS = [
     ],
   },
   {
-    id: 'vlaCrew', kind: 'person', at: { site: 'vla' }, name: t('VLA 전파천문학자, 엘레나 루이스'), portrait: 'radio-vla.png',
+    id: 'vlaCrew', kind: 'person', at: { site: 'vla' }, name: t('VLA 전파천문학자, 엘레나 루이스'), portrait: 'radio-vla.webp',
     hail: t('치익… VLA 관측실이야. 접시 스물일곱 개가 지금 하늘을 듣고 있어.'),
     visits: [
       {
@@ -108,7 +108,7 @@ export const SPEAKERS = [
     ],
   },
   {
-    id: 'naroCrew', kind: 'person', at: { site: 'naro' }, name: t('나로우주센터 발사 요원, 한도윤'), portrait: 'radio-naro.png',
+    id: 'naroCrew', kind: 'person', at: { site: 'naro' }, name: t('나로우주센터 발사 요원, 한도윤'), portrait: 'radio-naro.webp',
     hail: t('치익… 나로우주센터입니다. 고흥 바닷바람이 세네요.'),
     visits: [
       {
@@ -209,7 +209,7 @@ export const HIDDEN = [
     text: t('2020년 12월 6일 새벽, 하야부사2의 캡슐이 낙하산을 펴고 이 붉은 사막에 내렸다. 류구의 흙과 함께, 그 부호도 지구로 돌아왔다.'),
   },
   {
-    id: 'akatsukiOrbit', picture: 'radio-venus.jpg', name: t('아카쓰키의 금성 궤도'), nameEn: "Akatsuki's orbit of Venus", type: 'near', target: 'akatsuki', withinKm: 80,
+    id: 'akatsukiOrbit', picture: 'radio-venus.webp', name: t('아카쓰키의 금성 궤도'), nameEn: "Akatsuki's orbit of Venus", type: 'near', target: 'akatsuki', withinKm: 80,
     needs: ['akatsukiMark', 'akatsukiWait'], at: [0.44, 0.6],
     text: t('5년을 떠돈 끝에 아카쓰키가 들어선 금성의 궤도다. 탐사선 옆구리의 알루미늄 판에 "바다 건너 같은 별을 보던 HL에게"라는 글이 실려 있다.'),
   },
@@ -220,7 +220,7 @@ export const HIDDEN = [
     text: t('바다 건너 한국을 마주 보는 언덕이다. 1973년 여름, 열여덟 살 소년이 여기서 무전기를 켜고 바다 건너 처녀와 같은 별 이야기를 했다.'),
   },
   {
-    id: 'kiboWindow', picture: 'radio-kibo.jpg', name: t('기보의 창'), nameEn: "Kibo's window", type: 'near', target: 'iss', withinKm: 80,
+    id: 'kiboWindow', picture: 'radio-kibo.webp', name: t('기보의 창'), nameEn: "Kibo's window", type: 'near', target: 'iss', withinKm: 80,
     needs: [], needsFound: ['ryuguMarker', 'woomera', 'akatsukiOrbit', 'shotaShore'], at: [0.5, 0.74],
     text: t('일본 실험실 기보의 작은 창 앞이다. 일지 맨 뒤 장, 번지지 않은 자리에 호출 부호가 끝까지 적혀 있다. 소라는 그 부호를 수첩에 옮겨 적는다. 할머니께 전해 드리자.'),
   },

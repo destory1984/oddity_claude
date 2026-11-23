@@ -264,7 +264,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     // 2026-10-22, of the red ring it had: "동그라미가 아니라 체크 표시").
     const text = $('dailyText');
     text.classList.toggle('done', today.done);
-    if (today.done) text.replaceChildren(picture('notebook/mark-check.png', ''), t`${label} · 해냄: ${today.text}`);
+    if (today.done) text.replaceChildren(picture('notebook/mark-check.webp', ''), t`${label} · 해냄: ${today.text}`);
     else text.textContent = `☆ ${label}: ${today.text}`;
     // The errands done, folded to their count; a press lists them, the latest first, with
     // the day each was done (the journal's new tree, step 3: the seven days' stars were
@@ -535,7 +535,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const title = document.createElement('strong');
       title.textContent = `${done ? '✓' : '○'} ${story.name}${story.year ? t` (${story.year}년)` : ''}`;
       // Its question answered right: grandmother's red ring before the name.
-      if (solved) title.prepend(picture('notebook/mark-right.png', t('문제를 맞힘')));
+      if (solved) title.prepend(picture('notebook/mark-right.webp', t('문제를 맞힘')));
       const line = document.createElement('span');
       line.textContent = done ? story.text : shut ? CLIPPING : last ? t`${story.hint}. 거기서 지구를 사진에 담기` : story.hint;
       li.append(title, line);
@@ -593,7 +593,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
           stars.className = 'stars';
           stars.setAttribute('role', 'img');
           stars.setAttribute('aria-label', t`별 ${entry.rate.stars}개 (${starText(entry.rate.stars)})`);
-          for (let i = 0; i < 3; i++) stars.append(picture(`notebook/star-${i < entry.rate.stars ? 'on' : 'off'}.png`, ''));
+          for (let i = 0; i < 3; i++) stars.append(picture(`notebook/star-${i < entry.rate.stars ? 'on' : 'off'}.webp`, ''));
           reply.append(stars);
         }
         reply.append(entry.reply);
@@ -650,7 +650,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
       const frame = document.createElement('div');
       frame.className = 'photoFrame';
       frame.append(img);
-      if (entry.sent) frame.append(picture('notebook/postmark.png', '', 'postmark'), picture(postageFile(entry), t('우표'), 'postage'));
+      if (entry.sent) frame.append(picture('notebook/postmark.webp', '', 'postmark'), picture(postageFile(entry), t('우표'), 'postage'));
       figure.append(frame, text, ...(pair ? [pair] : []), ...(send ? [send] : []), card, remove);
       grid.append(figure);
     });

@@ -102,7 +102,7 @@ const SITE_MIN_KM = 6;
 const SITE_MAX_KM = 30;
 
 // Dokdo is drawn, not modelled: a flat card with a pixel drawing of the two islets
-// (public/assets/dokdo.png, 384 x 192), its foot on the sea and its face always turned
+// (public/assets/dokdo.webp, 384 x 192), its foot on the sea and its face always turned
 // to the traveler. The islets are a kilometre across, far too small to see, so the card
 // is 12 km wide from close by and up to 60 km from far off.
 const DOKDO_MIN_KM = 12;
@@ -112,7 +112,7 @@ const DOKDO_APPARENT = 0.1;
 const DOKDO_NIGHT = 0.25;
 
 // Places shown as a drawing on a card, and the picture of each (public/assets/).
-const SITE_CARDS = { dokdo: 'dokdo.png', wadiRum: 'wadi-rum.png', bohyunsan: 'bohyunsan.png' };
+const SITE_CARDS = { dokdo: 'dokdo.webp', wadiRum: 'wadi-rum.webp', bohyunsan: 'bohyunsan.webp' };
 
 function createSiteCard(scene, id, file) {
   // The node sits at sea level; the card stands on it (two wide, one high, +y up).

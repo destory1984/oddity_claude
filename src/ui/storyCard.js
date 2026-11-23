@@ -50,7 +50,7 @@ export function createStoryCard({ onOpen, onClose, onSolve = () => {}, isSolved 
             if (!right) button.classList.add('wrong');
             for (const b of buttons) b.disabled = true;
             const mark = document.createElement('img');
-            mark.src = `${import.meta.env.BASE_URL}assets/notebook/mark-${right ? 'right' : 'wrong'}.png`;
+            mark.src = `${import.meta.env.BASE_URL}assets/notebook/mark-${right ? 'right' : 'wrong'}.webp`;
             mark.alt = right ? t('동그라미') : t('세모');
             $('storyQuizResult').replaceChildren(mark, right ? t('맞았다. 꼼꼼히 읽었구나.') : t`답은 "${quiz.choices[quiz.right]}". 다음에 또 맞혀 보렴.`);
             if (right) onSolve(story.id);

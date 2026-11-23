@@ -10,7 +10,7 @@ import { seeded } from './seeded.js';
 //   huygens: no picture: Huygens at his telescope, Mars turning (render/huygensStage.js).
 //   solstice: no picture: Stonehenge at midsummer dawn (render/hengeModels.js).
 //   starNight: no picture: Cheomseongdae under wheeling stars (render/cheomModels.js).
-// The picture is the story's own (public/assets/stories/<id>.jpg). What each scene tells
+// The picture is the story's own (public/assets/stories/<id>.webp). What each scene tells
 // is in core/landmarkScenes.js. Pieces are placed as in core/moonScenes.js: x to the
 // side, y up, in the model's units; a narrow phone's view ends about 1.45 to either side,
 // and the sheet of telling comes down to about y = 1.45 when it has three rows (English):

@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-24', text: t('우주멍 시계가 넘기는 시계로 바뀌어, 분이 바뀔 때 숫자판이 딸깍 탁 넘어갑니다.') },
   { day: '2026-11-23', text: t('그림 파일을 가볍게 바꿔, 게임이 받는 양이 72MB에서 54MB로 줄었습니다.') },
   { day: '2026-11-23', text: t('큐폴라에서 본 지구 코스의 고운 지구를 더 많은 휴대전화에서 볼 수 있습니다.') },
   { day: '2026-11-23', text: t('추천 우주멍 코스 스타십, 하늘에서 붙잡은 로켓이 생겼습니다. 2024년 발사탑이 1단을 붙잡은 날입니다.') },

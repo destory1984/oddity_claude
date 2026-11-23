@@ -449,6 +449,39 @@ export function createSound({ music } = {}) {
   }
 
   const CUES = {
+    // The 우주멍 clock's card turning over (ui/calm.js; the user, 2026-11-24: "넘어갈 때마다
+    // 소리 내", "플립 시계 소리는 저런게 아닌데", of three "2로 해"): played as the card starts
+    // to fold, a small "딸깍" as it is let go 0.3 s on, then a plastic "탁" as its lower half
+    // lands at 0.6 s (a hard front, the card ringing at about 950 Hz and 2.1 kHz for 50 ms,
+    // a low knock) and a small bounce after it.
+    flip: () => {
+      const ring = (start, freq, q, volume, length) => {
+        const t = ctx.currentTime + start;
+        const src = ctx.createBufferSource();
+        src.buffer = noiseBuffer;
+        src.loop = true;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = freq;
+        filter.Q.value = q;
+        const env = ctx.createGain();
+        env.gain.setValueAtTime(volume, t);
+        env.gain.exponentialRampToValueAtTime(0.0001, t + length);
+        src.connect(filter).connect(env).connect(sfx);
+        src.start(t);
+        src.stop(t + length + 0.02);
+      };
+      const slap = (start, k) => {
+        ring(start, 3800, 1.2, 0.35 * k, 0.012);
+        ring(start, 950, 9, 1.1 * k, 0.055);
+        ring(start, 2100, 8, 0.63 * k, 0.04);
+        ring(start, 420, 6, 0.56 * k, 0.05);
+      };
+      ring(0.3, 5000, 2, 0.18, 0.008);
+      ring(0.3, 1800, 6, 0.21, 0.02);
+      slap(0.6, 1);
+      slap(0.628, 0.25);
+    },
     // A page of the notebook turned (a journal tab pressed; the user, 2026-10-23: "수첩 탭
     // 넘길 때마다 종이 넘기는 소리"): a dry swish rising as the page lifts, a flutter of its
     // edge, and a soft pat as it lies down.

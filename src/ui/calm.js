@@ -65,7 +65,7 @@ export function createCalm({ sound }) {
     const time = clock.querySelector('time');
     const date = clock.querySelector('.gazeDate');
     const width = document.getElementById('gazeLogo')?.getBoundingClientRect?.().width || 92;
-    const key = `${time.textContent}|${date.textContent}|${sleepWords}|${width}`;
+    const key = `${shownTime}|${date.textContent}|${sleepWords}|${width}`;
     if (key === fitted) return;
     fitted = key;
     const fit = (el, least, most) => {
@@ -76,6 +76,47 @@ export function createCalm({ sound }) {
     fit(time, 16, 48);
     fit(date, 10, 22);
     clock.querySelector('.gazeSleep').style.fontSize = date.style.fontSize;
+  };
+  // The time as a flip clock (the user, 2026-11-24: "우주멍의 시계를 플립시계로 바꿔볼까?",
+  // "폰트는 지금꺼 그냥", "가로 해"): each digit on a dark see-through card in the same hand,
+  // and when one changes its top half folds down over 0.3 s and the new bottom half drops
+  // onto it over the next 0.3 s, with a "딸깍" and a "탁" as it lands ("넘어갈 때마다 소리 내").
+  // Back after a while away (or the language changed): set at once, no fold, no sound.
+  const timeEl = clock.querySelector('time');
+  let shownTime = '';
+  let shownAt = 0;
+  const isDigit = (ch) => ch >= '0' && ch <= '9';
+  const flipCard = (ch) => `<span class="flipCard"><span class="flipHalf flipTop"><i>${ch}</i></span><span class="flipHalf flipBottom"><i>${ch}</i></span></span>`;
+  const flipFold = (card, from, to) => {
+    const top = card.querySelector('.flipTop:not(.flipFlap) i');
+    const bottom = card.querySelector('.flipBottom:not(.flipFlap) i');
+    for (const flap of card.querySelectorAll('.flipFlap')) flap.remove();
+    top.textContent = to;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !card.animate) {
+      bottom.textContent = to;
+      return;
+    }
+    bottom.textContent = from;
+    card.insertAdjacentHTML('beforeend', `<span class="flipHalf flipTop flipFlap"><i>${from}</i></span><span class="flipHalf flipBottom flipFlap"><i>${to}</i></span>`);
+    const [fold, drop] = card.querySelectorAll('.flipFlap');
+    drop.style.transform = 'rotateX(90deg)';
+    fold.animate([{ transform: 'rotateX(0deg)', filter: 'brightness(1)' }, { transform: 'rotateX(-90deg)', filter: 'brightness(0.55)' }], { duration: 300, easing: 'ease-in', fill: 'forwards' });
+    drop.animate([{ transform: 'rotateX(90deg)', filter: 'brightness(1.25)' }, { transform: 'rotateX(0deg)', filter: 'brightness(1)' }], { duration: 300, delay: 300, easing: 'ease-out', fill: 'forwards' })
+      .onfinish = () => { bottom.textContent = to; fold.remove(); drop.remove(); };
+  };
+  const showTime = (text, now) => {
+    const old = shownTime;
+    const away = now - shownAt > 5000;
+    shownAt = now;
+    if (text === old) return;
+    shownTime = text;
+    const sameShape = old.length === text.length && [...text].every((ch, i) => isDigit(ch) === isDigit(old[i]) && (isDigit(ch) || ch === old[i]));
+    if (!sameShape || away || timeEl.children?.length !== text.length) {
+      timeEl.innerHTML = [...text].map((ch) => (isDigit(ch) ? flipCard(ch) : `<span class="flipSep">${ch}</span>`)).join('');
+      return;
+    }
+    [...text].forEach((ch, i) => { if (ch !== old[i]) flipFold(timeEl.children[i], old[i], ch); });
+    if (gazing && enabled) sound.cue('flip');
   };
   const update = () => {
     const now = Date.now();
@@ -96,9 +137,9 @@ export function createCalm({ sound }) {
     if (gazing && enabled) {
       const locale = language();
       const date = new Date(now);
-      clock.querySelector('time').textContent = new Intl.DateTimeFormat(locale, {
+      showTime(new Intl.DateTimeFormat(locale, {
         hour: '2-digit', minute: '2-digit', ...(locale === 'en' ? {} : { hourCycle: 'h23' }),
-      }).format(date);
+      }).format(date), now);
       // Short, as people write it: "Wed, Nov 18", "11월 18일 (수)" (the user, 2026-11-18: "줄임말로 쓰지").
       clock.querySelector('.gazeDate').textContent = new Intl.DateTimeFormat(locale, {
         month: 'short', day: 'numeric', weekday: 'short',

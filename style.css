@@ -5172,9 +5172,12 @@ html:not(.gaze) #cabinCount {
 }
 /* While the frame is up, the keys that stay through the bare view (the moon, music, sleep)
    lie above it: a solid part of a frame drawn there hid the moon, the one way back (the user,
-   2026-11-19: "아이콘이 안 보임"). */
+   2026-11-19: "아이콘이 안 보임"), and above the photos a course opens with (main.js
+   cabinPhoto, z-index 8: Apollo's Kennedy and pad hid them; the user, 2026-11-24: "아폴로에서
+   앞부분에서 사진이 보여질 떄에는 화면 하단의 아이콘들이 안 보이네"). The dark between scenes
+   (#cabinVeil, 9, made later) still goes over them. */
 html.gaze #hud {
-  z-index:7;
+  z-index:9;
 }
 
 /* The ink's tails and the ripples round the drain, drawn while the pieces move (main.js

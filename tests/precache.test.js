@@ -51,3 +51,22 @@ test('a public file redrawn under the same name still changes the cache version'
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('the lazy folders are left out of the install list but kept in the manifest', async () => {
+  const { LAZY, fileManifest } = await import('../build/precache.js');
+  const list = precacheEntries(['assets/index-abc.js'], ['assets/tours/apollo-cabin.webp', 'assets/planets/mars.webp'], LAZY);
+  assert.deepEqual(list, ['./', 'assets/index-abc.js', 'assets/planets/mars.webp']);
+  const m = fileManifest({ 'assets/tours/apollo-cabin.webp': 'cabin', 'assets/planets/mars.webp': 'mars', 'sw.js': 'x', 'index.html': 'y', 'a.js.map': 'z' });
+  assert.deepEqual(Object.keys(m), ['assets/planets/mars.webp', 'assets/tours/apollo-cabin.webp']);
+  assert.match(m['assets/planets/mars.webp'], /^[0-9a-f]{12}$/);
+});
+
+test('a file keeps its digest while its content stays, so a new build does not fetch it again', async () => {
+  const { fileManifest } = await import('../build/precache.js');
+  const a = fileManifest({ 'p.webp': 'same', 'q.webp': 'old' });
+  const b = fileManifest({ 'p.webp': 'same', 'q.webp': 'new' });
+  assert.equal(a['p.webp'], b['p.webp']);
+  assert.notEqual(a['q.webp'], b['q.webp']);
+  const out = renderServiceWorker('const MANIFEST = __MANIFEST__;', ['./'], '', b);
+  assert.equal(out, `const MANIFEST = ${JSON.stringify(b)};`);
+});

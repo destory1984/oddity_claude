@@ -3395,6 +3395,7 @@ ${STORY_MORE[target.id]}` : told) };
   // and to, `y` its up-down place and `origin` where it grows from) (the user, 2026-11-19,
   // Apollo: Kennedy's launch complex from the air, panned, then the Saturn V waiting on its
   // pad, then the countdown: "발사 단지 항공", "발사대의 새턴 5호").
+  // (Its credit stands over the row of keys, which lie above the photo: style.css html.gaze #hud.)
   function cabinPhoto(chosen) {
     const list = cupolaOn ? chosen?.rail?.photos : null;
     let box = document.getElementById('cabinPhoto');
@@ -3404,7 +3405,7 @@ ${STORY_MORE[target.id]}` : told) };
       return;
     }
     if (!box) {
-      document.body.insertAdjacentHTML('beforeend', `<div id="cabinPhoto" aria-hidden="true" style="position:fixed;inset:0;z-index:8;overflow:hidden;background:#000;pointer-events:none"><div class="pic" style="position:absolute;inset:0;background-size:cover;background-repeat:no-repeat;will-change:transform,opacity"></div><span style="position:absolute;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));font:500 10px/1 system-ui,sans-serif;color:rgba(255,255,255,.6);text-shadow:0 1px 2px #000">${t('사진: NASA')}</span></div>`);
+      document.body.insertAdjacentHTML('beforeend', `<div id="cabinPhoto" aria-hidden="true" style="position:fixed;inset:0;z-index:8;overflow:hidden;background:#000;pointer-events:none"><div class="pic" style="position:absolute;inset:0;background-size:cover;background-repeat:no-repeat;will-change:transform,opacity"></div><span style="position:absolute;right:10px;bottom:calc(66px + env(safe-area-inset-bottom));font:500 10px/1 system-ui,sans-serif;color:rgba(255,255,255,.6);text-shadow:0 1px 2px #000">${t('사진: NASA')}</span></div>`);
       box = document.getElementById('cabinPhoto');
     }
     box.hidden = false;

@@ -2494,7 +2494,8 @@ ${STORY_MORE[target.id]}` : told) };
     let most = 0;
     for (const k of list ?? []) {
       if (courseTime <= k.from || courseTime >= k.to) continue;
-      most = Math.max(most, courseTime < k.peak ? ease((courseTime - k.from) / (k.peak - k.from)) : 1 - ease((courseTime - k.peak) / (k.to - k.peak)));
+      // (power: how hard, 1 if not given.)
+      most = Math.max(most, (k.power ?? 1) * (courseTime < k.peak ? ease((courseTime - k.from) / (k.peak - k.from)) : 1 - ease((courseTime - k.peak) / (k.to - k.peak))));
     }
     // An engine burning shakes the cabin the while, less than the launch, throbbing a little.
     const b = burnNow();

@@ -21,8 +21,9 @@ export const ORBITS = {
   planets: [250, 300], // all the planets, the further the slower
   sun: [300, 312], // the Sun turning
   helix: [312, 370], // the Sun going on, the planets with it: helices (the last 20 s true to scale)
-  galaxy: [370, 440], // the Sun going round the galaxy
-  end: 440,
+  hood: [370, 435], // the stars near the Sun going on with it: a look round, then four of them
+  galaxy: [435, 505], // the Sun going round the galaxy
+  end: 505,
 };
 
 const TILT = (23.4 * Math.PI) / 180;
@@ -555,6 +556,103 @@ export function createOrbitStage(canvas) {
   galTrail.color = new Color3(1, 0.95, 0.75);
   galTrail.setEnabled(false);
 
+  // --- The stars near the Sun (the user, 2026-11-24, of a film that names them: "케플러 16,
+  // 알파 센타우리, 케플러 452 등 우리 근처에 있는 별도 같이 달려가고 있다는거 그려") ----
+  // Each a system of its own going the one way with the Sun, a little faster or slower,
+  // its stars and planets drawing helices behind it. Far apart from the rest (HOOD).
+  // Distances between them drawn far shorter than they are (said in a caption).
+  const HOOD = new Vector3(0, 4000, 0);
+  const HOOD_WAY = new Vector3(-1, 0.3, 0).normalize();
+  const HOOD_PACE = 1.2;
+  const HOOD_W = 24; // seconds of trail
+  const star = (size, color, extra = {}) => ({ size, color, star: true, ...extra });
+  const world = (r, lap, size, color, extra = {}) => ({ r, lap, size, color, ...extra });
+  // Orbits in the plane of e1, e2 (of each system); a binary's two stars on one lap.
+  const SYSTEMS = [
+    { key: 'sun', base: new Vector3(0, 0, 0), drift: new Vector3(0, 0, 0), e1: new Vector3(0, 1, 0), e2: new Vector3(0, 0, 1),
+      bodies: [star(0.5, [1, 0.85, 0.55])] },
+    { key: 'alpha', base: new Vector3(14, 6, 10), drift: new Vector3(0.05, 0.03, -0.02), e1: new Vector3(0, 1, 0.3), e2: new Vector3(0.2, -0.3, 1), dist: 1.6,
+      bodies: [star(0.5, [1, 0.88, 0.6], { r: 1.0, lap: 8, phase: 0 }), star(0.42, [1, 0.7, 0.45], { r: 1.25, lap: 8, phase: Math.PI }),
+        star(0.17, [1, 0.42, 0.32], { at: new Vector3(3.5, -3.2, -4) }), world(0.55, 1.6, 0.07, [0.75, 0.6, 0.5], { around: 2 })] },
+    { key: 'trappist', base: new Vector3(-22, -8, 20), drift: new Vector3(-0.04, 0.02, 0.04), e1: new Vector3(0.2, 1, 0), e2: new Vector3(0, 0.2, 1), dist: 0.8,
+      bodies: [star(0.32, [1, 0.38, 0.22]),
+        ...[[0.5, 1.51], [0.68, 2.42], [0.86, 4.05], [1.06, 6.1], [1.3, 9.2], [1.52, 12.4], [1.82, 18.8]].map(([r, d], i) =>
+          world(r, d * 0.45, [0.075, 0.08, 0.06, 0.07, 0.08, 0.085, 0.06][i], [[0.7, 0.6, 0.55], [0.85, 0.7, 0.55], [0.6, 0.65, 0.75], [0.45, 0.6, 0.85], [0.8, 0.85, 0.9], [0.55, 0.7, 0.8], [0.7, 0.75, 0.8]][i], { phase: i * 1.7 }))] },
+    { key: 'kepler16', base: new Vector3(32, 12, -26), drift: new Vector3(0.03, -0.04, 0.02), e1: new Vector3(0, 1, -0.2), e2: new Vector3(-0.2, 0.2, 1), dist: 1,
+      bodies: [star(0.4, [1, 0.68, 0.4], { r: 0.25, lap: 41 * 0.03, phase: 0 }), star(0.22, [1, 0.45, 0.3], { r: 0.85, lap: 41 * 0.03, phase: Math.PI }),
+        world(2.2, 229 * 0.03, 0.17, [0.85, 0.75, 0.55])] },
+    { key: 'kepler452', base: new Vector3(-46, 16, -42), drift: new Vector3(-0.03, -0.03, -0.04), e1: new Vector3(0.1, 1, 0.1), e2: new Vector3(0, -0.1, 1), dist: 1,
+      bodies: [star(0.52, [1, 0.86, 0.6]), world(2.4, 6, 0.15, [0.45, 0.7, 0.75])] },
+  ];
+  // Where a body of a system is at the part's second t (t from the part's start).
+  const hoodCentre = (sys, t) => HOOD.add(HOOD_WAY.scale(HOOD_PACE * t)).add(sys.base).add(sys.drift.scale(t));
+  const bodyLocal = (sys, b, t) => {
+    if (b.at) return b.at.clone();
+    if (!b.r) return Vector3.Zero();
+    const a = (2 * Math.PI * t) / b.lap + (b.phase ?? 0);
+    const c = b.around !== undefined ? bodyLocal(sys, sys.bodies[b.around], t) : Vector3.Zero();
+    return c.add(sys.e1.normalize().scale(Math.cos(a) * b.r)).add(sys.e2.normalize().scale(Math.sin(a) * b.r));
+  };
+  const bodyAt = (sys, b, t) => hoodCentre(sys, t).add(bodyLocal(sys, b, t));
+  for (const sys of SYSTEMS) {
+    for (const [i, b] of sys.bodies.entries()) {
+      b.mesh = CreateSphere(`hood-${sys.key}-${i}`, { diameter: b.size * 2, segments: 24 }, scene);
+      b.mesh.material = bodyMat(`hood-${sys.key}-${i}-mat`, null, b.color);
+      if (b.star) {
+        b.mesh.material.setFloat('night', 1);
+        b.glow = CreatePlane(`hood-${sys.key}-${i}-glow`, { size: b.size * 7 }, scene);
+        b.glow.material = glowMat(`hood-${sys.key}-${i}-glowMat`, b.color);
+        b.glow.billboardMode = Mesh.BILLBOARDMODE_ALL;
+      } else {
+        b.mesh.material.setFloat('night', 0.2);
+        b.mesh.material.setFloat('gain', 1.6);
+        b.mesh.material.setFloat('sunPoint', 1);
+      }
+      b.trailName = `hood-${sys.key}-${i}-trail`;
+      const pts = [];
+      for (let k = 0; k <= 160; k++) pts.push(Vector3.Zero());
+      b.trail = CreateLineSystem(b.trailName, { lines: [pts], updatable: true }, scene);
+      b.trail.color = new Color3(...b.color.map((c) => c * (b.star ? 0.8 : 0.65)));
+    }
+  }
+  // Dust standing still in the space they go through, so their going shows.
+  const hoodDust = new Mesh('orbitHoodDust', scene);
+  {
+    const N = 2500;
+    let sd = 31;
+    const rnd = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+    const pos = new Float32Array(N * 3), seeds = new Float32Array(N * 4), ind = new Uint32Array(N);
+    for (let i = 0; i < N; i++) {
+      const b = HOOD.add(HOOD_WAY.scale(-40 + 160 * rnd())).add(new Vector3(rnd() - 0.5, rnd() - 0.5, rnd() - 0.5).scale(260));
+      pos.set([b.x, b.y, b.z], i * 3);
+      seeds.set([rnd(), 0.3 + 0.7 * rnd(), 0, 0], i * 4);
+      ind[i] = i;
+    }
+    const vd = new VertexData();
+    vd.positions = pos;
+    vd.indices = ind;
+    vd.applyToMesh(hoodDust);
+    hoodDust.setVerticesData('seed', seeds, false, 4);
+  }
+  const hoodDustMat = new ShaderMaterial('orbitHoodDustMat', scene, { vertex: 'orbitStars', fragment: 'orbitStars' }, { attributes: ['position', 'seed'], uniforms: ['viewProjection', 'turn', 'centre', 'pixel', 'eye', 'fade', 'bright', 'maxSize'], needAlphaBlending: true });
+  hoodDustMat.setVector3('centre', Vector3.Zero());
+  hoodDustMat.setFloat('turn', 0);
+  hoodDustMat.setFloat('bright', 0.55);
+  hoodDustMat.setFloat('maxSize', 2.5);
+  hoodDustMat.setFloat('fade', 1);
+  hoodDustMat.pointsCloud = true;
+  hoodDustMat.alphaMode = 1;
+  hoodDustMat.disableDepthWrite = true;
+  hoodDust.material = hoodDustMat;
+  hoodDust.alwaysSelectAsActiveMesh = true;
+  // The four visited, one after another, after the look round.
+  const HOOD_LOOK = 9;
+  const HOOD_EACH = 14;
+  const visitOf = (T) => {
+    const k = Math.floor((T - ORBITS.hood[0] - HOOD_LOOK) / HOOD_EACH);
+    return T >= ORBITS.hood[0] + HOOD_LOOK && k >= 0 && k < 4 ? k + 1 : 0;
+  };
+
   // Names on the screen, over what they name.
   const names = document.createElement('div');
   names.style.cssText = 'position:fixed;inset:0;z-index:7;pointer-events:none;font:600 13px system-ui,sans-serif;color:#e8ecf4;text-shadow:0 1px 4px #000';
@@ -590,6 +688,13 @@ export function createOrbitStage(canvas) {
   clock.style.cssText = 'position:absolute;left:0;right:0;top:12%;text-align:center;font:700 clamp(18px,5vw,24px) system-ui,sans-serif;letter-spacing:0.04em;opacity:0;transition:opacity 0.8s';
   names.append(clock);
   const tag = (text, at, shown) => tags.push({ el: label(text), at, shown });
+  const pillColor = { sun: '#ffe6a8', alpha: '#ffb27a', trappist: '#ff8a78', kepler16: '#ffc58a', kepler452: '#f3f0d8' };
+  const card = document.createElement('div');
+  card.style.cssText = 'position:absolute;left:8%;right:8%;top:13%;opacity:0;transition:opacity 0.8s';
+  card.innerHTML = '<div style="font:700 clamp(24px,7vw,34px) system-ui,sans-serif;letter-spacing:0.02em"></div><div style="margin-top:4px;font:500 clamp(13px,3.6vw,16px) system-ui,sans-serif;opacity:0.9"></div>';
+  names.append(card);
+  let cardShown = -1;
+  let hoodT = 0;
 
   function update(T, words) {
     if (words && !tags.length) {
@@ -601,12 +706,65 @@ export function createOrbitStage(canvas) {
       tag(words.here, () => helio.position, (t) => t >= ORBITS.galaxy[0] + 10);
       for (const m of marks) tag(words[m.key], () => m.dot.position, (t) => (m.u === 0 ? t >= ORBITS.galaxy[0] + 40 : lapU(t) >= m.u) && t < ORBITS.end - 8);
       tag(words.sun, () => helio.position, (t) => inPart([ORBITS.helix[0] + 4, ORBITS.helix[1]], t));
+      for (const sys of SYSTEMS) {
+        const n = tags.length;
+        tag(words.hood[sys.key][0], () => hoodCentre(sys, hoodT), (t) => inPart([ORBITS.hood[0] + 1, ORBITS.hood[0] + HOOD_LOOK], t));
+        const el = tags[n].el;
+        el.style.border = `1.5px solid ${pillColor[sys.key]}`;
+        el.style.color = pillColor[sys.key];
+        el.style.borderRadius = '999px';
+        el.style.padding = '2px 9px';
+        el.style.background = 'rgba(10,10,14,0.55)';
+      }
+    }
+    // The stars near the Sun.
+    const hoodOn = inPart(ORBITS.hood, T);
+    const ht = Math.max(0, T - ORBITS.hood[0]);
+    hoodT = ht;
+    hoodDust.setEnabled(hoodOn);
+    hoodDustMat.setFloat('pixel', engine.getRenderHeight() / camera.fov);
+    hoodDustMat.setVector3('eye', camera.position);
+    for (const sys of SYSTEMS) {
+      const lit = bodyAt(sys, sys.bodies[0], ht);
+      for (const b of sys.bodies) {
+        b.mesh.setEnabled(hoodOn);
+        if (b.glow) b.glow.setEnabled(hoodOn);
+        b.trail.setEnabled(hoodOn && ht > 0.2);
+        if (!hoodOn) continue;
+        const at = bodyAt(sys, b, ht);
+        b.mesh.position.copyFrom(at);
+        if (b.glow) {
+          b.glow.position.copyFrom(at);
+          // (Seen from far, a star stays a few pixels across.)
+          b.glow.scaling.setAll(Math.max(1, camera.position.subtract(at).length() * 0.02 / b.size));
+          b.glow.material.setFloat('power', 0.9);
+        } else b.mesh.material.setVector3('sunAt', b.around !== undefined ? bodyAt(sys, sys.bodies[b.around], ht) : lit);
+        // (A quick one's trail shorter, so that its turns are drawn with points enough.)
+        const from = Math.max(0, ht - Math.min(HOOD_W, (b.lap ?? (b.around !== undefined ? sys.bodies[b.around].lap : 0) ?? HOOD_W) * 6 || HOOD_W));
+        const pts = [];
+        for (let k = 0; k <= 160; k++) pts.push(bodyAt(sys, b, from + ((ht - from) * k) / 160));
+        b.trail = CreateLineSystem(b.trailName, { lines: [pts], instance: b.trail }, scene);
+      }
+    }
+    const visit = hoodOn ? visitOf(T) : 0;
+    if (words) {
+      if (visit !== cardShown) {
+        cardShown = visit;
+        if (visit) {
+          const sys = SYSTEMS[visit];
+          card.children[0].textContent = words.hood[sys.key][0];
+          card.children[0].style.color = pillColor[sys.key];
+          card.children[1].textContent = words.hood[sys.key][1];
+        }
+      }
+      const inVisit = visit ? (T - ORBITS.hood[0] - HOOD_LOOK) % HOOD_EACH : 0;
+      card.style.opacity = visit && inVisit > 1 && inVisit < HOOD_EACH - 1.5 ? '1' : '0';
     }
     const nearOn = T < ORBITS.year[0];
     const nearFade = 1 - smooth(ORBITS.phases[1] - 3, ORBITS.phases[1], T);
     const helioIn = smooth(ORBITS.year[0], ORBITS.year[0] + 3, T);
     near.setEnabled(nearOn);
-    helio.setEnabled(!nearOn);
+    helio.setEnabled(!nearOn && !inPart(ORBITS.hood, T));
 
     // The Earth turning once in 6 s (a day), anticlockwise from above.
     earth.rotation.y = -(2 * Math.PI * T) / 6;
@@ -776,6 +934,24 @@ export function createOrbitStage(canvas) {
   // out over both rounds (the true Moon and the one that does not turn); at the Earth,
   // looking at the Moon as it goes round (its shape); then over the Sun and the Earth's
   // year, out over all the planets, in to the Sun, and far out over the galaxy.
+  function hoodKeys(T) {
+    const ht = Math.max(0, T - ORBITS.hood[0]);
+    const c0 = HOOD.add(HOOD_WAY.scale(HOOD_PACE * ht));
+    const keys = [
+      { t: ORBITS.hood[0] + 0.1, at: c0.add(new Vector3(-30, 75, 190)), look: c0.add(new Vector3(-6, 4, -6)), fov: 0.8 },
+      { t: ORBITS.hood[0] + HOOD_LOOK - 2, at: c0.add(new Vector3(-26, 70, 175)), look: c0.add(new Vector3(-6, 4, -6)), fov: 0.8 },
+    ];
+    for (let k = 0; k < 4; k++) {
+      const sys = SYSTEMS[k + 1];
+      const c = hoodCentre(sys, ht);
+      const f = sys.dist;
+      const view = { at: c.add(new Vector3(-5, 4, 10).scale(f)), look: c.add(new Vector3(1.5, 0, 0).scale(f)), fov: 0.75 };
+      const t0 = ORBITS.hood[0] + HOOD_LOOK + k * HOOD_EACH;
+      keys.push({ t: t0, ...view }, { t: t0 + HOOD_EACH - 2, ...view });
+    }
+    keys.push({ ...keys[keys.length - 1], t: ORBITS.hood[1] });
+    return keys;
+  }
   function cameraAt(T) {
     const at = (x, y, z) => new Vector3(x, y, z);
     const helioAt = (x, y, z) => helio.position.add(new Vector3(x, y, z));
@@ -807,6 +983,8 @@ export function createOrbitStage(canvas) {
       // 보이잖아", "정면 쪽으로 돌리는 것도 넣어").
       { t: TRUE0 + 16, at: helioAt(117, 163, -30), look: helioAt(-150, -260, 0), fov: 0.55 },
       { t: ORBITS.helix[1], at: helioAt(117, 163, -30), look: helioAt(-150, -260, 0), fov: 0.55 },
+      // A look round the stars near the Sun, all going the one way; then to each of four.
+      ...hoodKeys(T),
       // Close behind the Sun on its way, the stars near it going by; the galaxy a band of light.
       { t: ORBITS.galaxy[0] + 0.1, at: helioAt(7, 5, 36), look: helioAt(-1, 0, -30), fov: 0.85 },
       { t: ORBITS.galaxy[0] + 18, at: helioAt(5, 5, 30), look: helioAt(-1, 0, -30), fov: 0.85 },

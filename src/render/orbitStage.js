@@ -69,7 +69,10 @@ void main() {
   vec4 w = world * vec4(position, 1.0);
   vW = w.xyz;
   vN = normalize((world * vec4(normal, 0.0)).xyz);
-  vUV = uv;
+  // (The map turned the right way round: Babylon's sphere laid it on mirrored, Madagascar
+  // west of Africa, so the Earth looked to turn backwards. The middle column stays put, so
+  // the Moon's near face is the same.)
+  vUV = vec2(1.0 - uv.x, uv.y);
   gl_Position = viewProjection * w;
 }`;
 // Lit by the Sun: from a point (sunAt, sunPoint 1) or from a way (sunAt as a direction).
@@ -1133,8 +1136,11 @@ export function createOrbitStage(canvas) {
       // In to the Sun turning.
       { t: ORBITS.sun[1] - 2, at: helioAt(1.5, 3, -11), look: helioAt(0, 0, 0), fov: 0.7 },
       // Beside the Sun's way, its trail and the planets' helices running down behind it.
-      { t: ORBITS.helix[0] + 8, at: helioAt(10, -30, -95), look: helioAt(0, -30, 0), fov: 0.8 },
-      { t: TRUE0, at: helioAt(10, -30, -95), look: helioAt(0, -30, 0), fov: 0.8 },
+      // (From above the planets' plane, its north, so they go round anticlockwise as they
+      // do: from below it they seemed to go the other way, the user, 2026-11-25: "태양계
+      // 모든 것은 반시계로 도는거 아니었어?")
+      { t: ORBITS.helix[0] + 8, at: helioAt(10, 22, -95), look: helioAt(0, -32, 0), fov: 0.8 },
+      { t: TRUE0, at: helioAt(10, 22, -95), look: helioAt(0, -32, 0), fov: 0.8 },
       // True to scale: far off to the side, the way running up the screen, the waves behind.
       { t: TRUE0 + 4, at: helioAt(-130, -225, -780), look: helioAt(-130, -225, 0), fov: 0.8 },
       { t: TRUE0 + 9, at: helioAt(-130, -225, -780), look: helioAt(-130, -225, 0), fov: 0.8 },

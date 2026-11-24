@@ -8298,8 +8298,9 @@ dialog > .backBar {
 #noteCardTip[hidden] {
   display:none;
 }
+/* (At the top of the note: the first thing seen; the user, 2026-11-25: "오늘의 팁을 위로 올려".) */
 #noteCardTip {
-  margin:16px 0 0;
+  margin:0 0 14px;
   padding:10px 12px;
   border-left:3px solid var(--gold);
   border-radius:4px;
@@ -8336,4 +8337,8 @@ dialog > .backBar {
 }
 #noteCard.byItself > .backBar {
   display:none;
+}
+/* (With no way-back key, no band kept for it over the words.) */
+#noteCard.byItself {
+  padding-top:22px;
 }

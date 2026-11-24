@@ -45,7 +45,7 @@ export function createNoteCard({ onOpen, onClose }) {
   // 보기' 버튼을 옆에 두자", "가장 최근에 만들어진 기능을 today's tip 같은 메뉴로 넣자", "가").
   $('skipNoteToday').textContent = t('오늘은 그만 보기');
   $('noteCardTipLabel').textContent = t('오늘의 팁');
-  $('noteCardTipGo').textContent = t('가 보기');
+  $('noteCardTipGo').textContent = t('지금 보러 가기');
   const extras = (note) => {
     $('skipNoteToday').hidden = !note?.onSkip;
     $('noteCardTip').hidden = !note?.tip;

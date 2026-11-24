@@ -23,8 +23,8 @@ export const ORBITS = {
   helix: [312, 370], // the Sun going on, the planets with it: helices (the last 20 s true to scale)
   hood: [370, 441], // the stars near the Sun going on with it: a look round, then four of them
   core: [441, 477], // the galaxy's middle: the black hole Sagittarius A* and the stars close round it
-  galaxy: [477, 547], // back to the Sun: its lap of the galaxy, ending where it began
-  end: 547,
+  galaxy: [477, 555], // back to the Sun: its lap of the galaxy, ending where it began (and 8 s on it)
+  end: 555,
 };
 
 const TILT = (23.4 * Math.PI) / 180;
@@ -487,7 +487,8 @@ export function createOrbitStage(canvas) {
     return new Vector3(GAL_AT.x + SUN_GAL_R * Math.cos(a), 0, SUN_GAL_R * Math.sin(a));
   };
   const lapU = (() => {
-    const [g0, g1] = ORBITS.galaxy;
+    // (Its lap done in 70 s; the part's last 8 s rest on today.)
+    const g0 = ORBITS.galaxy[0], g1 = g0 + 70;
     const sm = (a, b, x) => { const k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
     const v = (t) => 0.0016 * sm(g0 + 1, g0 + 4, t) + 0.045 * sm(g0 + 16, g0 + 34, t) * (1 - sm(g1 - 14, g1 - 5, t));
     const table = [0];
@@ -756,7 +757,7 @@ export function createOrbitStage(canvas) {
         tags[n].el.style.textAlign = 'center';
         tags[n].el.style.transform = 'translate(-50%,-135%)';
       }
-      for (const m of marks) tag(words[m.key], () => m.dot.position, (t) => (m.u === 0 ? t >= ORBITS.galaxy[0] + 40 : lapU(t) >= m.u) && t < ORBITS.galaxy[1] - 8);
+      for (const m of marks) tag(words[m.key], () => m.dot.position, (t) => (m.u === 0 ? t >= ORBITS.galaxy[0] + 40 && lapU(t) < 0.95 : lapU(t) >= m.u) && t < ORBITS.galaxy[1] - 8);
       tag(words.sun, () => helio.position, (t) => inPart([ORBITS.helix[0] + 4, ORBITS.helix[1]], t));
       for (const sys of SYSTEMS) {
         const n = tags.length;

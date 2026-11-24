@@ -57,6 +57,7 @@ import { offerApp } from './ui/openInApp.js';
 import { photoSlides } from './core/photoSlides.js';
 import { createStoryCard } from './ui/storyCard.js';
 import { createNoteCard } from './ui/noteCard.js';
+import { CHANGES } from './core/changes.js';
 import { createSay } from './ui/say.js';
 import { createMapSky } from './ui/mapSky.js';
 import { skyNews, newsLine } from './core/forecast.js';
@@ -2154,7 +2155,25 @@ ${STORY_MORE[target.id]}` : told) };
   // answers the first reading with a line of her own.
   let notePriorPause = false;
   let noteWait = 0;
-  let dailyDue = Boolean(request) && !requestDone();
+  // (Not again today once "오늘은 그만 보기" was pressed on it: the request stands in the
+  // journal all the same.)
+  const DAILY_HIDDEN_KEY = 'oddity.dailyHidden';
+  const hiddenToday = (() => { try { return localStorage.getItem(DAILY_HIDDEN_KEY) === today; } catch { return false; } })();
+  let dailyDue = Boolean(request) && !requestDone() && !hiddenToday;
+  // The day's tip, under the request: the newest thing in the list of changes
+  // (core/changes.js) not yet shown as one, of the last 30 days; each shown once.
+  const TIPS_SEEN_KEY = 'oddity.tipsSeen';
+  const tipToday = () => {
+    let seen = [];
+    try { seen = JSON.parse(localStorage.getItem(TIPS_SEEN_KEY) ?? '[]'); } catch { seen = []; }
+    const since = Date.parse(`${today}T00:00:00`) - 30 * 86400000;
+    // (Counted from the oldest, so a change keeps its number as new ones come on top.)
+    const fresh = CHANGES.map((c, i) => ({ ...c, id: `${c.day}#${CHANGES.length - 1 - i}` }))
+      .find((c) => Date.parse(`${c.day}T00:00:00`) >= since && !seen.includes(c.id));
+    if (!fresh) return null;
+    try { localStorage.setItem(TIPS_SEEN_KEY, JSON.stringify([...seen, fresh.id].slice(-200))); } catch { /* shown again next time */ }
+    return fresh.text;
+  };
   let noteDueId = null;
   // A note read again from the journal: folding it brings the journal back (the user,
   // 2026-10-05; it went back to the flight).
@@ -5456,6 +5475,10 @@ ${STORY_MORE[target.id]}` : told) };
         title: t('할머니의 부탁'),
         text: t`${request.text}\n\n수첩을 열면 다시 볼 수 있단다.`,
         button: t('확인'),
+        tip: tipToday(),
+        onSkip: () => {
+          try { localStorage.setItem(DAILY_HIDDEN_KEY, today); } catch { /* not kept: it comes again next time */ }
+        },
       });
     } else if (note && calm) {
       progress = recordNote(progress, note.id);

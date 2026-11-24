@@ -8273,3 +8273,43 @@ dialog > .backBar {
   mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent), linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
   mask-composite: intersect;
 }
+
+/* The day's request: "오늘은 그만 보기" beside its "확인", the two halves of the row, the
+   quieter one first; and the day's tip under the note, a gold mark on glass. */
+#noteCard .journalActions:has(#skipNoteToday:not([hidden])) {
+  gap:10px;
+}
+#noteCard .journalActions:has(#skipNoteToday:not([hidden])) button {
+  flex:1 1 0;
+  width:auto;
+}
+#noteCard #skipNoteToday {
+  min-height:44px;
+  padding:10px 12px;
+  border:1px solid var(--glass-line);
+  border-radius:12px;
+  background:transparent;
+  color:#c9d3f2;
+  font-size:15px;
+  font-weight:500;
+  line-height:1.2;
+}
+#noteCard #skipNoteToday[hidden],
+#noteCardTip[hidden] {
+  display:none;
+}
+#noteCardTip {
+  margin:16px 0 0;
+  padding:10px 12px;
+  border-left:3px solid var(--gold);
+  border-radius:4px;
+  background:#ffffff0d;
+  color:#dfe6f5;
+  font-size:14px;
+  line-height:1.55;
+}
+#noteCardTipLabel {
+  margin-right:6px;
+  color:var(--gold);
+  font-weight:700;
+}

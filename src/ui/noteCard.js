@@ -40,6 +40,20 @@ export function createNoteCard({ onOpen, onClose }) {
     $('closeNoteCard').textContent = index + 1 < pages.length ? t('다음') : shown.note.button;
     dialog.scrollTop = 0;
   }
+  // The day's request may be put away for the rest of the day, and may carry a tip on
+  // something new in the game (the user, 2026-11-25: "그냥 확인 말고, '오늘은 더 이상 안
+  // 보기' 버튼을 옆에 두자", "가장 최근에 만들어진 기능을 today's tip 같은 메뉴로 넣자", "가").
+  $('skipNoteToday').textContent = t('오늘은 그만 보기');
+  $('noteCardTipLabel').textContent = t('오늘의 팁');
+  const extras = (note) => {
+    $('skipNoteToday').hidden = !note?.onSkip;
+    $('noteCardTip').hidden = !note?.tip;
+    $('noteCardTipText').textContent = note?.tip ?? '';
+  };
+  $('skipNoteToday').addEventListener('click', () => {
+    shown?.note.onSkip?.();
+    dialog.close();
+  });
   $('closeNoteCard').addEventListener('click', () => {
     const pages = pagesOf();
     if (pages && page + 1 < pages.length) turnTo(page + 1);
@@ -62,6 +76,7 @@ export function createNoteCard({ onOpen, onClose }) {
       if (dialog.open || gate.open) return;
       shown = { note, first };
       $('noteCardTitle').textContent = note.title;
+      extras(first ? note : null);
       if (pagesOf()) turnTo(0);
       else {
         $('noteCardScene').textContent = first ? note.scene ?? '' : '';

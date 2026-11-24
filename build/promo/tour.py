@@ -37,7 +37,8 @@ def main(lang, name, take):
     rel = [t - times[0] for t in times]
     picked = [i for i, t in enumerate(rel) if START_S <= t <= START_S + SHOT_S[name]]
     # The end card on a darkened, blurred last look.
-    last = Image.open(os.path.join(folder, f'{picked[-1]:05d}.jpg')).convert('RGB').resize(SIZE, Image.LANCZOS)
+    # (A drawn shot ends in a dip to black: its end card lies on a frame from before it.)
+    last = Image.open(os.path.join(folder, f'{picked[-1 - (15 if name in MUSIC else 0)]:05d}.jpg')).convert('RGB').resize(SIZE, Image.LANCZOS)
     back = last.filter(ImageFilter.GaussianBlur(28)).point(lambda v: int(v * 0.35)).convert('RGBA')
     card = os.path.join(ROOT, lang, 'captions', f'end-{name}.png')
     back.alpha_composite(Image.open(card if os.path.exists(card) else os.path.join(ROOT, lang, 'captions', 'end.png')).convert('RGBA'))

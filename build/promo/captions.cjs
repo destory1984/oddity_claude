@@ -99,7 +99,9 @@ const TOUR = {
     'orbits-1-5': '곁의 별들도 함께 달립니다.\n가장 가까운 별, 알파 센타우리',
     'orbits-1-6': '은하 한가운데에는\n블랙홀 궁수자리 A*.\n수천억 개의 별이 이 중심을 돕니다',
     end: FIRST.ko.end,
-    'end-orbits': { ...FIRST.ko.end, note: '우주멍 코스\n「태양계는 어떻게 도는가」' },
+    // (The course's own last words above, in place of the note: the user, 2026-11-25,
+    // missing them: "오늘 밤에도 우리는 초속 230km로 은하를 달립니다 이거 어디감?", "넣어".)
+    'end-orbits': { ...FIRST.ko.end, lead: '오늘 밤에도 우리는\n초속 230km로\n은하를 달립니다', note: '' },
   },
   en: {
     'auroraDrift-1-1': 'The aurora, seen from space',
@@ -127,6 +129,7 @@ html, body { margin: 0; width: 405px; height: 720px; background: transparent; ov
 .kick { font: 700 11px/1 Pretendard Variable, Pretendard, sans-serif; letter-spacing: 0.32em; color: #f2c46b; margin-bottom: 12px; }
 .line { font: 400 37px/1.15 Gaegu, cursive; color: #fdf8ec; text-align: center; word-break: keep-all; text-wrap: balance; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6); }
 .end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 86px; text-align: center; }
+.end .lead { font: 400 34px/1.15 Gaegu, cursive; color: #fdf8ec; margin-bottom: 26px; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6); }
 .end img { width: 120px; image-rendering: pixelated; margin-bottom: 14px; }
 .end .name { font: 800 40px/1 Pretendard Variable, Pretendard, sans-serif; color: #fdf8ec; letter-spacing: 0.02em; }
 .end .title { font: 400 50px/1.1 Gaegu, cursive; color: #f2c46b; margin-top: 8px; }
@@ -146,7 +149,7 @@ html, body { margin: 0; width: 405px; height: 720px; background: transparent; ov
   await p.goto(`${DEV}fonts/gaegu/400.css`);
   for (const [key, line] of Object.entries(lines)) {
     const body = key.startsWith('end')
-      ? `<div class="end"><img src="${DEV}assets/seora-sprites/cheer-big-1.webp"><div class="name">Space Oddity</div><div class="title">${line.title}</div><div class="note">${line.note.replace(/\n/g, '<br>')}</div><div class="find">${line.find}<b>${line.store}</b></div></div>`
+      ? `<div class="end">${line.lead ? `<div class="lead">${line.lead.replace(/\n/g, '<br>')}</div>` : ''}<img src="${DEV}assets/seora-sprites/cheer-big-1.webp"><div class="name">Space Oddity</div><div class="title">${line.title}</div>${line.note ? `<div class="note">${line.note.replace(/\n/g, '<br>')}</div>` : ''}<div class="find">${line.find}<b>${line.store}</b></div></div>`
       : `<div class="band"><div class="kick">SPACE ODDITY</div><div class="line">${line.replace(/\n/g, '<br>')}</div></div>`;
     await p.setContent(page(body), { waitUntil: 'networkidle' });
     await p.evaluate(() => document.fonts.ready);

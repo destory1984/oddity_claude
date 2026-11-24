@@ -14,10 +14,12 @@ const DEV = process.env.PROMO_DEV || 'http://localhost:4417/oddity_claude/';
 const ROOT = path.join(__dirname, '..', '..', 'assets', 'promo');
 const FPS = 30;
 // [from, to] in the course's seconds, how long it lasts in the film, and how far (CSS
-// pixels) the stage is moved down, so what it shows is not under the captions at the top.
+// pixels) the stage is moved down, so what it shows is not under the captions at the top,
+// and how much smaller it is drawn (the Earth's year is wider than a phone held upright:
+// the user, 2026-11-25, of its sides: "이쪽이 잘리네").
 const PARTS = [
   [15, 27, 6], // the Earth turning
-  [211, 225, 7], // its year, the axis keeping its way
+  [211, 225, 7, 0, 0.8], // its year, the axis keeping its way
   [263, 284, 7], // the planets, the further the slower
   [324, 351, 9, 170], // the helices behind the Sun
   [368, 395, 9], // back from the Sun to the stars near it, on to Alpha Centauri
@@ -60,13 +62,24 @@ const WORDS = {
     await p.waitForTimeout(4000);
     const times = [];
     let n = 0;
-    for (const [k, [from, to, film, down = 0]] of PARTS.entries()) {
+    for (const [k, [from, to, film, down = 0, size = 1]] of PARTS.entries()) {
       const frames = Math.round(film * FPS);
       if (only.length && !only.includes(k + 1)) {
         for (let f = 0; f < frames; f++) times.push(n++ / FPS);
         continue;
       }
-      await p.evaluate((down) => { document.body.style.transform = `translateY(${down}px)`; }, down);
+      // (Smaller: the stage drawn on a page wider by 1 / size, then that page made smaller,
+      // so what lay beyond the screen's sides comes in.)
+      await p.evaluate(([down, size]) => {
+        const b = document.body.style;
+        // (Wider only: the camera keeps its height of view, so a taller page would just be
+        // the same picture larger. Set in the middle of the screen's height.)
+        b.width = `${100 / size}vw`;
+        b.height = '100vh';
+        b.transformOrigin = '0 0';
+        b.transform = `translateY(${down + ((1 - size) * innerHeight) / 2}px) scale(${size})`;
+        window.st.resize();
+      }, [down, size]);
       // (A few steps into the part before the first frame, so that what it keeps is set.)
       await p.evaluate((T) => { for (let i = 3; i > 0; i--) window.st.update(T - i * 0.03, window.W); }, from);
       for (let f = 0; f < frames; f++) {

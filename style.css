@@ -8309,10 +8309,15 @@ dialog > .backBar {
   font-size:14px;
   line-height:1.55;
 }
+/* (Its name on a line of its own, so it does not run on into the tip: the user, 2026-11-25,
+   reading "오늘의 팁 추천 우주멍 코스..." as one: ". 빠졌다".) */
 #noteCardTipLabel {
-  margin-right:6px;
+  display:block;
+  margin:0 0 3px;
   color:var(--gold);
+  font-size:13px;
   font-weight:700;
+  letter-spacing:.04em;
 }
 
 /* The tip's key to what it tells of, at the end of its line; and no way back on a note that

@@ -110,7 +110,7 @@ import { nextVisit, hear, speakerAt, talkNote, foundHidden, recordFound, hiddenS
 import {
   eclipseNow, eclipseNews, eclipseTitle, eclipseDayText, eclipseSpot, canWatch, showFrame, stagedMoon, stagedNote,
 } from './core/eclipses.js';
-import { t } from './core/i18n.js';
+import { t, language } from './core/i18n.js';
 
 // All the code is in (render/world.js marks the steps after this one).
 performance.mark('oddity:code');
@@ -2444,7 +2444,17 @@ ${STORY_MORE[target.id]}` : told) };
   // How the Solar System turns (rail.orbits): drawn by a little world of its own on a canvas
   // over the game's (render/orbitStage.js), names over what they name, a film's title.
   let orbitStage = null;
-  const ORBIT_WORDS = { sun: t('태양'), earth: t('지구'), moon: t('달'), ghost: t('스스로 돌지 않는다면'), here: t('태양계는 여기'), mercury: t('수성'), venus: t('금성'), mars: t('화성'), jupiter: t('목성'), saturn: t('토성'), uranus: t('천왕성'), neptune: t('해왕성') };
+  const ORBIT_WORDS = { sun: t('태양'), earth: t('지구'), moon: t('달'), ghost: t('스스로 돌지 않는다면'), here: t('태양계는 여기'), mercury: t('수성'), venus: t('금성'), mars: t('화성'), jupiter: t('목성'), saturn: t('토성'), uranus: t('천왕성'), neptune: t('해왕성'), firstDino: t('첫 공룡'), dinoGone: t('공룡이 사라짐'), ago: yearsAgo };
+  // How long ago, in millions of years, as the clock over the galaxy writes it.
+  function yearsAgo(my) {
+    if (my <= 0) return t('오늘');
+    const lang = language();
+    if (lang === 'en') return `${my} million years ago`;
+    // Korean, Japanese and Chinese count in ten thousands (만, 万) and hundred millions (억, 億, 亿).
+    const [eok, man, ago, gap] = { ko: ['억', '만', ' 년 전', ' '], ja: ['億', '万', '年前', ''], zh: ['亿', '万', '年前', ''] }[lang] ?? ['억', '만', ' 년 전', ' '];
+    const big = Math.floor(my / 100), rest = (my % 100) * 100;
+    return (big ? `${big}${eok}` : '') + (big && rest ? gap : '') + (rest ? `${rest}${man}` : '') + ago;
+  }
   function orbitStep(chosen) {
     const now = courseTime;
     const on = chosen.rail.stage.some(([a, b]) => now >= a && now < b);

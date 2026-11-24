@@ -21,8 +21,8 @@ export const ORBITS = {
   planets: [250, 300], // all the planets, the further the slower
   sun: [300, 312], // the Sun turning
   helix: [312, 352], // the Sun going on, the planets with it: helices
-  galaxy: [352, 392], // the Sun going round the galaxy
-  end: 392,
+  galaxy: [352, 422], // the Sun going round the galaxy
+  end: 422,
 };
 
 const TILT = (23.4 * Math.PI) / 180;
@@ -184,19 +184,54 @@ uniform float turn;
 uniform vec3 centre;
 uniform float pixel;
 uniform vec3 eye;
+uniform float maxSize;
 varying vec3 vCol;
 void main() {
   float c = cos(turn), s = sin(turn);
   vec3 p = centre + vec3(c * position.x - s * position.z, position.y, s * position.x + c * position.z);
   gl_Position = viewProjection * vec4(p, 1.0);
   vCol = mix(vec3(1.0, 0.85, 0.65), vec3(0.65, 0.75, 1.0), seed.x) * (0.35 + 0.65 * seed.y);
-  gl_PointSize = clamp(pixel * 1.6 / length(eye - p), 1.0, 3.0);
+  gl_PointSize = clamp(pixel * 1.6 / length(eye - p), 1.0, maxSize);
 }`;
 Effect.ShadersStore.orbitStarsFragmentShader = `
 precision highp float;
 varying vec3 vCol;
 uniform float fade;
-void main() { gl_FragColor = vec4(vCol * fade * 0.3, 1.0); }`;
+uniform float bright;
+void main() { gl_FragColor = vec4(vCol * fade * bright, 1.0); }`;
+// The galaxy's own light under its stars: the glow along its arms with a dark lane of dust
+// on their inner side, pink knots where stars are born, and its yellow middle.
+Effect.ShadersStore.orbitDiscVertexShader = `
+precision highp float;
+attribute vec3 position;
+uniform mat4 worldViewProjection;
+varying vec2 vP;
+void main() { vP = position.xy; gl_Position = worldViewProjection * vec4(position, 1.0); }`;
+Effect.ShadersStore.orbitDiscFragmentShader = `
+precision highp float;
+varying vec2 vP;
+uniform float fade;
+float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float n2(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h(i), h(i + vec2(1, 0)), f.x), mix(h(i + vec2(0, 1)), h(i + vec2(1, 1)), f.x), f.y); }
+const float PI = 3.14159265;
+float wrapA(float a) { return mod(a + PI, 2.0 * PI) - PI; }
+void main() {
+  // (The plane lies flat, turned from x-y: its y is the galaxy's z.)
+  vec2 q = vP;
+  float r = length(q);
+  float ang = atan(q.y, q.x);
+  float aa = log(max(r, 1.0) / 60.0) * 1.7;
+  float d0 = wrapA(ang - aa), d1 = wrapA(ang - aa - PI);
+  float d = abs(d0) < abs(d1) ? d0 : d1;
+  float edge = smoothstep(520.0, 380.0, r) * smoothstep(50.0, 110.0, r);
+  float arm = exp(-pow(d / 0.28, 2.0)) * edge;
+  float lane = exp(-pow((d + 0.2) / 0.06, 2.0)) * edge;
+  float bulge = exp(-r * r / 9000.0);
+  float knots = smoothstep(0.75, 0.95, n2(q / 7.0)) * exp(-pow(d / 0.16, 2.0)) * edge;
+  vec3 col = vec3(0.32, 0.4, 0.62) * arm * (1.0 - lane) * 0.28 + vec3(0.04, 0.045, 0.065) * edge * (1.0 - 0.8 * lane)
+    + vec3(1.0, 0.78, 0.5) * bulge * 0.55 + vec3(1.0, 0.3, 0.55) * knots * 0.35;
+  gl_FragColor = vec4(col * fade, 1.0);
+}`;
 
 export function createOrbitStage(canvas) {
   const engine = new Engine(canvas, true, { preserveDrawingBuffer: false, stencil: false });
@@ -361,12 +396,14 @@ export function createOrbitStage(canvas) {
       const r = GAL_R * (0.04 + 0.96 * Math.pow(rnd(), 0.85));
       const arm = rnd() < 0.5 ? 0 : Math.PI;
       const bar = r < 70;
-      const ang = bar ? arm + (rnd() - 0.5) * 0.5 : arm + Math.log(r / 60) * 1.7 + (rnd() - 0.5) * (0.35 + 0.35 * rnd());
+      const off = (rnd() - 0.5) * (0.35 + 0.35 * rnd());
+      const ang = bar ? arm + (rnd() - 0.5) * 0.5 : arm + Math.log(r / 60) * 1.7 + off;
       const spread = rnd() < 0.35 ? (rnd() - 0.5) * 2 * Math.PI : 0;
       const a = ang + spread;
       const rr = bar ? r * (0.3 + rnd()) : r;
       pos.set([Math.cos(a) * rr, (rnd() - 0.5) * (bar ? 30 : 12) * Math.exp(-r / 400), Math.sin(a) * rr], i * 3);
-      seeds.set([spread === 0 && !bar ? 0.7 * rnd() + 0.3 : 0.2 * rnd(), rnd(), 0, 0], i * 4);
+      const dusty = !bar && spread === 0 && Math.abs(off + 0.2) < 0.06;
+      seeds.set([spread === 0 && !bar ? 0.7 * rnd() + 0.3 : 0.2 * rnd(), rnd() * (dusty ? 0.1 : 1), 0, 0], i * 4);
       ind[i] = i;
     }
     const vd = new VertexData();
@@ -375,8 +412,10 @@ export function createOrbitStage(canvas) {
     vd.applyToMesh(galaxy);
     galaxy.setVerticesData('seed', seeds, false, 4);
   }
-  const galMat = new ShaderMaterial('orbitGalMat', scene, { vertex: 'orbitStars', fragment: 'orbitStars' }, { attributes: ['position', 'seed'], uniforms: ['viewProjection', 'turn', 'centre', 'pixel', 'eye', 'fade'], needAlphaBlending: true });
+  const galMat = new ShaderMaterial('orbitGalMat', scene, { vertex: 'orbitStars', fragment: 'orbitStars' }, { attributes: ['position', 'seed'], uniforms: ['viewProjection', 'turn', 'centre', 'pixel', 'eye', 'fade', 'bright', 'maxSize'], needAlphaBlending: true });
   galMat.setVector3('centre', GAL_AT);
+  galMat.setFloat('bright', 0.3);
+  galMat.setFloat('maxSize', 3);
   galMat.pointsCloud = true;
   galMat.alphaMode = 1;
   galMat.disableDepthWrite = true;
@@ -387,6 +426,98 @@ export function createOrbitStage(canvas) {
   galCore.material = glowMat('orbitGalCoreMat', [1, 0.85, 0.6]);
   galCore.billboardMode = Mesh.BILLBOARDMODE_ALL;
   galCore.position.copyFrom(GAL_AT);
+  const disc = CreatePlane('orbitGalDisc', { size: 1100 }, scene);
+  disc.rotation.x = Math.PI / 2;
+  disc.position.copyFrom(GAL_AT);
+  const discMat = new ShaderMaterial('orbitDiscMat', scene, { vertex: 'orbitDisc', fragment: 'orbitDisc' }, { attributes: ['position'], uniforms: ['worldViewProjection', 'fade'], needAlphaBlending: true });
+  discMat.alphaMode = 1;
+  discMat.disableDepthWrite = true;
+  discMat.backFaceCulling = false;
+  disc.material = discMat;
+  disc.setEnabled(false);
+  // Pink clouds where stars are being born, strung along the arms.
+  const nebulae = [];
+  {
+    const nebMat = glowMat('orbitNebMat', [1, 0.38, 0.62]);
+    const neb0 = CreatePlane('orbitNeb', { size: 1 }, scene);
+    neb0.material = nebMat;
+    neb0.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    let sd = 5;
+    const rnd = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+    for (let i = 0; i < 70; i++) {
+      const r = 120 + 360 * rnd();
+      const a = (rnd() < 0.5 ? 0 : Math.PI) + Math.log(r / 60) * 1.7 + (rnd() - 0.5) * 0.14;
+      const m = i ? neb0.clone(`orbitNeb${i}`) : neb0;
+      m.position.set(GAL_AT.x + Math.cos(a) * r, (rnd() - 0.5) * 3, Math.sin(a) * r);
+      m.scaling.setAll(8 + 18 * rnd());
+      nebulae.push(m);
+    }
+  }
+  // The Sun's lap round the middle: u (0 to 1) at the course's second T. Slow while the
+  // eye rides close behind it among the stars near it, then fast as the eye draws back.
+  const SUN_GAL_R = Math.abs(GAL_AT.x);
+  const galSunAt = (u) => {
+    // (Clockwise from above, the way its trailing arms turn.)
+    const a = -2 * Math.PI * u;
+    return new Vector3(GAL_AT.x + SUN_GAL_R * Math.cos(a), 0, SUN_GAL_R * Math.sin(a));
+  };
+  const lapU = (() => {
+    const [g0, g1] = ORBITS.galaxy;
+    const sm = (a, b, x) => { const k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
+    const v = (t) => 0.0016 * sm(g0 + 1, g0 + 4, t) + 0.045 * sm(g0 + 16, g0 + 34, t) * (1 - sm(g1 - 14, g1 - 5, t));
+    const table = [0];
+    for (let t = g0; t < g1; t += 0.1) table.push(table[table.length - 1] + v(t + 0.05) * 0.1);
+    const all = table[table.length - 1];
+    return (T) => {
+      const k = Math.min(table.length - 1, Math.max(0, (T - g0) / 0.1));
+      const i = Math.floor(k);
+      const f = k - i;
+      return (table[i] + (table[Math.min(i + 1, table.length - 1)] - table[i]) * f) / all;
+    };
+  })();
+  // The stars near the Sun at the start, which it passes among.
+  const nearStars = new Mesh('orbitNearStars', scene);
+  {
+    const N = 1600;
+    let sd = 23;
+    const rnd = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+    const pos = new Float32Array(N * 3), seeds = new Float32Array(N * 4), ind = new Uint32Array(N);
+    for (let i = 0; i < N; i++) {
+      let o;
+      do o = new Vector3(rnd() - 0.5, (rnd() - 0.5) * 0.5, rnd() - 0.5).scale(80);
+      while (o.length() > 40 || Math.hypot(o.x, o.y) < 5);
+      const b = galSunAt(-0.01 + 0.07 * rnd()).add(o);
+      pos.set([b.x, b.y, b.z], i * 3);
+      seeds.set([rnd() * 0.8 + 0.1, 0.4 + 0.6 * rnd(), 0, 0], i * 4);
+      ind[i] = i;
+    }
+    const vd = new VertexData();
+    vd.positions = pos;
+    vd.indices = ind;
+    vd.applyToMesh(nearStars);
+    nearStars.setVerticesData('seed', seeds, false, 4);
+  }
+  const nearMat = new ShaderMaterial('orbitNearMat', scene, { vertex: 'orbitStars', fragment: 'orbitStars' }, { attributes: ['position', 'seed'], uniforms: ['viewProjection', 'turn', 'centre', 'pixel', 'eye', 'fade', 'bright', 'maxSize'], needAlphaBlending: true });
+  nearMat.setVector3('centre', Vector3.Zero());
+  nearMat.setFloat('turn', 0);
+  nearMat.setFloat('bright', 1);
+  nearMat.setFloat('maxSize', 3);
+  nearMat.pointsCloud = true;
+  nearMat.alphaMode = 1;
+  nearMat.disableDepthWrite = true;
+  nearStars.material = nearMat;
+  nearStars.alwaysSelectAsActiveMesh = true;
+  nearStars.setEnabled(false);
+  // Where the Sun was when things happened on the Earth: a lap takes 230 million years.
+  const LAP_MY = 230;
+  const marks = [{ my: 230, key: 'firstDino' }, { my: 66, key: 'dinoGone' }].map((m) => {
+    const dot = CreatePlane(`orbitMark-${m.key}`, { size: 1 }, scene);
+    dot.material = glowMat(`orbitMarkMat-${m.key}`, [1, 0.6, 0.45]);
+    dot.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    dot.position.copyFrom(galSunAt(1 - m.my / LAP_MY));
+    dot.setEnabled(false);
+    return { ...m, u: 1 - m.my / LAP_MY, dot };
+  });
   // Where the Sun is in it: a marker that stays a few pixels across.
   const sunMark = CreatePlane('orbitSunMark', { size: 1 }, scene);
   sunMark.material = glowMat('orbitSunMarkMat', [1, 0.9, 0.5]);
@@ -397,16 +528,14 @@ export function createOrbitStage(canvas) {
   const galRing = ring('orbitGalRing', Math.abs(GAL_AT.x), [1, 0.85, 0.55]);
   galRing.position.copyFrom(GAL_AT);
   galRing.setEnabled(false);
-  const GAL_TRAIL = 1.4; // radians of the way just gone, drawn bright
-  const galTrailAt = (turn) => {
+  // The way just gone, drawn bright: a fifth of a lap behind the Sun (less at the start).
+  const galTrailAt = (u) => {
     const pts = [];
-    for (let i = 0; i <= 60; i++) {
-      const a = turn - GAL_TRAIL + (GAL_TRAIL * i) / 60;
-      pts.push(new Vector3(GAL_AT.x + Math.abs(GAL_AT.x) * Math.cos(a), 0, Math.abs(GAL_AT.x) * Math.sin(a)));
-    }
+    const from = Math.max(0, u - 0.22);
+    for (let i = 0; i <= 60; i++) pts.push(galSunAt(from + ((u - from) * i) / 60));
     return pts;
   };
-  let galTrail = CreateLineSystem('orbitGalTrail', { lines: [galTrailAt(0)], updatable: true }, scene);
+  let galTrail = CreateLineSystem('orbitGalTrail', { lines: [galTrailAt(0.2)], updatable: true }, scene);
   galTrail.color = new Color3(1, 0.95, 0.75);
   galTrail.setEnabled(false);
 
@@ -441,6 +570,9 @@ export function createOrbitStage(canvas) {
     return { x: v.x / dpr, y: v.y / dpr, front: v.z > 0 && v.z < 1 };
   };
   const tags = [];
+  const clock = document.createElement('div');
+  clock.style.cssText = 'position:absolute;left:0;right:0;top:12%;text-align:center;font:700 clamp(18px,5vw,24px) system-ui,sans-serif;letter-spacing:0.04em;opacity:0;transition:opacity 0.8s';
+  names.append(clock);
   const tag = (text, at, shown) => tags.push({ el: label(text), at, shown });
 
   function update(T, words) {
@@ -451,6 +583,7 @@ export function createOrbitStage(canvas) {
       tag(words.ghost, () => ghost.getAbsolutePosition(), (t) => inPart([ORBITS.lock[0] + 14, ORBITS.lock[1]], t));
       for (const p of planets) tag(words[p.id], () => p.mesh.getAbsolutePosition(), (t) => inPart([ORBITS.planets[0] + 4, ORBITS.planets[1] + 6], t) || (p.id === 'earth' && inPart(ORBITS.year, t)));
       tag(words.here, () => helio.position, (t) => t >= ORBITS.galaxy[0] + 10);
+      for (const m of marks) tag(words[m.key], () => m.dot.position, (t) => (m.u === 0 ? t >= ORBITS.galaxy[0] + 40 : lapU(t) >= m.u) && t < ORBITS.end - 8);
       tag(words.sun, () => helio.position, (t) => inPart([ORBITS.helix[0] + 4, ORBITS.helix[1]], t));
     }
     const nearOn = T < ORBITS.year[0];
@@ -519,6 +652,7 @@ export function createOrbitStage(canvas) {
       p.line.alpha = 0.55 * others * away * helioIn * (1 - ringOff);
       p.line.setEnabled(others * away * (1 - ringOff) > 0.001);
       p.mesh.setEnabled(others * away > 0.001);
+      if (p.axis) p.axis.setEnabled(others * away > 0.001);
       // The Earth drawn larger while it is the one watched (the year), smaller among the rest.
       if (p.id === 'earth') { const big = lerp(5, 1, smooth(ORBITS.planets[0], ORBITS.planets[0] + 6, T)); p.mesh.scaling.setAll(big); p.axis.scaling.setAll(big); }
     }
@@ -533,28 +667,47 @@ export function createOrbitStage(canvas) {
     sunMat.setFloat('spin', T >= ORBITS.sun[0] ? (T - ORBITS.sun[0]) / 25 : 0);
     sunMat.setFloat('fade', helioIn);
     sunMat.setVector3('eye', camera.position);
-    sunGlow.material.setFloat('power', helioIn * (1 - 0.6 * smooth(ORBITS.galaxy[0] + 2, ORBITS.galaxy[0] + 10, T)));
+    sunGlow.material.setFloat('power', helioIn * (1 - 0.6 * smooth(ORBITS.galaxy[0] + 20, ORBITS.galaxy[0] + 30, T)));
 
     // The galaxy: the Sun (and all that goes with it) going round its middle, which
     // takes 230 million years; drawn as a quarter turn over the last part.
-    const gOn = smooth(ORBITS.galaxy[0], ORBITS.galaxy[0] + 10, T);
+    const gOn = smooth(ORBITS.galaxy[0], ORBITS.galaxy[0] + 4, T);
     galaxy.setEnabled(gOn > 0.001);
+    disc.setEnabled(gOn > 0.001);
+    discMat.setFloat('fade', gOn * (0.25 + 0.75 * smooth(ORBITS.galaxy[0] + 22, ORBITS.galaxy[0] + 40, T)));
+    for (const n of nebulae) n.setEnabled(gOn > 0.001);
+    nebulae[0].material.setFloat('power', gOn * 0.5);
+    const nearOnG = gOn * (1 - smooth(ORBITS.galaxy[0] + 24, ORBITS.galaxy[0] + 34, T));
+    nearStars.setEnabled(nearOnG > 0.001);
+    nearMat.setFloat('fade', nearOnG);
+    nearMat.setFloat('pixel', engine.getRenderHeight() / camera.fov);
+    nearMat.setVector3('eye', camera.position);
+    const uNow = lapU(T);
+    for (const m of marks) {
+      const shown = gOn > 0.001 && (m.u === 0 ? T >= ORBITS.galaxy[0] + 40 : uNow >= m.u);
+      m.dot.setEnabled(shown);
+      m.dot.scaling.setAll(Math.max(1, camera.position.subtract(m.dot.position).length() * 0.012));
+      m.dot.material.setFloat('power', 1.2);
+    }
+    if (words) {
+      const on = gOn > 0.001 && T >= ORBITS.galaxy[0] + 4 && T < ORBITS.end - 0.5;
+      clock.style.opacity = on ? '1' : '0';
+      if (on) clock.textContent = words.ago(Math.round(LAP_MY * (1 - uNow)));
+    }
     galCore.setEnabled(gOn > 0.001);
     galMat.setFloat('fade', gOn);
-    galCore.material.setFloat('power', gOn * 0.6);
+    galCore.material.setFloat('power', gOn * 0.45 * smooth(ORBITS.galaxy[0] + 20, ORBITS.galaxy[0] + 40, T));
     galMat.setFloat('turn', 0);
     galMat.setFloat('pixel', engine.getRenderHeight() / camera.fov);
     galMat.setVector3('eye', camera.position);
-    const gTurn = 0.6 * smooth(ORBITS.galaxy[0] + 12, ORBITS.end, T);
-    const sunR = Math.abs(GAL_AT.x);
-    helio.position.set(GAL_AT.x + sunR * Math.cos(gTurn), 0, sunR * Math.sin(gTurn));
-    const wayOn = smooth(ORBITS.galaxy[0] + 8, ORBITS.galaxy[0] + 14, T);
+    helio.position.copyFrom(galSunAt(uNow));
+    const wayOn = smooth(ORBITS.galaxy[0] + 26, ORBITS.galaxy[0] + 36, T);
     galRing.setEnabled(wayOn > 0.001);
     galRing.alpha = wayOn;
     galRing.color.set(0.35 * wayOn, 0.3 * wayOn, 0.2 * wayOn);
     galTrail.setEnabled(wayOn > 0.001);
     if (wayOn > 0.001) {
-      galTrail = CreateLineSystem('orbitGalTrail', { lines: [galTrailAt(gTurn)], instance: galTrail }, scene);
+      galTrail = CreateLineSystem('orbitGalTrail', { lines: [galTrailAt(uNow)], instance: galTrail }, scene);
       galTrail.alpha = 0.9 * wayOn;
     }
     // Going on with the Sun: it moves along WAY, the planets round it, so each draws a helix
@@ -627,9 +780,14 @@ export function createOrbitStage(canvas) {
       // Beside the Sun's way, its trail and the planets' helices running down behind it.
       { t: ORBITS.helix[0] + 8, at: helioAt(10, -30, -95), look: helioAt(0, -30, 0), fov: 0.8 },
       { t: ORBITS.helix[1], at: helioAt(10, -30, -95), look: helioAt(0, -30, 0), fov: 0.8 },
-      // Far out over the galaxy.
-      { t: ORBITS.galaxy[0] + 12, at: GAL_AT.add(at(120, 1900, -700)), look: GAL_AT.add(at(80, 0, 0)), fov: 0.8 },
-      { t: ORBITS.end, at: GAL_AT.add(at(30, 2200, -600)), look: GAL_AT, fov: 0.8 },
+      // Close behind the Sun on its way, the stars near it going by; the galaxy a band of light.
+      { t: ORBITS.galaxy[0] + 0.1, at: helioAt(7, 5, 36), look: helioAt(-1, 0, -30), fov: 0.85 },
+      { t: ORBITS.galaxy[0] + 18, at: helioAt(5, 5, 30), look: helioAt(-1, 0, -30), fov: 0.85 },
+      // Drawing back and up as it speeds on, the arms coming into sight...
+      { t: ORBITS.galaxy[0] + 32, at: helioAt(60, 90, 130), look: helioAt(0, 0, -20), fov: 0.85 },
+      // ...to the whole galaxy, its lap drawn.
+      { t: ORBITS.galaxy[0] + 46, at: GAL_AT.add(at(260, 1500, 950)), look: GAL_AT.add(at(40, 0, 0)), fov: 0.8 },
+      { t: ORBITS.end, at: GAL_AT.add(at(-120, 1950, 700)), look: GAL_AT, fov: 0.8 },
     ];
     let i = 0;
     while (i < keys.length - 2 && T > keys[i + 1].t) i++;

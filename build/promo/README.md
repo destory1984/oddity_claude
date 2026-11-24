@@ -26,6 +26,17 @@
 
 공개 페이지에 코스가 올라간 뒤에는 `PROMO_URL` 을 빼도 된다.
 
+### 그려서 만드는 쇼츠 (태양계는 어떻게 도는가)
+
+이 코스는 568초라 실시간으로 찍으면 이 PC에서 끊긴다. 코스의 장면(`src/render/orbitStage.js`)은 시각만 주면 그 순간을 그릴 수 있어서, 한 장씩 그려 초당 30장으로 엮는다. 여섯 토막을 2 → 3배로 감아 48초, 끝 화면 5초.
+
+1. 음악: `PROMO_URL=http://localhost:4417/oddity_claude/ node build/promo/shoot.cjs ko music60` (게임 음악 62초)
+2. 장면: `node build/promo/orbits.cjs ko` → `assets/promo/ko/orbits/` 1,440장, 약 8분. 토막 몇 개만 다시 그릴 때는 `node build/promo/orbits.cjs ko 4 6`
+3. 자막과 끝 화면: `FILM=tour node build/promo/captions.cjs ko`
+4. 편집: `python -P build/promo/tour.py ko orbits 1` → `assets/promo/tour-orbits-1-ko.mp4`
+
+토막마다 쓰는 구간과 감는 배, 자막에 가리지 않게 장면을 내리는 정도는 `orbits.cjs` 의 `PARTS` 에 있다.
+
 ## 고칠 곳
 
 | 무엇 | 파일 |

@@ -13,7 +13,7 @@ const { chromium, executablePath } = require('./env.cjs');
 const SHOTS = require('./shots.cjs');
 
 // The shots with the music on and the effects off.
-const TUNED = ['music', 'auroraDrift'];
+const TUNED = ['music', 'music60', 'auroraDrift'];
 const URL = process.env.PROMO_URL || 'https://destory1984.github.io/oddity_claude/';
 const ROOT = path.join(__dirname, '..', '..', 'assets', 'promo');
 

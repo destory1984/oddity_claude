@@ -226,6 +226,13 @@ module.exports = {
     await rec.start();
     await p.waitForTimeout(36000);
   },
+  // The same, a minute long, for a Short drawn frame by frame (build/promo/orbits.cjs).
+  music60: async (p, rec) => {
+    await settle(p);
+    await p.waitForTimeout(1500);
+    await rec.start();
+    await p.waitForTimeout(62000);
+  },
   // She flies by the player's own hand: facing the Moon, the forward key held down and the
   // speed climbing. Where and when the key was held goes to touch.json, for cut.py to draw
   // a fingertip on it (x, y: its middle in CSS pixels; from, to: seconds since 1970).

@@ -91,7 +91,15 @@ const TOUR = {
     'auroraDrift-1-4': '소리 없는 빛의 커튼',
     'auroraDrift-2-1': '오늘 밤, 오로라 속을\n날아 볼까요',
     'auroraDrift-2-2': '소리 없는 빛의 커튼',
+    // 태양계는 어떻게 도는가 (build/promo/orbits.cjs), agreed with the user 2026-11-25.
+    'orbits-1-1': '지구는 하루에 한 바퀴,\n스스로 돕니다',
+    'orbits-1-2': '축이 늘 같은 쪽을 가리켜\n여름과 겨울이 옵니다',
+    'orbits-1-3': '수성은 88일,\n해왕성은 165년에 한 바퀴',
+    'orbits-1-4': '해도 멈춰 있지 않습니다.\n행성들은 나선을 그리며 따라갑니다',
+    'orbits-1-5': '곁의 별들도 함께 달립니다.\n가장 가까운 별, 알파 센타우리',
+    'orbits-1-6': '은하 한가운데에는\n블랙홀 궁수자리 A*.\n수천억 개의 별이 이 중심을 돕니다',
     end: FIRST.ko.end,
+    'end-orbits': { ...FIRST.ko.end, note: '우주멍 코스\n「태양계는 어떻게 도는가」' },
   },
   en: {
     'auroraDrift-1-1': 'The aurora, seen from space',
@@ -137,11 +145,24 @@ html, body { margin: 0; width: 405px; height: 720px; background: transparent; ov
   // (From the dev server's own origin, or the fonts are refused as another site's.)
   await p.goto(`${DEV}fonts/gaegu/400.css`);
   for (const [key, line] of Object.entries(lines)) {
-    const body = key === 'end'
-      ? `<div class="end"><img src="${DEV}assets/seora-sprites/cheer-big-1.webp"><div class="name">Space Oddity</div><div class="title">${line.title}</div><div class="note">${line.note}</div><div class="find">${line.find}<b>${line.store}</b></div></div>`
+    const body = key.startsWith('end')
+      ? `<div class="end"><img src="${DEV}assets/seora-sprites/cheer-big-1.webp"><div class="name">Space Oddity</div><div class="title">${line.title}</div><div class="note">${line.note.replace(/\n/g, '<br>')}</div><div class="find">${line.find}<b>${line.store}</b></div></div>`
       : `<div class="band"><div class="kick">SPACE ODDITY</div><div class="line">${line.replace(/\n/g, '<br>')}</div></div>`;
     await p.setContent(page(body), { waitUntil: 'networkidle' });
     await p.evaluate(() => document.fonts.ready);
+    // (The orbit Short's lines are broken by hand: each part kept whole on its line, the
+    // letters made smaller till the longest fits.)
+    if (key.startsWith('orbits')) {
+      await p.evaluate(() => {
+        const el = document.querySelector('.line');
+        if (!el) return;
+        el.style.whiteSpace = 'nowrap';
+        let size = 37;
+        // (The band's width less its sides: the line itself grows with what it holds.)
+        const room = el.parentElement.clientWidth - 80;
+        while (el.getBoundingClientRect().width > room && size > 24) el.style.fontSize = `${--size}px`;
+      });
+    }
     await p.waitForTimeout(300);
     await p.screenshot({ path: path.join(out, `${key}.png`), omitBackground: true });
   }

@@ -4814,6 +4814,14 @@ ${STORY_MORE[target.id]}` : told) };
         cheerUntil = performance.now() + 1500;
       }
     }
+    // Her engine heard here too, as in free flight: without it the sound stayed as it was
+    // when the practice began, a roar on after a stop (the user, 2026-11-25: "중간에
+    // 멈췄는데, 굉음이 계속 난다").
+    sound.engine(engineSound({
+      speed: paused ? 0 : totalSpeed(state),
+      maxSpeed: TOP_SPEED,
+      thrusting: !paused && input.driving(),
+    }), elapsed || 1 / 60);
     const turn = dt > 0
       ? [dragTurn[0] / dt + intent.strafe * 0.6, dragTurn[1] / dt - ((state.riseSpeed ?? 0) > 0.01 ? state.riseSign : 0) * 0.6]
       : [0, 0];

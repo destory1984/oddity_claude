@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-24', text: t('추천 우주멍 코스 태양계는 어떻게 도는가가 생겼습니다. 자전부터 은하까지 봅니다.') },
   { day: '2026-11-24', text: t('추천 우주멍 코스 화성 산책이 생겼습니다. 퍼서비어런스가 실제로 간 길을 걷습니다.') },
   { day: '2026-11-24', text: t('추천 우주멍 코스 아폴로 8호 창밖의 달이 생겼습니다. 사령선 창으로 달을 돌며 지구돋이를 봅니다.') },
   { day: '2026-11-24', text: t('추천 우주멍 코스 달의 탄생, 테이아 충돌이 생겼습니다. 46억 년 전 지구에 부딪힌 천체의 파편이 모여 달이 되기까지입니다.') },

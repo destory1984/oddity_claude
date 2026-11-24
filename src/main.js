@@ -15,6 +15,7 @@ import { createWorld } from './render/world.js';
 import { createStarshipStage } from './render/starshipStage.js';
 import { createTheiaStage } from './render/theiaStage.js';
 import { createMarsStage } from './render/marsStage.js';
+import { createOrbitStage } from './render/orbitStage.js';
 import { createVanish, cutOut, pictureOf } from './ui/vanish.js';
 import { realCloudMap } from './render/realClouds.js';
 import { createInput } from './ui/input.js';
@@ -2439,6 +2440,49 @@ ${STORY_MORE[target.id]}` : told) };
     }
     canvas?.remove();
     document.getElementById('theiaTitle')?.remove();
+  }
+  // How the Solar System turns (rail.orbits): drawn by a little world of its own on a canvas
+  // over the game's (render/orbitStage.js), names over what they name, a film's title.
+  let orbitStage = null;
+  const ORBIT_WORDS = { sun: t('태양'), earth: t('지구'), moon: t('달'), ghost: t('스스로 돌지 않는다면'), here: t('태양계는 여기'), mercury: t('수성'), venus: t('금성'), mars: t('화성'), jupiter: t('목성'), saturn: t('토성'), uranus: t('천왕성'), neptune: t('해왕성') };
+  function orbitStep(chosen) {
+    const now = courseTime;
+    const on = chosen.rail.stage.some(([a, b]) => now >= a && now < b);
+    let canvas = document.getElementById('orbitStage');
+    if (on) {
+      if (!canvas) {
+        document.body.insertAdjacentHTML('beforeend', '<canvas id="orbitStage" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;z-index:6;pointer-events:none;background:#000"></canvas>');
+        canvas = document.getElementById('orbitStage');
+      }
+      if (!orbitStage) {
+        orbitStage = createOrbitStage(canvas);
+        addEventListener('resize', orbitResize);
+      }
+      canvas.hidden = false;
+      orbitStage.update(now, ORBIT_WORDS);
+    } else if (canvas) canvas.hidden = true;
+    let title = document.getElementById('orbitTitle');
+    if (!title) {
+      document.body.insertAdjacentHTML('beforeend', '<div id="orbitTitle" aria-hidden="true" style="position:fixed;left:0;right:0;top:20%;z-index:7;pointer-events:none;text-align:center;color:#f6eee6;text-shadow:0 2px 14px rgba(0,0,0,0.75),0 0 2px rgba(0,0,0,0.6)" hidden><div style="font-size:clamp(28px,8.5vw,48px);font-weight:700;letter-spacing:0.08em"></div><div style="margin-top:8px;font-size:clamp(14px,3.8vw,18px);letter-spacing:0.08em;opacity:0.9"></div></div>');
+      title = document.getElementById('orbitTitle');
+      title.children[0].textContent = t`태양계는 어떻게 도는가`;
+      title.children[1].textContent = t`작은 것부터 큰 것까지`;
+    }
+    const ease = (x) => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k); };
+    const shown = on ? ease((now - 0.5) / 2) * (1 - ease((now - 8) / 2)) : 0;
+    title.hidden = shown <= 0.001;
+    title.style.opacity = String(shown);
+    title.style.transform = `translateY(${(1 - shown) * 8}px)`;
+  }
+  function orbitResize() { orbitStage?.resize(); }
+  function orbitOff() {
+    if (orbitStage) {
+      orbitStage.dispose();
+      orbitStage = null;
+      removeEventListener('resize', orbitResize);
+    }
+    document.getElementById('orbitStage')?.remove();
+    document.getElementById('orbitTitle')?.remove();
   }
   function starshipOff() {
     world.setFloatModel('starshipShip', null);
@@ -5003,6 +5047,7 @@ ${STORY_MORE[target.id]}` : told) };
         if (chosen.rail.starship) starshipStep(chosen, state);
         if (chosen.rail.theia) theiaStep(chosen);
         if (chosen.rail.marsWalk) marsStep(chosen);
+        if (chosen.rail.orbits) orbitStep(chosen);
         if (chosen.rail.cabin) state = { ...state, orientation: cupolaFloat(state) };
         if (chosen.rail.mmu) mmuFlyStep(chosen, dt, jetKey);
         // Sounds at their moments (rail.sounds: [seconds, cue]).
@@ -5053,6 +5098,7 @@ ${STORY_MORE[target.id]}` : told) };
     if ((!course || !courseById(course)?.rail?.starship) && starshipStage) starshipOff();
     if ((!course || !courseById(course)?.rail?.theia) && theiaStage) theiaOff();
     if ((!course || !courseById(course)?.rail?.marsWalk) && marsStage) marsOff();
+    if ((!course || !courseById(course)?.rail?.orbits) && orbitStage) orbitOff();
     if (!course || !courseById(course)?.rail?.dock) {
       world.setFloatModel('columbia', null);
       landingNow = { dust: 0, shadow: null };

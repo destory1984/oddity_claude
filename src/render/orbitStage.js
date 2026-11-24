@@ -20,9 +20,9 @@ export const ORBITS = {
   year: [196, 250], // the Earth round the Sun, its axis keeping its way: the seasons
   planets: [250, 300], // all the planets, the further the slower
   sun: [300, 312], // the Sun turning
-  helix: [312, 362], // the Sun going on, the planets with it: helices (the last 12 s true to scale)
-  galaxy: [362, 432], // the Sun going round the galaxy
-  end: 432,
+  helix: [312, 370], // the Sun going on, the planets with it: helices (the last 20 s true to scale)
+  galaxy: [370, 440], // the Sun going round the galaxy
+  end: 440,
 };
 
 const TILT = (23.4 * Math.PI) / 180;
@@ -365,9 +365,9 @@ export function createOrbitStage(canvas) {
   const HELIX_PACE = 30 / YEAR;
   // Then true to scale (the user, 2026-11-24: "실제 비율 물결도 넣어"): the Sun at its own
   // pace, the helices drawn out into shallow waves. The clock runs 4 times faster there,
-  // so that a few years' waves are drawn in its 12 s.
+  // so that a few years' waves are drawn in its 20 s.
   const TRUE_PACE = 864 / YEAR;
-  const TRUE0 = ORBITS.helix[1] - 12;
+  const TRUE0 = ORBITS.helix[1] - 20;
   const WARP = 4;
   // The integral of a smoothstep from a over w, at x.
   const rampInt = (x, a, w) => {
@@ -667,12 +667,14 @@ export function createOrbitStage(canvas) {
       p.mesh.material.setFloat('fade', helioIn * others * away);
       p.line.alpha = 0.55 * others * away * helioIn * (1 - ringOff);
       p.line.setEnabled(others * away * (1 - ringOff) > 0.001);
-      p.mesh.setEnabled(others * away > 0.001);
-      if (p.axis) p.axis.setEnabled(others * away > 0.001);
+      // (True to scale only those with trails: the far ones would stand in the way.)
+      const kept = !(T >= TRUE0 + 1 && T < ORBITS.galaxy[0]) || trails.some((tr) => tr.p === p);
+      p.mesh.setEnabled(others * away > 0.001 && kept);
+      if (p.axis) p.axis.setEnabled(others * away > 0.001 && kept);
       // The Earth drawn larger while it is the one watched (the year), smaller among the rest.
       if (p.id === 'earth') { const big = lerp(5, 1, smooth(ORBITS.planets[0], ORBITS.planets[0] + 6, T)); p.mesh.scaling.setAll(big); p.axis.scaling.setAll(big); }
     }
-    for (const r of saturnRing) r.setEnabled(T >= ORBITS.planets[0] + 2 && T < ORBITS.galaxy[0]);
+    for (const r of saturnRing) r.setEnabled(T >= ORBITS.planets[0] + 2 && T < TRUE0 + 1);
     const pe = planets.find((p) => p.id === 'earth');
     const yma = (2 * Math.PI * ySince) / 3;
     yearMoon.position.copyFrom(pe.tilt.position.add(new Vector3(Math.cos(yma) * 2.2, 0, Math.sin(yma) * 2.2)));
@@ -799,7 +801,12 @@ export function createOrbitStage(canvas) {
       { t: TRUE0, at: helioAt(10, -30, -95), look: helioAt(0, -30, 0), fov: 0.8 },
       // True to scale: far off to the side, the way running up the screen, the waves behind.
       { t: TRUE0 + 4, at: helioAt(-130, -225, -780), look: helioAt(-130, -225, 0), fov: 0.8 },
-      { t: ORBITS.helix[1], at: helioAt(-130, -225, -780), look: helioAt(-130, -225, 0), fov: 0.8 },
+      { t: TRUE0 + 9, at: helioAt(-130, -225, -780), look: helioAt(-130, -225, 0), fov: 0.8 },
+      // Round to ahead of the Sun, looking back along its way: the same waves now a spring
+      // going off into the distance (the user, 2026-11-24: "거의 정면에서 보면 스프링처럼
+      // 보이잖아", "정면 쪽으로 돌리는 것도 넣어").
+      { t: TRUE0 + 16, at: helioAt(117, 163, -30), look: helioAt(-150, -260, 0), fov: 0.55 },
+      { t: ORBITS.helix[1], at: helioAt(117, 163, -30), look: helioAt(-150, -260, 0), fov: 0.55 },
       // Close behind the Sun on its way, the stars near it going by; the galaxy a band of light.
       { t: ORBITS.galaxy[0] + 0.1, at: helioAt(7, 5, 36), look: helioAt(-1, 0, -30), fov: 0.85 },
       { t: ORBITS.galaxy[0] + 18, at: helioAt(5, 5, 30), look: helioAt(-1, 0, -30), fov: 0.85 },

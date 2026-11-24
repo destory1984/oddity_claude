@@ -66,7 +66,7 @@ export const COURSES = [
   // booster over the Gulf of Mexico (starshipAt). hotStage: the ship lighting and leaving.
   // The Moon's birth (the user, 2026-11-24: "테이아 달 형성론을 3D로 만들어볼까", "개발 시작"): the
   // giant impact, drawn by render/theiaStage.js; its seconds are THEIA's there.
-  { id: 'theia', body: 'earth', lapS: 214, rail: { theia: true, stage: [[0, 224]], sounds: [[38, 'theiaHit'], [122, 'theiaGather']], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 213.9], still: [[-60, 224]], phases: [[0, t('다가오는 테이아')], [38, t('충돌')], [50, t('파편의 팔')], [78, t('불타는 원반')], [118, t('달의 탄생')], [152, t('멀어지는 달')], [196, t('오늘의 지구와 달')]], captions: [
+  { id: 'theia', body: 'earth', lapS: 214, rail: { theia: true, stage: [[-2, 224]], sounds: [[38, 'theiaHit'], [122, 'theiaGather']], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 213.9], still: [[-60, 224]], phases: [[0, t('다가오는 테이아')], [38, t('충돌')], [50, t('파편의 팔')], [78, t('불타는 원반')], [118, t('달의 탄생')], [152, t('멀어지는 달')], [196, t('오늘의 지구와 달')]], captions: [
     { at: 1, text: t('46억 년 전, 태양계가 생긴 지 얼마 안 됐을 때입니다. 갓 생긴 지구 곁으로 화성만 한 천체가 다가옵니다. 테이아라고 부릅니다.') },
     { at: 14, text: t('달이 어떻게 생겼는지는 오랫동안 수수께끼였습니다. 아폴로가 가져온 달의 돌이 지구의 돌과 무척 닮아, 이 충돌설이 가장 널리 받아들여집니다.') },
     { at: 27, text: t('테이아는 정면이 아니라 비스듬히, 45도쯤으로 부딪혔다고 봅니다.') },

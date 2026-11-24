@@ -31,7 +31,7 @@ import { outOf, sunFrame } from './startSpots.js';
 import { t } from './i18n.js';
 
 export const COURSES = [
-  { id: 'auroraDrift', body: 'earth', lapS: 240, rail: { oval: { latDeg: 62, ringDeg: 67, highKm: 450, atKm: 500, aheadDeg: 20, fromDeg: -45, toDeg: 45 }, loops: true, startS: 0, fades: [239.2] }, name: t('오로라 유영'), todo: t('밤쪽 오로라 한 곳을 가까이에서 맴돌며 빛의 커튼 사이를 지나갑니다.') },
+  { id: 'auroraDrift', body: 'earth', lapS: 240, rail: { oval: { latDeg: 65.8, ringDeg: 67, highKm: 420, atKm: 200, aheadDeg: 35, fromDeg: -45, toDeg: 45 }, loops: true, startS: 0, fades: [239.2] }, name: t('오로라 유영'), todo: t('밤쪽 오로라 한 곳을 가까이에서 맴돌며 빛의 커튼 사이를 지나갑니다.') },
   // At the height of the round the user flew; its plane leans to the line of day and night,
   // for the Sun in view puts out the rest (the user, 2026-11-02: "태양이 안 보였으면 좋겠어").
   { id: 'earthRound', body: 'earth', lapS: 120, radii: 4.31, name: t('지구 한 바퀴'), todo: t('두 분 동안 지구를 한 바퀴 비행합니다. 낮과 밤, 오로라가 차례로 지나갑니다.'),

@@ -351,20 +351,28 @@ export function createTheiaStage(canvas) {
   const lerp = (a, b, k) => a + (b - a) * k;
   const vlerp = (a, b, k) => Vector3.Lerp(a, b, k);
 
-  // Theia's way in: in the Earth's equator plane from the night side, curving round to strike
-  // the leading edge at about 45 degrees.
+  // Theia's way in: in the Earth's equator plane on a straight line that misses the
+  // Earth's middle, so it strikes the edge at 45 degrees and slides on round the way the
+  // thrown rock goes (the user, 2026-11-24, of it coming straight at the middle: "저렇게
+  // 정면 출돌하면, 다 없어지지않을까? 살짝 빗겨서 맞춰").
   const hitAngle = 2.3;
   const hitDir = new Vector3(Math.cos(hitAngle), 0, Math.sin(hitAngle));
+  const TOUCH = 1 + THEIA_R * 0.7;
+  const along = new Vector3(-Math.sin(hitAngle), 0, Math.cos(hitAngle)); // round the Earth, as the arm goes
+  const way = hitDir.scale(-Math.SQRT1_2).add(along.scale(Math.SQRT1_2)); // 45 degrees off straight in
+  const touchAt = hitDir.scale(TOUCH);
   const theiaAt = (T) => {
     const s = THEIA.impact - T; // seconds before the touch
     if (s <= 0) {
-      // Through and into the Earth over 8 s, smeared out (drawn as shrinking).
+      // On along its way, grinding into the Earth's side as it goes, over 8 s (drawn as
+      // shrinking and pressed flat).
       const k = smooth(0, 8, -s);
-      return hitDir.scale((1 + THEIA_R * 0.7) * (1 - k * 0.9));
+      const on = touchAt.add(way.scale(0.9 * Math.sqrt(k)));
+      return on.normalize().scale(lerp(TOUCH, 0.75, k));
     }
-    const ang = hitAngle + 0.9 * (1 - Math.exp(-s / 14)) + 0.02 * s;
-    const r = 1 + THEIA_R * 0.7 + 0.28 * s;
-    return new Vector3(Math.cos(ang) * r, 0.05 * s * 0.1, Math.sin(ang) * r);
+    // Slowing a little as it nears (the pull of the Earth drawn the other way round: it
+    // is quicker far off, so the last seconds can be watched).
+    return touchAt.subtract(way.scale(0.2 * s + 0.004 * s * s)).add(new Vector3(0, 0.005 * s, 0));
   };
   // The Moon: gathering at 3.8 radii, then drawing away (hundreds of millions of years in
   // seconds) to where it is today, 60 radii, the month lengthening as it goes.
@@ -466,10 +474,13 @@ export function createTheiaStage(canvas) {
   function cameraAt(T, tp, moonAt, R) {
     const polar = (ang, r, y) => new Vector3(Math.cos(ang) * r, y, Math.sin(ang) * r);
     const keys = [
-      { t: 0, at: polar(hitAngle - 1.7, 10, 1.6), look: polar(hitAngle + 0.5, 1.5, 0), fov: 0.75 },
-      // (The blow seen from the side, so the hollow and Theia pressed flat show.)
-      { t: 30, at: polar(hitAngle - 1.35, 5.6, 1.2), look: polar(hitAngle + 0.25, 1.2, 0), fov: 0.75 },
-      { t: THEIA.impact + 2, at: polar(hitAngle - 1.15, 4.4, 0.9), look: hitDir.scale(1.1), fov: 0.75 },
+      // (From behind Theia as it sets off, the Earth far ahead.)
+      { t: 0, at: touchAt.subtract(way.scale(17)).add(new Vector3(0, 1.2, 0)), look: touchAt, fov: 0.75 },
+      // (The blow seen from above its side, so Theia's way missing the Earth's middle shows,
+      // and the hollow and Theia pressed flat.)
+      { t: 28, at: null, look: null, fov: 0.75 },
+      { t: 34, at: polar(hitAngle - 0.75, 3.6, 4.6), look: polar(hitAngle - 0.15, 1.4, 0), fov: 0.75 },
+      { t: THEIA.impact + 2, at: polar(hitAngle - 0.5, 3.2, 4.0), look: hitDir.scale(1.1), fov: 0.75 },
       { t: THEIA.arms[0] + 14, at: new Vector3(-3, 9, 3.5), look: new Vector3(0, 0, 0.3), fov: 0.85 },
       { t: THEIA.arms[1], at: new Vector3(2, 11, 7), look: new Vector3(0, 0, 0), fov: 0.85 },
       { t: THEIA.disc[0] + 22, at: new Vector3(9, 2.2, 4), look: new Vector3(0, -0.2, 0), fov: 0.8 },
@@ -479,30 +490,34 @@ export function createTheiaStage(canvas) {
       { t: THEIA.recede[1], at: new Vector3(3, 1.2, -6.5), look: new Vector3(0, 0, 0), fov: 0.75 },
       { t: THEIA.end, at: new Vector3(3, 1.2, -6.5), look: new Vector3(0, 0, 0), fov: 0.75 },
     ];
+    // Coming in: just behind Theia and above, so it stays in sight with the Earth ahead.
+    // Then, over the last seconds, up over the blow (the next key).
+    const chase = (p) => ({ at: p.subtract(way.scale(4)).add(new Vector3(0, 0.7, 0)), look: Vector3.Lerp(p, touchAt, 0.3) });
+    Object.assign(keys[0], chase(tp));
+    Object.assign(keys[1], chase(theiaAt(Math.min(T, 28))));
     // Beside the Moon as it gathers: outside its way and above, the Earth beyond it.
     const out = moonAt.clone().normalize();
     const along = Vector3.Cross(Vector3.Up(), out);
-    keys[7].at = moonAt.add(out.scale(3.6)).add(new Vector3(0, 2.2, 0)).add(along.scale(-1.8));
-    keys[7].look = Vector3.Lerp(moonAt, Vector3.Zero(), 0.3);
-    keys[7].fov = 0.85;
+    keys[8].at = moonAt.add(out.scale(3.6)).add(new Vector3(0, 2.2, 0)).add(along.scale(-1.8));
+    keys[8].look = Vector3.Lerp(moonAt, Vector3.Zero(), 0.3);
+    keys[8].fov = 0.85;
     // As it draws off: on the Sun's side of the Earth, the Moon beyond it and aside, full,
     // growing small; at the end, today's two.
     const sunSide = (d, up) => SUN.scale(d).add(new Vector3(0, up, 0));
-    keys[8].at = sunSide(11, 3);
-    keys[8].look = moonAt.scale(0.35);
+    keys[9].at = sunSide(11, 3);
+    keys[9].look = moonAt.scale(0.35);
     // Far off at the end (60 radii): from behind the Earth, a little aside, so the Moon stands
     // just past the Earth's edge, small, full (it ends a little aside of opposite the Sun).
-    keys[9].at = out.scale(-7).add(along.scale(1.7)).add(new Vector3(0, 0.6, 0));
-    keys[9].look = out.scale(2.2);
-    keys[9].fov = 0.62;
-    keys[10].at = keys[9].at;
-    keys[10].look = keys[9].look;
+    keys[10].at = out.scale(-7).add(along.scale(1.7)).add(new Vector3(0, 0.6, 0));
+    keys[10].look = out.scale(2.2);
     keys[10].fov = 0.62;
+    keys[11].at = keys[10].at;
+    keys[11].look = keys[10].look;
+    keys[11].fov = 0.62;
     let i = 0;
     while (i < keys.length - 2 && T > keys[i + 1].t) i++;
     const a = keys[i], b = keys[i + 1];
     const k = smooth(a.t, b.t, T);
-    void tp;
     void R;
     const ra = a.at.length(), rb = b.at.length();
     const at = vlerp(a.at.scale(1 / ra), b.at.scale(1 / rb), k).normalize().scale(lerp(ra, rb, k));

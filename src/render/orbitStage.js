@@ -95,6 +95,8 @@ void main() {
   vec3 l = normalize(sunPoint > 0.5 ? sunAt - vW : sunAt);
   float lit = max(dot(n, l), 0.0);
   vec3 c = hasMap > 0.5 ? texture2D(map, vUV).rgb : tint;
+  // The Earth's dark seas lifted, so a sea-turned face does not read as night.
+  if (hasNight > 0.5) c = pow(c, vec3(0.7)) * 1.05;
   vec3 col = c * (night + (1.0 - night) * lit * gain);
   // The Earth's night side: its cities' lights.
   if (hasNight > 0.5) col += texture2D(nightMap, vUV).rgb * vec3(1.0, 0.85, 0.6) * 1.6 * smoothstep(0.15, -0.05, dot(n, l));
@@ -258,6 +260,9 @@ export function createOrbitStage(canvas) {
   const nightLights = new Texture(`${base}assets/earth-night.webp`, scene, false, false);
   earthMat.setTexture('nightMap', nightLights);
   earthMat.setFloat('hasNight', 1);
+  // Brighter, its shade not black (the user, 2026-11-24: "지구를 좀 더 밝게").
+  earthMat.setFloat('gain', 1.6);
+  earthMat.setFloat('night', 0.15);
   const earth = CreateSphere('orbitEarth', { diameter: 2, segments: 64 }, scene);
   earth.material = earthMat;
   earth.parent = earthTilt;
@@ -299,6 +304,10 @@ export function createOrbitStage(canvas) {
     mesh.material = bodyMat(`orbit-${id}-mat`, src, id === 'uranus' ? [0.62, 0.85, 0.9] : [0.5, 0.5, 0.5]);
     mesh.parent = tilt;
     if (id === 'earth') { mesh.material.setTexture('nightMap', nightLights); mesh.material.setFloat('hasNight', 1); }
+    // Their shade not black, so a planet between the Sun and the eye still shows; the small
+    // dark ones brighter (the user, 2026-11-24: "수성도 완전 검은색인데, 화성도").
+    mesh.material.setFloat('night', id === 'mercury' || id === 'mars' ? 0.45 : id === 'earth' ? 0.3 : 0.35);
+    mesh.material.setFloat('gain', id === 'mercury' ? 2.6 : id === 'mars' ? 2.0 : id === 'earth' ? 1.6 : 1.5);
     const line = ring(`orbit-${id}-ring`, orbitOf(au), id === 'earth' ? [0.45, 0.7, 1] : [0.45, 0.45, 0.55]);
     line.parent = helio;
     let axis = null;
@@ -383,6 +392,23 @@ export function createOrbitStage(canvas) {
   sunMark.material = glowMat('orbitSunMarkMat', [1, 0.9, 0.5]);
   sunMark.billboardMode = Mesh.BILLBOARDMODE_ALL;
   sunMark.parent = helio;
+  // The Sun's way round the galaxy's middle, and a brighter stretch behind it showing which
+  // way it goes (the user, 2026-11-24: "태양계의 공전도 공전 동그라미 그려").
+  const galRing = ring('orbitGalRing', Math.abs(GAL_AT.x), [1, 0.85, 0.55]);
+  galRing.position.copyFrom(GAL_AT);
+  galRing.setEnabled(false);
+  const GAL_TRAIL = 1.4; // radians of the way just gone, drawn bright
+  const galTrailAt = (turn) => {
+    const pts = [];
+    for (let i = 0; i <= 60; i++) {
+      const a = turn - GAL_TRAIL + (GAL_TRAIL * i) / 60;
+      pts.push(new Vector3(GAL_AT.x + Math.abs(GAL_AT.x) * Math.cos(a), 0, Math.abs(GAL_AT.x) * Math.sin(a)));
+    }
+    return pts;
+  };
+  let galTrail = CreateLineSystem('orbitGalTrail', { lines: [galTrailAt(0)], updatable: true }, scene);
+  galTrail.color = new Color3(1, 0.95, 0.75);
+  galTrail.setEnabled(false);
 
   // Names on the screen, over what they name.
   const names = document.createElement('div');
@@ -435,8 +461,14 @@ export function createOrbitStage(canvas) {
 
     // The Earth turning once in 6 s (a day), anticlockwise from above.
     earth.rotation.y = -(2 * Math.PI * T) / 6;
+    // While the Moon's shape is not watched, the Sun stands behind the eye's shoulder, so the
+    // Earth's day side faces the eye wherever the camera goes; while it is, the Sun stays put.
+    const shapeSun = smooth(ORBITS.phases[0] - 4, ORBITS.phases[0], T);
+    const fromEye = camera.position.subtract(near.position).normalize();
+    const eyeSun = Vector3.TransformNormal(fromEye, Matrix.RotationY(0.7)).add(new Vector3(0, 0.25, 0)).normalize();
+    const nearSun = Vector3.Lerp(eyeSun, LOCAL_SUN, shapeSun).normalize();
     for (const m of [earthMat, moonMat, ghostMat]) {
-      m.setVector3('sunAt', LOCAL_SUN);
+      m.setVector3('sunAt', nearSun);
       m.setFloat('sunPoint', 0);
       m.setFloat('fade', nearFade);
     }
@@ -516,6 +548,15 @@ export function createOrbitStage(canvas) {
     const gTurn = 0.6 * smooth(ORBITS.galaxy[0] + 12, ORBITS.end, T);
     const sunR = Math.abs(GAL_AT.x);
     helio.position.set(GAL_AT.x + sunR * Math.cos(gTurn), 0, sunR * Math.sin(gTurn));
+    const wayOn = smooth(ORBITS.galaxy[0] + 8, ORBITS.galaxy[0] + 14, T);
+    galRing.setEnabled(wayOn > 0.001);
+    galRing.alpha = wayOn;
+    galRing.color.set(0.35 * wayOn, 0.3 * wayOn, 0.2 * wayOn);
+    galTrail.setEnabled(wayOn > 0.001);
+    if (wayOn > 0.001) {
+      galTrail = CreateLineSystem('orbitGalTrail', { lines: [galTrailAt(gTurn)], instance: galTrail }, scene);
+      galTrail.alpha = 0.9 * wayOn;
+    }
     // Going on with the Sun: it moves along WAY, the planets round it, so each draws a helix
     // behind it (the user, 2026-11-24, of a picture of such helices: "태양이 우리를 데리고,
     // 은하를 공전하는 것도 그려"). WAY stands 60 degrees from the planets' plane (30 from

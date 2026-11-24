@@ -119,10 +119,23 @@ const TOUR = {
     end: FIRST.en.end,
     'end-orbits': { ...FIRST.en.end, lead: 'Tonight, too, we race\nthrough the galaxy\nat 230 km a second', note: '' },
   },
+  ja: {
+    'orbits-1-1': '地球は一日に一回、\n自分で回ります',
+    'orbits-1-2': '地軸がいつも同じ向きを指すから\n夏と冬が来ます',
+    'orbits-1-3': '水星は88日、\n海王星は165年で一周',
+    'orbits-1-4': '太陽も止まってはいません。\n惑星たちはらせんを描いて\nついていきます',
+    'orbits-1-5': '近くの星々も一緒に駆けています。\nいちばん近い星、\nアルファ・ケンタウリ',
+    'orbits-1-6': '銀河の真ん中には\nブラックホール、いて座A*。\n数千億の星がこの中心を回ります',
+    'end-orbits': { title: 'おばあちゃんの手帳', note: '', find: 'Google Play で探してみてください', store: 'Space Oddity: おばあちゃんの手帳', lead: '今夜も私たちは\n秒速230kmで\n銀河を駆けています' },
+  },
 };
 const LINES = { thatday: THAT_DAY, gaze: GAZE, tour: TOUR }[process.env.FILM] ?? FIRST;
 
-const page = (body) => `<!doctype html><html><head><meta charset="utf-8">
+// (Gaegu and Pretendard have no kana or kanji: Japanese in a Japanese face of Windows.)
+const CJK = {
+  ja: ".line, .end .lead, .end .title, .end .note { font-family: 'BIZ UDPGothic', 'Yu Gothic', 'Meiryo', sans-serif !important; font-weight: 700 !important; }\n.end .find, .end .find b { font-family: 'BIZ UDPGothic', 'Yu Gothic', 'Meiryo', sans-serif !important; }\n.end .title { font-size: 38px !important; }",
+};
+const page = (body, lang) => `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="${DEV}fonts/pretendard/pretendardvariable-dynamic-subset.css">
 <link rel="stylesheet" href="${DEV}fonts/gaegu/400.css">
 <style>
@@ -143,6 +156,7 @@ html, body { margin: 0; width: 405px; height: 720px; background: transparent; ov
 .end .note { font: 400 27px/1.2 Gaegu, cursive; color: #fdf8ec; margin-top: 22px; word-break: keep-all; }
 .end .find { font: 500 13px/1.5 Pretendard Variable, Pretendard, sans-serif; color: #c9d3f2; margin-top: 30px; padding: 9px 16px; border: 1px solid rgba(242, 196, 107, 0.55); border-radius: 999px; word-break: keep-all; max-width: 250px; }
 .end .find b { display: block; font-weight: 800; font-size: 15px; color: #fdf8ec; white-space: nowrap; margin-top: 2px; }
+${CJK[lang] ?? ''}
 </style></head><body>${body}</body></html>`;
 
 (async () => {
@@ -158,7 +172,7 @@ html, body { margin: 0; width: 405px; height: 720px; background: transparent; ov
     const body = key.startsWith('end')
       ? `<div class="end">${line.lead ? `<div class="lead">${line.lead.replace(/\n/g, '<br>')}</div>` : ''}<img src="${DEV}assets/seora-sprites/cheer-big-1.webp"><div class="name">Space Oddity</div><div class="title">${line.title}</div>${line.note ? `<div class="note">${line.note.replace(/\n/g, '<br>')}</div>` : ''}<div class="find">${line.find}<b>${line.store}</b></div></div>`
       : `<div class="band"><div class="kick">SPACE ODDITY</div><div class="line">${line.replace(/\n/g, '<br>')}</div></div>`;
-    await p.setContent(page(body), { waitUntil: 'networkidle' });
+    await p.setContent(page(body, lang), { waitUntil: 'networkidle' });
     await p.evaluate(() => document.fonts.ready);
     // (The orbit Short's lines are broken by hand: each part kept whole on its line, the
     // letters made smaller till the longest fits.)

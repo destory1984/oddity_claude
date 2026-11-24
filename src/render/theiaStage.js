@@ -11,13 +11,14 @@ import { Engine, Scene, FreeCamera, Vector3, Vector4, Color3, Color4, CreateSphe
 
 // The course's seconds (core/courses.js keeps its captions to these).
 export const THEIA = {
-  approach: [0, 38], // Theia drawing near
-  impact: 38, // the first touch
-  arms: [40, 78], // the mantle flung out in a long arm, wrapping round
-  disc: [78, 118], // a glowing disc round a molten Earth
-  moon: [112, 152], // the Moon gathering out of it beyond 3 radii
-  recede: [152, 206], // the hundreds of millions of years after, in seconds: the Moon drawing off, the Earth cooling
-  end: 214,
+  // (Theia's coming 12 s longer, for a caption on where it came from: the user, 2026-11-25.)
+  approach: [0, 50], // Theia drawing near
+  impact: 50, // the first touch
+  arms: [52, 90], // the mantle flung out in a long arm, wrapping round
+  disc: [90, 130], // a glowing disc round a molten Earth
+  moon: [124, 164], // the Moon gathering out of it beyond 3 radii
+  recede: [164, 218], // the hundreds of millions of years after, in seconds: the Moon drawing off, the Earth cooling
+  end: 226,
 };
 
 // (From the side the blow is watched from, so the struck ground and Theia are lit.)
@@ -478,8 +479,8 @@ export function createTheiaStage(canvas) {
       { t: 0, at: touchAt.subtract(way.scale(17)).add(new Vector3(0, 1.2, 0)), look: touchAt, fov: 0.75 },
       // (The blow seen from above its side, so Theia's way missing the Earth's middle shows,
       // and the hollow and Theia pressed flat.)
-      { t: 28, at: null, look: null, fov: 0.75 },
-      { t: 34, at: polar(hitAngle - 0.75, 3.6, 4.6), look: polar(hitAngle - 0.15, 1.4, 0), fov: 0.75 },
+      { t: THEIA.impact - 10, at: null, look: null, fov: 0.75 },
+      { t: THEIA.impact - 4, at: polar(hitAngle - 0.75, 3.6, 4.6), look: polar(hitAngle - 0.15, 1.4, 0), fov: 0.75 },
       { t: THEIA.impact + 2, at: polar(hitAngle - 0.5, 3.2, 4.0), look: hitDir.scale(1.1), fov: 0.75 },
       { t: THEIA.arms[0] + 14, at: new Vector3(-3, 9, 3.5), look: new Vector3(0, 0, 0.3), fov: 0.85 },
       { t: THEIA.arms[1], at: new Vector3(2, 11, 7), look: new Vector3(0, 0, 0), fov: 0.85 },
@@ -494,7 +495,7 @@ export function createTheiaStage(canvas) {
     // Then, over the last seconds, up over the blow (the next key).
     const chase = (p) => ({ at: p.subtract(way.scale(4)).add(new Vector3(0, 0.7, 0)), look: Vector3.Lerp(p, touchAt, 0.3) });
     Object.assign(keys[0], chase(tp));
-    Object.assign(keys[1], chase(theiaAt(Math.min(T, 28))));
+    Object.assign(keys[1], chase(theiaAt(Math.min(T, THEIA.impact - 10))));
     // Beside the Moon as it gathers: outside its way and above, the Earth beyond it.
     const out = moonAt.clone().normalize();
     const along = Vector3.Cross(Vector3.Up(), out);

@@ -2422,7 +2422,7 @@ ${STORY_MORE[target.id]}` : told) };
       document.body.insertAdjacentHTML('beforeend', '<div id="theiaTitle" aria-hidden="true" style="position:fixed;left:0;right:0;top:22%;z-index:7;pointer-events:none;text-align:center;color:#f6eee6;text-shadow:0 2px 14px rgba(0,0,0,0.75),0 0 2px rgba(0,0,0,0.6)" hidden><div style="font-size:clamp(34px,10vw,54px);font-weight:700;letter-spacing:0.12em"></div><div style="margin-top:8px;font-size:clamp(14px,3.8vw,18px);letter-spacing:0.08em;opacity:0.9"></div></div>');
       title = document.getElementById('theiaTitle');
       title.children[0].textContent = t`달의 탄생`;
-      title.children[1].textContent = t`46억 년 전, 테이아 충돌`;
+      title.children[1].textContent = t`45억 년 전, 테이아 충돌`;
     }
     const ease = (x) => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k); };
     const shown = on ? ease((now - 0.5) / 2) * (1 - ease((now - 8) / 2)) : 0;

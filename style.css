@@ -8275,7 +8275,7 @@ dialog > .backBar {
 }
 
 /* The day's request: "오늘은 그만 보기" beside its "확인", the two halves of the row, the
-   quieter one first; and the day's tip under the note, a gold mark on glass. */
+   "확인" first (the user, 2026-11-25: "서로 바꿔"); and the day's tip, a gold mark on glass. */
 #noteCard .journalActions:has(#skipNoteToday:not([hidden])) {
   gap:10px;
 }

@@ -20,9 +20,9 @@ export const ORBITS = {
   year: [196, 250], // the Earth round the Sun, its axis keeping its way: the seasons
   planets: [250, 300], // all the planets, the further the slower
   sun: [300, 312], // the Sun turning
-  helix: [312, 352], // the Sun going on, the planets with it: helices
-  galaxy: [352, 422], // the Sun going round the galaxy
-  end: 422,
+  helix: [312, 362], // the Sun going on, the planets with it: helices (the last 12 s true to scale)
+  galaxy: [362, 432], // the Sun going round the galaxy
+  end: 432,
 };
 
 const TILT = (23.4 * Math.PI) / 180;
@@ -363,6 +363,22 @@ export function createOrbitStage(canvas) {
   // Drawn so that the Earth's helix shows: 30 a year; truly the Sun goes 48 times the
   // Earth's distance from it in a year, 864 here (said in a caption).
   const HELIX_PACE = 30 / YEAR;
+  // Then true to scale (the user, 2026-11-24: "실제 비율 물결도 넣어"): the Sun at its own
+  // pace, the helices drawn out into shallow waves. The clock runs 4 times faster there,
+  // so that a few years' waves are drawn in its 12 s.
+  const TRUE_PACE = 864 / YEAR;
+  const TRUE0 = ORBITS.helix[1] - 12;
+  const WARP = 4;
+  // The integral of a smoothstep from a over w, at x.
+  const rampInt = (x, a, w) => {
+    if (x <= a) return 0;
+    if (x >= a + w) return w / 2 + (x - a - w);
+    const k = (x - a) / w;
+    return w * (k * k * k - (k * k * k * k) / 2);
+  };
+  // The clock the helices are drawn by, and how far the Sun has gone by it.
+  const tauOf = (T) => T + (WARP - 1) * rampInt(T, TRUE0, 2);
+  const sunGone = (tau) => HELIX_PACE * (tau - ORBITS.helix[0]) + (TRUE_PACE - HELIX_PACE) * rampInt(tau, TRUE0, 4);
   const trails = [null, ...planets.filter((p) => ['mercury', 'venus', 'earth', 'mars', 'jupiter'].includes(p.id))].map((p) => {
     const name = `orbitTrail-${p ? p.id : 'sun'}`;
     // (Made with as many points as it is redrawn with: an update keeps the count.)
@@ -640,7 +656,7 @@ export function createOrbitStage(canvas) {
     // Round the Sun.
     const ySince = T - ORBITS.year[0];
     for (const p of planets) {
-      p.tilt.position.copyFrom(localAt(p, T));
+      p.tilt.position.copyFrom(localAt(p, tauOf(T)));
       p.mesh.rotation.y = -ySince * 1.5;
       p.mesh.material.setVector3('sunAt', helio.position);
       p.mesh.material.setFloat('sunPoint', 1);
@@ -715,16 +731,17 @@ export function createOrbitStage(canvas) {
     // 은하를 공전하는 것도 그려"). WAY stands 60 degrees from the planets' plane (30 from
     // its pole), as the Sun's way round the galaxy does from the plane the planets go round in.
     const hOn = inPart(ORBITS.helix, T);
-    if (hOn) helio.position.copyFrom(WAY.scale(HELIX_PACE * (T - ORBITS.helix[0])));
+    const tau = tauOf(T);
+    if (hOn) helio.position.copyFrom(WAY.scale(sunGone(tau)));
     for (const tr of trails) {
       const show = hOn && T > ORBITS.helix[0] + 1;
       tr.line.setEnabled(show);
       if (!show) continue;
-      const from = Math.max(ORBITS.helix[0], T - 36);
+      const from = Math.max(ORBITS.helix[0], tau - 44);
       const pts = [];
       for (let i = 0; i <= 240; i++) {
-        const t = from + ((T - from) * i) / 240;
-        pts.push(WAY.scale(HELIX_PACE * (t - ORBITS.helix[0])).add(tr.p ? localAt(tr.p, t) : Vector3.Zero()));
+        const t = from + ((tau - from) * i) / 240;
+        pts.push(WAY.scale(sunGone(t)).add(tr.p ? localAt(tr.p, t) : Vector3.Zero()));
       }
       tr.line = CreateLineSystem(tr.name, { lines: [pts], instance: tr.line }, scene);
       tr.line.alpha = Math.min(1, (T - ORBITS.helix[0] - 1) / 3) * (1 - smooth(ORBITS.helix[1] - 3, ORBITS.helix[1], T));
@@ -779,7 +796,10 @@ export function createOrbitStage(canvas) {
       { t: ORBITS.sun[1] - 2, at: helioAt(1.5, 3, -11), look: helioAt(0, 0, 0), fov: 0.7 },
       // Beside the Sun's way, its trail and the planets' helices running down behind it.
       { t: ORBITS.helix[0] + 8, at: helioAt(10, -30, -95), look: helioAt(0, -30, 0), fov: 0.8 },
-      { t: ORBITS.helix[1], at: helioAt(10, -30, -95), look: helioAt(0, -30, 0), fov: 0.8 },
+      { t: TRUE0, at: helioAt(10, -30, -95), look: helioAt(0, -30, 0), fov: 0.8 },
+      // True to scale: far off to the side, the way running up the screen, the waves behind.
+      { t: TRUE0 + 4, at: helioAt(-130, -225, -780), look: helioAt(-130, -225, 0), fov: 0.8 },
+      { t: ORBITS.helix[1], at: helioAt(-130, -225, -780), look: helioAt(-130, -225, 0), fov: 0.8 },
       // Close behind the Sun on its way, the stars near it going by; the galaxy a band of light.
       { t: ORBITS.galaxy[0] + 0.1, at: helioAt(7, 5, 36), look: helioAt(-1, 0, -30), fov: 0.85 },
       { t: ORBITS.galaxy[0] + 18, at: helioAt(5, 5, 30), look: helioAt(-1, 0, -30), fov: 0.85 },

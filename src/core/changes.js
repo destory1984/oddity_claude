@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-24', text: t('태양계는 어떻게 도는가에서 행성들의 나선을 실제 비율로 펴서도 보여 줍니다.') },
   { day: '2026-11-24', text: t('태양계는 어떻게 도는가의 은하 장면이 길어져, 해가 은하를 한 바퀴 도는 2억 3천만 년을 봅니다.') },
   { day: '2026-11-24', text: t('태양계는 어떻게 도는가에서 지구와 행성들이 더 밝게 보이고, 해가 은하를 도는 길이 그려집니다.') },
   { day: '2026-11-24', text: t('추천 우주멍 코스 태양계는 어떻게 도는가가 생겼습니다. 자전부터 은하까지 봅니다.') },

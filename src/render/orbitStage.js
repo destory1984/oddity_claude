@@ -125,7 +125,9 @@ float n2(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
 void main() {
   vec3 n = normalize(vN);
   float limb = max(dot(n, normalize(eye - vW)), 0.0);
-  vec2 uv = vec2(vUV.x + spin, vUV.y);
+  // (The face slid eastward, anticlockwise from the north: with the map now the right way
+  // round, that is less u, not more; the user, 2026-11-25: "태양은 시계 방향으로 돈다".)
+  vec2 uv = vec2(vUV.x - spin, vUV.y);
   float g = n2(uv * vec2(90.0, 45.0)) * 0.5 + n2(uv * vec2(30.0, 15.0)) * 0.5;
   float spots = 0.0;
   for (int i = 0; i < 4; i++) {

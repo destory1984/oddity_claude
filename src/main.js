@@ -2168,11 +2168,18 @@ ${STORY_MORE[target.id]}` : told) };
     try { seen = JSON.parse(localStorage.getItem(TIPS_SEEN_KEY) ?? '[]'); } catch { seen = []; }
     const since = Date.parse(`${today}T00:00:00`) - 30 * 86400000;
     // (Counted from the oldest, so a change keeps its number as new ones come on top.)
+    // (Only something new to see or do, `go` on its line: not a fault mended.)
     const fresh = CHANGES.map((c, i) => ({ ...c, id: `${c.day}#${CHANGES.length - 1 - i}` }))
-      .find((c) => Date.parse(`${c.day}T00:00:00`) >= since && !seen.includes(c.id));
+      .find((c) => c.go && Date.parse(`${c.day}T00:00:00`) >= since && !seen.includes(c.id));
     if (!fresh) return null;
     try { localStorage.setItem(TIPS_SEEN_KEY, JSON.stringify([...seen, fresh.id].slice(-200))); } catch { /* shown again next time */ }
-    return fresh.text;
+    return fresh;
+  };
+  // Its key: the course flown from the second the tip tells of, or the settings opened.
+  const tipGo = (go) => {
+    if (go?.course && courseById(go.course)) return () => flyCourse(go.course, go.at);
+    if (go?.settings) return () => $('settingsButton').click();
+    return null;
   };
   let noteDueId = null;
   // A note read again from the journal: folding it brings the journal back (the user,
@@ -3770,7 +3777,8 @@ ${STORY_MORE[target.id]}` : told) };
     cabinWordsPlace(frame, px, py);
   }
 
-  function flyCourse(id) {
+  // (fromS: from that second of a rail's course, for a tip of one of its scenes.)
+  function flyCourse(id, fromS = null) {
     const chosen = courseById(id);
     if (!chosen || warp.busy()) return;
     if (locked) unlock('jump');
@@ -3890,7 +3898,7 @@ ${STORY_MORE[target.id]}` : told) };
         lockAim = aimNow();
       }
       course = id;
-      courseTime = chosen.rail?.startS ?? 0;
+      courseTime = chosen.rail && typeof fromS === 'number' ? fromS : chosen.rail?.startS ?? 0;
       showLockKey();
       // Only the view on the screen, Sora gone too, behind the flash (the user, 2026-11-02:
       // "추천코스에서는 소라도 없앤 우주멍으로해줘"); the moon brings all back and the course goes on.
@@ -5470,12 +5478,14 @@ ${STORY_MORE[target.id]}` : told) };
     // steps to the Moon (once she stands there and its note is read, it may).
     if (dailyDue && settled && noteWait === 0 && !note && (guide.step === null || guide.step === 'photo') && (progress.notes ?? []).length > 0) {
       dailyDue = false;
+      const tip = tipToday();
       noteCard.show({
         scene: t('수첩 사이에 오늘 날짜가 적힌 쪽지가 끼워져 있다.'),
         title: t('할머니의 부탁'),
         text: t`${request.text}\n\n수첩을 열면 다시 볼 수 있단다.`,
         button: t('확인'),
-        tip: tipToday(),
+        tip: tip?.text ?? null,
+        onTipGo: tipGo(tip?.go),
         onSkip: () => {
           try { localStorage.setItem(DAILY_HIDDEN_KEY, today); } catch { /* not kept: it comes again next time */ }
         },

@@ -45,11 +45,19 @@ export function createNoteCard({ onOpen, onClose }) {
   // 보기' 버튼을 옆에 두자", "가장 최근에 만들어진 기능을 today's tip 같은 메뉴로 넣자", "가").
   $('skipNoteToday').textContent = t('오늘은 그만 보기');
   $('noteCardTipLabel').textContent = t('오늘의 팁');
+  $('noteCardTipGo').textContent = t('가 보기');
   const extras = (note) => {
     $('skipNoteToday').hidden = !note?.onSkip;
     $('noteCardTip').hidden = !note?.tip;
     $('noteCardTipText').textContent = note?.tip ?? '';
+    $('noteCardTipGo').hidden = !note?.onTipGo;
   };
+  // (To what the tip tells of: the note shut first, then the going.)
+  $('noteCardTipGo').addEventListener('click', () => {
+    const go = shown?.note.onTipGo;
+    dialog.close();
+    go?.();
+  });
   $('skipNoteToday').addEventListener('click', () => {
     shown?.note.onSkip?.();
     dialog.close();
@@ -77,6 +85,8 @@ export function createNoteCard({ onOpen, onClose }) {
       shown = { note, first };
       $('noteCardTitle').textContent = note.title;
       extras(first ? note : null);
+      // (No way back on a note that came by itself: there is nothing to go back to.)
+      dialog.classList.toggle('byItself', first);
       if (pagesOf()) turnTo(0);
       else {
         $('noteCardScene').textContent = first ? note.scene ?? '' : '';

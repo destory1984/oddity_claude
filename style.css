@@ -8313,3 +8313,27 @@ dialog > .backBar {
   color:var(--gold);
   font-weight:700;
 }
+
+/* The tip's key to what it tells of, at the end of its line; and no way back on a note that
+   came by itself (the user, 2026-11-25, of the key at its corner: "첫 화면에는 돌아가기 버튼은
+   없애"): read again from the journal, it keeps it. */
+#noteCardTipGo {
+  display:inline-block;
+  width:auto;
+  min-height:0;
+  margin:6px 0 0;
+  padding:5px 12px;
+  border:1px solid var(--gold);
+  border-radius:999px;
+  background:transparent;
+  color:var(--gold);
+  font-size:13px;
+  font-weight:600;
+  line-height:1.2;
+}
+#noteCardTipGo[hidden] {
+  display:none;
+}
+#noteCard.byItself > .backBar {
+  display:none;
+}

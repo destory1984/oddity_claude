@@ -18,6 +18,8 @@
 //     point she looks at stands, in the curtain (100 to 1,500 km up); highKm: how high she
 //     flies; rangeKm: how far off she goes round it, through the curtain twice a lap;
 //     startS: how far into a lap it starts, where the curtains stand thickest.
+//   rail.oval: along the aurora's ring instead (ovalAt below): the course Drifting Over
+//     the Aurora since 2026-11-25; the round above is no longer flown.
 //   rail.orbit: a low round of the whole body, through midnight, dawn, noon and dusk,
 //     looking ahead along the way at lookDeg under the level, so the horizon stands low in
 //     the view and the Sun comes up over it (an orbital sunrise; the user, 2026-11-18:
@@ -31,7 +33,7 @@ import { outOf, sunFrame } from './startSpots.js';
 import { t } from './i18n.js';
 
 export const COURSES = [
-  { id: 'auroraDrift', body: 'earth', lapS: 240, rail: { oval: { latDeg: 65.8, ringDeg: 67, highKm: 420, atKm: 200, aheadDeg: 35, fromDeg: -45, toDeg: 45 }, loops: true, startS: 0, fades: [239.2] }, name: t('오로라 유영'), todo: t('밤쪽 오로라 한 곳을 가까이에서 맴돌며 빛의 커튼 사이를 지나갑니다.') },
+  { id: 'auroraDrift', body: 'earth', lapS: 240, rail: { oval: { latDeg: 65.8, ringDeg: 67, highKm: 420, atKm: 200, aheadDeg: 35, fromDeg: -45, toDeg: 45 }, loops: true, startS: 0, fades: [239.2] }, name: t('오로라 유영'), todo: t('북극을 두른 오로라 고리를 따라 밤하늘을 날며, 강물처럼 길게 이어진 빛의 커튼을 봅니다.') },
   // At the height of the round the user flew; its plane leans to the line of day and night,
   // for the Sun in view puts out the rest (the user, 2026-11-02: "태양이 안 보였으면 좋겠어").
   { id: 'earthRound', body: 'earth', lapS: 120, radii: 4.31, name: t('지구 한 바퀴'), todo: t('두 분 동안 지구를 한 바퀴 비행합니다. 낮과 밤, 오로라가 차례로 지나갑니다.'),

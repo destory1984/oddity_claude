@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-25', text: t('오로라 유영이 북극을 두른 오로라 고리를 따라 날며, 길게 이어진 커튼을 보게 바뀌었습니다.') },
   { day: '2026-11-25', text: t('달의 탄생, 테이아 충돌에 테이아가 어디서 왔는지 이야기가 생겼습니다.') },
   { day: '2026-11-25', text: t('비행 연습에서 멈춘 뒤에도 엔진 소리가 계속 나던 것을 고쳤습니다.') },
   { day: '2026-11-25', text: t('태양계는 어떻게 도는가의 끝에 은하 한가운데의 블랙홀 궁수자리 A*를 찾아갑니다.') },

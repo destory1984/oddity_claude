@@ -43,16 +43,26 @@ test('every round starts clear of the ground, going square to the body at the sp
   }
 });
 
-test('the aurora rail goes round a point of the curtain, keeping off it and above the ground', () => {
+test('the aurora rail runs along the ring on the night side, ahead along it and above the ground', () => {
   const c = courseById('auroraDrift');
+  const o = c.rail.oval;
   const b = at('earth');
   const point = (seconds) => railAt(c, b, sun, seconds);
-  const out = (p) => p.position.map((n, i) => n - b.position[i]);
-  const zero = point(0);
-  const half = point(c.lapS / 2);
-  assert.ok(Math.hypot(...zero.position.map((n, i) => n - half.position[i])) > 2 * c.rail.rangeKm * 0.99);
-  assert.ok(Math.hypot(...zero.position.map((n, i) => n - point(c.lapS).position[i])) < 1);
-  for (const s of [0, 30, 60, 90]) assert.ok(Math.hypot(...out(point(s))) > b.radiusKm + 300);
+  const out = (p) => unit(p.position.map((n, i) => n - b.position[i]));
+  const night = unit([b.position[0] - sun.position[0], 0, b.position[2] - sun.position[2]]);
+  for (const s of [0, 60, 120, 180, 239]) {
+    const p = point(s);
+    const o2 = p.position.map((n, i) => n - b.position[i]);
+    // At its height, at its latitude, on the night side.
+    assert.ok(Math.abs(Math.hypot(...o2) - (b.radiusKm + o.highKm)) < 1, `${s}`);
+    assert.ok(Math.abs(Math.asin(out(p)[1]) * 180 / Math.PI - o.latDeg) < 0.01, `${s}`);
+    assert.ok(dot(unit([o2[0], 0, o2[2]]), night) > Math.cos((Math.max(Math.abs(o.fromDeg), Math.abs(o.toDeg)) + 0.1) * Math.PI / 180), `${s}`);
+    // Looking ahead the way it goes, not back.
+    const going = point(s + 0.5).position.map((n, i) => n - p.position[i]);
+    assert.ok(dot(forward(p.orientation), unit(going)) > 0.3, `${s}`);
+  }
+  // Round again from the start once a lap is done.
+  assert.ok(Math.hypot(...point(0).position.map((n, i) => n - point(c.lapS).position[i])) < 1);
 });
 
 test('she looks at the body from the start', () => {

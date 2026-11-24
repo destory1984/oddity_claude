@@ -3,8 +3,9 @@
 // 공전... 작은 것부터 설명해봐", "만들어"): a little world of its own on a canvas over the
 // game's, as the Moon's birth is. Not to scale: at true sizes and distances the Moon and
 // the planets would not show at all, so sizes and distances are shrunk and the paces sped
-// up (the captions say so); the ways things turn are kept: every orbit and spin goes the
-// same way (anticlockwise seen from the north), the Earth's axis leans 23.4 degrees and
+// up (the captions say so); the ways things turn are kept: every orbit goes the same way
+// (anticlockwise seen from the north), and every spin but Venus's (backwards) and
+// Uranus's (on its side, 98 degrees); the Earth's axis leans 23.4 degrees and
 // keeps pointing the same way round the Sun, the Moon keeps one face to the Earth, and
 // the planets go slower the further out they are (Kepler: the period as the distance to
 // the power 1.5).
@@ -323,9 +324,12 @@ export function createOrbitStage(canvas) {
   ghost.material = ghostMat;
   ghost.parent = near;
   ghost.scaling.setAll(1.8);
-  const moonRing = ring('orbitMoonRing', MOON_ORBIT, [0.7, 0.7, 0.75]);
+  // The Moon's round leans 5 degrees from the Earth's (as a caption says).
+  const MOON_TILT = (5.1 * Math.PI) / 180;
+  const moonUp = new Vector3(0, Math.cos(MOON_TILT), -Math.sin(MOON_TILT));
+  const moonRing = ring('orbitMoonRing', MOON_ORBIT, [0.7, 0.7, 0.75], moonUp);
   moonRing.parent = near;
-  const ghostRing = ring('orbitGhostRing', MOON_ORBIT * 1.35, [0.55, 0.45, 0.45]);
+  const ghostRing = ring('orbitGhostRing', MOON_ORBIT * 1.35, [0.55, 0.45, 0.45], moonUp);
   ghostRing.parent = near;
 
   // --- Round the Sun ----------------------------------------------------------------
@@ -343,6 +347,7 @@ export function createOrbitStage(canvas) {
     const tilt = new TransformNode(`orbit-${id}-tilt`, scene);
     tilt.parent = helio;
     if (id === 'earth') tilt.rotation.z = -TILT;
+    if (id === 'uranus') tilt.rotation.z = (-98 * Math.PI) / 180;
     const mesh = CreateSphere(`orbit-${id}`, { diameter: size * 2, segments: 40 }, scene);
     mesh.material = bodyMat(`orbit-${id}-mat`, src, id === 'uranus' ? [0.62, 0.85, 0.9] : [0.5, 0.5, 0.5]);
     mesh.parent = tilt;
@@ -839,7 +844,7 @@ export function createOrbitStage(canvas) {
     moonRing.setEnabled(showMoon && !inPart([ORBITS.phases[0] + 3, ORBITS.phases[1]], T));
     moonRing.alpha = 0.6 * smooth(ORBITS.moon[0], ORBITS.moon[0] + 4, T) * nearFade;
     const ma = moonAngle(T - ORBITS.moon[0]);
-    moon.position.set(Math.cos(ma) * MOON_ORBIT, 0, Math.sin(ma) * MOON_ORBIT);
+    moon.position.set(Math.cos(ma) * MOON_ORBIT, Math.sin(ma) * MOON_ORBIT * Math.sin(MOON_TILT), Math.sin(ma) * MOON_ORBIT * Math.cos(MOON_TILT));
     // It turns once a month: one face (u = 0.5 under Babylon's sphere map) to the Earth.
     moon.rotation.y = -ma + Math.PI / 2;
     const face = moon.position.scale(-1).normalize();
@@ -858,7 +863,7 @@ export function createOrbitStage(canvas) {
     ghost.setEnabled(ghostOn > 0.001);
     ghostRing.setEnabled(ghostOn > 0.001);
     ghostRing.alpha = 0.5 * ghostOn;
-    ghost.position.set(Math.cos(ma) * MOON_ORBIT * 1.35, 0, Math.sin(ma) * MOON_ORBIT * 1.35);
+    ghost.position.set(Math.cos(ma) * MOON_ORBIT * 1.35, Math.sin(ma) * MOON_ORBIT * 1.35 * Math.sin(MOON_TILT), Math.sin(ma) * MOON_ORBIT * 1.35 * Math.cos(MOON_TILT));
     ghostMat.setFloat('mark', ghostOn);
     // Its spot keeps pointing the one way (toward where the Earth was at the start).
     ghostMat.setVector3('markAt', ghost.position.add(new Vector3(-1, 0, 0).scale(MOON_R * 1.8)));
@@ -868,7 +873,8 @@ export function createOrbitStage(canvas) {
     const ySince = T - ORBITS.year[0];
     for (const p of planets) {
       p.tilt.position.copyFrom(localAt(p, tauOf(T)));
-      p.mesh.rotation.y = -ySince * 1.5;
+      // (Venus turns backwards.)
+      p.mesh.rotation.y = (p.id === 'venus' ? 0.25 : -1.5) * ySince;
       p.mesh.material.setVector3('sunAt', helio.position);
       p.mesh.material.setFloat('sunPoint', 1);
       const others = p.id === 'earth' ? 1 : smooth(ORBITS.planets[0], ORBITS.planets[0] + 4, T);

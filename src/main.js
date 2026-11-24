@@ -13,6 +13,7 @@ import { CURIOS, curiosAt, hiddenCurios, carryingCurio, curiosNear, curioHead, s
 import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
 import { createStarshipStage } from './render/starshipStage.js';
+import { createTheiaStage } from './render/theiaStage.js';
 import { createVanish, cutOut, pictureOf } from './ui/vanish.js';
 import { realCloudMap } from './render/realClouds.js';
 import { createInput } from './ui/input.js';
@@ -2395,6 +2396,49 @@ ${STORY_MORE[target.id]}` : told) };
     void base;
   }
   function starshipResize() { starshipStage?.resize(); }
+  // The Moon's birth (rail.theia): all of it drawn by a little world of its own on a canvas
+  // over the game's (render/theiaStage.js), with a film's title at the start.
+  let theiaStage = null;
+  function theiaStep(chosen) {
+    const now = courseTime;
+    const on = chosen.rail.stage.some(([a, b]) => now >= a && now < b);
+    let canvas = document.getElementById('theiaStage');
+    if (on) {
+      if (!canvas) {
+        document.body.insertAdjacentHTML('beforeend', '<canvas id="theiaStage" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;z-index:6;pointer-events:none;background:#000"></canvas>');
+        canvas = document.getElementById('theiaStage');
+      }
+      if (!theiaStage) {
+        theiaStage = createTheiaStage(canvas);
+        addEventListener('resize', theiaResize);
+      }
+      canvas.hidden = false;
+      theiaStage.update(now);
+    } else if (canvas) canvas.hidden = true;
+    let title = document.getElementById('theiaTitle');
+    if (!title) {
+      document.body.insertAdjacentHTML('beforeend', '<div id="theiaTitle" aria-hidden="true" style="position:fixed;left:0;right:0;top:22%;z-index:7;pointer-events:none;text-align:center;color:#f6eee6;text-shadow:0 2px 14px rgba(0,0,0,0.75),0 0 2px rgba(0,0,0,0.6)" hidden><div style="font-size:clamp(34px,10vw,54px);font-weight:700;letter-spacing:0.12em"></div><div style="margin-top:8px;font-size:clamp(14px,3.8vw,18px);letter-spacing:0.08em;opacity:0.9"></div></div>');
+      title = document.getElementById('theiaTitle');
+      title.children[0].textContent = t`달의 탄생`;
+      title.children[1].textContent = t`46억 년 전, 테이아 충돌`;
+    }
+    const ease = (x) => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k); };
+    const shown = on ? ease((now - 0.5) / 2) * (1 - ease((now - 8) / 2)) : 0;
+    title.hidden = shown <= 0.001;
+    title.style.opacity = String(shown);
+    title.style.transform = `translateY(${(1 - shown) * 8}px)`;
+  }
+  function theiaResize() { theiaStage?.resize(); }
+  function theiaOff() {
+    const canvas = document.getElementById('theiaStage');
+    if (theiaStage) {
+      theiaStage.dispose();
+      theiaStage = null;
+      removeEventListener('resize', theiaResize);
+    }
+    canvas?.remove();
+    document.getElementById('theiaTitle')?.remove();
+  }
   function starshipOff() {
     world.setFloatModel('starshipShip', null);
     const canvas = document.getElementById('starshipStage');
@@ -4881,6 +4925,7 @@ ${STORY_MORE[target.id]}` : told) };
         apolloDock(chosen, state);
         apolloLanding(chosen, state);
         if (chosen.rail.starship) starshipStep(chosen, state);
+        if (chosen.rail.theia) theiaStep(chosen);
         if (chosen.rail.cabin) state = { ...state, orientation: cupolaFloat(state) };
         if (chosen.rail.mmu) mmuFlyStep(chosen, dt, jetKey);
         // Sounds at their moments (rail.sounds: [seconds, cue]).
@@ -4929,6 +4974,7 @@ ${STORY_MORE[target.id]}` : told) };
       world.setCraftModel('hubble', { kind: shuttleRail.craftModel, doors: x * x * (3 - 2 * x), arm: shuttleRail.armPose ?? {}, ...facing });
     } else world.setCraftModel('hubble', null);
     if ((!course || !courseById(course)?.rail?.starship) && starshipStage) starshipOff();
+    if ((!course || !courseById(course)?.rail?.theia) && theiaStage) theiaOff();
     if (!course || !courseById(course)?.rail?.dock) {
       world.setFloatModel('columbia', null);
       landingNow = { dust: 0, shadow: null };

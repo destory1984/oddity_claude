@@ -449,6 +449,20 @@ export function createSound({ music } = {}) {
   }
 
   const CUES = {
+    // The Moon's birth (core/courses.js theia; the user, 2026-11-24, of four things to mend:
+    // "1~4 다 고쳐", the fourth no sound): the blow, a crack and a long deep boom dying into a
+    // rumble over nine seconds; and as the Moon gathers, a low chord swelling in and away.
+    // (Space carries no sound: these are the film's, kept low.)
+    theiaHit: () => {
+      noise({ length: 0.3, volume: 0.13, type: 'bandpass', freq: 700, to: 200, attack: 0.005 });
+      noise({ length: 7, volume: 0.33, type: 'lowpass', freq: 220, to: 50, attack: 0.04 });
+      tone({ freq: 58, to: 26, length: 6.5, volume: 0.24, attack: 0.03, hold: 0.8 });
+      noise({ start: 0.8, length: 9, volume: 0.17, type: 'lowpass', freq: 110, to: 45, attack: 1.2 });
+    },
+    theiaGather: () => {
+      for (const [freq, volume] of [[110, 0.042], [165, 0.03], [220, 0.021]]) tone({ freq, length: 8, volume, attack: 2.5, type: 'triangle', hold: 4 });
+      noise({ length: 7, volume: 0.036, type: 'lowpass', freq: 320, attack: 2.5 });
+    },
     // The 우주멍 clock's card turning over (ui/calm.js; the user, 2026-11-24: "넘어갈 때마다
     // 소리 내", "플립 시계 소리는 저런게 아닌데", of three "2로 해"): played as the card starts
     // to fold, a small "딸깍" as it is let go 0.3 s on, then a plastic "탁" as its lower half

@@ -19,15 +19,18 @@ export const ORBITS = {
   phases: [146, 196], // why its shape changes, seen from the Earth
   year: [196, 250], // the Earth round the Sun, its axis keeping its way: the seasons
   planets: [250, 300], // all the planets, the further the slower
-  galaxy: [300, 346], // the Sun turning, and going round the galaxy
-  end: 346,
+  sun: [300, 312], // the Sun turning
+  helix: [312, 352], // the Sun going on, the planets with it: helices
+  galaxy: [352, 392], // the Sun going round the galaxy
+  end: 392,
 };
 
 const TILT = (23.4 * Math.PI) / 180;
 // The Earth's axis: leaning toward +x (so at the year's x end its north is toward the Sun).
 const AXIS = new Vector3(Math.sin(TILT), Math.cos(TILT), 0);
-// Near the Earth (the first four parts) the Sun is far off along -x... seen lit from there.
-const LOCAL_SUN = new Vector3(-1, 0, 0.25).normalize();
+// Near the Earth (the first four parts) the Sun is far off, on the eye's side of the Earth
+// so its day side faces the eye (the user, 2026-11-24: "지구가 너무 어두워").
+const LOCAL_SUN = new Vector3(-0.8, 0.15, -0.55).normalize();
 const MOON_R = 0.27;
 const MOON_ORBIT = 5;
 const MOON_LAP = 16; // seconds a month, drawn
@@ -84,12 +87,17 @@ uniform vec3 markAt;
 uniform float mark;
 uniform float fade;
 uniform float markR;
+uniform sampler2D nightMap;
+uniform float hasNight;
+uniform float gain;
 void main() {
   vec3 n = normalize(vN);
   vec3 l = normalize(sunPoint > 0.5 ? sunAt - vW : sunAt);
   float lit = max(dot(n, l), 0.0);
   vec3 c = hasMap > 0.5 ? texture2D(map, vUV).rgb : tint;
-  vec3 col = c * (night + (1.0 - night) * lit * 1.25);
+  vec3 col = c * (night + (1.0 - night) * lit * gain);
+  // The Earth's night side: its cities' lights.
+  if (hasNight > 0.5) col += texture2D(nightMap, vUV).rgb * vec3(1.0, 0.85, 0.6) * 1.6 * smoothstep(0.15, -0.05, dot(n, l));
   float m = mark * smoothstep(markR, markR * 0.6, length(vW - markAt));
   col = mix(col, vec3(1.0, 0.25, 0.2), m);
   gl_FragColor = vec4(col * fade, 1.0);
@@ -205,13 +213,15 @@ export function createOrbitStage(canvas) {
   sky.infiniteDistance = true;
 
   const bodyMat = (name, src, tint = [0.5, 0.5, 0.5]) => {
-    const m = new ShaderMaterial(name, scene, { vertex: 'orbitBody', fragment: 'orbitBody' }, { attributes: ['position', 'normal', 'uv'], uniforms: ['world', 'viewProjection', 'sunAt', 'sunPoint', 'hasMap', 'tint', 'night', 'markAt', 'mark', 'fade', 'markR'], samplers: ['map'] });
+    const m = new ShaderMaterial(name, scene, { vertex: 'orbitBody', fragment: 'orbitBody' }, { attributes: ['position', 'normal', 'uv'], uniforms: ['world', 'viewProjection', 'sunAt', 'sunPoint', 'hasMap', 'tint', 'night', 'markAt', 'mark', 'fade', 'markR', 'hasNight', 'gain'], samplers: ['map', 'nightMap'] });
     if (src) m.setTexture('map', new Texture(`${base}${src}`, scene, false, false));
     m.setFloat('hasMap', src ? 1 : 0);
     m.setColor3('tint', new Color3(...tint));
     m.setFloat('night', 0.05);
     m.setFloat('mark', 0);
     m.setFloat('markR', 0.07);
+    m.setFloat('hasNight', 0);
+    m.setFloat('gain', 1.25);
     m.setVector3('markAt', Vector3.Zero());
     m.setFloat('fade', 1);
     return m;
@@ -245,6 +255,9 @@ export function createOrbitStage(canvas) {
   earthTilt.parent = near;
   earthTilt.rotation.z = -TILT;
   const earthMat = bodyMat('orbitEarthMat', 'assets/earth-day.webp');
+  const nightLights = new Texture(`${base}assets/earth-night.webp`, scene, false, false);
+  earthMat.setTexture('nightMap', nightLights);
+  earthMat.setFloat('hasNight', 1);
   const earth = CreateSphere('orbitEarth', { diameter: 2, segments: 64 }, scene);
   earth.material = earthMat;
   earth.parent = earthTilt;
@@ -285,6 +298,7 @@ export function createOrbitStage(canvas) {
     const mesh = CreateSphere(`orbit-${id}`, { diameter: size * 2, segments: 40 }, scene);
     mesh.material = bodyMat(`orbit-${id}-mat`, src, id === 'uranus' ? [0.62, 0.85, 0.9] : [0.5, 0.5, 0.5]);
     mesh.parent = tilt;
+    if (id === 'earth') { mesh.material.setTexture('nightMap', nightLights); mesh.material.setFloat('hasNight', 1); }
     const line = ring(`orbit-${id}-ring`, orbitOf(au), id === 'earth' ? [0.45, 0.7, 1] : [0.45, 0.45, 0.55]);
     line.parent = helio;
     let axis = null;
@@ -294,6 +308,24 @@ export function createOrbitStage(canvas) {
       axis.parent = tilt;
     }
     return { id, au, size, tilt, mesh, line, axis };
+  });
+  // Where a planet stands round the Sun (in the Sun's frame) at the course's second t.
+  const localAt = (p, t) => {
+    const ang = (2 * Math.PI * (t - ORBITS.year[0])) / lapOf(p.au) + p.au * 2.1;
+    const r = orbitOf(p.au);
+    return new Vector3(Math.cos(ang) * r, 0, Math.sin(ang) * r);
+  };
+  const WAY = new Vector3(Math.sin(Math.PI / 6), Math.cos(Math.PI / 6), 0);
+  // Drawn so that the Earth's helix shows: 30 a year; truly the Sun goes 48 times the
+  // Earth's distance from it in a year, 864 here (said in a caption).
+  const HELIX_PACE = 30 / YEAR;
+  const trails = [null, ...planets.filter((p) => ['mercury', 'venus', 'earth', 'mars', 'jupiter'].includes(p.id))].map((p) => {
+    const name = `orbitTrail-${p ? p.id : 'sun'}`;
+    // (Made with as many points as it is redrawn with: an update keeps the count.)
+    const line = CreateLineSystem(name, { lines: [Array.from({ length: 241 }, () => Vector3.Zero())], updatable: true }, scene);
+    line.color = p ? (p.id === 'earth' ? new Color3(0.45, 0.75, 1) : new Color3(0.6, 0.65, 0.85)) : new Color3(1, 0.8, 0.45);
+    line.setEnabled(false);
+    return { p, name, line };
   });
   const yearMoon = CreateSphere('orbitYearMoon', { diameter: 0.3, segments: 24 }, scene);
   yearMoon.material = bodyMat('orbitYearMoonMat', 'assets/planets/moon.webp');
@@ -392,7 +424,8 @@ export function createOrbitStage(canvas) {
       tag(words.moon, () => moon.getAbsolutePosition(), (t) => inPart([ORBITS.moon[0] + 4, ORBITS.lock[1]], t));
       tag(words.ghost, () => ghost.getAbsolutePosition(), (t) => inPart([ORBITS.lock[0] + 14, ORBITS.lock[1]], t));
       for (const p of planets) tag(words[p.id], () => p.mesh.getAbsolutePosition(), (t) => inPart([ORBITS.planets[0] + 4, ORBITS.planets[1] + 6], t) || (p.id === 'earth' && inPart(ORBITS.year, t)));
-      tag(words.here, () => helio.position, (t) => t >= ORBITS.galaxy[0] + 22);
+      tag(words.here, () => helio.position, (t) => t >= ORBITS.galaxy[0] + 10);
+      tag(words.sun, () => helio.position, (t) => inPart([ORBITS.helix[0] + 4, ORBITS.helix[1]], t));
     }
     const nearOn = T < ORBITS.year[0];
     const nearFade = 1 - smooth(ORBITS.phases[1] - 3, ORBITS.phases[1], T);
@@ -420,6 +453,10 @@ export function createOrbitStage(canvas) {
     const face = moon.position.scale(-1).normalize();
     const markOn = smooth(ORBITS.lock[0], ORBITS.lock[0] + 3, T) * (1 - smooth(ORBITS.phases[0] + 6, ORBITS.phases[0] + 9, T));
     moonMat.setFloat('mark', markOn);
+    // Brighter, its shade not black, while its round is watched from far (the user,
+    // 2026-11-24: "달도 너무 어둡다"); dark-shaded while its shape is watched.
+    const shapeOn = smooth(ORBITS.phases[0], ORBITS.phases[0] + 3, T) * (1 - smooth(ORBITS.phases[1] - 3, ORBITS.phases[1], T));
+    for (const m of [moonMat, ghostMat]) { m.setFloat('night', lerp(0.2, 0.02, shapeOn)); m.setFloat('gain', lerp(1.7, 1.3, shapeOn)); }
     // (Large while seen from far over both rounds, small up close.)
     const markR = lerp(0.24, 0.09, smooth(ORBITS.phases[0], ORBITS.phases[0] + 3, T));
     moonMat.setFloat('markR', markR);
@@ -438,22 +475,22 @@ export function createOrbitStage(canvas) {
     // Round the Sun.
     const ySince = T - ORBITS.year[0];
     for (const p of planets) {
-      const ang = (2 * Math.PI * ySince) / lapOf(p.au) + p.au * 2.1;
-      const r = orbitOf(p.au);
-      p.tilt.position.set(Math.cos(ang) * r, 0, Math.sin(ang) * r);
+      p.tilt.position.copyFrom(localAt(p, T));
       p.mesh.rotation.y = -ySince * 1.5;
       p.mesh.material.setVector3('sunAt', helio.position);
       p.mesh.material.setFloat('sunPoint', 1);
       const others = p.id === 'earth' ? 1 : smooth(ORBITS.planets[0], ORBITS.planets[0] + 4, T);
-      const away = 1 - smooth(ORBITS.galaxy[0] + 8, ORBITS.galaxy[0] + 16, T);
+      const away = 1 - smooth(ORBITS.galaxy[0] - 1, ORBITS.galaxy[0] + 3, T);
+      // (No rings while they go on with the Sun: their trails show the way they go.)
+      const ringOff = smooth(ORBITS.helix[0], ORBITS.helix[0] + 4, T);
       p.mesh.material.setFloat('fade', helioIn * others * away);
-      p.line.alpha = 0.55 * others * away * helioIn;
-      p.line.setEnabled(others * away > 0.001);
+      p.line.alpha = 0.55 * others * away * helioIn * (1 - ringOff);
+      p.line.setEnabled(others * away * (1 - ringOff) > 0.001);
       p.mesh.setEnabled(others * away > 0.001);
       // The Earth drawn larger while it is the one watched (the year), smaller among the rest.
       if (p.id === 'earth') { const big = lerp(5, 1, smooth(ORBITS.planets[0], ORBITS.planets[0] + 6, T)); p.mesh.scaling.setAll(big); p.axis.scaling.setAll(big); }
     }
-    for (const r of saturnRing) r.setEnabled(T >= ORBITS.planets[0] + 2 && T < ORBITS.galaxy[0] + 14);
+    for (const r of saturnRing) r.setEnabled(T >= ORBITS.planets[0] + 2 && T < ORBITS.galaxy[0]);
     const pe = planets.find((p) => p.id === 'earth');
     const yma = (2 * Math.PI * ySince) / 3;
     yearMoon.position.copyFrom(pe.tilt.position.add(new Vector3(Math.cos(yma) * 2.2, 0, Math.sin(yma) * 2.2)));
@@ -461,14 +498,14 @@ export function createOrbitStage(canvas) {
     yearMoon.material.setFloat('sunPoint', 1);
     yearMoon.setEnabled(T < ORBITS.planets[0] + 6);
     // The Sun turning: once in 25 days, drawn once in 25 s in the last part.
-    sunMat.setFloat('spin', T >= ORBITS.galaxy[0] ? (T - ORBITS.galaxy[0]) / 25 : 0);
+    sunMat.setFloat('spin', T >= ORBITS.sun[0] ? (T - ORBITS.sun[0]) / 25 : 0);
     sunMat.setFloat('fade', helioIn);
     sunMat.setVector3('eye', camera.position);
-    sunGlow.material.setFloat('power', helioIn * (1 - 0.6 * smooth(ORBITS.galaxy[0] + 14, ORBITS.galaxy[0] + 22, T)));
+    sunGlow.material.setFloat('power', helioIn * (1 - 0.6 * smooth(ORBITS.galaxy[0] + 2, ORBITS.galaxy[0] + 10, T)));
 
     // The galaxy: the Sun (and all that goes with it) going round its middle, which
     // takes 230 million years; drawn as a quarter turn over the last part.
-    const gOn = smooth(ORBITS.galaxy[0] + 12, ORBITS.galaxy[0] + 22, T);
+    const gOn = smooth(ORBITS.galaxy[0], ORBITS.galaxy[0] + 10, T);
     galaxy.setEnabled(gOn > 0.001);
     galCore.setEnabled(gOn > 0.001);
     galMat.setFloat('fade', gOn);
@@ -476,9 +513,28 @@ export function createOrbitStage(canvas) {
     galMat.setFloat('turn', 0);
     galMat.setFloat('pixel', engine.getRenderHeight() / camera.fov);
     galMat.setVector3('eye', camera.position);
-    const gTurn = 0.6 * smooth(ORBITS.galaxy[0] + 24, ORBITS.end, T);
+    const gTurn = 0.6 * smooth(ORBITS.galaxy[0] + 12, ORBITS.end, T);
     const sunR = Math.abs(GAL_AT.x);
     helio.position.set(GAL_AT.x + sunR * Math.cos(gTurn), 0, sunR * Math.sin(gTurn));
+    // Going on with the Sun: it moves along WAY, the planets round it, so each draws a helix
+    // behind it (the user, 2026-11-24, of a picture of such helices: "태양이 우리를 데리고,
+    // 은하를 공전하는 것도 그려"). WAY stands 60 degrees from the planets' plane (30 from
+    // its pole), as the Sun's way round the galaxy does from the plane the planets go round in.
+    const hOn = inPart(ORBITS.helix, T);
+    if (hOn) helio.position.copyFrom(WAY.scale(HELIX_PACE * (T - ORBITS.helix[0])));
+    for (const tr of trails) {
+      const show = hOn && T > ORBITS.helix[0] + 1;
+      tr.line.setEnabled(show);
+      if (!show) continue;
+      const from = Math.max(ORBITS.helix[0], T - 36);
+      const pts = [];
+      for (let i = 0; i <= 240; i++) {
+        const t = from + ((T - from) * i) / 240;
+        pts.push(WAY.scale(HELIX_PACE * (t - ORBITS.helix[0])).add(tr.p ? localAt(tr.p, t) : Vector3.Zero()));
+      }
+      tr.line = CreateLineSystem(tr.name, { lines: [pts], instance: tr.line }, scene);
+      tr.line.alpha = Math.min(1, (T - ORBITS.helix[0] - 1) / 3) * (1 - smooth(ORBITS.helix[1] - 3, ORBITS.helix[1], T));
+    }
     sunMark.setEnabled(gOn > 0.001);
     sunMark.material.setFloat('power', gOn * 1.4);
     sunMark.scaling.setAll(Math.max(1, camera.position.subtract(helio.position).length() * 0.02));
@@ -526,9 +582,12 @@ export function createOrbitStage(canvas) {
       { t: ORBITS.planets[0] + 12, at: helioAt(10, 95, -120), look: helioAt(0, 0, 0), fov: 0.8 },
       { t: ORBITS.planets[1], at: helioAt(10, 80, -110), look: helioAt(0, 0, 0), fov: 0.8 },
       // In to the Sun turning.
-      { t: ORBITS.galaxy[0] + 10, at: helioAt(1.5, 3, -11), look: helioAt(0, 0, 0), fov: 0.7 },
+      { t: ORBITS.sun[1] - 2, at: helioAt(1.5, 3, -11), look: helioAt(0, 0, 0), fov: 0.7 },
+      // Beside the Sun's way, its trail and the planets' helices running down behind it.
+      { t: ORBITS.helix[0] + 8, at: helioAt(10, -30, -95), look: helioAt(0, -30, 0), fov: 0.8 },
+      { t: ORBITS.helix[1], at: helioAt(10, -30, -95), look: helioAt(0, -30, 0), fov: 0.8 },
       // Far out over the galaxy.
-      { t: ORBITS.galaxy[0] + 24, at: GAL_AT.add(at(120, 1900, -700)), look: GAL_AT.add(at(80, 0, 0)), fov: 0.8 },
+      { t: ORBITS.galaxy[0] + 12, at: GAL_AT.add(at(120, 1900, -700)), look: GAL_AT.add(at(80, 0, 0)), fov: 0.8 },
       { t: ORBITS.end, at: GAL_AT.add(at(30, 2200, -600)), look: GAL_AT, fov: 0.8 },
     ];
     let i = 0;

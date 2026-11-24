@@ -1392,6 +1392,10 @@ ${STORY_MORE[target.id]}` : told) };
     const bodyId = kind === 'vista' || kind === 'pole' || (kind === 'aurora' && AURORA_VIEWS[selectedId]) ? selectedId : HOME.body;
     if (kind === 'vista' && !VISTAS.includes(bodyId)) return;
     if (kind === 'pole' && !POLES.includes(bodyId)) return;
+    // Setting off lets go of a lock too: held, the view kept turning to the body
+    // and she arrived staring into the ground, not at the aurora (the user,
+    // 2026-11-24: "오로라가 이상해", pressed while orbiting Earth).
+    if (locked) unlock('trip');
     const spot = kind === 'home' ? () => homeSpot(here(bodyId), simTime)
       : kind === 'aurora' ? () => auroraSpot(here(bodyId), here('sun').position, AURORA_VIEWS[bodyId])
       : kind === 'meteors' ? () => meteorSpot(here(bodyId), here('sun'))
@@ -1548,6 +1552,7 @@ ${STORY_MORE[target.id]}` : told) };
     const told = {
       button: t('맴돌기를 풀었습니다.'),
       jump: t('순간 이동해서 맴돌기를 풀었습니다.'),
+      trip: t('다른 자리로 떠나서 맴돌기를 풀었습니다.'),
       look: t('다른 곳을 바라봐서 맴돌기를 풀었습니다.'),
       other: t('고른 것이 바뀌어 맴돌기를 풀었습니다.'),
       away: t('맴돌던 것이 화면 밖인데 앞으로 날아가서\n맴돌기를 풀었습니다.'),

@@ -90,7 +90,8 @@ export const COURSES = [
   { id: 'orion', body: 'earth', lapS: 150, radii: 6, sky: 'm42', overDeg: 16, name: t('오리온 대성운'), todo: t('지구를 돌면서 겨울 밤하늘의 붉은 성운을 봅니다.') },
   { id: 'andromeda', body: 'moon', lapS: 150, radii: 7, sky: 'm31', overDeg: 16, name: t('안드로메다은하'), todo: t('달을 돌면서 안드로메다은하와 곁의 삼각형자리 은하를 봅니다.') },
   { id: 'pleiades', body: 'earth', lapS: 150, radii: 6, sky: 'm45', overDeg: 16, name: t('플레이아데스'), todo: t('지구를 돌면서 일곱 자매 별무리를 봅니다.') },
-  { id: 'moonLow', body: 'moon', lapS: 120, radii: 1.25, name: t('달 저공비행'), todo: t('달의 땅 위를 낮게 돌며 크레이터를 내려다봅니다.'),
+  // A third of its first pace (the user, 2026-11-24: "달 저공비행. 속도를 1/3로 느리게 해").
+  { id: 'moonLow', body: 'moon', lapS: 360, radii: 1.25, name: t('달 저공비행'), todo: t('달의 땅 위를 낮게 돌며 크레이터를 내려다봅니다.'),
     sun: { from: [0.6, 0.35, 0.7], toward: [-0.7, 0, 0.6] } },
   { id: 'jupiterMoons', body: 'jupiter', lapS: 180, radii: 5, name: t('목성과 위성들'), todo: t('목성을 돌면서 구름 띠와 안쪽 위성들을 봅니다.'),
     sun: { from: [0.7, 0.1, 0.7], toward: [-0.7, 0.1, 0.7] } },

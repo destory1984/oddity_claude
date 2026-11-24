@@ -114,6 +114,7 @@ varying vec3 vW;
 varying vec2 vUV;
 uniform vec3 eye;
 uniform float spin;
+uniform float hot;
 uniform float fade;
 float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float n2(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h(i), h(i + vec2(1, 0)), f.x), mix(h(i + vec2(0, 1)), h(i + vec2(1, 1)), f.x), f.y); }
@@ -130,7 +131,10 @@ void main() {
   }
   vec3 col = vec3(1.0, 0.78, 0.42) * (0.85 + 0.25 * g);
   col *= 0.45 + 0.55 * pow(limb, 0.5);
-  col *= 1.0 - 0.75 * min(spots, 1.0);
+  col *= 1.0 - 0.75 * min(spots, 1.0) * (1.0 - hot);
+  // Seen from afar on its way: a white-hot face, yellow toward its edge (the user,
+  // 2026-11-25: "태양이 아니라 호박 같아").
+  col = mix(col, mix(vec3(1.0, 0.82, 0.5), vec3(1.25, 1.2, 1.1), pow(limb, 0.7)), hot);
   gl_FragColor = vec4(col * fade, 1.0);
 }`;
 Effect.ShadersStore.orbitGlowVertexShader = `
@@ -325,7 +329,8 @@ export function createOrbitStage(canvas) {
 
   // --- Round the Sun ----------------------------------------------------------------
   const helio = new TransformNode('orbitHelio', scene);
-  const sunMat = new ShaderMaterial('orbitSunMat', scene, { vertex: 'orbitBody', fragment: 'orbitSun' }, { attributes: ['position', 'normal', 'uv'], uniforms: ['world', 'viewProjection', 'eye', 'spin', 'fade'] });
+  const sunMat = new ShaderMaterial('orbitSunMat', scene, { vertex: 'orbitBody', fragment: 'orbitSun' }, { attributes: ['position', 'normal', 'uv'], uniforms: ['world', 'viewProjection', 'eye', 'spin', 'fade', 'hot'] });
+  sunMat.setFloat('hot', 0);
   const sun = CreateSphere('orbitSun', { diameter: SUN_R * 2, segments: 64 }, scene);
   sun.material = sunMat;
   sun.parent = helio;
@@ -496,7 +501,7 @@ export function createOrbitStage(canvas) {
   // The stars near the Sun at the start, which it passes among.
   const nearStars = new Mesh('orbitNearStars', scene);
   {
-    const N = 1600;
+    const N = 2400;
     let sd = 23;
     const rnd = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
     const pos = new Float32Array(N * 3), seeds = new Float32Array(N * 4), ind = new Uint32Array(N);
@@ -504,7 +509,7 @@ export function createOrbitStage(canvas) {
       let o;
       do o = new Vector3(rnd() - 0.5, (rnd() - 0.5) * 0.5, rnd() - 0.5).scale(80);
       while (o.length() > 40 || Math.hypot(o.x, o.y) < 5);
-      const b = galSunAt(-0.01 + 0.07 * rnd()).add(o);
+      const b = galSunAt(-0.05 + 0.11 * rnd()).add(o);
       pos.set([b.x, b.y, b.z], i * 3);
       seeds.set([rnd() * 0.8 + 0.1, 0.4 + 0.6 * rnd(), 0, 0], i * 4);
       ind[i] = i;
@@ -740,7 +745,7 @@ export function createOrbitStage(canvas) {
       tag(words.moon, () => moon.getAbsolutePosition(), (t) => inPart([ORBITS.moon[0] + 4, ORBITS.lock[1]], t));
       tag(words.ghost, () => ghost.getAbsolutePosition(), (t) => inPart([ORBITS.lock[0] + 14, ORBITS.lock[1]], t));
       for (const p of planets) tag(words[p.id], () => p.mesh.getAbsolutePosition(), (t) => inPart([ORBITS.planets[0] + 4, ORBITS.planets[1] + 6], t) || (p.id === 'earth' && inPart(ORBITS.year, t)));
-      tag(words.here, () => helio.position, (t) => inPart([ORBITS.galaxy[0] + 10, ORBITS.galaxy[1]], t));
+      tag(words.here, () => helio.position.add(new Vector3(0, 5, 0)), (t) => inPart([ORBITS.galaxy[0] + 10, ORBITS.galaxy[1]], t));
       {
         const n = tags.length;
         tag(`${words.sgr[0]}\n${words.sgr[1]}`, () => GAL_AT.add(new Vector3(0, 13, 0)), (t) => inPart([ORBITS.core[0] + 5, ORBITS.core[1] - 0.5], t));
@@ -887,7 +892,10 @@ export function createOrbitStage(canvas) {
     sunMat.setFloat('spin', T >= ORBITS.sun[0] ? (T - ORBITS.sun[0]) / 25 : 0);
     sunMat.setFloat('fade', helioIn);
     sunMat.setVector3('eye', camera.position);
-    sunGlow.material.setFloat('power', helioIn * (1 - 0.6 * smooth(ORBITS.galaxy[0] + 20, ORBITS.galaxy[0] + 30, T)));
+    const hot = T >= ORBITS.galaxy[0] ? 1 : 0;
+    sunMat.setFloat('hot', hot);
+    sunGlow.scaling.setAll(1 + 1.6 * hot);
+    sunGlow.material.setFloat('power', helioIn * (1 + 0.4 * hot) * (1 - 0.6 * smooth(ORBITS.galaxy[0] + 20, ORBITS.galaxy[0] + 30, T)));
 
     // The galaxy: the Sun (and all that goes with it) going round its middle, which
     // takes 230 million years; drawn as a quarter turn over the last part.
@@ -1046,8 +1054,8 @@ export function createOrbitStage(canvas) {
       // A look round the stars near the Sun, all going the one way; then to each of four.
       ...hoodKeys(T),
       // Close behind the Sun on its way, the stars near it going by; the galaxy a band of light.
-      { t: ORBITS.galaxy[0] + 0.1, at: helioAt(7, 5, 36), look: helioAt(-1, 0, -30), fov: 0.85 },
-      { t: ORBITS.galaxy[0] + 18, at: helioAt(5, 5, 30), look: helioAt(-1, 0, -30), fov: 0.85 },
+      { t: ORBITS.galaxy[0] + 0.1, at: helioAt(14, 10, 78), look: helioAt(-2, 0, -40), fov: 0.85 },
+      { t: ORBITS.galaxy[0] + 18, at: helioAt(11, 9, 66), look: helioAt(-2, 0, -40), fov: 0.85 },
       // Drawing back and up as it speeds on, the arms coming into sight...
       { t: ORBITS.galaxy[0] + 32, at: helioAt(60, 90, 130), look: helioAt(0, 0, -20), fov: 0.85 },
       // ...to the whole galaxy, its lap drawn.

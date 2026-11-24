@@ -32,7 +32,8 @@ MUSIC = {'orbits': 'music60'}
 
 def main(lang, name, take):
     # (One recording for every language: the bare view has no words on it.)
-    folder = os.path.abspath(os.path.join(ROOT, 'ko', name))
+    # (A drawn shot has the names over the stage in its language: one for each.)
+    folder = os.path.abspath(os.path.join(ROOT, lang if name in MUSIC else 'ko', name))
     times = json.load(open(os.path.join(folder, 'times.json')))
     rel = [t - times[0] for t in times]
     picked = [i for i, t in enumerate(rel) if START_S <= t <= START_S + SHOT_S[name]]

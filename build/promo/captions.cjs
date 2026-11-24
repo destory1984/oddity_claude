@@ -110,7 +110,14 @@ const TOUR = {
     'auroraDrift-1-4': 'Silent curtains of light',
     'auroraDrift-2-1': 'Shall we fly\ninto the aurora tonight?',
     'auroraDrift-2-2': 'Silent curtains of light',
+    'orbits-1-1': 'The Earth turns once a day,\non its own',
+    'orbits-1-2': 'Its axis always points one way:\nso summer and winter come',
+    'orbits-1-3': 'Mercury goes round in 88 days,\nNeptune in 165 years',
+    'orbits-1-4': 'The Sun does not stand still.\nThe planets follow it in helices',
+    'orbits-1-5': 'The stars nearby race along too.\nThe nearest: Alpha Centauri',
+    'orbits-1-6': 'At the heart of the galaxy,\nthe black hole Sagittarius A*.\nHundreds of billions of stars go round it',
     end: FIRST.en.end,
+    'end-orbits': { ...FIRST.en.end, lead: 'Tonight, too, we race\nthrough the galaxy\nat 230 km a second', note: '' },
   },
 };
 const LINES = { thatday: THAT_DAY, gaze: GAZE, tour: TOUR }[process.env.FILM] ?? FIRST;

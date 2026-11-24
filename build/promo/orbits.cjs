@@ -31,6 +31,14 @@ const WORDS = {
   ko: { sun: '태양', earth: '지구', moon: '달', ghost: '스스로 돌지 않는다면', here: '태양계', sgr: ['궁수자리 A*', '질량은 태양의 400만 배 · 2만 6천 광년'], mercury: '수성', venus: '금성', mars: '화성', jupiter: '목성', saturn: '토성', uranus: '천왕성', neptune: '해왕성', firstDino: '첫 공룡', dinoGone: '공룡이 사라짐', hood: { sun: ['태양계', ''], alpha: ['알파 센타우리', '4.4광년 · 해가 셋'], trappist: ['트라피스트-1', '40광년 · 지구만 한 행성 일곱'], kepler16: ['케플러-16', '245광년 · 해가 둘인 행성'], kepler452: ['케플러-452', '1,800광년 · 지구의 사촌'] } },
 };
 
+// In another language, each Korean word as the game's own translation gives it.
+function wordsIn(lang) {
+  if (lang === 'ko') return WORDS.ko;
+  const table = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'src', 'i18n', `${lang}.json`), 'utf8'));
+  const say = (v) => (typeof v === 'string' ? (v ? table[v] ?? v : v) : Array.isArray(v) ? v.map(say) : Object.fromEntries(Object.entries(v).map(([k, w]) => [k, say(w)])));
+  return say(WORDS.ko);
+}
+
 (async () => {
   const lang = process.argv[2] || 'ko';
   const only = process.argv.slice(3).map(Number);
@@ -55,8 +63,8 @@ const WORDS = {
       const s = document.createElement('style');
       s.textContent = '* { transition: none !important; }';
       document.head.append(s);
-      window.W = { ...words, ago: (my) => `${my}만 년 전` };
-    }, [DEV, WORDS[lang]]);
+      window.W = { ...words, ago: (my) => `${my}` };
+    }, [DEV, wordsIn(lang)]);
     // The pictures and shaders first.
     await p.evaluate(() => { for (let i = 0; i < 5; i++) window.st.update(20 + i * 0.03, window.W); });
     await p.waitForTimeout(4000);

@@ -18,6 +18,8 @@
 | `public/assets/tours/starship-pad.webp` | Steve Jurvetson, SpaceX Starship before IFT-5 (5차 비행 전날 밤의 발사대). https://commons.wikimedia.org/wiki/File:SpaceX_Starship_before_IFT-5.jpg 줄였다. | CC BY 2.0 |
 | `public/assets/tours/apollo-cabin.webp`, `eagle-cabin.webp`, `shuttle-cabin.webp`, `eagle-top.webp`, `helmet-rim.webp`, `helmet-hands.webp`, `candy.webp`, `booster-up.webp`, `booster-down.webp`, `*-switch*-down.webp` | 이 게임을 위해 GPT(OpenAI 이미지 생성)로 그렸다. | 이 저장소의 것 |
 | `public/assets/tours/helmet-air.mp3` | 이 게임을 위해 만든 소리(우주복 환풍기와 숨소리를 잡음으로 합성). | 이 저장소의 것 |
+| `public/assets/mars/near.webp`, `far.webp`, `near-h.png`, `far-h.png` | NASA/JPL/University of Arizona, HiRISE (USGS가 만든 높이 모형 DTEEC_045994_1985_046060_1985_U01 1m, 정사 사진 ESP_046060_1985_RED_A_01 25cm). 퍼서비어런스가 걸은 둘레 600m와 바깥 7km를 잘라 줄였다. https://www.uahirise.org/dtm/ | NASA/JPL 영상, 출처 표시 |
+| `public/assets/mars/pia24264.webp`, `pia24663.webp` | NASA/JPL-Caltech/ASU/MSSS, 퍼서비어런스 Mastcam-Z 360도 사진 PIA24264(솔 3, 착륙지), PIA24663(밴 질 전망대). https://photojournal.jpl.nasa.gov 탐사선을 가린 검은 곳은 같은 줄의 땅으로 메웠다. | 미국 정부 저작물, 저작권 없음 |
 | `public/assets/earth-clouds.webp` | NASA Visible Earth, 구름 합성 지도. https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg | 미국 정부 저작물, 저작권 없음 |
 | 실제 구름 (게임이 열릴 때마다 받아 옴, `src/render/realClouds.js`) | NASA GIBS, VIIRS Suomi NPP / NOAA-20 Corrected Reflectance (True Color), 어제의 지구 전체. https://gibs.earthdata.nasa.gov | NASA 영상, 저작권 없음 |
 | `public/assets/planets/mars.webp` | Solar System Scope 지도(8K 원본을 4096×2048로 줄임). https://www.solarsystemscope.com/textures/ | CC BY 4.0 (출처 표시) |

@@ -86,6 +86,50 @@ export const COURSES = [
     { at: 206, text: t('여기서 본 것은 가장 널리 받아들여지는 설을 따른 것이고, 아직 정해지지 않은 부분이 많습니다.') },
   ] }, name: t('달의 탄생, 테이아 충돌'), todo: t('46억 년 전 화성만 한 천체가 지구에 부딪혀, 흩어진 돌이 모여 달이 되기까지를 봅니다.') },
   { id: 'starship', body: 'earth', lapS: 440, rail: { starship: true, stage: [[-20, 30], [372, 460]], hotStage: { from: 158, to: 178, nearKm: 11, farKm: 400, sizeKm: 30, sideKm: 6, aimKm: 9 }, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }, { at: 30, cabin: 'assets/tours/booster-up.webp' }, { at: 184, cabin: 'assets/tours/booster-down.webp' }, { at: 372, cabin: 'assets/tours/none.webp', captionY: 76 }], stageShakes: [{ from: 0.5, peak: 2.5, to: 9, power: 1 }, { from: 407.8, peak: 408.2, to: 410.5, power: 0.6 }], floaters: [], loops: true, fades: [30, 372, 439.2], startS: -44, burns: [{ from: -3, to: 20, power: 0.9, buzz: true }, { from: 20, to: 158, power: 0.55 }, { from: 188, to: 226, power: 0.6, buzz: true }, { from: 381, to: 407, power: 0.75, buzz: true }], shakes: [{ from: -3, peak: 2, to: 30 }, { from: 158, peak: 159, to: 163 }, { from: 406.8, peak: 407, to: 409 }], still: [[-60, 30], [372, 460]], photos: [{ from: -44, to: -32, src: 'assets/tours/starbase-sat.webp', pan: [60, 76], zoom: [1, 2.4], origin: '74% 90%', credit: 'SpaceFrom.Space, CC BY 2.0' }, { from: -32, to: -20, src: 'assets/tours/starship-pad.webp', pan: [57, 57], zoom: [1.1, 1.4], origin: '50% 12%', credit: 'Steve Jurvetson, CC BY 2.0' }], sounds: [[1.3, 'liftoff'], [158, 'staging'], [408.1, 'capture']], countdowns: [{ at: 0, from: 20, beeps: 10, said: t('발사까지'), go: t('이륙!') }], phases: [[-44, t('발사대')], [0, t('발사')], [158, t('단 분리')], [184, t('돌아오는 길')], [381, t('착륙')], [407, t('붙잡음')]], captions: [{ at: -43, text: t('2024년 10월 13일 아침, 미국 텍사스 남쪽 바닷가의 발사장. 높이 121m, 지금까지 만든 가장 큰 로켓입니다.') }, { at: -31, text: t('전날 밤의 발사대. 불 밝힌 탑 옆에서 로켓이 기다립니다.') }, { at: -19, text: t('아래는 1단 슈퍼 헤비, 위는 2단 스타십. 둘 다 다시 쓰려고 만든 로켓입니다.') }, { at: 2, text: t('1단 바닥의 엔진 33개에 불이 붙습니다.') }, { at: 34, text: t('1단 옆에 붙은 카메라로 봅니다. 하늘이 점점 검어집니다.') }, { at: 70, text: t('가장 큰 공기의 힘을 견디고 지나갑니다. 곧 소리보다 몇 배 빨라집니다.') }, { at: 120, text: t('2분 반 동안 연료 3,400톤을 태웠습니다.') }, { at: 158, text: t('2단이 1단에 붙은 채로 엔진을 켜고 떨어져 나갑니다. 핫 스테이징이라고 합니다.') }, { at: 186, text: t('1단은 몸을 돌려 엔진을 다시 켜고, 떠나온 발사장으로 되돌아갑니다.') }, { at: 232, text: t('고도 약 95km. 이제 떨어지며 격자 날개로 방향을 잡습니다.') }, { at: 300, text: t('1단에서 떨어져 나간 2단은 우주로 올라가 지구를 3분의 2 바퀴쯤 돌고, 1시간 남짓 뒤 인도양에 내렸습니다.') }, { at: 374, text: t('다시 발사장. 1단이 하늘에서 내려옵니다.') }, { at: 383, text: t('엔진 13개를 켜고 속도를 줄입니다.') }, { at: 394, text: t('마지막엔 엔진 세 개만 켜고 탑 옆으로 내려옵니다.') }, { at: 407, text: t('탑의 두 팔이 70m 높이의 1단을 공중에서 붙잡았습니다. 처음 해낸 일이었습니다.') }, { at: 420, text: t('발사부터 7분 만의 일이었습니다.') }], track: { alt: [[30, 2.5], [60, 12], [100, 35], [158, 65], [200, 92], [215, 95], [260, 82], [320, 40], [372, 3]], down: [[30, 0.3], [60, 3], [100, 20], [158, 62], [200, 86], [215, 88], [260, 70], [320, 26], [372, 1]], tilt: [[30, 0], [60, 14], [100, 34], [158, 52], [176, 60], [190, -60], [226, -55], [300, -15], [372, 0]] } }, name: t('스타십, 하늘에서 붙잡은 로켓'), todo: t('2024년 거대한 로켓이 날아올랐다 돌아와, 발사탑의 두 팔에 붙잡히기까지를 땅과 로켓에서 봅니다.') },
+  // A walk on Mars along Perseverance's tracks, landing site to Van Zyl Overlook (the user,
+  // 2026-11-23: "화성 산책하는 것 같은 3D 모션", "가+나로 만들어"): drawn on the ground
+  // (render/marsStage.js, whose MARS_WALK its seconds keep to); before it, a moment over Mars.
+  { id: 'marsWalk', body: 'mars', lapS: 835, rail: { marsWalk: true, stage: [[0, 751.2]], orbitFrom: 751, latDeg: 18, atKm: 0, sunwardKm: 0, highKm: 900, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -7, fades: [0, 750.5, 834.9], still: [[-60, 751.2]], phases: [[-7, t('화성')], [0, t('착륙지')], [40, t('바퀴 자국을 따라')], [393, t('밴 질 전망대')], [412, t('첫 비행')], [475, t('먼지 회오리')], [503, t('포보스 일식')], [557, t('해 질 녘')], [585, t('빛나는 구름')], [611, t('저녁별 지구')], [655, t('포보스')], [703, t('초록 오로라')], [751, t('궤도에서 본 오로라')], [806, t('화성의 해돋이')]], captions: [
+    { at: -6, text: t('화성의 예제로 분화구로 내려갑니다.') },
+    { at: 1, text: t('2021년 2월 18일, 퍼서비어런스가 이곳에 내렸습니다. 사흘째 날 돛대 위 카메라로 찍은 360도 사진입니다.') },
+    { at: 20, text: t('아래는 탐사선의 갑판입니다. 멀리 보이는 산들은 너비 45km인 분화구의 가장자리입니다.') },
+    { at: 42, text: t('이제 탐사선이 실제로 지나간 길을 따라 걷습니다. 땅은 궤도선이 25cm까지 찍은 사진과 높이로 만들었습니다.') },
+    { at: 60, text: t('솔 14. 내린 지 14일째, 처음으로 바퀴를 굴려 6m를 갔다 왔습니다. 화성의 하루를 솔이라고 하며, 지구의 하루보다 40분쯤 깁니다.') },
+    { at: 96, text: t('솔 15. 하루에 몇십 m씩, 바퀴와 카메라를 시험하며 나아갑니다.') },
+    { at: 216, text: t('솔 31. 헬리콥터를 내려놓을 평평한 땅을 찾아 이리저리 다닙니다.') },
+    { at: 280, text: t('솔 43. 여기서 배 밑에 달고 온 헬리콥터 인제뉴어티를 땅에 내려놓았습니다. 나중에 이곳은 "라이트 형제 비행장"이라는 이름을 얻었습니다.') },
+    { at: 332, text: t('헬리콥터에서 물러나, 비행을 지켜볼 자리로 갑니다.') },
+    { at: 392.5, text: t('솔 52, 밴 질 전망대. 헬리콥터에서 65m 떨어진 이곳에서 13일을 머물렀습니다.') },
+    { at: 398, text: t('헬리콥터 쪽으로 돌아봅니다. 탐사선의 돛대 카메라처럼 크게 당겨 봅니다.') },
+    { at: 412.5, text: t('2021년 4월 19일, 솔 58. 날개 두 쌍이 1분에 2,400번씩 돌기 시작합니다.') },
+    { at: 423, text: t('3m 높이로 떠올라 제자리에서 96도 돕니다. 화성의 공기는 지구의 1%뿐이라, 날기가 무척 어렵습니다.') },
+    { at: 455.5, text: t('39초 만에 내려앉았습니다. 다른 행성에서 처음 해낸 동력 비행이었습니다.') },
+    { at: 476, text: t('몇 시간 뒤, 해가 서쪽으로 기웁니다.') },
+    { at: 481, text: t('들판 멀리 먼지 회오리가 일어납니다. 예제로 분화구에서 퍼서비어런스가 여러 번 찍은, 높이 수백 m까지 솟는 회오리입니다.') },
+    { at: 493, text: t('햇볕에 데워진 땅에서 더운 공기가 돌며 솟아올라 먼지를 감아올립니다.') },
+    { at: 504, text: t('해를 크게 당겨 봅니다.') },
+    { at: 511, text: t('2022년 4월 2일, 퍼서비어런스는 화성의 달 포보스가 해 앞을 지나는 모습을 찍었습니다.') },
+    { at: 526, text: t('포보스는 지름 22km쯤의 울퉁불퉁한 감자 모양이라 해를 다 가리지 못하고, 그림자도 감자 모양입니다.') },
+    { at: 540, text: t('포보스는 화성을 하루에 세 바퀴 넘게 돕니다. 그래서 40초 남짓 만에 해 앞을 지나갑니다.') },
+    { at: 558, text: t('해가 집니다. 화성의 노을은 파랗습니다. 고운 먼지가 파란빛을 해 쪽으로 더 많이 보내 해 둘레만 파랗게 물듭니다.') },
+    { at: 573, text: t('해가 지구에서 볼 때의 3분의 2 크기로 작습니다. 화성은 태양에서 1.5배 멀리 있습니다.') },
+    { at: 587, text: t('해가 진 뒤, 높은 구름에 아직 햇빛이 닿아 진주빛으로 빛납니다. 2021년 큐리오시티가 찍은 빛나는 구름입니다.') },
+    { at: 600, text: t('물이나 이산화탄소가 언 얼음 알갱이의 구름으로, 60km보다 높이 뜬 것도 있습니다.') },
+    { at: 613, text: t('하늘이 어두워지자 서쪽 낮은 곳에 파란 별 하나가 나타납니다. 지구입니다.') },
+    { at: 627, text: t('곁의 작은 점은 달입니다. 2014년 큐리오시티가 화성에서 지구와 달을 함께 찍었습니다.') },
+    { at: 655, text: t('밤이 깊어지면 화성의 달 포보스가 서쪽에서 떠오릅니다. 화성이 한 바퀴 도는 동안 세 바퀴 넘게 돌아, 해와 반대로 서쪽에서 떠서 동쪽으로 집니다.') },
+    { at: 671, text: t('당겨 보면 해 쪽만 가늘게 빛나는 감자 모양입니다. 지구에서 본 달의 3분의 1쯤 크기로 보입니다.') },
+    { at: 687, text: t('포보스는 화성에 조금씩 다가가고 있어, 수천만 년 뒤에는 부서지거나 화성에 떨어질 것으로 봅니다.') },
+    { at: 705, text: t('2024년 3월, 큰 태양 폭풍이 닿은 밤, 퍼서비어런스가 화성 땅에서 처음으로 오로라를 찍었습니다.') },
+    { at: 719, text: t('지구의 커튼 같은 오로라와 달리 하늘 전체가 엷은 초록빛으로 물듭니다. 화성에는 지구 같은 큰 자기장이 없어, 태양에서 온 알갱이가 대기 곳곳에 부딪힙니다.') },
+    { at: 737, text: t('이제 하늘로 올라가, 이 오로라를 위에서 내려다봅니다.') },
+    { at: 753, text: t('화성 위로 올라왔습니다. 밤쪽을 지나 남쪽으로 갑니다.') },
+    { at: 765, text: t('남반구의 땅속 바위에는 옛 자기가 군데군데 남아 있어, 그 위로 오로라가 띠처럼 맺힙니다.') },
+    { at: 779, text: t('2021년부터 아랍에미리트의 화성 탐사선 아말이 궤도에서 이 오로라를 찍었습니다. 사진은 자외선이라, 여기서는 퍼서비어런스가 본 초록빛으로 그렸습니다.') },
+    { at: 793, text: t('큰 태양 폭풍이 닿으면 밤쪽 전체가 엷게 빛납니다. 궤도에서는 메이븐이 보았고, 땅에서 퍼서비어런스가 본 것이 이 빛입니다.') },
+    { at: 807, text: t('화성의 가장자리 너머로 해가 떠오릅니다.') },
+    { at: 820, text: t('퍼서비어런스는 그 뒤로도 달려, 솔 2,000을 넘기며 45km 넘게 갔습니다.') },
+  ] }, name: t('화성 산책, 퍼서비어런스의 바퀴 자국'), todo: t('화성 탐사선이 내린 곳에서 헬리콥터의 첫 비행을 지켜본 곳까지, 실제 지나간 길을 따라 걷습니다.') },
   { id: 'orbitSunrise', body: 'earth', lapS: 360, rail: { orbit: true, highKm: 400, lookDeg: 12, startS: 22 }, name: t('궤도 일출'), todo: t('지구 400km 위를 돌며 밤에서 낮으로 넘어갑니다. 지평선에 빨강, 주황, 파랑의 띠가 켜지고 태양이 솟습니다.') },
   { id: 'milkyWay', body: 'earth', lapS: 180, radii: 8, rollDeg: 35, sky: 'milkyWay', name: t('은하수 일주'), todo: t('은하수가 놓인 평면을 따라 지구 둘레를 비행합니다. 은하 중심에서 출발합니다.') },
   { id: 'orion', body: 'earth', lapS: 150, radii: 6, sky: 'm42', overDeg: 16, name: t('오리온 대성운'), todo: t('지구를 돌면서 겨울 밤하늘의 붉은 성운을 봅니다.') },
@@ -176,6 +220,7 @@ export function railAt(course, body, sun, seconds, moon = null, hubble = null, e
   if (course.rail.orbit) return orbitAt(course, body, sun, seconds);
   if (course.rail.cupola) return cupolaAt(course, body, sun, seconds);
   if (course.rail.lunar) return lunarAt(course, body, sun, seconds, earth);
+  if (course.rail.orbitFrom !== undefined && seconds >= course.rail.orbitFrom) return marsOrbitAt(course, body, sun, seconds);
   // (Over midnight, Earth a strip at the foot of the view (the user, 2026-11-02: "지구가 조금
   // 보여야해"); facing the Sun the view rises by sunwardKm, for the Sun, drawn large, stands
   // on the horizon there, and in view it puts out the aurora and the stars. The user, 2026-11-02: "태양은 안 나와야해... 다 없어지네".)
@@ -229,6 +274,42 @@ export function auroraGlance(position, body, sunUpDeg, toSun, dipRad = 0) {
   const night = smooth(-6, -18, sunUpDeg);
   if (!best) return { weight: 0, toward: out, lat };
   return { weight: 0.9 * night * smooth(3800, 2200, best.km), toward: best.toward, lat };
+}
+
+// After the walk on Mars (rail.orbitFrom): up over the night side, south toward the aurora
+// over the southern highlands, low enough at first to see it stand over the horizon, then
+// out to 4,000 km for the whole night side, and round toward the Sun until it comes up
+// over the edge of the globe (the user, 2026-11-24: "화성의 오로라를 공중에서 보는건어떄?").
+function marsOrbitAt(course, body, sun, seconds) {
+  const u = seconds - course.rail.orbitFrom;
+  const away = unit([body.position[0] - sun.position[0], 0, body.position[2] - sun.position[2]]);
+  const north = [0, 1, 0];
+  const side = unit(cross(north, away));
+  // (The Sun, drawn large, stays behind the globe while she is straight over midnight;
+  // the round toward it brings it up over the edge.)
+  const phi = rad(40) * smooth(54, 76, u);
+  const lat = rad(12 - 42 * smooth(0, 30, u) + 22 * smooth(32, 50, u));
+  const flat = mix(Math.cos(phi), away, Math.sin(phi), side);
+  const out = mix(Math.cos(lat), flat, Math.sin(lat), north);
+  const highKm = 350 * Math.pow(4000 / 350, smooth(18, 48, u));
+  const position = body.position.map((n, i) => n + out[i] * (body.radiusKm + highKm));
+  // Low: looking south a little under the horizon; high: at the globe's middle; at the
+  // end, turned a little toward where the Sun comes up.
+  const dip = Math.acos(body.radiusKm / (body.radiusKm + highKm)) + 0.06;
+  const south = squareTo(north.map((n) => -n), out);
+  const low = mix(Math.cos(dip), south, -Math.sin(dip), out);
+  const toMiddle = out.map((n) => -n);
+  // (Not quite at the middle: at a point 40 degrees south of under her, so the aurora's
+  // band over the south stands in the middle of the view and the globe fills the top.)
+  const ring = mix(Math.cos(rad(-40)), out, Math.sin(rad(-40)), squareTo(north, out));
+  const toRing = unit(body.position.map((n, i) => n + ring[i] * body.radiusKm - position[i]));
+  const k = smooth(22, 46, u);
+  let forward = unit(mix(1 - k, low, k, unit(mix(1, toRing, 0.25, toMiddle))));
+  const toSun = sun.position.map((n, i) => n - position[i]);
+  const sunSide = squareTo(unit(toSun), toMiddle);
+  forward = unit(mix(1, forward, 0.35 * smooth(52, 68, u), sunSide));
+  const up = unit(mix(1 - k, out, k, north));
+  return { position, orientation: orientationFrom(forward, up) };
 }
 
 function cupolaAt(course, body, sun, seconds) {

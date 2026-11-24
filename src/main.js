@@ -14,6 +14,7 @@ import { skyLabels } from './core/sky.js';
 import { createWorld } from './render/world.js';
 import { createStarshipStage } from './render/starshipStage.js';
 import { createTheiaStage } from './render/theiaStage.js';
+import { createMarsStage } from './render/marsStage.js';
 import { createVanish, cutOut, pictureOf } from './ui/vanish.js';
 import { realCloudMap } from './render/realClouds.js';
 import { createInput } from './ui/input.js';
@@ -2449,6 +2450,56 @@ ${STORY_MORE[target.id]}` : told) };
       removeEventListener('resize', starshipResize);
       canvas?.remove();
     }
+  }
+  // The walk on Mars (rail.marsWalk): all of it drawn by a little world of its own on a
+  // canvas over the game's (render/marsStage.js), as Starship's ground is.
+  let marsStage = null;
+  function marsStep(chosen) {
+    const now = courseTime;
+    const on = chosen.rail.stage.some(([a, b]) => now >= a && now < b);
+    let canvas = document.getElementById('marsStage');
+    if (on) {
+      if (!canvas) {
+        document.body.insertAdjacentHTML('beforeend', '<canvas id="marsStage" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;z-index:6;pointer-events:none;background:#000"></canvas>');
+        canvas = document.getElementById('marsStage');
+      }
+      if (!marsStage) {
+        marsStage = createMarsStage(canvas);
+        addEventListener('resize', marsResize);
+      }
+      canvas.hidden = false;
+      marsStage.update(now);
+    } else if (canvas) canvas.hidden = true;
+    // The title, as a film's, over the landing site's panorama (the user, 2026-11-23:
+    // "화면 어딘가에 화성 산책.. 뭐 이런 제목으로 하나 넣어"): up over 2 s, gone by 11 s.
+    let title = document.getElementById('marsTitle');
+    if (!title) {
+      document.body.insertAdjacentHTML('beforeend', '<div id="marsTitle" aria-hidden="true" style="position:fixed;left:0;right:0;top:25%;z-index:7;pointer-events:none;text-align:center;color:#f6eee6;text-shadow:0 2px 14px rgba(0,0,0,0.75),0 0 2px rgba(0,0,0,0.6)" hidden><div style="font-size:clamp(34px,10vw,54px);font-weight:700;letter-spacing:0.12em"></div><div style="margin-top:8px;font-size:clamp(14px,3.8vw,18px);letter-spacing:0.08em;opacity:0.9"></div></div>');
+      title = document.getElementById('marsTitle');
+      title.children[0].textContent = t`화성 산책`;
+      title.children[1].textContent = t`퍼서비어런스의 바퀴 자국을 따라`;
+    }
+    const ease = (x) => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k); };
+    const shown = on ? ease((now - 0.5) / 2) * (1 - ease((now - 9) / 2)) : 0;
+    title.hidden = shown <= 0.001;
+    title.style.opacity = String(shown);
+    title.style.transform = `translateY(${(1 - shown) * 8}px)`;
+    // Up over the night side: a storm's glow over all of it, as Perseverance saw from under it.
+    const from = chosen.rail.orbitFrom;
+    const glow = now >= from ? ease((now - from - 36) / 8) : 0;
+    world.setNightAir('mars', glow > 0 ? [0.08 * glow, 0.34 * glow, 0.14 * glow] : null);
+  }
+  function marsResize() { marsStage?.resize(); }
+  function marsOff() {
+    const canvas = document.getElementById('marsStage');
+    if (marsStage) {
+      marsStage.dispose();
+      marsStage = null;
+      removeEventListener('resize', marsResize);
+    }
+    canvas?.remove();
+    document.getElementById('marsTitle')?.remove();
+    world.setNightAir('mars', null);
   }
   // The pad at dawn (13 October 2024: the liftoff a few minutes before sunrise, the catch
   // just after): the moment of the game's clock, within the next two days, when the Sun
@@ -4951,6 +5002,7 @@ ${STORY_MORE[target.id]}` : told) };
         apolloLanding(chosen, state);
         if (chosen.rail.starship) starshipStep(chosen, state);
         if (chosen.rail.theia) theiaStep(chosen);
+        if (chosen.rail.marsWalk) marsStep(chosen);
         if (chosen.rail.cabin) state = { ...state, orientation: cupolaFloat(state) };
         if (chosen.rail.mmu) mmuFlyStep(chosen, dt, jetKey);
         // Sounds at their moments (rail.sounds: [seconds, cue]).
@@ -5000,6 +5052,7 @@ ${STORY_MORE[target.id]}` : told) };
     } else world.setCraftModel('hubble', null);
     if ((!course || !courseById(course)?.rail?.starship) && starshipStage) starshipOff();
     if ((!course || !courseById(course)?.rail?.theia) && theiaStage) theiaOff();
+    if ((!course || !courseById(course)?.rail?.marsWalk) && marsStage) marsOff();
     if (!course || !courseById(course)?.rail?.dock) {
       world.setFloatModel('columbia', null);
       landingNow = { dust: 0, shadow: null };

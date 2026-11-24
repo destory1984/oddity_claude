@@ -317,6 +317,9 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
     setStorms(on) {
       scene.materials.find((m) => m.name === 'cloudLayer')?.setFloat('storms', on ? 1 : 0);
     },
+    setNightAir(id, rgb) {
+      rendered.find((item) => item.body.id === id)?.setNightAir?.(rgb);
+    },
     setEarthClouds(url) {
       rendered.find((item) => item.body.id === 'earth')?.setClouds?.(url);
     },

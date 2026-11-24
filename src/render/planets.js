@@ -568,6 +568,10 @@ function createProceduralPlanet(scene, body, look, sunDir) {
     setClose(heightRadii) {
       if (look.shader === 'textured') material.setFloat('close', heightRadii);
     },
+    // The night side's own glow changed for a while (null: back to its look's).
+    setNightAir(rgb) {
+      if (look.shader === 'textured') material.setColor3('nightAir', color(rgb ?? look.nightAir ?? [0, 0, 0]));
+    },
     setSun(dir) {
       material.setVector3('sun', new Vector3(...dir));
       if (ring) ring.setSun(new Vector3(...dir));

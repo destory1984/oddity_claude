@@ -3707,6 +3707,31 @@ ${STORY_MORE[target.id]}` : told) };
         cupolaClock = true;
         clockPace = chosen.rail.pace * (chosen.rail.testSpeed ?? 1);
       }
+      // Apollo 8's round of the Moon near a half moon (the user, 2026-11-24: "반달 무렵으로
+      // 옮겨"): the clock moved on to the next time the Sun and the Earth stand
+      // rail.sunEarthDeg apart as seen from the Moon, so the far side lies under a low Sun,
+      // its craters long in shadow, and the Earth comes up over the line of day and night.
+      if (chosen.rail?.lunar) {
+        const want = Math.cos((chosen.rail.sunEarthDeg * Math.PI) / 180);
+        const apart = (t) => {
+          const all = allAt(t);
+          const m = all.find((b) => b.id === 'moon').position, e = all.find((b) => b.id === 'earth').position, sn = all.find((b) => b.id === 'sun').position;
+          const a = e.map((n, i) => n - m[i]), b = sn.map((n, i) => n - m[i]);
+          return a.reduce((sum, n, i) => sum + n * b[i], 0) / (Math.hypot(...a) * Math.hypot(...b));
+        };
+        let best = simTime;
+        let near = Infinity;
+        // (A month of the game's clock, an hour at a time.)
+        for (let t = simTime; t < simTime + 30 * 86400; t += 3600) {
+          const off = Math.abs(apart(t) - want);
+          if (off < near) { near = off; best = t; }
+          if (off < 0.01) break;
+        }
+        simTime = best;
+        bodies = allAt(simTime);
+        craft = craftAt(simTime, bodies);
+        body = here(chosen.body);
+      }
       // Discovery's course in daylight: the clock moved on to the next time Hubble
       // has the Sun some 30 degrees over its level, morning on the ground under it.
       if (chosen.rail?.shuttle) {
@@ -3729,7 +3754,7 @@ ${STORY_MORE[target.id]}` : told) };
         craft = craftAt(simTime, bodies);
         body = here(chosen.body);
       }
-      const start = courseStart(chosen, body, here('sun'), world.ringNormal(body.id), here('moon'), here('hubble'));
+      const start = courseStart(chosen, body, here('sun'), world.ringNormal(body.id), here('moon'), here('hubble'), here('earth'));
       state = { ...createState(start.position, start.orientation), ...start.slide };
       selectedId = body.id;
       wasWith = null;
@@ -4921,7 +4946,7 @@ ${STORY_MORE[target.id]}` : told) };
         // tries it (2026-11-19: "나와의 테스트 기간 중에는 아폴로 속도를 10배로 해").
         const wasTime = courseTime;
         courseTime += dt * (chosen.rail.testSpeed ?? 1);
-        state = { ...state, ...railAt(chosen, here(chosen.body), here('sun'), courseTime, here('moon'), here('hubble')) };
+        state = { ...state, ...railAt(chosen, here(chosen.body), here('sun'), courseTime, here('moon'), here('hubble'), here('earth')) };
         apolloDock(chosen, state);
         apolloLanding(chosen, state);
         if (chosen.rail.starship) starshipStep(chosen, state);

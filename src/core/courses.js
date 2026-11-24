@@ -93,6 +93,25 @@ export const COURSES = [
   // A third of its first pace (the user, 2026-11-24: "달 저공비행. 속도를 1/3로 느리게 해").
   { id: 'moonLow', body: 'moon', lapS: 360, radii: 1.25, name: t('달 저공비행'), todo: t('달의 땅 위를 낮게 돌며 크레이터를 내려다봅니다.'),
     sun: { from: [0.6, 0.35, 0.7], toward: [-0.7, 0, 0.6] } },
+  // Apollo 8's round of the Moon, seen out of the command module's window (lunarAt); a
+  // lap in 30 minutes, four times the true pace (the user, 2026-11-24, of the ground
+  // going by at eight: "달 표면 움직이는 속도를 1/2로"); near a half moon (main.js).
+  { id: 'apollo8', body: 'moon', lapS: 1800, rail: { lunar: true, sunEarthDeg: 105, cabin: 'assets/tours/apollo-cabin.webp', highKm: 110, overHorizonDeg: 12, riseS: 70, hold: [84, 150], startS: 0, pace: 1, loops: true, floaters: [], fades: [1799.9], phases: [[0, t('달의 뒷면')], [70, t('지구돋이')], [170, t('달의 앞면')], [1070, t('다시 뒷면으로')]], captions: [
+    { at: 1, text: t('1968년 12월 24일, 아폴로 8호. 사람이 처음으로 달을 돌고 있습니다. 달 위 110km, 한 바퀴에 2시간입니다.') },
+    { at: 16, text: t('창밖은 달의 뒷면입니다. 지구에서는 한 번도 보이지 않는 쪽입니다.') },
+    { at: 32, text: t('뒷면을 지나는 동안은 달이 가로막아 지구와 무전이 끊깁니다.') },
+    { at: 56, text: t('곧 앞쪽 지평선 위로 지구가 떠오릅니다.') },
+    { at: 76, text: t('"저기 좀 봐! 지구가 떠오르고 있어. 정말 예쁘다." 사령관 프랭크 보먼') },
+    { at: 92, text: t('윌리엄 앤더스가 서둘러 컬러 필름을 끼워 찍은 사진이 "지구돋이"입니다.') },
+    { at: 110, text: t('실제로 창밖의 지구는 엄지손톱만 했습니다. 여기서는 잘 보이게 크게 그렸습니다.') },
+    { at: 128, text: t('세 사람은 달을 보러 와서, 지구를 발견했다고 말했습니다.') },
+    { at: 180, text: t('달에는 공기가 없어, 해가 낮게 드는 곳에서는 크레이터 그림자가 길고 검게 떨어집니다.') },
+    { at: 260, text: t('짐 러벨은 달을 "넓고 쓸쓸하고 험한 곳"이라 했습니다. 그래서 지구가 우주의 오아시스로 보였다고 했습니다.') },
+    { at: 360, text: t('그날 밤 세 사람은 창세기의 첫 구절을 읽어 지구로 보냈습니다.') },
+    { at: 460, text: t('아폴로 8호는 달을 열 바퀴 돌고, 크리스마스에 지구로 돌아오는 길에 올랐습니다.') },
+    { at: 700, text: t('지금 보는 것은 2시간 걸리는 한 바퀴를 4배 빠르게 보인 것입니다.') },
+    { at: 1076, text: t('다시 달의 뒷면으로 들어갑니다. 지구는 등 뒤로 저뭅니다.') },
+  ] }, name: t('아폴로 8호 창밖의 달'), todo: t('처음으로 사람이 달을 돈 아폴로 8호의 창으로, 달 뒷면과 지구돋이를 봅니다.') },
   { id: 'jupiterMoons', body: 'jupiter', lapS: 180, radii: 5, name: t('목성과 위성들'), todo: t('목성을 돌면서 구름 띠와 안쪽 위성들을 봅니다.'),
     sun: { from: [0.7, 0.1, 0.7], toward: [-0.7, 0.1, 0.7] } },
   { id: 'saturnRings', body: 'saturn', lapS: 180, radii: 4.6, name: t('토성의 고리'), todo: t('고리 위로 비스듬히 토성 둘레를 비행합니다. 고리에 드리운 그림자가 보입니다.'),
@@ -149,13 +168,14 @@ function roundOf(course, frame, ringNormal) {
 }
 
 // Where a rail has her after `seconds`, looking at the point it goes round.
-export function railAt(course, body, sun, seconds, moon = null, hubble = null) {
+export function railAt(course, body, sun, seconds, moon = null, hubble = null, earth = null) {
   if (course.rail.mmu && seconds < 0) return mmuAt(course, body, hubble, seconds, sun);
   if (course.rail.shuttle) return shuttleAt(course, body, hubble, seconds, sun);
   if (course.rail.starship) return starshipAt(course, body, seconds, sun);
   if (course.rail.apollo) return apolloAt(course, body, moon, seconds, sun);
   if (course.rail.orbit) return orbitAt(course, body, sun, seconds);
   if (course.rail.cupola) return cupolaAt(course, body, sun, seconds);
+  if (course.rail.lunar) return lunarAt(course, body, sun, seconds, earth);
   // (Over midnight, Earth a strip at the foot of the view (the user, 2026-11-02: "지구가 조금
   // 보여야해"); facing the Sun the view rises by sunwardKm, for the Sun, drawn large, stands
   // on the horizon there, and in view it puts out the aurora and the stars. The user, 2026-11-02: "태양은 안 나와야해... 다 없어지네".)
@@ -234,6 +254,39 @@ function cupolaAt(course, body, sun, seconds) {
   if (aurora.weight > 0) ahead = unit(mix(1 - aurora.weight, ahead, aurora.weight, aurora.toward));
   const dip = rad(horizon + overHorizonDeg * (1 - glance) + 3 * glance);
   const look = mix(Math.cos(dip), ahead, -Math.sin(dip), out);
+  return { position, orientation: orientationFrom(look, out) };
+}
+
+// Round the Moon low, looking ahead out of the command module's window (rail.lunar; the
+// user, 2026-11-24, of seeing the Moon's ground as from the cupola: "큐폴라처럼", "가"):
+// Apollo 8's round, 110 km up, in the plane of the Earth and the line square to it and to
+// the Sun, so the ground ahead where the Earth comes up stands on the line of day and
+// night, its craters long in shadow. Seen from the far side, the Earth comes up over the
+// horizon ahead riseS into a lap; she looks up after it a while (hold: [from, to]) so it
+// stays in the window, then lets it go over the top. overHorizonDeg: how far over the
+// middle of the view the horizon stands.
+function lunarAt(course, body, sun, seconds, earth) {
+  const { highKm, overHorizonDeg, riseS, hold } = course.rail;
+  const R = body.radiusKm;
+  const toSun = unit(sun.position.map((n, i) => n - body.position[i]));
+  const e = earth ? unit(earth.position.map((n, i) => n - body.position[i])) : toSun;
+  let p = cross(e, toSun);
+  p = Math.hypot(...p) > 1e-3 ? unit(p) : squareTo([0, 1, 0], e);
+  // The horizon's dip under the level, and where round the lap the Earth stands on it.
+  const dipH = Math.acos(R / (R + highKm));
+  const rise = Math.acos(Math.sin(dipH));
+  const th = rise + (2 * Math.PI * (seconds - riseS)) / course.lapS;
+  const out = mix(-Math.cos(th), e, Math.sin(th), p);
+  const ahead = mix(Math.sin(th), e, Math.cos(th), p);
+  const position = body.position.map((n, i) => n + out[i] * (R + highKm));
+  // Looking ahead and down, so the horizon stands overHorizonDeg over the middle of the view;
+  // while the Earth is held, raised to keep it 8 degrees over the horizon's place.
+  const d = dipH + rad(overHorizonDeg);
+  const earthUp = Math.asin(Math.max(-1, Math.min(1, dot(e, out)))) + d;
+  const lift = Math.max(0, earthUp - rad(overHorizonDeg + 8));
+  const w = smooth(hold[0], hold[0] + 12, seconds) * (1 - smooth(hold[1], hold[1] + 25, seconds));
+  const pitch = d - lift * w;
+  const look = mix(Math.cos(pitch), ahead, -Math.sin(pitch), out);
   return { position, orientation: orientationFrom(look, out) };
 }
 
@@ -760,8 +813,8 @@ function orbitAt(course, body, sun, seconds) {
 
 // Where a round starts and the slide that carries her along it, with the bodies where
 // they are now. ringNormal: of the body, for a round kept to its rings.
-export function courseStart(course, body, sun, ringNormal = null, moon = null, hubble = null) {
-  if (course.rail) return { ...railAt(course, body, sun, course.rail.startS, moon, hubble), slide: {} };
+export function courseStart(course, body, sun, ringNormal = null, moon = null, hubble = null, earth = null) {
+  if (course.rail) return { ...railAt(course, body, sun, course.rail.startS, moon, hubble, earth), slide: {} };
   const frame = sunFrame(body.position, sun.position);
   const { from, along } = roundOf(course, frame, ringNormal);
   const km = course.radii * body.radiusKm;

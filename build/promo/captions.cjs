@@ -128,12 +128,23 @@ const TOUR = {
     'orbits-1-6': '銀河の真ん中には\nブラックホール、いて座A*。\n数千億の星がこの中心を回ります',
     'end-orbits': { title: 'おばあちゃんの手帳', note: '', find: 'Google Play で探してみてください', store: 'Space Oddity: おばあちゃんの手帳', lead: '今夜も私たちは\n秒速230kmで\n銀河を駆けています' },
   },
+  zh: {
+    'orbits-1-1': '地球每天\n自己转一圈',
+    'orbits-1-2': '地轴总是指向同一个方向，\n所以有了夏天和冬天',
+    'orbits-1-3': '水星88天，\n海王星165年绕一圈',
+    'orbits-1-4': '太阳也没有停下来。\n行星们画着螺旋\n跟着它前进',
+    'orbits-1-5': '附近的恒星也一起奔跑。\n最近的是半人马座α',
+    'orbits-1-6': '银河系的正中央\n是黑洞人马座A*。\n数千亿颗恒星绕着它转',
+    'end-orbits': { title: '奶奶的笔记本', note: '', find: '在 Google Play 上搜索', store: 'Space Oddity: 奶奶的笔记本', lead: '今夜，我们也以\n每秒230公里\n在银河中奔驰' },
+  },
 };
 const LINES = { thatday: THAT_DAY, gaze: GAZE, tour: TOUR }[process.env.FILM] ?? FIRST;
 
 // (Gaegu and Pretendard have no kana or kanji: Japanese in a Japanese face of Windows.)
 const CJK = {
   ja: ".line, .end .lead, .end .title, .end .note { font-family: 'BIZ UDPGothic', 'Yu Gothic', 'Meiryo', sans-serif !important; font-weight: 700 !important; }\n.end .find, .end .find b { font-family: 'BIZ UDPGothic', 'Yu Gothic', 'Meiryo', sans-serif !important; }\n.end .title { font-size: 38px !important; }",
+  zh: ".line, .end .lead, .end .title, .end .note { font-family: 'Microsoft YaHei', 'DengXian', sans-serif !important; font-weight: 700 !important; }\n"
+    + ".end .find, .end .find b { font-family: 'Microsoft YaHei', 'DengXian', sans-serif !important; }\n.end .title { font-size: 40px !important; }",
 };
 const page = (body, lang) => `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="${DEV}fonts/pretendard/pretendardvariable-dynamic-subset.css">

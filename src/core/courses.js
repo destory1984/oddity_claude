@@ -31,7 +31,7 @@ import { outOf, sunFrame } from './startSpots.js';
 import { t } from './i18n.js';
 
 export const COURSES = [
-  { id: 'auroraDrift', body: 'earth', lapS: 120, rail: { latDeg: 67, startS: 75, atKm: 800, sunwardKm: 470, highKm: 400, rangeKm: 1500 }, name: t('오로라 유영'), todo: t('밤쪽 오로라 한 곳을 가까이에서 맴돌며 빛의 커튼 사이를 지나갑니다.') },
+  { id: 'auroraDrift', body: 'earth', lapS: 240, rail: { oval: { latDeg: 62, ringDeg: 67, highKm: 450, atKm: 500, aheadDeg: 20, fromDeg: -45, toDeg: 45 }, loops: true, startS: 0, fades: [239.2] }, name: t('오로라 유영'), todo: t('밤쪽 오로라 한 곳을 가까이에서 맴돌며 빛의 커튼 사이를 지나갑니다.') },
   // At the height of the round the user flew; its plane leans to the line of day and night,
   // for the Sun in view puts out the rest (the user, 2026-11-02: "태양이 안 보였으면 좋겠어").
   { id: 'earthRound', body: 'earth', lapS: 120, radii: 4.31, name: t('지구 한 바퀴'), todo: t('두 분 동안 지구를 한 바퀴 비행합니다. 낮과 밤, 오로라가 차례로 지나갑니다.'),
@@ -269,6 +269,7 @@ export function railAt(course, body, sun, seconds, moon = null, hubble = null, e
   if (course.rail.cupola) return cupolaAt(course, body, sun, seconds);
   if (course.rail.lunar) return lunarAt(course, body, sun, seconds, earth);
   if (course.rail.orbitFrom !== undefined && seconds >= course.rail.orbitFrom) return marsOrbitAt(course, body, sun, seconds);
+  if (course.rail.oval) return ovalAt(course, body, sun, seconds);
   // (Over midnight, Earth a strip at the foot of the view (the user, 2026-11-02: "지구가 조금
   // 보여야해"); facing the Sun the view rises by sunwardKm, for the Sun, drawn large, stands
   // on the horizon there, and in view it puts out the aurora and the stars. The user, 2026-11-02: "태양은 안 나와야해... 다 없어지네".)
@@ -282,6 +283,29 @@ export function railAt(course, body, sun, seconds, moon = null, hubble = null, e
   const position = body.position.map((n, i) => n + over[i] * (body.radiusKm + highKm) + aside[i] * rangeKm);
   const facingSun = Math.max(0, dot(aside, away));
   const point = body.position.map((n, i) => n + over[i] * (body.radiusKm + atKm + sunwardKm * facingSun));
+  return { position, orientation: orientationFrom(point.map((n, i) => n - position[i]), over) };
+}
+
+// Along the aurora's ring (rail.oval; the user, 2026-11-25, of the old round of one
+// stretch: "코스를 좀 바꿔보자", "나"): on the night side, flying along the ring that stands
+// at ringDeg about the spin axis, a little to the equator's side of it (latDeg) at highKm,
+// from fromDeg to toDeg round the pole (0 is midnight, the east positive), looking ahead
+// along the ring aheadDeg on to a point atKm up in the curtain, so it runs on ahead like
+// a river, the night Earth under it.
+function ovalAt(course, body, sun, seconds) {
+  const { latDeg, ringDeg, highKm, atKm, aheadDeg, fromDeg, toDeg } = course.rail.oval;
+  const night = unit([body.position[0] - sun.position[0], 0, body.position[2] - sun.position[2]]);
+  const east = unit(cross([0, 1, 0], night));
+  const outAt = (phiDeg, lat) => {
+    const round = mix(Math.cos(rad(phiDeg)), night, Math.sin(rad(phiDeg)), east);
+    return mix(Math.cos(rad(lat)), round, Math.sin(rad(lat)), [0, 1, 0]);
+  };
+  const k = ((seconds % course.lapS) + course.lapS) % course.lapS / course.lapS;
+  const phi = fromDeg + (toDeg - fromDeg) * k;
+  const over = outAt(phi, latDeg);
+  const position = body.position.map((n, i) => n + over[i] * (body.radiusKm + highKm));
+  const ahead = outAt(phi + Math.sign(toDeg - fromDeg) * aheadDeg, ringDeg);
+  const point = body.position.map((n, i) => n + ahead[i] * (body.radiusKm + atKm));
   return { position, orientation: orientationFrom(point.map((n, i) => n - position[i]), over) };
 }
 

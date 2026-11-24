@@ -3619,6 +3619,7 @@ ${STORY_MORE[target.id]}` : told) };
   // the hours since liftoff, as the course passes the true moments (rail.met: course
   // second and mission hour; rail.phases: from which course second, the name) (2026-11-19,
   // Apollo, so that eight days are felt in a course of minutes). Off with the captions.
+  // (17px, as the clock's date over it: it was 14, the user, 2026-11-25: "글자 너무 작아".)
   function cabinMet(chosen) {
     const met = cupolaOn && captionsOn ? chosen?.rail?.met : null;
     let line = document.getElementById('cabinMet');
@@ -3627,7 +3628,7 @@ ${STORY_MORE[target.id]}` : told) };
       return;
     }
     if (!line) {
-      document.body.insertAdjacentHTML('beforeend', '<div id="cabinMet" aria-hidden="true" style="position:fixed;z-index:20;pointer-events:none;white-space:nowrap;font-family:var(--hand);font-size:14px;letter-spacing:.04em;color:#fff1d0;opacity:.85;text-shadow:0 2px 8px #000c"></div>');
+      document.body.insertAdjacentHTML('beforeend', '<div id="cabinMet" aria-hidden="true" style="position:fixed;z-index:20;pointer-events:none;white-space:nowrap;font-family:var(--hand);font-size:17px;letter-spacing:.04em;color:#fff1d0;opacity:.85;text-shadow:0 2px 8px #000c"></div>');
       line = document.getElementById('cabinMet');
     }
     let h = met[met.length - 1][1];

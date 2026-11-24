@@ -23,7 +23,8 @@ export const ORBITS = {
   helix: [312, 370], // the Sun going on, the planets with it: helices (the last 20 s true to scale)
   hood: [370, 435], // the stars near the Sun going on with it: a look round, then four of them
   galaxy: [435, 505], // the Sun going round the galaxy
-  end: 505,
+  core: [505, 527], // in to its middle: the black hole Sagittarius A* and the stars close round it
+  end: 527,
 };
 
 const TILT = (23.4 * Math.PI) / 180;
@@ -535,6 +536,42 @@ export function createOrbitStage(canvas) {
     dot.setEnabled(false);
     return { ...m, u: 1 - m.my / LAP_MY, dot };
   });
+  // Its middle: the black hole, a dark ball in a glow, and stars on tight, fast ellipses
+  // round it (the S stars; S2 takes 16 years).
+  const hole = CreateSphere('orbitHole', { diameter: 3, segments: 24 }, scene);
+  hole.material = bodyMat('orbitHoleMat', null, [0, 0, 0]);
+  hole.material.setFloat('night', 1);
+  hole.position.copyFrom(GAL_AT);
+  hole.setEnabled(false);
+  const holeGlow = CreatePlane('orbitHoleGlow', { size: 22 }, scene);
+  holeGlow.material = glowMat('orbitHoleGlowMat', [1, 0.62, 0.32]);
+  holeGlow.billboardMode = Mesh.BILLBOARDMODE_ALL;
+  holeGlow.position.copyFrom(GAL_AT);
+  holeGlow.setEnabled(false);
+  const sStars = [[9, 0.88, 3.2, 0.3, 0], [14, 0.6, 5.0, 1.2, 2], [7, 0.45, 2.4, 2.1, 4], [18, 0.75, 7.0, 2.9, 1], [11, 0.3, 3.9, 0.9, 3], [16, 0.5, 6.2, 1.8, 5]].map(([a, e, lap, tilt, ph], i) => {
+    // The ellipse in its own plane, its focus at the hole.
+    const u = new Vector3(Math.cos(tilt), Math.sin(tilt) * 0.6, Math.sin(tilt) * 0.8).normalize();
+    const w0 = Vector3.Cross(u, new Vector3(0.3, 1, 0.2)).normalize();
+    const v = Vector3.Cross(w0, u).normalize();
+    const b = a * Math.sqrt(1 - e * e);
+    const local = (E) => u.scale(a * (Math.cos(E) - e)).add(v.scale(b * Math.sin(E)));
+    const at = (t) => {
+      const M = (2 * Math.PI * t) / lap + ph;
+      let E = M;
+      for (let k = 0; k < 6; k++) E = M + e * Math.sin(E);
+      return GAL_AT.add(local(E));
+    };
+    const pts = [];
+    for (let k = 0; k <= 120; k++) pts.push(GAL_AT.add(local((2 * Math.PI * k) / 120)));
+    const ring = CreateLineSystem(`orbitSRing${i}`, { lines: [pts] }, scene);
+    ring.color = new Color3(0.75, 0.8, 1);
+    ring.setEnabled(false);
+    const dot = CreatePlane(`orbitS${i}`, { size: 2.4 }, scene);
+    dot.material = glowMat(`orbitSMat${i}`, [0.8, 0.88, 1]);
+    dot.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    dot.setEnabled(false);
+    return { at, ring, dot };
+  });
   // Where the Sun is in it: a marker that stays a few pixels across.
   const sunMark = CreatePlane('orbitSunMark', { size: 1 }, scene);
   sunMark.material = glowMat('orbitSunMarkMat', [1, 0.9, 0.5]);
@@ -685,12 +722,12 @@ export function createOrbitStage(canvas) {
   };
   const tags = [];
   const clock = document.createElement('div');
-  clock.style.cssText = 'position:absolute;left:0;right:0;top:12%;text-align:center;font:700 clamp(18px,5vw,24px) system-ui,sans-serif;letter-spacing:0.04em;opacity:0;transition:opacity 0.8s';
+  clock.style.cssText = 'position:absolute;left:0;right:0;top:27%;text-align:center;font:700 clamp(18px,5vw,24px) system-ui,sans-serif;letter-spacing:0.04em;opacity:0;transition:opacity 0.8s';
   names.append(clock);
   const tag = (text, at, shown) => tags.push({ el: label(text), at, shown });
   const pillColor = { sun: '#ffe6a8', alpha: '#ffb27a', trappist: '#ff8a78', kepler16: '#ffc58a', kepler452: '#f3f0d8' };
   const card = document.createElement('div');
-  card.style.cssText = 'position:absolute;left:8%;right:8%;top:13%;opacity:0;transition:opacity 0.8s';
+  card.style.cssText = 'position:absolute;left:8%;right:8%;top:27%;opacity:0;transition:opacity 0.8s';
   card.innerHTML = '<div style="font:700 clamp(24px,7vw,34px) system-ui,sans-serif;letter-spacing:0.02em"></div><div style="margin-top:4px;font:500 clamp(13px,3.6vw,16px) system-ui,sans-serif;opacity:0.9"></div>';
   names.append(card);
   let cardShown = -1;
@@ -703,8 +740,15 @@ export function createOrbitStage(canvas) {
       tag(words.moon, () => moon.getAbsolutePosition(), (t) => inPart([ORBITS.moon[0] + 4, ORBITS.lock[1]], t));
       tag(words.ghost, () => ghost.getAbsolutePosition(), (t) => inPart([ORBITS.lock[0] + 14, ORBITS.lock[1]], t));
       for (const p of planets) tag(words[p.id], () => p.mesh.getAbsolutePosition(), (t) => inPart([ORBITS.planets[0] + 4, ORBITS.planets[1] + 6], t) || (p.id === 'earth' && inPart(ORBITS.year, t)));
-      tag(words.here, () => helio.position, (t) => t >= ORBITS.galaxy[0] + 10);
-      for (const m of marks) tag(words[m.key], () => m.dot.position, (t) => (m.u === 0 ? t >= ORBITS.galaxy[0] + 40 : lapU(t) >= m.u) && t < ORBITS.end - 8);
+      tag(words.here, () => helio.position, (t) => inPart([ORBITS.galaxy[0] + 10, ORBITS.galaxy[1]], t));
+      {
+        const n = tags.length;
+        tag(`${words.sgr[0]}\n${words.sgr[1]}`, () => GAL_AT.add(new Vector3(0, 13, 0)), (t) => inPart([ORBITS.core[0] + 5, ORBITS.core[1] - 0.5], t));
+        tags[n].el.style.whiteSpace = 'pre';
+        tags[n].el.style.textAlign = 'center';
+        tags[n].el.style.transform = 'translate(-50%,-135%)';
+      }
+      for (const m of marks) tag(words[m.key], () => m.dot.position, (t) => (m.u === 0 ? t >= ORBITS.galaxy[0] + 40 : lapU(t) >= m.u) && t < ORBITS.galaxy[1] - 8);
       tag(words.sun, () => helio.position, (t) => inPart([ORBITS.helix[0] + 4, ORBITS.helix[1]], t));
       for (const sys of SYSTEMS) {
         const n = tags.length;
@@ -850,7 +894,7 @@ export function createOrbitStage(canvas) {
     const gOn = smooth(ORBITS.galaxy[0], ORBITS.galaxy[0] + 4, T);
     galaxy.setEnabled(gOn > 0.001);
     disc.setEnabled(gOn > 0.001);
-    discMat.setFloat('fade', gOn * (0.25 + 0.75 * smooth(ORBITS.galaxy[0] + 22, ORBITS.galaxy[0] + 40, T)));
+    discMat.setFloat('fade', gOn * (0.25 + 0.75 * smooth(ORBITS.galaxy[0] + 22, ORBITS.galaxy[0] + 40, T)) * (1 - 0.85 * smooth(ORBITS.core[0], ORBITS.core[0] + 5, T)));
     for (const n of nebulae) n.setEnabled(gOn > 0.001);
     nebulae[0].material.setFloat('power', gOn * 0.5);
     const nearOnG = gOn * (1 - smooth(ORBITS.galaxy[0] + 24, ORBITS.galaxy[0] + 34, T));
@@ -866,13 +910,29 @@ export function createOrbitStage(canvas) {
       m.dot.material.setFloat('power', 1.2);
     }
     if (words) {
-      const on = gOn > 0.001 && T >= ORBITS.galaxy[0] + 4 && T < ORBITS.end - 0.5;
+      const on = gOn > 0.001 && T >= ORBITS.galaxy[0] + 4 && T < ORBITS.galaxy[1] - 0.5;
       clock.style.opacity = on ? '1' : '0';
       if (on) clock.textContent = words.ago(Math.round(LAP_MY * (1 - uNow)));
     }
     galCore.setEnabled(gOn > 0.001);
     galMat.setFloat('fade', gOn);
-    galCore.material.setFloat('power', gOn * 0.45 * smooth(ORBITS.galaxy[0] + 20, ORBITS.galaxy[0] + 40, T));
+    galCore.material.setFloat('power', gOn * 0.45 * smooth(ORBITS.galaxy[0] + 20, ORBITS.galaxy[0] + 40, T) * (1 - smooth(ORBITS.core[0], ORBITS.core[0] + 5, T)));
+    // The black hole and the stars close round it.
+    const coreOn = inPart(ORBITS.core, T);
+    hole.setEnabled(coreOn);
+    holeGlow.setEnabled(coreOn);
+    holeGlow.material.setFloat('power', 0.8 * smooth(ORBITS.core[0] + 2, ORBITS.core[0] + 6, T));
+    // (Kept behind the ball, so the ball stays black all over.)
+    holeGlow.position.copyFrom(GAL_AT.add(GAL_AT.subtract(camera.position).normalize().scale(2.5)));
+    for (const st of sStars) {
+      st.dot.setEnabled(coreOn);
+      st.ring.setEnabled(coreOn);
+      if (!coreOn) continue;
+      st.dot.position.copyFrom(st.at(T - ORBITS.core[0]));
+      st.dot.material.setFloat('power', smooth(ORBITS.core[0] + 4, ORBITS.core[0] + 7, T));
+      const rk = 0.3 * smooth(ORBITS.core[0] + 5, ORBITS.core[0] + 8, T);
+      st.ring.color.set(0.75 * rk, 0.8 * rk, rk);
+    }
     galMat.setFloat('turn', 0);
     galMat.setFloat('pixel', engine.getRenderHeight() / camera.fov);
     galMat.setVector3('eye', camera.position);
@@ -906,7 +966,7 @@ export function createOrbitStage(canvas) {
       tr.line = CreateLineSystem(tr.name, { lines: [pts], instance: tr.line }, scene);
       tr.line.alpha = Math.min(1, (T - ORBITS.helix[0] - 1) / 3) * (1 - smooth(ORBITS.helix[1] - 3, ORBITS.helix[1], T));
     }
-    sunMark.setEnabled(gOn > 0.001);
+    sunMark.setEnabled(gOn > 0.001 && T < ORBITS.galaxy[1]);
     sunMark.material.setFloat('power', gOn * 1.4);
     sunMark.scaling.setAll(Math.max(1, camera.position.subtract(helio.position).length() * 0.02));
 
@@ -992,7 +1052,10 @@ export function createOrbitStage(canvas) {
       { t: ORBITS.galaxy[0] + 32, at: helioAt(60, 90, 130), look: helioAt(0, 0, -20), fov: 0.85 },
       // ...to the whole galaxy, its lap drawn.
       { t: ORBITS.galaxy[0] + 46, at: GAL_AT.add(at(260, 1500, 950)), look: GAL_AT.add(at(40, 0, 0)), fov: 0.8 },
-      { t: ORBITS.end, at: GAL_AT.add(at(-120, 1950, 700)), look: GAL_AT, fov: 0.8 },
+      { t: ORBITS.galaxy[1], at: GAL_AT.add(at(-120, 1950, 700)), look: GAL_AT, fov: 0.8 },
+      // In to its middle.
+      { t: ORBITS.core[0] + 6, at: GAL_AT.add(at(18, 34, 62)), look: GAL_AT, fov: 0.8 },
+      { t: ORBITS.end, at: GAL_AT.add(at(-6, 30, 58)), look: GAL_AT, fov: 0.8 },
     ];
     let i = 0;
     while (i < keys.length - 2 && T > keys[i + 1].t) i++;

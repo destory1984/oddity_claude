@@ -11,6 +11,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-25', text: t('태양계는 어떻게 도는가의 끝에 은하 한가운데의 블랙홀 궁수자리 A*를 찾아갑니다.') },
   { day: '2026-11-24', text: t('태양계는 어떻게 도는가에 이웃 별들 장면이 생겼습니다. 알파 센타우리 같은 별도 함께 달립니다.') },
   { day: '2026-11-24', text: t('태양계는 어떻게 도는가에서 행성들의 나선을 실제 비율로 펴서도 보여 줍니다.') },
   { day: '2026-11-24', text: t('태양계는 어떻게 도는가의 은하 장면이 길어져, 해가 은하를 한 바퀴 도는 2억 3천만 년을 봅니다.') },

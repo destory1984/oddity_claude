@@ -2444,7 +2444,7 @@ ${STORY_MORE[target.id]}` : told) };
   // How the Solar System turns (rail.orbits): drawn by a little world of its own on a canvas
   // over the game's (render/orbitStage.js), names over what they name, a film's title.
   let orbitStage = null;
-  const ORBIT_WORDS = { sun: t('태양'), earth: t('지구'), moon: t('달'), ghost: t('스스로 돌지 않는다면'), here: t('태양계는 여기'), mercury: t('수성'), venus: t('금성'), mars: t('화성'), jupiter: t('목성'), saturn: t('토성'), uranus: t('천왕성'), neptune: t('해왕성'), firstDino: t('첫 공룡'), dinoGone: t('공룡이 사라짐'), ago: yearsAgo, hood: { sun: [t('태양계'), ''], alpha: [t('알파 센타우리'), t('4.4광년 · 해가 셋')], trappist: [t('트라피스트-1'), t('40광년 · 지구만 한 행성 일곱')], kepler16: [t('케플러-16'), t('245광년 · 해가 둘인 행성')], kepler452: [t('케플러-452'), t('1,800광년 · 지구의 사촌')] } };
+  const ORBIT_WORDS = { sun: t('태양'), earth: t('지구'), moon: t('달'), ghost: t('스스로 돌지 않는다면'), here: t('태양계'), sgr: [t('궁수자리 A*'), t('해의 400만 배 · 2만 6천 광년')], mercury: t('수성'), venus: t('금성'), mars: t('화성'), jupiter: t('목성'), saturn: t('토성'), uranus: t('천왕성'), neptune: t('해왕성'), firstDino: t('첫 공룡'), dinoGone: t('공룡이 사라짐'), ago: yearsAgo, hood: { sun: [t('태양계'), ''], alpha: [t('알파 센타우리'), t('4.4광년 · 해가 셋')], trappist: [t('트라피스트-1'), t('40광년 · 지구만 한 행성 일곱')], kepler16: [t('케플러-16'), t('245광년 · 해가 둘인 행성')], kepler452: [t('케플러-452'), t('1,800광년 · 지구의 사촌')] } };
   // How long ago, in millions of years, as the clock over the galaxy writes it.
   function yearsAgo(my) {
     if (my <= 0) return t('오늘');

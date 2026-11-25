@@ -16,6 +16,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-25', text: t('달은 왜 한쪽 얼굴만 보일까에 에리스와 디스노미아, 소행성 쌍 파트로클로스와 메노이티오스가 생겼습니다.'), go: { course: 'moonFace', at: 231 } },
   { day: '2026-11-25', text: t('추천 우주멍 코스 달은 왜 한쪽 얼굴만 보일까가 생겼습니다. 갓 생긴 달부터 명왕성과 카론까지 봅니다.'), go: { course: 'moonFace' } },
   { day: '2026-11-25', text: t('태양계는 어떻게 도는가의 달 이야기를 새 코스로 옮겨, 한 바퀴가 9분 40초에서 7분 10초로 줄었습니다.') },
   { day: '2026-11-25', text: t('태양계는 어떻게 도는가에서 태양이 은하를 돌며 원반의 위아래를 오가는 모습을 봅니다.'), go: { course: 'orbits', at: 369 } },

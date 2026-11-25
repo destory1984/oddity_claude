@@ -10,11 +10,14 @@
 //   why:    the newborn Moon turning fast; the Earth's pull stretches it toward the Earth;
 //           the turning carries the bulge ahead, the Earth pulls it back, the turning slows
 //           until it keeps pace with the round: one face for good.
-//   phases: from beside the Earth, the Moon's lit half seen from round its way.
 //   seas:   the same on the Earth: the Moon raises its seas, the Earth's quicker turn carries
 //           them ahead; the Moon pulls them back, so the day grows longer, and they pull the
 //           Moon on, so it draws away (3.8 cm a year).
-//   pluto:  Pluto and Charon, each keeping one face to the other: both locked.
+//   pluto, eris, trojans: is it only the Earth and the Moon? Pluto and Charon, each keeping
+//          one face to the other; Eris, keeping one face to its moon Dysnomia; and the twin
+//          asteroids Patroclus and Menoetius, locked to each other (the user: "명왕성 말고도
+//          또 있으면, 샘플 넣어"). (The Moon's shape went to a course of its own: "달의
+//          모양은 다른 영상으로 뺴자".)
 // y up (north); x and z in the Earth's orbit's plane.
 import { Engine, Scene, FreeCamera, Vector3, Color3, Color4, CreateSphere, CreateLineSystem, ShaderMaterial, Effect, Texture, Mesh, TransformNode, Matrix } from './babylon.js';
 import './orbitStage.js'; // its shaders: orbitBody, orbitSky
@@ -24,18 +27,17 @@ export const MOONS = {
   round: [0, 50],
   lock: [50, 100],
   why: [100, 160],
-  phases: [160, 210],
-  seas: [210, 248],
-  pluto: [248, 284],
-  end: 286,
+  seas: [160, 198],
+  pluto: [198, 232],
+  eris: [232, 256],
+  trojans: [256, 290],
+  end: 292,
 };
 
 const TILT = (23.4 * Math.PI) / 180;
 const MOON_TILT = (5.1 * Math.PI) / 180;
 const MOON_ORBIT = 5;
 const MOON_R = 0.27 * 1.8;
-// Near the Earth the Sun stands here while the Moon's shape is watched.
-const LOCAL_SUN = new Vector3(-0.8, 0.15, -0.55).normalize();
 
 // A swollen sea: a see-through shell, brighter toward its edge.
 Effect.ShadersStore.moonShellVertexShader = `
@@ -80,11 +82,11 @@ export function createMoonStage(canvas) {
   sky.material = skyMat;
   sky.infiniteDistance = true;
 
-  const bodyMat = (name, src) => {
+  const bodyMat = (name, src, tint = [0.5, 0.5, 0.5]) => {
     const m = new ShaderMaterial(name, scene, { vertex: 'orbitBody', fragment: 'orbitBody' }, { attributes: ['position', 'normal', 'uv'], uniforms: ['world', 'viewProjection', 'sunAt', 'sunPoint', 'hasMap', 'tint', 'night', 'markAt', 'mark', 'fade', 'markR', 'hasNight', 'gain'], samplers: ['map', 'nightMap'] });
-    m.setTexture('map', new Texture(`${base}${src}`, scene, false, false));
-    m.setFloat('hasMap', 1);
-    m.setColor3('tint', new Color3(0.5, 0.5, 0.5));
+    if (src) m.setTexture('map', new Texture(`${base}${src}`, scene, false, false));
+    m.setFloat('hasMap', src ? 1 : 0);
+    m.setColor3('tint', new Color3(...tint));
     m.setFloat('night', 0.2);
     m.setFloat('mark', 0);
     m.setFloat('markR', 0.2);
@@ -158,18 +160,34 @@ export function createMoonStage(canvas) {
   const middles = lineOf('moonMiddles', [0.55, 0.6, 0.7], [Vector3.Zero(), Vector3.Zero()]);
   const seaPull = lineOf('moonSeaPull', [1, 0.85, 0.35], [Vector3.Zero(), Vector3.Zero()]);
 
-  // Pluto and Charon (Charon 0.51 of Pluto across), round their common middle, which lies
-  // outside Pluto (Charon is an eighth of Pluto's weight).
-  const plutoMat = bodyMat('moonPlutoMat', 'assets/planets/pluto.webp');
-  const charonMat = bodyMat('moonCharonMat', 'assets/planets/charon.webp');
-  const PLUTO_R = 0.6, CHARON_R = 0.31, PAIR = 6, PAIR_MID = 6 * 0.109;
-  const pluto = CreateSphere('moonPluto', { diameter: PLUTO_R * 2, segments: 48 }, scene);
-  pluto.material = plutoMat;
-  const charon = CreateSphere('moonCharon', { diameter: CHARON_R * 2, segments: 48 }, scene);
-  charon.material = charonMat;
+  // Pairs locked to each other (or one to the other), each going round their common middle:
+  // a and b with their radius, a map or a colour, and a shape (stretched along the line
+  // between them, z in each one's own frame); sep the distance between, mid how far from a
+  // the middle lies; lap the seconds of a round, drawn.
+  //   Pluto and Charon: Charon 0.51 of Pluto across, an eighth of its weight, so the middle
+  //   lies outside Pluto. Eris and Dysnomia: Dysnomia about a quarter of Eris across, some
+  //   0.5% of its weight (not well measured), the middle inside Eris; only Eris is known to
+  //   keep one face (Dysnomia's own turn is not known: no spot on it; Codex, 2026-11-25). Patroclus and Menoetius: near twins some 110 km across, each
+  //   a little drawn out.
+  const PAIRS = [
+    { part: 'pluto', words: ['pluto', 'charon'], a: { src: 'assets/planets/pluto.webp', r: 0.6 }, b: { src: 'assets/planets/charon.webp', r: 0.31 }, sep: 6, mid: 6 * 0.109, lap: 10 },
+    { part: 'eris', words: ['eris', 'dysnomia'], a: { tint: [0.9, 0.9, 0.92], r: 0.6 }, b: { tint: [0.32, 0.3, 0.29], r: 0.16, noMark: true }, sep: 6, mid: 6 * 0.005, lap: 12 },
+    { part: 'trojans', words: ['patroclus', 'menoetius'], a: { src: 'assets/planets/phobos.webp', r: 0.5, shape: [0.85, 0.9, 1.25] }, b: { src: 'assets/planets/vesta.webp', r: 0.46, shape: [0.9, 0.85, 1.2] }, sep: 4.2, mid: 4.2 * 0.47, lap: 8 },
+  ];
   const flatCircle = (R) => Array.from({ length: 161 }, (_, i) => flatDir((i / 160) * Math.PI * 2).scale(R));
-  const plutoRing = lineOf('moonPlutoRing', [0.7, 0.7, 0.75], flatCircle(PAIR_MID));
-  const charonRing = lineOf('moonCharonRing', [0.7, 0.7, 0.75], flatCircle(PAIR - PAIR_MID));
+  for (const p of PAIRS) {
+    for (const k of ['a', 'b']) {
+      const o = p[k];
+      o.mat = bodyMat(`moon${p.part}${k}Mat`, o.src, o.tint);
+      o.mesh = CreateSphere(`moon${p.part}${k}`, { diameter: o.r * 2, segments: 48 }, scene);
+      o.mesh.material = o.mat;
+      const [x, y, z] = o.shape ?? [1, 1, 1];
+      o.mesh.scaling.set(x, y, z);
+      o.ring = lineOf(`moon${p.part}${k}Ring`, [0.7, 0.7, 0.75], flatCircle(k === 'a' ? p.mid : p.sep - p.mid));
+    }
+  }
+  const pairOf = (T) => PAIRS.find((p) => T >= MOONS[p.part][0] && T < MOONS[p.part][1]) ?? (T >= MOONS.trojans[1] ? PAIRS[2] : null);
+  const pairAng = (p, T) => (2 * Math.PI * (T - MOONS[p.part][0])) / p.lap + 2.2;
 
   const smooth = (a, b, x) => { const k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
   const lerp = (a, b, k) => a + (b - a) * k;
@@ -217,7 +235,6 @@ export function createMoonStage(canvas) {
 
   let moonAt = Vector3.Zero();
   let T0 = 0;
-  const pairAng = (T) => (2 * Math.PI * (T - MOONS.pluto[0])) / 10 + 2.2;
   let moonDir = wayDir(0);
   function update(T, words) {
     T0 = T;
@@ -227,13 +244,16 @@ export function createMoonStage(canvas) {
       tag(words.earth, () => (T0 >= MOONS.seas[0] ? moonDir.scale(-1.15) : new Vector3(0, 0.95, 0)), (t) => inPart([MOONS.round[0] + 2, MOONS.lock[1]], t) || inPart([MOONS.seas[0] + 4, MOONS.seas[1]], t));
       tag(words.moon, () => (T0 >= MOONS.seas[0] ? moonAt.add(moonDir.scale(-MOON_R * 1.2)) : moonAt), (t) => inPart([MOONS.round[0] + 4, MOONS.why[0]], t) || inPart([MOONS.seas[0] + 4, MOONS.seas[1]], t));
       tag(words.ghost, () => ghost.position, (t) => inPart([MOONS.lock[0] + 14, MOONS.lock[1]], t));
-      tag(words.pluto, () => pluto.position.add(flatDir(pairAng(T0)).scale(-PLUTO_R * 1.15)), (t) => inPart([MOONS.pluto[0] + 2, MOONS.pluto[1]], t));
-      tag(words.charon, () => charon.position.add(flatDir(pairAng(T0)).scale(-CHARON_R * 1.3)), (t) => inPart([MOONS.pluto[0] + 2, MOONS.pluto[1]], t));
+      for (const p of PAIRS) {
+        const span = [MOONS[p.part][0] + 2, MOONS[p.part][1]];
+        tag(words[p.words[0]], () => p.a.mesh.position.add(flatDir(pairAng(p, T0)).scale(-p.a.r * 1.15)), (t) => inPart(span, t));
+        tag(words[p.words[1]], () => p.b.mesh.position.add(flatDir(pairAng(p, T0)).scale(-p.b.r * 1.4)), (t) => inPart(span, t));
+      }
     }
-    // A dip to black between the Earth's part and Pluto's, and at the end.
-    const fade = (1 - smooth(MOONS.seas[1] - 1, MOONS.seas[1], T) * (1 - smooth(MOONS.pluto[0], MOONS.pluto[0] + 1.5, T))) * (1 - smooth(MOONS.pluto[1] + 0.5, MOONS.end, T));
+    // A dip to black between the Earth's part and the pairs, and between them, and at the end.
+    let fade = 1 - smooth(MOONS.trojans[1] + 0.5, MOONS.end, T);
+    for (const d of [MOONS.pluto[0], MOONS.eris[0], MOONS.trojans[0]]) fade *= 1 - smooth(d - 1, d, T) * (1 - smooth(d, d + 1.5, T));
     const nearOn = T < MOONS.seas[1];
-    const pairOn = !nearOn;
 
     // --- The Earth and the Moon ---
     earthTilt.setEnabled(nearOn);
@@ -247,14 +267,16 @@ export function createMoonStage(canvas) {
     moonHold.position.copyFrom(moonAt);
     setLine(moonRing, circle(R), 0.6 * smooth(MOONS.round[0] + 1, MOONS.round[0] + 5, T) * (1 - smooth(MOONS.why[0], MOONS.why[0] + 3, T) + smooth(MOONS.seas[0] + 2, MOONS.seas[0] + 5, T)) * (nearOn ? 1 : 0));
     // Up close while its turning is watched.
-    const big = 1 + 0.75 * smooth(MOONS.why[0], MOONS.why[0] + 4, T) * (1 - smooth(MOONS.phases[0] - 2, MOONS.phases[0] + 2, T));
+    const big = 1 + 0.75 * smooth(MOONS.why[0], MOONS.why[0] + 4, T) * (1 - smooth(MOONS.seas[0] - 2, MOONS.seas[0] + 2, T));
     const extra = extraOf(T);
     // The bulge: carried ahead (anticlockwise) by the fast turn, drawn back to the Earth as
     // the turn slows; kept, pointing at the Earth, once it is locked.
-    const bulgeOn = smooth(MOONS.why[0] + 8, MOONS.why[0] + 12, T) * (1 - smooth(MOONS.phases[0] - 2, MOONS.phases[0] + 2, T));
+    const bulgeOn = smooth(MOONS.why[0] + 8, MOONS.why[0] + 12, T) * (1 - smooth(MOONS.seas[0] - 2, MOONS.seas[0] + 2, T));
     const toEarth = ma + Math.PI;
-    const bulgeAng = toEarth + 0.55 * extraRate(T);
-    const stretch = 1 + 0.42 * bulgeOn;
+    // (Swollen hugely, and carried far ahead, to show: the user, 2026-11-25, of a stretch of
+    // 1.42 and a lead of 30 degrees: "좀 더 과장해서 그려".)
+    const bulgeAng = toEarth + 0.8 * extraRate(T);
+    const stretch = 1 + 0.8 * bulgeOn;
     moonHold.rotation.y = -bulgeAng;
     moonHold.scaling.set(stretch * big, big, big);
     // The rock's own turn, in the stretching node's frame: its near face (u = 0.5 under
@@ -265,16 +287,12 @@ export function createMoonStage(canvas) {
     const r = MOON_R * big;
     const off = spotAng - bulgeAng;
     const surf = r / Math.sqrt(Math.pow(Math.cos(off) / stretch, 2) + Math.pow(Math.sin(off), 2));
-    const markOn = smooth(MOONS.lock[0], MOONS.lock[0] + 3, T) * (1 - smooth(MOONS.phases[0] + 6, MOONS.phases[0] + 9, T));
+    const markOn = smooth(MOONS.lock[0], MOONS.lock[0] + 3, T) * (1 - smooth(MOONS.seas[0] - 2, MOONS.seas[0] + 1, T));
     moonMat.setFloat('mark', markOn);
-    // (Large while seen from far, small up close from beside the Earth.)
     // (Larger up close over it, where it is seen side-on at its edge.)
-    const markR = lerp(0.24, 0.09, smooth(MOONS.phases[0], MOONS.phases[0] + 3, T)) * lerp(1, 1.9, smooth(MOONS.why[0], MOONS.why[0] + 4, T) * (1 - smooth(MOONS.phases[0] - 2, MOONS.phases[0], T)));
+    const markR = 0.24 * lerp(1, 1.9, smooth(MOONS.why[0], MOONS.why[0] + 4, T));
     moonMat.setFloat('markR', markR);
     moonMat.setVector3('markAt', moonAt.add(flatDir(spotAng).scale(surf)));
-    // Brighter, its shade not black, while seen from far; dark-shaded while its shape is watched.
-    const shapeOn = smooth(MOONS.phases[0], MOONS.phases[0] + 3, T) * (1 - smooth(MOONS.phases[1] - 3, MOONS.phases[1], T));
-    for (const m of [moonMat, ghostMat]) { m.setFloat('night', lerp(0.2, 0.02, shapeOn)); m.setFloat('gain', lerp(1.7, 1.3, shapeOn)); }
 
     // The Moon that does not turn.
     const ghostOn = smooth(MOONS.lock[0] + 12, MOONS.lock[0] + 15, T) * (1 - smooth(MOONS.lock[1] - 2, MOONS.lock[1], T));
@@ -286,7 +304,7 @@ export function createMoonStage(canvas) {
     setLine(ghostRing, circle(MOON_ORBIT * 1.35), 0.5 * ghostOn);
 
     // The Earth's pull on the Moon's near bulge.
-    const pullOn = smooth(MOONS.why[0] + 16, MOONS.why[0] + 19, T) * (1 - smooth(MOONS.phases[0] - 3, MOONS.phases[0], T));
+    const pullOn = smooth(MOONS.why[0] + 16, MOONS.why[0] + 19, T) * (1 - smooth(MOONS.seas[0] - 3, MOONS.seas[0], T));
     const tip = moonAt.add(flatDir(bulgeAng).scale(r * stretch));
     setLine(pull, [moonDir.scale(1.02), tip], pullOn);
     setLine(middles, [moonDir.scale(1.02), moonAt.add(moonDir.scale(-r))], pullOn * 0.55);
@@ -301,32 +319,37 @@ export function createMoonStage(canvas) {
     const seaTip = flatDir(seaAng).scale(1.03 * (1 + 0.32 * seaOn));
     setLine(seaPull, [seaTip, moonAt.add(moonDir.scale(-MOON_R))], smooth(MOONS.seas[0] + 10, MOONS.seas[0] + 13, T) * (1 - smooth(MOONS.seas[1] - 2, MOONS.seas[1], T)));
 
-    // --- Pluto and Charon: round their middle once in 10 s, each keeping one face to the other ---
-    pluto.setEnabled(pairOn);
-    charon.setEnabled(pairOn);
-    const pa = (2 * Math.PI * (T - MOONS.pluto[0])) / 10 + 2.2;
-    const pd = flatDir(pa);
-    pluto.position.copyFrom(pd.scale(-PAIR_MID));
-    charon.position.copyFrom(pd.scale(PAIR - PAIR_MID));
-    // (Each turned so its own near face looks at the other.)
-    pluto.rotation.y = -pa - Math.PI / 2;
-    charon.rotation.y = -pa + Math.PI / 2;
-    plutoMat.setVector3('markAt', pluto.position.add(pd.scale(PLUTO_R)));
-    charonMat.setVector3('markAt', charon.position.add(pd.scale(-CHARON_R)));
-    plutoMat.setFloat('markR', 0.22);
-    charonMat.setFloat('markR', 0.21);
-    for (const m of [plutoMat, charonMat]) m.setFloat('mark', smooth(MOONS.pluto[0] + 8, MOONS.pluto[0] + 10, T));
-    const pairRing = 0.5 * smooth(MOONS.pluto[0] + 1, MOONS.pluto[0] + 3, T) * (pairOn ? 1 : 0);
-    setLine(plutoRing, flatCircle(PAIR_MID), pairRing);
-    setLine(charonRing, flatCircle(PAIR - PAIR_MID), pairRing);
+    // --- The pairs: round their middle, each keeping its near face to the other ---
+    const pairNow = pairOf(T);
+    for (const p of PAIRS) {
+      const on = p === pairNow;
+      const pa = pairAng(p, T);
+      const pd = flatDir(pa);
+      p.a.mesh.setEnabled(on);
+      p.b.mesh.setEnabled(on);
+      p.a.mesh.position.copyFrom(pd.scale(-p.mid));
+      p.b.mesh.position.copyFrom(pd.scale(p.sep - p.mid));
+      // (Each turned so its own near face, and its long way, look at the other.)
+      p.a.mesh.rotation.y = -pa - Math.PI / 2;
+      p.b.mesh.rotation.y = -pa + Math.PI / 2;
+      p.a.mat.setVector3('markAt', p.a.mesh.position.add(pd.scale(p.a.r * (p.a.shape?.[2] ?? 1))));
+      p.b.mat.setVector3('markAt', p.b.mesh.position.add(pd.scale(-p.b.r * (p.b.shape?.[2] ?? 1))));
+      p.a.mat.setFloat('markR', p.a.r * 0.37);
+      p.b.mat.setFloat('markR', Math.max(0.16, p.b.r * 0.6));
+      const markOn = smooth(MOONS[p.part][0] + 6, MOONS[p.part][0] + 8, T);
+      p.a.mat.setFloat('mark', markOn);
+      p.b.mat.setFloat('mark', p.b.noMark ? 0 : markOn);
+      const ringOn = on ? 0.5 * smooth(MOONS[p.part][0] + 1, MOONS[p.part][0] + 3, T) : 0;
+      setLine(p.a.ring, flatCircle(p.mid), ringOn);
+      setLine(p.b.ring, flatCircle(p.sep - p.mid), ringOn);
+    }
 
-    // The light: from behind the eye's shoulder, so the day sides face the eye; while the
-    // Moon's shape is watched the Sun stays put.
+    // The light: from behind the eye's shoulder, so the day sides face the eye.
     const eye = cameraAt(T);
     const fromEye = eye.at.subtract(eye.look).normalize();
     const eyeSun = Vector3.TransformNormal(fromEye, Matrix.RotationY(0.7)).add(new Vector3(0, 0.25, 0)).normalize();
-    const sunAt = Vector3.Lerp(eyeSun, LOCAL_SUN, smooth(MOONS.phases[0] - 4, MOONS.phases[0], T) * (1 - smooth(MOONS.phases[1], MOONS.phases[1] + 4, T))).normalize();
-    for (const m of [earthMat, moonMat, ghostMat, plutoMat, charonMat]) {
+    const sunAt = eyeSun;
+    for (const m of [earthMat, moonMat, ghostMat, ...PAIRS.flatMap((p) => [p.a.mat, p.b.mat])]) {
       m.setVector3('sunAt', sunAt);
       m.setFloat('fade', fade);
     }
@@ -351,8 +374,7 @@ export function createMoonStage(canvas) {
   }
 
   // Where the eye is: beside the Earth, then up over the Moon's way; close over the Moon,
-  // the Earth at the top of the screen; from just off the Earth toward the Moon; over the
-  // Earth's seas; then Pluto and Charon, turning with them.
+  // the Earth at the top of the screen; over the Earth's seas; then each pair, turning with it.
   function cameraAt(T) {
     const at = (x, y, z) => new Vector3(x, y, z);
     const keys = [
@@ -362,15 +384,17 @@ export function createMoonStage(canvas) {
       { t: MOONS.lock[1] - 1, at: at(0, 26, -4), look: at(0, 0, 0.5), fov: 0.9 },
     ];
     const closeMoon = { at: flatDir(moonAngle(T)).scale(MOON_ORBIT + 1.4).add(at(0, 9.5, 0)), look: flatDir(moonAngle(T)).scale(MOON_ORBIT - 1.3), fov: 0.85 };
-    const fromEarth = { at: moonAt.scale(0.25).add(at(0, 1.3, 0)), look: moonAt, fov: 0.5 };
     const R = orbitOf(T);
     const closeSeas = { at: flatDir(moonAngle(T)).scale(R + 2).add(at(0, 12, 0)), look: flatDir(moonAngle(T)).scale(R * 0.62), fov: 0.85 };
-    const pd = flatDir((2 * Math.PI * (T - MOONS.pluto[0])) / 10 + 2.2);
-    const pair = { at: pd.scale(PAIR + 1).add(at(0, 9.5, 0)), look: pd.scale(PAIR / 2 - PAIR_MID + 1.4), fov: 0.85 };
     const mix = (a, b, k) => ({ at: vlerp(a.at, b.at, k), look: vlerp(a.look, b.look, k), fov: lerp(a.fov, b.fov, k) });
-    if (T >= MOONS.seas[1]) return pair;
-    if (T >= MOONS.seas[0]) return mix(fromEarth, closeSeas, smooth(MOONS.seas[0], MOONS.seas[0] + 6, T));
-    if (T >= MOONS.phases[0] - 2) return mix(closeMoon, fromEarth, smooth(MOONS.phases[0] - 2, MOONS.phases[0] + 4, T));
+    const p = pairOf(T);
+    if (p) {
+      const pd = flatDir(pairAng(p, T));
+      const k = p.sep / 6;
+      // (Far enough back that the upper one's name, over it, stays on the screen.)
+      return { at: pd.scale(p.sep - p.mid + 1.2 * k).add(at(0, 12 * k, 0)), look: pd.scale(p.sep / 2 - p.mid + 0.6 * k), fov: 0.85 };
+    }
+    if (T >= MOONS.seas[0] - 2) return mix(closeMoon, closeSeas, smooth(MOONS.seas[0] - 2, MOONS.seas[0] + 5, T));
     if (T >= MOONS.lock[1] - 1) return mix(keys[3], closeMoon, smooth(MOONS.lock[1] - 1, MOONS.why[0] + 5, T));
     let i = 0;
     while (i < keys.length - 2 && T > keys[i + 1].t) i++;

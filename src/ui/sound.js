@@ -881,9 +881,9 @@ export function createSound({ music } = {}) {
     hum.gain.setTargetAtTime(on ? 0.5 : 0, ctx.currentTime, on ? 1.2 : 0.4);
   }
 
-  // A course's caption read aloud (public/assets/voice/<course>-NN.mp3): on by its own switch in
-  // the settings (the user, 2026-11-26, the Moon course dubbed in 하린's voice: "넣어. 개발해"),
-  // through the effects, so that turning the sound off quiets it too, as it does the docking
+  // A course's caption read aloud (public/assets/voice/<course>-NN.mp3) (the user, 2026-11-26, the
+  // Moon course dubbed in 하린's voice: "넣어. 개발해"), one of the effects (the user: "효과음 =
+  // TTS 목소리"), so that turning the sound off quiets it too, as it does the docking
   // voice (the user: "TTS 목소리는 소리 없애면 같이 조용해져야지"). One line at a time; a new one
   // cuts the last.
   const voices = new Map();
@@ -895,7 +895,7 @@ export function createSound({ music } = {}) {
     voiceSrc = null;
   }
   function sayVoice(url, from = 0) {
-    if (!ctx) return;
+    if (!ctx || muted) return;
     stopVoice();
     voiceWant = url;
     const asked = performance.now();

@@ -3684,35 +3684,15 @@ ${STORY_MORE[target.id]}` : told) };
   }
   // The captions read aloud where the course has them in the language in use (rail.voice: the
   // languages; files public/assets/voice/<course id>-NN.mp3 in Korean, -NN-en.mp3 and so on in the
-  // others, NN the caption's place from 01), off until turned on
-  // in the settings (the user, 2026-11-26, the Moon course dubbed in 하린's voice: "넣어. 개발해").
-  // Not tied to the caption switch: the voice may be wanted with the words off.
-  const VOICE_KEY = 'oddity.voice';
-  // The languages some course is read aloud in (the settings row shows only in these).
-  const VOICED = new Set(COURSES.flatMap((c) => c.rail?.voice ?? []));
-  let voiceOn = (() => { try { return localStorage.getItem(VOICE_KEY) === '1'; } catch { return false; } })();
+  // others, NN the caption's place from 01) (the user, 2026-11-26, the Moon course dubbed in 하린's
+  // voice: "넣어. 개발해"). On and off with the sound effects, the voice being one of them (the
+  // user: "효과음 = TTS 목소리", "2번으로 하고 개발해": it had a settings switch of its own, off
+  // at first). Not tied to the caption switch: the voice may be wanted with the words off.
   let voiceSaid = null;
   let voiceCourse = null;
-  const voiceButton = document.getElementById('voiceButton');
-  voiceButton?.addEventListener('click', () => {
-    voiceOn = !voiceOn;
-    try { localStorage.setItem(VOICE_KEY, voiceOn ? '1' : '0'); } catch { /* kept for this visit only */ }
-    sound.cue('click');
-    if (!voiceOn) sound.stopVoice();
-    voiceSaid = null;
-  });
   function courseVoice(chosen) {
     const lang = language();
-    const spoken = VOICED.has(lang);
-    for (const row of document.querySelectorAll('.voiceRow')) if (row.hidden === spoken) row.hidden = !spoken;
-    if (voiceButton) {
-      const label = voiceOn ? t('켜짐') : t('꺼짐');
-      if (voiceButton.textContent !== label) {
-        voiceButton.textContent = label;
-        voiceButton.setAttribute('aria-pressed', String(voiceOn));
-      }
-    }
-    const list = voiceOn && chosen?.rail?.voice?.includes(lang) ? chosen.rail.captions : null;
+    const list = !sound.muted() && chosen?.rail?.voice?.includes(lang) ? chosen.rail.captions : null;
     const url = (i) => `${import.meta.env.BASE_URL}assets/voice/${chosen.id}-${String(i + 1).padStart(2, '0')}${lang === 'ko' ? '' : `-${lang}`}.mp3`;
     if (!list) {
       if (voiceSaid || voiceCourse) sound.stopVoice();

@@ -68,7 +68,7 @@ export const COURSES = [
   // booster over the Gulf of Mexico (starshipAt). hotStage: the ship lighting and leaving.
   // The Moon's birth (the user, 2026-11-24: "테이아 달 형성론을 3D로 만들어볼까", "개발 시작"): the
   // giant impact, drawn by render/theiaStage.js; its seconds are THEIA's there.
-  { id: 'theia', body: 'earth', lapS: 226, rail: { theia: true, stage: [[-2, 236]], sounds: [[50, 'theiaHit'], [134, 'theiaGather']], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 225.9], still: [[-60, 236]], phases: [[0, t('다가오는 테이아')], [50, t('충돌')], [62, t('파편의 팔')], [90, t('불타는 원반')], [130, t('달의 탄생')], [164, t('멀어지는 달')], [208, t('오늘의 지구와 달')]], captions: [
+  { id: 'theia', body: 'earth', lapS: 238, rail: { theia: true, stage: [[-2, 248]], sounds: [[50, 'theiaHit'], [134, 'theiaGather']], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 237.9], still: [[-60, 248]], phases: [[0, t('다가오는 테이아')], [50, t('충돌')], [62, t('파편의 팔')], [90, t('불타는 원반')], [130, t('달의 탄생')], [164, t('멀어지는 달')], [208, t('오늘의 지구와 달')]], captions: [
     { at: 1, text: t('45억 년 전쯤, 태양계가 생긴 지 얼마 안 됐을 때입니다. 갓 생긴 지구 곁으로 화성만 한 천체가 다가옵니다. 테이아라고 부릅니다.') },
     { at: 14, text: t('달이 어떻게 생겼는지는 오랫동안 수수께끼였습니다. 아폴로가 가져온 달의 돌이 지구의 돌과 무척 닮아, 이 충돌설이 가장 널리 받아들여집니다.') },
     // Where Theia came from (the user, 2026-11-25: "테이아는 어디에서 온거야", "넣어"; checked
@@ -78,17 +78,20 @@ export const COURSES = [
     { at: 52, text: t('두 천체의 겉이 녹아 섞이고, 엄청난 양의 돌이 하늘로 뿜어져 나갑니다.') },
     { at: 64, text: t('뿜어진 돌은 긴 팔처럼 늘어나 지구를 감습니다. 테이아의 금속 핵은 지구 속으로 가라앉아, 원래 있던 지구의 핵과 합쳐졌습니다.') },
     { at: 75, text: t('튀어 나간 것은 주로 가벼운 겉돌이었습니다. 그래서 달은 금속이 적고, 핵이 아주 작습니다.') },
-    { at: 85, text: t('지구 전체가 녹아 수천 도의 용암 바다가 됩니다.') },
+    { at: 85, text: t('지구의 겉과 속 많은 곳이 녹아, 수천 도의 마그마 바다가 됩니다.') },
     { at: 92, text: t('녹은 돌과 돌 증기가 지구를 도는 원반이 됩니다. 토성의 고리처럼 빛나지만 훨씬 뜨겁습니다.') },
     { at: 108, text: t('원반의 돌들이 서로 부딪히며 뭉치기 시작합니다.') },
     { at: 124, text: t('지구 반지름의 3배쯤보다 안쪽에서는, 지구가 돌무더기를 잡아늘려 크게 뭉치지 못합니다.') },
     { at: 136, text: t('그 바깥에서 돌들이 뭉쳐 달이 됩니다. 몇 시간 만이라는 계산도, 몇백 년이라는 계산도 있습니다.') },
     { at: 150, text: t('갓 생긴 달은 지구에서 2만 4천km, 지금 거리(38만km)의 15분의 1쯤 되는 곳을 돌았습니다. 하늘에서는 지금보다 15배쯤 크게 보였을 것입니다.') },
     { at: 166, text: t('그 뒤로 달은 조금씩 멀어졌습니다. 지금도 1년에 3.8cm씩 멀어지는 것을, 아폴로가 달에 놓고 온 거울에 레이저를 쏘아 잽니다.') },
-    { at: 180, text: t('지구의 하루도 길어졌습니다. 그때는 하루가 5시간쯤이었고, 지금은 24시간입니다.') },
+    { at: 180, text: t('지구의 하루도 길어졌습니다. 그때 하루는 5시간쯤이었을 것으로 보며, 지금은 24시간입니다.') },
     { at: 194, text: t('지구는 식어 굳고, 바다가 생겼습니다.') },
     { at: 208, text: t('지금의 지구와 달입니다. 달은 38만km, 지구 반지름의 60배 떨어져 있습니다.') },
-    { at: 218, text: t('여기서 본 것은 가장 널리 받아들여지는 설을 따른 것이고, 아직 정해지지 않은 부분이 많습니다.') },
+    // (The user, 2026-11-25: "지구의 위성은 다른 행성에 비해서 매우 크다는거 넣고"; checked by Codex:
+    // the Moon 0.273 of the Earth across, the next of the eight planets' moons Triton, 0.055.)
+    { at: 218, text: t('달의 지름은 지구의 4분의 1이 넘습니다. 여덟 행성의 위성 가운데, 자기 행성에 견주어 이만큼 큰 위성은 달뿐입니다.') },
+    { at: 230, text: t('여기서 본 것은 가장 널리 받아들여지는 설을 따른 것이고, 아직 정해지지 않은 부분이 많습니다.') },
   ] }, name: t('달의 탄생, 테이아 충돌'), todo: t('45억 년 전쯤 화성만 한 천체가 지구에 부딪혀, 흩어진 돌이 모여 달이 되기까지를 봅니다.') },
   // How the Solar System turns, smallest first (the user, 2026-11-24: "태양계 공전에 대해서
   // 설명하는 우주멍 만들자", "작은 것부터 설명해봐", "만들어"): drawn by render/orbitStage.js,

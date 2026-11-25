@@ -18,7 +18,7 @@ export const THEIA = {
   disc: [90, 130], // a glowing disc round a molten Earth
   moon: [124, 164], // the Moon gathering out of it beyond 3 radii
   recede: [164, 218], // the hundreds of millions of years after, in seconds: the Moon drawing off, the Earth cooling
-  end: 226,
+  end: 238, // (12 s more on today's Earth and Moon, for a caption on the Moon's size)
 };
 
 // (From the side the blow is watched from, so the struck ground and Theia are lit.)

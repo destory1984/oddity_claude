@@ -24,8 +24,8 @@ export const ORBITS = {
   helix: [312, 370], // the Sun going on, the planets with it: helices (the last 20 s true to scale)
   hood: [370, 454], // the stars near the Sun going on with it: a look round, then four of them
   core: [454, 490], // the galaxy's middle: the black hole Sagittarius A* and the stars close round it
-  galaxy: [490, 568], // back to the Sun: its lap of the galaxy, ending where it began (and 8 s on it)
-  end: 568,
+  galaxy: [490, 580], // back to the Sun: its lap of the galaxy, ending where it began (and 8 s on it)
+  end: 580,
 };
 
 const TILT = (23.4 * Math.PI) / 180;
@@ -493,14 +493,22 @@ export function createOrbitStage(canvas) {
   // The Sun's lap round the middle: u (0 to 1) at the course's second T. Slow while the
   // eye rides close behind it among the stars near it, then fast as the eye draws back.
   const SUN_GAL_R = Math.abs(GAL_AT.x);
+  // It bobs up and down through the galaxy's plane as it goes (the user, 2026-11-25, of a
+  // picture of such a way: "개발해"): about 2.7 times a lap (once in some 85 million years),
+  // some 300 light-years out at most, today a little over the plane and going up; drawn some
+  // thirteen times as far out (a unit is about 100 light-years), so it shows (said in a caption).
+  const BOB_TIMES = 2.7;
+  const BOB_OUT = 40;
+  const BOB_TODAY = Math.asin(0.22);
   const galSunAt = (u) => {
     // (Clockwise from above, the way its trailing arms turn.)
     const a = -2 * Math.PI * u;
-    return new Vector3(GAL_AT.x + SUN_GAL_R * Math.cos(a), 0, SUN_GAL_R * Math.sin(a));
+    const y = BOB_OUT * Math.sin(2 * Math.PI * BOB_TIMES * (u - 1) + BOB_TODAY);
+    return new Vector3(GAL_AT.x + SUN_GAL_R * Math.cos(a), y, SUN_GAL_R * Math.sin(a));
   };
   const lapU = (() => {
-    // (Its lap done in 70 s; the part's last 8 s rest on today.)
-    const g0 = ORBITS.galaxy[0], g1 = g0 + 70;
+    // (Its lap done in 82 s; the part's last 8 s rest on today.)
+    const g0 = ORBITS.galaxy[0], g1 = g0 + 82;
     const sm = (a, b, x) => { const k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
     const v = (t) => 0.0016 * sm(g0 + 1, g0 + 4, t) + 0.045 * sm(g0 + 16, g0 + 34, t) * (1 - sm(g1 - 14, g1 - 5, t));
     const table = [0];
@@ -599,8 +607,9 @@ export function createOrbitStage(canvas) {
   sunMark.parent = helio;
   // The Sun's way round the galaxy's middle, and a brighter stretch behind it showing which
   // way it goes (the user, 2026-11-24: "태양계의 공전도 공전 동그라미 그려").
-  const galRing = ring('orbitGalRing', Math.abs(GAL_AT.x), [1, 0.85, 0.55]);
-  galRing.position.copyFrom(GAL_AT);
+  // (The whole lap as it goes, up and down with it, not a flat ring.)
+  const galRing = CreateLineSystem('orbitGalRing', { lines: [Array.from({ length: 401 }, (_, i) => galSunAt(i / 400))] }, scene);
+  galRing.color = new Color3(1, 0.85, 0.55);
   galRing.setEnabled(false);
   // The way just gone, drawn bright: a fifth of a lap behind the Sun (less at the start).
   const galTrailAt = (u) => {
@@ -1161,9 +1170,12 @@ export function createOrbitStage(canvas) {
       { t: ORBITS.galaxy[0] + 0.1, at: helioAt(14, 10, 78), look: helioAt(-2, 0, -40), fov: 0.85 },
       { t: ORBITS.galaxy[0] + 18, at: helioAt(11, 9, 66), look: helioAt(-2, 0, -40), fov: 0.85 },
       // Drawing back and up as it speeds on, the arms coming into sight...
-      { t: ORBITS.galaxy[0] + 32, at: helioAt(60, 90, 130), look: helioAt(0, 0, -20), fov: 0.85 },
+      // ...low over the galaxy's edge while its going up and down is told, the waves of its way
+      // in sight...
+      { t: ORBITS.galaxy[0] + 30, at: GAL_AT.add(at(0, 150, 950)), look: GAL_AT.add(at(0, -10, 0)), fov: 0.85 },
+      { t: ORBITS.galaxy[0] + 42, at: GAL_AT.add(at(-60, 170, 920)), look: GAL_AT.add(at(0, -10, 0)), fov: 0.85 },
       // ...to the whole galaxy, its lap drawn.
-      { t: ORBITS.galaxy[0] + 46, at: GAL_AT.add(at(260, 1500, 950)), look: GAL_AT.add(at(40, 0, 0)), fov: 0.8 },
+      { t: ORBITS.galaxy[0] + 56, at: GAL_AT.add(at(260, 1500, 950)), look: GAL_AT.add(at(40, 0, 0)), fov: 0.8 },
       { t: ORBITS.galaxy[1], at: GAL_AT.add(at(-120, 1950, 700)), look: GAL_AT, fov: 0.8 },
     ];
     if (inPart(ORBITS.hood, T)) return hoodCam(T);

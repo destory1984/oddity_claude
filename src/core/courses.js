@@ -130,7 +130,7 @@ export const COURSES = [
     { at: 413, text: t('해가 한 바퀴를 돌아 다시 이 자리에 왔습니다. 지난번 이 자리에서 지구에는 첫 공룡이 나타나고 있었습니다.') },
     { at: 421, text: t('오늘 밤에도 우리는 지구와 함께 돌고, 해와 함께 초속 230km로 은하를 달립니다. 느끼지 못할 뿐입니다.') },
   ] }, name: t('태양계는 어떻게 도는가'), todo: t('지구의 자전에서 은하를 도는 태양까지, 작은 움직임부터 차례로 봅니다.') },
-  { id: 'moonFace', body: 'earth', lapS: 292, rail: { moonFace: true, stage: [[-2, 302]], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 291.9], still: [[-60, 302]], phases: [[-1, t('달의 공전')], [50, t('달의 자전')], [100, t('왜 한쪽 얼굴일까')], [160, t('지구의 밀물과 썰물')], [198, t('명왕성과 카론')], [232, t('에리스와 디스노미아')], [256, t('파트로클로스와 메노이티오스')]], captions: [
+  { id: 'moonFace', body: 'earth', lapS: 292, rail: { voice: true, moonFace: true, stage: [[-2, 302]], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 291.9], still: [[-60, 302]], phases: [[-1, t('달의 공전')], [50, t('달의 자전')], [100, t('왜 한쪽 얼굴일까')], [160, t('지구의 밀물과 썰물')], [198, t('명왕성과 카론')], [232, t('에리스와 디스노미아')], [256, t('파트로클로스와 메노이티오스')]], captions: [
     { at: 1, text: t('달은 지구 둘레를 27.3일에 한 바퀴 돕니다. 공전이라고 합니다. 크기와 거리는 보기 쉽게 줄였고, 시간은 빠르게 돌렸습니다.') },
     { at: 16, text: t('달은 평균 38만km 떨어져 있습니다. 지구 지름의 약 30배입니다.') },
     { at: 32, text: t('도는 방향은 지구의 자전과 같습니다. 지구 북극 위에서 내려다보면 둘 다 시계 반대 방향입니다.') },

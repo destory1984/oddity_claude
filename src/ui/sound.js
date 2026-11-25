@@ -881,8 +881,54 @@ export function createSound({ music } = {}) {
     hum.gain.setTargetAtTime(on ? 0.5 : 0, ctx.currentTime, on ? 1.2 : 0.4);
   }
 
+  // A course's caption read aloud (public/assets/voice/<course>-NN.mp3), straight to the master:
+  // its own switch in the settings, not the music or the effects key (the user, 2026-11-26,
+  // the Moon course dubbed in 하린's voice: "넣어. 개발해"). One line at a time; a new one cuts
+  // the last.
+  const voices = new Map();
+  let voiceSrc = null;
+  let voiceWant = '';
+  function stopVoice() {
+    voiceWant = '';
+    try { voiceSrc?.stop(); } catch { /* already ended */ }
+    voiceSrc = null;
+  }
+  function sayVoice(url, from = 0) {
+    if (!ctx) return;
+    stopVoice();
+    voiceWant = url;
+    const asked = performance.now();
+    const play = (buffer) => {
+      // (A line still loading starts as far in as the wait took, to stay with its caption.)
+      const at = from + (performance.now() - asked) / 1000;
+      if (voiceWant !== url || !buffer || at >= buffer.duration - 0.3) return;
+      const gain = ctx.createGain();
+      gain.gain.value = 0.9;
+      gain.connect(master);
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(gain);
+      src.onended = () => { if (voiceSrc === src) voiceSrc = null; gain.disconnect(); };
+      src.start(ctx.currentTime, at);
+      voiceSrc = src;
+    };
+    readyVoice(url);
+    voices.get(url)?.then(play);
+  }
+  // Fetched and decoded ahead, so that the line starts with its caption.
+  function readyVoice(url) {
+    if (!ctx || voices.has(url)) return;
+    voices.set(url, fetch(url)
+      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
+      .then((bytes) => new Promise((done, fail) => ctx.decodeAudioData(bytes, done, fail)))
+      .catch(() => { voices.delete(url); return null; }));
+  }
+
   return {
     cabinHum,
+    sayVoice,
+    readyVoice,
+    stopVoice,
     // A gain of its own (after the master) keeps scene ducking and the switches from undoing sleep.
     sleepVolume(level, seconds = 0) {
       sleepLevel = level;

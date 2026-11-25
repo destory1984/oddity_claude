@@ -6058,5 +6058,8 @@
  "목성과 같은 궤도에서 해를 도는 소행성 파트로클로스와 메노이티오스입니다. 둘 다 지름 100km 남짓인, 크기가 비슷한 짝입니다.": "The asteroids Patroclus and Menoetius, which go round the Sun on Jupiter's orbit. Both are a little over 100 km across: a pair of much the same size.",
  "둘은 4.3일마다 서로를 돌며, 서로 한쪽 얼굴만 마주 봅니다. 2033년 NASA의 탐사선 루시가 찾아갈 예정입니다.": "They go round each other every 4.3 days, each showing the other only one face. NASA's Lucy probe is due to visit them in 2033.",
  "지구와 달도 아주 먼 훗날 이렇게 서로 묶일 수 있지만, 그 전에 해가 먼저 부풀어 오릅니다.": "The Earth and the Moon could end up locked to each other like this in the very far future, but the Sun will swell up first.",
- "달은 왜 한쪽 얼굴만 보일까에 에리스와 디스노미아, 소행성 쌍 파트로클로스와 메노이티오스가 생겼습니다.": "Why Does the Moon Show One Face? now has Eris and Dysnomia, and the asteroid pair Patroclus and Menoetius."
+ "달은 왜 한쪽 얼굴만 보일까에 에리스와 디스노미아, 소행성 쌍 파트로클로스와 메노이티오스가 생겼습니다.": "Why Does the Moon Show One Face? now has Eris and Dysnomia, and the asteroid pair Patroclus and Menoetius.",
+ "우주멍 목소리": "Just-looking voice",
+ "우주멍 코스의 자막을 목소리로 읽어 줍니다. 지금은 「달은 왜 한쪽 얼굴만 보일까」에만 있습니다.": "Reads the just-looking courses' captions aloud (in Korean). For now only in “Why Does the Moon Show One Face?”.",
+ "달은 왜 한쪽 얼굴만 보일까의 자막을 하린의 목소리로 들을 수 있습니다. 설정에서 켭니다.": "Why Does the Moon Show One Face? can now be heard read aloud in Korean; turn it on in the settings."
 }

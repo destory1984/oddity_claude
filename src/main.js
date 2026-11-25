@@ -3682,6 +3682,53 @@ ${STORY_MORE[target.id]}` : told) };
       box.animate([{ opacity: 0, transform: 'translate(-50%, 6px)' }, { opacity: 1, transform: 'translate(-50%, 0)' }], { duration: 700, easing: 'ease-out', fill: 'forwards' });
     }
   }
+  // The captions read aloud, in Korean only, where the course has them (rail.voice: files
+  // public/assets/voice/<course id>-NN.mp3, NN the caption's place from 01), off until turned on
+  // in the settings (the user, 2026-11-26, the Moon course dubbed in 하린's voice: "넣어. 개발해").
+  // Not tied to the caption switch: the voice may be wanted with the words off.
+  const VOICE_KEY = 'oddity.voice';
+  let voiceOn = (() => { try { return localStorage.getItem(VOICE_KEY) === '1'; } catch { return false; } })();
+  let voiceSaid = null;
+  let voiceCourse = null;
+  const voiceButton = document.getElementById('voiceButton');
+  voiceButton?.addEventListener('click', () => {
+    voiceOn = !voiceOn;
+    try { localStorage.setItem(VOICE_KEY, voiceOn ? '1' : '0'); } catch { /* kept for this visit only */ }
+    sound.cue('click');
+    if (!voiceOn) sound.stopVoice();
+    voiceSaid = null;
+  });
+  function courseVoice(chosen) {
+    const korean = language() === 'ko';
+    for (const row of document.querySelectorAll('.voiceRow')) if (row.hidden === korean) row.hidden = !korean;
+    if (voiceButton) {
+      const label = voiceOn ? t('켜짐') : t('꺼짐');
+      if (voiceButton.textContent !== label) {
+        voiceButton.textContent = label;
+        voiceButton.setAttribute('aria-pressed', String(voiceOn));
+      }
+    }
+    const list = voiceOn && korean && chosen?.rail?.voice ? chosen.rail.captions : null;
+    const url = (i) => `${import.meta.env.BASE_URL}assets/voice/${chosen.id}-${String(i + 1).padStart(2, '0')}.mp3`;
+    if (!list) {
+      if (voiceSaid || voiceCourse) sound.stopVoice();
+      voiceSaid = null;
+      voiceCourse = null;
+      return;
+    }
+    if (voiceCourse !== chosen.id) {
+      voiceCourse = chosen.id;
+      list.forEach((_, i) => sound.readyVoice(url(i)));
+    }
+    let i = -1;
+    for (let k = list.length - 1; k >= 0; k--) if (courseTime >= list[k].at) { i = k; break; }
+    const now = i >= 0 && courseTime < list[i].at + CAPTION_S ? list[i] : null;
+    if (now === voiceSaid) return;
+    voiceSaid = now;
+    // (Only a line just begun: a course entered or wound partway through a line waits for the
+    // next. A line longer than its caption's 10 s is let finish; the next line cuts it.)
+    if (now && courseTime - now.at < 1.5) sound.sayVoice(url(i), courseTime - now.at);
+  }
   let countShown = null;
   let countSpec = null;
   function cabinCount(chosen) {
@@ -5129,6 +5176,7 @@ ${STORY_MORE[target.id]}` : told) };
     cabinMet(course ? courseById(course) : null);
     cabinCount(course ? courseById(course) : null);
     cabinCaption(course ? courseById(course) : null);
+    courseVoice(course ? courseById(course) : null);
     gazeCaptionKey();
     spacewalkTick(dt);
     if (cupolaOn) cupolaLight();

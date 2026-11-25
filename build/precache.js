@@ -9,7 +9,7 @@ import path from 'node:path';
 // install (the user, 2026-11-23: "이건 전체 로딩할 때에 로딩하지말고, 이 화면을 선택할 때에
 // 로딩하게 하면 낫지않나?"; built 2026-11-24): the courses' cabins and photos, the cupola's
 // window and fine Earth maps, the Mars walk's ground, and the notebook's photos.
-export const LAZY = ['assets/tours/', 'assets/cupola/', 'assets/mars/', 'assets/craftPhotos/', 'assets/stories/', 'assets/objectPhotos/'];
+export const LAZY = ['assets/tours/', 'assets/cupola/', 'assets/mars/', 'assets/craftPhotos/', 'assets/stories/', 'assets/objectPhotos/', 'assets/voice/'];
 
 const cached = (f) => !f.endsWith('.map') && f !== 'sw.js' && f !== 'index.html';
 

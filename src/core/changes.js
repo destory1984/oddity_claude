@@ -16,6 +16,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-26', text: t('우주멍 목소리가 효과음을 따라, 효과음을 끄면 함께 조용해집니다.') },
   { day: '2026-11-26', text: t('달은 왜 한쪽 얼굴만 보일까의 앞부분이 짧아져, 한 바퀴가 4분 52초에서 4분 24초로 줄었습니다.'), go: { course: 'moonFace' } },
   { day: '2026-11-26', text: t('달은 왜 한쪽 얼굴만 보일까의 자막을 하린의 목소리로 들을 수 있습니다. 설정에서 켭니다.'), go: { course: 'moonFace' } },
   { day: '2026-11-25', text: t('달은 왜 한쪽 얼굴만 보일까에 에리스와 디스노미아, 소행성 쌍 파트로클로스와 메노이티오스가 생겼습니다.'), go: { course: 'moonFace', at: 203 } },

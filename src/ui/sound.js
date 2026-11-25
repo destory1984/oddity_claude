@@ -881,10 +881,11 @@ export function createSound({ music } = {}) {
     hum.gain.setTargetAtTime(on ? 0.5 : 0, ctx.currentTime, on ? 1.2 : 0.4);
   }
 
-  // A course's caption read aloud (public/assets/voice/<course>-NN.mp3), straight to the master:
-  // its own switch in the settings, not the music or the effects key (the user, 2026-11-26,
-  // the Moon course dubbed in 하린's voice: "넣어. 개발해"). One line at a time; a new one cuts
-  // the last.
+  // A course's caption read aloud (public/assets/voice/<course>-NN.mp3): on by its own switch in
+  // the settings (the user, 2026-11-26, the Moon course dubbed in 하린's voice: "넣어. 개발해"),
+  // through the effects, so that turning the sound off quiets it too, as it does the docking
+  // voice (the user: "TTS 목소리는 소리 없애면 같이 조용해져야지"). One line at a time; a new one
+  // cuts the last.
   const voices = new Map();
   let voiceSrc = null;
   let voiceWant = '';
@@ -904,7 +905,7 @@ export function createSound({ music } = {}) {
       if (voiceWant !== url || !buffer || at >= buffer.duration - 0.3) return;
       const gain = ctx.createGain();
       gain.gain.value = 0.9;
-      gain.connect(master);
+      gain.connect(sfx);
       const src = ctx.createBufferSource();
       src.buffer = buffer;
       src.connect(gain);
@@ -1096,7 +1097,7 @@ export function createSound({ music } = {}) {
     setMuted(value) {
       muted = value;
       saveMuted(muted);
-      if (muted) window.speechSynthesis?.cancel();
+      if (muted) { window.speechSynthesis?.cancel(); stopVoice(); }
       if (ctx) sfx.gain.setTargetAtTime(muted ? 0 : 1, ctx.currentTime, 0.05);
     },
   };

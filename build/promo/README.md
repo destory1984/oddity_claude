@@ -37,6 +37,19 @@
 
 토막마다 쓰는 구간과 감는 배, 자막에 가리지 않게 장면을 내리는 정도는 `orbits.cjs` 의 `PARTS` 에 있다.
 
+### 목소리가 있는 쇼츠 (달은 왜 한쪽 얼굴만 보일까)
+
+하린의 목소리가 16줄을 읽고, 장면과 자막의 길이를 그 목소리에 맞춘다. 같은 말이라도 언어마다 길이가 달라 영상 길이도 다르다(한국어 58.7초, 영어 57.3초, 중국어 63.5초, 일본어 72.6초).
+
+1. 대사: `build/promo/moon-lines.json` 에 언어마다 16줄, 읽는 문장과 화면 자막(줄바꿈, 금빛 낱말은 `<em>`)을 함께 둔다. 마지막 줄은 끝 화면 위에서 읽는다.
+2. 목소리: TTS 세션이 만든 `moonShort2-01-ko.mp3` 같은 파일을 `assets/promo/<언어>/voice/` 에 둔다. 목소리는 로컬 모델이라 돈이 들지 않는다. 영어, 일본어, 중국어는 그 말이 모국어인 하린 목소리를 따로 만들어 쓴다(한국어 하린으로 읽히면 한국어 억양이 짙다).
+3. 시간 맞추기: `python -P build/promo/moon-timing.py ko` → `assets/promo/ko/moon-timing.json` (토막 길이, 자막 시각, 줄마다 읽기 시작하는 때)
+4. 장면: `node build/promo/moon.cjs ko` (약 1분, `PEEK=1` 이면 토막마다 한 장만 그려 미리 본다)
+5. 자막과 끝 화면: `FILM=tour node build/promo/captions.cjs ko`
+6. 편집: `python -P build/promo/tour.py ko moon 1` → `assets/promo/tour-moon-1-ko.mp4`. 음악은 목소리 밑에 절반 크기로 깐다.
+
+한국어를 다 만들고 사용자가 허락한 뒤에 다른 언어를 만든다.
+
 ## 고칠 곳
 
 | 무엇 | 파일 |

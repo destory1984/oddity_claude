@@ -138,6 +138,14 @@ const TOUR = {
     'end-orbits': { title: '奶奶的笔记本', note: '', find: '在 Google Play 上搜索', store: 'Space Oddity: 奶奶的笔记本', lead: '今夜，我们也以\n每秒230公里\n在银河中奔驰' },
   },
 };
+// The Moon Short's lines (build/promo/moon-lines.json: what 하린 says and how its caption
+// breaks), one caption a line, the last over the end card.
+for (const [lang, lines] of Object.entries(JSON.parse(fs.readFileSync(path.join(__dirname, 'moon-lines.json'), 'utf8')))) {
+  if (lang === '_') continue;
+  TOUR[lang] ??= {};
+  lines.slice(0, -1).forEach(([, show], i) => { TOUR[lang][`moon-1-${i + 1}`] = show; });
+  TOUR[lang]['end-moon'] = { ...(TOUR[lang]['end-orbits'] ?? FIRST[lang].end), lead: lines.at(-1)[1], note: '' };
+}
 const LINES = { thatday: THAT_DAY, gaze: GAZE, tour: TOUR }[process.env.FILM] ?? FIRST;
 
 // (Gaegu and Pretendard have no kana or kanji: Japanese in a Japanese face of Windows.)
@@ -159,6 +167,8 @@ html, body { margin: 0; width: 405px; height: 720px; background: transparent; ov
   background: linear-gradient(to top, rgba(5, 9, 28, 0) 0%, rgba(5, 9, 28, 0.82) 30%, rgba(5, 9, 28, 0.94) 100%); }
 .kick { font: 700 11px/1 Pretendard Variable, Pretendard, sans-serif; letter-spacing: 0.32em; color: #f2c46b; margin-bottom: 12px; }
 .line { font: 400 37px/1.15 Gaegu, cursive; color: #fdf8ec; text-align: center; word-break: keep-all; text-wrap: balance; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6); }
+/* A word to keep (<em>): gold, as the game's own highlights. */
+.line em { font-style: normal; color: #ffd27a; }
 .end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 86px; text-align: center; }
 .end .lead { font: 400 34px/1.15 Gaegu, cursive; color: #fdf8ec; margin-bottom: 26px; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6); }
 .end img { width: 120px; image-rendering: pixelated; margin-bottom: 14px; }

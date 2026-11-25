@@ -16,6 +16,8 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-25', text: t('태양계는 어떻게 도는가에서 태양이 은하를 돌며 원반의 위아래를 오가는 모습을 봅니다.'), go: { course: 'orbits', at: 519 } },
+  { day: '2026-11-25', text: t('달의 탄생에 달이 다른 행성의 위성들보다 훨씬 크다는 이야기가 생겼습니다.'), go: { course: 'theia', at: 217 } },
   { day: '2026-11-25', text: t('할머니의 부탁 쪽지에 오늘은 그만 보기 단추와, 새로 생긴 것을 알려 주는 오늘의 팁이 생겼습니다.'), go: {} },
   { day: '2026-11-25', text: t('오로라 유영이 북극을 두른 오로라 고리를 따라 날며, 길게 이어진 커튼을 보게 바뀌었습니다.'), go: { course: 'auroraDrift' } },
   { day: '2026-11-25', text: t('달의 탄생, 테이아 충돌에 테이아가 어디서 왔는지 이야기가 생겼습니다.'), go: { course: 'theia', at: 26 } },

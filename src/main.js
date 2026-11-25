@@ -2160,20 +2160,24 @@ ${STORY_MORE[target.id]}` : told) };
   const DAILY_HIDDEN_KEY = 'oddity.dailyHidden';
   const hiddenToday = (() => { try { return localStorage.getItem(DAILY_HIDDEN_KEY) === today; } catch { return false; } })();
   let dailyDue = Boolean(request) && !requestDone() && !hiddenToday;
-  // The day's tip, under the request: the newest thing in the list of changes
-  // (core/changes.js) not yet shown as one, of the last 30 days; each shown once.
-  const TIPS_SEEN_KEY = 'oddity.tipsSeen';
+  // The day's tip, at the top of the request: the things new to see or do in the list of
+  // changes (core/changes.js) of the last 30 days, the newest first, one after the other each
+  // time the note comes, round again from the newest at the end (the user, 2026-11-25:
+  // "오늘은 그만 보기 버튼 누르기 전까지는 팁도 계속 돌아가면서 보여줘"; each was shown once
+  // only, and a day of reloads used them all up).
+  const TIP_LAST_KEY = 'oddity.tipLast';
   const tipToday = () => {
-    let seen = [];
-    try { seen = JSON.parse(localStorage.getItem(TIPS_SEEN_KEY) ?? '[]'); } catch { seen = []; }
     const since = Date.parse(`${today}T00:00:00`) - 30 * 86400000;
     // (Counted from the oldest, so a change keeps its number as new ones come on top.)
     // (Only something new to see or do, `go` on its line: not a fault mended.)
-    const fresh = CHANGES.map((c, i) => ({ ...c, id: `${c.day}#${CHANGES.length - 1 - i}` }))
-      .find((c) => c.go && Date.parse(`${c.day}T00:00:00`) >= since && !seen.includes(c.id));
-    if (!fresh) return null;
-    try { localStorage.setItem(TIPS_SEEN_KEY, JSON.stringify([...seen, fresh.id].slice(-200))); } catch { /* shown again next time */ }
-    return fresh;
+    const tips = CHANGES.map((c, i) => ({ ...c, id: `${c.day}#${CHANGES.length - 1 - i}` }))
+      .filter((c) => c.go && Date.parse(`${c.day}T00:00:00`) >= since);
+    if (!tips.length) return null;
+    let last = null;
+    try { last = localStorage.getItem(TIP_LAST_KEY); } catch { last = null; }
+    const tip = tips[(tips.findIndex((c) => c.id === last) + 1) % tips.length];
+    try { localStorage.setItem(TIP_LAST_KEY, tip.id); } catch { /* the same one again next time */ }
+    return tip;
   };
   // Its key: the course flown from the second the tip tells of, or the settings opened.
   const tipGo = (go) => {

@@ -3682,11 +3682,14 @@ ${STORY_MORE[target.id]}` : told) };
       box.animate([{ opacity: 0, transform: 'translate(-50%, 6px)' }, { opacity: 1, transform: 'translate(-50%, 0)' }], { duration: 700, easing: 'ease-out', fill: 'forwards' });
     }
   }
-  // The captions read aloud, in Korean only, where the course has them (rail.voice: files
-  // public/assets/voice/<course id>-NN.mp3, NN the caption's place from 01), off until turned on
+  // The captions read aloud where the course has them in the language in use (rail.voice: the
+  // languages; files public/assets/voice/<course id>-NN.mp3 in Korean, -NN-en.mp3 and so on in the
+  // others, NN the caption's place from 01), off until turned on
   // in the settings (the user, 2026-11-26, the Moon course dubbed in 하린's voice: "넣어. 개발해").
   // Not tied to the caption switch: the voice may be wanted with the words off.
   const VOICE_KEY = 'oddity.voice';
+  // The languages some course is read aloud in (the settings row shows only in these).
+  const VOICED = new Set(COURSES.flatMap((c) => c.rail?.voice ?? []));
   let voiceOn = (() => { try { return localStorage.getItem(VOICE_KEY) === '1'; } catch { return false; } })();
   let voiceSaid = null;
   let voiceCourse = null;
@@ -3699,8 +3702,9 @@ ${STORY_MORE[target.id]}` : told) };
     voiceSaid = null;
   });
   function courseVoice(chosen) {
-    const korean = language() === 'ko';
-    for (const row of document.querySelectorAll('.voiceRow')) if (row.hidden === korean) row.hidden = !korean;
+    const lang = language();
+    const spoken = VOICED.has(lang);
+    for (const row of document.querySelectorAll('.voiceRow')) if (row.hidden === spoken) row.hidden = !spoken;
     if (voiceButton) {
       const label = voiceOn ? t('켜짐') : t('꺼짐');
       if (voiceButton.textContent !== label) {
@@ -3708,16 +3712,16 @@ ${STORY_MORE[target.id]}` : told) };
         voiceButton.setAttribute('aria-pressed', String(voiceOn));
       }
     }
-    const list = voiceOn && korean && chosen?.rail?.voice ? chosen.rail.captions : null;
-    const url = (i) => `${import.meta.env.BASE_URL}assets/voice/${chosen.id}-${String(i + 1).padStart(2, '0')}.mp3`;
+    const list = voiceOn && chosen?.rail?.voice?.includes(lang) ? chosen.rail.captions : null;
+    const url = (i) => `${import.meta.env.BASE_URL}assets/voice/${chosen.id}-${String(i + 1).padStart(2, '0')}${lang === 'ko' ? '' : `-${lang}`}.mp3`;
     if (!list) {
       if (voiceSaid || voiceCourse) sound.stopVoice();
       voiceSaid = null;
       voiceCourse = null;
       return;
     }
-    if (voiceCourse !== chosen.id) {
-      voiceCourse = chosen.id;
+    if (voiceCourse !== `${chosen.id}-${lang}`) {
+      voiceCourse = `${chosen.id}-${lang}`;
       list.forEach((_, i) => sound.readyVoice(url(i)));
     }
     let i = -1;

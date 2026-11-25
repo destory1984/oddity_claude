@@ -24,14 +24,14 @@ import './orbitStage.js'; // its shaders: orbitBody, orbitSky
 
 // The course's seconds (core/courses.js keeps its captions to these).
 export const MOONS = {
-  round: [0, 50],
-  lock: [50, 100],
-  why: [100, 160],
-  seas: [160, 198],
-  pluto: [198, 232],
-  eris: [232, 256],
-  trojans: [256, 290],
-  end: 292,
+  round: [0, 34],
+  lock: [34, 72],
+  why: [72, 132],
+  seas: [132, 170],
+  pluto: [170, 204],
+  eris: [204, 228],
+  trojans: [228, 262],
+  end: 264,
 };
 
 const TILT = (23.4 * Math.PI) / 180;

@@ -19,11 +19,11 @@ const FPS = 30;
 // the user, 2026-11-25, of its sides: "이쪽이 잘리네").
 const PARTS = [
   [15, 27, 6], // the Earth turning
-  [211, 225, 7, 0, 0.8], // its year, the axis keeping its way
-  [263, 284, 7], // the planets, the further the slower
-  [324, 351, 9, 170], // the helices behind the Sun
-  [368, 395, 9], // back from the Sun to the stars near it, on to Alpha Centauri
-  [456, 486, 10, 100], // down to the black hole
+  [61, 75, 7, 0, 0.8], // its year, the axis keeping its way
+  [113, 134, 7], // the planets, the further the slower
+  [174, 201, 9, 170], // the helices behind the Sun
+  [218, 245, 9], // back from the Sun to the stars near it, on to Alpha Centauri
+  [306, 336, 10, 100], // down to the black hole
 ];
 const DIP = 0.25; // seconds of black at each end of a part
 // The names over the stage, as src/main.js ORBIT_WORDS gives them.

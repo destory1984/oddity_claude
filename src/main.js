@@ -16,6 +16,7 @@ import { createStarshipStage } from './render/starshipStage.js';
 import { createTheiaStage } from './render/theiaStage.js';
 import { createMarsStage } from './render/marsStage.js';
 import { createOrbitStage } from './render/orbitStage.js';
+import { createMoonStage } from './render/moonStage.js';
 import { createVanish, cutOut, pictureOf } from './ui/vanish.js';
 import { realCloudMap } from './render/realClouds.js';
 import { createInput } from './ui/input.js';
@@ -2474,7 +2475,8 @@ ${STORY_MORE[target.id]}` : told) };
   // How the Solar System turns (rail.orbits): drawn by a little world of its own on a canvas
   // over the game's (render/orbitStage.js), names over what they name, a film's title.
   let orbitStage = null;
-  const ORBIT_WORDS = { sun: t('태양'), earth: t('지구'), moon: t('달'), ghost: t('스스로 돌지 않는다면'), here: t('태양계'), sgr: [t('궁수자리 A*'), t('질량은 태양의 400만 배 · 2만 6천 광년')], mercury: t('수성'), venus: t('금성'), mars: t('화성'), jupiter: t('목성'), saturn: t('토성'), uranus: t('천왕성'), neptune: t('해왕성'), firstDino: t('첫 공룡'), dinoGone: t('공룡이 사라짐'), ago: yearsAgo, hood: { sun: [t('태양계'), ''], alpha: [t('알파 센타우리'), t('4.4광년 · 해가 셋')], trappist: [t('트라피스트-1'), t('40광년 · 지구만 한 행성 일곱')], kepler16: [t('케플러-16'), t('245광년 · 해가 둘인 행성')], kepler452: [t('케플러-452'), t('1,800광년 · 지구의 사촌')] } };
+  let orbitKind = '';
+  const ORBIT_WORDS = { sun: t('태양'), earth: t('지구'), moon: t('달'), ghost: t('스스로 돌지 않는다면'), here: t('태양계'), sgr: [t('궁수자리 A*'), t('질량은 태양의 400만 배 · 2만 6천 광년')], mercury: t('수성'), venus: t('금성'), mars: t('화성'), jupiter: t('목성'), saturn: t('토성'), uranus: t('천왕성'), neptune: t('해왕성'), firstDino: t('첫 공룡'), dinoGone: t('공룡이 사라짐'), pluto: t('명왕성'), charon: t('카론'), ago: yearsAgo, hood: { sun: [t('태양계'), ''], alpha: [t('알파 센타우리'), t('4.4광년 · 해가 셋')], trappist: [t('트라피스트-1'), t('40광년 · 지구만 한 행성 일곱')], kepler16: [t('케플러-16'), t('245광년 · 해가 둘인 행성')], kepler452: [t('케플러-452'), t('1,800광년 · 지구의 사촌')] } };
   // How long ago, in millions of years, as the clock over the galaxy writes it.
   function yearsAgo(my) {
     if (my <= 0) return t('오늘');
@@ -2495,7 +2497,9 @@ ${STORY_MORE[target.id]}` : told) };
         canvas = document.getElementById('orbitStage');
       }
       if (!orbitStage) {
-        orbitStage = createOrbitStage(canvas);
+        // (The Moon's one face is drawn the same way, by a world of its own.)
+        orbitKind = chosen.rail.moonFace ? 'moon' : 'orbits';
+        orbitStage = chosen.rail.moonFace ? createMoonStage(canvas) : createOrbitStage(canvas);
         addEventListener('resize', orbitResize);
       }
       canvas.hidden = false;
@@ -2505,8 +2509,8 @@ ${STORY_MORE[target.id]}` : told) };
     if (!title) {
       document.body.insertAdjacentHTML('beforeend', '<div id="orbitTitle" aria-hidden="true" style="position:fixed;left:0;right:0;top:20%;z-index:7;pointer-events:none;text-align:center;color:#f6eee6;text-shadow:0 2px 14px rgba(0,0,0,0.75),0 0 2px rgba(0,0,0,0.6)" hidden><div style="font-size:clamp(28px,8.5vw,48px);font-weight:700;letter-spacing:0.08em"></div><div style="margin-top:8px;font-size:clamp(14px,3.8vw,18px);letter-spacing:0.08em;opacity:0.9"></div></div>');
       title = document.getElementById('orbitTitle');
-      title.children[0].textContent = t`태양계는 어떻게 도는가`;
-      title.children[1].textContent = t`작은 것부터 큰 것까지`;
+      title.children[0].textContent = chosen.rail.moonFace ? t`달은 왜 한쪽 얼굴만 보일까` : t`태양계는 어떻게 도는가`;
+      title.children[1].textContent = chosen.rail.moonFace ? t`지구와 달이 서로 붙잡는 힘` : t`작은 것부터 큰 것까지`;
     }
     const ease = (x) => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k); };
     const shown = on ? ease((now - 0.5) / 2) * (1 - ease((now - 8) / 2)) : 0;
@@ -5097,7 +5101,7 @@ ${STORY_MORE[target.id]}` : told) };
         if (chosen.rail.starship) starshipStep(chosen, state);
         if (chosen.rail.theia) theiaStep(chosen);
         if (chosen.rail.marsWalk) marsStep(chosen);
-        if (chosen.rail.orbits) orbitStep(chosen);
+        if (chosen.rail.orbits || chosen.rail.moonFace) orbitStep(chosen);
         if (chosen.rail.cabin) state = { ...state, orientation: cupolaFloat(state) };
         if (chosen.rail.mmu) mmuFlyStep(chosen, dt, jetKey);
         // Sounds at their moments (rail.sounds: [seconds, cue]).
@@ -5148,7 +5152,7 @@ ${STORY_MORE[target.id]}` : told) };
     if ((!course || !courseById(course)?.rail?.starship) && starshipStage) starshipOff();
     if ((!course || !courseById(course)?.rail?.theia) && theiaStage) theiaOff();
     if ((!course || !courseById(course)?.rail?.marsWalk) && marsStage) marsOff();
-    if ((!course || !courseById(course)?.rail?.orbits) && orbitStage) orbitOff();
+    if (orbitStage && (!course || orbitKind !== (courseById(course)?.rail?.moonFace ? 'moon' : courseById(course)?.rail?.orbits ? 'orbits' : ''))) orbitOff();
     if (!course || !courseById(course)?.rail?.dock) {
       world.setFloatModel('columbia', null);
       landingNow = { dust: 0, shadow: null };

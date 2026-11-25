@@ -6,7 +6,7 @@
 // up (the captions say so); the ways things turn are kept: every orbit goes the same way
 // (anticlockwise seen from the north), and every spin but Venus's (backwards) and
 // Uranus's (on its side, 98 degrees); the Earth's axis leans 23.4 degrees and
-// keeps pointing the same way round the Sun, the Moon keeps one face to the Earth, and
+// keeps pointing the same way round the Sun, and
 // the planets go slower the further out they are (Kepler: the period as the distance to
 // the power 1.5).
 // y up (the north of the Earth's orbit); x and z in its plane.
@@ -14,29 +14,23 @@ import { Engine, Scene, FreeCamera, Vector3, Color3, Color4, CreateSphere, Creat
 
 // The course's seconds (core/courses.js keeps its captions to these).
 export const ORBITS = {
+  // (The Moon's round, its one face and its shape went to a course of their own,
+  // render/moonStage.js; the user, 2026-11-25: "태양계는 어떻게 도는가에서 달의 움직임
+  // 관련한걸 아예 빼서, 따로 만드는거야".)
   spin: [0, 46], // the Earth turning once a day
-  moon: [46, 96], // the Moon going round the Earth
-  lock: [96, 146], // the Moon turning once as it goes round: one face to the Earth
-  phases: [146, 196], // why its shape changes, seen from the Earth
-  year: [196, 250], // the Earth round the Sun, its axis keeping its way: the seasons
-  planets: [250, 300], // all the planets, the further the slower
-  sun: [300, 312], // the Sun turning
-  helix: [312, 370], // the Sun going on, the planets with it: helices (the last 20 s true to scale)
-  hood: [370, 454], // the stars near the Sun going on with it: a look round, then four of them
-  core: [454, 490], // the galaxy's middle: the black hole Sagittarius A* and the stars close round it
-  galaxy: [490, 580], // back to the Sun: its lap of the galaxy, ending where it began (and 8 s on it)
-  end: 580,
+  year: [46, 100], // the Earth round the Sun, its axis keeping its way: the seasons
+  planets: [100, 150], // all the planets, the further the slower
+  sun: [150, 162], // the Sun turning
+  helix: [162, 220], // the Sun going on, the planets with it: helices (the last 20 s true to scale)
+  hood: [220, 304], // the stars near the Sun going on with it: a look round, then four of them
+  core: [304, 340], // the galaxy's middle: the black hole Sagittarius A* and the stars close round it
+  galaxy: [340, 430], // back to the Sun: its lap of the galaxy, ending where it began (and 8 s on it)
+  end: 430,
 };
 
 const TILT = (23.4 * Math.PI) / 180;
 // The Earth's axis: leaning toward +x (so at the year's x end its north is toward the Sun).
 const AXIS = new Vector3(Math.sin(TILT), Math.cos(TILT), 0);
-// Near the Earth (the first four parts) the Sun is far off, on the eye's side of the Earth
-// so its day side faces the eye (the user, 2026-11-24: "지구가 너무 어두워").
-const LOCAL_SUN = new Vector3(-0.8, 0.15, -0.55).normalize();
-const MOON_R = 0.27;
-const MOON_ORBIT = 5;
-const MOON_LAP = 16; // seconds a month, drawn
 
 // Planets: [id, map, display radius, distance in AU, display size].
 const PLANETS = [
@@ -318,24 +312,6 @@ export function createOrbitStage(canvas) {
   const axisLine = CreateLineSystem('orbitAxis', { lines: [[new Vector3(0, -1.6, 0), new Vector3(0, 1.6, 0)]] }, scene);
   axisLine.color = new Color3(0.6, 0.85, 1);
   axisLine.parent = earthTilt;
-  const moonMat = bodyMat('orbitMoonMat', 'assets/planets/moon.webp');
-  const moon = CreateSphere('orbitMoon', { diameter: MOON_R * 2, segments: 48 }, scene);
-  moon.material = moonMat;
-  moon.parent = near;
-  moon.scaling.setAll(1.8);
-  // The Moon as it would go if it did not turn: beside the true one, its spot fixed.
-  const ghostMat = bodyMat('orbitGhostMat', 'assets/planets/moon.webp');
-  const ghost = CreateSphere('orbitGhost', { diameter: MOON_R * 2, segments: 48 }, scene);
-  ghost.material = ghostMat;
-  ghost.parent = near;
-  ghost.scaling.setAll(1.8);
-  // The Moon's round leans 5 degrees from the Earth's (as a caption says).
-  const MOON_TILT = (5.1 * Math.PI) / 180;
-  const moonUp = new Vector3(0, Math.cos(MOON_TILT), -Math.sin(MOON_TILT));
-  const moonRing = ring('orbitMoonRing', MOON_ORBIT, [0.7, 0.7, 0.75], moonUp);
-  moonRing.parent = near;
-  const ghostRing = ring('orbitGhostRing', MOON_ORBIT * 1.35, [0.55, 0.45, 0.45], moonUp);
-  ghostRing.parent = near;
 
   // --- Round the Sun ----------------------------------------------------------------
   const helio = new TransformNode('orbitHelio', scene);
@@ -767,13 +743,6 @@ export function createOrbitStage(canvas) {
   const vlerp = (a, b, k) => Vector3.Lerp(a, b, k);
   const inPart = (part, T) => T >= part[0] && T < part[1];
 
-  // Where the Moon is round the Earth (anticlockwise from above), and its own turn.
-  // (Slower while its shape is watched: a month in 40 s there.)
-  const moonAngle = (T) => {
-    const a = ORBITS.phases[0] - ORBITS.moon[0], b = ORBITS.phases[1] - ORBITS.moon[0];
-    const turns = Math.min(T, a) / MOON_LAP + Math.max(0, Math.min(T, b) - a) / 40 + Math.max(0, T - b) / MOON_LAP;
-    return 2 * Math.PI * turns;
-  };
   const toScreen = (p) => {
     const w = engine.getRenderWidth(), h = engine.getRenderHeight();
     const v = Vector3.Project(p, Matrix.Identity(), scene.getTransformMatrix(), camera.viewport.toGlobal(w, h));
@@ -796,9 +765,6 @@ export function createOrbitStage(canvas) {
   function update(T, words) {
     if (words && !tags.length) {
       tag(words.sun, () => helio.position, (t) => inPart([ORBITS.year[0], ORBITS.planets[1]], t));
-      tag(words.earth, () => near.position, (t) => inPart([ORBITS.moon[0], ORBITS.lock[1]], t));
-      tag(words.moon, () => moon.getAbsolutePosition(), (t) => inPart([ORBITS.moon[0] + 4, ORBITS.lock[1]], t));
-      tag(words.ghost, () => ghost.getAbsolutePosition(), (t) => inPart([ORBITS.lock[0] + 14, ORBITS.lock[1]], t));
       for (const p of planets) tag(words[p.id], () => p.mesh.getAbsolutePosition(), (t) => inPart([ORBITS.planets[0] + 4, ORBITS.planets[1] + 6], t) || (p.id === 'earth' && inPart(ORBITS.year, t)));
       tag(words.here, () => helio.position.add(new Vector3(0, 5, 0)), (t) => inPart([ORBITS.galaxy[0] + 10, ORBITS.galaxy[1]], t));
       {
@@ -878,55 +844,20 @@ export function createOrbitStage(canvas) {
       card.style.opacity = visit && inVisit > 1 && inVisit < VISITS[visit - 1] - goes ? '1' : '0';
     }
     const nearOn = T < ORBITS.year[0];
-    const nearFade = 1 - smooth(ORBITS.phases[1] - 3, ORBITS.phases[1], T);
+    const nearFade = 1 - smooth(ORBITS.year[0] - 3, ORBITS.year[0], T);
     const helioIn = smooth(ORBITS.year[0], ORBITS.year[0] + 3, T);
     near.setEnabled(nearOn);
     helio.setEnabled(!nearOn && !inPart(ORBITS.hood, T) && !inPart(ORBITS.core, T));
 
     // The Earth turning once in 6 s (a day), anticlockwise from above.
     earth.rotation.y = -(2 * Math.PI * T) / 6;
-    // While the Moon's shape is not watched, the Sun stands behind the eye's shoulder, so the
-    // Earth's day side faces the eye wherever the camera goes; while it is, the Sun stays put.
-    const shapeSun = smooth(ORBITS.phases[0] - 4, ORBITS.phases[0], T);
+    // The Sun stands behind the eye's shoulder, so the Earth's day side faces the eye
+    // wherever the camera goes.
     const fromEye = camera.position.subtract(near.position).normalize();
-    const eyeSun = Vector3.TransformNormal(fromEye, Matrix.RotationY(0.7)).add(new Vector3(0, 0.25, 0)).normalize();
-    const nearSun = Vector3.Lerp(eyeSun, LOCAL_SUN, shapeSun).normalize();
-    for (const m of [earthMat, moonMat, ghostMat]) {
-      m.setVector3('sunAt', nearSun);
-      m.setFloat('sunPoint', 0);
-      m.setFloat('fade', nearFade);
-    }
-    // The Moon: in sight from the second part; its spot shown from the third.
-    const showMoon = T >= ORBITS.moon[0] - 2;
-    moon.setEnabled(showMoon);
-    moonRing.setEnabled(showMoon);
-    moonRing.setEnabled(showMoon && !inPart([ORBITS.phases[0] + 3, ORBITS.phases[1]], T));
-    moonRing.alpha = 0.6 * smooth(ORBITS.moon[0], ORBITS.moon[0] + 4, T) * nearFade;
-    const ma = moonAngle(T - ORBITS.moon[0]);
-    moon.position.set(Math.cos(ma) * MOON_ORBIT, Math.sin(ma) * MOON_ORBIT * Math.sin(MOON_TILT), Math.sin(ma) * MOON_ORBIT * Math.cos(MOON_TILT));
-    // It turns once a month: one face (u = 0.5 under Babylon's sphere map) to the Earth.
-    moon.rotation.y = -ma + Math.PI / 2;
-    const face = moon.position.scale(-1).normalize();
-    const markOn = smooth(ORBITS.lock[0], ORBITS.lock[0] + 3, T) * (1 - smooth(ORBITS.phases[0] + 6, ORBITS.phases[0] + 9, T));
-    moonMat.setFloat('mark', markOn);
-    // Brighter, its shade not black, while its round is watched from far (the user,
-    // 2026-11-24: "달도 너무 어둡다"); dark-shaded while its shape is watched.
-    const shapeOn = smooth(ORBITS.phases[0], ORBITS.phases[0] + 3, T) * (1 - smooth(ORBITS.phases[1] - 3, ORBITS.phases[1], T));
-    for (const m of [moonMat, ghostMat]) { m.setFloat('night', lerp(0.2, 0.02, shapeOn)); m.setFloat('gain', lerp(1.7, 1.3, shapeOn)); }
-    // (Large while seen from far over both rounds, small up close.)
-    const markR = lerp(0.24, 0.09, smooth(ORBITS.phases[0], ORBITS.phases[0] + 3, T));
-    moonMat.setFloat('markR', markR);
-    ghostMat.setFloat('markR', markR);
-    moonMat.setVector3('markAt', moon.position.add(face.scale(MOON_R * 1.8)).add(near.position));
-    const ghostOn = smooth(ORBITS.lock[0] + 12, ORBITS.lock[0] + 15, T) * (1 - smooth(ORBITS.lock[1] - 2, ORBITS.lock[1], T));
-    ghost.setEnabled(ghostOn > 0.001);
-    ghostRing.setEnabled(ghostOn > 0.001);
-    ghostRing.alpha = 0.5 * ghostOn;
-    ghost.position.set(Math.cos(ma) * MOON_ORBIT * 1.35, Math.sin(ma) * MOON_ORBIT * 1.35 * Math.sin(MOON_TILT), Math.sin(ma) * MOON_ORBIT * 1.35 * Math.cos(MOON_TILT));
-    ghostMat.setFloat('mark', ghostOn);
-    // Its spot keeps pointing the one way (toward where the Earth was at the start).
-    ghostMat.setVector3('markAt', ghost.position.add(new Vector3(-1, 0, 0).scale(MOON_R * 1.8)));
-    ghostMat.setFloat('fade', nearFade * ghostOn);
+    const nearSun = Vector3.TransformNormal(fromEye, Matrix.RotationY(0.7)).add(new Vector3(0, 0.25, 0)).normalize();
+    earthMat.setVector3('sunAt', nearSun);
+    earthMat.setFloat('sunPoint', 0);
+    earthMat.setFloat('fade', nearFade);
 
     // Round the Sun.
     const ySince = T - ORBITS.year[0];
@@ -1129,16 +1060,10 @@ export function createOrbitStage(canvas) {
   function cameraAt(T) {
     const at = (x, y, z) => new Vector3(x, y, z);
     const helioAt = (x, y, z) => helio.position.add(new Vector3(x, y, z));
-    const moonNow = moon.position.add(near.position);
     const keys = [
       { t: 0, at: at(-2.6, 1.2, -3.2), look: at(0, 0.1, 0), fov: 0.75 },
       { t: ORBITS.spin[1] - 6, at: at(-2.2, 2.6, -3.2), look: at(0, 0, 0), fov: 0.75 },
-      { t: ORBITS.moon[0] + 8, at: at(1, 12, -11), look: at(0, 0, 0), fov: 0.8 },
-      { t: ORBITS.lock[0] + 8, at: at(0, 26, -4), look: at(0, 0, 0.5), fov: 0.9 },
-      { t: ORBITS.lock[1] - 2, at: at(0, 26, -4), look: at(0, 0, 0.5), fov: 0.9 },
-      // From just off the Earth toward the Moon, looking at it.
-      { t: ORBITS.phases[0] + 4, at: moonNow.scale(0.25).add(at(0, 1.3, 0)), look: moonNow, fov: 0.5 },
-      { t: ORBITS.phases[1], at: moonNow.scale(0.25).add(at(0, 1.3, 0)), look: moonNow, fov: 0.5 },
+      { t: ORBITS.year[0] - 0.5, at: at(-2.2, 2.6, -3.2), look: at(0, 0, 0), fov: 0.75 },
       // The year: over the Sun and the Earth's round, a little to its side.
       { t: ORBITS.year[0] + 1, at: helioAt(0, 58, -46), look: helioAt(0, 0, 0), fov: 0.8 },
       { t: ORBITS.year[1], at: helioAt(0, 56, -44), look: helioAt(0, 0, 0), fov: 0.8 },
@@ -1184,8 +1109,6 @@ export function createOrbitStage(canvas) {
     const a = keys[i], b = keys[i + 1];
     // Over a cut (near the Earth to round the Sun) the eye jumps behind the fade.
     const k = a.t < ORBITS.year[0] && b.t >= ORBITS.year[0] ? (T >= ORBITS.year[0] ? 1 : 0) : smooth(a.t, b.t, T);
-    // (Hold the phases' view on the Moon: it moves while the keys stand.)
-    if (T >= ORBITS.phases[0] + 4 && T < ORBITS.phases[1]) return { at: keys[5].at, look: keys[5].look, fov: 0.5 };
     return { at: vlerp(a.at, b.at, k), look: vlerp(a.look, b.look, k), fov: lerp(a.fov, b.fov, k) };
   }
 

@@ -160,14 +160,18 @@ export const COURSES = [
   // (assets/codex/moonsides/answer1.md): Burns 2013 (seas 31% / 1%), Gallant 2009, Wieczorek
   // 2013 and NASA (crust some 40 / up to 60 km), Lawrence 1998, Roy 2014, Jones 2022,
   // Jutzi & Asphaug 2011, Zhang 2024 (Chang'e 6 basalt 2.807 Ga); the four ideas are said
-  // to be ideas.
+  // to be ideas. (The user, 2026-11-26: "지구의 중력 방패가 될 수도 있지않나?": Le Feuvre &
+  // Wieczorek 2011, a few % when the Moon was within 30 Earth radii, 0.1% today; "하나 <- 이건
+  // 너무 억지 아니냐. 멀다며": Roy 2014 has the Moon some 3 Earth radii off, the Earth
+  // 20 times wider in its sky; He & Li 2025, Nature Geoscience, the far side's mantle some
+  // 100 degrees cooler; answer2.md, answer3.md; "셋 다 넣고 개발해".)
   { id: 'moonSides', body: 'earth', lapS: 232, rail: { moonSides: true, stage: [[-2, 242]], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 231.9], still: [[-60, 242]], phases: [[-1, t('앞면의 바다')], [22, t('곰보 뒷면')], [44, t('지구가 막아 줬을까')], [60, t('바다가 생기다')], [104, t('반으로 자른 달')], [134, t('설 하나: 뜨거운 지구')], [150, t('설 둘: 열을 내는 원소')], [166, t('설 셋: 큰 충돌')], [182, t('설 넷: 둘째 달')], [198, t('뒷면의 돌')], [218, t('다시 앞면')]], captions: [
     { at: 1, text: t('지구에서 보는 달의 앞면입니다. 검은 얼룩이 넓게 퍼져 있어, 옛사람들은 여기서 방아 찧는 토끼를 보았습니다.') },
     { at: 11, text: t('검은 곳을 바다라고 부르지만 물은 없습니다. 굳은 용암이 덮은 평평한 땅이라 매끈하고, 크레이터가 적습니다.') },
     { at: 23, text: t('달을 돌려, 지구에서는 보이지 않는 뒷면으로 갑니다. 1959년 소련의 루나 3호가 처음 사진을 찍었습니다.') },
     { at: 33, text: t('뒷면에는 바다가 거의 없습니다. 바다가 앞면은 3분의 1쯤 덮지만, 뒷면은 1%쯤뿐입니다. 크레이터 위에 크레이터가 겹친 고지대입니다.') },
     { at: 45, text: t('지구가 앞면을 가려 줘서 운석을 덜 맞았을까요? 아닙니다. 달에서 보면 지구는 하늘의 아주 작은 부분만 가립니다.') },
-    { at: 53, text: t('앞면과 뒷면이 맞은 운석은 대체로 비슷합니다. 크기와 거리는 보기 쉽게 줄였습니다.') },
+    { at: 53, text: t('지구의 중력도 방패가 되지 못했습니다. 달이 가까웠던 옛날에도 몇 %를 막는 데 그쳤습니다. 크기와 거리는 보기 쉽게 줄였습니다.') },
     { at: 61, text: t('앞면도 처음에는 뒷면처럼 크레이터투성이였습니다. 큰 소행성이 부딪혀, 지름 수백 km의 커다란 구덩이도 파였습니다.') },
     { at: 72, text: t('약 39억 년 전부터 30억 년 전 무렵까지, 달 속에서 녹은 돌이 갈라진 틈을 따라 올라와 낮은 곳부터 채웠습니다.') },
     { at: 86, text: t('용암은 옛 크레이터를 덮어 묻고, 식어서 검은 현무암이 되었습니다. 그래서 바다는 어둡고 매끈합니다.') },
@@ -176,15 +180,16 @@ export const COURSES = [
     { at: 113, text: t('2012년 쌍둥이 탐사선 그레일이 달의 중력을 재어 겉껍질의 두께를 알아냈습니다. 앞면 쪽은 40km쯤, 뒷면은 두꺼운 곳이 60km쯤입니다. 잘 보이게 두껍게 그렸습니다.') },
     { at: 124, text: t('껍질이 얇은 앞면에서는 녹은 돌이 뚫고 나왔고, 두꺼운 뒷면에서는 대부분 막혔습니다.') },
     { at: 135, text: t('그럼 겉껍질의 두께는 왜 다를까요? 아직 정답은 없고, 몇 가지 설이 있습니다.') },
-    { at: 141, text: t('하나. 갓 생긴 지구는 녹은 돌로 뜨겁게 빛났습니다. 바로 곁의 달 앞면은 데워지고, 차가운 뒷면에 껍질이 될 돌이 더 쌓였다는 설입니다.') },
+    { at: 141, text: t('하나. 갓 생긴 달은 지금보다 훨씬 가까웠고, 지구는 녹은 돌로 뜨겁게 빛났습니다. 그 열에 앞면이 데워져, 더 차가운 뒷면에 껍질의 재료가 먼저 굳어 쌓였다는 설입니다.') },
     { at: 151, text: t('둘. 1998년 루나 프로스펙터가 재어 보니, 토륨처럼 열을 내는 방사성 원소가 앞면 서쪽의 큰 바다 둘레에 몰려 있었습니다.') },
     { at: 159, text: t('이 원소들이 내는 열이 앞면 속을 오래 녹여, 용암이 많이 나왔다는 설입니다.') },
     { at: 167, text: t('셋. 뒷면 남쪽에는 지름 2,500km에 이르는, 태양계에서 손꼽히게 큰 충돌 구덩이가 있습니다. 남극-에이킨 분지입니다.') },
     { at: 175, text: t('이 충돌이 달 속을 휘저어, 열을 내는 원소를 앞면 쪽으로 밀어냈다는 설입니다.') },
     { at: 183, text: t('넷. 달 곁에 작은 달이 하나 더 있다가, 천천히 뒷면에 부딪혀 두꺼운 고지대를 덮었다는 설도 있습니다.') },
     { at: 199, text: t('2024년 중국의 창어 6호가 뒷면의 돌을 처음 지구로 가져왔습니다. 남극-에이킨 분지 안에서 떠 왔습니다.') },
-    { at: 208, text: t('그 돌을 보니 뒷면에도 28억 년 전쯤 용암이 흘렀습니다. 다만 앞면보다 훨씬 적었습니다.') },
-    { at: 219, text: t('앞면이 늘 지구를 향하는 까닭은 「달은 왜 한쪽 얼굴만 보일까」에서 볼 수 있습니다.') },
+    { at: 205, text: t('그 돌을 보니 뒷면에도 28억 년 전쯤 용암이 흘렀습니다. 다만 앞면보다 훨씬 적었습니다.') },
+    { at: 211, text: t('2025년에는 그 돌로, 옛날 뒷면의 맨틀이 앞면보다 100도쯤 차가웠다는 연구도 나왔습니다. 뒷면의 돌이 더 모이면 답이 가까워질 것입니다.') },
+    { at: 220, text: t('앞면이 늘 지구를 향하는 까닭은 「달은 왜 한쪽 얼굴만 보일까」에서 볼 수 있습니다.') },
   ] }, name: t('달의 뒷면은 왜 곰보일까'), todo: t('매끈한 검은 바다가 달의 앞면에만 있는 까닭을, 달을 반으로 잘라 보며 찾아봅니다.') },
   { id: 'starship', body: 'earth', lapS: 440, rail: { starship: true, stage: [[-20, 30], [372, 460]], hotStage: { from: 158, to: 178, nearKm: 11, farKm: 400, sizeKm: 30, sideKm: 6, aimKm: 9 }, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }, { at: 30, cabin: 'assets/tours/booster-up.webp' }, { at: 184, cabin: 'assets/tours/booster-down.webp' }, { at: 372, cabin: 'assets/tours/none.webp', captionY: 76 }], stageShakes: [{ from: 0.5, peak: 2.5, to: 9, power: 1 }, { from: 407.8, peak: 408.2, to: 410.5, power: 0.6 }], floaters: [], loops: true, fades: [30, 372, 439.2], startS: -44, burns: [{ from: -3, to: 20, power: 0.9, buzz: true }, { from: 20, to: 158, power: 0.55 }, { from: 188, to: 226, power: 0.6, buzz: true }, { from: 381, to: 407, power: 0.75, buzz: true }], shakes: [{ from: -3, peak: 2, to: 30 }, { from: 158, peak: 159, to: 163 }, { from: 406.8, peak: 407, to: 409 }], still: [[-60, 30], [372, 460]], photos: [{ from: -44, to: -32, src: 'assets/tours/starbase-sat.webp', pan: [60, 76], zoom: [1, 2.4], origin: '74% 90%', credit: 'SpaceFrom.Space, CC BY 2.0' }, { from: -32, to: -20, src: 'assets/tours/starship-pad.webp', pan: [57, 57], zoom: [1.1, 1.4], origin: '50% 12%', credit: 'Steve Jurvetson, CC BY 2.0' }], sounds: [[1.3, 'liftoff'], [158, 'staging'], [408.1, 'capture']], countdowns: [{ at: 0, from: 20, beeps: 10, said: t('발사까지'), go: t('이륙!') }], phases: [[-44, t('발사대')], [0, t('발사')], [158, t('단 분리')], [184, t('돌아오는 길')], [381, t('착륙')], [407, t('붙잡음')]], captions: [{ at: -43, text: t('2024년 10월 13일 아침, 미국 텍사스 남쪽 바닷가의 발사장. 높이 121m, 지금까지 만든 가장 큰 로켓입니다.') }, { at: -31, text: t('전날 밤의 발사대. 불 밝힌 탑 옆에서 로켓이 기다립니다.') }, { at: -19, text: t('아래는 1단 슈퍼 헤비, 위는 2단 스타십. 둘 다 다시 쓰려고 만든 로켓입니다.') }, { at: 2, text: t('1단 바닥의 엔진 33개에 불이 붙습니다.') }, { at: 34, text: t('1단 옆에 붙은 카메라로 봅니다. 하늘이 점점 검어집니다.') }, { at: 70, text: t('가장 큰 공기의 힘을 견디고 지나갑니다. 곧 소리보다 몇 배 빨라집니다.') }, { at: 120, text: t('2분 반 동안 연료 3,400톤을 태웠습니다.') }, { at: 158, text: t('2단이 1단에 붙은 채로 엔진을 켜고 떨어져 나갑니다. 핫 스테이징이라고 합니다.') }, { at: 186, text: t('1단은 몸을 돌려 엔진을 다시 켜고, 떠나온 발사장으로 되돌아갑니다.') }, { at: 232, text: t('고도 약 95km. 이제 떨어지며 격자 날개로 방향을 잡습니다.') }, { at: 300, text: t('1단에서 떨어져 나간 2단은 우주로 올라가 지구를 3분의 2 바퀴쯤 돌고, 1시간 남짓 뒤 인도양에 내렸습니다.') }, { at: 374, text: t('다시 발사장. 1단이 하늘에서 내려옵니다.') }, { at: 383, text: t('엔진 13개를 켜고 속도를 줄입니다.') }, { at: 394, text: t('마지막엔 엔진 세 개만 켜고 탑 옆으로 내려옵니다.') }, { at: 407, text: t('탑의 두 팔이 70m 높이의 1단을 공중에서 붙잡았습니다. 처음 해낸 일이었습니다.') }, { at: 420, text: t('발사부터 7분 만의 일이었습니다.') }], track: { alt: [[30, 2.5], [60, 12], [100, 35], [158, 65], [200, 92], [215, 95], [260, 82], [320, 40], [372, 3]], down: [[30, 0.3], [60, 3], [100, 20], [158, 62], [200, 86], [215, 88], [260, 70], [320, 26], [372, 1]], tilt: [[30, 0], [60, 14], [100, 34], [158, 52], [176, 60], [190, -60], [226, -55], [300, -15], [372, 0]] } }, name: t('스타십, 하늘에서 붙잡은 로켓'), todo: t('2024년 거대한 로켓이 날아올랐다 돌아와, 발사탑의 두 팔에 붙잡히기까지를 땅과 로켓에서 봅니다.') },
   // A walk on Mars along Perseverance's tracks, landing site to Van Zyl Overlook (the user,

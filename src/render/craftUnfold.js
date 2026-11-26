@@ -171,7 +171,8 @@ function slab(scene, name, parent, material, outline, through) {
 // (The shuttle is drawn at half its true size beside the telescope, to fit the view.)
 // The scene faces the watcher (render/craft.js `face`): the shuttle is seen from its side.
 function hubbleService(scene, name, mats) {
-  const { root } = based(scene, name, mats, 'hubble');
+  // (In 1993 it still had flexible arrays: the new ones it got then were flexible too.)
+  const { root } = based(scene, name, mats, 'hubble1990');
   const shuttle = group(scene, `${name}Shuttle`, root);
   // Its nose to +x, its open bay up (+y) under the telescope. (Redrawn on 2026-10-06 with
   // a round body, delta wings, a swept fin, engine pods and the arm: the user, of the

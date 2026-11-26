@@ -5171,6 +5171,8 @@ ${STORY_MORE[target.id]}` : told) };
     // Hubble drawn at a set size while Discovery backs away from it, so that it goes small.
     const shuttleRail = course ? courseById(course)?.rail : null;
     world.setCraftSize('hubble', shuttleRail?.shuttle ? (shuttleRail.craftKm ?? 5.6) : null);
+    // Hubble as it was on the course's day (render/hubble3d.js), else as it is now.
+    world.setCraftLook('hubble', shuttleRail?.craftLook ?? null);
     // Held by the shuttle's arm until the course's second 0, let go then.
     world.setCraftArm('hubble', shuttleRail?.arm ? courseTime : null);
     // Another photo in Hubble's place (McCandless's course: Challenger).

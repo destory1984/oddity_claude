@@ -11,7 +11,7 @@ import { createBodyMeshes } from './planets.js';
 import { createSun } from './sun.js';
 import { createStars } from './stars.js';
 import { createSpriteHero } from './spriteHero.js';
-import { createCraft, createSiteModels, setCraftSize, setCraftArm, setCraftPhoto, setFloatPhoto, setCraftModel, setFloatModel } from './craft.js';
+import { createCraft, createSiteModels, setCraftSize, setCraftArm, setCraftPhoto, setFloatPhoto, setCraftModel, setFloatModel, setCraftLook } from './craft.js';
 import { createGroundPatches } from './groundPatches.js';
 import { storySitesAt } from '../core/stories.js';
 import { createComet } from './comet.js';
@@ -313,7 +313,7 @@ export async function createWorld(canvas, bodies = BODIES, heroCanvas = null) {
       fineEarth = null;
     },
     // Lightning in the night's clouds (shaders/clouds.frag), during the cupola course.
-    setCraftSize, setCraftArm, setCraftPhoto, setFloatPhoto, setCraftModel, setFloatModel,
+    setCraftSize, setCraftArm, setCraftPhoto, setFloatPhoto, setCraftModel, setFloatModel, setCraftLook,
     setStorms(on) {
       scene.materials.find((m) => m.name === 'cloudLayer')?.setFloat('storms', on ? 1 : 0);
     },

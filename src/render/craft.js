@@ -632,6 +632,13 @@ export function setCraftArm(id, t) {
   if (t === null) ARM_SET.delete(id);
   else ARM_SET.set(id, t);
 }
+// Another look of a craft's own model (CRAFT_BUILD), by its builder's name: Discovery's
+// course wants Hubble as it was in 1990 ('hubble1990'), not as it is now.
+const LOOK_SET = new Map();
+export function setCraftLook(id, look) {
+  if (look === null) LOOK_SET.delete(id);
+  else LOOK_SET.set(id, look);
+}
 const PHOTO_SET = { hubble: { src: 'assets/tours/hubble-photo.webp', aspect: 787 / 1400, width: 0.5 } };
 // Another photo in that place for a course of its own: McCandless's spacewalk puts
 // Challenger where Hubble would be, seen from his helmet.
@@ -869,7 +876,9 @@ export function createCraft(scene, craftList) {
     arm.root.setEnabled(true);
   }
   const buildCraft = (id) => {
-    const node = (CRAFT_BUILD[id] ?? CURIO_BUILD[id])(scene, id, mats);
+    const look = LOOK_SET.get(id) ?? id;
+    const node = (CRAFT_BUILD[look] ?? CURIO_BUILD[id])(scene, id, mats);
+    node.metadata = { ...node.metadata, look };
     nodes.set(id, node);
     if (CRAFT_UNFOLD[id]) {
       const loose = CRAFT_UNFOLD[id](scene, `${id}Unfolding`, mats);
@@ -918,6 +927,11 @@ export function createCraft(scene, craftList) {
       const distanceKm = Math.hypot(...rel) * KM_PER_UNIT;
       const rule = RULES[c.id];
       const shows = distanceKm < rule.visibleKm && !hidden.includes(c.id);
+      // (Built again when its look has changed.)
+      if (nodes.get(c.id) && nodes.get(c.id).metadata?.look !== (LOOK_SET.get(c.id) ?? c.id)) {
+        nodes.get(c.id).dispose();
+        nodes.delete(c.id);
+      }
       const node = nodes.get(c.id) ?? (shows || replay?.id === c.id ? buildCraft(c.id) : null);
       if (!node) continue;
       const loose = unfolding.get(c.id);

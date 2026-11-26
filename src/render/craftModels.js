@@ -2,6 +2,7 @@ import { TransformNode, Vector3, CreateBox, CreateSphere, CreateRibbon, Mesh } f
 import {
   QUARTER, part, cyl, group, aim, box, drum, rod, dish, truss, wing, rtg, nozzle, thrusters, fuse,
 } from './craftParts.js';
+import { hubble1990, hubbleToday } from './hubble3d.js';
 
 // The spacecraft, telescopes and stations, each about one unit across and built from
 // the parts in craftParts.js. Local +z points at the Sun (Voyager's dish toward home,
@@ -58,57 +59,7 @@ function voyager(scene, name, mats) {
   return fuse(scene, root);
 }
 
-// Hubble: a narrow forward tube with the aperture door open, a fatter equipment ring
-// and aft shroud with its instrument doors and handrails, two solar arrays on masts and
-// two dish antennas on booms. It never looks at the Sun, so the tube lies across the
-// sunward axis.
-function hubble(scene, name, mats) {
-  const outer = new TransformNode(name, scene);
-  const root = group(scene, `${name}Body`, outer, [0, 0, 0], [-QUARTER, 0, 0]);
-  const tube = (id, diameter, height, z, material, tessellation = 32) => drum(scene, `${name}${id}`, root, material, { height, diameter, tessellation }, [0, 0, z], Z);
-  tube('Forward', 0.23, 0.6, 0.18, mats.foil);
-  tube('Bay', 0.31, 0.12, -0.18, mats.foil);
-  tube('Aft', 0.32, 0.26, -0.37, mats.foil);
-  tube('Bulkhead', 0.3, 0.012, -0.505, mats.dark);
-  tube('Mouth', 0.21, 0.01, 0.482, mats.black);
-  // Dark bands where the sections join, and the rim of the aperture.
-  for (const [i, z, d] of [[0, 0.47, 0.238], [1, 0.3, 0.236], [2, 0.12, 0.236], [3, -0.12, 0.316], [4, -0.24, 0.326], [5, -0.49, 0.326]]) {
-    tube(`Band${i}`, d, 0.008, z, mats.grey);
-  }
-  // Aperture door, swung open on its hinge at the top of the mouth.
-  const hinge = group(scene, `${name}Hinge`, root, [0, 0.115, 0.48], [-1.85, 0, 0]);
-  drum(scene, `${name}Door`, hinge, mats.foil, { height: 0.01, diameter: 0.23, tessellation: 32 }, [0, -0.115, 0], Z);
-  drum(scene, `${name}DoorInside`, hinge, mats.black, { height: 0.004, diameter: 0.2, tessellation: 32 }, [0, -0.115, 0.007], Z);
-  // Equipment bay doors round the ring, and the instrument doors on the aft shroud.
-  for (const [x, y, , a] of ring(8, 0.157, 0, 0.39)) {
-    box(scene, `${name}BayDoor${a}`, root, mats.plate, [0.09, 0.004, 0.09], [x, y, -0.18], [0, 0, a + QUARTER]);
-  }
-  for (const [x, y, , a] of ring(4, 0.162, 0, 0.78)) {
-    box(scene, `${name}AftDoor${a}`, root, mats.plate, [0.13, 0.004, 0.2], [x, y, -0.37], [0, 0, a + QUARTER]);
-  }
-  // Yellow handrails for the astronauts who serviced it, and their foot sockets.
-  for (const [x, y, , a] of ring(6, 0.167, 0, 0.2)) {
-    rod(scene, `${name}Rail${a}`, root, mats.gold, [x, y, -0.28], [x, y, -0.46], 0.006, 4);
-    rod(scene, `${name}BayRail${a}`, root, mats.gold, [x * 0.96, y * 0.96, -0.13], [x * 0.96, y * 0.96, -0.23], 0.006, 4);
-  }
-  for (const [x, y, , a] of ring(4, 0.12, 0, 0.6)) rod(scene, `${name}TubeRail${a}`, root, mats.gold, [x, y, 0.14], [x, y, 0.44], 0.005, 4);
-  // Fine guidance sensors and star trackers looking out of the aft shroud.
-  for (const [x, y] of ring(3, 0.17, 0, 2.2)) box(scene, `${name}Tracker${x}`, root, mats.dark, [0.04, 0.04, 0.06], [x, y, -0.27]);
-  // Solar arrays: rigid panels 7.6 m long, each on a mast, lying along the tube.
-  for (const s of [-1, 1]) {
-    rod(scene, `${name}Mast${s}`, root, mats.grey, [s * 0.12, 0, 0.08], [s * 0.32, 0, 0.08], 0.014, 6);
-    wing(scene, `${name}ArrayA${s}`, root, mats, { from: [s * 0.41, 0, 0.08], to: [s * 0.41, 0, 0.37], width: 0.19, panels: 2, face: [0, 1, 0], yoke: 0, back: mats.goldFoil });
-    wing(scene, `${name}ArrayB${s}`, root, mats, { from: [s * 0.41, 0, 0.08], to: [s * 0.41, 0, -0.21], width: 0.19, panels: 2, face: [0, 1, 0], yoke: 0, back: mats.goldFoil });
-    box(scene, `${name}Spar${s}`, root, mats.grey, [0.014, 0.016, 0.6], [s * 0.41, 0, 0.08]);
-    box(scene, `${name}Drive${s}`, root, mats.dark, [0.04, 0.04, 0.04], [s * 0.13, 0, 0.08]);
-    // High-gain antennas: small dishes on booms above and below the tube.
-    rod(scene, `${name}Boom${s}`, root, mats.grey, [0, s * 0.11, 0.1], [0, s * 0.36, 0.1], 0.008, 5);
-    dish(scene, `${name}Hga${s}`, root, mats, { at: [0, s * 0.36, 0.1], toward: [0, s, 0], diameter: 0.1 });
-  }
-  // The docking ring left by the last servicing mission.
-  tube('Dock', 0.14, 0.02, -0.52, mats.grey, 20);
-  return fuse(scene, outer);
-}
+// Hubble: render/hubble3d.js, in two looks (1990's flexible arrays; today's since 2009).
 
 // Webb: five kite-shaped sunshield layers with their spreader bars, and on the cold
 // side a gold mirror of 18 hexagons facing sideways, its secondary held out on three
@@ -1201,7 +1152,7 @@ function galileo(scene, name, mats) {
 }
 
 export const CRAFT_BUILD = {
-  voyager1: voyager, voyager2: voyager, hubble, jwst: webb, kepler, chandra, euclid,
+  voyager1: voyager, voyager2: voyager, hubble: hubbleToday, hubble1990, jwst: webb, kepler, chandra, euclid,
   iss, tiangong, sputnik, mro, juno, cassini, parker, roadster, newHorizons, pioneer10: pioneer,
   danuri, lro, europaClipper, lucy, pioneer11: pioneer, bepiColombo, akatsuki, mangalyaan, dawn, juice,
   hayabusa2, soho, solarOrbiter, tianwen1, osirisRex, hera, tess, gaia, psyche,

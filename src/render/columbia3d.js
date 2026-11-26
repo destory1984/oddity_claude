@@ -1,22 +1,33 @@
-import { Vector3, Quaternion, Color3, StandardMaterial, TransformNode, DynamicTexture, Mesh, CreateCylinder, CreateSphere, CreateBox, CreateTorus, CreatePlane, Texture, Constants } from './babylon.js';
+import { Vector3, Quaternion, Color3, StandardMaterial, TransformNode, DynamicTexture, Mesh, VertexData, CreateCylinder, CreateSphere, CreateBox, CreateTorus, CreatePlane, Texture, Constants } from './babylon.js';
 
-// Apollo 11's command and service module, Columbia, as Eagle saw it coming back from the
-// Moon to dock (the user, 2026-11-20: "아폴로 귀환 시에 사령선이 도킹하는걸 게임에 넣는건 어때",
-// then a scene to watch, not to fly). Built in metres: the nose (the docking probe) at +x,
-// "up" (+y) the side with the high-gain antenna. Surfaces are painted here, not loaded.
+// Apollo 11's command and service module, Columbia, as Eagle saw it leaving and coming back
+// to dock. Rebuilt from photographs with the img2threejs method (the user, 2026-11-26:
+// "콜롬비아 다시 그려보자", "넣고"): AS15-88-11972 for the stack's proportions (its open SIM
+// bay ignored: Columbia's side there was plain panels), AS09-20-3064 for the command
+// module's skin, AS11-37-5446 (Columbia from Eagle) for the nose and the antenna; the spec
+// behind the numbers is on branch try/columbia-img2 (trial/img2/object-sculpt-spec.json).
+// Metres: the nose (docking probe) at +x, +y the side with the high-gain antenna, the root
+// at the joint of the two modules; jets "fwd"/"side". Surfaces are painted here, not loaded.
 
 const PI = Math.PI;
+const TAU = 2 * PI;
+const R = 1.956; // the service module's radius (3.91 m across)
+// Round the axis: azimuth 0 is +y (the antenna's side), PI/2 is +z.
+const QUAD_AZ = [PI / 4, (3 * PI) / 4, (5 * PI) / 4, (7 * PI) / 4];
+// The hatch, as Eagle saw it (AS11-37-5446): 225 degrees round from the antenna.
+const HATCH_AZ = (5 * PI) / 4;
+
 function seeded(seed) {
   let s = seed;
   return () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
 }
-function paintTexture(scene, name, w, h, paint, { u = 1, v = 1 } = {}) {
+function paintTexture(scene, name, w, h, paint) {
   const tex = new DynamicTexture(name, { width: w, height: h }, scene, true, Texture.TRILINEAR_SAMPLINGMODE, undefined, false);
   const g = tex.getContext();
   paint(g, w, h, seeded(name.length * 7907 + w));
   tex.update(false);
-  tex.uScale = u;
-  tex.vScale = v;
+  tex.wrapU = Texture.WRAP_ADDRESSMODE;
+  tex.wrapV = Texture.CLAMP_ADDRESSMODE;
   tex.anisotropicFilteringLevel = 8;
   return tex;
 }
@@ -30,70 +41,111 @@ function material(scene, name, tex, { spec = 0.3, power = 32, color = null, emis
   m.backFaceCulling = false;
   return m;
 }
-function grime(g, w, h, rnd, count, dark, size) {
-  for (let i = 0; i < count; i++) {
-    const x = rnd() * w, y = rnd() * h, r = size * (0.3 + rnd());
-    const spot = g.createRadialGradient(x, y, 0, x, y, r);
-    spot.addColorStop(0, `rgba(50,46,40,${(dark * (0.3 + rnd())).toFixed(3)})`);
-    spot.addColorStop(1, 'rgba(0,0,0,0)');
-    g.fillStyle = spot;
-    g.fillRect(x - r, y - r, 2 * r, 2 * r);
+
+// A surface of revolution about x. profile: [x, r, crease?] from aft to fore; a crease
+// point gets two rings so the edge stays sharp. u goes round (0 at +y, toward +z), v is
+// x mapped from [v0, v1] onto 0..1. Normals come from the profile, not from averaging.
+function revolve(scene, name, profile, { segments = 64, v0 = null, v1 = null, inside = false } = {}) {
+  const xs = profile.map((p) => p[0]);
+  const lo = v0 ?? Math.min(...xs), hi = v1 ?? Math.max(...xs);
+  const segN = [];
+  for (let i = 0; i + 1 < profile.length; i++) {
+    const dx = profile[i + 1][0] - profile[i][0], dr = profile[i + 1][1] - profile[i][1];
+    const l = Math.hypot(dx, dr) || 1;
+    segN.push([-dr / l, dx / l]); // outward (x, r) normal of a segment going +x
   }
+  const rings = [];
+  profile.forEach(([x, r, crease], i) => {
+    const before = segN[i - 1], after = segN[i];
+    if (crease && before && after) {
+      rings.push({ x, r, n: before });
+      rings.push({ x, r, n: after });
+    } else {
+      const a = before || after, b = after || before;
+      const n = [a[0] + b[0], a[1] + b[1]];
+      const l = Math.hypot(n[0], n[1]) || 1;
+      rings.push({ x, r, n: [n[0] / l, n[1] / l] });
+    }
+  });
+  const positions = [], normals = [], uvs = [], indices = [];
+  const flip = inside ? -1 : 1;
+  for (const ring of rings) {
+    for (let k = 0; k <= segments; k++) {
+      const a = (k / segments) * TAU, c = Math.cos(a), s = Math.sin(a);
+      positions.push(ring.x, ring.r * c, ring.r * s);
+      normals.push(flip * ring.n[0], flip * ring.n[1] * c, flip * ring.n[1] * s);
+      uvs.push(k / segments, 1 - (ring.x - lo) / (hi - lo || 1));
+    }
+  }
+  const row = segments + 1;
+  for (let j = 0; j + 1 < rings.length; j++) {
+    if (rings[j].x === rings[j + 1].x && rings[j].r === rings[j + 1].r) continue; // a crease's pair
+    for (let k = 0; k < segments; k++) {
+      const a = j * row + k, b = a + 1, c = a + row, d = c + 1;
+      if (inside) indices.push(a, b, c, b, d, c);
+      else indices.push(a, c, b, b, c, d);
+    }
+  }
+  const mesh = new Mesh(name, scene);
+  const data = new VertexData();
+  data.positions = positions;
+  data.normals = normals;
+  data.uvs = uvs;
+  data.indices = indices;
+  data.applyToMesh(mesh);
+  return mesh;
 }
-// The command module's skin: the silvered tape over it in long strips, a little rumpled,
-// its seams, and its five windows (two forward for the rendezvous, two at the sides, one
-// in the hatch). u goes round the cone, v from its base (0) to its top (1).
+
+// ---- the command module ----------------------------------------------------------------
+// Its profile (x, r): the aft heat shield and the rounded shoulder (both hidden inside the
+// service module's forward fairing), the 33-degree cone, a flat ring at the top round the docking tunnel's collar.
+const CM_PROFILE = [
+  [-0.26, 0.001], [-0.22, 0.9], [-0.1, 1.55], [0.04, 1.86], [0.14, 1.93], [0.24, 1.92], [0.34, 1.86, true],
+  [2.26, 0.62], [2.32, 0.58], [2.34, 0.54, true],
+];
+const CM_X0 = -0.26, CM_X1 = 2.34;
+const cmV = (x) => 1 - (x - CM_X0) / (CM_X1 - CM_X0); // canvas y fraction for an x
+const coneR = (x) => 1.86 + ((0.62 - 1.86) * (x - 0.34)) / (2.26 - 0.34);
+const coneX = (r) => 0.34 + ((r - 1.86) * (2.26 - 0.34)) / (0.62 - 1.86);
+
+// The skin: silvered tape in strips along the cone (it mirrored the Moon and the black sky
+// in turn), crinkled; the shoulder's bright rim with the thin copper line Eagle's photograph
+// shows; the forward heat shield's smoother ring round the top; five windows (two forward
+// rendezvous windows, two side ones, one in the hatch), the hatch's outline, the small
+// dark ports of its own thrusters with their brown fans.
 function paintCommand(g, w, h, rnd) {
   for (let x = 0; x < w; x += 16) {
-    const k = Math.round((rnd() - 0.5) * 34);
+    const k = Math.round((rnd() - 0.5) * 70);
+    const dark = rnd() < 0.22;
     const strip = g.createLinearGradient(x, 0, x + 16, 0);
-    strip.addColorStop(0, `rgb(${196 + k},${200 + k},${206 + k})`);
-    strip.addColorStop(0.5, `rgb(${226 + k},${229 + k},${233 + k})`);
-    strip.addColorStop(1, `rgb(${182 + k},${186 + k},${192 + k})`);
+    const c = dark ? 120 : 205;
+    strip.addColorStop(0, `rgb(${c - 30 + k},${c - 28 + k},${c - 24 + k})`);
+    strip.addColorStop(0.5, `rgb(${c + 25 + k},${c + 27 + k},${c + 30 + k})`);
+    strip.addColorStop(1, `rgb(${c - 40 + k},${c - 38 + k},${c - 34 + k})`);
     g.fillStyle = strip;
     g.fillRect(x, 0, 16, h);
   }
-  for (let i = 0; i < 140; i++) {
-    g.fillStyle = `rgba(${rnd() < 0.5 ? '255,255,255' : '60,62,66'},${(0.08 + rnd() * 0.14).toFixed(2)})`;
-    g.fillRect(rnd() * w, rnd() * h, 4 + rnd() * 26, 2 + rnd() * 10);
-  }
-  g.fillStyle = 'rgba(70,72,78,.55)';
-  for (const v of [0.16, 0.5, 0.82]) g.fillRect(0, (1 - v) * h, w, 3);
-  const win = (u, v, ww, hh, tri = false) => {
-    const x = u * w, y = (1 - v) * h;
-    g.fillStyle = '#1b2026';
-    g.strokeStyle = '#5b6068';
-    g.lineWidth = 4;
-    g.beginPath();
-    if (tri) {
-      g.moveTo(x - ww / 2, y + hh / 2);
-      g.lineTo(x + ww / 2, y + hh / 2);
-      g.lineTo(x, y - hh / 2);
-    } else g.roundRect(x - ww / 2, y - hh / 2, ww, hh, 8);
-    g.closePath();
-    g.fill();
-    g.stroke();
-    const glint = g.createLinearGradient(x - ww / 2, y - hh / 2, x + ww / 2, y + hh / 2);
-    glint.addColorStop(0, 'rgba(120,150,180,.35)');
-    glint.addColorStop(0.5, 'rgba(255,255,255,0)');
-    g.fillStyle = glint;
-    g.fill();
-  };
-  win(0.22, 0.6, 46, 52, true);
-  win(0.28, 0.6, 46, 52, true);
-  win(0.08, 0.42, 54, 54);
-  win(0.42, 0.42, 54, 54);
-  win(0.25, 0.38, 60, 60);
-  grime(g, w, h, rnd, 30, 0.08, 40);
-  weatherCommand(g, w, h, rnd);
-}
-// Eight days flown (the user, 2026-11-20: "웨더링 더 넣고"): the tape crinkled all over in
-// fine creases that catch the light or go dark, dull and bright patches where it lies flat
-// or lifts, a few lifted corners with their shadows, scorch round the windows' rims and the
-// brown fans of the module's own small jets.
-function weatherCommand(g, w, h, rnd) {
-  for (let i = 0; i < 900; i++) {
-    const x = rnd() * w, y = rnd() * h, l = 4 + rnd() * 18, a = (rnd() - 0.5) * 2.4;
+  // The forward heat shield: the upper cone above r = 1.0 m, smoother and brighter.
+  const yTop = cmV(coneX(1.0)) * h;
+  g.fillStyle = 'rgba(232,234,238,.45)';
+  g.fillRect(0, 0, w, yTop);
+  g.fillStyle = 'rgba(60,62,68,.7)';
+  g.fillRect(0, yTop - 2, w, 3);
+  // The shoulder: bright, with the copper line at its edge and the dark gap under it.
+  const ySh0 = cmV(0.34) * h, ySh1 = cmV(0.04) * h;
+  const sh = g.createLinearGradient(0, ySh0, 0, ySh1);
+  sh.addColorStop(0, '#e6e8eb');
+  sh.addColorStop(0.5, '#b9bdc2');
+  sh.addColorStop(1, '#6d6f73');
+  g.fillStyle = sh;
+  g.fillRect(0, ySh0, w, ySh1 - ySh0);
+  g.fillStyle = 'rgba(176,104,72,.85)';
+  g.fillRect(0, cmV(0.4) * h, w, 3);
+  g.fillStyle = '#4a3a2c';
+  g.fillRect(0, ySh1, w, h - ySh1); // the aft heat shield, brown (hidden)
+  // Crinkles and lifted corners over the tape.
+  for (let i = 0; i < 1100; i++) {
+    const x = rnd() * w, y = rnd() * ySh0, l = 4 + rnd() * 16, a = (rnd() - 0.5) * 2.4;
     g.strokeStyle = rnd() < 0.55 ? `rgba(255,255,255,${(0.1 + rnd() * 0.25).toFixed(2)})` : `rgba(40,42,46,${(0.12 + rnd() * 0.25).toFixed(2)})`;
     g.lineWidth = 0.6 + rnd() * 1.2;
     g.beginPath();
@@ -102,135 +154,202 @@ function weatherCommand(g, w, h, rnd) {
     g.stroke();
   }
   for (let i = 0; i < 40; i++) {
-    const x = rnd() * w, y = rnd() * h, r = 20 + rnd() * 70;
+    const x = rnd() * w, y = rnd() * ySh0, r = 20 + rnd() * 60;
     const spot = g.createRadialGradient(x, y, 0, x, y, r);
-    spot.addColorStop(0, rnd() < 0.5 ? 'rgba(150,146,138,.28)' : 'rgba(255,255,250,.22)');
+    spot.addColorStop(0, rnd() < 0.5 ? 'rgba(130,128,124,.3)' : 'rgba(255,255,250,.25)');
     spot.addColorStop(1, 'rgba(0,0,0,0)');
     g.fillStyle = spot;
     g.fillRect(x - r, y - r, 2 * r, 2 * r);
   }
-  for (let i = 0; i < 14; i++) {
-    // A corner of tape lifted: bright face, dark gap under it.
-    const x = rnd() * w, y = rnd() * h, k = 8 + rnd() * 14;
-    g.fillStyle = 'rgba(30,30,34,.55)';
-    g.beginPath(); g.moveTo(x, y); g.lineTo(x + k, y + 2); g.lineTo(x + 2, y + k); g.closePath(); g.fill();
-    g.fillStyle = 'rgba(250,250,252,.8)';
-    g.beginPath(); g.moveTo(x - 2, y - 2); g.lineTo(x + k - 3, y - 1); g.lineTo(x - 1, y + k - 3); g.closePath(); g.fill();
-  }
-  for (const [u, v] of [[0.22, 0.6], [0.28, 0.6], [0.08, 0.42], [0.42, 0.42], [0.25, 0.38]]) {
-    const x = u * w, y = (1 - v) * h, r = 46;
-    const ring = g.createRadialGradient(x, y, 24, x, y, r);
-    ring.addColorStop(0, 'rgba(92,70,44,.4)');
+  // A window at azimuth az, centre at cone radius r, size in metres (wide round, tall up the cone).
+  const pxU = (m, r) => (m / (TAU * r)) * w;
+  const pxV = (m) => (m * 0.84 / (CM_X1 - CM_X0)) * h; // slant metres to axial (cos 33 deg)
+  const uOf = (az) => (((az % TAU) + TAU) % TAU) / TAU;
+  const shape = (az, r, ww, hh, kind) => {
+    const x = uOf(az) * w, y = cmV(coneX(r)) * h, a = pxU(ww, r), b = pxV(hh);
+    g.beginPath();
+    if (kind === 'tri') { g.moveTo(x - a / 2, y + b / 2); g.lineTo(x + a / 2, y + b / 2); g.lineTo(x + a * 0.32, y - b / 2); g.lineTo(x - a * 0.32, y - b / 2); }
+    else if (kind === 'hatch') { g.moveTo(x - a / 2, y + b / 2); g.lineTo(x + a / 2, y + b / 2); g.lineTo(x + a * 0.4, y - b / 2); g.lineTo(x - a * 0.4, y - b / 2); }
+    else g.roundRect(x - a / 2, y - b / 2, a, b, 6);
+    g.closePath();
+    return [x, y, a, b];
+  };
+  // The hatch: a trapezoid of plain panel round its window, its edge dark.
+  shape(HATCH_AZ, 1.32, 0.95, 1.05, 'hatch');
+  g.fillStyle = 'rgba(170,174,180,.55)';
+  g.fill();
+  g.strokeStyle = 'rgba(40,42,46,.85)';
+  g.lineWidth = 3;
+  g.stroke();
+  const win = (az, r, ww, hh, kind) => {
+    const [x, y, a] = shape(az, r, ww, hh, kind);
+    g.fillStyle = '#121519';
+    g.fill();
+    g.strokeStyle = '#3c4046';
+    g.lineWidth = 5;
+    g.stroke();
+    const glint = g.createLinearGradient(x - a / 2, y, x + a / 2, y);
+    glint.addColorStop(0, 'rgba(110,130,160,.35)');
+    glint.addColorStop(0.6, 'rgba(255,255,255,0)');
+    g.fillStyle = glint;
+    g.fill();
+    // Scorch round the rim.
+    const ring = g.createRadialGradient(x, y, a * 0.5, x, y, a * 1.1);
+    ring.addColorStop(0, 'rgba(92,70,44,.35)');
     ring.addColorStop(1, 'rgba(92,70,44,0)');
     g.fillStyle = ring;
-    g.fillRect(x - r, y - r, 2 * r, 2 * r);
-  }
-  for (const u of [0.12, 0.37, 0.62, 0.87]) {
-    const x = u * w, y = 0.3 * h;
-    const fan = g.createRadialGradient(x, y, 2, x, y, 70);
-    fan.addColorStop(0, 'rgba(88,62,34,.55)');
-    fan.addColorStop(0.5, 'rgba(120,92,52,.22)');
+    g.fillRect(x - a * 1.2, y - a * 1.2, a * 2.4, a * 2.4);
+  };
+  win(HATCH_AZ, 1.3, 0.3, 0.3, 'rect');
+  win(HATCH_AZ - 0.42, 1.05, 0.32, 0.34, 'tri');
+  win(HATCH_AZ + 0.42, 1.05, 0.32, 0.34, 'tri');
+  win(HATCH_AZ - 1.15, 1.42, 0.33, 0.33, 'rect');
+  win(HATCH_AZ + 1.15, 1.42, 0.33, 0.33, 'rect');
+  // Its own thrusters: pitch and yaw pairs high on the cone, roll pairs low, with fans.
+  const port = (az, r) => {
+    const x = uOf(az) * w, y = cmV(coneX(r)) * h;
+    const fan = g.createRadialGradient(x, y, 2, x, y, 60);
+    fan.addColorStop(0, 'rgba(88,62,34,.5)');
     fan.addColorStop(1, 'rgba(120,92,52,0)');
     g.fillStyle = fan;
-    g.beginPath(); g.moveTo(x, y); g.arc(x, y, 70, 0.9, 2.25); g.closePath(); g.fill();
-  }
+    g.beginPath(); g.moveTo(x, y); g.arc(x, y, 60, 0.9, 2.25); g.closePath(); g.fill();
+    g.fillStyle = '#16181b';
+    g.fillRect(x - 7, y - 6, 14, 12);
+  };
+  for (const az of [PI / 4, (3 * PI) / 4, (5 * PI) / 4, (7 * PI) / 4]) port(HATCH_AZ + az, 0.95);
+  for (const az of [0.3, PI + 0.3]) { port(HATCH_AZ + az + PI / 2, 1.72); port(HATCH_AZ + az + PI / 2 + 0.08, 1.72); }
 }
-// The service module: a ring of panels, the white radiator strips near its front, the
-// words UNITED STATES down one side with the flag. u round it, v along it (0 at the back).
+
+// ---- the service module ----------------------------------------------------------------
+const SM_PROFILE = [
+  [-4.42, R, true], [0.3, R], [0.36, 1.94, true], [0.36, 1.8, true], [0.36, 0.001],
+];
+const SM_X0 = -4.42, SM_X1 = 0.36;
+const smV = (x) => 1 - (x - SM_X0) / (SM_X1 - SM_X0);
+// Painted aluminium in six sectors with dark seams; round its forward edge the white ribbed
+// radiators of the fuel cells, broken where the thruster quads sit; low on two opposite
+// sides the big white ribbed radiators of the cabin's cooling; UNITED STATES and the flag;
+// the yellow-brown fans round each quad; grime run aft.
 function paintService(g, w, h, rnd) {
-  g.fillStyle = '#b8bcc1';
+  g.fillStyle = '#9a9ea4';
   g.fillRect(0, 0, w, h);
-  const sectors = 6;
-  for (let s = 0; s < sectors; s++) {
-    const k = Math.round((rnd() - 0.5) * 22);
-    g.fillStyle = `rgb(${186 + k},${190 + k},${196 + k})`;
-    g.fillRect((s * w) / sectors + 3, 0, w / sectors - 6, h);
+  const seams = [0.02, 0.19, 0.35, 0.52, 0.69, 0.85];
+  for (let s = 0; s < seams.length; s++) {
+    const u0 = seams[s], u1 = seams[(s + 1) % seams.length] + (s + 1 === seams.length ? 1 : 0);
+    const k = Math.round((rnd() - 0.5) * 24);
+    g.fillStyle = `rgb(${150 + k},${154 + k},${160 + k})`;
+    for (const off of [0, -1]) g.fillRect((u0 + off) * w + 3, 0, (u1 - u0) * w - 6, h);
   }
-  g.fillStyle = 'rgba(60,62,68,.7)';
-  for (let s = 0; s <= sectors; s++) g.fillRect((s * w) / sectors - 2, 0, 4, h);
-  // Radiators: white bands with fine fins, near the front on two sides.
-  for (const u0 of [0.05, 0.55]) {
-    g.fillStyle = '#eef0f2';
-    g.fillRect(u0 * w, h * 0.05, 0.22 * w, h * 0.42);
-    g.fillStyle = 'rgba(150,156,166,.6)';
-    for (let x = u0 * w; x < (u0 + 0.22) * w; x += 7) g.fillRect(x, h * 0.05, 2, h * 0.42);
+  // Long panel shading: each sector a little brighter in its middle.
+  for (let x = 0; x < w; x += 4) {
+    const t = 0.5 + 0.5 * Math.sin((x / w) * TAU * 6);
+    g.fillStyle = `rgba(255,255,255,${(0.05 * t).toFixed(3)})`;
+    g.fillRect(x, 0, 4, h);
   }
-  // UNITED STATES along its length, and the flag ahead of it.
+  g.fillStyle = 'rgba(50,52,58,.75)';
+  for (const u of seams) g.fillRect(u * w - 2, 0, 4, h);
+  // Bolt rows along each seam.
+  g.fillStyle = 'rgba(60,62,66,.5)';
+  for (const u of seams) for (let y = 6; y < h; y += 14) { g.fillRect(u * w - 7, y, 2, 2); g.fillRect(u * w + 5, y, 2, 2); }
+  const ribbed = (u0, u1, x0, x1, gap) => {
+    const y0 = smV(x1) * h, y1 = smV(x0) * h;
+    for (const off of [0, -1, 1]) {
+      const a = (u0 + off) * w, b = (u1 + off) * w;
+      g.fillStyle = '#e9eaeb';
+      g.fillRect(a, y0, b - a, y1 - y0);
+      g.fillStyle = 'rgba(120,126,134,.55)';
+      for (let y = y0 + 2; y < y1; y += gap) g.fillRect(a, y, b - a, 1.5);
+      g.fillStyle = 'rgba(60,62,66,.6)';
+      g.fillRect(a, y0, b - a, 2);
+      g.fillRect(a, y1 - 2, b - a, 2);
+    }
+  };
+  // Fuel-cell radiators: forward 0.45 m, in eight panels between the quads' places.
+  for (let k = 0; k < 8; k++) {
+    const mid = k / 8 + 1 / 16; // the quads sit at 1/8, 3/8, ...: skip a gap there
+    ribbed(mid - 0.045, mid + 0.045, -0.12, 0.33, 6);
+  }
+  // Cabin radiators: two big panels low on opposite sides (azimuth 90 and 270 deg).
+  ribbed(0.25 - 0.1, 0.25 + 0.1, -4.3, -3.1, 5);
+  ribbed(0.75 - 0.1, 0.75 + 0.1, -4.3, -3.1, 5);
+  // UNITED STATES down the side away from the antenna, the flag ahead of it.
   g.save();
-  g.translate(0.86 * w, h * 0.5);
+  g.translate(0.5 * w, smV(-2.0) * h);
+  g.scale(-1, 1); // u runs the other way to the eye outside
   g.rotate(-PI / 2);
-  g.fillStyle = '#1b1d22';
-  g.font = `bold ${Math.round(w * 0.04)}px Helvetica, Arial, sans-serif`;
+  g.fillStyle = 'rgba(28,30,36,.85)';
+  g.font = `bold ${Math.round(h * 0.07)}px Helvetica, Arial, sans-serif`;
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.fillText('UNITED STATES', -h * 0.05, 0);
+  g.fillText('UNITED STATES', 0, 0);
   g.restore();
-  const fx = 0.83 * w, fy = h * 0.06, fw = w * 0.06, fh = h * 0.16;
-  for (let k = 0; k < 13; k++) { g.fillStyle = k % 2 ? '#f2efe8' : '#b0242c'; g.fillRect(fx, fy + (k * fh) / 13, fw, fh / 13 + 1); }
-  g.fillStyle = '#23305f';
-  g.fillRect(fx, fy, fw * 0.45, fh * 0.54);
-  grime(g, w, h, rnd, 40, 0.1, 50);
-  weatherService(g, w, h, rnd);
-}
-// Eight days flown: the words and the flag a little faded, grime run along the panels,
-// the radiators greyed unevenly, and round each of the four thruster quads (u 1/8, 3/8,
-// 5/8, 7/8 round, some 83% of the way forward) the yellow-brown fans of their exhaust.
-function weatherService(g, w, h, rnd) {
-  g.fillStyle = 'rgba(200,198,190,.22)';
-  g.fillRect(0.8 * w, 0, 0.12 * w, h);
-  for (let i = 0; i < 70; i++) {
-    const x = rnd() * w, y0 = rnd() * h, l = 40 + rnd() * 200;
+  // (u runs right to left seen from outside, so the canton is drawn at the high-u end.)
+  const fx = 0.46 * w, fy = smV(-0.6) * h, fw = w * 0.075, fh = h * 0.1;
+  for (let k = 0; k < 13; k++) { g.fillStyle = k % 2 ? '#e8e5de' : '#a8262e'; g.fillRect(fx, fy + (k * fh) / 13, fw, fh / 13 + 1); }
+  g.fillStyle = '#26315c';
+  g.fillRect(fx + fw * 0.6, fy, fw * 0.4, fh * 0.54);
+  // Weathering: grime run aft, scuffs, the quads' fans.
+  for (let i = 0; i < 90; i++) {
+    const x = rnd() * w, y0 = rnd() * h, l = 40 + rnd() * 160;
     const run = g.createLinearGradient(0, y0, 0, y0 + l);
-    run.addColorStop(0, `rgba(70,62,50,${(0.12 + rnd() * 0.2).toFixed(2)})`);
+    run.addColorStop(0, `rgba(70,62,50,${(0.1 + rnd() * 0.18).toFixed(2)})`);
     run.addColorStop(1, 'rgba(70,62,50,0)');
     g.fillStyle = run;
     g.fillRect(x, y0, 1 + rnd() * 3, l);
   }
-  for (const u0 of [0.05, 0.55]) {
-    for (let i = 0; i < 18; i++) {
-      const x = (u0 + rnd() * 0.22) * w, y = h * (0.05 + rnd() * 0.42), r = 10 + rnd() * 34;
-      const spot = g.createRadialGradient(x, y, 0, x, y, r);
-      spot.addColorStop(0, `rgba(150,146,130,${(0.15 + rnd() * 0.2).toFixed(2)})`);
-      spot.addColorStop(1, 'rgba(0,0,0,0)');
-      g.fillStyle = spot;
-      g.fillRect(x - r, y - r, 2 * r, 2 * r);
-    }
+  for (let i = 0; i < 50; i++) {
+    const x = rnd() * w, y = rnd() * h, r = 10 + rnd() * 50;
+    const spot = g.createRadialGradient(x, y, 0, x, y, r);
+    spot.addColorStop(0, `rgba(${rnd() < 0.5 ? '90,84,72' : '230,230,226'},${(0.08 + rnd() * 0.12).toFixed(2)})`);
+    spot.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = spot;
+    g.fillRect(x - r, y - r, 2 * r, 2 * r);
   }
-  for (const u of [0.125, 0.375, 0.625, 0.875]) {
-    const x = u * w, y = (1 - 0.83) * h;
-    for (const [a0, a1, r] of [[-0.5, 0.5, 120], [Math.PI - 0.5, Math.PI + 0.5, 120], [Math.PI / 2 - 0.35, Math.PI / 2 + 0.35, 210]]) {
+  for (const az of QUAD_AZ) {
+    const x = (az / TAU) * w, y = smV(-1.25) * h;
+    for (const [a0, a1, r] of [[-0.5, 0.5, 110], [PI - 0.5, PI + 0.5, 110], [PI / 2 - 0.35, PI / 2 + 0.35, 190], [-PI / 2 - 0.35, -PI / 2 + 0.35, 120]]) {
       const fan = g.createRadialGradient(x, y, 4, x, y, r);
-      fan.addColorStop(0, 'rgba(96,66,30,.6)');
-      fan.addColorStop(0.45, 'rgba(150,112,58,.28)');
+      fan.addColorStop(0, 'rgba(96,66,30,.55)');
+      fan.addColorStop(0.45, 'rgba(150,112,58,.25)');
       fan.addColorStop(1, 'rgba(160,124,70,0)');
       g.fillStyle = fan;
       g.beginPath(); g.moveTo(x, y); g.arc(x, y, r, a0, a1); g.closePath(); g.fill();
     }
   }
 }
+// The aft skirt: crinkled foil, gold and silver.
+function paintFoil(g, w, h, rnd) {
+  g.fillStyle = '#b4b2aa';
+  g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 900; i++) {
+    const x = rnd() * w, y = rnd() * h, s = 3 + rnd() * 14;
+    const t = rnd();
+    g.fillStyle = t < 0.35 ? 'rgba(250,248,240,.7)' : t < 0.65 ? 'rgba(60,58,54,.5)' : 'rgba(196,166,104,.55)';
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + s, y + rnd() * s * 0.6); g.lineTo(x + rnd() * s * 0.5, y + s); g.closePath(); g.fill();
+  }
+}
+// The engine's nozzle: just under the skirt a bright collar, then dull grey-brown, the last
+// quarter darker (its cooler extension), mottled, the rim lit.
+const BELL_PROFILE = [
+  [-7.42, 1.245], [-7.0, 1.2], [-6.5, 1.14], [-6.0, 1.07], [-5.5, 0.98], [-5.05, 0.86], [-4.85, 0.78], [-4.7, 0.66], [-4.62, 0.5],
+];
 function paintBell(g, w, h, rnd) {
-  const grad = g.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, '#2b2a2a');
-  grad.addColorStop(0.35, '#5d5a55');
-  grad.addColorStop(1, '#c9c7c2');
+  const grad = g.createLinearGradient(0, 0, 0, h); // top = forward (collar), bottom = exit
+  grad.addColorStop(0, '#a29b8c');
+  grad.addColorStop(0.08, '#857d6e');
+  grad.addColorStop(0.15, '#625a4e');
+  grad.addColorStop(0.68, '#5a5449');
+  grad.addColorStop(0.72, '#3b3c38');
+  grad.addColorStop(0.97, '#34352f');
+  grad.addColorStop(1, '#8a8a84');
   g.fillStyle = grad;
   g.fillRect(0, 0, w, h);
-  for (let x = 0; x < w; x += 6) { g.fillStyle = `rgba(30,28,26,${(0.18 + rnd() * 0.15).toFixed(2)})`; g.fillRect(x, 0, 1, h); }
-  for (const v of [0.35, 0.55, 0.75]) { g.fillStyle = 'rgba(40,38,36,.5)'; g.fillRect(0, v * h, w, 3); }
-  // Heat: the throat darkest, then bands going blue-grey, straw and bronze toward the rim,
-  // mottled.
-  const heat = g.createLinearGradient(0, 0, 0, h);
-  heat.addColorStop(0, 'rgba(10,10,12,.55)');
-  heat.addColorStop(0.3, 'rgba(60,70,96,.35)');
-  heat.addColorStop(0.55, 'rgba(120,110,150,.22)');
-  heat.addColorStop(0.72, 'rgba(176,150,90,.3)');
-  heat.addColorStop(0.88, 'rgba(150,100,60,.32)');
-  heat.addColorStop(1, 'rgba(110,84,60,.2)');
-  g.fillStyle = heat;
-  g.fillRect(0, 0, w, h);
-  for (let i = 0; i < 120; i++) {
-    const x = rnd() * w, y = rnd() * h, r = 4 + rnd() * 16;
-    g.fillStyle = `rgba(${rnd() < 0.5 ? '40,36,40' : '190,160,120'},${(0.08 + rnd() * 0.12).toFixed(2)})`;
+  for (let x = 0; x < w; x += 5) { g.fillStyle = `rgba(30,28,26,${(0.1 + rnd() * 0.12).toFixed(2)})`; g.fillRect(x, 0, 1, h); }
+  g.fillStyle = 'rgba(30,28,26,.6)';
+  g.fillRect(0, 0.7 * h, w, 3);
+  for (let i = 0; i < 140; i++) {
+    const x = rnd() * w, y = rnd() * h, r = 4 + rnd() * 18;
+    g.fillStyle = `rgba(${rnd() < 0.5 ? '40,36,40' : '170,150,120'},${(0.06 + rnd() * 0.1).toFixed(2)})`;
     g.fillRect(x - r, y - r / 3, 2 * r, (2 * r) / 3);
   }
 }
@@ -238,108 +357,120 @@ function paintBell(g, w, h, rnd) {
 export function buildColumbia(scene, name = 'columbia') {
   const root = new TransformNode(name, scene);
   root.rotationQuaternion = Quaternion.Identity();
+  const parts = new Map(); // material -> meshes, merged into one mesh each at the end
   const add = (mesh, mat, x = 0, y = 0, z = 0) => {
     mesh.parent = root;
-    mesh.material = mat;
     mesh.position.set(x, y, z);
     mesh.isPickable = false;
+    if (!parts.has(mat)) parts.set(mat, []);
+    parts.get(mat).push(mesh);
     return mesh;
   };
   const along = (mesh) => { mesh.rotation.z = -PI / 2; return mesh; }; // a builder's +y onto +x
+  // A rod from a to b (game frame).
+  const rod = (id, a, b, d, mat) => {
+    const va = Vector3.FromArray(a), vb = Vector3.FromArray(b);
+    const len = Vector3.Distance(va, vb);
+    const m = add(CreateCylinder(id, { height: len, diameter: d, tessellation: 8 }, scene), mat);
+    m.position.copyFrom(va.add(vb).scale(0.5));
+    const dir = vb.subtract(va).normalize();
+    const axis = Vector3.Cross(Vector3.Up(), dir);
+    const ang = Math.acos(Math.max(-1, Math.min(1, Vector3.Dot(Vector3.Up(), dir))));
+    m.rotationQuaternion = axis.length() < 1e-6 ? Quaternion.Identity() : Quaternion.RotationAxis(axis.normalize(), ang);
+    return m;
+  };
 
-  const cmMat = material(scene, `${name}CM`, paintTexture(scene, `${name}CMT`, 1024, 512, paintCommand), { spec: 0.9, power: 60 });
-  const smMat = material(scene, `${name}SM`, paintTexture(scene, `${name}SMT`, 1024, 512, paintService), { spec: 0.5, power: 40 });
-  const bellMat = material(scene, `${name}Bell`, paintTexture(scene, `${name}BellT`, 256, 256, paintBell), { spec: 0.4, power: 24 });
-  const dark = material(scene, `${name}Dark`, null, { color: [0.13, 0.13, 0.14], spec: 0.3 });
-  const shield = material(scene, `${name}Shield`, null, { color: [0.42, 0.33, 0.24], spec: 0.15 });
-  const metal = material(scene, `${name}Metal`, null, { color: [0.62, 0.63, 0.66], spec: 0.6, power: 50 });
-  const white = material(scene, `${name}White`, null, { color: [0.9, 0.9, 0.88], spec: 0.25 });
-  const gold = material(scene, `${name}Gold`, null, { color: [0.78, 0.6, 0.25], spec: 0.7, power: 50 });
+  const cmMat = material(scene, `${name}CM`, paintTexture(scene, `${name}CMT`, 1024, 512, paintCommand), { spec: 0.9, power: 70 });
+  const smMat = material(scene, `${name}SM`, paintTexture(scene, `${name}SMT`, 1024, 512, paintService), { spec: 0.45, power: 36 });
+  const bellMat = material(scene, `${name}Bell`, paintTexture(scene, `${name}BellT`, 256, 256, paintBell), { spec: 0.35, power: 20 });
+  const foilMat = material(scene, `${name}Foil`, paintTexture(scene, `${name}FoilT`, 512, 64, paintFoil), { spec: 0.8, power: 40 });
+  const dark = material(scene, `${name}Dark`, null, { color: [0.14, 0.14, 0.15], spec: 0.3 });
+  const metal = material(scene, `${name}Metal`, null, { color: [0.66, 0.67, 0.7], spec: 0.6, power: 50 });
+  const copper = material(scene, `${name}Copper`, null, { color: [0.72, 0.4, 0.26], spec: 0.6, power: 40 });
+  const gold = material(scene, `${name}Gold`, null, { color: [0.7, 0.55, 0.28], spec: 0.6, power: 40 });
 
-  // The command module: a cone 3.9 m across and 3.2 m high, its shoulder rounded, the
-  // heat shield behind it, the docking tunnel and probe at its top.
-  add(along(CreateCylinder(`${name}Cone`, { height: 3.0, diameterTop: 1.3, diameterBottom: 3.84, tessellation: 64, cap: Mesh.NO_CAP }, scene)), cmMat, 1.62, 0, 0);
-  add(along(CreateTorus(`${name}Shoulder`, { diameter: 3.64, thickness: 0.3, tessellation: 64 }, scene)), cmMat, 0.12, 0, 0);
-  const heat = add(CreateSphere(`${name}Heat`, { diameter: 3.9, segments: 32, slice: 0.5 }, scene), shield, 0.02, 0, 0);
-  heat.rotation.z = PI / 2;
-  heat.scaling.y = 0.12;
-  // Her nose as Aldrin's photograph from Eagle shows it (AS11-37-5446; the user, 2026-11-21:
-  // "3,4만 해"): a flat ring of bright metal at the top of the cone, the docking tunnel's
-  // mouth inside it rimmed with a copper ring, dark within, and the probe in it: a dark
-  // hub on three dark arms that reach to the rim, its spike standing out with a small head.
-  add(along(CreateCylinder(`${name}NoseRing`, { height: 0.04, diameter: 1.3, tessellation: 48 }, scene)), metal, 3.12, 0, 0);
-  const copper = material(scene, `${name}Copper`, null, { color: [0.72, 0.38, 0.22], spec: 0.6, power: 40 });
-  add(along(CreateTorus(`${name}TunnelRim`, { diameter: 0.96, thickness: 0.07, tessellation: 48 }, scene)), copper, 3.15, 0, 0);
-  add(along(CreateCylinder(`${name}Tunnel`, { height: 0.3, diameter: 0.92, tessellation: 32 }, scene)), dark, 3.0, 0, 0);
-  add(along(CreateCylinder(`${name}ProbeHub`, { height: 0.16, diameter: 0.32, tessellation: 20 }, scene)), dark, 3.2, 0, 0);
+  // The command module, one profile; the tunnel's collar on top, copper-rimmed, dark inside;
+  // the probe: three dark arms from the rim to its head, the spike beyond.
+  add(revolve(scene, `${name}Cone`, CM_PROFILE, { segments: 72, v0: CM_X0, v1: CM_X1 }), cmMat);
+  add(revolve(scene, `${name}Collar`, [[2.34, 0.54, true], [2.36, 0.5, true], [2.62, 0.5], [2.66, 0.47, true], [2.66, 0.41, true], [2.5, 0.41, true], [2.5, 0.001]], { segments: 40 }), metal);
+  add(along(CreateTorus(`${name}TunnelRim`, { diameter: 0.9, thickness: 0.06, tessellation: 40 }, scene)), copper, 2.67, 0, 0);
+  add(along(CreateCylinder(`${name}ProbeHub`, { height: 0.2, diameter: 0.34, tessellation: 16 }, scene)), dark, 2.6, 0, 0);
   for (let k = 0; k < 3; k++) {
-    const a = (k / 3) * 2 * PI + PI / 6;
-    const arm = add(CreateBox(`${name}ProbeArm${k}`, { width: 0.07, height: 0.34, depth: 0.07 }, scene), dark, 3.18, 0.3 * Math.cos(a), 0.3 * Math.sin(a));
-    arm.rotation.x = a - PI / 2;
+    const a = (k / 3) * TAU + PI / 6;
+    rod(`${name}ProbeArm${k}`, [2.66, 0.36 * Math.cos(a), 0.36 * Math.sin(a)], [3.08, 0.05 * Math.cos(a), 0.05 * Math.sin(a)], 0.06, dark);
   }
-  add(along(CreateCylinder(`${name}Probe`, { height: 0.5, diameterTop: 0.05, diameterBottom: 0.1, tessellation: 12 }, scene)), metal, 3.5, 0, 0);
-  add(CreateSphere(`${name}ProbeHead`, { diameter: 0.1, segments: 8 }, scene), dark, 3.76, 0, 0);
+  add(along(CreateCylinder(`${name}Probe`, { height: 0.5, diameterTop: 0.04, diameterBottom: 0.1, tessellation: 10 }, scene)), metal, 3.25, 0, 0);
+  add(CreateSphere(`${name}ProbeHead`, { diameter: 0.1, segments: 6 }, scene), dark, 3.5, 0, 0);
 
-  // The service module behind it: a can 3.9 m across and 3.9 m long, its front fairing,
-  // the four thruster quads, the engine bell, the high-gain antenna on its boom.
-  add(along(CreateCylinder(`${name}Fairing`, { height: 0.32, diameterTop: 3.86, diameterBottom: 3.92, tessellation: 64 }, scene)), white, -0.18, 0, 0);
-  add(along(CreateCylinder(`${name}Service`, { height: 3.9, diameter: 3.92, tessellation: 64 }, scene)), smMat, -2.29, 0, 0);
-  add(along(CreateCylinder(`${name}Aft`, { height: 0.2, diameterTop: 3.92, diameterBottom: 3.4, tessellation: 64 }, scene)), dark, -4.34, 0, 0);
-  add(along(CreateCylinder(`${name}Bell`, { height: 2.9, diameterTop: 0.9, diameterBottom: 2.5, tessellation: 48, cap: Mesh.NO_CAP }, scene)), bellMat, -5.85, 0, 0);
+  // The service module, its aft foil skirt, the engine.
+  add(revolve(scene, `${name}Service`, SM_PROFILE, { segments: 72, v0: SM_X0, v1: SM_X1 }), smMat);
+  add(revolve(scene, `${name}Skirt`, [[-4.8, 1.78, true], [-4.74, 1.96], [-4.6, R + 0.04], [-4.42, R + 0.012, true]], { segments: 72 }), foilMat);
+  add(revolve(scene, `${name}Aft`, [[-4.8, 0.001], [-4.8, 1.78, true]], { segments: 48 }), dark);
+  add(revolve(scene, `${name}Bell`, BELL_PROFILE, { segments: 48 }), bellMat);
+  add(revolve(scene, `${name}BellIn`, BELL_PROFILE.map(([x, r]) => [x, r - 0.02]), { segments: 48, inside: true }), dark);
+
+  // The four thruster quads, each a plate on the skin with its housing and four nozzles
+  // (fore, aft, and the two round the module).
   const quads = [];
-  for (let k = 0; k < 4; k++) {
-    const a = PI / 4 + (k / 4) * 2 * PI;
+  QUAD_AZ.forEach((a, k) => {
     const quad = new TransformNode(`${name}Quad${k}`, scene);
     quad.parent = root;
-    quad.position.set(-1.0, 2.0 * Math.cos(a), 2.0 * Math.sin(a));
+    quad.position.set(-1.25, (R + 0.02) * Math.cos(a), (R + 0.02) * Math.sin(a));
     quad.rotation.x = a;
+    quad.computeWorldMatrix(true);
     quads.push(quad);
-    const box = add(CreateBox(`${name}QuadBox${k}`, { width: 0.75, height: 0.22, depth: 0.55 }, scene), metal);
-    box.parent = quad;
-    for (const [dx, dz, ry, rz] of [[0.42, 0, 0, -PI / 2], [-0.42, 0, 0, PI / 2], [0, 0.32, PI / 2, 0], [0, -0.32, -PI / 2, 0]]) {
-      const nozzle = add(CreateCylinder(`${name}Rcs${k}${dx}${dz}`, { height: 0.22, diameterTop: 0.05, diameterBottom: 0.13, tessellation: 12 }, scene), dark);
-      nozzle.parent = quad;
-      nozzle.position.set(dx, 0.02, dz);
-      nozzle.rotation.set(rz === 0 ? (dz > 0 ? PI / 2 : -PI / 2) : 0, ry, rz);
+    const inQuad = (mesh, mat, x, y, z) => { add(mesh, mat); mesh.parent = quad; mesh.position.set(x, y, z); return mesh; };
+    // (The plate thick enough not to shadow itself: a 5 cm one went black in the Sun's map.)
+    inQuad(CreateBox(`${name}QuadPlate${k}`, { width: 0.9, height: 0.14, depth: 0.72 }, scene), metal, 0, 0, 0);
+    inQuad(CreateBox(`${name}QuadBox${k}`, { width: 0.6, height: 0.2, depth: 0.42 }, scene), metal, 0, 0.15, 0);
+    for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const n = inQuad(CreateCylinder(`${name}Rcs${k}${dx}${dz}`, { height: 0.24, diameterTop: 0.14, diameterBottom: 0.05, tessellation: 10 }, scene), dark, dx * 0.41, 0.14, dz * 0.32);
+      if (dx) n.rotation.z = -dx * PI / 2;
+      else n.rotation.x = dz * PI / 2;
     }
-  }
-  // The high-gain antenna as the photograph shows it: close beside the service module's
-  // aft rim on a short boom, its four dishes dark grey mesh on spokes, facing ahead (it had
-  // no gold box; that was a guess).
-  const dishTex = paintTexture(scene, `${name}DishT`, 128, 128, (g, w, h) => {
-    g.fillStyle = '#3a3b3e';
-    g.fillRect(0, 0, w, h);
-    g.strokeStyle = 'rgba(150,152,156,.8)';
-    g.lineWidth = 2;
-    for (let k = 0; k < 12; k++) {
-      const a = (k / 12) * 2 * PI;
-      g.beginPath();
-      g.moveTo(w / 2, h / 2);
-      g.lineTo(w / 2 + Math.cos(a) * w, h / 2 + Math.sin(a) * h);
-      g.stroke();
-    }
-    g.strokeStyle = 'rgba(120,122,126,.5)';
-    for (const r of [0.2, 0.35, 0.48]) { g.beginPath(); g.arc(w / 2, h / 2, r * w, 0, 2 * PI); g.stroke(); }
   });
-  const mesh = material(scene, `${name}DishMat`, dishTex, { spec: 0.35, power: 30 });
-  const ay = Math.cos(PI / 4), az = -Math.sin(PI / 4);
-  const boom = add(CreateCylinder(`${name}Boom`, { height: 1.3, diameter: 0.09, tessellation: 10 }, scene), metal, -4.05, 2.6 * ay, 2.6 * az);
-  boom.rotation.x = -PI / 4 - PI / 2;
-  const cx = -4.15, cr = 3.4;
-  const tang = [-az, ay];
-  for (const [dr, dt] of [[0.4, 0.4], [0.4, -0.4], [-0.4, 0.4], [-0.4, -0.4]]) {
-    const dish = add(CreateSphere(`${name}Dish${dr}${dt}`, { diameter: 0.8, segments: 16, slice: 0.5 }, scene), mesh, cx, (cr + dr) * ay + dt * tang[0], (cr + dr) * az + dt * tang[1]);
-    dish.rotation.z = -PI / 2;
-    dish.scaling.y = 0.32;
-  }
-  add(CreateBox(`${name}DishBack`, { width: 0.22, height: 0.3, depth: 0.3 }, scene), dark, cx - 0.12, cr * ay, cr * az);
 
-  // The jets' puffs (the user, 2026-11-20: "도킹이 저렇게 쉽다구?"), out of each quad's
-  // forward nozzle (fwd: braking as she comes, pushing back as she goes) and one side nozzle
-  // (side: the small corrections), shown by pose(). As the films show them in vacuum (the
-  // user, 2026-11-22, chose sample "1+2+3"): a fan bright at the nozzle that spreads wide and
-  // thins out at once, fired in 0.1 s bursts each with a flash at the nozzle, and grains of
-  // propellant frozen as they leave flung out along the fan, fading as they go.
+  // The high-gain antenna as Columbia flew it (AS11-37-5446): out from the aft skirt on the
+  // +y side, on a boom, four dark mesh dishes in a square round a small gold horn, facing
+  // ahead.
+  const dishTex = paintTexture(scene, `${name}DishT`, 128, 128, (g, w, h) => {
+    g.fillStyle = '#4a4c50';
+    g.fillRect(0, 0, w, h);
+    g.strokeStyle = 'rgba(190,192,196,.9)';
+    g.lineWidth = 2;
+    for (let k = 0; k < 10; k++) {
+      const a = (k / 10) * TAU;
+      g.beginPath(); g.moveTo(w / 2, h / 2); g.lineTo(w / 2 + Math.cos(a) * w, h / 2 + Math.sin(a) * h); g.stroke();
+    }
+    g.strokeStyle = 'rgba(200,200,204,.9)';
+    g.lineWidth = 4;
+    g.beginPath(); g.arc(w / 2, h / 2, w * 0.48, 0, TAU); g.stroke();
+  });
+  const dishMat = material(scene, `${name}DishMat`, dishTex, { spec: 0.35, power: 30 });
+  const hx = -4.85, hr = 3.05; // the dishes' centre: aft of the skirt, out on +y
+  rod(`${name}Boom`, [-4.65, R - 0.1, 0], [hx - 0.1, hr - 0.15, 0], 0.09, metal);
+  rod(`${name}HgaFrameA`, [hx - 0.1, hr - 0.42, -0.42], [hx - 0.1, hr + 0.42, 0.42], 0.04, metal);
+  rod(`${name}HgaFrameB`, [hx - 0.1, hr - 0.42, 0.42], [hx - 0.1, hr + 0.42, -0.42], 0.04, metal);
+  for (const [dy, dz] of [[0.42, 0.42], [0.42, -0.42], [-0.42, 0.42], [-0.42, -0.42]]) {
+    const dish = add(CreateSphere(`${name}Dish${dy}${dz}`, { diameter: 0.79, segments: 12, slice: 0.5, sideOrientation: Mesh.DOUBLESIDE }, scene), dishMat, hx, hr + dy, dz);
+    dish.rotation.z = PI / 2; // the bowl opens toward +x
+    dish.scaling.y = 0.3;
+  }
+  add(CreateBox(`${name}HgaHorn`, { width: 0.3, height: 0.2, depth: 0.2 }, scene), gold, hx - 0.05, hr, 0);
+
+  // Merge what doesn't move into one mesh per material (few draw calls on a phone).
+  for (const [mat, meshes] of parts) {
+    for (const m of meshes) m.computeWorldMatrix(true);
+    const merged = meshes.length > 1 ? Mesh.MergeMeshes(meshes, true, true) : meshes[0];
+    merged.name = `${name}${mat.name.slice(name.length)}Body`;
+    merged.parent = root;
+    merged.material = mat;
+    merged.isPickable = false;
+  }
+
+  // The jets' puffs, exactly as render/columbia3d.js makes them (the user, 2026-11-22,
+  // chose sample "1+2+3"): a fan bright at the nozzle that spreads and thins at once, 0.1 s
+  // bursts each with a flash, grains of frozen propellant flung out along the fan.
   const glowTex = (w, h, paint) => {
     const tex = new DynamicTexture(`${name}Glow${w}x${h}`, { width: w, height: h }, scene, false);
     paint(tex.getContext());
@@ -388,7 +519,7 @@ export function buildColumbia(scene, name = 'columbia') {
   quads.forEach((quad, k) => {
     for (const kind of ['fwd', 'side']) {
       const dir = kind === 'fwd' ? [1, 0, 0] : [0, 0, k % 2 ? -1 : 1];
-      const at = kind === 'fwd' ? [0.53, 0.02, 0] : [0, 0.02, k % 2 ? -0.43 : 0.43];
+      const at = kind === 'fwd' ? [0.53, 0.14, 0] : [0, 0.14, k % 2 ? -0.44 : 0.44];
       const fan = glowing(CreateCylinder(`${name}PuffFan${kind}${k}`, { height: 1, diameterTop: 1.7, diameterBottom: 0.06, tessellation: 24, cap: Mesh.NO_CAP }, scene));
       fan.material = fanMat;
       fan.parent = quad;
@@ -410,11 +541,10 @@ export function buildColumbia(scene, name = 'columbia') {
       jets[kind].push({ fan, flash, grains, at, dir, next: 0 });
     }
   });
-  // A burst every PULSE seconds while a jet is on, BURST long, sharp at the start.
   const PULSE = 0.24, BURST = 0.1;
   const fired = { fwd: -1, side: -1 };
   let lastT = null;
-  const LENGTH = 4.47 + 7.3;
+  const LENGTH = 3.55 + 7.42; // probe head to the nozzle's exit
   return {
     root,
     length: LENGTH,
@@ -445,15 +575,13 @@ export function buildColumbia(scene, name = 'columbia') {
             flash.scaling.setAll(0.35 + 0.5 * k);
             flash.visibility = k;
           }
-          // A handful of grains each burst, out along the fan, fading as they go.
           if (fresh) {
             for (let i = 0; i < 6; i++) {
               const g = jet.grains[jet.next];
               jet.next = (jet.next + 1) % jet.grains.length;
               const speed = 3 + 4 * Math.random();
-              const a = Math.random() * 2 * PI;
+              const a = Math.random() * TAU;
               const r = 0.55 * Math.random();
-              // Along the jet, with a spread across it (the two axes square to dir).
               const across = dir[0] ? [0, Math.cos(a), Math.sin(a)] : [Math.cos(a), Math.sin(a), 0];
               g.v = dir.map((d, n) => speed * (d + r * across[n]));
               g.age = 0;
@@ -478,4 +606,3 @@ export function buildColumbia(scene, name = 'columbia') {
     },
   };
 }
-

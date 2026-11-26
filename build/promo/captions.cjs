@@ -146,6 +146,16 @@ for (const [lang, lines] of Object.entries(JSON.parse(fs.readFileSync(path.join(
   lines.slice(0, -1).forEach(([, show], i) => { TOUR[lang][`moon-1-${i + 1}`] = show; });
   TOUR[lang]['end-moon'] = { ...(TOUR[lang]['end-orbits'] ?? FIRST[lang].end), lead: lines.at(-1)[1], note: '' };
 }
+// The far side Short's lines (build/promo/sides-lines.json), in the same way.
+const SIDES_TITLE = { ko: '<em>달의 뒷면은</em>\n왜 곰보일까', en: "Why Is the Moon's\n<em>Far Side</em>\nSo Pitted?", ja: '<em>月の裏側</em>は\nなぜあばただらけ\nなのか', zh: '<em>月球背面</em>\n为什么坑坑洼洼' };
+for (const [lang, lines] of Object.entries(JSON.parse(fs.readFileSync(path.join(__dirname, 'sides-lines.json'), 'utf8')))) {
+  if (lang === '_') continue;
+  TOUR[lang] ??= {};
+  // (The film's title first, over the near side: the user, 2026-11-26: "제목이 안 보이네".)
+  TOUR[lang]['sides-1-1'] = SIDES_TITLE[lang];
+  lines.slice(0, -1).forEach(([, show], i) => { TOUR[lang][`sides-1-${i + 2}`] = show; });
+  TOUR[lang]['end-sides'] = { ...(TOUR[lang]['end-orbits'] ?? FIRST[lang].end), lead: lines.at(-1)[1], note: '' };
+}
 const LINES = { thatday: THAT_DAY, gaze: GAZE, tour: TOUR }[process.env.FILM] ?? FIRST;
 
 // (Gaegu and Pretendard have no kana or kanji: Japanese in a Japanese face of Windows.)

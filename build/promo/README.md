@@ -50,6 +50,16 @@
 
 한국어를 다 만들고 사용자가 허락한 뒤에 다른 언어를 만든다.
 
+### 목소리가 있는 쇼츠 (달의 뒷면은 왜 곰보일까)
+
+달 쇼츠와 같은 방법이다. 19줄, 첫머리 2.8초에 제목을 띄운다. 길이는 한국어 75.9초, 영어 81.8초, 일본어 90.6초, 중국어 78.7초다(60초에 맞추기는 사용자가 거뒀다).
+
+1. 대사: `build/promo/sides-lines.json`, 제목은 `captions.cjs` 의 `SIDES_TITLE`
+2. 목소리: `assets/promo/<언어>/voice/sidesShort2-NN-<언어>.mp3` (TTS 세션)
+3. `python -P build/promo/sides-timing.py ko` → `node build/promo/sides.cjs ko` → `FILM=tour node build/promo/captions.cjs ko` → `python -P build/promo/tour.py ko sides 1`
+
+영상이 음악(62초)보다 길면 음악을 되풀이해 깐다.
+
 ## 고칠 곳
 
 | 무엇 | 파일 |

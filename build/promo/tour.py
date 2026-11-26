@@ -11,9 +11,9 @@ ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'promo')
 SIZE = (1080, 1920)
 START_S = 0.1
 # Seconds of the shot used, each shot its own (a Short runs 60 s at most, end card too).
-SHOT_S = {'auroraDrift': 24.9, 'orbits': 47.9, 'moon': 52.5}
+SHOT_S = {'auroraDrift': 24.9, 'orbits': 47.9, 'moon': 52.5, 'sides': 60.0}
 # The end card's seconds (the Moon's is longer: 하린 reads its last line over it).
-END_S = {'moon': 6.1}
+END_S = {'moon': 6.1, 'sides': 6.0}
 FADE_S = 2.5
 # From and to (s) of each caption of a take: <shot>-<take>-<n>.png (captions.cjs).
 TAKES = {
@@ -29,14 +29,16 @@ TAKES = {
     'moon': {
         '1': [(0.2, 2.57), (2.57, 5.5), (5.5, 7.1), (7.4, 12.1), (12.1, 17.2), (17.5, 22.6), (22.9, 27.29), (27.29, 30.0), (30.3, 33.58), (33.58, 36.54), (36.54, 39.0), (39.3, 42.8), (42.8, 44.79), (44.79, 48.4), (48.7, 52.5)],
     },
+    # (Timed from sides-timing.json.)
+    'sides': {'1': []},
 }
 # A shot drawn frame by frame takes its sound from another shot.
-MUSIC = {'orbits': 'music60', 'moon': 'music60'}
+MUSIC = {'orbits': 'music60', 'moon': 'music60', 'sides': 'music60'}
 # A voice over the music: when (s) each line starts, its file
 # assets/promo/<lang>/voice/<name>Short2-<nn>-<lang>.mp3 (하린, made by the TTS session),
 # the last over the end card; the film's parts and captions are timed to these lines
 # (build/promo/moon.cjs PARTS). The music is turned down under it.
-VOICE = {'moon': [0.45, 2.82, 5.75, 7.65, 12.35, 17.75, 23.15, 27.54, 30.55, 33.83, 36.79, 39.55, 43.05, 45.04, 48.95, 53.1]}
+VOICE = {'sides': [], 'moon': [0.45, 2.82, 5.75, 7.65, 12.35, 17.75, 23.15, 27.54, 30.55, 33.83, 36.79, 39.55, 43.05, 45.04, 48.95, 53.1]}
 MUSIC_UNDER_VOICE = 0.5
 
 
@@ -83,7 +85,8 @@ def main(lang, name, take):
         graph.append(f'[{n}:v]format=rgba,fade=t=in:st=0:d=0.4:alpha=1,fade=t=out:st={length - 0.4}:d=0.4:alpha=1,setpts=PTS+{a}/TB[w{n}]')
         graph.append(f'[f{n - 1}][w{n}]overlay=eof_action=pass[f{n}]')
     k = len(spans)
-    inputs += ['-i', os.path.join(sound, 'audio.webm'), '-loop', '1', '-t', str(END_S.get(name, 5.0)), '-framerate', '30', '-i', end]
+    # (The music looped when a film runs longer than its recording.)
+    inputs += ['-stream_loop', '-1', '-i', os.path.join(sound, 'audio.webm'), '-loop', '1', '-t', str(END_S.get(name, 5.0)), '-framerate', '30', '-i', end]
     graph.append(f'[f{k}]scale=in_range=pc:out_range=tv,format=yuv420p,setsar=1[main]')
     graph.append(f'[{k + 2}:v]fps=30,scale={SIZE[0]}:{SIZE[1]}:in_range=pc:out_range=tv,format=yuv420p,setsar=1[end]')
     graph.append('[main][end]concat=n=2:v=1:a=0[v]')

@@ -28,7 +28,7 @@ export const SIDES = {
   spa: [166, 182],
   twin: [182, 198],
   change6: [198, 218],
-  end: [218, 232],
+  end: [218, 238],
 };
 
 const rad = (d) => (d * Math.PI) / 180;
@@ -212,7 +212,7 @@ float fbm(vec3 p) { float a = 0.5, s = 0.0; for (int i = 0; i < 5; i++) { s += a
 void main() {
   vec3 n = normalize(vN);
   float lit = max(dot(n, sunDir), 0.0);
-  vec3 col = texture2D(map, vUV).rgb * (0.04 + 1.25 * lit);
+  vec3 col = texture2D(map, vUV).rgb * (0.08 + 2.1 * lit);
   float u = vUV.x * 6.28318, v = vUV.y * 3.14159;
   vec3 q = vec3(cos(u) * sin(v), cos(v), sin(u) * sin(v)) * 3.0;
   float w = fbm(q + vec3(time * 0.04, 0.0, -time * 0.03));
@@ -222,7 +222,7 @@ void main() {
   fire = mix(fire, mix(vec3(0.75, 0.16, 0.03), vec3(1.0, 0.62, 0.18), w), smoothstep(0.55, 0.75, fbm(q * 0.8 - 3.0)));
   float rim = pow(1.0 - max(dot(n, normalize(eye - vW)), 0.0), 2.5);
   col = mix(col, fire + vec3(1.0, 0.4, 0.1) * rim, hot);
-  col += vec3(0.3, 0.55, 1.0) * rim * 0.5 * (1.0 - hot) * lit;
+  col += vec3(0.3, 0.55, 1.0) * rim * (0.35 + 0.6 * lit) * (1.0 - hot);
   gl_FragColor = vec4(col * fade, 1.0);
 }`;
 
@@ -368,8 +368,9 @@ export function createMoonSidesStage(canvas) {
     // The Earth: far off while the rocks fall; close and molten for the first idea.
     const earthOn = inPart(SIDES.shield, T) || inPart(SIDES.hot, T);
     earth.setEnabled(earthOn);
-    if (inPart(SIDES.shield, T)) { earth.position.set(-10, 0, 0); earth.scaling.setAll(1.1); earthMat.setFloat('hot', 0); }
-    else { earth.position.set(-4.6, 0, 0); earth.scaling.setAll(1.6); earthMat.setFloat('hot', 1); }
+    // (Its north toward the top of the screen there, where the screen's up is -x.)
+    if (inPart(SIDES.shield, T)) { earth.position.set(-10, 0, 0); earth.scaling.setAll(1.1); earthMat.setFloat('hot', 0); earth.rotation.z = Math.PI / 2; }
+    else { earth.position.set(-4.6, 0, 0); earth.scaling.setAll(1.6); earthMat.setFloat('hot', 1); earth.rotation.z = 0; }
     earth.rotation.y = -T * 0.3;
     earthMat.setFloat('time', T);
 
@@ -412,7 +413,8 @@ export function createMoonSidesStage(canvas) {
     const fromEye = eye.at.subtract(eye.look).normalize();
     const sun = Vector3.TransformNormal(fromEye, Matrix.RotationAxis(eye.up, 0.55)).add(eye.up.scale(0.25)).normalize();
     for (const m of [moonMat, twinMat]) { m.setVector3('sunDir', sun); m.setFloat('fade', fade); }
-    earthMat.setVector3('sunDir', sun);
+    // (The Earth's day side toward the eye, a little from above: the user, 2026-11-26: "지구를 좀 밝게 해".)
+    earthMat.setVector3('sunDir', eye.at.subtract(earth.position).normalize().add(eye.up.scale(0.35)).normalize());
     earthMat.setVector3('eye', eye.at);
     earthMat.setFloat('fade', fade);
     cutMat.setFloat('fade', fade);
@@ -463,7 +465,7 @@ export function createMoonSidesStage(canvas) {
     [198, round(-150, -32, 4.6, 0.8, new Vector3(0, -0.35, 0))],
     [218, round(-158, -30, 4.4, 0.8, new Vector3(0, -0.35, 0))],
     [228, round(0, 0, 5.4)],
-    [232, round(0, 0, 5.4)],
+    [238, round(0, 0, 5.4)],
   ];
   const place = (k) => (k.at ? k : { ...k, at: dirOf(k.lon, k.lat).scale(k.dist) });
   function cameraAt(T) {

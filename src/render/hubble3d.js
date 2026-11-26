@@ -122,18 +122,29 @@ function bayTexture(scene, nobl) {
     }
   });
 }
-// The first arrays' blankets: gold cells in a fine grid, brighter bus lines across.
+// The first arrays' blankets: amber-gold cells in a fine grid, darker where the cells
+// meet, thin pale-gold bus lines framing panels four across (colours sampled from
+// STS-31's grapple photo: cells about (124, 83, 7), the lines about (150, 105, 25); the
+// user, 2026-11-27: "날개 색 좀 사진처럼 다듬어").
 function blanketTexture(scene) {
   return drawn(scene, 'hubbleBlanketMap', 128, 512, (g, w, h, rand) => {
-    g.fillStyle = '#c98b22';
+    g.fillStyle = '#7c540c';
     g.fillRect(0, 0, w, h);
-    g.fillStyle = 'rgba(120,70,10,0.55)';
-    for (let x = 0; x < w; x += 5) g.fillRect(x, 0, 1, h);
-    for (let y = 0; y < h; y += 4) g.fillRect(0, y, w, 1);
-    g.fillStyle = '#f0c048';
-    for (let k = 1; k < 5; k++) g.fillRect(0, (k * h) / 5, w, 3);
-    g.fillRect(w / 2 - 1, 0, 2, h);
-    for (let n = 0; n < 6; n++) g.fillRect(rand() * w, rand() * h, 16, 2);
+    // Cells, each a shade of its own.
+    for (let x = 0; x < w; x += 4) {
+      for (let y = 0; y < h; y += 4) {
+        const v = 0.9 + rand() * 0.2;
+        g.fillStyle = `rgb(${(124 * v) | 0},${(84 * v) | 0},${(10 * v) | 0})`;
+        g.fillRect(x, y, 3, 3);
+      }
+    }
+    // Bus lines: thin, pale gold, a frame of panels four across and many down.
+    g.fillStyle = 'rgba(200,150,50,0.85)';
+    for (let k = 0; k <= 4; k++) g.fillRect(Math.min(w - 2, (k * w) / 4), 0, 2, h);
+    for (let k = 0; k <= 12; k++) g.fillRect(0, Math.min(h - 2, (k * h) / 12), w, 2);
+    // A few short traces inside the panels.
+    g.fillStyle = 'rgba(190,140,45,0.6)';
+    for (let n = 0; n < 10; n++) g.fillRect(((rand() * 4) | 0) * (w / 4) + 4, rand() * h, w / 8, 1);
   });
 }
 // The rigid arrays since 2002: four strips of near-black cells, silver lines between.
@@ -158,7 +169,7 @@ function hubbleMaterials(scene) {
     shroud: sheet(scene, 'hubbleShroud', shroudTexture(scene), { glow: 0.28, spec: 0.8, power: 48 }),
     bay: sheet(scene, 'hubbleBay', bayTexture(scene, false), { glow: 0.3, spec: 0.5, power: 24 }),
     nobl: sheet(scene, 'hubbleNobl', bayTexture(scene, true), { glow: 0.3, spec: 0.15, power: 8 }),
-    blanket: sheet(scene, 'hubbleBlanket', blanketTexture(scene), { glow: 0.35, spec: 0.35, power: 24 }),
+    blanket: sheet(scene, 'hubbleBlanket', blanketTexture(scene), { glow: 0.2, spec: 0.3, power: 30 }),
     rigid: sheet(scene, 'hubbleRigid', rigidTexture(scene), { glow: 0.25, spec: 0.5, power: 40 }),
   };
   m.blanket.backFaceCulling = false;

@@ -96,6 +96,7 @@ uniform float today;
 uniform float ocean;
 uniform float time;
 uniform vec3 rock;
+uniform float seamGlow;
 uniform vec3 hitDir;
 uniform float hit;
 uniform sampler2D map;
@@ -110,7 +111,7 @@ void main() {
   vec3 crust = rock * (0.55 + 0.6 * m);
   float seam = smoothstep(0.02, 0.0, abs(fbm(vObj * 3.0 + 7.0) - 0.5)) * smoothstep(0.45, 0.6, fbm(vObj * 2.0 + 1.0));
   vec3 col = crust * (0.05 + 1.35 * lit);
-  vec3 glow = vec3(0.9, 0.25, 0.05) * seam * 0.22 * (1.0 - today) * (1.0 - 0.7 * lit);
+  vec3 glow = vec3(0.9, 0.25, 0.05) * seam * seamGlow * (1.0 - today) * (1.0 - 0.7 * lit);
   // Molten: cells of yellow-white fire in darker orange, drifting.
   float flow = fbm(vObj * 5.0 + vec3(time * 0.05, -time * 0.03, time * 0.04));
   float cells = fbm(vObj * 11.0 - vec3(0.0, time * 0.07, 0.0));
@@ -288,7 +289,7 @@ export function createTheiaStage(canvas) {
   sky.infiniteDistance = true;
 
   const worldMat = (name, rock, mapSrc) => {
-    const m = new ShaderMaterial(name, scene, { vertex: 'theiaWorld', fragment: 'theiaWorld' }, { attributes: ['position', 'normal', 'uv'], uniforms: ['world', 'viewProjection', 'sunDir', 'eye', 'heat', 'today', 'ocean', 'time', 'rock', 'hitDir', 'hit', 'dentDir', 'dent', 'flatDir', 'flatCut'], samplers: ['map'] });
+    const m = new ShaderMaterial(name, scene, { vertex: 'theiaWorld', fragment: 'theiaWorld' }, { attributes: ['position', 'normal', 'uv'], uniforms: ['world', 'viewProjection', 'sunDir', 'eye', 'heat', 'today', 'ocean', 'time', 'rock', 'seamGlow', 'hitDir', 'hit', 'dentDir', 'dent', 'flatDir', 'flatCut'], samplers: ['map'] });
     m.setVector3('dentDir', new Vector3(1, 0, 0));
     m.setVector4('dent', new Vector4(0, 0, 0, 0));
     m.setVector3('flatDir', new Vector3(1, 0, 0));
@@ -296,6 +297,7 @@ export function createTheiaStage(canvas) {
     m.setFloat('ocean', 0);
     m.setVector3('sunDir', SUN);
     m.setColor3('rock', rock);
+    m.setFloat('seamGlow', 0.22);
     m.setFloat('heat', 0);
     m.setFloat('today', 0);
     m.setFloat('hit', 0);
@@ -304,10 +306,14 @@ export function createTheiaStage(canvas) {
     return m;
   };
   const earth = CreateSphere('theiaEarth', { diameter: 2, segments: 96 }, scene);
-  const earthMat = worldMat('theiaEarthMat', new Color3(0.32, 0.27, 0.24), 'assets/earth-day.webp');
+  const earthMat = worldMat('theiaEarthMat', new Color3(0.36, 0.25, 0.19), 'assets/earth-day.webp');
+  // (The two told apart as Theia comes, the user, 2026-11-26: "색도 넣고": the young Earth
+  // warm, its red seams glowing bright; Theia a cool grey.)
+  earthMat.setFloat('seamGlow', 0.75);
   earth.material = earthMat;
   const theia = CreateSphere('theiaBody', { diameter: 2 * THEIA_R, segments: 64 }, scene);
-  const theiaMat = worldMat('theiaBodyMat', new Color3(0.4, 0.33, 0.27), 'assets/planets/moon.webp');
+  const theiaMat = worldMat('theiaBodyMat', new Color3(0.34, 0.35, 0.38), 'assets/planets/moon.webp');
+  theiaMat.setFloat('seamGlow', 0.05);
   theia.material = theiaMat;
   const moon = CreateSphere('theiaMoon', { diameter: 2 * MOON_R, segments: 64 }, scene);
   const moonMat = worldMat('theiaMoonMat', new Color3(0.42, 0.4, 0.38), 'assets/planets/moon.webp');
@@ -449,6 +455,7 @@ export function createTheiaStage(canvas) {
     // Where the eye is.
     const eye = cameraAt(T, tp, moonAt, R);
     camera.position.copyFrom(eye.at);
+    camera.upVector.copyFrom(eye.up);
     camera.setTarget(eye.look);
     camera.fov = eye.fov;
 
@@ -472,6 +479,36 @@ export function createTheiaStage(canvas) {
   // The eye's way through it all: off to the side as Theia comes; close by the blow; high
   // over the arm as it wraps round; low over the disc; beside the new Moon; out and back to
   // see the two of them as they are today.
+  // The view as Theia comes: the eye beside its way, held still; aimed and widened so that
+  // Theia's far edge stands at 0.75 of the half-height above the middle and the Earth's
+  // near edge at 0.55 below it (clear of the captions), with Theia straight above the Earth.
+  const sideAt = (() => {
+    let d = Vector3.Cross(way, Vector3.Up()).normalize();
+    if (Vector3.Dot(d, SUN) < 0) d = d.scale(-1);
+    return d.scale(5.5).add(way.scale(1)).add(new Vector3(0, 1.5, 0));
+  })();
+  function sideView(T) {
+    const at = sideAt;
+    const toE = Vector3.Zero().subtract(at), toT = theiaAt(T).subtract(at);
+    const dE = toE.length(), dT = toT.length();
+    const e = toE.scale(1 / dE), th = toT.scale(1 / dT);
+    const gap = Math.acos(Math.min(1, Vector3.Dot(e, th)));
+    const rE = Math.asin(Math.min(1, 1 / dE)), rT = Math.asin(Math.min(1, THEIA_R / dT));
+    const lo = -rE, hi = gap + rT, top = 0.75, bottom = 0.55;
+    // The axis's angle from the Earth's middle, found by halving.
+    let a = lo + 1e-4, b = hi - 1e-4;
+    for (let i = 0; i < 40; i++) {
+      const m = (a + b) / 2;
+      if (Math.tan(hi - m) / Math.tan(m - lo) > top / bottom) a = m; else b = m;
+    }
+    const phi = (a + b) / 2;
+    const h = Math.tan(hi - phi) / top;
+    // Turned from the Earth toward Theia by phi, in the plane of the two.
+    const across = th.subtract(e.scale(Vector3.Dot(th, e))).normalize();
+    const axis = e.scale(Math.cos(phi)).add(across.scale(Math.sin(phi)));
+    const up = across.scale(Math.cos(phi)).subtract(e.scale(Math.sin(phi)));
+    return { at, look: at.add(axis.scale(5)), fov: 2 * Math.atan(h), up };
+  }
   function cameraAt(T, tp, moonAt, R) {
     const polar = (ang, r, y) => new Vector3(Math.cos(ang) * r, y, Math.sin(ang) * r);
     const keys = [
@@ -491,11 +528,13 @@ export function createTheiaStage(canvas) {
       { t: THEIA.recede[1], at: new Vector3(3, 1.2, -6.5), look: new Vector3(0, 0, 0), fov: 0.75 },
       { t: THEIA.end, at: new Vector3(3, 1.2, -6.5), look: new Vector3(0, 0, 0), fov: 0.75 },
     ];
-    // Coming in: just behind Theia and above, so it stays in sight with the Earth ahead.
+    // Coming in: from beside its way, on the Sun's side, held still; Theia small at the top
+    // of the view, the Earth large below it, the gap closing (the user, 2026-11-26, of the
+    // view from behind Theia hiding the Earth: "이 구도가 마음에 안 들어", "1").
     // Then, over the last seconds, up over the blow (the next key).
-    const chase = (p) => ({ at: p.subtract(way.scale(4)).add(new Vector3(0, 0.7, 0)), look: Vector3.Lerp(p, touchAt, 0.3) });
-    Object.assign(keys[0], chase(tp));
-    Object.assign(keys[1], chase(theiaAt(Math.min(T, THEIA.impact - 10))));
+    const side = sideView(Math.min(T, THEIA.impact - 10));
+    Object.assign(keys[0], side);
+    Object.assign(keys[1], side);
     // Beside the Moon as it gathers: outside its way and above, the Earth beyond it.
     const out = moonAt.clone().normalize();
     const along = Vector3.Cross(Vector3.Up(), out);
@@ -523,6 +562,10 @@ export function createTheiaStage(canvas) {
     const ra = a.at.length(), rb = b.at.length();
     const at = vlerp(a.at.scale(1 / ra), b.at.scale(1 / rb), k).normalize().scale(lerp(ra, rb, k));
     let look = vlerp(a.look, b.look, k), fov = lerp(a.fov, b.fov, k);
+    // (Swinging up over the blow, kept on where the two are about to meet, so Theia does not
+    // slip out of the side of the view on the way.)
+    const meet = smooth(THEIA.impact - 10, THEIA.impact - 7, T) * (1 - smooth(THEIA.impact - 5, THEIA.impact - 2, T));
+    if (meet > 0) look = vlerp(look, Vector3.Lerp(tp, hitDir, 0.5), meet);
     // Once the Moon has formed, both always in the view: aimed between them, wide enough
     // for the two with a margin (it went out of the view as it drew off).
     const both = smooth(THEIA.moon[1] - 8, THEIA.moon[1], T) * (1 - smooth(THEIA.recede[0] + 18, THEIA.recede[0] + 32, T));
@@ -537,7 +580,8 @@ export function createTheiaStage(canvas) {
       const aspect = engine.getRenderWidth() / Math.max(1, engine.getRenderHeight());
       fov = lerp(fov, Math.max(fov, ((sep + 2 * eAng) * 1.25) / Math.min(1, aspect)), both);
     }
-    return { at, look, fov: Math.min(fov, 1.6) };
+    const up = vlerp(side.up, Vector3.Up(), smooth(THEIA.impact - 10, THEIA.impact - 4, T)).normalize();
+    return { at, look, fov: Math.min(fov, 1.6), up };
   }
 
   return {

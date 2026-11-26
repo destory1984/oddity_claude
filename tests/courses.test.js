@@ -18,11 +18,11 @@ const velocity = ({ orientation, slide }) => {
   return r.map((n, i) => n * slide.sideSpeed * slide.sideSign + u[i] * slide.riseSpeed * slide.riseSign);
 };
 
-test('twenty-three rounds, the aurora first, then the one the user was flying, each of a known body', () => {
-  assert.equal(COURSES.length, 23);
+test('twenty-four rounds, the aurora first, then the one the user was flying, each of a known body', () => {
+  assert.equal(COURSES.length, 24);
   assert.equal(COURSES[0].id, 'auroraDrift');
   assert.equal(COURSES[1].id, 'earthRound');
-  assert.equal(new Set(COURSES.map((c) => c.id)).size, 23);
+  assert.equal(new Set(COURSES.map((c) => c.id)).size, 24);
   for (const c of COURSES) {
     assert.ok(body(c.body), c.id);
     assert.ok(c.name && c.todo, c.id);

@@ -16,6 +16,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-26', text: t('추천 우주멍 코스 달의 뒷면은 왜 곰보일까가 생겼습니다. 달을 반으로 잘라 그 까닭을 봅니다.'), go: { course: 'moonSides' } },
   { day: '2026-11-26', text: t('달은 왜 한쪽 얼굴만 보일까의 설명 네 줄을 더 알기 쉽게 고쳤고, 영어 목소리를 영어가 모국어인 목소리로 바꿨습니다.'), go: { course: 'moonFace', at: 157 } },
   { day: '2026-11-26', text: t('달은 왜 한쪽 얼굴만 보일까를 영어, 일본어, 중국어 목소리로도 들을 수 있습니다.'), go: { course: 'moonFace' } },
   { day: '2026-11-26', text: t('달은 왜 한쪽 얼굴만 보일까의 앞부분이 짧아져, 한 바퀴가 4분 52초에서 4분 24초로 줄었습니다.'), go: { course: 'moonFace' } },

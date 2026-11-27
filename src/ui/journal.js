@@ -125,9 +125,10 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   const lastPart = {};
   // (A kept part no longer in GROUPS opens "오늘".)
   let tab = Object.values(GROUPS).flat().includes(lastDone?.tab) ? lastDone.tab : 'today';
-  // name: a part, or a tab (its part last looked at).
-  function showTab(name) {
-    const part = GROUPS[name] ? lastPart[name] ?? GROUPS[name][0] : name;
+  // name: a part; with asTab, a tab (its part last looked at). The flag, not the name, says
+  // which: "stories" is both a tab and its first part, and its key reopened 우주 상식.
+  function showTab(name, asTab = false) {
+    const part = asTab ? lastPart[name] ?? GROUPS[name][0] : name;
     const group = groupOf(part);
     tab = part;
     lastPart[group] = part;
@@ -210,7 +211,7 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
     button.addEventListener('click', () => {
       if (button.dataset.tab !== groupOf(tab)) onTab();
       showRecord(false);
-      showTab(button.dataset.tab);
+      showTab(button.dataset.tab, true);
     });
   }
   $('resetJournal').addEventListener('click', () => {

@@ -62,12 +62,13 @@ const SHAPES = Object.fromEntries(Object.entries(FIGURES).map(([name, f]) => {
   return [name, { strokes, length: strokes.reduce((s, x) => s + x.length, 0) }];
 }));
 
-export function createMoonFiguresStage(canvas) {
+// maxDpr: the most screen pixels to a page pixel (2 in the game; the Shorts draw at 8 / 3).
+export function createMoonFiguresStage(canvas, { maxDpr = 2 } = {}) {
   const ctx = canvas.getContext('2d');
   const base = import.meta.env?.BASE_URL ?? './';
   let W = 1, H = 1, dpr = 1;
   function resize() {
-    dpr = Math.min(2, window.devicePixelRatio || 1);
+    dpr = Math.min(maxDpr, window.devicePixelRatio || 1);
     W = canvas.clientWidth || innerWidth;
     H = canvas.clientHeight || innerHeight;
     canvas.width = Math.round(W * dpr);

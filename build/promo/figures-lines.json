@@ -1,0 +1,187 @@
+{
+ "_": "The Short of 달에는 누가 살까: each line as 하린 reads it and as the caption shows it (\n where it breaks, <em> in gold); the last over the end card. Korean checked by GPT 2026-11-28 (the user: \"gpt 자문 받고 만들어\").",
+ "ko": [
+  [
+   "이 달무늬, 토끼로 보이세요? 다른 나라에서는 달랐습니다.",
+   "이 달무늬\n<em>토끼</em>로 보이세요?"
+  ],
+  [
+   "한국에서는 계수나무 아래 떡방아 찧는 옥토끼를 보았습니다.",
+   "한국\n떡방아 찧는 <em>옥토끼</em>"
+  ],
+  [
+   "일본에서도 달토끼가 절구에 떡을 찧습니다.",
+   "일본\n절구에 떡을 찧는 <em>달토끼</em>"
+  ],
+  [
+   "중국에는 불사약을 찧는 옥토끼와, 달에 사는 두꺼비 이야기가 있습니다.",
+   "중국\n<em>불사약</em>을 찧는 옥토끼\n달에 사는 두꺼비"
+  ],
+  [
+   "베트남에서는 반얀나무 아래 앉은 나무꾼 꾸오이를 봅니다.",
+   "베트남\n반얀나무 아래\n나무꾼 <em>꾸오이</em>"
+  ],
+  [
+   "인도 설화에서 굶주린 이를 위해 불에 뛰어든 토끼는 다치지 않았고, 신은 그 모습을 달에 그렸다고 합니다.",
+   "인도\n불에 뛰어든 토끼\n<em>신이 달에 그렸다</em>"
+  ],
+  [
+   "아즈텍 신화에서는 한 신이 달의 얼굴을 토끼로 쳐서 빛을 줄였다고 합니다.",
+   "아즈텍\n<em>토끼로</em> 달을 쳐\n빛을 줄였다"
+  ],
+  [
+   "유럽의 한 전승에서는 나뭇단을 진 남자를 보았습니다.",
+   "유럽\n나뭇단을 진 <em>남자</em>"
+  ],
+  [
+   "북유럽은 물동이를 멘 남매, 마오리는 여인 로나, 하와이는 여신 히나를 봅니다.",
+   "북유럽 · 물동이 남매\n마오리 · <em>로나</em>\n하와이 · <em>히나</em>"
+  ],
+  [
+   "남반구에서는 달이 우리와 거꾸로 보여, 토끼가 물구나무를 섭니다.",
+   "남반구에서는\n달이 거꾸로\n토끼가 <em>물구나무</em>"
+  ],
+  [
+   "오늘 밤, 당신에게는 무엇이 보이나요?",
+   "오늘 밤, 당신에게는\n<em>무엇</em>이 보이나요?"
+  ]
+ ],
+ "en": [
+  [
+   "Does this pattern on the Moon look like a rabbit? Elsewhere, people saw other things.",
+   "Does the Moon's pattern\nlook like a <em>rabbit</em>?"
+  ],
+  [
+   "In Korea, people saw a jade rabbit pounding rice cakes under an osmanthus tree.",
+   "Korea\na <em>jade rabbit</em>\npounding rice cakes"
+  ],
+  [
+   "In Japan, too, the Moon rabbit pounds rice cakes in a mortar.",
+   "Japan\nthe <em>Moon rabbit</em>\nat its mortar"
+  ],
+  [
+   "In China, there are tales of a jade rabbit pounding the elixir of life, and of a toad on the Moon.",
+   "China\na rabbit pounding <em>the elixir</em>\nand a toad on the Moon"
+  ],
+  [
+   "In Vietnam, people see Cuội the woodcutter, sitting under a banyan tree.",
+   "Vietnam\nunder a banyan tree\n<em>Cuội</em> the woodcutter"
+  ],
+  [
+   "In a tale from India, a hare leapt into a fire to feed a starving man. It was not hurt, and a god drew its image on the Moon.",
+   "India\na hare leapt into the fire\n<em>a god drew it</em> on the Moon"
+  ],
+  [
+   "In an Aztec myth, a god struck the Moon's face with a rabbit to dim its light.",
+   "Aztecs\nstruck <em>with a rabbit</em>\nthe Moon grew dim"
+  ],
+  [
+   "In one European tale, people saw a man carrying a bundle of sticks.",
+   "Europe\na <em>man</em> with a bundle of sticks"
+  ],
+  [
+   "Northern Europe sees a brother and sister with a pail, the Māori see Rona, and Hawaii sees the goddess Hina.",
+   "Norse · siblings with a pail\nMāori · <em>Rona</em>\nHawaii · <em>Hina</em>"
+  ],
+  [
+   "In the Southern Hemisphere the Moon looks upside down to us, so the rabbit stands on its head.",
+   "South of the equator\nthe Moon turns over\nthe rabbit <em>on its head</em>"
+  ],
+  [
+   "Tonight, what do you see?",
+   "Tonight,\nwhat do <em>you</em> see?"
+  ]
+ ],
+ "ja": [
+  [
+   "この月の模様、うさぎに見えますか？ほかの国では違いました。",
+   "この月の模様\n<em>うさぎ</em>に見えますか？"
+  ],
+  [
+   "韓国では、桂の木の下で餅をつく玉兎を見ました。",
+   "韓国\n餅をつく<em>玉兎</em>"
+  ],
+  [
+   "日本でも、月のうさぎが臼で餅をついています。",
+   "日本\n臼で餅をつく<em>月のうさぎ</em>"
+  ],
+  [
+   "中国には、不老不死の薬をつく玉兎と、月に住むヒキガエルの話があります。",
+   "中国\n<em>不老不死の薬</em>をつく玉兎\n月に住むヒキガエル"
+  ],
+  [
+   "ベトナムでは、ガジュマルの木の下に座る木こりのクオイを見ます。",
+   "ベトナム\nガジュマルの木の下\n木こりの<em>クオイ</em>"
+  ],
+  [
+   "インドの説話では、飢えた人のために火に飛び込んだうさぎは傷つかず、神はその姿を月に描いたといいます。",
+   "インド\n火に飛び込んだうさぎ\n<em>神が月に描いた</em>"
+  ],
+  [
+   "アステカの神話では、ある神がうさぎで月の顔を打ち、光を弱めたといいます。",
+   "アステカ\n<em>うさぎで</em>月を打ち\n光を弱めた"
+  ],
+  [
+   "ヨーロッパのある言い伝えでは、薪の束を背負った男を見ました。",
+   "ヨーロッパ\n薪を背負った<em>男</em>"
+  ],
+  [
+   "北欧は水桶を担いだ兄妹、マオリは女の人ロナ、ハワイは女神ヒナを見ます。",
+   "北欧・水桶の兄妹\nマオリ・<em>ロナ</em>\nハワイ・<em>ヒナ</em>"
+  ],
+  [
+   "南半球では月が私たちと逆さまに見え、うさぎが逆立ちをします。",
+   "南半球では\n月が逆さま\nうさぎが<em>逆立ち</em>"
+  ],
+  [
+   "今夜、あなたには何が見えますか？",
+   "今夜、あなたには\n<em>何</em>が見えますか？"
+  ]
+ ],
+ "zh": [
+  [
+   "这月亮上的花纹，像兔子吗？在别的地方，人们看到的不一样。",
+   "这月亮的花纹\n像<em>兔子</em>吗？"
+  ],
+  [
+   "在韩国，人们看到桂树下捣年糕的玉兔。",
+   "韩国\n捣年糕的<em>玉兔</em>"
+  ],
+  [
+   "在日本，月兔也在臼里捣年糕。",
+   "日本\n在臼里捣年糕的<em>月兔</em>"
+  ],
+  [
+   "在中国，有捣长生不老药的玉兔，和住在月亮上的蟾蜍的故事。",
+   "中国\n捣<em>不老药</em>的玉兔\n月亮上的蟾蜍"
+  ],
+  [
+   "在越南，人们看到坐在榕树下的樵夫阿贵。",
+   "越南\n榕树下\n樵夫<em>阿贵</em>"
+  ],
+  [
+   "印度的传说里，为了给饥饿的人当食物而跳进火里的兔子没有受伤，神把它的样子画在了月亮上。",
+   "印度\n跳进火里的兔子\n<em>神把它画在月亮上</em>"
+  ],
+  [
+   "阿兹特克神话里，一位神用兔子打了月亮的脸，让它的光变暗了。",
+   "阿兹特克\n<em>用兔子</em>打月亮\n光变暗了"
+  ],
+  [
+   "欧洲的一个传说里，人们看到一个背着柴捆的男人。",
+   "欧洲\n背着柴捆的<em>男人</em>"
+  ],
+  [
+   "北欧看到挑水桶的兄妹，毛利人看到女子罗娜，夏威夷看到女神希娜。",
+   "北欧·挑水桶的兄妹\n毛利·<em>罗娜</em>\n夏威夷·<em>希娜</em>"
+  ],
+  [
+   "在南半球，月亮看起来和我们这边是倒过来的，兔子成了倒立的样子。",
+   "在南半球\n月亮倒过来\n兔子<em>倒立</em>"
+  ],
+  [
+   "今晚，你看到了什么呢？",
+   "今晚，你看到了\n<em>什么</em>呢？"
+  ]
+ ]
+}

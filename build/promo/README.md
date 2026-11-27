@@ -70,6 +70,16 @@
 
 토막마다 쓰는 코스의 구간과 장면을 내리는 정도는 `sunlight.cjs` 의 `PARTS` 에 있다. 코스의 초는 장면(`src/render/sunlightStage.js`)의 `KNOTS` 가 장면의 초로 바꾼다.
 
+### 목소리가 있는 쇼츠 (달에는 누가 살까)
+
+햇빛 쇼츠와 같은 방법이다. 코스(166초)에서 열 토막을 골라 11줄을 읽는다. 첫머리 2.8초에 제목을 띄운다. 한국어는 58.5초다. 장면 위의 나라 이름은 끄고 자막에 적는다. 자막 글은 GPT 검수를 받았다.
+
+1. 대사: `build/promo/figures-lines.json`, 제목은 `captions.cjs` 의 `FIGURES_TITLE`
+2. 목소리: `assets/promo/<언어>/voice/figuresShort2-NN-<언어>.mp3` (TTS 세션)
+3. `python -P build/promo/figures-timing.py ko` → `node build/promo/figures.cjs ko` → `FILM=tour node build/promo/captions.cjs ko` → `python -P build/promo/tour.py ko figures 1`
+
+장면(`src/render/moonFiguresStage.js`)은 평면 캔버스라, 쇼츠에서는 `maxDpr: 3` 으로 화면 배율 8/3을 그대로 받아 선명하게 그린다(게임에서는 2까지).
+
 ## 고칠 곳
 
 | 무엇 | 파일 |

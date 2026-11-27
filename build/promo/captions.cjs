@@ -166,6 +166,16 @@ for (const [lang, lines] of Object.entries(JSON.parse(fs.readFileSync(path.join(
   lines.slice(0, -1).forEach(([, show], i) => { TOUR[lang][`sunlight-1-${i + 2}`] = show; });
   TOUR[lang]['end-sunlight'] = { ...(TOUR[lang]['end-orbits'] ?? FIRST[lang].end), lead: lines.at(-1)[1], note: '' };
 }
+// The Short of 달에는 누가 살까 (build/promo/figures-lines.json), in the same way (the user,
+// 2026-11-28: "이제 쇼츠로 만들자", "gpt 자문 받고 만들어").
+const FIGURES_TITLE = { ko: '달에는\n<em>누가</em> 살까', en: 'Who Lives on\nthe <em>Moon</em>?', ja: '月には\n<em>誰</em>が住んでいる？', zh: '月亮上\n住着<em>谁</em>？' };
+for (const [lang, lines] of Object.entries(JSON.parse(fs.readFileSync(path.join(__dirname, 'figures-lines.json'), 'utf8')))) {
+  if (lang === '_') continue;
+  TOUR[lang] ??= {};
+  TOUR[lang]['figures-1-1'] = FIGURES_TITLE[lang];
+  lines.slice(0, -1).forEach(([, show], i) => { TOUR[lang][`figures-1-${i + 2}`] = show; });
+  TOUR[lang]['end-figures'] = { ...(TOUR[lang]['end-orbits'] ?? FIRST[lang].end), lead: lines.at(-1)[1], note: '' };
+}
 const LINES = { thatday: THAT_DAY, gaze: GAZE, tour: TOUR }[process.env.FILM] ?? FIRST;
 
 // (Gaegu and Pretendard have no kana or kanji: Japanese in a Japanese face of Windows.)

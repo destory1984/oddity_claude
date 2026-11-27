@@ -121,7 +121,7 @@ export function createMoonFiguresStage(canvas) {
   const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
   const stars = Array.from({ length: 260 }, () => [rnd(), rnd(), 0.3 + rnd() * 0.9, rnd() * 6]);
 
-  // The place's name, under the Moon.
+  // The place's name, over the Moon (the captions are under it).
   const label = document.createElement('div');
   label.style.cssText = 'position:fixed;left:0;right:0;z-index:7;pointer-events:none;text-align:center;color:#f3d48a;font:600 clamp(17px,4.6vw,24px) system-ui,sans-serif;letter-spacing:0.12em;text-shadow:0 1px 8px #000;opacity:0;transition:opacity 0.7s';
   canvas.after(label);
@@ -168,10 +168,11 @@ export function createMoonFiguresStage(canvas) {
       ctx.fillStyle = `rgba(235, 240, 255, ${(0.35 + 0.35 * Math.sin(T * 0.8 + ph)) * fade})`;
       ctx.fillRect(x * canvas.width, y * canvas.height, r * dpr, r * dpr);
     }
-    // The Moon: below the captions, slowly breathing in.
+    // The Moon: above the captions (the course's captions stand at 76% of the screen's
+    // height), the place's name over it, slowly breathing in.
     const cw = canvas.width, ch = canvas.height;
-    const R = Math.min(cw * 0.43, ch * 0.3) * (1 + 0.03 * smooth(0, END, T));
-    const cx = cw / 2, cy = ch * 0.54;
+    const R = Math.min(cw * 0.42, ch * 0.26) * (1 + 0.03 * smooth(0, END, T));
+    const cx = cw / 2, cy = ch * 0.45;
     const turn = Math.PI * smooth(FLIP[0], FLIP[1], T) * (1 - smooth(SEAS[0], SEAS[0] + 2.5, T));
     if (disc) {
       ctx.save();
@@ -217,7 +218,7 @@ export function createMoonFiguresStage(canvas) {
     const text = name ? w[name] : '';
     if (text && label.textContent !== text) label.textContent = text;
     label.style.opacity = text ? String(fade) : '0';
-    label.style.top = `${(cy + R) / dpr + 18}px`;
+    label.style.top = `${(cy - R) / dpr - 40}px`;
   }
 
   return {

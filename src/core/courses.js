@@ -234,7 +234,7 @@ export const COURSES = [
   // Florentine Codex (one god struck the Moon's face with a rabbit), A Midsummer Night's Dream
   // 5.1, the Prose Edda (Hjúki and Bil), Te Ara (Rona), Chang'e 5 basalt about 2.0 Ga (so the
   // seas' age is left without a number), Vietnam's Cuội.
-  { id: 'moonFigures', learn: true, body: 'earth', lapS: 166, rail: { moonFigures: true, stage: [[-2, 176]], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 165.9], still: [[-60, 176]], phases: [[-1, t('보름달의 무늬')], [12.5, t('방아 찧는 토끼')], [44.5, t('나무 아래 꾸오이')], [51.5, t('불에 뛰어든 토끼')], [77.5, t('너무 밝은 달')], [90.5, t('달 속의 사람')], [104.5, t('물동이와 여인들')], [125.5, t('여인의 얼굴')], [132.5, t('거꾸로 뜬 달')], [140.5, t('달의 바다')]], captions: [
+  { id: 'moonFigures', learn: true, body: 'earth', lapS: 166, rail: { voice: ['ko'], moonFigures: true, stage: [[-2, 176]], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 165.9], still: [[-60, 176]], phases: [[-1, t('보름달의 무늬')], [12.5, t('방아 찧는 토끼')], [44.5, t('나무 아래 꾸오이')], [51.5, t('불에 뛰어든 토끼')], [77.5, t('너무 밝은 달')], [90.5, t('달 속의 사람')], [104.5, t('물동이와 여인들')], [125.5, t('여인의 얼굴')], [132.5, t('거꾸로 뜬 달')], [140.5, t('달의 바다')]], captions: [
     { at: 1, text: t('보름달에는 어두운 무늬가 있습니다.') },
     { at: 6.5, text: t('같은 달 무늬에서, 사람들은 저마다 다른 모습을 보았습니다.') },
     { at: 13, text: t('한국에서는 계수나무 아래 떡방아 찧는 옥토끼를 떠올렸습니다.') },

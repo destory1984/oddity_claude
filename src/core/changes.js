@@ -16,6 +16,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-27', text: t('수첩의 갈래가 일곱이 되었습니다. 우주멍 코스는 우주멍 갈래에, 우주 상식 코스는 이야기 갈래에 모았습니다.') },
   { day: '2026-11-26', text: t('허블 우주망원경을 실제 사진에 맞춰 다시 만들었습니다. 허블의 안경에는 1993년의 모습으로 나옵니다.'), go: {} },
   { day: '2026-11-26', text: t('줄 하나 없이 우주 유영에서 우주 왕복선 챌린저를 실제 사진에 맞춰 다시 만들었습니다.'), go: { course: 'mmu' } },
   { day: '2026-11-26', text: t('아폴로 11호의 길에서 사령선 컬럼비아를 실제 사진에 맞춰 다시 만들었습니다.'), go: { course: 'apollo11', at: 488 } },

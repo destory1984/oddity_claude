@@ -104,18 +104,21 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   // Six tabs, each holding one or more parts, chosen in a row of small keys under the
   // tabs: what is looked for, grouped (the user, 2026-10-23, "수첩의 메뉴 트리를 전체적으로
   // 좀 손 보자.. gpt하고 상의해봐", then "만들어"; nine tabs before). A tab opens on the part
-  // of it last looked at.
+  // of it last looked at. Seven since 2026-11-27: the self-flown courses got a tab of their
+  // own, 우주멍, out of 비행, and the explainers went under 이야기 as 우주 상식.
   const GROUPS = {
     today: ['today'],
     places: ['bodies', 'craft', 'curios'],
     photos: ['missions', 'album', 'views'],
-    stories: ['stories'],
+    stories: ['stories', 'lessons'],
     radio: ['radio'],
-    flight: ['courses', 'tours', 'stunts'],
+    gaze: ['courses'],
+    flight: ['tours', 'stunts'],
   };
   const PART_NAMES = {
     bodies: t('천체'), craft: t('탐사선'), curios: t('상상'),
     missions: t('따라 찍기'), album: t('내 사진'), views: t('엽서'),
+    stories: t('이야기 장소'), lessons: t('우주 상식'),
     courses: t('추천 우주멍 코스'), tours: t('할머니의 길'), stunts: t('묘기 비행'),
   };
   const groupOf = (part) => Object.keys(GROUPS).find((g) => GROUPS[g].includes(part)) ?? part;
@@ -792,12 +795,15 @@ export function createJournal({ bodies, missions, stories = [], craft = [], onGo
   }
 
   // 우주 관광 추천코스 (core/courses.js): what each is, and a button; shut till she has been there.
-  // courses: { all(): [{ id, name, todo, open, where, on }], start(id), quit(), share(id) }.
+  // courses: { all(): [{ id, name, todo, open, where, on, learn }], start(id), quit(), share(id) }.
+  // The explainers (learn) stand under 이야기 → 우주 상식, the rest under the 우주멍 tab
+  // (the user, 2026-11-27: "그럼 이야기에 넣을까", "그래도 우주멍은 위로 올려. 7개로 해").
   function renderCourses() {
-    const list = $('journalCourses');
-    list.replaceChildren();
+    $('journalCourses').replaceChildren();
+    $('journalLessons').replaceChildren();
     if (!courses) return;
     for (const course of courses.all()) {
+      const list = $(course.learn ? 'journalLessons' : 'journalCourses');
       const li = document.createElement('li');
       li.className = course.on ? 'going' : '';
       const title = document.createElement('strong');

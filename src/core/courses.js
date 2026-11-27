@@ -27,6 +27,9 @@
 //   rail.cupola: a round over both poles, looking out of a side window from inside the
 //     station's cupola (main.js cupolaView draws the window and what floats in it).
 // rollDeg: the view turned, for a band that lies across a tall screen.
+// learn: an explainer, listed in the journal under 이야기 → 우주 상식, not with the courses
+//   flown for the view (the user, 2026-11-27: "추천 우주멍 코스에서 우주 상식을 별도의 탭으로
+//   빼자", "그럼 이야기에 넣을까", "그래도 우주멍은 위로 올려. 7개로 해").
 import { orientationFrom, right, up } from './orientation.js';
 import { GALACTIC_CENTRE, GALACTIC_POLE, GALAXIES, NEBULAE, fromEquatorial } from './sky.js';
 import { outOf, sunFrame } from './startSpots.js';
@@ -68,7 +71,7 @@ export const COURSES = [
   // booster over the Gulf of Mexico (starshipAt). hotStage: the ship lighting and leaving.
   // The Moon's birth (the user, 2026-11-24: "테이아 달 형성론을 3D로 만들어볼까", "개발 시작"): the
   // giant impact, drawn by render/theiaStage.js; its seconds are THEIA's there.
-  { id: 'theia', body: 'earth', lapS: 238, rail: { theia: true, stage: [[-2, 248]], sounds: [[50, 'theiaHit'], [134, 'theiaGather']], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 237.9], still: [[-60, 248]], phases: [[0, t('다가오는 테이아')], [50, t('충돌')], [62, t('파편의 팔')], [90, t('불타는 원반')], [130, t('달의 탄생')], [164, t('멀어지는 달')], [208, t('오늘의 지구와 달')]], captions: [
+  { id: 'theia', learn: true, body: 'earth', lapS: 238, rail: { theia: true, stage: [[-2, 248]], sounds: [[50, 'theiaHit'], [134, 'theiaGather']], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 237.9], still: [[-60, 248]], phases: [[0, t('다가오는 테이아')], [50, t('충돌')], [62, t('파편의 팔')], [90, t('불타는 원반')], [130, t('달의 탄생')], [164, t('멀어지는 달')], [208, t('오늘의 지구와 달')]], captions: [
     { at: 1, text: t('45억 년 전쯤, 태양계가 생긴 지 얼마 안 됐을 때입니다. 갓 생긴 지구 곁으로 화성만 한 천체가 다가옵니다. 테이아라고 부릅니다.') },
     { at: 14, text: t('달이 어떻게 생겼는지는 오랫동안 수수께끼였습니다. 아폴로가 가져온 달의 돌이 지구의 돌과 무척 닮아, 이 충돌설이 가장 널리 받아들여집니다.') },
     // Where Theia came from (the user, 2026-11-25: "테이아는 어디에서 온거야", "넣어"; checked
@@ -96,7 +99,7 @@ export const COURSES = [
   // How the Solar System turns, smallest first (the user, 2026-11-24: "태양계 공전에 대해서
   // 설명하는 우주멍 만들자", "작은 것부터 설명해봐", "만들어"): drawn by render/orbitStage.js,
   // whose ORBITS its seconds keep to; sizes, distances and paces not to scale (said at once).
-  { id: 'orbits', body: 'earth', lapS: 430, rail: { orbits: true, stage: [[-2, 440]], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 45.8, 303.8, 339.8, 429.9], still: [[-60, 440]], phases: [[-1, t('지구의 자전')], [46, t('지구의 공전')], [100, t('행성들의 공전')], [150, t('태양의 자전')], [162, t('해를 따라가는 행성들')], [220, t('이웃 별들')], [304, t('은하의 중심')], [340, t('은하를 도는 태양')]], captions: [
+  { id: 'orbits', learn: true, body: 'earth', lapS: 430, rail: { orbits: true, stage: [[-2, 440]], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 45.8, 303.8, 339.8, 429.9], still: [[-60, 440]], phases: [[-1, t('지구의 자전')], [46, t('지구의 공전')], [100, t('행성들의 공전')], [150, t('태양의 자전')], [162, t('해를 따라가는 행성들')], [220, t('이웃 별들')], [304, t('은하의 중심')], [340, t('은하를 도는 태양')]], captions: [
     { at: 1, text: t('태양계는 모두 돌고 있습니다. 작은 것부터 차례로 봅니다. 크기와 거리는 보기 쉽게 줄였고, 시간은 빠르게 돌렸습니다.') },
     { at: 15, text: t('지구는 스스로 하루에 한 바퀴 돕니다. 자전이라고 합니다. 북쪽에서 내려다보면 시계 반대 방향입니다.') },
     { at: 29, text: t('축은 23.4도 기울어 있습니다. 해를 향한 쪽은 낮, 반대쪽은 밤입니다.') },
@@ -130,7 +133,7 @@ export const COURSES = [
     { at: 413, text: t('해가 한 바퀴를 돌아 다시 이 자리에 왔습니다. 지난번 이 자리에서 지구에는 첫 공룡이 나타나고 있었습니다.') },
     { at: 421, text: t('오늘 밤에도 우리는 지구와 함께 돌고, 해와 함께 초속 230km로 은하를 달립니다. 느끼지 못할 뿐입니다.') },
   ] }, name: t('태양계는 어떻게 도는가'), todo: t('지구의 자전에서 은하를 도는 태양까지, 작은 움직임부터 차례로 봅니다.') },
-  { id: 'moonFace', body: 'earth', lapS: 264, rail: { voice: ['ko', 'en', 'ja', 'zh'], moonFace: true, stage: [[-2, 274]], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 263.9], still: [[-60, 274]], phases: [[-1, t('달의 공전')], [34, t('달의 자전')], [72, t('왜 한쪽 얼굴일까')], [132, t('지구의 밀물과 썰물')], [170, t('명왕성과 카론')], [204, t('에리스와 디스노미아')], [228, t('파트로클로스와 메노이티오스')]], captions: [
+  { id: 'moonFace', learn: true, body: 'earth', lapS: 264, rail: { voice: ['ko', 'en', 'ja', 'zh'], moonFace: true, stage: [[-2, 274]], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 263.9], still: [[-60, 274]], phases: [[-1, t('달의 공전')], [34, t('달의 자전')], [72, t('왜 한쪽 얼굴일까')], [132, t('지구의 밀물과 썰물')], [170, t('명왕성과 카론')], [204, t('에리스와 디스노미아')], [228, t('파트로클로스와 메노이티오스')]], captions: [
     { at: 1, text: t('달은 지구 둘레를 27.3일에 한 바퀴 돕니다. 공전이라고 합니다. 크기와 거리는 보기 쉽게 줄였고, 시간은 빠르게 돌렸습니다.') },
     { at: 12, text: t('달은 평균 38만km 떨어져 있습니다. 지구 지름의 약 30배입니다.') },
     { at: 23, text: t('도는 방향은 지구의 자전과 같습니다. 지구 북극 위에서 내려다보면 둘 다 시계 반대 방향입니다.') },
@@ -168,7 +171,7 @@ export const COURSES = [
   // ("아직 정설은 없는거지?", "그럼 그런 얘기도 마무리에 넣어": no settled answer; heat-making
   // elements a strong explanation, crust thickness and mantle make-up studied too, where
   // the elements came from argued: Moriarty 2021, Elardo 2020, Li 2026; answer4.md.)
-  { id: 'moonSides', body: 'earth', lapS: 238, rail: { moonSides: true, stage: [[-2, 248]], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 237.9], still: [[-60, 248]], phases: [[-1, t('앞면의 바다')], [22, t('곰보 뒷면')], [44, t('지구가 막아 줬을까')], [60, t('바다가 생기다')], [104, t('반으로 자른 달')], [134, t('설 하나: 뜨거운 지구')], [150, t('설 둘: 열을 내는 원소')], [166, t('설 셋: 큰 충돌')], [182, t('설 넷: 둘째 달')], [198, t('뒷면의 돌')], [218, t('다시 앞면')]], captions: [
+  { id: 'moonSides', learn: true, body: 'earth', lapS: 238, rail: { moonSides: true, stage: [[-2, 248]], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 237.9], still: [[-60, 248]], phases: [[-1, t('앞면의 바다')], [22, t('곰보 뒷면')], [44, t('지구가 막아 줬을까')], [60, t('바다가 생기다')], [104, t('반으로 자른 달')], [134, t('설 하나: 뜨거운 지구')], [150, t('설 둘: 열을 내는 원소')], [166, t('설 셋: 큰 충돌')], [182, t('설 넷: 둘째 달')], [198, t('뒷면의 돌')], [218, t('다시 앞면')]], captions: [
     { at: 1, text: t('지구에서 보는 달의 앞면입니다. 검은 얼룩이 넓게 퍼져 있어, 옛사람들은 여기서 방아 찧는 토끼를 보았습니다.') },
     { at: 11, text: t('검은 곳을 바다라고 부르지만 물은 없습니다. 굳은 용암이 덮은 평평한 땅이라 매끈하고, 크레이터가 적습니다.') },
     { at: 23, text: t('달을 돌려, 지구에서는 보이지 않는 뒷면으로 갑니다. 1959년 소련의 루나 3호가 처음 사진을 찍었습니다.') },

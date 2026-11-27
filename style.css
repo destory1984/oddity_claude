@@ -1897,7 +1897,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 
 /* The tours in the journal: the route's name, grandmother's memo, the stops in order. */
 #journalTours li,
-#journalCourses li,
+:is(#journalCourses, #journalLessons) li,
 #journalStunts li {
   padding:10px 0;
   border-bottom:1px solid #ffffff12;
@@ -1906,7 +1906,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 #journalTours li strong,
-#journalCourses li strong,
+:is(#journalCourses, #journalLessons) li strong,
 #journalStunts li strong {
   display:block;
   font-weight:400;
@@ -1915,19 +1915,19 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 #journalTours li.done strong,
-#journalCourses li.done strong,
+:is(#journalCourses, #journalLessons) li.done strong,
 #journalStunts li.done strong {
   color:#7fe3c5;
 }
 
 #journalTours li.going strong,
-#journalCourses li.going strong,
+:is(#journalCourses, #journalLessons) li.going strong,
 #journalStunts li.going strong {
   color:#ffdfa6;
 }
 
 #journalTours .memo,
-#journalCourses .memo,
+:is(#journalCourses, #journalLessons) .memo,
 #journalStunts .memo {
   display:block;
   margin:2px 0 4px;
@@ -1937,7 +1937,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 #journalTours .stops,
-#journalCourses .stops,
+:is(#journalCourses, #journalLessons) .stops,
 #journalStunts .stops {
   display:block;
   line-height:1.7;
@@ -1945,33 +1945,33 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 #journalTours li button,
-#journalCourses li button,
+:is(#journalCourses, #journalLessons) li button,
 #journalStunts li button {
   display:block;
   margin-top:6px;
 }
 
 /* A course's two keys side by side: fly it, send it. */
-#journalCourses .keys {
+:is(#journalCourses, #journalLessons) .keys {
   display:flex;
   gap:8px;
 }
 
 /* The course's snapshot, its keys beside it. */
-#journalCourses .shotRow {
+:is(#journalCourses, #journalLessons) .shotRow {
   display:flex;
   align-items:center;
   gap:10px;
   margin-top:6px;
 }
-#journalCourses .shotRow .keys {
+:is(#journalCourses, #journalLessons) .shotRow .keys {
   flex-direction:column;
   gap:6px;
 }
-#journalCourses .shotRow .keys button {
+:is(#journalCourses, #journalLessons) .shotRow .keys button {
   margin-top:0;
 }
-#journal #journalCourses li button.shot {
+#journal :is(#journalCourses, #journalLessons) li button.shot {
   display:block;
   flex:0 0 auto;
   width:150px;
@@ -1984,7 +1984,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
   border:1px solid #7a5a3666;
   background:#0b0f1a;
 }
-#journalCourses button.shot img {
+:is(#journalCourses, #journalLessons) button.shot img {
   display:block;
   width:100%;
   height:100%;
@@ -2127,7 +2127,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 
 /* A tour's stamp beside its name; the clipping in the last slot; stars on a reply. */
 #journalTours li,
-#journalCourses li,
+:is(#journalCourses, #journalLessons) li,
 #journalStunts li {
   position:relative;
 }
@@ -2146,7 +2146,7 @@ body.touch #reverseButton kbd,body.touch #flyButton kbd,body.touch #brake kbd {
 }
 
 #journalTours li.done strong,
-#journalCourses li.done strong,
+:is(#journalCourses, #journalLessons) li.done strong,
 #journalStunts li.done strong,
 #journalTours li.done .memo,
 #journalStunts li.done .memo {
@@ -2817,7 +2817,7 @@ input[type=range] {
 
 #journalBodies li,
 #journalTours li,
-#journalCourses li,
+:is(#journalCourses, #journalLessons) li,
 #journalStunts li {
   border-bottom:1px solid #b79a6a99;
 }
@@ -2827,7 +2827,7 @@ input[type=range] {
 #journalStories li strong,
 #journalCraft li strong,
 #journalTours li strong,
-#journalCourses li strong,
+:is(#journalCourses, #journalLessons) li strong,
 #journalStunts li strong,
 #journalCurios li strong {
   color:#3b2a1a;
@@ -2841,7 +2841,7 @@ input[type=range] {
 #journalStories li,
 #journalCraft li,
 #journalTours li,
-#journalCourses li,
+:is(#journalCourses, #journalLessons) li,
 #journalStunts li,
 #journalAlbum figure,
 #journalNotes,
@@ -2854,7 +2854,7 @@ input[type=range] {
 #journalStories li.done strong,
 #journalCraft li.done strong,
 #journalTours li.done strong,
-#journalCourses li.done strong,
+:is(#journalCourses, #journalLessons) li.done strong,
 #journalStunts li.done strong,
 #journalAlbum figcaption span,
 #journalCurios li.done strong {
@@ -2862,7 +2862,7 @@ input[type=range] {
 }
 
 #journalTours li.going strong,
-#journalCourses li.going strong,
+:is(#journalCourses, #journalLessons) li.going strong,
 #journalStunts li.going strong {
   color:#a35a00;
 }
@@ -2870,7 +2870,7 @@ input[type=range] {
 /* Grandmother writes in brown ink, Sora in navy. */
 #journalBodies .memo,
 #journalTours .memo,
-#journalCourses .memo,
+:is(#journalCourses, #journalLessons) .memo,
 #journalStunts .memo,
 #journal li.clipping span,
 #journalAlbum figcaption .sent {
@@ -2944,7 +2944,7 @@ html.shell body {
 
 #journalBodies .memo,
 #journalTours .memo,
-#journalCourses .memo,
+:is(#journalCourses, #journalLessons) .memo,
 #journalStunts .memo,
 #journal li.clipping span,
 #journalCrane,
@@ -4907,7 +4907,7 @@ dialog .sheetHead .soundKeys button::before {
 #settings .soundKeys button.off { opacity:.6; }
 
 /* A stunt flight done once carries its stamp, as a tour does (ui/journal.js). */
-#journalCourses li,
+:is(#journalCourses, #journalLessons) li,
 #journalStunts li {
   position:relative;
 }
@@ -8003,11 +8003,12 @@ html #journal #journalTabs > button[role="tab"] {
   #scannerButton.fresh { animation:none; box-shadow:0 0 0 1px #ffd98a, 0 0 10px 3px #ffd98a88; }
 }
 
-/* The journal's six tabs (since 2026-10-23: "수첩의 메뉴 트리") and the row of small keys
+/* The journal's seven tabs (six from 2026-10-23, the seventh 우주멍 2026-11-27; since 2026-10-23: "수첩의 메뉴 트리") and the row of small keys
    under them that picks a part of a tab (#journalSeg, ui/journal.js GROUPS). */
 #journal #journalTabs button[data-tab="places"] { --tab-icon:url("/assets/ui/tab-bodies.svg"); }
 #journal #journalTabs button[data-tab="photos"] { --tab-icon:url("/assets/ui/tab-album.svg"); }
 #journal #journalTabs button[data-tab="flight"] { --tab-icon:url("/assets/ui/tab-tours.svg"); }
+#journal #journalTabs button[data-tab="gaze"] { --tab-icon:url("/assets/ui/tab-gaze.svg"); }
 
 #journal #journalSeg {
   display:flex;

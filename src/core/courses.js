@@ -227,6 +227,39 @@ export const COURSES = [
     { at: 133.6, text: t('오늘 아침의 햇빛은, 석기 시대에 태양 속에서 길을 떠난 기운입니다.') },
     { at: 138.9, text: t('내일 아침의 햇빛도, 지금 태양 속 어딘가를 헤매고 있습니다.') },
   ] }, name: t('햇빛은 몇 살일까'), todo: t('오늘 아침의 햇빛이 태양 속에서 길을 떠난 때를 찾아, 태양을 반으로 잘라 봅니다.') },
+  // What people have seen in the Moon's dark seas, culture by culture (the user, 2026-11-28:
+  // "달 토끼가 문화권에 따라서 다르게 보인다고 하네. 여러가지 소개해봐", "달 토끼 시작하자",
+  // "gpt한테 검수 받아", "만들어"): drawn by render/moonFiguresStage.js, whose FIGS its seconds
+  // keep to. Checked by GPT 2026-11-28: Jataka 316 (the fire did not burn the hare), the
+  // Florentine Codex (one god struck the Moon's face with a rabbit), A Midsummer Night's Dream
+  // 5.1, the Prose Edda (Hjúki and Bil), Te Ara (Rona), Chang'e 5 basalt about 2.0 Ga (so the
+  // seas' age is left without a number), Vietnam's Cuội.
+  { id: 'moonFigures', learn: true, body: 'earth', lapS: 166, rail: { moonFigures: true, stage: [[-2, 176]], latDeg: 0, atKm: 0, sunwardKm: 0, highKm: 2000, rangeKm: 300, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }], floaters: [], loops: true, startS: -1, fades: [0, 165.9], still: [[-60, 176]], phases: [[-1, t('보름달의 무늬')], [12.5, t('방아 찧는 토끼')], [44.5, t('나무 아래 꾸오이')], [51.5, t('불에 뛰어든 토끼')], [77.5, t('너무 밝은 달')], [90.5, t('달 속의 사람')], [104.5, t('물동이와 여인들')], [125.5, t('여인의 얼굴')], [132.5, t('거꾸로 뜬 달')], [140.5, t('달의 바다')]], captions: [
+    { at: 1, text: t('보름달에는 어두운 무늬가 있습니다.') },
+    { at: 6.5, text: t('같은 달 무늬에서, 사람들은 저마다 다른 모습을 보았습니다.') },
+    { at: 13, text: t('한국에서는 계수나무 아래 떡방아 찧는 옥토끼를 떠올렸습니다.') },
+    { at: 26, text: t('일본의 달토끼도 절구에 떡을 찧습니다.') },
+    { at: 32, text: t('중국 이야기 속 옥토끼는 영원히 살게 하는 약을 찧습니다.') },
+    { at: 38, text: t('달의 여신 항아와 함께 산다고 하지요. 그 곁에 두꺼비를 그리기도 했습니다.') },
+    { at: 45, text: t('베트남에서는 커다란 나무 아래 앉아 있는 꾸오이를 떠올립니다.') },
+    { at: 52, text: t('인도의 불교 설화에는 굶주린 노인을 만난 토끼가 나옵니다.') },
+    { at: 58, text: t('대접할 것이 없던 토끼는 제 몸을 불에 던졌습니다.') },
+    { at: 64, text: t('노인은 모습을 바꾼 신이었고, 불은 토끼를 해치지 않았습니다.') },
+    { at: 70.5, text: t('신은 그 마음을 기려 달에 토끼 모습을 남겼습니다.') },
+    { at: 78, text: t('아즈텍 설화에서는 처음에 달도 해만큼 밝았다고 합니다.') },
+    { at: 84, text: t('한 신이 토끼로 달의 얼굴을 쳐서 빛을 줄였다고 하지요.') },
+    { at: 91, text: t('유럽에는 나뭇단을 진 남자가 달에 산다는 이야기가 있습니다.') },
+    { at: 97.5, text: t('셰익스피어의 『한여름 밤의 꿈』에서는 배우가 등불을 들고 이 달 속 사람을 연기합니다.') },
+    { at: 105, text: t('북유럽 신화에서는 달의 신이 물동이를 메고 가던 남매를 데려갔습니다.') },
+    { at: 112, text: t('마오리의 한 설화에서는 물을 뜨러 가던 로나가 달을 욕했다가 끌려 올라갔습니다.') },
+    { at: 119, text: t('하와이의 한 이야기에서는 여신 히나가 달에서 나무껍질 천을 만듭니다.') },
+    { at: 126, text: t('옆으로 돌린 여인의 얼굴을 보는 사람들도 있습니다.') },
+    { at: 133, text: t('남반구에서는 달이 거의 거꾸로 떠서, 토끼가 물구나무를 섭니다.') },
+    { at: 142, text: t("어두운 무늬는 '달의 바다'. 오래전 흘러나온 용암이 굳은 평원입니다.") },
+    { at: 148.5, text: t('달은 지구에 거의 같은 면을 보여, 우리는 모두 비슷한 무늬를 올려다봅니다.') },
+    { at: 155, text: t('그 무늬 위에 사람들은 저마다의 이야기를 지었습니다.') },
+    { at: 160, text: t('오늘 밤, 당신에게는 무엇이 보이나요?') },
+  ] }, name: t('달에는 누가 살까'), todo: t('보름달의 같은 무늬를 두고, 나라마다 사람들이 무엇을 보았는지 그려 봅니다.') },
   { id: 'starship', body: 'earth', lapS: 440, rail: { starship: true, stage: [[-20, 30], [372, 460]], hotStage: { from: 158, to: 178, nearKm: 11, farKm: 400, sizeKm: 30, sideKm: 6, aimKm: 9 }, cabin: 'assets/tours/none.webp', cabins: [{ at: -100, cabin: 'assets/tours/none.webp', captionY: 76 }, { at: 30, cabin: 'assets/tours/booster-up.webp' }, { at: 184, cabin: 'assets/tours/booster-down.webp' }, { at: 372, cabin: 'assets/tours/none.webp', captionY: 76 }], stageShakes: [{ from: 0.5, peak: 2.5, to: 9, power: 1 }, { from: 407.8, peak: 408.2, to: 410.5, power: 0.6 }], floaters: [], loops: true, fades: [30, 372, 439.2], startS: -44, burns: [{ from: -3, to: 20, power: 0.9, buzz: true }, { from: 20, to: 158, power: 0.55 }, { from: 188, to: 226, power: 0.6, buzz: true }, { from: 381, to: 407, power: 0.75, buzz: true }], shakes: [{ from: -3, peak: 2, to: 30 }, { from: 158, peak: 159, to: 163 }, { from: 406.8, peak: 407, to: 409 }], still: [[-60, 30], [372, 460]], photos: [{ from: -44, to: -32, src: 'assets/tours/starbase-sat.webp', pan: [60, 76], zoom: [1, 2.4], origin: '74% 90%', credit: 'SpaceFrom.Space, CC BY 2.0' }, { from: -32, to: -20, src: 'assets/tours/starship-pad.webp', pan: [57, 57], zoom: [1.1, 1.4], origin: '50% 12%', credit: 'Steve Jurvetson, CC BY 2.0' }], sounds: [[1.3, 'liftoff'], [158, 'staging'], [408.1, 'capture']], countdowns: [{ at: 0, from: 20, beeps: 10, said: t('발사까지'), go: t('이륙!') }], phases: [[-44, t('발사대')], [0, t('발사')], [158, t('단 분리')], [184, t('돌아오는 길')], [381, t('착륙')], [407, t('붙잡음')]], captions: [{ at: -43, text: t('2024년 10월 13일 아침, 미국 텍사스 남쪽 바닷가의 발사장. 높이 121m, 지금까지 만든 가장 큰 로켓입니다.') }, { at: -31, text: t('전날 밤의 발사대. 불 밝힌 탑 옆에서 로켓이 기다립니다.') }, { at: -19, text: t('아래는 1단 슈퍼 헤비, 위는 2단 스타십. 둘 다 다시 쓰려고 만든 로켓입니다.') }, { at: 2, text: t('1단 바닥의 엔진 33개에 불이 붙습니다.') }, { at: 34, text: t('1단 옆에 붙은 카메라로 봅니다. 하늘이 점점 검어집니다.') }, { at: 70, text: t('가장 큰 공기의 힘을 견디고 지나갑니다. 곧 소리보다 몇 배 빨라집니다.') }, { at: 120, text: t('2분 반 동안 연료 3,400톤을 태웠습니다.') }, { at: 158, text: t('2단이 1단에 붙은 채로 엔진을 켜고 떨어져 나갑니다. 핫 스테이징이라고 합니다.') }, { at: 186, text: t('1단은 몸을 돌려 엔진을 다시 켜고, 떠나온 발사장으로 되돌아갑니다.') }, { at: 232, text: t('고도 약 95km. 이제 떨어지며 격자 날개로 방향을 잡습니다.') }, { at: 300, text: t('1단에서 떨어져 나간 2단은 우주로 올라가 지구를 3분의 2 바퀴쯤 돌고, 1시간 남짓 뒤 인도양에 내렸습니다.') }, { at: 374, text: t('다시 발사장. 1단이 하늘에서 내려옵니다.') }, { at: 383, text: t('엔진 13개를 켜고 속도를 줄입니다.') }, { at: 394, text: t('마지막엔 엔진 세 개만 켜고 탑 옆으로 내려옵니다.') }, { at: 407, text: t('탑의 두 팔이 70m 높이의 1단을 공중에서 붙잡았습니다. 처음 해낸 일이었습니다.') }, { at: 420, text: t('발사부터 7분 만의 일이었습니다.') }], track: { alt: [[30, 2.5], [60, 12], [100, 35], [158, 65], [200, 92], [215, 95], [260, 82], [320, 40], [372, 3]], down: [[30, 0.3], [60, 3], [100, 20], [158, 62], [200, 86], [215, 88], [260, 70], [320, 26], [372, 1]], tilt: [[30, 0], [60, 14], [100, 34], [158, 52], [176, 60], [190, -60], [226, -55], [300, -15], [372, 0]] } }, name: t('스타십, 하늘에서 붙잡은 로켓'), todo: t('2024년 거대한 로켓이 날아올랐다 돌아와, 발사탑의 두 팔에 붙잡히기까지를 땅과 로켓에서 봅니다.') },
   // A walk on Mars along Perseverance's tracks, landing site to Van Zyl Overlook (the user,
   // 2026-11-23: "화성 산책하는 것 같은 3D 모션", "가+나로 만들어"): drawn on the ground

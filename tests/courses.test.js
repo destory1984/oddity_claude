@@ -6,6 +6,8 @@ import { BODIES } from '../src/core/bodies.js';
 import { forward } from '../src/core/orientation.js';
 import { GALACTIC_POLE, GALAXIES, NEBULAE, fromEquatorial } from '../src/core/sky.js';
 import { right, up } from '../src/core/orientation.js';
+import { FIGURES } from '../src/render/moonFigures.js';
+import { FIGS, END } from '../src/render/moonFiguresStage.js';
 
 const body = (id) => BODIES.find((b) => b.id === id);
 const sun = { position: [0, 0, 0] };
@@ -18,11 +20,11 @@ const velocity = ({ orientation, slide }) => {
   return r.map((n, i) => n * slide.sideSpeed * slide.sideSign + u[i] * slide.riseSpeed * slide.riseSign);
 };
 
-test('twenty-five rounds, the aurora first, then the one the user was flying, each of a known body', () => {
-  assert.equal(COURSES.length, 25);
+test('twenty-six rounds, the aurora first, then the one the user was flying, each of a known body', () => {
+  assert.equal(COURSES.length, 26);
   assert.equal(COURSES[0].id, 'auroraDrift');
   assert.equal(COURSES[1].id, 'earthRound');
-  assert.equal(new Set(COURSES.map((c) => c.id)).size, 25);
+  assert.equal(new Set(COURSES.map((c) => c.id)).size, 26);
   for (const c of COURSES) {
     assert.ok(body(c.body), c.id);
     assert.ok(c.name && c.todo, c.id);
@@ -194,4 +196,23 @@ test("Apollo's burns at the far side of the Moon fire with the Earth hidden, and
   for (let i = 1; i < sorted.length; i++) assert.ok(sorted[i].from > sorted[i - 1].to, sorted[i].from);
   // The landing's engine with no buzz (the user: "진동은 별로고").
   assert.ok(!burns.find((b) => b.landing).buzz);
+});
+
+test("the Moon's figures: every one drawn on the disc, each shown inside the lap, captions in order", () => {
+  const c = courseById('moonFigures');
+  assert.ok(c.learn);
+  assert.equal(c.lapS, END);
+  for (const [name, f] of Object.entries(FIGURES)) {
+    for (const s of f.strokes) {
+      assert.equal(s.p.length % 2, 0, name);
+      for (let i = 0; i < s.p.length; i += 2) assert.ok(Math.hypot(s.p[i], s.p[i + 1]) < 0.99, `${name} ${s.p[i]}, ${s.p[i + 1]}`);
+    }
+  }
+  for (const [name, from, to] of FIGS) {
+    assert.ok(FIGURES[name], name);
+    assert.ok(from >= 0 && to > from && to <= END, name);
+  }
+  const at = c.rail.captions.map((x) => x.at);
+  assert.deepEqual(at, [...at].sort((a, b) => a - b));
+  assert.ok(at.at(-1) < END - 4);
 });

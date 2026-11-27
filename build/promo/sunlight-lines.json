@@ -1,0 +1,51 @@
+{
+  "_": "The Short of How Old Is Sunlight? (build/promo/sunlight.cjs, tour.py): each line as 하린 reads it (say) and as the caption shows it (show, \\n where it breaks, <em> in gold). The last line is read over the end card. Korean agreed with the user 2026-11-27 (\"만들어\", after GPT's check); the others translated from it once the Korean film is approved. The neutrino lines taken out, and the last 3% (the user, 2026-11-27: \"중성미자 얘기는 빼자\", \"마지막 3% 운운하는건 삭제\"). English, Japanese and Chinese from the Korean once the Korean film was approved (the user, 2026-11-27: \"다른 언어도 만들어\").",
+  "ko": [
+    ["오늘 아침 우리에게 닿은 햇빛은 몇 살일까요?", "오늘 아침의 햇빛은\n<em>몇 살</em>일까요?"],
+    ["태양에서 지구까지는 8분 20초. 하지만 그건 마지막 길일 뿐입니다.", "태양 → 지구 <em>8분 20초</em>\n그건 마지막 길일 뿐"],
+    ["햇빛의 기운은 1,500만 도의 핵에서 태어납니다.", "<em>1,500만 도</em>의 핵에서\n태어납니다"],
+    ["빛은 1초에 30만 km를 가지만, 태양 속 깊은 곳에서는 1cm도 못 가 부딪힙니다.", "빛은 1초에 30만 km\n하지만 태양 속에서는\n<em>1cm도 못 가</em> 부딪힙니다"],
+    ["술 취한 사람처럼 비틀대며, 수만 년에서 17만 년을 헤맵니다.", "<em>술 취한 사람</em>처럼\n수만 년에서 <em>17만 년</em>"],
+    ["이 빛의 기운이 태어났을 때, 지구는 석기 시대였습니다.", "빛의 기운이 태어났을 때\n지구는 <em>석기 시대</em>"],
+    ["농사도, 청동기도, 도시도 모두 그 사이에 생겼습니다.", "농사, 청동기, 도시\n모두 <em>그 사이에</em>"],
+    ["감마선 알갱이 하나는 태양 표면에 닿을 때 빛 알갱이 수십만 개쯤이 됩니다.", "감마선 하나가\n빛 알갱이 <em>수십만 개</em>로"],
+    ["그리고 8분 20초 만에 지구에 닿습니다.", "그리고 <em>8분 20초</em>"],
+    ["오늘 아침의 햇빛은, 석기 시대에 길을 떠난 기운입니다.", "오늘 아침의 햇빛은\n<em>석기 시대</em>에 길을 떠난 기운"]
+  ],
+  "en": [
+    ["How old is the sunlight that reached us this morning?", "How old is\nthis morning's sunlight?"],
+    ["From the Sun to the Earth takes 8 minutes 20 seconds. But that is only the last stretch.", "Sun → Earth <em>8 min 20 s</em>\nbut that is only\nthe last stretch"],
+    ["Sunlight's energy is born in the core, at 15 million degrees.", "Born in a core\nof <em>15 million degrees</em>"],
+    ["Light travels 300,000 km in one second, but deep inside the Sun it cannot go even 1 cm before it hits something.", "Light runs\n300,000 km/s\nbut inside the Sun\n<em>not even 1 cm</em>"],
+    ["Staggering like a drunk, it wanders for tens of thousands of years, up to 170,000.", "Like a <em>drunk</em>\nfor <em>170,000 years</em>"],
+    ["When the energy of this light was born, the Earth was in the Stone Age.", "Its energy was born\nin the <em>Stone Age</em>"],
+    ["Farming, bronze and cities all came in the meantime.", "Farming, bronze\nand cities, all\n<em>in the meantime</em>"],
+    ["One gamma-ray particle becomes some hundreds of thousands of particles of light by the time it reaches the Sun's surface.", "One gamma ray\nturns into <em>hundreds</em>\n<em>of thousands</em>"],
+    ["And then it reaches the Earth in 8 minutes 20 seconds.", "And then\n<em>8 min 20 s</em>"],
+    ["This morning's sunlight is energy that set out in the Stone Age.", "This morning's sunlight\nset out in the <em>Stone Age</em>"]
+  ],
+  "ja": [
+    ["今朝わたしたちに届いた日の光は、何歳でしょうか。", "今朝の日の光は\n<em>何歳</em>でしょう？"],
+    ["太陽から地球までは8分20秒。でも、それは最後の道のりにすぎません。", "太陽→地球\n<em>8分20秒</em>\nそれは最後の道のり"],
+    ["日の光のエネルギーは、1500万度の核で生まれます。", "<em>1500万度</em>の核で\n生まれます"],
+    ["光は1秒に30万km進みますが、太陽の奥では1cmも進めずにぶつかります。", "光は1秒に30万km\nでも太陽の中では\n<em>1cmも進めず</em>ぶつかる"],
+    ["酔っぱらいのようによろめきながら、数万年から17万年さまよいます。", "<em>酔っぱらい</em>のように\n数万年から<em>17万年</em>"],
+    ["この光のエネルギーが生まれたとき、地球は石器時代でした。", "エネルギーが\n生まれたとき\n地球は<em>石器時代</em>"],
+    ["農耕も、青銅器も、都市も、みなそのあいだに生まれました。", "農耕も青銅器も\n都市も みな\n<em>そのあいだ</em>に"],
+    ["ガンマ線の粒ひとつは、太陽の表面に着くころ、光の粒数十万個ほどになります。", "ガンマ線ひとつが\n光の粒<em>数十万個</em>に"],
+    ["そして8分20秒で地球に届きます。", "そして<em>8分20秒</em>"],
+    ["今朝の日の光は、石器時代に旅立ったエネルギーなのです。", "今朝の日の光は\n<em>石器時代</em>に旅立った"]
+  ],
+  "zh": [
+    ["今天早上照到我们身上的阳光，有多少岁了？", "今天早上的阳光\n<em>几岁</em>了？"],
+    ["从太阳到地球要8分20秒。但那只是最后一段路。", "太阳→地球\n<em>8分20秒</em>\n那只是最后一段路"],
+    ["阳光的能量，诞生在1500万度的核心里。", "诞生在\n<em>1500万度</em>的核心"],
+    ["光每秒能走30万千米，可在太阳深处，它走不到1厘米就会撞上东西。", "光每秒30万千米\n可在太阳里\n<em>走不到1厘米</em>"],
+    ["它像醉汉一样跌跌撞撞，徘徊几万年，最长17万年。", "像<em>醉汉</em>一样\n几万年到<em>17万年</em>"],
+    ["这道光的能量诞生时，地球还处在石器时代。", "光的能量诞生时\n地球还在<em>石器时代</em>"],
+    ["农耕、青铜器、城市，都是在这期间出现的。", "农耕和青铜器\n还有城市\n都在<em>这期间</em>"],
+    ["一个伽马射线粒子到达太阳表面时，会变成几十万个光粒子。", "一个伽马射线\n变成<em>几十万个</em>光粒子"],
+    ["然后8分20秒就到达地球。", "然后<em>8分20秒</em>"],
+    ["今天早上的阳光，是在石器时代启程的能量。", "今天早上的阳光\n在<em>石器时代</em>启程"]
+  ]
+}

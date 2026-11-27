@@ -11,9 +11,9 @@ ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'promo')
 SIZE = (1080, 1920)
 START_S = 0.1
 # Seconds of the shot used, each shot its own (a Short runs 60 s at most, end card too).
-SHOT_S = {'auroraDrift': 24.9, 'orbits': 47.9, 'moon': 52.5, 'sides': 60.0}
+SHOT_S = {'auroraDrift': 24.9, 'orbits': 47.9, 'moon': 52.5, 'sides': 60.0, 'sunlight': 60.0}
 # The end card's seconds (the Moon's is longer: 하린 reads its last line over it).
-END_S = {'moon': 6.1, 'sides': 6.0}
+END_S = {'moon': 6.1, 'sides': 6.0, 'sunlight': 6.0}
 FADE_S = 2.5
 # From and to (s) of each caption of a take: <shot>-<take>-<n>.png (captions.cjs).
 TAKES = {
@@ -31,14 +31,15 @@ TAKES = {
     },
     # (Timed from sides-timing.json.)
     'sides': {'1': []},
+    'sunlight': {'1': []},
 }
 # A shot drawn frame by frame takes its sound from another shot.
-MUSIC = {'orbits': 'music60', 'moon': 'music60', 'sides': 'music60'}
+MUSIC = {'orbits': 'music60', 'moon': 'music60', 'sides': 'music60', 'sunlight': 'music60'}
 # A voice over the music: when (s) each line starts, its file
 # assets/promo/<lang>/voice/<name>Short2-<nn>-<lang>.mp3 (하린, made by the TTS session),
 # the last over the end card; the film's parts and captions are timed to these lines
 # (build/promo/moon.cjs PARTS). The music is turned down under it.
-VOICE = {'sides': [], 'moon': [0.45, 2.82, 5.75, 7.65, 12.35, 17.75, 23.15, 27.54, 30.55, 33.83, 36.79, 39.55, 43.05, 45.04, 48.95, 53.1]}
+VOICE = {'sides': [], 'sunlight': [], 'moon': [0.45, 2.82, 5.75, 7.65, 12.35, 17.75, 23.15, 27.54, 30.55, 33.83, 36.79, 39.55, 43.05, 45.04, 48.95, 53.1]}
 MUSIC_UNDER_VOICE = 0.5
 
 

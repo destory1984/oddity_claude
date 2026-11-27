@@ -156,6 +156,16 @@ for (const [lang, lines] of Object.entries(JSON.parse(fs.readFileSync(path.join(
   lines.slice(0, -1).forEach(([, show], i) => { TOUR[lang][`sides-1-${i + 2}`] = show; });
   TOUR[lang]['end-sides'] = { ...(TOUR[lang]['end-orbits'] ?? FIRST[lang].end), lead: lines.at(-1)[1], note: '' };
 }
+// The sunlight Short's lines (build/promo/sunlight-lines.json), in the same way (the user,
+// 2026-11-27: "이제 이걸로 쇼츠 만들자", "만들어").
+const SUNLIGHT_TITLE = { ko: '<em>햇빛은</em>\n몇 살일까', en: 'How Old Is\n<em>Sunlight</em>?', ja: '<em>日の光</em>は\n何歳？', zh: '<em>阳光</em>\n几岁了？' };
+for (const [lang, lines] of Object.entries(JSON.parse(fs.readFileSync(path.join(__dirname, 'sunlight-lines.json'), 'utf8')))) {
+  if (lang === '_') continue;
+  TOUR[lang] ??= {};
+  TOUR[lang]['sunlight-1-1'] = SUNLIGHT_TITLE[lang];
+  lines.slice(0, -1).forEach(([, show], i) => { TOUR[lang][`sunlight-1-${i + 2}`] = show; });
+  TOUR[lang]['end-sunlight'] = { ...(TOUR[lang]['end-orbits'] ?? FIRST[lang].end), lead: lines.at(-1)[1], note: '' };
+}
 const LINES = { thatday: THAT_DAY, gaze: GAZE, tour: TOUR }[process.env.FILM] ?? FIRST;
 
 // (Gaegu and Pretendard have no kana or kanji: Japanese in a Japanese face of Windows.)

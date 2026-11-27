@@ -60,6 +60,16 @@
 
 영상이 음악(62초)보다 길면 음악을 되풀이해 깐다.
 
+### 목소리가 있는 쇼츠 (햇빛은 몇 살일까)
+
+달 쇼츠와 같은 방법이다. 코스(146.8초)에서 일곱 토막을 골라 10줄을 읽는다. 첫머리 2.8초에 제목을 띄운다. 길이는 한국어 52.2초, 영어 55.9초, 일본어 61.0초, 중국어 53.7초다.
+
+1. 대사: `build/promo/sunlight-lines.json`, 제목은 `captions.cjs` 의 `SUNLIGHT_TITLE`
+2. 목소리: `assets/promo/<언어>/voice/sunlightShort2-NN-<언어>.mp3` (TTS 세션)
+3. `python -P build/promo/sunlight-timing.py ko` → `node build/promo/sunlight.cjs ko` → `FILM=tour node build/promo/captions.cjs ko` → `python -P build/promo/tour.py ko sunlight 1`
+
+토막마다 쓰는 코스의 구간과 장면을 내리는 정도는 `sunlight.cjs` 의 `PARTS` 에 있다. 코스의 초는 장면(`src/render/sunlightStage.js`)의 `KNOTS` 가 장면의 초로 바꾼다.
+
 ## 고칠 곳
 
 | 무엇 | 파일 |

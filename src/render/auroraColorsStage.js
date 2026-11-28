@@ -255,7 +255,8 @@ export function createAuroraColorsStage(canvas, { maxDpr = 2 } = {}) {
       label(4, w.earth, ex, cy + R * 1.4);
     } else if (inside(PARTS.cut, T)) {
       // The air cut open: 0 km at the foot, 400 km at the top.
-      const top = H * 0.12, foot = H * (LOW - 0.02), x0 = W * 0.2, x1 = W * 0.95;
+      // (The top clear of the game's clock and date at the upper left.)
+      const top = H * 0.17, foot = H * (LOW - 0.02), x0 = W * 0.2, x1 = W * 0.95;
       const yOf = (km) => foot - ((foot - top) * km) / 400;
       const g = ctx.createLinearGradient(0, top, 0, foot);
       g.addColorStop(0, '#03050c'); g.addColorStop(1, '#0d1a33');

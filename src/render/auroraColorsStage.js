@@ -72,15 +72,15 @@ export function createAuroraColorsStage(canvas, { maxDpr = 2 } = {}) {
           const u = Math.min(mw - 1, Math.floor((0.5 + lon / (2 * Math.PI)) * mw));
           const v = Math.min(mh - 1, Math.floor((0.5 - lat / Math.PI) * mh));
           const k = (v * mw + u) * 4, o = (j * size + i) * 4;
-          const lit = 0.25 + 0.75 * z;
-          out.data[o] = from[k] * lit; out.data[o + 1] = from[k + 1] * lit; out.data[o + 2] = from[k + 2] * lit;
+          const lit = name === 'earth' ? Math.min(1.35, 0.85 + 0.6 * z) : 0.25 + 0.75 * z;
+          out.data[o] = Math.min(255, from[k] * lit); out.data[o + 1] = Math.min(255, from[k + 1] * lit); out.data[o + 2] = Math.min(255, from[k + 2] * lit);
           out.data[o + 3] = 255 * Math.min(1, (1 - Math.sqrt(r2)) * 200);
         }
       }
       d.putImageData(out, 0, 0);
       discs[name] = c;
     };
-    img.src = `${base}assets/${name === 'earth' ? 'earth-night.webp' : `planets/${name}.webp`}`;
+    img.src = `${base}assets/${name === 'earth' ? 'earth-day.webp' : `planets/${name}.webp`}`;
   }
   disc('earth');
   disc('jupiter');
@@ -104,6 +104,8 @@ export function createAuroraColorsStage(canvas, { maxDpr = 2 } = {}) {
   canvas.after(names);
   const pool = [];
   function label(i, text, x, y, color = '#e8ecf4', size = 13, align = 'center') {
+    // (A name, not a sentence: "the solar wind", "A magnetic field" as the game's English has them → "Solar wind", "Magnetic field".)
+    text = text.replace(/^(a|an|the) /i, '').replace(/^[a-z]/, (c) => c.toUpperCase());
     let el = pool[i];
     if (!el) {
       el = document.createElement('div');
@@ -208,7 +210,7 @@ export function createAuroraColorsStage(canvas, { maxDpr = 2 } = {}) {
           ctx.stroke();
         }
       }
-      if (field > 0.5) label(1, w.field, ex + R * 3.6, cy - R * 2.6, '#9cc6ff');
+      if (field > 0.5) label(1, w.field, ex - R * 1.6, cy + R * 2.7, '#9cc6ff');
       // The wind: straight on, then round the field; a few slide down to the poles.
       for (const p of wind) {
         const k = (T * 0.25 * p.v + p.ph) % 1;
@@ -230,7 +232,10 @@ export function createAuroraColorsStage(canvas, { maxDpr = 2 } = {}) {
         ctx.fillRect(x, y, 2.4 * dpr, 2.4 * dpr);
       }
       if (T < 26) label(2, w.solarWind, W * 0.3, cy - S * 0.36, '#ffd98a');
-      // The Earth, its night side to us, the ovals lit.
+      // The Earth, bright in the sunlight (the user, 2026-11-28: "지구 아주 밝게.."), its air a blue rim.
+      const halo = ctx.createRadialGradient(ex, cy, R * 0.9, ex, cy, R * 1.35);
+      halo.addColorStop(0, 'rgba(110, 170, 255, 0.55)'); halo.addColorStop(1, 'rgba(110, 170, 255, 0)');
+      ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(ex, cy, R * 1.35, 0, Math.PI * 2); ctx.fill();
       if (discs.earth) ctx.drawImage(discs.earth, ex - R, cy - R, 2 * R, 2 * R);
       const oval = smooth(32.5, 35.5, T);
       if (oval > 0) {
@@ -322,12 +327,12 @@ export function createAuroraColorsStage(canvas, { maxDpr = 2 } = {}) {
         ctx.beginPath(); ctx.arc(hx, hy, 12 * dpr, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke();
         label(20, w.waiting, hx, hy - 24 * dpr, '#ff9a9a', 11);
         if (T > KNOCK) {
-          const lx = x0 + (x1 - x0) * 0.4, ly = yOf(170);
+          const lx = x0 + (x1 - x0) * 0.35, ly = yOf(190);
           const b = smooth(KNOCK, KNOCK + 1, T);
           ctx.strokeStyle = `rgba(255, 255, 255, ${0.8 * b})`;
           ctx.beginPath(); ctx.moveTo(lx - 30 * dpr, ly - 8 * dpr); ctx.lineTo(lx - 4 * dpr, ly); ctx.stroke();
           ctx.strokeStyle = rgba(COL.red, 0.5 * (1 - b)); ctx.beginPath(); ctx.arc(lx, ly, 10 * dpr, 0, Math.PI * 2); ctx.stroke();
-          label(21, w.knocked, lx, ly + 20 * dpr, '#ffb3b3', 11);
+          label(21, w.knocked, lx, ly - 22 * dpr, '#ffb3b3', 11);
         }
       }
       if (show.green > 0.3) label(22, `${w.oxygen} · ${w.green} 557.7nm`, x1 - 6 * dpr, yOf(150), rgba(COL.green, 1), 13, 'right');

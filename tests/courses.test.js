@@ -8,7 +8,7 @@ import { GALACTIC_POLE, GALAXIES, NEBULAE, fromEquatorial } from '../src/core/sk
 import { right, up } from '../src/core/orientation.js';
 import { FIGURES } from '../src/render/moonFigures.js';
 import { FIGS, END } from '../src/render/moonFiguresStage.js';
-import { PARTS as AURORA_PARTS, END as AURORA_END } from '../src/render/auroraColorsStage.js';
+import { PARTS as AURORA_PARTS, END as AURORA_END, KNOTS as AURORA_KNOTS, COURSE_END as AURORA_COURSE_END } from '../src/render/auroraColorsStage.js';
 
 const body = (id) => BODIES.find((b) => b.id === id);
 const sun = { position: [0, 0, 0] };
@@ -221,7 +221,9 @@ test("the Moon's figures: every one drawn on the disc, each shown inside the lap
 test('the aurora colours: its parts follow one another inside the lap, captions in order', () => {
   const c = courseById('auroraColors');
   assert.ok(c.learn);
-  assert.equal(c.lapS, AURORA_END);
+  assert.equal(c.lapS, AURORA_COURSE_END);
+  assert.equal(AURORA_KNOTS.at(-1)[1], AURORA_END);
+  AURORA_KNOTS.slice(1).forEach(([c1, s1], i) => assert.ok(c1 > AURORA_KNOTS[i][0] && s1 > AURORA_KNOTS[i][1]));
   const parts = Object.values(AURORA_PARTS);
   parts.forEach(([a, b], i) => {
     assert.ok(b > a);
@@ -230,5 +232,5 @@ test('the aurora colours: its parts follow one another inside the lap, captions 
   assert.equal(parts.at(-1)[1], AURORA_END);
   const at = c.rail.captions.map((x) => x.at);
   assert.deepEqual(at, [...at].sort((a, b) => a - b));
-  assert.ok(at.at(-1) < AURORA_END - 4);
+  assert.ok(at.at(-1) < AURORA_COURSE_END - 4);
 });

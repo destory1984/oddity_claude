@@ -21,6 +21,49 @@ export const PARTS = {
   end: [175, 186],
 };
 export const END = 186;
+// The course's seconds → the stage's own: the captions moved later where 하린's lines (the
+// longest of the four languages) needed more room, the stage kept as it was drawn and
+// stretched between them. [course, stage] pairs.
+export const KNOTS = [
+  [0, 0],
+  [1, 1],
+  [7.5, 7.5],
+  [13.5, 13.5],
+  [21.2, 20],
+  [28.8, 27],
+  [35.2, 33],
+  [41.7, 39.5],
+  [49.5, 46],
+  [55, 51.5],
+  [61, 57.5],
+  [66.7, 63],
+  [74.4, 69.5],
+  [83.1, 77.5],
+  [88.6, 83],
+  [98, 90],
+  [104, 96],
+  [110.5, 102.5],
+  [116.5, 108.5],
+  [123.9, 115],
+  [129.4, 120.5],
+  [138.9, 129.5],
+  [148.4, 137],
+  [159, 145],
+  [167.5, 153.5],
+  [175.5, 161.5],
+  [182.3, 168],
+  [189.8, 175.5],
+  [201.3, 186],
+];
+export const COURSE_END = KNOTS.at(-1)[0];
+function stageTime(t) {
+  if (t <= 0) return t;
+  for (let i = 1; i < KNOTS.length; i++) {
+    const [c0, s0] = KNOTS[i - 1], [c1, s1] = KNOTS[i];
+    if (t <= c1) return s0 + ((t - c0) * (s1 - s0)) / (c1 - c0);
+  }
+  return END + (t - COURSE_END);
+}
 // Within the cut: the particles striking, then each colour in turn.
 const HIT = [39, 57], GREEN = [57, 77], RED = [77, 108], VIOLET = [108, 120];
 const JUPITER = [153, 161], MARS = [161, 175];
@@ -166,6 +209,7 @@ export function createAuroraColorsStage(canvas, { maxDpr = 2 } = {}) {
   }
 
   function update(T, words) {
+    T = stageTime(T);
     const w = { ...WORDS, ...(words ?? {}) };
     used.clear();
     const W = canvas.width, H = canvas.height;

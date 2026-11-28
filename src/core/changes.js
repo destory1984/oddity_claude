@@ -16,6 +16,7 @@ import { t } from './i18n.js';
 // carry a `link`, an address written after it that can be pressed (the user, 2026-10-14,
 // of the promo video's line: "쇼츠 주소는? 링크도 올려야지").
 export const CHANGES = [
+  { day: '2026-11-28', text: t('우주 상식에 오로라는 왜 초록빛일까가 생겼습니다. 오로라의 빛깔이 어느 높이의 어떤 기체에서 나오는지 대기를 잘라 봅니다.'), go: { course: 'auroraColors' } },
   { day: '2026-11-28', text: t('우주 상식에 달에는 누가 살까가 생겼습니다. 같은 달 무늬를 두고 나라마다 무엇을 보았는지 그려 봅니다.'), go: { course: 'moonFigures' } },
   { day: '2026-11-27', text: t('우주 상식에 햇빛은 몇 살일까가 생겼습니다. 오늘 아침의 햇빛이 태양 속에서 길을 떠난 때를 찾아갑니다.'), go: { course: 'sunlight' } },
   { day: '2026-11-27', text: t('수첩의 갈래가 일곱이 되었습니다. 우주멍 코스는 우주멍 갈래에, 우주 상식 코스는 이야기 갈래에 모았습니다.') },

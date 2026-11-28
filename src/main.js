@@ -19,6 +19,7 @@ import { createOrbitStage } from './render/orbitStage.js';
 import { createMoonStage } from './render/moonStage.js';
 import { createMoonSidesStage } from './render/moonSidesStage.js';
 import { createSunlightStage } from './render/sunlightStage.js';
+import { createAuroraColorsStage } from './render/auroraColorsStage.js';
 import { createMoonFiguresStage } from './render/moonFiguresStage.js';
 import { createVanish, cutOut, pictureOf } from './ui/vanish.js';
 import { realCloudMap } from './render/realClouds.js';
@@ -2493,7 +2494,8 @@ ${STORY_MORE[target.id]}` : told) };
   const SIDES_WORDS = { near: t('앞면'), far: t('뒷면'), seas: t('바다'), highland: t('고지대'), earth: t('지구'), earthSide: t('지구 쪽'), thin: t('얇은 겉껍질'), thick: t('두꺼운 겉껍질'), mantle: t('맨틀'), core: t('핵'), hotEarth: t('갓 생긴 뜨거운 지구'), thorium: t('토륨이 많은 곳'), spa: t('남극-에이킨 분지'), twin: t('작은 둘째 달'), change6: t('창어 6호 (2024)') };
   const SUN_WORDS = { sun: t('태양'), earth: t('지구'), core: t('핵 · 1,500만 도'), radiative: t('복사층'), convective: t('대류층'), photon: t('빛 한 알'), neutrino: t('중성미자'), start: t('17만 년 전'), stone: t('석기 시대'), leave: t('아프리카를 떠남'), farm: t('농사'), bronze: t('청동기'), today: t('오늘'), leaveAgo: t('6만 년 전'), farmAgo: t('1만 2천 년 전'), bronzeAgo: t('5천 년 전'), clock: (s) => t`${Math.floor(s / 60)}분 ${String(Math.floor(s % 60)).padStart(2, '0')}초` };
   const FIGURE_WORDS = { korea: t('한국'), japan: t('일본'), china: t('중국'), vietnam: t('베트남'), india: t('인도'), aztec: t('아즈텍 (멕시코)'), europe: t('유럽'), north: t('북유럽'), maori: t('마오리 (뉴질랜드)'), hawaii: t('하와이'), south: t('남반구에서 본 달'), seas: t('달의 바다') };
-  const orbitKindOf = (course) => (course?.rail?.moonFace ? 'moon' : course?.rail?.moonSides ? 'sides' : course?.rail?.sunlight ? 'sunlight' : course?.rail?.moonFigures ? 'figures' : course?.rail?.orbits ? 'orbits' : '');
+  const AURORA_WORDS = { solarWind: t('태양풍'), sun: t('태양'), earth: t('지구'), field: t('자기장'), oval: t('오로라 고리'), km: 'km', oxygen: t('산소'), nitrogen: t('질소'), green: t('초록'), red: t('빨강'), violet: t('보라 · 분홍'), knocked: t('부딪혀 빛을 잃음'), waiting: t('빛을 내기까지 기다리는 중'), korea: t('한국'), north: t('북쪽'), horizon: t('지평선'), seen: t('높은 곳이 먼저 보임'), jupiter: t('목성'), jupiterNote: t('자외선 사진에 색을 입힘'), mars: t('화성'), marsNote: t('하늘 전체가 엷은 초록') };
+  const orbitKindOf = (course) => (course?.rail?.moonFace ? 'moon' : course?.rail?.moonSides ? 'sides' : course?.rail?.sunlight ? 'sunlight' : course?.rail?.moonFigures ? 'figures' : course?.rail?.auroraColors ? 'auroraColors' : course?.rail?.orbits ? 'orbits' : '');
   function orbitStep(chosen) {
     const now = courseTime;
     const on = chosen.rail.stage.some(([a, b]) => now >= a && now < b);
@@ -2507,18 +2509,18 @@ ${STORY_MORE[target.id]}` : told) };
         // (The Moon's one face is drawn the same way, by a world of its own.)
         // (And the Moon's two sides.)
         orbitKind = orbitKindOf(chosen);
-        orbitStage = chosen.rail.moonFace ? createMoonStage(canvas) : chosen.rail.moonSides ? createMoonSidesStage(canvas) : chosen.rail.sunlight ? createSunlightStage(canvas) : chosen.rail.moonFigures ? createMoonFiguresStage(canvas) : createOrbitStage(canvas);
+        orbitStage = chosen.rail.moonFace ? createMoonStage(canvas) : chosen.rail.moonSides ? createMoonSidesStage(canvas) : chosen.rail.sunlight ? createSunlightStage(canvas) : chosen.rail.moonFigures ? createMoonFiguresStage(canvas) : chosen.rail.auroraColors ? createAuroraColorsStage(canvas) : createOrbitStage(canvas);
         addEventListener('resize', orbitResize);
       }
       canvas.hidden = false;
-      orbitStage.update(now, chosen.rail.moonSides ? SIDES_WORDS : chosen.rail.sunlight ? SUN_WORDS : chosen.rail.moonFigures ? FIGURE_WORDS : ORBIT_WORDS);
+      orbitStage.update(now, chosen.rail.moonSides ? SIDES_WORDS : chosen.rail.sunlight ? SUN_WORDS : chosen.rail.moonFigures ? FIGURE_WORDS : chosen.rail.auroraColors ? AURORA_WORDS : ORBIT_WORDS);
     } else if (canvas) canvas.hidden = true;
     let title = document.getElementById('orbitTitle');
     if (!title) {
       document.body.insertAdjacentHTML('beforeend', '<div id="orbitTitle" aria-hidden="true" style="position:fixed;left:0;right:0;top:20%;z-index:7;pointer-events:none;text-align:center;color:#f6eee6;text-shadow:0 2px 14px rgba(0,0,0,0.75),0 0 2px rgba(0,0,0,0.6)" hidden><div style="font-size:clamp(28px,8.5vw,48px);font-weight:700;letter-spacing:0.08em"></div><div style="margin-top:8px;font-size:clamp(14px,3.8vw,18px);letter-spacing:0.08em;opacity:0.9"></div></div>');
       title = document.getElementById('orbitTitle');
-      title.children[0].textContent = chosen.rail.moonFace ? t`달은 왜 한쪽 얼굴만 보일까` : chosen.rail.moonSides ? t`달의 뒷면은 왜 곰보일까` : chosen.rail.sunlight ? t`햇빛은 몇 살일까` : chosen.rail.moonFigures ? t`달에는 누가 살까` : t`태양계는 어떻게 도는가`;
-      title.children[1].textContent = chosen.rail.moonFace ? t`지구와 달이 서로 붙잡는 힘` : chosen.rail.moonSides ? t`매끈한 바다는 왜 앞면에만 있을까` : chosen.rail.sunlight ? t`태양 속을 헤맨 빛의 긴 여행` : chosen.rail.moonFigures ? t`같은 무늬, 저마다의 이야기` : t`작은 것부터 큰 것까지`;
+      title.children[0].textContent = chosen.rail.moonFace ? t`달은 왜 한쪽 얼굴만 보일까` : chosen.rail.moonSides ? t`달의 뒷면은 왜 곰보일까` : chosen.rail.sunlight ? t`햇빛은 몇 살일까` : chosen.rail.moonFigures ? t`달에는 누가 살까` : chosen.rail.auroraColors ? t`오로라는 왜 초록빛일까` : t`태양계는 어떻게 도는가`;
+      title.children[1].textContent = chosen.rail.moonFace ? t`지구와 달이 서로 붙잡는 힘` : chosen.rail.moonSides ? t`매끈한 바다는 왜 앞면에만 있을까` : chosen.rail.sunlight ? t`태양 속을 헤맨 빛의 긴 여행` : chosen.rail.moonFigures ? t`같은 무늬, 저마다의 이야기` : chosen.rail.auroraColors ? t`하늘 높은 곳 원자들의 빛` : t`작은 것부터 큰 것까지`;
     }
     const ease = (x) => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k); };
     const shown = on ? ease((now - 0.5) / 2) * (1 - ease((now - 8) / 2)) : 0;
@@ -5140,7 +5142,7 @@ ${STORY_MORE[target.id]}` : told) };
         if (chosen.rail.starship) starshipStep(chosen, state);
         if (chosen.rail.theia) theiaStep(chosen);
         if (chosen.rail.marsWalk) marsStep(chosen);
-        if (chosen.rail.orbits || chosen.rail.moonFace || chosen.rail.moonSides || chosen.rail.sunlight || chosen.rail.moonFigures) orbitStep(chosen);
+        if (chosen.rail.orbits || chosen.rail.moonFace || chosen.rail.moonSides || chosen.rail.sunlight || chosen.rail.moonFigures || chosen.rail.auroraColors) orbitStep(chosen);
         if (chosen.rail.cabin) state = { ...state, orientation: cupolaFloat(state) };
         if (chosen.rail.mmu) mmuFlyStep(chosen, dt, jetKey);
         // Sounds at their moments (rail.sounds: [seconds, cue]).

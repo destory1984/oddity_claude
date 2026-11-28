@@ -8,6 +8,7 @@ import { GALACTIC_POLE, GALAXIES, NEBULAE, fromEquatorial } from '../src/core/sk
 import { right, up } from '../src/core/orientation.js';
 import { FIGURES } from '../src/render/moonFigures.js';
 import { FIGS, END } from '../src/render/moonFiguresStage.js';
+import { PARTS as AURORA_PARTS, END as AURORA_END } from '../src/render/auroraColorsStage.js';
 
 const body = (id) => BODIES.find((b) => b.id === id);
 const sun = { position: [0, 0, 0] };
@@ -20,11 +21,11 @@ const velocity = ({ orientation, slide }) => {
   return r.map((n, i) => n * slide.sideSpeed * slide.sideSign + u[i] * slide.riseSpeed * slide.riseSign);
 };
 
-test('twenty-six rounds, the aurora first, then the one the user was flying, each of a known body', () => {
-  assert.equal(COURSES.length, 26);
+test('twenty-seven rounds, the aurora first, then the one the user was flying, each of a known body', () => {
+  assert.equal(COURSES.length, 27);
   assert.equal(COURSES[0].id, 'auroraDrift');
   assert.equal(COURSES[1].id, 'earthRound');
-  assert.equal(new Set(COURSES.map((c) => c.id)).size, 26);
+  assert.equal(new Set(COURSES.map((c) => c.id)).size, 27);
   for (const c of COURSES) {
     assert.ok(body(c.body), c.id);
     assert.ok(c.name && c.todo, c.id);
@@ -215,4 +216,19 @@ test("the Moon's figures: every one drawn on the disc, each shown inside the lap
   const at = c.rail.captions.map((x) => x.at);
   assert.deepEqual(at, [...at].sort((a, b) => a - b));
   assert.ok(at.at(-1) < END - 4);
+});
+
+test('the aurora colours: its parts follow one another inside the lap, captions in order', () => {
+  const c = courseById('auroraColors');
+  assert.ok(c.learn);
+  assert.equal(c.lapS, AURORA_END);
+  const parts = Object.values(AURORA_PARTS);
+  parts.forEach(([a, b], i) => {
+    assert.ok(b > a);
+    if (i) assert.equal(a, parts[i - 1][1]);
+  });
+  assert.equal(parts.at(-1)[1], AURORA_END);
+  const at = c.rail.captions.map((x) => x.at);
+  assert.deepEqual(at, [...at].sort((a, b) => a - b));
+  assert.ok(at.at(-1) < AURORA_END - 4);
 });
